@@ -1,0 +1,945 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+
+namespace Miruken.Concurrency
+{
+    public enum PromiseState
+    {
+        Pending,
+        Fulfilled,
+        Rejected,
+        Cancelled
+    }
+
+    public enum ChildCancelMode
+    {
+        All,
+        Any
+    }
+
+    #region Delegates
+
+    public delegate void ResolveCallback(object result, bool synchronous);
+    public delegate R    ResolveCallback<R>(object result, bool synchronous);
+    public delegate void RejectCallback(Exception exception, bool synchronous);
+    public delegate void RejectCallbackE<E>(E exception, bool synchronous) where E : Exception;
+    public delegate R    RejectCallback<R>(Exception exception, bool synchronous);
+    public delegate R    RejectCallbackE<E,R>(E exception, bool synchronous) where E : Exception;
+
+    public delegate ResolveCallback ResolveDecorator(ResolveCallback callback);
+    public delegate RejectCallback  RejectDecorator(RejectCallback callback);
+
+    public delegate void   FinallyCallback();
+    public delegate object FinallyCallbackR();
+    public delegate void   CancelledCallback(CancelledException exception);
+
+    #endregion
+
+    public abstract class Promise : AbstractAsyncResult
+    {
+        protected ResolveCallback _fulfilled;
+        protected RejectCallback _rejected;
+        protected readonly object _guard = new object();
+
+        public PromiseState State { get; protected set; }
+
+        public abstract Type            UnderlyingType { get; }
+        public abstract ChildCancelMode CancelMode     { get; }
+        public abstract Promise    Then(ResolveCallback then);
+        public abstract Promise    Then(ResolveCallback then, RejectCallback fail);
+        public abstract Promise<R> Then<R>(ResolveCallback<R> then);
+        public abstract Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback fail);
+        public abstract Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback<R> fail);
+        public abstract Promise    Decorate(ResolveDecorator resolve, RejectDecorator reject);
+
+        protected Promise()
+        {
+            State = PromiseState.Pending;
+        }
+
+        #region Then
+
+        public Promise Then(ResolveCallback<Promise> then)
+        {
+            return Then(then, (RejectCallback<Promise>)null).Unwrap();
+        }
+
+        public Promise<R> Then<R>(ResolveCallback<Promise<R>> then)
+        {
+            return Then(then, (RejectCallback<Promise<R>>)null).Unwrap();
+        }
+
+        #endregion
+
+        #region Catch
+
+        public Promise Catch(RejectCallback fail)
+        {
+            return Then(null, fail);
+        }
+
+        public Promise Catch<E>(RejectCallbackE<E> fail)
+            where E : Exception
+        {
+            return Then(null, fail != null ? (ex, s) => {
+                var tex = ex as E;
+                if (tex == null) throw ex;
+                fail((E)ex, s);
+            } : (RejectCallback)null);
+        }
+
+        public Promise Catch(RejectCallback<Promise> fail)
+        {
+            return Then(null, fail).Unwrap();
+        }
+
+        public Promise<R> Catch<R>(RejectCallback<R> fail)
+        {
+            return Then(null, fail);
+        }
+
+        public Promise<R> Catch<E,R>(RejectCallbackE<E,R> fail)
+            where E : Exception
+        {
+            return Then(null, fail != null ? (ex, s) => {
+                var tex = ex as E;
+                if (tex == null) throw ex;
+                return fail((E) ex, s);                 
+            } : (RejectCallback<R>)null);
+        }
+
+        #endregion
+
+        #region Finally
+
+        public Promise Finally(FinallyCallback final)
+        {
+            return FinallyT(final);
+        }
+
+        protected abstract Promise FinallyT(FinallyCallback final);
+
+        public Promise Decorate(ResolveDecorator resolve)
+        {
+            return Decorate(resolve, null);
+        }
+
+        #endregion
+
+        #region Cancel
+
+        public abstract void Cancel();
+
+        public void Cancelled(CancelledCallback cancelled)
+        {
+            if (cancelled == null) return;
+            lock (_guard)
+            {
+                if (IsCompleted)
+                {
+                    if (State == PromiseState.Cancelled)
+                        cancelled(_exception as CancelledException);
+                }
+                else
+                {
+                    _rejected += (ex, s) => {
+                        var cancel = ex as CancelledException;
+                        if (cancel != null) cancelled(cancel);
+                    };
+                }
+            }
+        }
+
+        #endregion
+
+        #region Misc
+
+        public Promise Timeout(TimeSpan timeout)
+        {
+            return TimeoutT(timeout);
+        }
+
+        protected abstract Promise TimeoutT(TimeSpan timeout);
+
+        public static Promise<object[]> All(params Promise[] promises)
+        {
+            return All(promises.Select(p => Resolved(p)).ToArray());
+        }
+
+        public static Promise<T[]> All<T>(params Promise<T>[] promises)
+        {
+            if (promises == null || promises.Length == 0)
+                return Resolved(new T[0]);
+
+            var pending     = 0;
+            var fulfilled   = new T[promises.Length];
+            var synchronous = true;
+            return new Promise<T[]>((resolve, reject) => {
+                for (var index = 0; index < promises.Length; ++index)
+                {
+                    var pos = index;
+                    promises[index].Then((r, s) => {
+                        synchronous &= s;
+                        fulfilled[pos] = r;
+                        if (Interlocked.Increment(ref pending) == promises.Length)
+                            resolve(fulfilled, synchronous); 
+                    }, reject);
+                }
+            });
+        }
+
+        public static Promise<object> Race(params Promise[] promises)
+        {
+            return Race(promises.Select(p => Resolved(p)).ToArray());
+        }
+
+        public static Promise<T> Race<T>(params Promise<T>[] promises)
+        {
+            return new Promise<T>((resolve, reject) =>
+            {
+                foreach (var t in promises) t.Then(resolve, reject);
+            });
+        }
+
+        public static Promise Delay(TimeSpan delay)
+        {
+            Timer timer = null;
+            Action disposeTimer = () =>
+            {
+                var t = Interlocked.CompareExchange(ref timer, null, timer);
+                if (t != null) t.Dispose();
+            };
+            return new Promise<object>((resolve, reject) => 
+                timer = new Timer(_ => {
+                    disposeTimer();
+                    resolve(null, false);
+                },
+                null, (int)delay.TotalMilliseconds, System.Threading.Timeout.Infinite)
+            ).Finally(() => disposeTimer());  // cancel;
+        }
+
+        public static Promise Try(Action action)
+        {
+            return new Promise<object>((resolve, reject) => {
+                try
+                {
+                    if (action != null)
+                        action();
+                    resolve(null, true);
+                }
+                catch (Exception exception)
+                {
+                    reject(exception, true);
+                }
+            });
+        }
+
+        public static Promise<T> Try<T>(Func<T> func)
+        {
+            return new Promise<T>((resolve, reject) =>
+            {
+                try
+                {
+                    var result = func != null ? func() : default(T);
+                    resolve(result, true);
+                }
+                catch (Exception exception)
+                {
+                    reject(exception, true);
+                }
+            });
+        }
+
+        public static Promise Try(Func<Promise> func)
+        {
+            return new Promise<object>((resolve, reject) =>
+            {
+                try
+                {
+                    var result = func != null ? func() : null;
+                    if (result == null)
+                        resolve(null, true);
+                    else
+                        result.Then((r, s) => resolve(r, s), reject);
+                }
+                catch (Exception exception)
+                {
+                    reject(exception, true);
+                }
+            });
+        }
+
+        public static Promise<T> Try<T>(Func<Promise<T>> func)
+        {
+            return new Promise<T>((resolve, reject) =>
+            {
+                try
+                {
+                    var result = func != null ? func() : null;
+                    if (result == null)
+                        resolve(default(T), true);
+                    else
+                        result.Then(resolve, reject);
+                }
+                catch (Exception exception)
+                {
+                    reject(exception, true);
+                }
+            });
+        }
+
+        #endregion
+
+        #region Build
+
+        public static readonly Promise Empty = Resolved<object>((object)null);
+
+        public static Promise<object> Resolved(object value)
+        {
+            var promise = value as Promise;
+            return promise != null  ? Resolved(promise) : Resolved<object>(value); // 2.3.2
+        }
+
+        public static Promise<object> Resolved(Promise promise)
+        {
+            return new Promise<object>((resolve, reject) =>
+                promise.Then((r, s) => resolve(r, s), reject));
+        }
+
+        public static Promise<T> Resolved<T>(T value)
+        {
+            return new Promise<T>((resolve, reject) => resolve(value, true));
+        }
+
+        public static Promise<T> Resolved<T>(T value, bool synchronous)
+        {
+            return new Promise<T>((resolve, reject) => resolve(value, synchronous));
+        }
+
+        public static Promise<T> Resolved<T>(Promise<T> promise)
+        {
+            return new Promise<T>((resolve, reject) => promise.Then(resolve, reject));
+        }
+
+        public static Promise Rejected(Exception exception)
+        {
+            return Promise<object>.Rejected(exception);
+        }
+
+        public static Promise Rejected(Exception exception, bool synchronous)
+        {
+            return Promise<object>.Rejected(exception, synchronous);
+        }
+
+        #endregion
+
+        #region Coerce
+
+        public Promise<T> Cast<T>()
+        {
+            // InvalidCastException if types don't match
+            return Then((r, s) => (T)r);
+        }
+
+        public Promise Coerce(Type promiseType)
+        {
+            if (promiseType == null ||
+                promiseType.IsInstanceOfType(this) ||
+                !promiseType.IsGenericType ||
+                promiseType.GetGenericTypeDefinition() != typeof(Promise<>))
+                return this;
+
+            var resultType = promiseType.GetGenericArguments()[0];
+            var coerceType = CoercePromise.MakeGenericMethod(resultType);
+            return (Promise) coerceType.Invoke(null, 
+                BindingFlags.Static | BindingFlags.NonPublic, null,
+                new object[] { this }, null);
+        }
+
+        private static Promise Coerce<R>(Promise promise)
+        {
+            return promise.Cast<R>();
+        }
+
+        private static readonly MethodInfo CoercePromise =
+            typeof(Promise).GetMethod("Coerce",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+        #endregion
+    }
+
+    public class Promise<T> : Promise
+    {
+        #region Delegates
+
+        public delegate void ResolveCallbackT(T result, bool synchronous);
+        public delegate R    ResolveCallbackT<R>(T result, bool synchronous);
+        public delegate ResolveCallbackT ResolveFilterT(ResolveCallbackT callback);
+        public delegate void PromiseOwner(ResolveCallbackT resolve, RejectCallback reject);
+        public delegate void CancellingPromiseOwner(ResolveCallbackT resolve, 
+            RejectCallback reject, Action<Action> onCancel);
+
+        #endregion
+
+        private readonly ChildCancelMode _mode;
+        private int _childCount;
+        private Action _onCancel;
+
+        public Promise(PromiseOwner owner)
+            : this(ChildCancelMode.All, owner)
+        {
+        }
+
+        public Promise(ChildCancelMode mode, PromiseOwner owner)
+        {
+            _mode = mode;
+
+            try
+            {
+                owner(Resolve, Reject);
+            }
+            catch (Exception exception)
+            {
+                Reject(exception, true);
+            }
+        }
+
+        public Promise(CancellingPromiseOwner owner)
+            : this(ChildCancelMode.All, owner)
+        {
+        }
+
+        public Promise(ChildCancelMode mode, CancellingPromiseOwner owner)
+        {
+            _mode = mode;
+
+            try
+            {
+                owner(Resolve, Reject, onCancel => _onCancel += onCancel);
+            }
+            catch (Exception exception)
+            {
+                Reject(exception, true);
+            }
+        }
+
+        public override Type UnderlyingType
+        {
+            get { return typeof (T); }
+        }
+
+        public override ChildCancelMode CancelMode
+        {
+            get { return _mode; }
+        }
+
+        #region Then
+
+        public override Promise Then(ResolveCallback then)
+        {
+            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT)null);
+        }
+
+        public override Promise Then(ResolveCallback then, RejectCallback fail)
+        {
+            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT)null, fail);
+        }
+
+        public override Promise<R> Then<R>(ResolveCallback<R> then)
+        {
+            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null);
+        }
+
+        public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback fail)
+        {
+            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null,
+                (ex, s) => { fail(ex, s); return default(R); });
+        }
+
+        public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback<R> fail)
+        {
+            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null, fail);
+        }
+
+        public Promise Then(ResolveCallbackT<Promise> then)
+        {
+            return Then(then, null);
+        }
+
+        public Promise Then(ResolveCallbackT<Promise> then, RejectCallback<Promise> fail)
+        {
+            if (then == null)  // 2.2.7.3
+                then = ((r, s) => CreateChild<object>((resolve, _) => resolve(r, s)));
+            return Then<Promise>(then, fail).Unwrap();
+        }
+
+        public Promise<T> Then(ResolveCallbackT then)
+        {
+            return Then(then, null);
+        }
+
+        public Promise<T> Then(ResolveCallbackT then, RejectCallback fail)
+        {
+            return CreateChild<T>((resolve, reject) => {
+                ResolveCallback res = (r,s) => {
+                    if (then != null)
+                    {
+                        try
+                        {
+                            then((T)r, s);
+                        }
+                        catch (Exception ex)
+                        {
+                            // 2.2.7.2
+                            reject(ex, s);
+                            return;
+                        }
+                    }
+                    resolve((T)r, s);
+                };
+                RejectCallback rej = (ex,s) => {
+                    if (fail != null && !(ex is CancelledException))
+                    {
+                        try
+                        {
+                            fail(ex, s);
+                            resolve(default(T), s);
+                        }
+                        catch (Exception exo)
+                        {
+                            // 2.2.7.2
+                            reject(exo, s);
+                        }
+                    }   
+                    else
+                        reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<R> then)
+        {
+            return Then(then, null);
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<Promise<R>> then)
+        {
+            return Then(then, null);
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<Promise<R>> then, RejectCallback<Promise<R>> fail)
+        {
+            if (then == null)  // 2.2.7.3
+                then = (r, s) => r is R
+                     ? CreateChild<R>((resolve, _) => resolve((R)(object)r, s))
+                     : Promise<R>.Empty;
+            return Then<Promise<R>>(then, fail).Unwrap();
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<R> then, RejectCallback<R> fail)
+        {
+            return CreateChild<R>((resolve, reject) =>
+            {
+                ResolveCallback res = (r,s) =>
+                {
+                    var f = default(R);
+                    if (then != null)
+                    {
+                        try
+                        {
+                            f = then((T)r, s);
+                        }
+                        catch (Exception ex)
+                        {
+                            // 2.2.7.2
+                            reject(ex, s);
+                            return;
+                        }
+                    }
+                    else if (r is R)
+                        f = (R)r;
+                    else if (typeof(R) == typeof(Promise))
+                        f = (R)(object)Resolved(r);
+                    resolve(f, s);
+                };
+                RejectCallback rej = (ex,s) =>
+                {
+                    if (fail != null && !(ex is CancelledException))
+                    {
+                        try
+                        {
+                            var f = fail(ex, s);
+                            resolve(f, s);
+                        }
+                        catch (Exception exo)
+                        {
+                            // 2.2.7.2
+                            reject(exo, s);
+                        }
+                    }
+                    else
+                        reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        #endregion
+
+        #region Catch
+
+        public new Promise<T> Catch<E>(RejectCallbackE<E> fail)
+            where E : Exception
+        {
+            return Then(null, fail != null ? (ex, s) =>
+            {
+                var tex = ex as E;
+                if (tex == null) throw ex;
+                fail((E)ex, s);
+            } : (RejectCallback)null);
+        }
+
+        public Promise<R> Catch<R>(RejectCallback<Promise<R>> fail)
+        {
+            return Then(null, fail);
+        }
+
+        public Promise<R> Catch<E, R>(RejectCallbackE<E, Promise<R>> fail)
+            where E : Exception
+        {
+            return Then(null, fail != null ? (ex, s) =>
+            {
+                var tex = ex as E;
+                if (tex == null) throw ex;
+                return fail((E)ex, s);
+            } : (RejectCallback<Promise<R>>)null);
+        }
+
+        #endregion
+
+        #region Finally
+
+        public new Promise<T> Finally(FinallyCallback final)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                ResolveCallback res = (r, s) =>
+                {
+                    if (final != null)
+                    {
+                        try
+                        {
+                            final();
+                        }
+                        catch (Exception ex)
+                        {
+                            reject(ex, s);
+                            return;
+                        }
+                    }
+                    resolve((T)r, s);
+                };
+                RejectCallback rej = (ex, s) =>
+                {
+                    if (final != null)
+                    {
+                        try
+                        {
+                            final();
+                            reject(ex, s);
+                        }
+                        catch (Exception exo)
+                        {
+                            reject(exo, s);
+                        }
+                    }
+                    else
+                        reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        protected override Promise FinallyT(FinallyCallback final)
+        {
+            return Finally(final);
+        }
+
+        public Promise<T> Finally(FinallyCallbackR final)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                ResolveCallback res = (r, s) =>
+                {
+                    if (final != null)
+                    {
+                        try
+                        {
+                            var result = final();
+                            var promise = result as Promise;
+                            if (promise != null)
+                                promise.Then((_, ss) => resolve((T)r, s & ss),
+                                             (ex, ss) => reject(ex, s & ss));
+                        }
+                        catch (Exception ex)
+                        {
+                            reject(ex, s);
+                        }
+                    }
+                    else
+                        resolve((T)r, s);
+                };
+                RejectCallback rej = (ex, s) =>
+                {
+                    if (final != null)
+                    {
+                        try
+                        {
+                            final();
+                            reject(ex, s);
+                        }
+                        catch (Exception exo)
+                        {
+                            reject(exo, s);
+                        }
+                    }
+                    else
+                        reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        #endregion
+
+        #region Cancel
+
+        public override void Cancel()
+        {
+            Reject(new CancelledException(), true);
+        }
+
+        #endregion
+
+        #region Misc
+
+        public override Promise Decorate(ResolveDecorator resolve, RejectDecorator reject)
+        {
+            return CreateChild<T>((res, rej) =>
+            {
+                ResolveCallback rc = (r, s) => res((T)r, s);
+                Then(resolve != null ? resolve(rc) : rc,
+                    reject != null ? reject(rej) : rej);
+            });
+        }
+
+        public Promise<T> Decorate(ResolveFilterT resolve, RejectDecorator reject)
+        {
+            return CreateChild<T>((res, rej) => 
+                Then(resolve != null ? resolve(res) : res, 
+                    reject != null ? reject(rej) : rej));
+        }
+
+        protected override Promise TimeoutT(TimeSpan timeout)
+        {
+            return Timeout(timeout);
+        }
+
+        public new Promise<T> Timeout(TimeSpan timeout)
+        {
+            Timer timer = null;
+            Action disposeTimer = () => {
+                var t = Interlocked.CompareExchange(ref timer, null, timer);
+                if (t != null) t.Dispose();
+            };
+            return CreateChild<T>((resolve, reject) => {
+                Then((r, s) => {
+                    disposeTimer();
+                    resolve(r, s);
+                }, (ex, s) => {
+                    disposeTimer();
+                    reject(ex, s);                           
+                }).Finally(() => disposeTimer());  // cancel
+                if (State != PromiseState.Pending) return;
+                timer = new Timer(_ => {
+                    disposeTimer();
+                    reject(new TimeoutException(), false);
+                },
+                null, (int)timeout.TotalMilliseconds, System.Threading.Timeout.Infinite);
+            });
+        }
+
+        #endregion
+
+        protected void Resolve(T result, bool synchronous)
+        {
+            if (!Complete(result, synchronous)) return;
+            lock (_guard)
+            {
+                State = PromiseState.Fulfilled;
+                var fulfilled = _fulfilled;
+                _fulfilled = null;
+                _rejected  = null;
+                if (fulfilled != null) fulfilled((T)_result, synchronous);
+            }
+        }
+
+        protected void Reject(Exception exception, bool synchronous)
+        {
+            if (!Complete(exception, synchronous)) return;
+            lock (_guard)
+            {
+                State = exception is CancelledException
+                      ? PromiseState.Cancelled
+                      : PromiseState.Rejected;
+                var rejected = _rejected;
+                _fulfilled = null;
+                _rejected  = null;
+                if (rejected != null) rejected(exception, synchronous);
+            }
+        }
+
+        protected virtual Promise<R> CreateChild<R>(Promise<R>.PromiseOwner owner)
+        {
+            var child = new Promise<R>(_mode, (resolve, reject, onCancel) =>
+            {
+                owner(resolve, reject);
+                onCancel(() =>
+                {
+                    if (_mode == ChildCancelMode.Any ||
+                        Interlocked.Decrement(ref _childCount) == 0)
+                        Cancel();
+                });
+            });
+            if (_mode == ChildCancelMode.All)
+                Interlocked.Increment(ref _childCount);
+            return child;
+        }
+
+        protected override void Complete(bool synchronously)
+        {
+            if (_onCancel != null && _exception is CancelledException)
+            {
+                try
+                {
+                    _onCancel();
+                }
+                catch
+                {
+                    // consume errors
+                }
+            }
+            base.Complete(synchronously);
+        }
+
+        public T End()
+        {
+            return (T)End(this);
+        }
+
+        #region Build
+
+        public static new Promise<T> Rejected(Exception exception)
+        {
+            return new Promise<T>((resolve, reject) => reject(exception, true));
+        }
+
+        public static new Promise<T> Rejected(Exception exception, bool synchronous)
+        {
+            return new Promise<T>((resolve, reject) => reject(exception, synchronous));
+        }
+
+        public new static readonly Promise<T> Empty = 
+            new Promise<T>((resolve, _) => resolve(default(T), true));
+
+        #endregion
+    }
+
+    public static class PromiseUnwrapExtensions
+    {
+        public static Promise Unwrap(this Promise<Promise> pipe)
+        {
+            if (pipe == null) return null;
+            return new Promise<object>(pipe.CancelMode, (resolve, reject, onCancel) =>
+            {
+                onCancel(pipe.Cancel);
+                pipe.Then((inner, s) => inner.Then((r, ss) => resolve(r, s && ss),
+                    (ex, ss) => reject(ex, s & ss))
+                    .Cancelled(ex => reject(ex, s)), reject)
+                    .Cancelled(ex => reject(ex, true));
+            });
+        }
+
+        public static Promise<T> Unwrap<T>(this Promise<Promise<T>> pipe)
+        {
+            if (pipe == null) return null;
+            return new Promise<T>(pipe.CancelMode, (resolve, reject, onCancel) =>
+            {
+                onCancel(pipe.Cancel);
+                pipe.Then((inner, s) => inner.Then((r, ss) => resolve(r, s && ss),
+                    (ex, ss) => reject(ex, s & ss))
+                    .Cancelled(ex => reject(ex, s)), reject)
+                    .Cancelled(ex => reject(ex, true));               
+            });
+        }   
+    }
+}

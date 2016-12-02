@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{82C1E9DE-D611-47CE-A091-2BED66DF5AC6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Miruken</RootNamespace>
+    <AssemblyName>Miruken</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Messaging" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Callback\CallbackHandler.cs" />
+    <Compile Include="Callback\CallbackHandler.HandleMethod.cs" />
+    <Compile Include="Callback\CallbackHandler.Helpers.cs" />
+    <Compile Include="Callback\CallbackHandler.Resolve.cs" />
+    <Compile Include="Callback\CallbackHandler.Semantics.cs" />
+    <Compile Include="Callback\CallbackHandler.Traverse.cs" />
+    <Compile Include="Callback\CallbackHandlerDecorator.cs" />
+    <Compile Include="Callback\CallbackHandlerFilter.cs" />
+    <Compile Include="Callback\CallbackHandlerMetadata.cs" />
+    <Compile Include="Callback\CallbackOptions.cs" />
+    <Compile Include="Callback\CascadeCallbackHandler.cs" />
+    <Compile Include="Callback\CompositeCallbackHandler.cs" />
+    <Compile Include="Callback\Composition.cs" />
+    <Compile Include="Callback\HandleMethod.cs" />
+    <Compile Include="Callback\ICallbackHandler.cs" />
+    <Compile Include="Callback\Protocol.cs" />
+    <Compile Include="Callback\RejectedException.cs" />
+    <Compile Include="Callback\Resolution.cs" />
+    <Compile Include="Callback\ResolveMethod.cs" />
+    <Compile Include="Concurrency\AbstractAsyncResult.cs" />
+    <Compile Include="Concurrency\CancelledException.cs" />
+    <Compile Include="Concurrency\LinqToPromises.cs" />
+    <Compile Include="Concurrency\Promise.cs" />
+    <Compile Include="Container\ContainerExtensions.cs" />
+    <Compile Include="Container\IContainer.cs" />
+    <Compile Include="Container\IRecycling.cs" />
+    <Compile Include="Container\ObjectPool.cs" />
+    <Compile Include="Context\Context.cs" />
+    <Compile Include="Context\ContextBase.cs" />
+    <Compile Include="Context\ContextExtensions.cs" />
+    <Compile Include="Context\IContext.cs" />
+    <Compile Include="Context\IContextual.cs" />
+    <Compile Include="Error\ErrorsHandler.cs" />
+    <Compile Include="Error\IErrors.cs" />
+    <Compile Include="Graph\Traversal.cs" />
+    <Compile Include="Graph\Traversing.cs" />
+    <Compile Include="Infrastructure\ConfigurationService.cs" />
+    <Compile Include="Infrastructure\DateTime2.cs" />
+    <Compile Include="Infrastructure\DisposableAction.cs" />
+    <Compile Include="Infrastructure\DisposableObject.cs" />
+    <Compile Include="Infrastructure\EnumHelper.cs" />
+    <Compile Include="Infrastructure\EventExtensions.cs" />
+    <Compile Include="Infrastructure\ExceptionEventArgs.cs" />
+    <Compile Include="Infrastructure\IConfigurationService.cs" />
+    <Compile Include="Infrastructure\ObjectExtensions.cs" />
+    <Compile Include="Infrastructure\PlatformHelper.cs" />
+    <Compile Include="Infrastructure\ReflectionHelper.cs" />
+    <Compile Include="Infrastructure\StringExtensions.cs" />
+    <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
+    <Compile Include="Log\ILog.cs" />
+    <Compile Include="Log\LoggingExtensions.cs" />
+    <Compile Include="Log\LogLevel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs" />
+    <Compile Include="Validation\ValidationException.cs" />
+    <Compile Include="Validation\ValidationFailure.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
