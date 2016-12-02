@@ -78,6 +78,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="MTA.runsettings" />
     <None Include="MTA.testsettings">
       <SubType>Designer</SubType>
     </None>
