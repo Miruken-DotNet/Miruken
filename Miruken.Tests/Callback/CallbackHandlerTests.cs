@@ -232,42 +232,42 @@ namespace Miruken.Tests.Callback
                 handler.Broadcast().BestEffort().Notify(), true));
         }
 
-        class Foo
+        private class Foo
         {     
             public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
         }
 
-        class SuperFoo : Foo
+        private class SuperFoo : Foo
         {
         }
 
-        class Bar
+        private class Bar
         {
             public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
 
         }
 
-        class SuperBar : Bar
+        private class SuperBar : Bar
         {         
         }
 
-        class Boo
+        private class Boo
         {
             public bool HasComposer { get; set; }
         }
 
-        class Baz
+        private class Baz
         {
             public bool HasComposer { get; set; }
         }
 
-        class SuperBaz : Baz
+        private class SuperBaz : Baz
         {          
         }
 
-        class Baz<T> : Baz
+        private class Baz<T> : Baz
         {
             public Baz(T stuff)
             {
@@ -283,11 +283,11 @@ namespace Miruken.Tests.Callback
             }
         }
 
-        class Bee
+        private class Bee
         {       
         }
 
-        class CustomHandler : CallbackHandler
+        private class CustomHandler : CallbackHandler
         {
             [Handles]
             public void HandleFooImplict(Foo foo)
@@ -368,7 +368,7 @@ namespace Miruken.Tests.Callback
             }
         }
 
-        class Controller
+        private class Controller
         {
             [Handles]
             public void HandleFooImplict(Foo foo)

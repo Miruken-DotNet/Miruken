@@ -141,19 +141,16 @@ namespace Miruken.Tests.Concurrency
         public void Should_Cancel_Linq_Fulfilled_Asynchronous_Promise()
         {
             var called  = false;
-            var cancel  = false;
             var promise =
                 (from zipCode in GetZipCode("Rockwall, TX")
                  where zipCode != 75032
                  from weather in GetWeather(zipCode)
                  select weather)
                 .Then((result, s) => { called = true; });
-            promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
             {
                 Assert.AreEqual(PromiseState.Cancelled, promise.State);
                 Assert.IsFalse(called);
-                Assert.IsTrue(cancel);
             }
             else
                 Assert.Fail("Operation timed out");

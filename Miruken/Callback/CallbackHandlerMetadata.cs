@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,26 +9,12 @@ namespace Miruken.Callback
 {
     public static class CallbackHandlerMetadata
     {
-        private static readonly Dictionary<Type, CallbackHandlerDescriptor>
-            _descriptors = new Dictionary<Type, CallbackHandlerDescriptor>();
+        private static readonly ConcurrentDictionary<Type, CallbackHandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, CallbackHandlerDescriptor>();
 
         public static CallbackHandlerDescriptor GetDescriptor(Type type)
         {
-            CallbackHandlerDescriptor descriptor;
-
-            if (_descriptors.TryGetValue(type, out descriptor)) 
-                return descriptor;
-
-            lock (_descriptors)
-            {
-                if (_descriptors.TryGetValue(type, out descriptor))
-                    return descriptor;
-
-                descriptor = new CallbackHandlerDescriptor(type);
-                _descriptors.Add(type, descriptor);
-            }
-
-            return descriptor;
+            return _descriptors.GetOrAdd(type, t => new CallbackHandlerDescriptor(t));
         }
     }
 
@@ -60,6 +47,7 @@ namespace Miruken.Callback
                         members = new List<DefinitionAttribute>();
                         _definitions.Add(definitionType, members);
                     }
+
                     for (var index = 0; index <= members.Count; ++index)
                     {
                         // maintain partial ordering by variance
@@ -295,31 +283,27 @@ namespace Miruken.Callback
             var parameters = method.GetParameters();
             var isVoid     = returnType == typeof(void);
 
-            if (parameters.Length == 2)
+            switch (parameters.Length)
             {
-                if (!typeof(Resolution).IsAssignableFrom(parameters[0].ParameterType) ||
-                    !typeof(ICallbackHandler).IsAssignableFrom(parameters[1].ParameterType))
+                case 2:
+                    if (!typeof(Resolution).IsAssignableFrom(parameters[0].ParameterType) ||
+                        !typeof(ICallbackHandler).IsAssignableFrom(parameters[1].ParameterType))
+                        return false;
+                    return _passComposer = _passResolution = true;
+                case 1:
+                    if (typeof (Resolution).IsAssignableFrom(parameters[0].ParameterType))
+                        return _passResolution = true;
+                    if (!isVoid && typeof (ICallbackHandler).IsAssignableFrom(parameters[0].ParameterType))
+                    {
+                        _passComposer = true;
+                        ConfigureCallbackType(method, returnType);
+                        return true;
+                    }
                     return false;
-                _passComposer = _passResolution = true;                
+                default:
+                    return (parameters.Length == 0 && !isVoid) &&
+                        ConfigureCallbackType(method, returnType);
             }
-            else if (parameters.Length == 1)
-            {
-                if (typeof (Resolution).IsAssignableFrom(parameters[0].ParameterType))
-                    _passResolution = true;
-                else if (!isVoid && 
-                    typeof (ICallbackHandler).IsAssignableFrom(parameters[0].ParameterType))
-                {
-                    _passComposer   = true;
-                    ConfigureCallbackType(method, returnType);
-                }
-                else 
-                    return false;
-            }
-            else if (parameters.Length == 0 && !isVoid)
-                ConfigureCallbackType(method, returnType);
-            else
-                return false;
-            return true;
         }
 
         protected internal override bool Dispatch(

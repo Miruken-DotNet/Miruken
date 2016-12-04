@@ -2,7 +2,7 @@
 {
     using System;
 
-    public abstract class DisposableObject:IDisposable
+    public abstract class DisposableObject : IDisposable
     {
         ~DisposableObject()
         {
@@ -17,39 +17,14 @@
         private void OnDisposed()
         {
             var handler = Disposed;
-            if (handler != null)
-                Disposed(this, EventArgs.Empty);
+            handler?.Invoke(this, EventArgs.Empty);
         }
-
-        #region IDisposable Members
 
         public void Dispose()
         {
             Dispose(true);
             OnDisposed();
             GC.SuppressFinalize(this);
-        }
-
-        #endregion
-    }
-
-    public static class DisposableExtensions
-    {
-        public static Exception TryDispose(this IDisposable obj)
-        {
-            Exception r = null;
-            if (obj != null)
-            {
-                try
-                {
-                    obj.Dispose();
-                }
-                catch (Exception e)
-                {
-                    r = e;
-                }
-            }
-            return r;
         }
     }
 }
