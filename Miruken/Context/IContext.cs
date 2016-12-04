@@ -1,8 +1,8 @@
 ﻿using System;
-using Miruken.Callback;
-using Miruken.Graph;
+using SixFlags.CF.Miruken.Callback;
+using SixFlags.CF.Miruken.Graph;
 
-namespace Miruken.Context
+namespace SixFlags.CF.Miruken.Context
 {
     public enum ContextState
     {

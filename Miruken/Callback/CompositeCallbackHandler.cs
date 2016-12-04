@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public interface ICompositeCallbackHandler : ICallbackHandler
     {
@@ -56,14 +56,15 @@ namespace Miruken.Callback
 	    protected override bool HandleCallback(
             object callback, bool greedy, ICallbackHandler composer)
 		{
-		    var handled = false;
+            var handled = base.HandleCallback(callback, greedy, composer);
+            if (handled && !greedy) { return true; }
 		    foreach (var handler in _handlers)
 		    {
 		        if (!handler.Handle(callback, greedy, composer)) continue;
 		        if (!greedy) return true;
 		        handled = true;
 		    }
-            return base.HandleCallback(callback, greedy, composer) || handled;                                                                                     
+            return handled;                                                                                     
 		}
 
 	    private ICallbackHandler Find(object instance)

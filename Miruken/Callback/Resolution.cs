@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public class Resolution : ICallback
     {

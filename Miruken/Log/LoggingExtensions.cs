@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using Miruken.Concurrency;
-using Miruken.Validation;
+using SixFlags.CF.Miruken.Concurrency;
+using SixFlags.CF.Miruken.Validation;
 
-namespace Miruken.Log
+namespace SixFlags.CF.Miruken.Log
 {
     public static class LoggingExtensions
     {

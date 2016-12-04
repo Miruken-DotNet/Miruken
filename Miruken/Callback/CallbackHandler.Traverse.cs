@@ -1,7 +1,7 @@
 ﻿using System;
-using Miruken.Graph;
+using SixFlags.CF.Miruken.Graph;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public interface ICallbackHandlerAxis : ICallbackHandler
     {

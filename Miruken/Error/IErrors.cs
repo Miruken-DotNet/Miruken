@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Miruken.Callback;
+using SixFlags.CF.Miruken.Callback;
 
-namespace Miruken.Error
+namespace SixFlags.CF.Miruken.Error
 {
     #region Protocol
     [ComImport,

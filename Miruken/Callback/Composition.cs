@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public class Composition : ICallback
     {

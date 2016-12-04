@@ -1,4 +1,4 @@
-﻿namespace Miruken.Callback
+﻿namespace SixFlags.CF.Miruken.Callback
 {
     public abstract class CallbackOptions<T> : Composition
         where T : CallbackOptions<T>

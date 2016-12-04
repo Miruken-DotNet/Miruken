@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public delegate bool CallbackFilter(
         object callback, ICallbackHandler filter, Func<bool> proceed

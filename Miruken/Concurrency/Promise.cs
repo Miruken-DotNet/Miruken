@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace Miruken.Concurrency
+namespace SixFlags.CF.Miruken.Concurrency
 {
     public enum PromiseState
     {

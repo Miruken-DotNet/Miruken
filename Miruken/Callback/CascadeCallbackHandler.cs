@@ -1,4 +1,4 @@
-﻿namespace Miruken.Callback
+﻿namespace SixFlags.CF.Miruken.Callback
 {
 	public class CascadeCallbackHandler : CallbackHandler
 	{
@@ -14,15 +14,12 @@
 		protected override bool HandleCallback(
             object callback, bool greedy, ICallbackHandler composer)
 		{
-			var handled = greedy
-				? _handlerA.Handle(callback, true, composer) 
+		    var handled = base.HandleCallback(callback, greedy, composer);
+			return greedy
+				? handled | _handlerA.Handle(callback, true, composer) 
                    | _handlerB.Handle(callback, true, composer)
-				: _handlerA.Handle(callback, false, composer)
+				: handled || _handlerA.Handle(callback, false, composer)
                   || _handlerB.Handle(callback, false, composer);
-            if (!handled || greedy) {                                                                                                                                   
-                handled = base.HandleCallback(callback, greedy, composer) || handled;                                                                                             
-            }
-		    return handled;
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Miruken.Concurrency
+namespace SixFlags.CF.Miruken.Concurrency
 {
     public static class LinqToPromises
     {

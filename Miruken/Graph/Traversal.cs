@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Miruken.Graph
+namespace SixFlags.CF.Miruken.Graph
 {
     public static class Traversal
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using Miruken.Callback;
-using Miruken.Concurrency;
+using SixFlags.CF.Miruken.Callback;
+using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Error
+namespace SixFlags.CF.Miruken.Error
 {
     public class ErrorsHandler : CallbackHandler, IErrors
     {

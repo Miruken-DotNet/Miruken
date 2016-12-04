@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Miruken.Concurrency
+namespace SixFlags.CF.Miruken.Concurrency
 {
     public class CancelledException : Exception
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Miruken.Callback;
-using Miruken.Concurrency;
+using SixFlags.CF.Miruken.Callback;
+using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Log
+namespace SixFlags.CF.Miruken.Log
 {
     #region Protocol
     [ComImport,

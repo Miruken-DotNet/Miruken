@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Miruken.Concurrency
+namespace SixFlags.CF.Miruken.Concurrency
 {
     public abstract class AbstractAsyncResult : IAsyncResult
     {

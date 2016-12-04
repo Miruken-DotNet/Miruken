@@ -1,7 +1,7 @@
 ﻿using System;
-using Miruken.Concurrency;
+using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public delegate object BeforeCallback(object callback, ICallbackHandler composer);
     public delegate void AfterCallback(object callback, ICallbackHandler composer, object state);

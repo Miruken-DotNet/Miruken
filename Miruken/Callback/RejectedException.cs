@@ -1,6 +1,6 @@
-﻿using Miruken.Concurrency;
+﻿using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public class RejectedException : CancelledException
     {

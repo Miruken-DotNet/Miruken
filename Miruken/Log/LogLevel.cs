@@ -1,4 +1,4 @@
-﻿namespace Miruken.Log
+﻿namespace SixFlags.CF.Miruken.Log
 {
     public enum LogLevel
     {

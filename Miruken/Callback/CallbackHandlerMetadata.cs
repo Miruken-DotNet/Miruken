@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public static class CallbackHandlerMetadata
     {

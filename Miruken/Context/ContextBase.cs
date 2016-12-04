@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Miruken.Callback;
-using Miruken.Graph;
+using SixFlags.CF.Miruken.Callback;
+using SixFlags.CF.Miruken.Graph;
 
-namespace Miruken.Context
+namespace SixFlags.CF.Miruken.Context
 {
 	public abstract class ContextBase<TContext> 
         : CompositeCallbackHandler, IContext<TContext>

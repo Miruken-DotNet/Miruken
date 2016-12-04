@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public class ResolveMethod : ICallback
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public static class CallbackHandlerResolveExtensions
     {
@@ -9,7 +9,7 @@ namespace Miruken.Callback
         {
             if (handler == null) return null;
             var resolution = key as Resolution ?? new Resolution(key);
-            return handler.Handle(resolution, false, HandleMethod.Composer)
+            return handler.Handle(resolution, false, null)
                  ? resolution.Result
                  : null;
         }
@@ -24,7 +24,7 @@ namespace Miruken.Callback
         {
             if (handler == null) return new object[0];
             var resolution = key as Resolution ?? new Resolution(key, true);
-            return handler.Handle(resolution, true, HandleMethod.Composer)
+            return handler.Handle(resolution, true, null)
                  ? EnsureArray(resolution.Result)
                  : new object[0];
         }

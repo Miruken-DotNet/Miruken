@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
-using Miruken.Concurrency;
+using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Callback
+namespace SixFlags.CF.Miruken.Callback
 {
     public abstract class HandleMethod : ICallback
     {
@@ -30,6 +30,15 @@ namespace Miruken.Callback
                 return data != null ? data.Composer : null;
             }
             protected set { HandleMethodData.Get(true).Composer = value; }
+        }
+
+        public static ICallbackHandler RequireComposer()
+        {
+            var composer = Composer;
+            if (composer == null)
+                throw new InvalidOperationException(
+                    "Composer not availanle.  Did you call this method directly?");
+            return composer;
         }
 
         public static bool Unhandled
@@ -98,7 +107,7 @@ namespace Miruken.Callback
 
             try
             {
-                threadData.Composer   = composer;
+                threadData.Composer  = composer;
                 threadData.Unhandled = false;
                 Action(receiver);
                 return !threadData.Unhandled;
@@ -111,7 +120,7 @@ namespace Miruken.Callback
             finally
             {
                 threadData.Unhandled = oldUnhandled;
-                threadData.Composer   = oldComposer;
+                threadData.Composer  = oldComposer;
             }
         }
     }

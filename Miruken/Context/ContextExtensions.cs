@@ -1,8 +1,8 @@
 ﻿using System;
-using Miruken.Callback;
-using Miruken.Concurrency;
+using SixFlags.CF.Miruken.Callback;
+using SixFlags.CF.Miruken.Concurrency;
 
-namespace Miruken.Context
+namespace SixFlags.CF.Miruken.Context
 {
     public static class ContextExtensions
     {
