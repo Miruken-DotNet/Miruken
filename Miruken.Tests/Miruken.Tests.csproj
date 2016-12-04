@@ -65,11 +65,11 @@
     <Compile Include="Concurrency\PromiseTests.cs" />
     <Compile Include="Context\ContextTests.cs" />
     <Compile Include="DisposableObjectTests.cs" />
-    <Compile Include="EnumHelperTests.cs" />
     <Compile Include="Graph\TraversalTests.cs" />
     <Compile Include="Graph\TraversingTests.cs" />
     <Compile Include="Graph\TreeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Miruken\Miruken.csproj">

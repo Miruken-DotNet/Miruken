@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface ICallback
     {
@@ -10,6 +10,6 @@ namespace SixFlags.CF.Miruken.Callback
 
 	public interface ICallbackHandler : IProtocolAdapter
 	{
-		bool Handle(object callback, bool greedy, ICallbackHandler composer);
+		bool Handle(object callback, bool greedy = false, ICallbackHandler composer = null);
 	}
 }

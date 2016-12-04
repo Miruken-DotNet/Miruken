@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SixFlags.CF.Miruken.Graph
+namespace Miruken.Graph
 {
     public enum TraversingAxis
     {
@@ -166,8 +166,7 @@ namespace SixFlags.CF.Miruken.Graph
             ICollection<ITraversing> visited, ITraversing node)
         {
             if (visited.Contains(node))
-                throw new Exception(string.Format(
-                    "Circularity detected for node {0}", node));
+                throw new Exception($"Circularity detected for node {node}");
             visited.Add(node);
         }
     }

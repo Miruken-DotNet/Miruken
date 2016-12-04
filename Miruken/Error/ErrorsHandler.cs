@@ -1,8 +1,8 @@
 ﻿using System;
-using SixFlags.CF.Miruken.Callback;
-using SixFlags.CF.Miruken.Concurrency;
+using Miruken.Callback;
+using Miruken.Concurrency;
 
-namespace SixFlags.CF.Miruken.Error
+namespace Miruken.Error
 {
     public class ErrorsHandler : CallbackHandler, IErrors
     {
@@ -32,19 +32,17 @@ namespace SixFlags.CF.Miruken.Error
                     if (handled)
                     {
                         var cb = callback as ICallback;
-                        if (cb != null)
+                        var promise = cb?.Result as Promise;
+                        if (promise != null)
                         {
-                            var promise = cb.Result as Promise;
-                            if (promise != null)
+                            cb.Result = promise.Catch((ex, s) => 
                             {
-                                cb.Result = promise.Catch((ex, s) => {
-                                    if (ex is CancelledException)
-                                        return Promise.Rejected(ex);
-                                    return new IErrors(composer).HandleException(ex, context)
-                                        ? Promise.Rejected(new RejectedException(cb))
-                                        : Promise.Rejected(ex);
-                                }).Coerce(cb.ResultType);
-                            }
+                                if (ex is CancelledException)
+                                    return Promise.Rejected(ex);
+                                return new IErrors(composer).HandleException(ex, context)
+                                     ? Promise.Rejected(new RejectedException(cb))
+                                     : Promise.Rejected(ex);
+                            }).Coerce(cb.ResultType);
                         }
                     }
                     return handled;

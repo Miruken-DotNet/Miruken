@@ -14,10 +14,7 @@ namespace Miruken.Tests.Graph
 
         public ITraversing Parent { get; private set; }
 
-        public ITraversing[] Children
-        {
-            get { return _children.ToArray(); }
-        }
+        public ITraversing[] Children => _children.ToArray();
 
         public void Traverse(TraversingAxis axis, Visitor visitor)
         {

@@ -1,8 +1,8 @@
 ﻿using System;
-using SixFlags.CF.Miruken.Callback;
-using SixFlags.CF.Miruken.Concurrency;
+using Miruken.Callback;
+using Miruken.Concurrency;
 
-namespace SixFlags.CF.Miruken.Context
+namespace Miruken.Context
 {
     public static class ContextExtensions
     {
@@ -16,20 +16,17 @@ namespace SixFlags.CF.Miruken.Context
                 if (handled)
                 {
                     var cb = callback as ICallback;
-                    if (cb != null)
+                    var promise = cb?.Result as Promise;
+                    if (promise != null)
                     {
-                        var promise = cb.Result as Promise;
-                        if (promise != null)
+                        if (context.State == ContextState.Active)
                         {
-                            if (context.State == ContextState.Active)
-                            {
-                                Action<IContext> ended = ctx => promise.Cancel();
-                                context.ContextEnded += ended;
-                                promise.Finally(() => context.ContextEnded -= ended);
-                            }
-                            else
-                                promise.Cancel();
+                            Action<IContext> ended = ctx => promise.Cancel();
+                            context.ContextEnded += ended;
+                            promise.Finally(() => context.ContextEnded -= ended);
                         }
+                        else
+                            promise.Cancel();
                     }
                 }
                 return handled;

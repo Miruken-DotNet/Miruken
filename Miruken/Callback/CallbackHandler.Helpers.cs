@@ -1,7 +1,7 @@
 ﻿using System;
-using SixFlags.CF.Miruken.Concurrency;
+using Miruken.Concurrency;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public delegate object BeforeCallback(object callback, ICallbackHandler composer);
     public delegate void AfterCallback(object callback, ICallbackHandler composer, object state);
@@ -12,16 +12,6 @@ namespace SixFlags.CF.Miruken.Callback
         {
             var handler = instance as ICallbackHandler;
             return handler ?? new CallbackHandler(instance);
-        }
-
-        public static bool Handle(this ICallbackHandler handler, object callback)
-        {
-            return handler != null && handler.Handle(callback, false, null);
-        }
-
-        public static bool Handle(this ICallbackHandler handler, object callback, bool greedy)
-        {
-            return handler != null && handler.Handle(callback, greedy, null);
         }
 
         public static ICallbackHandler Chain(

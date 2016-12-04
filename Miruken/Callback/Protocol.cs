@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface IProtocolAdapter
     {
@@ -38,9 +38,8 @@ namespace SixFlags.CF.Miruken.Callback
         {
             if (adapter == null)
             {
-                throw new ArgumentNullException("adapter", string.Format(
-                    "Protocol '{0}' was created without an adapter",
-                    GetType().FullName));
+                throw new ArgumentNullException(nameof(adapter),
+                    $"Protocol '{GetType().FullName}' was created without an adapter");
             }
             _adapter = adapter;
         }

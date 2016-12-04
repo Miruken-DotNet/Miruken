@@ -1,8 +1,8 @@
 ﻿using System;
-using SixFlags.CF.Miruken.Callback;
-using SixFlags.CF.Miruken.Graph;
+using Miruken.Callback;
+using Miruken.Graph;
 
-namespace SixFlags.CF.Miruken.Context
+namespace Miruken.Context
 {
     public enum ContextState
     {
@@ -11,7 +11,7 @@ namespace SixFlags.CF.Miruken.Context
         Ended
     }
 
-	public interface IContext<TContext>
+	public interface IContext<out TContext>
         : ICompositeCallbackHandler, ICallbackHandlerAxis, ITraversing, IDisposable
 		where TContext : class, IContext<TContext>
 	{

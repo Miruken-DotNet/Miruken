@@ -1,4 +1,4 @@
-﻿namespace SixFlags.CF.Miruken.Callback
+﻿namespace Miruken.Callback
 {
 	public class CascadeCallbackHandler : CallbackHandler
 	{

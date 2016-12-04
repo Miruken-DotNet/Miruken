@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface ICompositeCallbackHandler : ICallbackHandler
     {
@@ -22,12 +22,9 @@ namespace SixFlags.CF.Miruken.Callback
                 AddHandlers(handlers);
         }
 
-	    public ICallbackHandler[] Handlers
-	    {
-	        get { return _handlers.ToArray(); }
-	    }
+	    public ICallbackHandler[] Handlers => _handlers.ToArray();
 
-        public ICompositeCallbackHandler AddHandlers(params object[] handlers)
+	    public ICompositeCallbackHandler AddHandlers(params object[] handlers)
         {
             foreach (var handler in handlers
                 .Where(handler => Find(handler) == null))

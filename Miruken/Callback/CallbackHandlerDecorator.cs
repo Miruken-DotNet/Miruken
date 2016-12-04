@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface ICallbackHandlerDecorator
     {
@@ -13,7 +13,7 @@ namespace SixFlags.CF.Miruken.Callback
         protected CallbackHandlerDecorator(ICallbackHandler decoratee)
         {
             if (decoratee == null)
-                throw new ArgumentNullException("decoratee");
+                throw new ArgumentNullException(nameof(decoratee));
             Decoratee = decoratee;
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     [Flags]
     public enum CallbackOptions
@@ -92,7 +92,7 @@ namespace SixFlags.CF.Miruken.Callback
                 else
                 {
                     var cs = new CallbackSemantics();
-                    if (this.Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
+                    if (Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
                         greedy = cs.HasOption(CallbackOptions.Broadcast) &&
                             !cs.HasOption(CallbackOptions.Resolve);
                 }

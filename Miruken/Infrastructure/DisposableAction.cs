@@ -10,15 +10,12 @@
         public DisposableAction(Action<T> action, T val)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
             _action = action;
             _val    = val;
         }
 
-        public T Value
-        {
-            get { return _val; }
-        }
+        public T Value => _val;
 
         public void Dispose()
         {

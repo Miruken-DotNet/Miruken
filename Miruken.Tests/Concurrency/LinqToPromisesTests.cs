@@ -189,18 +189,15 @@ namespace Miruken.Tests.Concurrency
         public void Should_Cancel_Unmatched_Join_Linq_Asynchronous_Promises()
         {
             var called  = false;
-            var cancel  = false;
             var promise =
                 (from person   in GetPerson("123456")
                  join employee in GetEmployee("123789") on person.SSN equals employee.Id
                  select new Employment { Person = person, Employee = employee })
                 .Then((result, s) => { called = true; });
-            promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
             {
                 Assert.AreEqual(PromiseState.Cancelled, promise.State);
                 Assert.IsFalse(called);
-                Assert.IsTrue(cancel);
             }
             else
                 Assert.Fail("Operation timed out");
@@ -220,7 +217,7 @@ namespace Miruken.Tests.Concurrency
         private static Promise<string> GetWeather(int zipCode)
         {
             return Promise.Delay(100.Millis()).Then((r, s) =>
-                string.Format("Today's weather for {0} is Rainy, high of 75", zipCode));
+                $"Today's weather for {zipCode} is Rainy, high of 75");
         }
 
         private static Promise<Person> GetPerson(string ssn)
@@ -257,22 +254,21 @@ namespace Miruken.Tests.Concurrency
                 }));
         }
 
-        class Person
+        private class Person
         {
             public string FirstName { get; set; }
             public string LastName  { get; set; }
             public string SSN       { get; set; }
         }
 
-        class Employee
+        private class Employee
         {
             public string  Id      { get; set; }
-            public string  SSN     { get; set; }
             public string  Title   { get; set; }
             public decimal Salaray { get; set; }
         }
 
-        class Employment
+        private class Employment
         {
             public Person   Person   { get; set; }
             public Employee Employee { get; set; }

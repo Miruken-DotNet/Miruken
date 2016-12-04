@@ -1,4 +1,4 @@
-namespace SixFlags.CF.Miruken.Context
+namespace Miruken.Context
 {
     public class Context : ContextBase<IContext>, IContext
     {

@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using Miruken.Infrastructure;
 
-namespace SixFlags.CF.Miruken.Tests
+namespace Miruken.Tests
 {
     [TestClass]
     public class DisposableObjectTests

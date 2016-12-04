@@ -1,26 +1,20 @@
-﻿using System;
-
-namespace SixFlags.CF.Miruken.Callback
+﻿namespace Miruken.Callback
 {
 	public partial class CallbackHandler : ICallbackHandler
 	{
-	    private readonly object _surrogate;
-
 	    public CallbackHandler()
 	    {        
 	    }
 
 	    public CallbackHandler(object surrogate)
 	    {
-	        _surrogate = surrogate;
+	        Surrogate = surrogate;
         }
 
-	    public Object Surrogate
-	    {
-	        get { return _surrogate; }
-	    }
+	    public object Surrogate { get; }
 
-	    public virtual bool Handle(object callback, bool greedy, ICallbackHandler composer)
+	    public virtual bool Handle(
+            object callback, bool greedy = false, ICallbackHandler composer = null)
 	    {
             if (callback == null) return false;
             if (composer == null)
@@ -28,7 +22,8 @@ namespace SixFlags.CF.Miruken.Callback
 	        return HandleCallback(callback, greedy, composer);
 	    }
 
-        protected virtual bool HandleCallback(object callback, bool greedy, ICallbackHandler composer)
+        protected virtual bool HandleCallback(
+            object callback, bool greedy, ICallbackHandler composer)
         {
             var compose = callback as Composition;
             if (compose != null)
@@ -49,7 +44,7 @@ namespace SixFlags.CF.Miruken.Callback
 
             if (resolution != null)
             {
-                handled = (_surrogate != null && resolution.TryResolve(_surrogate, false));
+                handled = (Surrogate != null && resolution.TryResolve(Surrogate, false));
                 if (!handled || greedy)
                     handled = resolution.TryResolve(this, false) || handled;
                 if (handled && !greedy) return true;
@@ -62,10 +57,10 @@ namespace SixFlags.CF.Miruken.Callback
                            ? typeof(ProvidesAttribute)
                            : typeof(HandlesAttribute);
 
-            if (_surrogate != null)
+            if (Surrogate != null)
             {
-                var descriptor = CallbackHandlerMetadata.GetDescriptor(_surrogate.GetType());
-                handled = descriptor.Dispatch(definition, _surrogate, callback, greedy, composer) || handled;
+                var descriptor = CallbackHandlerMetadata.GetDescriptor(Surrogate.GetType());
+                handled = descriptor.Dispatch(definition, Surrogate, callback, greedy, composer) || handled;
             }
 
             if (!handled || greedy)
@@ -82,7 +77,7 @@ namespace SixFlags.CF.Miruken.Callback
 	        if ((callback is HandleMethod) || (callback is ResolveMethod))
 	            return true;
 
-	        if (_surrogate != null)
+	        if (Surrogate != null)
 	            return false;
 
 	        var handlerType = GetType();

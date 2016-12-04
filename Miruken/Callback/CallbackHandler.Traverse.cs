@@ -1,7 +1,7 @@
 ﻿using System;
-using SixFlags.CF.Miruken.Graph;
+using Miruken.Graph;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface ICallbackHandlerAxis : ICallbackHandler
     {
@@ -17,7 +17,7 @@ namespace SixFlags.CF.Miruken.Callback
         public CallbackHandlerAxis(ICallbackHandlerAxis handler, TraversingAxis axis)
         {
             if (handler == null)
-                throw new ArgumentNullException("handler");
+                throw new ArgumentNullException(nameof(handler));
             _handler = handler;
             _axis    = axis;
         }

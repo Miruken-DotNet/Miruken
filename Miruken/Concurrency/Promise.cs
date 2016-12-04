@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace SixFlags.CF.Miruken.Concurrency
+namespace Miruken.Concurrency
 {
     public enum PromiseState
     {
@@ -22,11 +22,11 @@ namespace SixFlags.CF.Miruken.Concurrency
     #region Delegates
 
     public delegate void ResolveCallback(object result, bool synchronous);
-    public delegate R    ResolveCallback<R>(object result, bool synchronous);
+    public delegate R    ResolveCallback<out R>(object result, bool synchronous);
     public delegate void RejectCallback(Exception exception, bool synchronous);
-    public delegate void RejectCallbackE<E>(E exception, bool synchronous) where E : Exception;
-    public delegate R    RejectCallback<R>(Exception exception, bool synchronous);
-    public delegate R    RejectCallbackE<E,R>(E exception, bool synchronous) where E : Exception;
+    public delegate void RejectCallbackE<in E>(E exception, bool synchronous) where E : Exception;
+    public delegate R    RejectCallback<out R>(Exception exception, bool synchronous);
+    public delegate R    RejectCallbackE<in E, out R>(E exception, bool synchronous) where E : Exception;
 
     public delegate ResolveCallback ResolveDecorator(ResolveCallback callback);
     public delegate RejectCallback  RejectDecorator(RejectCallback callback);
@@ -165,7 +165,7 @@ namespace SixFlags.CF.Miruken.Concurrency
 
         public static Promise<object[]> All(params Promise[] promises)
         {
-            return All(promises.Select(p => Resolved(p)).ToArray());
+            return All(promises.Select(Resolved).ToArray());
         }
 
         public static Promise<T[]> All<T>(params Promise<T>[] promises)
@@ -192,7 +192,7 @@ namespace SixFlags.CF.Miruken.Concurrency
 
         public static Promise<object> Race(params Promise[] promises)
         {
-            return Race(promises.Select(p => Resolved(p)).ToArray());
+            return Race(promises.Select(Resolved).ToArray());
         }
 
         public static Promise<T> Race<T>(params Promise<T>[] promises)
@@ -209,7 +209,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             Action disposeTimer = () =>
             {
                 var t = Interlocked.CompareExchange(ref timer, null, timer);
-                if (t != null) t.Dispose();
+                t?.Dispose();
             };
             return new Promise<object>((resolve, reject) => 
                 timer = new Timer(_ => {
@@ -225,8 +225,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             return new Promise<object>((resolve, reject) => {
                 try
                 {
-                    if (action != null)
-                        action();
+                    action?.Invoke();
                     resolve(null, true);
                 }
                 catch (Exception exception)
@@ -258,7 +257,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             {
                 try
                 {
-                    var result = func != null ? func() : null;
+                    var result = func?.Invoke();
                     if (result == null)
                         resolve(null, true);
                     else
@@ -277,7 +276,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             {
                 try
                 {
-                    var result = func != null ? func() : null;
+                    var result = func?.Invoke();
                     if (result == null)
                         resolve(default(T), true);
                     else
@@ -375,7 +374,7 @@ namespace SixFlags.CF.Miruken.Concurrency
         #region Delegates
 
         public delegate void ResolveCallbackT(T result, bool synchronous);
-        public delegate R    ResolveCallbackT<R>(T result, bool synchronous);
+        public delegate R    ResolveCallbackT<out R>(T result, bool synchronous);
         public delegate ResolveCallbackT ResolveFilterT(ResolveCallbackT callback);
         public delegate void PromiseOwner(ResolveCallbackT resolve, RejectCallback reject);
         public delegate void CancellingPromiseOwner(ResolveCallbackT resolve, 
@@ -425,15 +424,9 @@ namespace SixFlags.CF.Miruken.Concurrency
             }
         }
 
-        public override Type UnderlyingType
-        {
-            get { return typeof (T); }
-        }
+        public override Type UnderlyingType => typeof (T);
 
-        public override ChildCancelMode CancelMode
-        {
-            get { return _mode; }
-        }
+        public override ChildCancelMode CancelMode => _mode;
 
         #region Then
 
@@ -722,9 +715,8 @@ namespace SixFlags.CF.Miruken.Concurrency
                         {
                             var result = final();
                             var promise = result as Promise;
-                            if (promise != null)
-                                promise.Then((_, ss) => resolve((T)r, s & ss),
-                                             (ex, ss) => reject(ex, s & ss));
+                            promise?.Then((_, ss) => resolve((T)r, s & ss),
+                                (ex, ss) => reject(ex, s & ss));
                         }
                         catch (Exception ex)
                         {
@@ -809,7 +801,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             Timer timer = null;
             Action disposeTimer = () => {
                 var t = Interlocked.CompareExchange(ref timer, null, timer);
-                if (t != null) t.Dispose();
+                 t?.Dispose();
             };
             return CreateChild<T>((resolve, reject) => {
                 Then((r, s) => {
@@ -839,7 +831,7 @@ namespace SixFlags.CF.Miruken.Concurrency
                 var fulfilled = _fulfilled;
                 _fulfilled = null;
                 _rejected  = null;
-                if (fulfilled != null) fulfilled((T)_result, synchronous);
+                fulfilled?.Invoke((T)_result, synchronous);
             }
         }
 
@@ -854,7 +846,7 @@ namespace SixFlags.CF.Miruken.Concurrency
                 var rejected = _rejected;
                 _fulfilled = null;
                 _rejected  = null;
-                if (rejected != null) rejected(exception, synchronous);
+                rejected?.Invoke(exception, synchronous);
             }
         }
 
@@ -898,12 +890,12 @@ namespace SixFlags.CF.Miruken.Concurrency
 
         #region Build
 
-        public static new Promise<T> Rejected(Exception exception)
+        public new static Promise<T> Rejected(Exception exception)
         {
             return new Promise<T>((resolve, reject) => reject(exception, true));
         }
 
-        public static new Promise<T> Rejected(Exception exception, bool synchronous)
+        public new static Promise<T> Rejected(Exception exception, bool synchronous)
         {
             return new Promise<T>((resolve, reject) => reject(exception, synchronous));
         }

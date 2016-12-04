@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace SixFlags.CF.Miruken.Concurrency
+namespace Miruken.Concurrency
 {
     public abstract class AbstractAsyncResult : IAsyncResult
     {
@@ -25,10 +25,7 @@ namespace SixFlags.CF.Miruken.Concurrency
 
         public object AsyncState { get; protected set; }
 
-        public bool IsCompleted
-        {
-            get { return _completed != 0; }
-        }
+        public bool IsCompleted => _completed != 0;
 
         public bool CompletedSynchronously
         {
@@ -60,12 +57,12 @@ namespace SixFlags.CF.Miruken.Concurrency
         public static object End(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
-                throw new ArgumentNullException("asyncResult");
+                throw new ArgumentNullException(nameof(asyncResult));
 
             var result = asyncResult as AbstractAsyncResult;
 
             if (result == null)
-                throw new ArgumentException("Unrecognized IAsyncResult", "result");
+                throw new ArgumentException("Unrecognized IAsyncResult", nameof(asyncResult));
 
             if (result._endCalled)
                 throw new InvalidOperationException("IAsyncResult has already ended");
@@ -103,10 +100,9 @@ namespace SixFlags.CF.Miruken.Concurrency
         {
             _completedSynchronously = synchronously;
 
-            if (_waitEvent != null)
-                ((ManualResetEvent)_waitEvent).Set();
+            ((ManualResetEvent) _waitEvent)?.Set();
 
-            if (_callback != null) _callback(this);
+            _callback?.Invoke(this);
         }
     }
 }

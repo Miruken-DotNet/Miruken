@@ -71,8 +71,6 @@
     <Compile Include="Concurrency\Promise.cs" />
     <Compile Include="Container\ContainerExtensions.cs" />
     <Compile Include="Container\IContainer.cs" />
-    <Compile Include="Container\IRecycling.cs" />
-    <Compile Include="Container\ObjectPool.cs" />
     <Compile Include="Context\Context.cs" />
     <Compile Include="Context\ContextBase.cs" />
     <Compile Include="Context\ContextExtensions.cs" />
@@ -82,26 +80,14 @@
     <Compile Include="Error\IErrors.cs" />
     <Compile Include="Graph\Traversal.cs" />
     <Compile Include="Graph\Traversing.cs" />
-    <Compile Include="Infrastructure\ConfigurationService.cs" />
-    <Compile Include="Infrastructure\DateTime2.cs" />
     <Compile Include="Infrastructure\DisposableAction.cs" />
     <Compile Include="Infrastructure\DisposableObject.cs" />
-    <Compile Include="Infrastructure\EnumHelper.cs" />
     <Compile Include="Infrastructure\EventExtensions.cs" />
     <Compile Include="Infrastructure\ExceptionEventArgs.cs" />
-    <Compile Include="Infrastructure\IConfigurationService.cs" />
-    <Compile Include="Infrastructure\ObjectExtensions.cs" />
-    <Compile Include="Infrastructure\PlatformHelper.cs" />
     <Compile Include="Infrastructure\ReflectionHelper.cs" />
-    <Compile Include="Infrastructure\StringExtensions.cs" />
     <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
-    <Compile Include="Log\ILog.cs" />
-    <Compile Include="Log\LoggingExtensions.cs" />
-    <Compile Include="Log\LogLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />
-    <Compile Include="Validation\ValidationException.cs" />
-    <Compile Include="Validation\ValidationFailure.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx" />

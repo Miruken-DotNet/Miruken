@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using SixFlags.CF.Miruken.Callback;
-using SixFlags.CF.Miruken.Graph;
+using Miruken.Callback;
+using Miruken.Graph;
 
-namespace SixFlags.CF.Miruken.Context
+namespace Miruken.Context
 {
 	public abstract class ContextBase<TContext> 
         : CompositeCallbackHandler, IContext<TContext>
@@ -27,17 +27,11 @@ namespace SixFlags.CF.Miruken.Context
 			Parent = parent;
 		}
 
-	    public ContextState State
-	    {
-	        get { return _state; }
-	    }
+	    public ContextState State => _state;
 
-	    ITraversing ITraversing.Parent
-	    {
-	        get { return Parent; }
-	    }
+	    ITraversing ITraversing.Parent => Parent;
 
-		public TContext Parent { get; private set; }
+	    public TContext Parent { get; }
 
 	    public bool HasChildren
 	    {
@@ -53,7 +47,7 @@ namespace SixFlags.CF.Miruken.Context
             get
             {
                 var root = this as TContext;
-                while (root != null && root.Parent != null)
+                while (root?.Parent != null)
                     root = root.Parent;
                 return root;                  
             }
@@ -224,8 +218,7 @@ namespace SixFlags.CF.Miruken.Context
         {
             add
             {
-                if (_events != null)
-                    _events.AddHandler(ContextEvents.ChildContextEnding, value);
+                _events?.AddHandler(ContextEvents.ChildContextEnding, value);
             }
             remove
             {
@@ -237,8 +230,7 @@ namespace SixFlags.CF.Miruken.Context
         {
             add
             {
-                if (_events != null)
-                    _events.AddHandler(ContextEvents.ChildContextEnded, value);
+                _events?.AddHandler(ContextEvents.ChildContextEnded, value);
             }
             remove
             {
@@ -286,10 +278,8 @@ namespace SixFlags.CF.Miruken.Context
 
         private void Raise(object key, TContext context)
         {
-            if (_events == null) return;
-            var eventHandler = (Action<TContext>)_events[key];
-            if (eventHandler != null)
-                eventHandler(context);
+            var eventHandler = (Action<TContext>) _events?[key];
+            eventHandler?.Invoke(context);
         }
 
         private void AssertActive()

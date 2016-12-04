@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public interface IResolving {}
 
@@ -24,7 +24,7 @@ namespace SixFlags.CF.Miruken.Callback
         {
             var handleMethod = callback as HandleMethod;
             if (handleMethod == null) return false;
-            var handled = _surrogate != null && handleMethod.InvokeOn(_surrogate, composer);
+            var handled = Surrogate != null && handleMethod.InvokeOn(Surrogate, composer);
             if (!handled || greedy)
                 handled = handleMethod.InvokeOn(this, composer) || handled;
             return handled;
@@ -36,10 +36,7 @@ namespace SixFlags.CF.Miruken.Callback
             return resolveMethod != null && resolveMethod.InvokeResolve(composer);
         }
 
-        public static ICallbackHandler Composer
-        {
-            get { return HandleMethod.Composer; }
-        }
+        public static ICallbackHandler Composer => HandleMethod.Composer;
 
         public static void Unhandled()
         {

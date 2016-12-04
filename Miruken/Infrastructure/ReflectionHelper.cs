@@ -10,6 +10,7 @@
             var fullyQualifiedTypeName = t.AssemblyQualifiedName;
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
         }
+
         private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)
         {
             var builder = new StringBuilder();

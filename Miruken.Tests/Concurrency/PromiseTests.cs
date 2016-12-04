@@ -41,7 +41,7 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Fulfill_With_Value()
         {
-            var promise = Promise<int>.Resolved(2);
+            var promise = Promise.Resolved(2);
             Assert.AreEqual(2, promise.End());
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
         }
@@ -49,8 +49,8 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Adopt_Promise_Fulfilled_State()
         {
-            var promise1 = Promise<int>.Resolved(2);
-            var promise2 = Promise<int>.Resolved(promise1);
+            var promise1 = Promise.Resolved(2);
+            var promise2 = Promise.Resolved(promise1);
             Assert.AreEqual(PromiseState.Fulfilled, promise2.State);
             Assert.AreEqual(2, promise2.End());
         }
@@ -59,7 +59,7 @@ namespace Miruken.Tests.Concurrency
         public void Should_Adopt_Promise_Rejected_State()
         {
             var promise1 = Promise<int>.Rejected(new Exception("Boo"));
-            var promise2 = Promise<int>.Resolved(promise1);
+            var promise2 = Promise.Resolved(promise1);
             Assert.AreEqual(PromiseState.Rejected, promise2.State);
             try
             {
@@ -117,25 +117,30 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Fulfill_Asynchronously_Using_callbacks()
         {
-            var called  = 0;
-            var promise = new Promise<object>((resolve, reject) => 
-                ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
-            var fulfill1 = promise.Then((r, s) => {
-                Assert.AreEqual("Hello", r); 
-                ++called;
-            });
-            var fulfill2 = promise.Then((r, s) => {
-                Assert.AreEqual("Hello", r);
-                ++called;
-            });
-            if (WaitHandle.WaitAll(
-                new [] { fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle }, 5.Sec()))
+            TestRunner.MTA(() =>
             {
-                Assert.AreEqual(2, called);
-                Assert.IsFalse(promise.CompletedSynchronously);
-            }
-            else
-                Assert.Fail("Operation timed out");
+                var called = 0;
+                var promise = new Promise<object>((resolve, reject) =>
+                    ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
+                var fulfill1 = promise.Then((r, s) =>
+                {
+                    Assert.AreEqual("Hello", r);
+                    ++called;
+                });
+                var fulfill2 = promise.Then((r, s) =>
+                {
+                    Assert.AreEqual("Hello", r);
+                    ++called;
+                });
+                if (WaitHandle.WaitAll(
+                    new[] {fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle}, 5.Sec()))
+                {
+                    Assert.AreEqual(2, called);
+                    Assert.IsFalse(promise.CompletedSynchronously);
+                }
+                else
+                    Assert.Fail("Operation timed out");
+            });
         }
 
         [TestMethod]
@@ -194,26 +199,31 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Reject_Asynchronously_Using_Callbacks()
         {
-            var called  = 0;
-            var promise = new Promise<object>((resolve, reject) =>
-                ThreadPool.QueueUserWorkItem(_ => 
-                    reject(new Exception("Rejected"), false)));
-            var catch1 = promise.Catch((ex, s) => {
-                Assert.AreEqual("Rejected", ex.Message);
-                ++called;
-            });
-            var catch2 = promise.Catch((ex, s) => {
-                Assert.AreEqual("Rejected", ex.Message);
-                ++called;
-            }); 
-            if (WaitHandle.WaitAll(
-                new [] { catch1.AsyncWaitHandle, catch2.AsyncWaitHandle }, 5.Sec()))
+            TestRunner.MTA(() =>
             {
-                Assert.AreEqual(2, called);
-                Assert.IsFalse(promise.CompletedSynchronously);
-            }
-            else
-                Assert.Fail("Operation timed out");
+                var called = 0;
+                var promise = new Promise<object>((resolve, reject) =>
+                    ThreadPool.QueueUserWorkItem(_ =>
+                        reject(new Exception("Rejected"), false)));
+                var catch1 = promise.Catch((ex, s) =>
+                {
+                    Assert.AreEqual("Rejected", ex.Message);
+                    ++called;
+                });
+                var catch2 = promise.Catch((ex, s) =>
+                {
+                    Assert.AreEqual("Rejected", ex.Message);
+                    ++called;
+                });
+                if (WaitHandle.WaitAll(
+                    new[] {catch1.AsyncWaitHandle, catch2.AsyncWaitHandle}, 5.Sec()))
+                {
+                    Assert.AreEqual(2, called);
+                    Assert.IsFalse(promise.CompletedSynchronously);
+                }
+                else
+                    Assert.Fail("Operation timed out");
+            });
         }
 
         [TestMethod]

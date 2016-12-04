@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public class Composition : ICallback
     {
@@ -13,14 +13,14 @@ namespace SixFlags.CF.Miruken.Callback
         {         
         }
 
-        public object Callback { get; private set; }
+        public object Callback { get; }
 
         public Type ResultType
         {
             get
             {
                 var cb = Callback as ICallback;
-                return cb != null ? cb.ResultType : null;
+                return cb?.ResultType;
             }
         }
 
@@ -29,7 +29,7 @@ namespace SixFlags.CF.Miruken.Callback
             get
             {
                 var cb = Callback as ICallback;
-                return cb != null ? cb.Result : null;
+                return cb?.Result;
             }
 
             set
@@ -44,7 +44,7 @@ namespace SixFlags.CF.Miruken.Callback
             where T : class
         {
             var composition = callback as Composition;
-            return composition != null && composition.Callback is T;
+            return composition?.Callback is T;
         }
     }
 }

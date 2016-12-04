@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public delegate bool CallbackFilter(
         object callback, ICallbackHandler filter, Func<bool> proceed
@@ -22,7 +22,7 @@ namespace SixFlags.CF.Miruken.Callback
             bool reentrant) : base(handler)
         {
             if (filter == null)
-                throw new ArgumentNullException("filter");
+                throw new ArgumentNullException(nameof(filter));
 
             _filter    = filter;
             _reentrant = reentrant;

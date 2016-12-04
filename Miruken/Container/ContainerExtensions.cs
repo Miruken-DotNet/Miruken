@@ -1,6 +1,6 @@
-﻿using SixFlags.CF.Miruken.Callback;
+﻿using Miruken.Callback;
 
-namespace SixFlags.CF.Miruken.Container
+namespace Miruken.Container
 {
     public static class ContainerExtensions
     {

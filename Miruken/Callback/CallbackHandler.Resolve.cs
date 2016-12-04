@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public static class CallbackHandlerResolveExtensions
     {
@@ -9,7 +9,7 @@ namespace SixFlags.CF.Miruken.Callback
         {
             if (handler == null) return null;
             var resolution = key as Resolution ?? new Resolution(key);
-            return handler.Handle(resolution, false, null)
+            return handler.Handle(resolution)
                  ? resolution.Result
                  : null;
         }
@@ -24,7 +24,7 @@ namespace SixFlags.CF.Miruken.Callback
         {
             if (handler == null) return new object[0];
             var resolution = key as Resolution ?? new Resolution(key, true);
-            return handler.Handle(resolution, true, null)
+            return handler.Handle(resolution, true)
                  ? EnsureArray(resolution.Result)
                  : new object[0];
         }
@@ -33,14 +33,12 @@ namespace SixFlags.CF.Miruken.Callback
         {
             if (handler == null) return new T[0];
             var results = ResolveAll(handler, typeof (T));
-            return results != null 
-                 ? results.Cast<T>().ToArray()
-                 : new T[0];
+            return results?.Cast<T>().ToArray() ?? new T[0];
         }
 
         private static object[] EnsureArray(object array)
         {
-            return array as object[] ?? (array as IEnumerable).Cast<object>().ToArray();
+            return array as object[] ?? ((IEnumerable)array).Cast<object>().ToArray();
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public class Resolution : ICallback
     {
@@ -21,19 +21,13 @@ namespace SixFlags.CF.Miruken.Callback
             _resolutions = new List<object>();
         }
 
-        public object Key  { get; private set; }
+        public object Key  { get; }
 
-        public bool   Many { get; private set; }
+        public bool   Many { get; }
 
-        public ICollection<object> Resolutions
-        {
-            get { return _resolutions.AsReadOnly(); }
-        }
+        public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
-        public Type ResultType
-        {
-            get { return Key as Type; }
-        }
+        public Type ResultType => Key as Type;
 
         public object Result
         {

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public static class CallbackHandlerMetadata
     {
@@ -85,23 +85,22 @@ namespace SixFlags.CF.Miruken.Callback
                 return false;
 
             var dispatched   = false;
-            var threadData   = HandleMethodData.Get(true);
-            var oldUnhandled = threadData.Unhandled;
+            var oldUnhandled = HandleMethod.Unhandled;
 
             try
             {
                 foreach (var definition in definitions)
                 {
-                    threadData.Unhandled = false;
+                    HandleMethod.Unhandled = false;
                     var handled = definition.Dispatch(handler, callback, composer);
-                    dispatched = (handled && !threadData.Unhandled) || dispatched;
+                    dispatched = (handled && !HandleMethod.Unhandled) || dispatched;
                     if (dispatched && !greedy)
                         return true;
                 }
             }
             finally
             {
-                threadData.Unhandled = oldUnhandled;
+                HandleMethod.Unhandled = oldUnhandled;
             }
 
             return dispatched;
@@ -132,13 +131,7 @@ namespace SixFlags.CF.Miruken.Callback
             return true;
         }
 
-        public bool Untyped
-        {
-            get
-            {
-                return CallbackType == null || CallbackType == typeof(object);
-            }
-        }
+        public bool Untyped => CallbackType == null || CallbackType == typeof(object);
 
         protected abstract bool Configure(MethodInfo method);
 
@@ -186,8 +179,7 @@ namespace SixFlags.CF.Miruken.Callback
             if (callbackType != null && method.ContainsGenericParameters)
             {
                 var types    = callbackType.GetGenericArguments();
-                var argTypes = _typeMapping == null ? types
-                             : _typeMapping.Select(i => types[i]).ToArray();
+                var argTypes = _typeMapping?.Select(i => types[i]).ToArray() ?? types;
                 method = method.MakeGenericMethod(argTypes);
             }
             return method.Invoke(target, CallbackHandlerDescriptor.Binding,

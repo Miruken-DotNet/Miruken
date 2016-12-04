@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public class ResolveMethod : ICallback
     {
@@ -14,10 +14,7 @@ namespace SixFlags.CF.Miruken.Callback
             _all          = all;
         }
 
-        public Type ResultType
-        {
-            get { return _handleMethod.ResultType; }
-        }
+        public Type ResultType => _handleMethod.ResultType;
 
         public object Result
         {

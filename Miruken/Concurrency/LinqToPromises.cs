@@ -3,15 +3,15 @@ using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace SixFlags.CF.Miruken.Concurrency
+namespace Miruken.Concurrency
 {
     public static class LinqToPromises
     {
         public static Promise<TResult> Select<TResult>(
              this Promise source, Func<object, TResult> selector)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (selector == null) throw new ArgumentNullException("selector");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (selector == null) throw new ArgumentNullException(nameof(selector));
 
             return source.Then((result, s) => selector(null));
         }
@@ -19,8 +19,8 @@ namespace SixFlags.CF.Miruken.Concurrency
         public static Promise<TResult> Select<TSource, TResult>(
             this Promise<TSource> source, Func<TSource, TResult> selector)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (selector == null) throw new ArgumentNullException("selector");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (selector == null) throw new ArgumentNullException(nameof(selector));
 
             return source.Then((result,s) => selector(result));
         }
@@ -28,8 +28,8 @@ namespace SixFlags.CF.Miruken.Concurrency
         public static Promise<TResult> SelectMany<TSource, TResult>(
             this Promise<TSource> source, Func<TSource, Promise<TResult>> selector)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (selector == null) throw new ArgumentNullException("selector");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (selector == null) throw new ArgumentNullException(nameof(selector));
 
             return source.Then((result,s) => selector(result));
         }
@@ -39,9 +39,9 @@ namespace SixFlags.CF.Miruken.Concurrency
             Func<TSource, Promise<TCollection>> collectionSelector,
             Func<TSource, TCollection, TResult> resultSelector)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (collectionSelector == null) throw new ArgumentNullException("collectionSelector");
-            if (resultSelector == null) throw new ArgumentNullException("resultSelector");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (collectionSelector == null) throw new ArgumentNullException(nameof(collectionSelector));
+            if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
 
             return source.Then((result,s) => collectionSelector(result)
                 .Then((collection,ss) => resultSelector(result, collection)));
@@ -50,8 +50,8 @@ namespace SixFlags.CF.Miruken.Concurrency
         public static Promise<TSource> Where<TSource>(
             this Promise<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (predicate == null) throw new ArgumentNullException("predicate");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
             return source.Then((result,s) => {
                 if (predicate(result)) return result;
@@ -75,12 +75,12 @@ namespace SixFlags.CF.Miruken.Concurrency
             Func<TOuter, TInner, TResult> resultSelector,
             IEqualityComparer<TKey> comparer)
         {
-            if (outer == null) throw new ArgumentNullException("outer");
-            if (inner == null) throw new ArgumentNullException("inner");
-            if (outerKeySelector == null) throw new ArgumentNullException("outerKeySelector");
-            if (innerKeySelector == null) throw new ArgumentNullException("innerKeySelector");
-            if (resultSelector == null) throw new ArgumentNullException("resultSelector");
-            if (comparer == null) throw new ArgumentNullException("comparer");
+            if (outer == null) throw new ArgumentNullException(nameof(outer));
+            if (inner == null) throw new ArgumentNullException(nameof(inner));
+            if (outerKeySelector == null) throw new ArgumentNullException(nameof(outerKeySelector));
+            if (innerKeySelector == null) throw new ArgumentNullException(nameof(innerKeySelector));
+            if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
 
             return outer.Then((outResult,s) => inner.Then((inResult,ss) => {
                 if (comparer.Equals(outerKeySelector(outResult), innerKeySelector(inResult)))
@@ -105,12 +105,12 @@ namespace SixFlags.CF.Miruken.Concurrency
             Func<TOuter, Promise<TInner>, TResult> resultSelector,
             IEqualityComparer<TKey> comparer)
         {
-            if (outer == null) throw new ArgumentNullException("outer");
-            if (inner == null) throw new ArgumentNullException("inner");
-            if (outerKeySelector == null) throw new ArgumentNullException("outerKeySelector");
-            if (innerKeySelector == null) throw new ArgumentNullException("innerKeySelector");
-            if (resultSelector == null) throw new ArgumentNullException("resultSelector");
-            if (comparer == null) throw new ArgumentNullException("comparer");
+            if (outer == null) throw new ArgumentNullException(nameof(outer));
+            if (inner == null) throw new ArgumentNullException(nameof(inner));
+            if (outerKeySelector == null) throw new ArgumentNullException(nameof(outerKeySelector));
+            if (innerKeySelector == null) throw new ArgumentNullException(nameof(innerKeySelector));
+            if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
 
             return outer.Then((outResult,s) => inner.Then((inResult,ss) => {
                 if (comparer.Equals(outerKeySelector(outResult), innerKeySelector(inResult)))
@@ -122,9 +122,9 @@ namespace SixFlags.CF.Miruken.Concurrency
         public static Promise<IGrouping<TKey, TElement>> GroupBy<TSource, TKey, TElement>(
             this Promise<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector)
         {
-            if (source == null) throw new ArgumentNullException("source");
-            if (keySelector == null) throw new ArgumentNullException("keySelector");
-            if (elementSelector == null) throw new ArgumentNullException("elementSelector");
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (keySelector == null) throw new ArgumentNullException(nameof(keySelector));
+            if (elementSelector == null) throw new ArgumentNullException(nameof(elementSelector));
 
             return source.Then((result,s) => {
                 var key     = keySelector(result);
@@ -141,7 +141,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             this Promise<TSource> source, Func<TSource, TKey> keySelector)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             return source;
         }
 
@@ -149,7 +149,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             this Promise<TSource> source, Func<TSource, TKey> keySelector)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             return source;
         }
 
@@ -157,7 +157,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             this Promise<TSource> source, Func<TSource, TKey> keySelector)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             return source;
         }
 
@@ -165,7 +165,7 @@ namespace SixFlags.CF.Miruken.Concurrency
             this Promise<TSource> source, Func<TSource, TKey> keySelector)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             return source;
         }
 

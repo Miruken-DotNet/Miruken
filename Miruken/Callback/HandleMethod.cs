@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Threading;
-using SixFlags.CF.Miruken.Concurrency;
+using Miruken.Concurrency;
 
-namespace SixFlags.CF.Miruken.Callback
+namespace Miruken.Callback
 {
     public abstract class HandleMethod : ICallback
     {
@@ -22,15 +21,7 @@ namespace SixFlags.CF.Miruken.Callback
 
         public abstract bool InvokeOn(object target, ICallbackHandler composer);
 
-        public static ICallbackHandler Composer
-        {
-            get
-            {
-                var data = HandleMethodData.Get(false);
-                return data != null ? data.Composer : null;
-            }
-            protected set { HandleMethodData.Get(true).Composer = value; }
-        }
+        [ThreadStatic] public static ICallbackHandler Composer;
 
         public static ICallbackHandler RequireComposer()
         {
@@ -41,38 +32,8 @@ namespace SixFlags.CF.Miruken.Callback
             return composer;
         }
 
-        public static bool Unhandled
-        {
-            get
-            {
-                var data = HandleMethodData.Get(false);
-                return data != null && data.Unhandled;
-               
-            }
-            set { HandleMethodData.Get(true).Unhandled = value; }
-        }
+        [ThreadStatic] public static bool Unhandled;
     }
-
-    #region HandleMethodData
-
-    internal class HandleMethodData
-    {
-        public ICallbackHandler Composer;
-        public bool             Unhandled;
-
-        public static HandleMethodData Get(bool create)
-        {
-            var data = (HandleMethodData)Thread.GetData(Slot);
-            if (data != null) return data;
-            data = new HandleMethodData();
-            Thread.SetData(Slot, data);
-            return data;
-        }
-
-        static readonly LocalDataStoreSlot Slot = Thread.AllocateDataSlot();
-    }
-
-    #endregion
 
     public class HandleAction<T> : HandleMethod
         where T : class
@@ -82,35 +43,28 @@ namespace SixFlags.CF.Miruken.Callback
         public HandleAction(Action<T> action)
         {
             if (action == null)
-                throw new ArgumentNullException("action");
+                throw new ArgumentNullException(nameof(action));
             Action = action;
         }
 
-        public override Type TargetType
-        {
-            get { return typeof (T); }
-        }
+        public override Type TargetType => typeof (T);
 
-        public override Type ResultType
-        {
-            get { return null; }
-        }
+        public override Type ResultType => null;
 
         public override bool InvokeOn(object target, ICallbackHandler composer)
         {
             var receiver = target as T;
             if (receiver == null) return false;
 
-            var threadData   = HandleMethodData.Get(true);
-            var oldComposer  = threadData.Composer;
-            var oldUnhandled = threadData.Unhandled;
+            var oldComposer  = Composer;
+            var oldUnhandled = Unhandled;
 
             try
             {
-                threadData.Composer  = composer;
-                threadData.Unhandled = false;
+                Composer  = composer;
+                Unhandled = false;
                 Action(receiver);
-                return !threadData.Unhandled;
+                return !Unhandled;
             }
             catch (Exception exception)
             {
@@ -119,8 +73,8 @@ namespace SixFlags.CF.Miruken.Callback
             }
             finally
             {
-                threadData.Unhandled = oldUnhandled;
-                threadData.Composer  = oldComposer;
+                Unhandled = oldUnhandled;
+                Composer  = oldComposer;
             }
         }
     }
@@ -133,36 +87,28 @@ namespace SixFlags.CF.Miruken.Callback
         public HandleFunc(Func<T, R> func)
         {
             if (func == null)
-                throw new ArgumentNullException("func");
+                throw new ArgumentNullException(nameof(func));
             _func = func;
         }
 
-        public override Type TargetType
-        {
-            get { return typeof(T); }
-        }
+        public override Type TargetType => typeof(T);
 
-        public override Type ResultType
-        {
-            get { return typeof(R); }
-        }
+        public override Type ResultType => typeof(R);
 
         public override bool InvokeOn(object target, ICallbackHandler composer)
         {
             var receiver = target as T;
             if (receiver == null) return false;
 
-            var threadData   = HandleMethodData.Get(true);
-            var oldComposer  = threadData.Composer;
-            var oldUnhandled = threadData.Unhandled;
+            var oldComposer  = Composer;
+            var oldUnhandled = Unhandled;
 
             try
             {
-                threadData.Composer   = composer;
-                threadData.Unhandled = false;
+                Composer   = composer;
+                Unhandled = false;
                 var returnValue = _func(receiver);
-                if (threadData.Unhandled)
-                    return false;
+                if (Unhandled) return false;
                 ReturnValue = returnValue;
                 return true;
             }
@@ -177,8 +123,8 @@ namespace SixFlags.CF.Miruken.Callback
             }
             finally
             {
-                threadData.Unhandled = oldUnhandled;
-                threadData.Composer   = oldComposer;
+                Unhandled = oldUnhandled;
+                Composer   = oldComposer;
             }
         }
     }

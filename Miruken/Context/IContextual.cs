@@ -1,4 +1,4 @@
-﻿namespace SixFlags.CF.Miruken.Context
+﻿namespace Miruken.Context
 {
 	public interface IContextual<TContext>
         where TContext : class, IContext<TContext>
