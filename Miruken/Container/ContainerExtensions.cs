@@ -6,23 +6,23 @@ namespace Miruken.Container
     {
         #region Add Handlers
 
-        public static ICompositeCallbackHandler AddHandler<T>(
-            this ICompositeCallbackHandler handler)
+        public static ICompositeHandler AddHandler<T>(
+            this ICompositeHandler handler)
         {
             var container  = new IContainer(handler);
             return handler.AddHandlers(container.Resolve<T>());
         }
 
-        public static ICompositeCallbackHandler AddHandlers<T1, T2>(
-            this ICompositeCallbackHandler handler)
+        public static ICompositeHandler AddHandlers<T1, T2>(
+            this ICompositeHandler handler)
         {
             var container = new IContainer(handler);
             return handler.AddHandlers(container.Resolve<T1>(),
                                        container.Resolve<T2>());
         }
 
-        public static ICompositeCallbackHandler AddHandlers<T1, T2, T3>(
-             this ICompositeCallbackHandler handler)
+        public static ICompositeHandler AddHandlers<T1, T2, T3>(
+             this ICompositeHandler handler)
         {
             var container = new IContainer(handler);
             return handler.AddHandlers(container.Resolve<T1>(),
@@ -30,8 +30,8 @@ namespace Miruken.Container
                                        container.Resolve<T3>());
         }
 
-        public static ICompositeCallbackHandler AddHandlers<T1, T2, T3, T4>(
-               this ICompositeCallbackHandler handler)
+        public static ICompositeHandler AddHandlers<T1, T2, T3, T4>(
+               this ICompositeHandler handler)
         {
             var container = new IContainer(handler);
             return handler.AddHandlers(container.Resolve<T1>(),
@@ -44,24 +44,24 @@ namespace Miruken.Container
 
         #region Insert Handlers
 
-        public static ICompositeCallbackHandler InsertHandler<T>(
-            this ICompositeCallbackHandler handler, int atIndex)
+        public static ICompositeHandler InsertHandler<T>(
+            this ICompositeHandler handler, int atIndex)
         {
             var container = new IContainer(handler);
             return handler.InsertHandlers(atIndex, container.Resolve<T>());
         }
 
 
-        public static ICompositeCallbackHandler InsertHandlers<T1, T2>(
-            this ICompositeCallbackHandler handler, int atIndex)
+        public static ICompositeHandler InsertHandlers<T1, T2>(
+            this ICompositeHandler handler, int atIndex)
         {
             var container = new IContainer(handler);
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),
                                                    container.Resolve<T2>());
         }
 
-        public static ICompositeCallbackHandler InsertHandlers<T1, T2, T3>(
-             this ICompositeCallbackHandler handler, int atIndex)
+        public static ICompositeHandler InsertHandlers<T1, T2, T3>(
+             this ICompositeHandler handler, int atIndex)
         {
             var container = new IContainer(handler);
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),
@@ -69,8 +69,8 @@ namespace Miruken.Container
                                                    container.Resolve<T3>());
         }
 
-        public static ICompositeCallbackHandler InsertHandlers<T1, T2, T3, T4>(
-               this ICompositeCallbackHandler handler, int atIndex)
+        public static ICompositeHandler InsertHandlers<T1, T2, T3, T4>(
+               this ICompositeHandler handler, int atIndex)
         {
             var container = new IContainer(handler);
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),

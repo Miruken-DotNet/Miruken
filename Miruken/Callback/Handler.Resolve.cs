@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace Miruken.Callback
 {
-    public static class CallbackHandlerResolveExtensions
+    public static class HandlerResolveExtensions
     {
-        public static object Resolve(this ICallbackHandler handler, object key)
+        public static object Resolve(this IHandler handler, object key)
         {
             if (handler == null) return null;
             var resolution = key as Resolution ?? new Resolution(key);
@@ -14,13 +14,13 @@ namespace Miruken.Callback
                  : null;
         }
 
-        public static T Resolve<T>(this ICallbackHandler handler)
+        public static T Resolve<T>(this IHandler handler)
         {
             if (handler == null) return default(T);
             return (T) Resolve(handler, typeof(T));
         }
 
-        public static object[] ResolveAll(this ICallbackHandler handler, object key)
+        public static object[] ResolveAll(this IHandler handler, object key)
         {
             if (handler == null) return new object[0];
             var resolution = key as Resolution ?? new Resolution(key, true);
@@ -29,7 +29,7 @@ namespace Miruken.Callback
                  : new object[0];
         }
 
-        public static T[] ResolveAll<T>(this ICallbackHandler handler)
+        public static T[] ResolveAll<T>(this IHandler handler)
         {
             if (handler == null) return new T[0];
             var results = ResolveAll(handler, typeof (T));

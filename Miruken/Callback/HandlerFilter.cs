@@ -3,22 +3,22 @@
 namespace Miruken.Callback
 {
     public delegate bool CallbackFilter(
-        object callback, ICallbackHandler filter, Func<bool> proceed
+        object callback, IHandler filter, Func<bool> proceed
     );
 
-    public class CallbackHandlerFilter : CallbackHandlerDecorator
+    public class HandlerFilter : HandlerDecorator
     {
         private readonly CallbackFilter _filter;
         private readonly bool _reentrant;
 
-        public CallbackHandlerFilter(
-            ICallbackHandler handler, CallbackFilter filter
+        public HandlerFilter(
+            IHandler handler, CallbackFilter filter
             ) : this(handler, filter, false)
         {           
         }
 
-        public CallbackHandlerFilter(
-            ICallbackHandler handler, CallbackFilter filter, 
+        public HandlerFilter(
+            IHandler handler, CallbackFilter filter, 
             bool reentrant) : base(handler)
         {
             if (filter == null)
@@ -29,7 +29,7 @@ namespace Miruken.Callback
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
         {
             if (!_reentrant && (callback is Composition)) {                                                                                              
                 return base.HandleCallback(callback, greedy, composer);                                                                                                   
@@ -37,7 +37,7 @@ namespace Miruken.Callback
             return _filter(callback, composer, () => BaseHandle(callback, greedy, composer));  
         }
 
-        private bool BaseHandle(object callback, bool greedy, ICallbackHandler composer)
+        private bool BaseHandle(object callback, bool greedy, IHandler composer)
         {
             return base.HandleCallback(callback, greedy, composer);
         }

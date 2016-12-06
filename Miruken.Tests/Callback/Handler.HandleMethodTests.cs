@@ -6,10 +6,10 @@ using Miruken.Callback;
 namespace Miruken.Tests.Callback
 {
     /// <summary>
-    /// Summary description for CallbackHandler
+    /// Summary description for Handler
     /// </summary>
     [TestClass]
-    public class CallbackHandlerHandleMethodTests
+    public class HandlerHandleMethodTests
     {
         interface IEmailFeature
         {
@@ -18,7 +18,7 @@ namespace Miruken.Tests.Callback
             void CancelEmail(int id);
         }
 
-        class EmailHandler : CallbackHandler, IEmailFeature
+        class EmailHandler : Handler, IEmailFeature
         {
             public int Count { get; private set; }
 
@@ -93,7 +93,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Handle_Void_Methods()
         {
-            var handler = new EmailHandler().Chain(new CallbackHandler(new Billing()));
+            var handler = new EmailHandler().Chain(new Handler(new Billing()));
             handler.Do((IEmailFeature f) => f.CancelEmail(1));
         }
 
@@ -136,21 +136,21 @@ namespace Miruken.Tests.Callback
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Reject_Unhandled_Methods()
         {
-            var handler = new CallbackHandler();
+            var handler = new Handler();
             handler.Do((IEmailFeature f) => f.Email("Hello"));
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Reject_Unhandled_Method_Broadcast()
         {
-            var handler = new CallbackHandler().Chain(new CallbackHandler());
+            var handler = new Handler().Chain(new Handler());
             handler.Do((IEmailFeature f) => f.Email("Hello"));
         }
 
         [TestMethod]
         public void Should_Ignore_Unhandled_Methods_If_Best_Effort()
         {
-            var handler = new CallbackHandler();
+            var handler = new Handler();
             handler.BestEffort().Do((IEmailFeature f) => f.Email("Hello"));
         }
 
@@ -173,7 +173,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Resolve_Methods_Implicitly()
         {
-            var handler = new CallbackHandler(new Billing());
+            var handler = new Handler(new Billing());
             var total   = handler.Do((IBilling f) => f.Bill(7.50M));
             Assert.AreEqual(9.50M, total);
         }
@@ -181,7 +181,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Handle_Methods_Using_Protocol()
         {
-            var billing = new CallbackHandler(new Billing(4M));
+            var billing = new Handler(new Billing(4M));
             Assert.AreEqual(7M, new IBilling(billing).Bill(3M));
         }
     }

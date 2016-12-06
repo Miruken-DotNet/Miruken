@@ -1,12 +1,12 @@
 ﻿namespace Miruken.Callback
 {
-	public partial class CallbackHandler : ICallbackHandler
+	public partial class Handler : IHandler
 	{
-	    public CallbackHandler()
+	    public Handler()
 	    {        
 	    }
 
-	    public CallbackHandler(object surrogate)
+	    public Handler(object surrogate)
 	    {
 	        Surrogate = surrogate;
         }
@@ -14,7 +14,7 @@
 	    public object Surrogate { get; }
 
 	    public virtual bool Handle(
-            object callback, bool greedy = false, ICallbackHandler composer = null)
+            object callback, bool greedy = false, IHandler composer = null)
 	    {
             if (callback == null) return false;
             if (composer == null)
@@ -23,7 +23,7 @@
 	    }
 
         protected virtual bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
         {
             var compose = callback as Composition;
             if (compose != null)
@@ -35,7 +35,7 @@
                 || TryDefinitions(callback, greedy, composer));
         }
 
-        private bool TryDefinitions(object callback, bool greedy, ICallbackHandler composer)
+        private bool TryDefinitions(object callback, bool greedy, IHandler composer)
 	    {
             var handled    = false;
             var resolution = callback as Resolution;
@@ -59,13 +59,13 @@
 
             if (Surrogate != null)
             {
-                var descriptor = CallbackHandlerMetadata.GetDescriptor(Surrogate.GetType());
+                var descriptor = HandlerMetadata.GetDescriptor(Surrogate.GetType());
                 handled = descriptor.Dispatch(definition, Surrogate, callback, greedy, composer) || handled;
             }
 
             if (!handled || greedy)
             {
-                var descriptor = CallbackHandlerMetadata.GetDescriptor(GetType());
+                var descriptor = HandlerMetadata.GetDescriptor(GetType());
                 handled = descriptor.Dispatch(definition, this, callback, greedy, composer) || handled;
             }
 
@@ -81,25 +81,25 @@
 	            return false;
 
 	        var handlerType = GetType();
-	        return handlerType == typeof(CallbackHandler) ||
+	        return handlerType == typeof(Handler) ||
 	               handlerType == typeof(CallbackFilter);
 	    }
 
-        public static ICallbackHandler operator +(CallbackHandler c1, ICallbackHandler c2)
+        public static IHandler operator +(Handler c1, IHandler c2)
         {
             return c1.Chain(c2);
         }
 	}
 
-    public class CompositionScope : CallbackHandlerDecorator
+    public class CompositionScope : HandlerDecorator
     {
-        public CompositionScope(ICallbackHandler handler)
+        public CompositionScope(IHandler handler)
             : base(handler)
         {
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
         {
             if (callback.GetType() != typeof(Composition))
                 callback = new Composition(callback);

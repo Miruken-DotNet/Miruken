@@ -19,11 +19,11 @@ namespace Miruken.Callback
 
         public abstract Type TargetType { get; }
 
-        public abstract bool InvokeOn(object target, ICallbackHandler composer);
+        public abstract bool InvokeOn(object target, IHandler composer);
 
-        [ThreadStatic] public static ICallbackHandler Composer;
+        [ThreadStatic] public static IHandler Composer;
 
-        public static ICallbackHandler RequireComposer()
+        public static IHandler RequireComposer()
         {
             var composer = Composer;
             if (composer == null)
@@ -51,7 +51,7 @@ namespace Miruken.Callback
 
         public override Type ResultType => null;
 
-        public override bool InvokeOn(object target, ICallbackHandler composer)
+        public override bool InvokeOn(object target, IHandler composer)
         {
             var receiver = target as T;
             if (receiver == null) return false;
@@ -95,7 +95,7 @@ namespace Miruken.Callback
 
         public override Type ResultType => typeof(R);
 
-        public override bool InvokeOn(object target, ICallbackHandler composer)
+        public override bool InvokeOn(object target, IHandler composer)
         {
             var receiver = target as T;
             if (receiver == null) return false;

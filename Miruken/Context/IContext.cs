@@ -12,7 +12,7 @@ namespace Miruken.Context
     }
 
 	public interface IContext<out TContext>
-        : ICompositeCallbackHandler, ICallbackHandlerAxis, ITraversing, IDisposable
+        : ICompositeHandler, IHandlerAxis, ITraversing, IDisposable
 		where TContext : class, IContext<TContext>
 	{
         event Action<TContext> ContextEnding;

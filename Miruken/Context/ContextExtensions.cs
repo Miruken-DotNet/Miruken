@@ -6,8 +6,8 @@ namespace Miruken.Context
 {
     public static class ContextExtensions
     {
-        public static ICallbackHandler TrackPromise(
-            this ICallbackHandler handler, IContext context)
+        public static IHandler TrackPromise(
+            this IHandler handler, IContext context)
         {
             if (handler == null || context == null) return handler;
             return handler.Filter((callback, composer, proceed) =>

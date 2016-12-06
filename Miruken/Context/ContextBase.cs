@@ -8,7 +8,7 @@ using Miruken.Graph;
 namespace Miruken.Context
 {
 	public abstract class ContextBase<TContext> 
-        : CompositeCallbackHandler, IContext<TContext>
+        : CompositeHandler, IContext<TContext>
 		where TContext : class, IContext<TContext>
 	{
 	    private ContextState _state;
@@ -93,7 +93,7 @@ namespace Miruken.Context
 	    }
 
 	    protected override bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
 	    {
 	        var handled = base.HandleCallback(callback, greedy, composer);
 	        if (handled && !greedy)
@@ -106,7 +106,7 @@ namespace Miruken.Context
 
 	    public virtual bool Handle(
             TraversingAxis axis, object callback,
-            bool greedy, ICallbackHandler composer)
+            bool greedy, IHandler composer)
 	    {
             if (axis == TraversingAxis.Self)                                                                                                              
                 return base.HandleCallback(callback, greedy, composer);
@@ -123,7 +123,7 @@ namespace Miruken.Context
 	        return handled;
 	    }
 
-        private bool BaseHandle(object callback, bool greedy, ICallbackHandler composer)
+        private bool BaseHandle(object callback, bool greedy, IHandler composer)
         {
             return base.HandleCallback(callback, greedy, composer);
         }

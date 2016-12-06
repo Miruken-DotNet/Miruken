@@ -22,13 +22,13 @@ namespace Miruken.Callback
             set { _handleMethod.Result = value; }
         }
 
-        public bool InvokeResolve(ICallbackHandler composer)
+        public bool InvokeResolve(IHandler composer)
         {
             var targets = composer.ResolveAll(_handleMethod.TargetType);
             return InvokeTargets(targets, composer);
         }
 
-        private bool InvokeTargets(IEnumerable<object> targets, ICallbackHandler composer)
+        private bool InvokeTargets(IEnumerable<object> targets, IHandler composer)
         {
             var handled = false;
             foreach (var target in targets)

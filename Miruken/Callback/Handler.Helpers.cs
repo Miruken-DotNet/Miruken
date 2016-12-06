@@ -3,19 +3,19 @@ using Miruken.Concurrency;
 
 namespace Miruken.Callback
 {
-    public delegate object BeforeCallback(object callback, ICallbackHandler composer);
-    public delegate void AfterCallback(object callback, ICallbackHandler composer, object state);
+    public delegate object BeforeCallback(object callback, IHandler composer);
+    public delegate void AfterCallback(object callback, IHandler composer, object state);
 
-    public static class CallbackHandlerHelpers
+    public static class HandlerHelpers
     {
-        public static ICallbackHandler ToCallbackHandler(this object instance)
+        public static IHandler ToHandler(this object instance)
         {
-            var handler = instance as ICallbackHandler;
-            return handler ?? new CallbackHandler(instance);
+            var handler = instance as IHandler;
+            return handler ?? new Handler(instance);
         }
 
-        public static ICallbackHandler Chain(
-            this ICallbackHandler handler, params ICallbackHandler[] chain)
+        public static IHandler Chain(
+            this IHandler handler, params IHandler[] chain)
         {
             if (handler == null) return null;
             switch (chain.Length)
@@ -23,66 +23,65 @@ namespace Miruken.Callback
                 case 0:
                     return handler;
                 case 1:
-                    return new CascadeCallbackHandler(handler, chain[0]);
+                    return new CascadeHandler(handler, chain[0]);
                 default:
                 {
                     var h = new object[chain.Length + 1];
                     h[0]  = handler;
                     chain.CopyTo(h, 1);
-                    return new CompositeCallbackHandler(h);
+                    return new CompositeHandler(h);
                 }
             }
         }
 
-        public static CallbackHandlerFilter Filter(
-            this ICallbackHandler handler, CallbackFilter filter)
+        public static HandlerFilter Filter(
+            this IHandler handler, CallbackFilter filter)
         {
             return Filter(handler, filter, false);
         }
 
-        public static CallbackHandlerFilter Filter(
-            this ICallbackHandler handler, CallbackFilter filter, bool reentrant)
+        public static HandlerFilter Filter(
+            this IHandler handler, CallbackFilter filter, bool reentrant)
         {
             return handler == null ? null
-                 : new CallbackHandlerFilter(handler, filter, reentrant);
+                 : new HandlerFilter(handler, filter, reentrant);
         }
 
-        public static CallbackHandlerFilter Aspect(
-            this ICallbackHandler handler, BeforeCallback before)
+        public static HandlerFilter Aspect(
+            this IHandler handler, BeforeCallback before)
         {
             return Aspect(handler, before, false);
         }
 
-        public static CallbackHandlerFilter Aspect(
-            this ICallbackHandler handler, BeforeCallback before, bool reentrant)
+        public static HandlerFilter Aspect(
+            this IHandler handler, BeforeCallback before, bool reentrant)
         {
             return Aspect(handler, before, null, reentrant);
         }
 
-        public static CallbackHandlerFilter Aspect(
-            this ICallbackHandler handler, AfterCallback after)
+        public static HandlerFilter Aspect(
+            this IHandler handler, AfterCallback after)
         {
             return Aspect(handler, after, false);
         }
 
-        public static CallbackHandlerFilter Aspect(
-                 this ICallbackHandler handler, AfterCallback after, bool reentrant)
+        public static HandlerFilter Aspect(
+                 this IHandler handler, AfterCallback after, bool reentrant)
         {
             return Aspect(handler, null, after, reentrant);
         }
 
-        public static CallbackHandlerFilter Aspect(
-            this ICallbackHandler handler, BeforeCallback before, AfterCallback after)
+        public static HandlerFilter Aspect(
+            this IHandler handler, BeforeCallback before, AfterCallback after)
         {
             return Aspect(handler, before, after, false);
         }
 
-        public static CallbackHandlerFilter Aspect(
-            this ICallbackHandler handler, BeforeCallback before, AfterCallback after,
+        public static HandlerFilter Aspect(
+            this IHandler handler, BeforeCallback before, AfterCallback after,
             bool reentrant)
         {
-            return handler == null ? null
-                 : handler.Filter((callback, composer, proceed) =>
+            return handler?.Filter((callback, composer, proceed) =>
             {
                 object state = null;
                 var cb = callback as ICallback;
@@ -99,7 +98,7 @@ namespace Miruken.Callback
                             if (!Equals(accepted, false))
                             {
                                 AspectProceed(callback, composer, proceed, after, state);
-                                return Promise.Resolved(cb != null ? cb.Result : null);
+                                return Promise.Resolved(cb?.Result);
                             }
                             return Promise.Rejected(new RejectedException(callback), s);
                         });                     
@@ -109,7 +108,7 @@ namespace Miruken.Callback
                     }
                     if (Equals(state, false))
                     {
-                        var resultType = cb != null ? cb.ResultType : null;
+                        var resultType = cb?.ResultType;
                         if (resultType != null && typeof(Promise).IsAssignableFrom(cb.ResultType))
                         {
                             cb.Result = Promise.Rejected(new RejectedException(callback))
@@ -124,7 +123,7 @@ namespace Miruken.Callback
         }
 
         private static bool AspectProceed(
-            object callback, ICallbackHandler composer,
+            object callback, IHandler composer,
             Func<bool> proceed, AfterCallback after, object state)
         {
             Promise promise = null;

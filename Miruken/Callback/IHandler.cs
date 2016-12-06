@@ -8,8 +8,8 @@ namespace Miruken.Callback
         object Result     { get; set; }
     }
 
-	public interface ICallbackHandler : IProtocolAdapter
+	public interface IHandler : IProtocolAdapter
 	{
-		bool Handle(object callback, bool greedy = false, ICallbackHandler composer = null);
+		bool Handle(object callback, bool greedy = false, IHandler composer = null);
 	}
 }

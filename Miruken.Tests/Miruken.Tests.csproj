@@ -60,8 +60,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Callback\CallbackHandler.HandleMethodTests.cs" />
-    <Compile Include="Callback\CallbackHandlerTests.cs" />
+    <Compile Include="Callback\Handler.HandleMethodTests.cs" />
+    <Compile Include="Callback\HandlerTests.cs" />
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\LinqToPromisesTests.cs" />
     <Compile Include="Concurrency\PromiseTests.cs" />

@@ -4,7 +4,7 @@ using Miruken.Concurrency;
 
 namespace Miruken.Error
 {
-    public class ErrorsHandler : CallbackHandler, IErrors
+    public class ErrorsHandler : Handler, IErrors
     {
         public virtual bool HandleException(Exception exception, object context)
         {
@@ -15,12 +15,12 @@ namespace Miruken.Error
 
     public static class ErrorsExtensions
     {
-        public static ICallbackHandler Recover(this ICallbackHandler handler)
+        public static IHandler Recover(this IHandler handler)
         {
             return Recover(handler, null);
         }
 
-        public static ICallbackHandler Recover(this ICallbackHandler handler, object context)
+        public static IHandler Recover(this IHandler handler, object context)
         {
             return handler.Filter((callback, composer, proceed) => {
                 if (callback is Composition)

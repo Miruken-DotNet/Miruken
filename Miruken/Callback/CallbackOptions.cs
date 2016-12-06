@@ -6,12 +6,12 @@
         public abstract void MergeInto(T other);
     }
 
-    public class CallbackOptionsHandler<T> : CallbackHandlerDecorator
+    public class OptionsHandler<T> : HandlerDecorator
         where T : CallbackOptions<T>
     {
         private readonly T _options;
 
-        public CallbackOptionsHandler(ICallbackHandler handler, T options)
+        public OptionsHandler(IHandler handler, T options)
             : base(handler)
         {
             _options = options;

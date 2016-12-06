@@ -4,10 +4,10 @@ using Miruken.Callback;
 namespace Miruken.Tests.Callback
 {
     /// <summary>
-    /// Summary description for CallbackHandlerTests
+    /// Summary description for HandlerTests
     /// </summary>
     [TestClass]
-    public class CallbackHandlerTests
+    public class HandlerTests
     {
         [TestMethod]
         public void Should_Indicate_Not_Handled()
@@ -19,7 +19,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Indicate_Not_Handled_Surrogate()
         {
-            var handler = new CallbackHandler(new Controller());
+            var handler = new Handler(new Controller());
             Assert.IsFalse(handler.Handle(new Bee()));
         }
 
@@ -36,7 +36,7 @@ namespace Miruken.Tests.Callback
         public void Should_Handle_Callbacks_Implicitly_Surrogate()
         {
             var foo     = new Foo();
-            var handler = new CallbackHandler(new Controller());
+            var handler = new Handler(new Controller());
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
@@ -84,7 +84,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Indicate_Not_Provided_Surrogate()
         {
-            var handler = new CallbackHandler(new Controller());
+            var handler = new Handler(new Controller());
             var bee     = handler.Resolve<Bee>();
             Assert.IsNull(bee);
         }
@@ -102,7 +102,7 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Provide_Callbacks_Implicitly_Surrogate()
         {
-            var handler = new CallbackHandler(new Controller());
+            var handler = new Handler(new Controller());
             var bar     = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -193,7 +193,7 @@ namespace Miruken.Tests.Callback
         public void Should_Resolve_Self_Surrogate_Implicitly()
         {
             var controller = new Controller();
-            var handler    = new CallbackHandler(controller);
+            var handler    = new Handler(controller);
             var result     = handler.Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
@@ -202,7 +202,7 @@ namespace Miruken.Tests.Callback
         public void Should_Resolve_Self_Surrogate_Implicitly_Decorated()
         {
             var controller = new Controller();
-            var handler    = new CallbackHandler(controller);
+            var handler    = new Handler(controller);
             var result     = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
@@ -220,15 +220,15 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Get_Target_If_Not_Decorated()
         {
-            var handler = new CallbackHandler();
-            Assert.AreSame(handler, CallbackHandlerDecorator.Decorated(handler, true));
+            var handler = new Handler();
+            Assert.AreSame(handler, HandlerDecorator.Decorated(handler, true));
         }
 
         [TestMethod]
         public void Should_Get_Deepest_Decorated_Handler()
         {
-            var handler = new CallbackHandler();
-            Assert.AreSame(handler, CallbackHandlerDecorator.Decorated(
+            var handler = new Handler();
+            Assert.AreSame(handler, HandlerDecorator.Decorated(
                 handler.Broadcast().BestEffort().Notify(), true));
         }
 
@@ -287,7 +287,7 @@ namespace Miruken.Tests.Callback
         {       
         }
 
-        private class CustomHandler : CallbackHandler
+        private class CustomHandler : Handler
         {
             [Handles]
             public void HandleFooImplict(Foo foo)
@@ -296,7 +296,7 @@ namespace Miruken.Tests.Callback
             }
 
             [Handles]
-            public bool HandleSuperFooImplict(SuperFoo foo, ICallbackHandler composer)
+            public bool HandleSuperFooImplict(SuperFoo foo, IHandler composer)
             {
                 ++foo.Handled;
                 foo.HasComposer = true;
@@ -304,7 +304,7 @@ namespace Miruken.Tests.Callback
             }
 
             [Handles]
-            public bool HandleBarExplicit(Bar bar, ICallbackHandler composer)
+            public bool HandleBarExplicit(Bar bar, IHandler composer)
             {
                 ++bar.Handled;
                 bar.HasComposer = true;
@@ -327,13 +327,13 @@ namespace Miruken.Tests.Callback
             }
 
             [Provides]
-            public Boo ProvideBooImplicitly(ICallbackHandler composer)
+            public Boo ProvideBooImplicitly(IHandler composer)
             {
                 return new Boo { HasComposer = true };
             }
 
             [Provides]
-            public SuperBar ProvideSuperBarImplicitly(ICallbackHandler composer)
+            public SuperBar ProvideSuperBarImplicitly(IHandler composer)
             {
                 return new SuperBar
                 {

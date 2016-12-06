@@ -337,7 +337,7 @@ namespace Miruken.Tests.Context
             var grandChild = child3.CreateChild();
             grandChild.Store(data);
 
-            Func<ICallbackHandler, ICallbackHandler> Foo =
+            Func<IHandler, IHandler> Foo =
                 h => h.Aspect((_, __, ___) => ++count);
 
             Assert.IsNull(Foo(child2.SelfDescendant()).Resolve<DataTable>());
@@ -428,7 +428,7 @@ namespace Miruken.Tests.Context
 
         #endregion
 
-        class Observer : CallbackHandler, IObserving
+        class Observer : Handler, IObserving
         {
             private readonly Counter _counter;
 

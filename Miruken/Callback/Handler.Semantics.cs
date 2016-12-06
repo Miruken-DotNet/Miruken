@@ -59,19 +59,19 @@ namespace Miruken.Callback
         }
     }
 
-    public class CallbackSemanticsHandler : CallbackHandlerDecorator
+    public class SemanticsHandler : HandlerDecorator
     {
         private readonly CallbackSemantics _semantics;
 
-        public CallbackSemanticsHandler(
-            ICallbackHandler handler, CallbackOptions options)
+        public SemanticsHandler(
+            IHandler handler, CallbackOptions options)
             : base(handler)
         {
             _semantics = new CallbackSemantics(options);
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
         {
             var handled   = false;
             if (Composition.IsComposed<CallbackSemantics>(callback))
@@ -107,31 +107,31 @@ namespace Miruken.Callback
 
     public static class CallbackSemanticExtensions
     {
-        public static ICallbackHandler Semantics(
-            this ICallbackHandler handler, CallbackOptions options)
+        public static IHandler Semantics(
+            this IHandler handler, CallbackOptions options)
         {
             return handler == null ? null : 
-                new CallbackSemanticsHandler(handler, options);
+                new SemanticsHandler(handler, options);
         }
 
         #region Semantics
 
-        public static ICallbackHandler Broadcast(this ICallbackHandler handler)
+        public static IHandler Broadcast(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Broadcast);
         }
 
-        public static ICallbackHandler BestEffort(this ICallbackHandler handler)
+        public static IHandler BestEffort(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.BestEffot);
         }
 
-        public static ICallbackHandler Notify(this ICallbackHandler handler)
+        public static IHandler Notify(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Notify);
         }
 
-        public static ICallbackHandler Resolve(this ICallbackHandler handler)
+        public static IHandler Resolve(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Resolve);
         }

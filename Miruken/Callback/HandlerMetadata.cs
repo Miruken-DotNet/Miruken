@@ -8,22 +8,22 @@ using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
-    public static class CallbackHandlerMetadata
+    public static class HandlerMetadata
     {
-        private static readonly ConcurrentDictionary<Type, CallbackHandlerDescriptor>
-            _descriptors = new ConcurrentDictionary<Type, CallbackHandlerDescriptor>();
+        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
 
-        public static CallbackHandlerDescriptor GetDescriptor(Type type)
+        public static HandlerDescriptor GetDescriptor(Type type)
         {
-            return _descriptors.GetOrAdd(type, t => new CallbackHandlerDescriptor(t));
+            return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
         }
     }
 
-    public class CallbackHandlerDescriptor
+    public class HandlerDescriptor
     {
         private readonly Dictionary<Type, List<DefinitionAttribute>> _definitions;
 
-        public CallbackHandlerDescriptor(Type type)
+        public HandlerDescriptor(Type type)
         {
             foreach (var method in type.GetMethods(Binding))
             {
@@ -64,7 +64,7 @@ namespace Miruken.Callback
         }
 
         public bool Dispatch(Type type, object handler, object callback,
-            bool greedy, ICallbackHandler composer)
+            bool greedy, IHandler composer)
         {
             if (callback == null) return false;
 
@@ -127,7 +127,7 @@ namespace Miruken.Callback
         public abstract int CompareTo(DefinitionAttribute other);
 
         protected internal abstract bool Dispatch(
-            object handler, object callback, ICallbackHandler composer);
+            object handler, object callback, IHandler composer);
 
         protected bool ConfigureCallbackType(MethodInfo method, Type callbackType)
         {
@@ -171,7 +171,7 @@ namespace Miruken.Callback
                 var argTypes = _typeMapping?.Select(i => types[i]).ToArray() ?? types;
                 method = method.MakeGenericMethod(argTypes);
             }
-            return method.Invoke(target, CallbackHandlerDescriptor.Binding,
+            return method.Invoke(target, HandlerDescriptor.Binding,
                 null, args, CultureInfo.InvariantCulture);
         }
 
@@ -237,7 +237,7 @@ namespace Miruken.Callback
             var parameters = method.GetParameters();
             if (parameters.Length == 2)
             {
-                if (!typeof(ICallbackHandler).IsAssignableFrom(parameters[1].ParameterType))
+                if (!typeof(IHandler).IsAssignableFrom(parameters[1].ParameterType))
                     return false;
                 _passComposer = true;
             }
@@ -271,7 +271,7 @@ namespace Miruken.Callback
         }
 
         protected internal override bool Dispatch(
-            object handler, object callback, ICallbackHandler composer)
+            object handler, object callback, IHandler composer)
         {
             if (!SatisfiesInvariantOrContravariant(callback))
                 return false;
@@ -323,14 +323,14 @@ namespace Miruken.Callback
             {
                 case 2:
                     if (!typeof(Resolution).IsAssignableFrom(parameters[0].ParameterType) ||
-                        !typeof(ICallbackHandler).IsAssignableFrom(parameters[1].ParameterType))
+                        !typeof(IHandler).IsAssignableFrom(parameters[1].ParameterType))
                         return false;
                     _passComposer = _passResolution = true;
                     break;
                 case 1:
                     if (typeof (Resolution).IsAssignableFrom(parameters[0].ParameterType))
                         _passResolution = true;
-                    else if (!_isVoid && typeof (ICallbackHandler).IsAssignableFrom(parameters[0].ParameterType))
+                    else if (!_isVoid && typeof (IHandler).IsAssignableFrom(parameters[0].ParameterType))
                     {
                         _passComposer = true;
                         ConfigureCallbackType(method, returnType);
@@ -367,7 +367,7 @@ namespace Miruken.Callback
         }
 
         protected internal override bool Dispatch(
-            object handler, object callback, ICallbackHandler composer)
+            object handler, object callback, IHandler composer)
         {
             var resolution = callback as Resolution;
             if (resolution == null)

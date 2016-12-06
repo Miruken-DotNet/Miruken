@@ -34,8 +34,7 @@
 
         public void Dispose()
         {
-            if (_action != null)
-                _action();
+            _action?.Invoke();
         }
     }
 }

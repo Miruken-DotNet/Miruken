@@ -46,21 +46,21 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Callback\CallbackHandler.cs" />
-    <Compile Include="Callback\CallbackHandler.HandleMethod.cs" />
-    <Compile Include="Callback\CallbackHandler.Helpers.cs" />
-    <Compile Include="Callback\CallbackHandler.Resolve.cs" />
-    <Compile Include="Callback\CallbackHandler.Semantics.cs" />
-    <Compile Include="Callback\CallbackHandler.Traverse.cs" />
-    <Compile Include="Callback\CallbackHandlerDecorator.cs" />
-    <Compile Include="Callback\CallbackHandlerFilter.cs" />
-    <Compile Include="Callback\CallbackHandlerMetadata.cs" />
+    <Compile Include="Callback\Handler.cs" />
+    <Compile Include="Callback\Handler.HandleMethod.cs" />
+    <Compile Include="Callback\Handler.Helpers.cs" />
+    <Compile Include="Callback\Handler.Resolve.cs" />
+    <Compile Include="Callback\Handler.Semantics.cs" />
+    <Compile Include="Callback\Handler.Traverse.cs" />
+    <Compile Include="Callback\HandlerDecorator.cs" />
+    <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="Callback\HandlerMetadata.cs" />
     <Compile Include="Callback\CallbackOptions.cs" />
-    <Compile Include="Callback\CascadeCallbackHandler.cs" />
-    <Compile Include="Callback\CompositeCallbackHandler.cs" />
+    <Compile Include="Callback\CascadeHandler.cs" />
+    <Compile Include="Callback\CompositeHandler.cs" />
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
-    <Compile Include="Callback\ICallbackHandler.cs" />
+    <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Protocol.cs" />
     <Compile Include="Callback\RejectedException.cs" />
     <Compile Include="Callback\Resolution.cs" />

@@ -4,7 +4,7 @@ namespace Miruken.Callback
 {
     public interface IResolving {}
 
-    public partial class CallbackHandler
+    public partial class Handler
     {
         #region Protocol
 
@@ -20,7 +20,7 @@ namespace Miruken.Callback
 
         #endregion
 
-        private bool TryHandleMethod(object callback, bool greedy, ICallbackHandler composer)
+        private bool TryHandleMethod(object callback, bool greedy, IHandler composer)
         {
             var handleMethod = callback as HandleMethod;
             if (handleMethod == null) return false;
@@ -30,13 +30,13 @@ namespace Miruken.Callback
             return handled;
         }
 
-        private static bool TryResolveMethod(object callback, ICallbackHandler composer)
+        private static bool TryResolveMethod(object callback, IHandler composer)
         {
             var resolveMethod = callback as ResolveMethod;
             return resolveMethod != null && resolveMethod.InvokeResolve(composer);
         }
 
-        public static ICallbackHandler Composer => HandleMethod.Composer;
+        public static IHandler Composer => HandleMethod.Composer;
 
         public static void Unhandled()
         {
@@ -52,7 +52,7 @@ namespace Miruken.Callback
 
     public static class CallbackHandleMethodExtensions
     {
-        public static void Do<T>(this ICallbackHandler handler, Action<T> action)
+        public static void Do<T>(this IHandler handler, Action<T> action)
             where T : class
         {
             if (handler == null) return;
@@ -60,7 +60,7 @@ namespace Miruken.Callback
             Do(handleMethod, handler, typeof(T));
         }
 
-        public static R Do<T, R>(this ICallbackHandler handler, Func<T, R> func)
+        public static R Do<T, R>(this IHandler handler, Func<T, R> func)
             where T : class
         {
             if (handler == null) return default(R);
@@ -70,7 +70,7 @@ namespace Miruken.Callback
                  : default(R);
         }
 
-        private static bool Do(HandleMethod method, ICallbackHandler handler, Type protocol)
+        private static bool Do(HandleMethod method, IHandler handler, Type protocol)
         {
             bool broadcast  = false,
                  useResolve = typeof(IResolving).IsAssignableFrom(protocol);
@@ -94,7 +94,7 @@ namespace Miruken.Callback
             return handled;
         }
 
-        private static CallbackSemantics GetSemantics(ICallbackHandler handler)
+        private static CallbackSemantics GetSemantics(IHandler handler)
         {
             var semantics = new CallbackSemantics();
             return handler.Handle(semantics, true) ? semantics : null;

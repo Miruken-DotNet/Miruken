@@ -1,18 +1,18 @@
 ﻿namespace Miruken.Callback
 {
-	public class CascadeCallbackHandler : CallbackHandler
+	public class CascadeHandler : Handler
 	{
-		private readonly ICallbackHandler _handlerA;
-		private readonly ICallbackHandler _handlerB;
+		private readonly IHandler _handlerA;
+		private readonly IHandler _handlerB;
 
-		internal CascadeCallbackHandler(ICallbackHandler handlerA, ICallbackHandler handlerB)
+		internal CascadeHandler(IHandler handlerA, IHandler handlerB)
 		{
 			_handlerA = handlerA;
 			_handlerB = handlerB;
 		}
 
 		protected override bool HandleCallback(
-            object callback, bool greedy, ICallbackHandler composer)
+            object callback, bool greedy, IHandler composer)
 		{
 		    var handled = base.HandleCallback(callback, greedy, composer);
 			return greedy
