@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
@@ -140,9 +141,9 @@ namespace Miruken.Callback
         protected bool SatisfiesInvariantOrContravariant(object callback)
         {
             var callbackType = callback.GetType();
-            return ((Invariant && (CallbackType == callbackType)) ||
-                    CallbackType.IsInstanceOfType(callback) ||
-                    SatisfiesGenericDef(callback.GetType()));
+            return (Invariant && (CallbackType == callbackType)) ||
+                   CallbackType.IsInstanceOfType(callback) ||
+                   SatisfiesGenericDef(callback.GetType());
         }
 
         protected bool SatisfiesCovariant(Type type)
@@ -229,6 +230,7 @@ namespace Miruken.Callback
     {
         private bool _returnsBool;
         private bool _passComposer;
+        private Delegate _delegate;
 
         protected override bool Configure(MethodInfo method)
         {
@@ -248,7 +250,24 @@ namespace Miruken.Callback
             else if (returnType != typeof (void))
                 return false;
 
-            return ConfigureCallbackType(method, parameters[0].ParameterType);
+            if (!ConfigureCallbackType(method, parameters[0].ParameterType))
+                return false;
+
+            if (!method.ContainsGenericParameters)
+            {
+                if (_returnsBool)
+                {
+                    _delegate = _passComposer
+                              ? ReflectionHelper.CreateFuncTwoArgs(method)
+                              : (Delegate)ReflectionHelper.CreateFuncOneArg(method);
+                }
+                else
+                    _delegate = _passComposer
+                              ? ReflectionHelper.CreateActionTwoArgs(method)
+                              : (Delegate)ReflectionHelper.CreateActionOneArg(method);
+            }
+
+            return true;
         }
 
         protected internal override bool Dispatch(
@@ -256,6 +275,20 @@ namespace Miruken.Callback
         {
             if (!SatisfiesInvariantOrContravariant(callback))
                 return false;
+
+            if (_delegate != null)
+            {
+                if (_returnsBool)
+                    return _passComposer
+                        ? (bool) ((Func<object, object, object, object>) _delegate)(handler, callback, composer)
+                        : (bool) ((Func<object, object, object>) _delegate)(handler, callback);
+
+                if (_passComposer)
+                    ((Action<object, object, object>) _delegate)(handler, callback, composer);
+                else
+                    ((Action<object, object>)_delegate)(handler, callback);
+                return true;
+            }
 
             var args   = _passComposer
                        ? new[] { callback, composer }
@@ -274,6 +307,8 @@ namespace Miruken.Callback
     {
         private bool _passResolution;
         private bool _passComposer;
+        private bool _isVoid;
+        private Delegate _delegate;
 
         public object Key { get; set; }
 
@@ -281,7 +316,8 @@ namespace Miruken.Callback
         {
             var returnType = method.ReturnType;
             var parameters = method.GetParameters();
-            var isVoid     = returnType == typeof(void);
+
+            _isVoid  = returnType == typeof(void);
 
             switch (parameters.Length)
             {
@@ -289,21 +325,45 @@ namespace Miruken.Callback
                     if (!typeof(Resolution).IsAssignableFrom(parameters[0].ParameterType) ||
                         !typeof(ICallbackHandler).IsAssignableFrom(parameters[1].ParameterType))
                         return false;
-                    return _passComposer = _passResolution = true;
+                    _passComposer = _passResolution = true;
+                    break;
                 case 1:
                     if (typeof (Resolution).IsAssignableFrom(parameters[0].ParameterType))
-                        return _passResolution = true;
-                    if (!isVoid && typeof (ICallbackHandler).IsAssignableFrom(parameters[0].ParameterType))
+                        _passResolution = true;
+                    else if (!_isVoid && typeof (ICallbackHandler).IsAssignableFrom(parameters[0].ParameterType))
                     {
                         _passComposer = true;
                         ConfigureCallbackType(method, returnType);
-                        return true;
                     }
-                    return false;
+                    else
+                        return false;
+                    break;
                 default:
-                    return (parameters.Length == 0 && !isVoid) &&
-                        ConfigureCallbackType(method, returnType);
+                    if (_isVoid || parameters.Length != 0 || !ConfigureCallbackType(method, returnType))
+                        return false;
+                    break;
             }
+
+            if (!method.ContainsGenericParameters)
+            {
+                if (_passResolution)
+                {
+                    if (_passComposer)
+                        _delegate = _isVoid 
+                                  ? ReflectionHelper.CreateActionTwoArgs(method)
+                                  : (Delegate)ReflectionHelper.CreateFuncTwoArgs(method);
+                    else
+                        _delegate = _isVoid 
+                                  ? ReflectionHelper.CreateActionOneArg(method)
+                                  : (Delegate)ReflectionHelper.CreateFuncOneArg(method);
+                }
+                else
+                    _delegate = _passComposer
+                              ? ReflectionHelper.CreateFuncOneArg(method)
+                              : (Delegate)ReflectionHelper.CreateFuncNoArgs(method);
+            }
+
+            return true;
         }
 
         protected internal override bool Dispatch(
@@ -317,14 +377,40 @@ namespace Miruken.Callback
             if (!SatisfiesCovariant(typeKey))
                 return false;
 
+            object result   = null;
             var resolutions = resolution.Resolutions;
-            var parameters  = _passResolution && _passComposer
-                            ? new[] { callback, composer }
-                            : _passResolution ? new[] { callback }
-                            : _passComposer ? new[] { composer }
-                            : null;
-            var count  = resolutions.Count;
-            var result = InvokeMethod(handler, typeKey, parameters);
+            var count       = resolutions.Count;
+
+            if (_delegate != null)
+            {
+                if (_passResolution)
+                {
+                    if (_passComposer)
+                    {
+                        if (_isVoid)
+                            ((Action<object, object, object>)_delegate)(handler, callback, composer);
+                        else
+                            result = ((Func<object, object, object, object>)_delegate)(handler, callback, composer);
+                    }
+                    else if (_isVoid)
+                        ((Action<object, object>)_delegate)(handler, callback);
+                    else
+                        result = ((Func<object, object, object>)_delegate)(handler, callback);
+                }
+                else
+                    result = _passComposer
+                        ? ((Func<object, object, object>) _delegate)(handler, composer)
+                        : ((Func<object, object>) _delegate)(handler);
+            }
+            else
+            {
+                var parameters = _passResolution && _passComposer
+                               ? new[] { callback, composer }
+                               : _passResolution ? new[] { callback }
+                               : _passComposer ? new[] { composer }
+                               : null;
+                result = InvokeMethod(handler, typeKey, parameters);
+            }
 
             if (result != null)
             {

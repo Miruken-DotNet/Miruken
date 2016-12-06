@@ -25,7 +25,6 @@ namespace Miruken.Error
             return handler.Filter((callback, composer, proceed) => {
                 if (callback is Composition)
                     return proceed();
-
                 try
                 {
                     var handled = proceed();

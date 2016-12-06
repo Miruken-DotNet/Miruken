@@ -10,8 +10,6 @@ namespace Miruken.Container
     #endregion
     public interface IContainer
     {
-        #region Resolve
-
         T        Resolve<T>();
 
         object   Resolve(object key);
@@ -21,9 +19,6 @@ namespace Miruken.Container
         object[] ResolveAll(object key);
 
         void     Release(object component);
-
-        #endregion
-
     }
 
     #region ContainerProtocol
