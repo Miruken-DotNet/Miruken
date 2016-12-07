@@ -8,6 +8,13 @@ namespace Miruken.Infrastructure
 
     public static class ReflectionHelper
     {
+        public static object GetDefault(Type type)
+        {
+            return type != null && type.IsValueType 
+                 ? Activator.CreateInstance(type) 
+                 : null;
+        }
+
         public static string GetSimpleTypeName(Type t)
         {
             var fullyQualifiedTypeName = t.AssemblyQualifiedName;

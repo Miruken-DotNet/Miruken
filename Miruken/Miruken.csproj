@@ -61,7 +61,7 @@
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
     <Compile Include="Callback\IHandler.cs" />
-    <Compile Include="Callback\Protocol.cs" />
+    <Compile Include="Protocol.cs" />
     <Compile Include="Callback\RejectedException.cs" />
     <Compile Include="Callback\Resolution.cs" />
     <Compile Include="Callback\ResolveMethod.cs" />

@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Miruken.Callback;
 using Miruken.Context;
+using static Miruken.Protocol;
 
 namespace Miruken.Tests.Context
 {
@@ -360,7 +360,7 @@ namespace Miruken.Tests.Context
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            root.Publish().Do((IObserving o) => o.Observe());
+            P<IObserving>(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -377,7 +377,7 @@ namespace Miruken.Tests.Context
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            new IObserving(root.Publish()).Observe();
+            P<IObserving>(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -389,10 +389,10 @@ namespace Miruken.Tests.Context
             var child2 = root.CreateChild();
             var child3 = root.CreateChild();
             var grandChild = child3.CreateChild();
-            new IObserving(root.SelfOrDescendantReverse().BestEffort()).Observe();
+            P<IObserving>(root.SelfOrDescendantReverse().BestEffort()).Observe();
         }
 
-        class Counter
+        private class Counter
         {
             public int Count { get; private set; }
             public int Increment()
@@ -401,34 +401,12 @@ namespace Miruken.Tests.Context
             }
         }
 
-        #region Protocol
-        [ComImport,
-         Guid(Protocol.Guid),
-         CoClass(typeof(ObservingProtocol))]
-        #endregion
-        interface IObserving
+        private interface IObserving
         {
             void Observe();
         }
 
-        #region ObservingProtocol
-
-        class ObservingProtocol : Protocol, IObserving
-        {
-            public ObservingProtocol(IProtocolAdapter adapter)
-                : base(adapter)
-            {       
-            }
-
-            void IObserving.Observe()
-            {
-                Do((IObserving p) => p.Observe());
-            }
-        }
-
-        #endregion
-
-        class Observer : Handler, IObserving
+        private class Observer : Handler, IObserving
         {
             private readonly Counter _counter;
 

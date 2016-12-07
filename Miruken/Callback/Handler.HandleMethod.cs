@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.Remoting.Messaging;
+using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
@@ -6,19 +8,39 @@ namespace Miruken.Callback
 
     public partial class Handler
     {
-        #region Protocol
-
-        void IProtocolAdapter.Do<T>(Action<T> action)
+        object IProtocolAdapter.Dispatch(IMethodCallMessage message)
         {
-            this.Do(action); 
+            var handleMethod = new HandleMethod(message);
+            var protocol     = handleMethod.TargetType;
+
+            bool broadcast  = false,
+                 useResolve = typeof(IResolving).IsAssignableFrom(protocol);
+
+            var semantics = GetSemantics(this);
+            if (semantics != null)
+            {
+                broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
+                useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
+            }
+
+            var callback = useResolve
+                         ? new ResolveMethod(handleMethod, broadcast)
+                         : (object)handleMethod;
+
+            var handled = Handle(callback, broadcast && !useResolve);
+            if (!handled && (semantics == null ||
+                !semantics.HasOption(CallbackOptions.BestEffot)))
+                throw new MissingMethodException();
+
+            return handled ? handleMethod.Result 
+                 : ReflectionHelper.GetDefault(handleMethod.ResultType);
         }
 
-        R IProtocolAdapter.Do<T, R>(Func<T, R> func)
+        private static CallbackSemantics GetSemantics(IHandler handler)
         {
-            return this.Do(func);
+            var semantics = new CallbackSemantics();
+            return handler.Handle(semantics, true) ? semantics : null;
         }
-
-        #endregion
 
         private bool TryHandleMethod(object callback, bool greedy, IHandler composer)
         {
@@ -47,57 +69,6 @@ namespace Miruken.Callback
         {
             HandleMethod.Unhandled = true;
             return default (Ret);
-        }
-    }
-
-    public static class CallbackHandleMethodExtensions
-    {
-        public static void Do<T>(this IHandler handler, Action<T> action)
-            where T : class
-        {
-            if (handler == null) return;
-            var handleMethod = new HandleAction<T>(action);
-            Do(handleMethod, handler, typeof(T));
-        }
-
-        public static R Do<T, R>(this IHandler handler, Func<T, R> func)
-            where T : class
-        {
-            if (handler == null) return default(R);
-            var handleMethod = new HandleFunc<T, R>(func);
-            return Do(handleMethod, handler, typeof (T))
-                 ? (R) handleMethod.ReturnValue
-                 : default(R);
-        }
-
-        private static bool Do(HandleMethod method, IHandler handler, Type protocol)
-        {
-            bool broadcast  = false,
-                 useResolve = typeof(IResolving).IsAssignableFrom(protocol);
-
-            var semantics  = GetSemantics(handler);
-            if (semantics != null)
-            {
-                broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
-                useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
-            }
-
-            var callback = useResolve
-                         ? new ResolveMethod(method, broadcast)
-                         : (object)method;
-
-            var handled = handler.Handle(callback, broadcast && !useResolve);
-            if (!handled && (semantics == null || 
-                !semantics.HasOption(CallbackOptions.BestEffot)))
-                throw new MissingMethodException();
-
-            return handled;
-        }
-
-        private static CallbackSemantics GetSemantics(IHandler handler)
-        {
-            var semantics = new CallbackSemantics();
-            return handler.Handle(semantics, true) ? semantics : null;
         }
     }
 }

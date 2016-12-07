@@ -1,11 +1,24 @@
 ﻿using System;
+using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using Miruken.Concurrency;
 
 namespace Miruken.Callback
 {
-    public abstract class HandleMethod : ICallback
+    public class HandleMethod : ICallback
     {
-        public abstract Type ResultType { get; }
+        private readonly IMethodCallMessage _methodCall;
+
+        public HandleMethod(IMethodCallMessage methodCall)
+        {
+            _methodCall = methodCall;
+            var method  = (MethodInfo)methodCall.MethodBase;
+            TargetType  = method.ReflectedType;
+            ResultType  = method.ReturnType == typeof(void) ? null
+                        : method.ReturnType;
+        }
+
+        public Type ResultType { get; }
 
         public object Result
         {
@@ -17,9 +30,38 @@ namespace Miruken.Callback
 
         public Exception Exception { get; set; }
 
-        public abstract Type TargetType { get; }
+        public Type TargetType { get; }
 
-        public abstract bool InvokeOn(object target, IHandler composer);
+        public bool InvokeOn(object target, IHandler composer)
+        {
+            if (!TargetType.IsInstanceOfType(target))
+                return false;
+
+            var oldComposer  = Composer;
+            var oldUnhandled = Unhandled;
+
+            try
+            {
+                Composer  = composer;
+                Unhandled = false;
+                var returnValue = _methodCall.MethodBase.Invoke(target, _methodCall.Args);
+                if (Unhandled) return false;
+                ReturnValue = returnValue;
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Exception = exception;
+                if (!typeof(Promise).IsAssignableFrom(ResultType)) throw;
+                ReturnValue = Promise.Rejected(exception).Coerce(ResultType);
+                return true;
+            }
+            finally
+            {
+                Unhandled = oldUnhandled;
+                Composer  = oldComposer;
+            }
+        }
 
         [ThreadStatic] public static IHandler Composer;
 
@@ -33,99 +75,5 @@ namespace Miruken.Callback
         }
 
         [ThreadStatic] public static bool Unhandled;
-    }
-
-    public class HandleAction<T> : HandleMethod
-        where T : class
-    {
-        private readonly Action<T> Action;
-
-        public HandleAction(Action<T> action)
-        {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            Action = action;
-        }
-
-        public override Type TargetType => typeof (T);
-
-        public override Type ResultType => null;
-
-        public override bool InvokeOn(object target, IHandler composer)
-        {
-            var receiver = target as T;
-            if (receiver == null) return false;
-
-            var oldComposer  = Composer;
-            var oldUnhandled = Unhandled;
-
-            try
-            {
-                Composer  = composer;
-                Unhandled = false;
-                Action(receiver);
-                return !Unhandled;
-            }
-            catch (Exception exception)
-            {
-                Exception = exception;
-                throw;
-            }
-            finally
-            {
-                Unhandled = oldUnhandled;
-                Composer  = oldComposer;
-            }
-        }
-    }
-
-    public class HandleFunc<T, R> : HandleMethod
-         where T : class
-    {
-        private readonly Func<T, R> _func;
-
-        public HandleFunc(Func<T, R> func)
-        {
-            if (func == null)
-                throw new ArgumentNullException(nameof(func));
-            _func = func;
-        }
-
-        public override Type TargetType => typeof(T);
-
-        public override Type ResultType => typeof(R);
-
-        public override bool InvokeOn(object target, IHandler composer)
-        {
-            var receiver = target as T;
-            if (receiver == null) return false;
-
-            var oldComposer  = Composer;
-            var oldUnhandled = Unhandled;
-
-            try
-            {
-                Composer   = composer;
-                Unhandled = false;
-                var returnValue = _func(receiver);
-                if (Unhandled) return false;
-                ReturnValue = returnValue;
-                return true;
-            }
-            catch (Exception exception)
-            {
-                Exception = exception;
-                var resultType = typeof (R);
-                if (!typeof(Promise).IsAssignableFrom(resultType))
-                    throw;
-                ReturnValue = Promise.Rejected(exception).Coerce(resultType);
-                return true;
-            }
-            finally
-            {
-                Unhandled = oldUnhandled;
-                Composer   = oldComposer;
-            }
-        }
     }
 }
