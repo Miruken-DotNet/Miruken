@@ -54,9 +54,9 @@ namespace Miruken
             var methodCall = (IMethodCallMessage)msg;
             try
             {
-                var result = _adapter.Dispatch(methodCall);
                 return new ReturnMessage(
-                    result, methodCall.Args, methodCall.ArgCount,
+                    _adapter.Dispatch(methodCall),
+                    methodCall.Args, methodCall.ArgCount,
                     methodCall.LogicalCallContext, methodCall);
             }
             catch (TargetInvocationException tex)
@@ -68,6 +68,11 @@ namespace Miruken
 
     public static class Protocol
     {
+        public static object P(IProtocolAdapter adapter)
+        {
+            return new Interceptor(adapter).GetTransparentProxy();
+        }
+
         public static TProtocol P<TProtocol>(IProtocolAdapter adapter)
         {
             return (TProtocol)new Interceptor(adapter).GetTransparentProxy();
