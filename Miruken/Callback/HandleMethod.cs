@@ -38,9 +38,6 @@ namespace Miruken.Callback
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            if (!TargetType.IsInstanceOfType(target))
-                return false;
-
             var targetMethod = MatchMethod(target);
             if (targetMethod == null) return false;
 
@@ -72,8 +69,18 @@ namespace Miruken.Callback
 
         private MethodInfo MatchMethod(object target)
         {
-            return target.GetType().GetMethods(Binding)
-                .FirstOrDefault(m => m.Name == _method.Name &&
+            MethodInfo[] candidates = null;
+
+            var targetType = target.GetType();
+            if (TargetType.IsInterface && TargetType.IsInstanceOfType(target))
+            {
+                var mapping = targetType.GetInterfaceMap(TargetType);
+                candidates = mapping.TargetMethods;
+            }
+
+            candidates = candidates ?? targetType.GetMethods(Binding);
+
+            return candidates.FirstOrDefault(m => m.Name == _method.Name &&
                     m.GetParameters().Select(p => p.ParameterType)
                     .SequenceEqual(_parameters));
         }
