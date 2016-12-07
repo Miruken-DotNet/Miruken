@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using Miruken.Concurrency;
@@ -44,7 +45,7 @@ namespace Miruken.Callback
             {
                 Composer  = composer;
                 Unhandled = false;
-                var returnValue = _methodCall.MethodBase.Invoke(target, _methodCall.Args);
+                var returnValue = InvokeMethod(target);
                 if (Unhandled) return false;
                 ReturnValue = returnValue;
                 return true;
@@ -63,7 +64,15 @@ namespace Miruken.Callback
             }
         }
 
-        [ThreadStatic] public static IHandler Composer;
+        private object InvokeMethod(object target)
+        {
+            var method = _methodCall.MethodBase;
+            var targetMethod = target.GetType().GetMethods()
+                .FirstOrDefault(m => m.Name == method.Name &&
+                    m.GetParameters().Select(p => p.ParameterType).SequenceEqual(
+                        method.GetParameters().Select(p => p.ParameterType)));
+            return targetMethod?.Invoke(target, _methodCall.Args);
+        }
 
         public static IHandler RequireComposer()
         {
@@ -74,6 +83,7 @@ namespace Miruken.Callback
             return composer;
         }
 
-        [ThreadStatic] public static bool Unhandled;
+        [ThreadStatic] public static IHandler Composer;
+        [ThreadStatic] public static bool     Unhandled;
     }
 }
