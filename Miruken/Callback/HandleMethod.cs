@@ -51,7 +51,7 @@ namespace Miruken.Callback
             {
                 Composer  = composer;
                 Unhandled = false;
-                var returnValue = targetMethod.Invoke(target, _args);
+                var returnValue = targetMethod.Invoke(target, Binding, null, _args, null);
                 if (Unhandled) return false;
                 ReturnValue = returnValue;
                 return true;
@@ -72,7 +72,7 @@ namespace Miruken.Callback
 
         private MethodInfo MatchMethod(object target)
         {
-            return target.GetType().GetMethods()
+            return target.GetType().GetMethods(Binding)
                 .FirstOrDefault(m => m.Name == _method.Name &&
                     m.GetParameters().Select(p => p.ParameterType)
                     .SequenceEqual(_parameters));
@@ -89,5 +89,9 @@ namespace Miruken.Callback
 
         [ThreadStatic] public static IHandler Composer;
         [ThreadStatic] public static bool     Unhandled;
+
+        private const BindingFlags Binding = BindingFlags.Instance
+                                           | BindingFlags.Public
+                                           | BindingFlags.NonPublic;
     }
 }
