@@ -44,8 +44,7 @@ namespace Miruken.Callback
             {
                 Composer  = composer;
                 Unhandled = false;
-                var returnValue = _methodCall.MethodBase.Invoke(
-                    target, BindingFlags,  null, _methodCall.Args, null);
+                var returnValue = _methodCall.MethodBase.Invoke(target, _methodCall.Args);
                 if (Unhandled) return false;
                 ReturnValue = returnValue;
                 return true;
@@ -76,8 +75,5 @@ namespace Miruken.Callback
         }
 
         [ThreadStatic] public static bool Unhandled;
-
-        private static readonly BindingFlags BindingFlags =
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     }
 }
