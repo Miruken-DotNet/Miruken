@@ -80,12 +80,12 @@ namespace Miruken
 
         public static object As(this IProtocolAdapter adapter)
         {
-            return new Interceptor(adapter).GetTransparentProxy();
+            return P(adapter);
         }
 
         public static TProtocol As<TProtocol>(this IProtocolAdapter adapter)
         {
-            return (TProtocol)new Interceptor(adapter).GetTransparentProxy();
+            return P<TProtocol>(adapter);
         }
     }
 }

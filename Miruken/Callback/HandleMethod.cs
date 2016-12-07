@@ -12,7 +12,7 @@ namespace Miruken.Callback
         private readonly Type[] _parameters;
         private readonly object[] _args;
 
-        public HandleMethod(IMethodCallMessage methodCall)
+        public HandleMethod(IMethodMessage methodCall)
         {
            _method      = (MethodInfo)methodCall.MethodBase;
             _parameters = _method.GetParameters().Select(p => p.ParameterType).ToArray();
