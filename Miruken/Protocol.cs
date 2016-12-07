@@ -15,11 +15,11 @@ namespace Miruken
 
     public class NullProtocolAdapter : IProtocolAdapter
     {
-        public static readonly NullProtocolAdapter 
+        public static readonly NullProtocolAdapter
             Instance = new NullProtocolAdapter();
 
         private NullProtocolAdapter()
-        {        
+        {
         }
 
         public object Dispatch(IMethodCallMessage message)
@@ -51,7 +51,7 @@ namespace Miruken
 
         public override IMessage Invoke(IMessage msg)
         {
-            var methodCall = (IMethodCallMessage)msg;
+            var methodCall = (IMethodCallMessage) msg;
             try
             {
                 return new ReturnMessage(
@@ -74,6 +74,16 @@ namespace Miruken
         }
 
         public static TProtocol P<TProtocol>(IProtocolAdapter adapter)
+        {
+            return (TProtocol) new Interceptor(adapter).GetTransparentProxy();
+        }
+
+        public static object As(this IProtocolAdapter adapter)
+        {
+            return new Interceptor(adapter).GetTransparentProxy();
+        }
+
+        public static TProtocol As<TProtocol>(this IProtocolAdapter adapter)
         {
             return (TProtocol)new Interceptor(adapter).GetTransparentProxy();
         }

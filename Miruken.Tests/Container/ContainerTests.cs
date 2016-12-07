@@ -40,6 +40,7 @@ namespace Miruken.Tests.Container
         {
             var handler = new TestContainer();
             var car = P<IContainer>(handler).ResolveAll<Car>();
+            car = handler.As<IContainer>().ResolveAll<Car>();
         }
 
         public interface Car

@@ -70,7 +70,7 @@ namespace Miruken.Callback
             var composer = Composer;
             if (composer == null)
                 throw new InvalidOperationException(
-                    "Composer not availanle.  Did you call this method directly?");
+                    "Composer not available.  Did you call this method directly?");
             return composer;
         }
 
