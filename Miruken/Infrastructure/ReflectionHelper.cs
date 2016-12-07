@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Miruken.Infrastructure
@@ -8,11 +9,14 @@ namespace Miruken.Infrastructure
 
     public static class ReflectionHelper
     {
+        private static readonly ConcurrentDictionary<Type, object> 
+            DefaultValues = new ConcurrentDictionary<Type, object>();
+
         public static object GetDefault(Type type)
         {
-            return type != null && type.IsValueType 
-                 ? Activator.CreateInstance(type) 
-                 : null;
+            return type != null && type.IsValueType
+                ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
+                : null;
         }
 
         public static string GetSimpleTypeName(Type t)
