@@ -8,15 +8,18 @@ namespace Miruken.Callback
 {
     public class HandleMethod : ICallback
     {
-        private readonly IMethodCallMessage _methodCall;
+        private readonly MethodInfo _method;
+        private readonly Type[] _parameters;
+        private readonly object[] _args;
 
         public HandleMethod(IMethodCallMessage methodCall)
         {
-            _methodCall = methodCall;
-            var method  = (MethodInfo)methodCall.MethodBase;
-            TargetType  = method.ReflectedType;
-            ResultType  = method.ReturnType == typeof(void) ? null
-                        : method.ReturnType;
+           _method      = (MethodInfo)methodCall.MethodBase;
+            _parameters = _method.GetParameters().Select(p => p.ParameterType).ToArray();
+            _args       = methodCall.Args;
+            TargetType  = _method.ReflectedType;
+            ResultType  = _method.ReturnType == typeof(void) ? null
+                        : _method.ReturnType;
         }
 
         public Type ResultType { get; }
@@ -43,9 +46,11 @@ namespace Miruken.Callback
 
             try
             {
-                Composer  = composer;
-                Unhandled = false;
-                var returnValue = InvokeMethod(target);
+                Composer         = composer;
+                Unhandled        = false;
+                var targetMethod = MatchMethod(target);
+                if (targetMethod == null) return false;
+                var returnValue = targetMethod.Invoke(target, _args);
                 if (Unhandled) return false;
                 ReturnValue = returnValue;
                 return true;
@@ -64,14 +69,12 @@ namespace Miruken.Callback
             }
         }
 
-        private object InvokeMethod(object target)
+        private MethodInfo MatchMethod(object target)
         {
-            var method = _methodCall.MethodBase;
-            var targetMethod = target.GetType().GetMethods()
-                .FirstOrDefault(m => m.Name == method.Name &&
-                    m.GetParameters().Select(p => p.ParameterType).SequenceEqual(
-                        method.GetParameters().Select(p => p.ParameterType)));
-            return targetMethod?.Invoke(target, _methodCall.Args);
+            return target.GetType().GetMethods()
+                .FirstOrDefault(m => m.Name == _method.Name &&
+                    m.GetParameters().Select(p => p.ParameterType)
+                    .SequenceEqual(_parameters));
         }
 
         public static IHandler RequireComposer()
