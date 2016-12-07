@@ -44,7 +44,8 @@ namespace Miruken.Infrastructure
             }
             else
             {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic);
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                                              BindingFlags.Instance);
                 foreach (var method in methods)
                 {
                     if (MethodSignatureComparer.Instance.Equals(method.GetBaseDefinition(), sourceMethod))

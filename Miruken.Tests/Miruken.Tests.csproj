@@ -66,6 +66,7 @@
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\LinqToPromisesTests.cs" />
     <Compile Include="Concurrency\PromiseTests.cs" />
+    <Compile Include="Container\ContainerTests.cs" />
     <Compile Include="Context\ContextTests.cs" />
     <Compile Include="Graph\TraversalTests.cs" />
     <Compile Include="Graph\TraversingTests.cs" />
