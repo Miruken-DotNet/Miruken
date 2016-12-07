@@ -33,7 +33,7 @@ namespace Miruken.Callback
                 throw new MissingMethodException();
 
             return handled ? handleMethod.Result 
-                 : ReflectionHelper.GetDefault(handleMethod.ResultType);
+                 : RuntimeHelper.GetDefault(handleMethod.ResultType);
         }
 
         private static CallbackSemantics GetSemantics(IHandler handler)

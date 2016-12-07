@@ -61,6 +61,7 @@
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
     <Compile Include="Callback\IHandler.cs" />
+    <Compile Include="Infrastructure\MethodSignatureComparer.cs" />
     <Compile Include="Protocol.cs" />
     <Compile Include="Callback\RejectedException.cs" />
     <Compile Include="Callback\Resolution.cs" />
@@ -84,7 +85,7 @@
     <Compile Include="Infrastructure\DisposableObject.cs" />
     <Compile Include="Infrastructure\EventExtensions.cs" />
     <Compile Include="Infrastructure\ExceptionEventArgs.cs" />
-    <Compile Include="Infrastructure\ReflectionHelper.cs" />
+    <Compile Include="Infrastructure\RuntimeHelper.cs" />
     <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />

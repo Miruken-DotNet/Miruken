@@ -258,13 +258,13 @@ namespace Miruken.Callback
                 if (_returnsBool)
                 {
                     _delegate = _passComposer
-                              ? ReflectionHelper.CreateFuncTwoArgs(method)
-                              : (Delegate)ReflectionHelper.CreateFuncOneArg(method);
+                              ? RuntimeHelper.CreateFuncTwoArgs(method)
+                              : (Delegate)RuntimeHelper.CreateFuncOneArg(method);
                 }
                 else
                     _delegate = _passComposer
-                              ? ReflectionHelper.CreateActionTwoArgs(method)
-                              : (Delegate)ReflectionHelper.CreateActionOneArg(method);
+                              ? RuntimeHelper.CreateActionTwoArgs(method)
+                              : (Delegate)RuntimeHelper.CreateActionOneArg(method);
             }
 
             return true;
@@ -350,17 +350,17 @@ namespace Miruken.Callback
                 {
                     if (_passComposer)
                         _delegate = _isVoid 
-                                  ? ReflectionHelper.CreateActionTwoArgs(method)
-                                  : (Delegate)ReflectionHelper.CreateFuncTwoArgs(method);
+                                  ? RuntimeHelper.CreateActionTwoArgs(method)
+                                  : (Delegate)RuntimeHelper.CreateFuncTwoArgs(method);
                     else
                         _delegate = _isVoid 
-                                  ? ReflectionHelper.CreateActionOneArg(method)
-                                  : (Delegate)ReflectionHelper.CreateFuncOneArg(method);
+                                  ? RuntimeHelper.CreateActionOneArg(method)
+                                  : (Delegate)RuntimeHelper.CreateFuncOneArg(method);
                 }
                 else
                     _delegate = _passComposer
-                              ? ReflectionHelper.CreateFuncOneArg(method)
-                              : (Delegate)ReflectionHelper.CreateFuncNoArgs(method);
+                              ? RuntimeHelper.CreateFuncOneArg(method)
+                              : (Delegate)RuntimeHelper.CreateFuncNoArgs(method);
             }
 
             return true;

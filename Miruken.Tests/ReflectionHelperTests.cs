@@ -53,7 +53,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Single_Arg_Action()
         {
-            var call = ReflectionHelper.CreateActionOneArg(
+            var call = RuntimeHelper.CreateActionOneArg(
                 typeof(Handler).GetMethod("HandleOne"));
             var handler = new Handler();
             call(handler, "Hello");
@@ -63,7 +63,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Double_Arg_Action()
         {
-            var call = ReflectionHelper.CreateActionTwoArgs(
+            var call = RuntimeHelper.CreateActionTwoArgs(
                 typeof(Handler).GetMethod("HandleTwo"));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14));
@@ -76,7 +76,7 @@ namespace Miruken.Tests
              "Method HandlerTwo expects 2 argument(s)")]
         public void Should_Fail_If_Action_Arg_Mismatch()
         {
-            ReflectionHelper.CreateFuncOneArg(
+            RuntimeHelper.CreateFuncOneArg(
                 typeof(Handler).GetMethod("HandleTwo"));
         }
 
@@ -85,14 +85,14 @@ namespace Miruken.Tests
             "Method Handle expects 0 arguments")]
         public void Should_Fail_If_No_Args()
         {
-            ReflectionHelper.CreateActionOneArg(
+            RuntimeHelper.CreateActionOneArg(
                 typeof(Handler).GetMethod("Handle"));
         }
 
         [TestMethod]
         public void Should_Create_No_Arg_Function()
         {
-            var call = ReflectionHelper.CreateFuncNoArgs(
+            var call = RuntimeHelper.CreateFuncNoArgs(
                 typeof(Provider).GetMethod("Provide"));
             var provider = new Provider();
             Assert.AreEqual("Hello", call(provider));
@@ -101,7 +101,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_One_Arg_Function()
         {
-            var call = ReflectionHelper.CreateFuncOneArg(
+            var call = RuntimeHelper.CreateFuncOneArg(
                 typeof(Provider).GetMethod("ProvideOne"));
             var provider = new Provider();
             Assert.AreEqual("22", call(provider, 22));
@@ -110,7 +110,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Two_Args_Function()
         {
-            var call = ReflectionHelper.CreateFuncTwoArgs(
+            var call = RuntimeHelper.CreateFuncTwoArgs(
                 typeof(Provider).GetMethod("ProvideTwo"));
             var provider = new Provider();
             Assert.AreEqual(new DateTime(2003, 4, 9),
@@ -122,7 +122,7 @@ namespace Miruken.Tests
             "Method ProvideOne expects 1 argument(s)")]
         public void Should_Fail_If_Function_Arg_Mismatch()
         {
-            ReflectionHelper.CreateFuncTwoArgs(
+            RuntimeHelper.CreateFuncTwoArgs(
                 typeof(Provider).GetMethod("ProvideOne"));
         }
 
@@ -131,7 +131,7 @@ namespace Miruken.Tests
             "Method Provide is void")]
         public void Should_Fail_If_No_ReturnType()
         {
-            ReflectionHelper.CreateActionOneArg(
+            RuntimeHelper.CreateActionOneArg(
                 typeof(Provider).GetMethod("ProvideVoid"));
         }
     }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using Miruken.Concurrency;
+using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
@@ -38,7 +39,7 @@ namespace Miruken.Callback
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            var targetMethod = MatchMethod(target);
+            var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType());
             if (targetMethod == null) return false;
 
             var oldComposer  = Composer;
@@ -65,24 +66,6 @@ namespace Miruken.Callback
                 Unhandled = oldUnhandled;
                 Composer  = oldComposer;
             }
-        }
-
-        private MethodInfo MatchMethod(object target)
-        {
-            MethodInfo[] candidates = null;
-
-            var targetType = target.GetType();
-            if (TargetType.IsInterface && TargetType.IsInstanceOfType(target))
-            {
-                var mapping = targetType.GetInterfaceMap(TargetType);
-                candidates = mapping.TargetMethods;
-            }
-
-            candidates = candidates ?? targetType.GetMethods(Binding);
-
-            return candidates.FirstOrDefault(m => m.Name == _method.Name &&
-                    m.GetParameters().Select(p => p.ParameterType)
-                    .SequenceEqual(_parameters));
         }
 
         public static IHandler RequireComposer()

@@ -7,7 +7,7 @@ namespace Miruken.Infrastructure
     using System;
     using System.Text;
 
-    public static class ReflectionHelper
+    public static class RuntimeHelper
     {
         private static readonly ConcurrentDictionary<Type, object> 
             DefaultValues = new ConcurrentDictionary<Type, object>();
@@ -23,6 +23,42 @@ namespace Miruken.Infrastructure
         {
             var fullyQualifiedTypeName = t.AssemblyQualifiedName;
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
+        }
+
+        public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type)
+        {
+            Type[] genericArguments = null;
+            if (sourceMethod.IsGenericMethod)
+            {
+                genericArguments = sourceMethod.GetGenericArguments();
+                sourceMethod     = sourceMethod.GetGenericMethodDefinition();
+            }
+            var declaringType = sourceMethod.DeclaringType;
+            MethodInfo methodOnTarget = null;
+            if (declaringType.GetTypeInfo().IsInterface &&
+                declaringType?.IsAssignableFrom(type) == true)
+            {
+                var mapping = type.GetTypeInfo().GetRuntimeInterfaceMap(declaringType);
+                var index   = Array.IndexOf(mapping.InterfaceMethods, sourceMethod);
+                methodOnTarget = mapping.TargetMethods[index];
+            }
+            else
+            {
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic);
+                foreach (var method in methods)
+                {
+                    if (MethodSignatureComparer.Instance.Equals(method.GetBaseDefinition(), sourceMethod))
+                    {
+                        methodOnTarget = method;
+                        break;
+                    }
+                }
+            }
+            if (methodOnTarget == null) return null;
+
+            return genericArguments == null
+                 ? methodOnTarget 
+                 : methodOnTarget.MakeGenericMethod(genericArguments);
         }
 
         public static Action<object, object> CreateActionOneArg(MethodInfo method)
