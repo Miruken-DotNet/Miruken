@@ -65,8 +65,7 @@ namespace Miruken.Callback
                            ? type == item.GetType()
                            : type.IsInstanceOfType(item);
 
-            if (!compatible)
-                return false;
+            if (!compatible) return false;
 
             Resolve(item);
             return true;	            
