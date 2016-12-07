@@ -41,15 +41,16 @@ namespace Miruken.Callback
             if (!TargetType.IsInstanceOfType(target))
                 return false;
 
+            var targetMethod = MatchMethod(target);
+            if (targetMethod == null) return false;
+
             var oldComposer  = Composer;
             var oldUnhandled = Unhandled;
 
             try
             {
-                Composer         = composer;
-                Unhandled        = false;
-                var targetMethod = MatchMethod(target);
-                if (targetMethod == null) return false;
+                Composer  = composer;
+                Unhandled = false;
                 var returnValue = targetMethod.Invoke(target, _args);
                 if (Unhandled) return false;
                 ReturnValue = returnValue;
