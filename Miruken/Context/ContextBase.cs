@@ -11,13 +11,12 @@ namespace Miruken.Context
         : CompositeHandler, IContext<TContext>
 		where TContext : class, IContext<TContext>
 	{
-	    private ContextState _state;
-        private EventHandlerList _events;
+	    private EventHandlerList _events;
 	    private readonly List<WeakReference> _children;
  
 		protected ContextBase()
 		{
-            _state    = ContextState.Active;
+            State     = ContextState.Active;
             _children = new List<WeakReference>();
             _events   = new EventHandlerList();
 		}
@@ -27,7 +26,7 @@ namespace Miruken.Context
 			Parent = parent;
 		}
 
-	    public ContextState State => _state;
+	    public ContextState State { get; private set; }
 
 	    ITraversing ITraversing.Parent => Parent;
 
@@ -158,10 +157,10 @@ namespace Miruken.Context
 
 	    public virtual void End()
 	    {
-	        if (_state != ContextState.Active)
+	        if (State != ContextState.Active)
 	            return;
 
-            _state = ContextState.Ending;
+            State = ContextState.Ending;
             Raise(ContextEvents.ContextEnding, this as TContext);
 
             try
@@ -171,7 +170,7 @@ namespace Miruken.Context
             }
             finally
             {
-                _state = ContextState.Ended;
+                State = ContextState.Ended;
                 Raise(ContextEvents.ContextEnded, this as TContext);
                 _events.Dispose();
                 _events = null;
@@ -188,9 +187,9 @@ namespace Miruken.Context
         {
             add
             {
-                if (_state == ContextState.Active)
+                if (State == ContextState.Active)
                     _events.AddHandler(ContextEvents.ContextEnding, value);
-                else if (_state == ContextState.Ending)
+                else if (State == ContextState.Ending)
                     value(this as TContext);
             }
             remove
@@ -203,9 +202,9 @@ namespace Miruken.Context
         {
             add
             {
-                if (_state == ContextState.Active)
+                if (State == ContextState.Active)
                     _events.AddHandler(ContextEvents.ContextEnded, value);
-                else if (_state == ContextState.Ended)
+                else if (State == ContextState.Ended)
                     value(this as TContext);
             }
             remove
@@ -284,7 +283,7 @@ namespace Miruken.Context
 
         private void AssertActive()
         {
-            if (_state != ContextState.Active)
+            if (State != ContextState.Active)
                 throw new Exception("The context has already ended");
         }
 	}
