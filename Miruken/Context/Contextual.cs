@@ -25,7 +25,7 @@
         public event ContextChangedDelegate<TContext> ContextChanged;
     }
 
-    public class Contextual : Contextual<IContext>
+    public class Contextual : Contextual<IContext>, IContextual
     {   
     }
 }
