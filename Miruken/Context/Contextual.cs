@@ -11,12 +11,12 @@
             set
             {
                 if (_context == value) return;
-                ContextChanging?.Invoke(_context, value);
+                ContextChanging?.Invoke(this, _context, value);
                 _context?.RemoveHandlers(this);
                 var oldContext = _context;
                 _context = value;
                 _context?.InsertHandlers(0, this);
-                ContextChanged?.Invoke(oldContext, _context);
+                ContextChanged?.Invoke(this, oldContext, _context);
             }
         }
 

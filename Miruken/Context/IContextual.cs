@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Context
 {
-    public delegate void ContextDelegate<in TContext>(
+    public delegate void ContextDelegate<TContext>(
+        IContextual<TContext> contextual,
         TContext oldContext, TContext neContext)
             where TContext : class, IContext<TContext>;
 
