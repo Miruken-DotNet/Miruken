@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -26,6 +27,12 @@ namespace Miruken.Infrastructure
         }
 
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type)
+        {
+            var key = new KeyValuePair<MethodInfo, Type>(sourceMethod, type);
+            return MethodMapping.GetOrAdd(key, k => MatchMethod(k.Key, k.Value));
+        }
+
+        private static MethodInfo MatchMethod(MethodInfo sourceMethod, Type type)
         {
             Type[] genericArguments = null;
             if (sourceMethod.IsGenericMethod)
@@ -61,6 +68,9 @@ namespace Miruken.Infrastructure
                  ? methodOnTarget 
                  : methodOnTarget.MakeGenericMethod(genericArguments);
         }
+
+        private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
+            MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
         public static Action<object, object> CreateActionOneArg(MethodInfo method)
         {
