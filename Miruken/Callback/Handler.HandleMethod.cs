@@ -32,7 +32,8 @@ namespace Miruken.Callback
             var handled = Handle(callback, broadcast && !useResolve);
             if (!handled && (semantics == null ||
                 !semantics.HasOption(CallbackOptions.BestEffot)))
-                throw new MissingMethodException();
+                throw new MissingMethodException(
+                    $"Method '{message.MethodName}' on {message.TypeName} not handled");
 
             return handled ? handleMethod.Result 
                  : RuntimeHelper.GetDefault(handleMethod.ResultType);

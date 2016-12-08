@@ -60,6 +60,10 @@ namespace Miruken.Tests.Callback
             }
         }
 
+        interface IDemo : IEmailFeature, IBilling
+        {      
+        }
+
         private class DemoHandler : Handler
         {
             public int Email(string message)
@@ -89,11 +93,26 @@ namespace Miruken.Tests.Callback
             Assert.AreEqual(22, id);
         }
 
+        [TestMethod]
+        public void Should_Handle_Methods_Covariantly()
+        {
+            var handler = new EmailHandler();
+            var id = P<IDemo>(handler).Email("Hello");
+            Assert.AreEqual(1, id);
+        }
+
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Require_Protocol_Conformance()
         {
             var handler = new DemoHandler();
             P<IEmailFeature>(handler.Strict()).Email("22");
+        }
+
+        [TestMethod, ExpectedException(typeof(MissingMethodException))]
+        public void Should_Require_Protocol_Invariance()
+        {
+            var handler = new DemoHandler();
+            P<IDemo>(handler.Strict()).Email("22");
         }
 
         [TestMethod]
