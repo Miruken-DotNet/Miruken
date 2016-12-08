@@ -60,12 +60,40 @@ namespace Miruken.Tests.Callback
             }
         }
 
+        private class DemoHandler : Handler
+        {
+            public int Email(string message)
+            {
+                return int.Parse(message);
+            }
+
+            public decimal Bill(decimal amount)
+            {
+                return amount * 2;
+            }
+        }
+
         [TestMethod]
         public void Should_Handle_Methods()
         {
             var handler = new EmailHandler();
             var id      = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Methods_Implicitly()
+        {
+            var handler = new DemoHandler();
+            var id = P<IEmailFeature>(handler).Email("22");
+            Assert.AreEqual(22, id);
+        }
+
+        [TestMethod, ExpectedException(typeof(MissingMethodException))]
+        public void Should_Require_Protocol_Conformance()
+        {
+            var handler = new DemoHandler();
+            P<IEmailFeature>(handler.Strict()).Email("22");
         }
 
         [TestMethod]
@@ -154,6 +182,13 @@ namespace Miruken.Tests.Callback
             var handler = new Handler(new Billing());
             var total   = P<IBilling>(handler).Bill(7.50M);
             Assert.AreEqual(9.50M, total);
+        }
+
+        [TestMethod, ExpectedException(typeof(MissingMethodException))]
+        public void Should_Not_Resolve_Methods_Implicitly()
+        {
+            var handler = new DemoHandler();
+            P<IBilling>(handler).Bill(15M);
         }
 
         [TestMethod]

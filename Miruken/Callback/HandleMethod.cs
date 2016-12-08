@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using Miruken.Concurrency;
@@ -9,14 +8,14 @@ namespace Miruken.Callback
 {
     public class HandleMethod : ICallback
     {
+        private readonly bool _strict;
         private readonly MethodInfo _method;
-        private readonly Type[] _parameters;
         private readonly object[] _args;
 
-        public HandleMethod(IMethodMessage methodCall)
+        public HandleMethod(IMethodMessage methodCall, bool strict)
         {
-           _method      = (MethodInfo)methodCall.MethodBase;
-            _parameters = _method.GetParameters().Select(p => p.ParameterType).ToArray();
+            _strict     = strict;
+            _method     = (MethodInfo)methodCall.MethodBase;
             _args       = methodCall.Args;
             TargetType  = _method.ReflectedType;
             ResultType  = _method.ReturnType == typeof(void) ? null
@@ -39,6 +38,9 @@ namespace Miruken.Callback
 
         public bool InvokeOn(object target, IHandler composer)
         {
+            if (_strict && !TargetType.IsInstanceOfType(target))
+                return false;
+
             var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType());
             if (targetMethod == null) return false;
 

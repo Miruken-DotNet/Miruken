@@ -10,22 +10,24 @@ namespace Miruken.Callback
     {
         object IProtocolAdapter.Dispatch(IMethodCallMessage message)
         {
-            var handleMethod = new HandleMethod(message);
-            var protocol     = handleMethod.TargetType;
+            var protocol = message.MethodBase.ReflectedType;
 
             bool broadcast  = false,
+                 strict     = typeof(IStrict).IsAssignableFrom(protocol),
                  useResolve = typeof(IResolving).IsAssignableFrom(protocol);
 
             var semantics = GetSemantics(this);
             if (semantics != null)
             {
                 broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
+                strict     = strict || semantics.HasOption(CallbackOptions.Strict);
                 useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
             }
 
-            var callback = useResolve
-                         ? new ResolveMethod(handleMethod, broadcast)
-                         : (object)handleMethod;
+            var handleMethod = new HandleMethod(message, strict);
+            var callback     = useResolve
+                             ? new ResolveMethod(handleMethod, broadcast)
+                             : (object)handleMethod;
 
             var handled = Handle(callback, broadcast && !useResolve);
             if (!handled && (semantics == null ||

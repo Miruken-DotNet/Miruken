@@ -8,7 +8,8 @@ namespace Miruken.Callback
         None      = 0,
         Broadcast = 1 << 0,
         BestEffot = 1 << 1,
-        Resolve   = 1 << 2,
+        Strict    = 1 << 2,
+        Resolve   = 1 << 3,
         Notify    = Broadcast | BestEffot
     }
 
@@ -47,6 +48,7 @@ namespace Miruken.Callback
 
         public void MergeInto(CallbackSemantics semantics)
         {
+            MergeInto(semantics, CallbackOptions.Strict);
             MergeInto(semantics, CallbackOptions.BestEffot);
             MergeInto(semantics, CallbackOptions.Broadcast);
             MergeInto(semantics, CallbackOptions.Resolve);
@@ -124,6 +126,11 @@ namespace Miruken.Callback
         public static IHandler BestEffort(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.BestEffot);
+        }
+
+        public static IHandler Strict(this IHandler handler)
+        {
+            return Semantics(handler, CallbackOptions.Strict);
         }
 
         public static IHandler Notify(this IHandler handler)

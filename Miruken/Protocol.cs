@@ -6,6 +6,8 @@ using System.Runtime.Remoting.Proxies;
 
 namespace Miruken
 {
+    public interface IStrict {}
+
     public interface IProtocolAdapter
     {
         object Dispatch(IMethodCallMessage message);
