@@ -47,8 +47,15 @@ namespace Miruken.Callback
 
         public void Resolve(params object[] resolutions)
         {
+            resolutions = resolutions.SelectMany(r =>
+            {
+                var list = r as IEnumerable;
+                return list?.Cast<object>() ?? new[] {r};
+            }).ToArray();
+
             if (resolutions.Length == 0 ||
                 (!Many && _resolutions.Count > 0)) return;
+
             _resolutions.AddRange(resolutions.Where(r => r != null));
             _result = null;
         }

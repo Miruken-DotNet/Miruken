@@ -418,14 +418,7 @@ namespace Miruken.Callback
                 if (Invariant && CallbackType != null &&
                     (CallbackType != result.GetType()))
                     return false;
-                var list = result as IEnumerable;
-                if (list != null)
-                {
-                    var many = list.Cast<object>().ToArray();
-                    resolution.Resolve(many);
-                }
-                else
-                    resolution.Resolve(result);
+                resolution.Resolve(result);
             }
 
             return resolutions.Count > count;
