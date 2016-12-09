@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
+using Miruken.Callback;
 
 namespace Miruken
 {
@@ -89,5 +90,8 @@ namespace Miruken
         {
             return P<TProtocol>(adapter);
         }
+
+        public static IHandler Composer => HandleMethod.Composer;
+        public static bool Unhandled => HandleMethod.Unhandled;
     }
 }
