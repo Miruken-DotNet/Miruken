@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -417,7 +418,14 @@ namespace Miruken.Callback
                 if (Invariant && CallbackType != null &&
                     (CallbackType != result.GetType()))
                     return false;
-                resolution.Resolve(result);
+                var list = result as IEnumerable;
+                if (list != null)
+                {
+                    var many = list.Cast<object>().ToArray();
+                    resolution.Resolve(many);
+                }
+                else
+                    resolution.Resolve(result);
             }
 
             return resolutions.Count > count;

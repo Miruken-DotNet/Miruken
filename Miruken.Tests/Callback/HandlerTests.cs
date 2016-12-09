@@ -161,9 +161,17 @@ namespace Miruken.Tests.Callback
         public void Should_Provide_Callbacks_Mapped()
         {
             var handler = new CustomHandler();
-            var baz = handler.Resolve<Baz<int,string>>();
+            var baz     = handler.Resolve<Baz<int,string>>();
             Assert.IsInstanceOfType(baz, typeof(Baz<int,string>));
             Assert.AreEqual(0, baz.Stuff);
+        }
+
+        [TestMethod]
+        public void Should_Provide_All_Callbacks()
+        {
+            var handler = new CustomHandler();
+            var bars    = handler.ResolveAll<Bar>();
+            Assert.AreEqual(2, bars.Length);
         }
 
         [TestMethod]

@@ -13,6 +13,8 @@ namespace Miruken.Tests.Callback
     {
         private interface IEmailFeature
         {
+            int Count { get; }
+
             int Email(string message);
 
             void CancelEmail(int id);
@@ -83,6 +85,14 @@ namespace Miruken.Tests.Callback
             var handler = new EmailHandler();
             var id      = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Properties()
+        {
+            var handler = new EmailHandler();
+            var count   = P<IEmailFeature>(handler).Count;
+            Assert.AreEqual(0, count);
         }
 
         [TestMethod]

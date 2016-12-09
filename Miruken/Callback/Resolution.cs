@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,9 +34,7 @@ namespace Miruken.Callback
         {
             get
             {
-                if (_result != null)
-                    return _result;
-
+                if (_result != null) return _result;
                 if (Many)
                     _result = _resolutions.ToArray();
                 else if (_resolutions.Count > 0)
@@ -48,10 +47,8 @@ namespace Miruken.Callback
 
         public void Resolve(params object[] resolutions)
         {
-            if (resolutions == null || resolutions.Length == 0 ||
-                (!Many && _resolutions.Count > 0))
-                return;
-
+            if (resolutions.Length == 0 ||
+                (!Many && _resolutions.Count > 0)) return;
             _resolutions.AddRange(resolutions.Where(r => r != null));
             _result = null;
         }
