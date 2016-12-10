@@ -34,8 +34,7 @@ namespace Miruken.Callback
             foreach (var target in targets)
             {
                 handled = _handleMethod.InvokeOn(target, composer) || handled;
-                if (handled && !_all)
-                    break;
+                if (handled && !_all) break;
             }
             return handled;
         }

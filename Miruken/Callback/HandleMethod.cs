@@ -41,7 +41,7 @@ namespace Miruken.Callback
             if (_strict && !TargetType.IsInstanceOfType(target))
                 return false;
 
-            var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType());
+            var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType(), Binding);
             if (targetMethod == null) return false;
 
             var oldComposer  = Composer;

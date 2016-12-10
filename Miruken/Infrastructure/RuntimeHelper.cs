@@ -26,13 +26,14 @@ namespace Miruken.Infrastructure
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
         }
 
-        public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type)
+        public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,
+            BindingFlags binding = BindingFlags.Public)
         {
             var key = new KeyValuePair<MethodInfo, Type>(sourceMethod, type);
-            return MethodMapping.GetOrAdd(key, k => MatchMethod(k.Key, k.Value));
+            return MethodMapping.GetOrAdd(key, k => MatchMethod(k.Key, k.Value, binding));
         }
 
-        private static MethodInfo MatchMethod(MethodInfo sourceMethod, Type type)
+        private static MethodInfo MatchMethod(MethodInfo sourceMethod, Type type, BindingFlags binding)
         {
             Type[] genericArguments = null;
             if (sourceMethod.IsGenericMethod)
@@ -51,8 +52,7 @@ namespace Miruken.Infrastructure
             }
             else
             {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
-                                              BindingFlags.Instance);
+                var methods = type.GetMethods(BindingFlags.Instance | binding);
                 foreach (var method in methods)
                 {
                     if (MethodSignatureComparer.Instance.Equals(method.GetBaseDefinition(), sourceMethod))

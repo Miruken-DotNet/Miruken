@@ -1,6 +1,8 @@
-﻿namespace Miruken.Callback
+﻿using System;
+
+namespace Miruken.Callback
 {
-	public partial class Handler : IHandler
+	public partial class Handler : MarshalByRefObject, IHandler
 	{
 	    public Handler()
 	    {        
