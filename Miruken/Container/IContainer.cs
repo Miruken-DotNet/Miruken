@@ -1,6 +1,6 @@
 ﻿namespace Miruken.Container
 {
-    public interface IContainer
+    public interface IContainer : IStrict
     {
         T        Resolve<T>();
 
