@@ -38,7 +38,7 @@ namespace Miruken
 
         public static TProtocol P<TProtocol>(IProtocolAdapter adapter)
         {
-            return (TProtocol)new Interceptor(adapter).GetTransparentProxy();
+            return (TProtocol)P(adapter);
         }
 
         public static object As(this IProtocolAdapter adapter)
