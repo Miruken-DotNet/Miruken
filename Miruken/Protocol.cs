@@ -1,7 +1,34 @@
-﻿using Miruken.Callback;
+﻿using System.Runtime.Remoting.Messaging;
+using Miruken.Callback;
 
 namespace Miruken
 {
+    public interface IStrict { }
+
+    public interface IProtocolAdapter
+    {
+        object Dispatch(IMethodCallMessage message);
+    }
+
+    #region NullProtocolAdapter
+
+    public class NullProtocolAdapter : IProtocolAdapter
+    {
+        public static readonly NullProtocolAdapter
+            Instance = new NullProtocolAdapter();
+
+        private NullProtocolAdapter()
+        {
+        }
+
+        public object Dispatch(IMethodCallMessage message)
+        {
+            return null;
+        }
+    }
+
+    #endregion
+
     public static class Protocol
     {
         public static object P(IProtocolAdapter adapter)

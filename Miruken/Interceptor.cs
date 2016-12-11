@@ -6,32 +6,6 @@ using System.Runtime.Remoting.Proxies;
 
 namespace Miruken
 {
-    public interface IStrict {}
-
-    public interface IProtocolAdapter
-    {
-        object Dispatch(IMethodCallMessage message);
-    }
-
-    #region NullProtocolAdapter
-
-    public class NullProtocolAdapter : IProtocolAdapter
-    {
-        public static readonly NullProtocolAdapter
-            Instance = new NullProtocolAdapter();
-
-        private NullProtocolAdapter()
-        {
-        }
-
-        public object Dispatch(IMethodCallMessage message)
-        {
-            return null;
-        }
-    }
-
-    #endregion
-
     public class Interceptor : RealProxy, IRemotingTypeInfo
     {
         private readonly IProtocolAdapter _adapter;
