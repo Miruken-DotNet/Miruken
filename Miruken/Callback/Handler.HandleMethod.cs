@@ -24,12 +24,16 @@ namespace Miruken.Callback
                 useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
             }
 
+            var handler = this as IHandler;
+            if (strict) handler = handler.Strict();
+            if (useResolve) handler = handler.Resolve();
+
             var handleMethod = new HandleMethod(message, strict);
             var callback     = useResolve
                              ? new ResolveMethod(handleMethod, broadcast)
                              : (object)handleMethod;
 
-            var handled = Handle(callback, broadcast && !useResolve);
+            var handled = handler.Handle(callback, broadcast && !useResolve);
             if (!handled && (semantics == null ||
                 !semantics.HasOption(CallbackOptions.BestEffot)))
                 throw new MissingMethodException(
