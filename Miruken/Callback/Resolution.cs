@@ -10,12 +10,7 @@ namespace Miruken.Callback
         private readonly List<object> _resolutions;
         private object _result;
 
-        public Resolution(object key)
-            : this(key, false)
-        {
-        }
-
-        public Resolution(object key, bool many)
+        public Resolution(object key, bool many = false)
         {
             Key          = key;
             Many         = many;
