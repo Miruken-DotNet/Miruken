@@ -85,6 +85,8 @@ namespace Miruken.Tests.Callback
             var handler = new EmailHandler();
             var id      = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
+            id = handler.P<IEmailFeature>().Email("Hello");
+            Assert.AreEqual(2, id);
         }
 
         [TestMethod]
