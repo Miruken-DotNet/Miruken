@@ -12,7 +12,7 @@ namespace Miruken.Callback
         private readonly MethodInfo _method;
         private readonly object[] _args;
 
-        public HandleMethod(IMethodMessage methodCall, bool duck)
+        public HandleMethod(IMethodMessage methodCall, bool duck = false)
         {
             _duck       = duck;
             _method     = (MethodInfo)methodCall.MethodBase;
