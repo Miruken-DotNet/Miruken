@@ -24,9 +24,14 @@ namespace Miruken.Callback
                 useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
             }
 
-            var handler = this as IHandler;
-            if (strict) handler = handler.Strict();
-            if (useResolve) handler = handler.Resolve();
+            var options = CallbackOptions.None;
+            if (strict && semantics?.HasOption(CallbackOptions.Strict) == false)
+                options = options | CallbackOptions.Strict;
+            if (useResolve && semantics?.HasOption(CallbackOptions.Resolve) == false)
+                options = options | CallbackOptions.Resolve;
+            var handler = options != CallbackOptions.None
+                        ? this.Semantics(options)
+                        : this;
 
             var handleMethod = new HandleMethod(message, strict);
             var callback     = useResolve
