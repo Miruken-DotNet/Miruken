@@ -9,22 +9,22 @@ namespace Miruken
     public class Interceptor : RealProxy, IRemotingTypeInfo
     {
         private readonly IProtocolAdapter _adapter;
-        private Type _protocol;
+        private readonly Type _protocol;
 
-        public Interceptor(IProtocolAdapter adapter)
+        public Interceptor(IProtocolAdapter adapter, Type protocol = null)
             : base(typeof(MarshalByRefObject))
         {
             if (adapter == null)
                 throw new ArgumentNullException(nameof(adapter));
-            _adapter = adapter;
+            _adapter  = adapter;
+            _protocol = protocol;
         }
 
         public string TypeName { get; set; }
 
         public bool CanCastTo(Type fromType, object o)
         {
-            _protocol = fromType;
-            return true;
+            return _protocol == null || fromType.IsAssignableFrom(_protocol);
         }
 
         public override IMessage Invoke(IMessage msg)

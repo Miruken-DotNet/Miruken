@@ -17,7 +17,7 @@ namespace Miruken.Callback
             _duck      = duck;
             _method    = (MethodInfo)methodCall.MethodBase;
             _args      = methodCall.Args;
-            TargetType = protocol ?? _method.ReflectedType;
+            Protocol   = protocol ?? _method.ReflectedType;
             ResultType = _method.ReturnType == typeof(void) ? null
                        : _method.ReturnType;
         }
@@ -34,11 +34,11 @@ namespace Miruken.Callback
 
         public Exception Exception { get; set; }
 
-        public Type TargetType { get; }
+        public Type Protocol { get; }
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            if (!(_duck || TargetType.IsInstanceOfType(target)))
+            if (!(_duck || Protocol.IsInstanceOfType(target)))
                 return false;
 
             var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType(), Binding);

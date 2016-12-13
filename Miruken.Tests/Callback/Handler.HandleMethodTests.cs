@@ -263,5 +263,22 @@ namespace Miruken.Tests.Callback
             var billing = new Handler(new Billing(4M));
             Assert.AreEqual(7M, P<IBilling>(billing).Bill(3M));
         }
+
+        [TestMethod]
+        public void Should_Allow_Protocol_Cast()
+        {
+            var offline = P<IOffline>(new Handler());
+            var email   = (IEmailFeature)offline;
+            Assert.IsNotNull(email);
+            var bill    = (IBilling)offline;
+            Assert.IsNotNull(bill);
+        }
+
+        [TestMethod, ExpectedException(typeof(InvalidCastException))]
+        public void Should_Reject_Invalid_Protocol_Cast()
+        {
+            var offline = P<IOffline>(new Handler());
+            var handler = (IHandler) offline;
+        }
     }
 }

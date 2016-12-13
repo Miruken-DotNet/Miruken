@@ -24,7 +24,7 @@ namespace Miruken.Callback
 
         public bool InvokeResolve(IHandler composer)
         {
-            var targets = composer.ResolveAll(_handleMethod.TargetType);
+            var targets = composer.ResolveAll(_handleMethod.Protocol);
             return InvokeTargets(targets, composer);
         }
 

@@ -10,6 +10,8 @@ namespace Miruken.Callback
     {
         object IProtocolAdapter.Dispatch(Type protocol, IMethodCallMessage message)
         {
+            protocol = protocol ?? message.MethodBase.ReflectedType;
+
             bool broadcast  = false,
                  duck       = typeof(IDuck).IsAssignableFrom(protocol),
                  useResolve = typeof(IResolving).IsAssignableFrom(protocol);

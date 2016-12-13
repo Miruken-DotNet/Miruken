@@ -23,11 +23,12 @@ namespace Miruken
 
         public static TProtocol P<TProtocol>(IProtocolAdapter adapter)
         {
-            return (TProtocol) P(adapter);
+            return (TProtocol)new Interceptor(adapter, typeof(TProtocol))
+                .GetTransparentProxy();
         }
 
-        public static IHandler Composer => HandleMethod.Composer;
-        public static bool Unhandled => HandleMethod.Unhandled;
+        public static IHandler Composer  => HandleMethod.Composer;
+        public static bool     Unhandled => HandleMethod.Unhandled;
     }
 
     public static class ProtocolExtensions
