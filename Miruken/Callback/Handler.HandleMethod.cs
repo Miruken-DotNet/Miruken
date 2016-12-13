@@ -8,10 +8,8 @@ namespace Miruken.Callback
 
     public partial class Handler
     {
-        object IProtocolAdapter.Dispatch(IMethodCallMessage message)
+        object IProtocolAdapter.Dispatch(Type protocol, IMethodCallMessage message)
         {
-            var protocol = message.MethodBase.ReflectedType;
-
             bool broadcast  = false,
                  duck       = typeof(IDuck).IsAssignableFrom(protocol),
                  useResolve = typeof(IResolving).IsAssignableFrom(protocol);
@@ -33,7 +31,7 @@ namespace Miruken.Callback
                         ? this.Semantics(options)
                         : this;
 
-            var handleMethod = new HandleMethod(message, duck);
+            var handleMethod = new HandleMethod(protocol, message, duck);
             var callback     = useResolve
                              ? new ResolveMethod(handleMethod, broadcast)
                              : (object)handleMethod;

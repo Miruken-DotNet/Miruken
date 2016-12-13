@@ -3,33 +3,16 @@ using Miruken.Callback;
 
 namespace Miruken
 {
+    using System;
+
     public interface IDuck
     {
     }
 
     public interface IProtocolAdapter
     {
-        object Dispatch(IMethodCallMessage message);
+        object Dispatch(Type protocol, IMethodCallMessage message);
     }
-
-    #region NullProtocolAdapter
-
-    public class NullProtocolAdapter : IProtocolAdapter
-    {
-        public static readonly NullProtocolAdapter
-            Instance = new NullProtocolAdapter();
-
-        private NullProtocolAdapter()
-        {
-        }
-
-        public object Dispatch(IMethodCallMessage message)
-        {
-            return null;
-        }
-    }
-
-    #endregion
 
     public static class Protocol
     {

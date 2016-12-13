@@ -9,6 +9,7 @@ namespace Miruken
     public class Interceptor : RealProxy, IRemotingTypeInfo
     {
         private readonly IProtocolAdapter _adapter;
+        private Type _protocol;
 
         public Interceptor(IProtocolAdapter adapter)
             : base(typeof(MarshalByRefObject))
@@ -22,6 +23,7 @@ namespace Miruken
 
         public bool CanCastTo(Type fromType, object o)
         {
+            _protocol = fromType;
             return true;
         }
 
@@ -31,7 +33,7 @@ namespace Miruken
             try
             {
                 return new ReturnMessage(
-                    _adapter.Dispatch(methodCall),
+                    _adapter.Dispatch(_protocol, methodCall),
                     methodCall.Args, methodCall.ArgCount,
                     methodCall.LogicalCallContext, methodCall);
             }

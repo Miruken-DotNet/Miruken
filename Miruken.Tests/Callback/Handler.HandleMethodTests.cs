@@ -26,6 +26,8 @@ namespace Miruken.Tests.Callback
 
             public int Email(string message)
             {
+                if (Count > 0 && Count % 2 == 0)
+                    return P<IOffline>(Composer).Email(message);
                 return ++Count;
             }
 
@@ -62,8 +64,29 @@ namespace Miruken.Tests.Callback
             }
         }
 
-        interface IDemo : IEmailFeature, IBilling
+        private interface IOffline : IEmailFeature, IBilling
         {      
+        }
+
+        private class OfflineHandler : Handler, IOffline
+        {
+            private int _count;
+
+            int IEmailFeature.Count => _count;
+
+            int IEmailFeature.Email(string message)
+            {
+                return ++_count;
+            }
+
+            void IEmailFeature.CancelEmail(int id)
+            {
+            }
+
+            decimal IBilling.Bill(decimal amount)
+            {
+                throw new NotSupportedException("Not supported offline");
+            }
         }
 
         private class DemoHandler : Handler
@@ -108,8 +131,20 @@ namespace Miruken.Tests.Callback
         [TestMethod]
         public void Should_Handle_Methods_Covariantly()
         {
-            var handler = new EmailHandler();
-            var id = P<IDemo>(handler).Email("Hello");
+            var handler = new OfflineHandler();
+            var id = P<IEmailFeature>(handler).Email("Hello");
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Methods_Strictly()
+        {
+            var handler = new EmailHandler() + new OfflineHandler();
+            var id = P<IEmailFeature>(handler).Email("Hello");
+            Assert.AreEqual(1, id);
+            id = handler.P<IEmailFeature>().Email("Hello");
+            Assert.AreEqual(2, id);
+            id = handler.P<IEmailFeature>().Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -124,7 +159,7 @@ namespace Miruken.Tests.Callback
         public void Should_Require_Protocol_Invariance()
         {
             var handler = new DemoHandler();
-            P<IDemo>(handler).Email("22");
+            P<IOffline>(handler).Email("22");
         }
 
         [TestMethod]

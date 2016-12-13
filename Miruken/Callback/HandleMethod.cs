@@ -12,14 +12,14 @@ namespace Miruken.Callback
         private readonly MethodInfo _method;
         private readonly object[] _args;
 
-        public HandleMethod(IMethodMessage methodCall, bool duck = false)
+        public HandleMethod(Type protocol, IMethodMessage methodCall, bool duck = false)
         {
-            _duck       = duck;
-            _method     = (MethodInfo)methodCall.MethodBase;
-            _args       = methodCall.Args;
-            TargetType  = _method.ReflectedType;
-            ResultType  = _method.ReturnType == typeof(void) ? null
-                        : _method.ReturnType;
+            _duck      = duck;
+            _method    = (MethodInfo)methodCall.MethodBase;
+            _args      = methodCall.Args;
+            TargetType = protocol ?? _method.ReflectedType;
+            ResultType = _method.ReturnType == typeof(void) ? null
+                       : _method.ReturnType;
         }
 
         public Type ResultType { get; }
