@@ -3,7 +3,7 @@ using Miruken.Callback;
 
 namespace Miruken
 {
-    public interface IStrict
+    public interface IDuck
     {
     }
 

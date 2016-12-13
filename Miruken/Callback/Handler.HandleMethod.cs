@@ -13,27 +13,27 @@ namespace Miruken.Callback
             var protocol = message.MethodBase.ReflectedType;
 
             bool broadcast  = false,
-                 strict     = typeof(IStrict).IsAssignableFrom(protocol),
+                 duck       = typeof(IDuck).IsAssignableFrom(protocol),
                  useResolve = typeof(IResolving).IsAssignableFrom(protocol);
 
             var semantics = GetSemantics(this);
             if (semantics != null)
             {
                 broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
-                strict     = strict || semantics.HasOption(CallbackOptions.Strict);
+                duck       = duck || semantics.HasOption(CallbackOptions.Duck);
                 useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
             }
 
             var options = CallbackOptions.None;
-            if (strict && semantics?.HasOption(CallbackOptions.Strict) == false)
-                options = options | CallbackOptions.Strict;
+            if (duck && semantics?.HasOption(CallbackOptions.Duck) == false)
+                options = options | CallbackOptions.Duck;
             if (useResolve && semantics?.HasOption(CallbackOptions.Resolve) == false)
                 options = options | CallbackOptions.Resolve;
             var handler = options != CallbackOptions.None
                         ? this.Semantics(options)
                         : this;
 
-            var handleMethod = new HandleMethod(message, strict);
+            var handleMethod = new HandleMethod(message, duck);
             var callback     = useResolve
                              ? new ResolveMethod(handleMethod, broadcast)
                              : (object)handleMethod;

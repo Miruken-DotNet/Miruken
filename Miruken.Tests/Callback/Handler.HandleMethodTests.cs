@@ -98,10 +98,10 @@ namespace Miruken.Tests.Callback
         }
 
         [TestMethod]
-        public void Should_Handle_Methods_Implicitly()
+        public void Should_Handle_Methods_Loosely()
         {
             var handler = new DemoHandler();
-            var id = P<IEmailFeature>(handler).Email("22");
+            var id = P<IEmailFeature>(handler.Duck()).Email("22");
             Assert.AreEqual(22, id);
         }
 
@@ -117,14 +117,14 @@ namespace Miruken.Tests.Callback
         public void Should_Require_Protocol_Conformance()
         {
             var handler = new DemoHandler();
-            P<IEmailFeature>(handler.Strict()).Email("22");
+            P<IEmailFeature>(handler).Email("22");
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Require_Protocol_Invariance()
         {
             var handler = new DemoHandler();
-            P<IDemo>(handler.Strict()).Email("22");
+            P<IDemo>(handler).Email("22");
         }
 
         [TestMethod]

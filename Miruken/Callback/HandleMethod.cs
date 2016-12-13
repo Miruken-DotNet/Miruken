@@ -8,13 +8,13 @@ namespace Miruken.Callback
 {
     public class HandleMethod : ICallback
     {
-        private readonly bool _strict;
+        private readonly bool _duck;
         private readonly MethodInfo _method;
         private readonly object[] _args;
 
-        public HandleMethod(IMethodMessage methodCall, bool strict)
+        public HandleMethod(IMethodMessage methodCall, bool duck)
         {
-            _strict     = strict;
+            _duck       = duck;
             _method     = (MethodInfo)methodCall.MethodBase;
             _args       = methodCall.Args;
             TargetType  = _method.ReflectedType;
@@ -38,7 +38,7 @@ namespace Miruken.Callback
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            if (_strict && !TargetType.IsInstanceOfType(target))
+            if (!(_duck || TargetType.IsInstanceOfType(target)))
                 return false;
 
             var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType(), Binding);
