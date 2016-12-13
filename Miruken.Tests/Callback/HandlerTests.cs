@@ -240,6 +240,22 @@ namespace Miruken.Tests.Callback
                 handler.Broadcast().BestEffort().Notify(), true));
         }
 
+        [TestMethod]
+        public void Should_Override_Providers()
+        {
+            var handler = new Handler();
+            var foo     = handler.Provide(new Foo()).Resolve<Foo>();
+            Assert.IsNotNull(foo);
+        }
+
+        [TestMethod]
+        public void Should_Ignore_Providers()
+        {
+            var handler = new Handler();
+            var foo     = handler.Provide(new Bar()).Resolve<Foo>();
+            Assert.IsNull(foo);
+        }
+
         private class Foo
         {     
             public int  Handled     { get; set; }

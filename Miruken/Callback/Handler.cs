@@ -76,7 +76,7 @@ namespace Miruken.Callback
 
 	    private bool ShouldShortCircuitDefinitions(object callback)
 	    {
-	        if ((callback is HandleMethod) || (callback is ResolveMethod))
+	        if (callback is HandleMethod || callback is ResolveMethod)
 	            return true;
 
 	        if (Surrogate != null)

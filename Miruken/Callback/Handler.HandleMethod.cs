@@ -39,8 +39,7 @@ namespace Miruken.Callback
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast && !useResolve);
-            if (!handled && (semantics == null ||
-                !semantics.HasOption(CallbackOptions.BestEffot)))
+            if (!handled && semantics?.HasOption(CallbackOptions.BestEffot) != true)
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 

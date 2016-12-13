@@ -34,6 +34,25 @@ namespace Miruken.Callback
             }
         }
 
+        public static IHandler Provide<R>(this IHandler handler, R result)
+        {
+            return Provide(handler, (resolution, composer) =>
+            {
+                var type = resolution.Key as Type;
+                if (type?.IsAssignableFrom(typeof(R)) == true)
+                {
+                    resolution.Resolve(result);
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        public static IHandler Provide(this IHandler handler, ProviderDelegate provider)
+        {
+            return new Provider(provider) + handler;
+        }
+
         public static HandlerFilter Filter(
             this IHandler handler, CallbackFilter filter)
         {
