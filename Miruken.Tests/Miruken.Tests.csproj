@@ -70,6 +70,7 @@
     <Compile Include="Graph\TraversalTests.cs" />
     <Compile Include="Graph\TraversingTests.cs" />
     <Compile Include="Graph\TreeNode.cs" />
+    <Compile Include="Infrastructure\PropertyChangeExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionHelperTests.cs" />
     <Compile Include="TestRunner.cs" />

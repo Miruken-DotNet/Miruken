@@ -68,6 +68,7 @@
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Context\Contextual.cs" />
     <Compile Include="Infrastructure\MethodSignatureComparer.cs" />
+    <Compile Include="Infrastructure\PropertyChangedExtensions.cs" />
     <Compile Include="Interceptor.cs" />
     <Compile Include="Callback\RejectedException.cs" />
     <Compile Include="Callback\Resolution.cs" />
