@@ -58,6 +58,8 @@ namespace Miruken.Callback
             }
             catch (Exception exception)
             {
+                var tie = exception as TargetException;
+                if (tie != null) exception = tie.InnerException;
                 Exception = exception;
                 if (!typeof(Promise).IsAssignableFrom(ResultType)) throw;
                 ReturnValue = Promise.Rejected(exception).Coerce(ResultType);

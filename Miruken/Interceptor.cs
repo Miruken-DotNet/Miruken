@@ -42,5 +42,10 @@ namespace Miruken
                 return new ReturnMessage(tex.InnerException, methodCall);
             }
         }
+
+        public override ObjRef CreateObjRef(Type type)
+        {
+            throw new NotSupportedException();
+        }
     }
 }
