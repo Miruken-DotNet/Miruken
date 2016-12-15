@@ -49,12 +49,10 @@ namespace Miruken.Callback
 
             try
             {
-                Composer  = composer;
-                Unhandled = false;
-                var returnValue = targetMethod.Invoke(target, Binding, null, _args, null);
-                if (Unhandled) return false;
-                ReturnValue = returnValue;
-                return true;
+                Composer    = composer;
+                Unhandled   = false;
+                ReturnValue = targetMethod.Invoke(target, Binding, null, _args, null);
+                return !Unhandled;
             }
             catch (Exception exception)
             {
