@@ -43,7 +43,9 @@ namespace Miruken.Callback
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 
-            return handled ? handleMethod.Result 
+            var result = handleMethod.Result;
+
+            return handled || result != null ? result 
                  : RuntimeHelper.GetDefault(handleMethod.ResultType);
         }
 
