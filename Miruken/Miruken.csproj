@@ -64,6 +64,7 @@
     <Compile Include="Callback\CompositeHandler.cs" />
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
+    <Compile Include="Callback\ICallback.cs" />
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Context\Contextual.cs" />
