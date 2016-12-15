@@ -76,10 +76,10 @@ namespace Miruken.Callback
             HandleMethod.Unhandled = true;
         }
 
-        public static Ret Unhandled<Ret>()
+        public static Ret Unhandled<Ret>(Ret result = default(Ret))
         {
             HandleMethod.Unhandled = true;
-            return default (Ret);
+            return result;
         }
     }
 }

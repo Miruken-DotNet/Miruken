@@ -175,6 +175,14 @@ namespace Miruken.Tests.Callback
         }
 
         [TestMethod]
+        public void Should_Provide_Empty_Array_If_No_Matches()
+        {
+            var handler = new Handler();
+            var bars = handler.ResolveAll<Bar>();
+            Assert.AreEqual(0, bars.Length);
+        }
+
+        [TestMethod]
         public void Should_Compose_Callbacks()
         {
             var handler = new CustomHandler();
