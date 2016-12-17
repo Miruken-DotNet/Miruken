@@ -3,6 +3,8 @@ using Miruken.Callback;
 
 namespace Miruken.Tests.Callback
 {
+    using System;
+
     /// <summary>
     /// Summary description for HandlerTests
     /// </summary>
@@ -221,6 +223,16 @@ namespace Miruken.Tests.Callback
             var handler    = new Handler(controller);
             var result     = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Using_IServiceProvider()
+        {
+            var handler = (IServiceProvider)new CustomHandler();
+            var bar     = (Bar)handler.GetService(typeof(Bar));
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
         }
 
         [TestMethod]

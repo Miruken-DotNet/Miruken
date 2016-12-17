@@ -1,11 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
-
-namespace Miruken.Infrastructure
+﻿namespace Miruken.Infrastructure
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
 
     public static class RuntimeHelper
@@ -16,8 +15,8 @@ namespace Miruken.Infrastructure
         public static object GetDefault(Type type)
         {
             return type != null && type.IsValueType
-                ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
-                : null;
+                 ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
+                 : null;
         }
 
         public static string GetSimpleTypeName(Type t)

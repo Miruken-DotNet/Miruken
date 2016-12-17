@@ -3,6 +3,16 @@ using System.Linq;
 
 namespace Miruken.Callback
 {
+    using System;
+
+    public partial class Handler
+    {
+        object IServiceProvider.GetService(Type service)
+        {
+            return this.Resolve(service);
+        }
+    }
+
     public static class HandlerResolveExtensions
     {
         public static object Resolve(this IHandler handler, object key)
