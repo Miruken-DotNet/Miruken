@@ -51,7 +51,8 @@ namespace Miruken.Callback
             if (resolutions.Length == 0 ||
                 (!Many && _resolutions.Count > 0)) return;
 
-            _resolutions.AddRange(resolutions.Where(r => r != null));
+            _resolutions.AddRange(resolutions
+                .Where(r => !(r == null || _resolutions.Contains(r))));
             _result = null;
         }
 
