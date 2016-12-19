@@ -36,8 +36,8 @@ namespace Miruken.Callback
         public void SetOption(CallbackOptions options, bool enabled)
         {
             _options = enabled
-                     ? (_options | options)
-                     : (_options & (~options));
+                     ? _options | options
+                     : _options & ~options;
             _specified = _specified | options;
         }
 

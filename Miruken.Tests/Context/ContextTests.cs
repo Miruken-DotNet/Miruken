@@ -1,13 +1,11 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Callback;
-using Miruken.Context;
-using static Miruken.Protocol;
-
-namespace Miruken.Tests.Context
+﻿namespace Miruken.Tests.Context
 {
+    using System;
     using System.Data;
-    using Context = Miruken.Context.Context;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Callback;
+    using Miruken.Context;
+    using static Protocol;
 
     /// <summary>
     /// Summary description for ContextTests

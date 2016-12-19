@@ -464,7 +464,7 @@ namespace Miruken.Concurrency
         public Promise Then(ResolveCallbackT<Promise> then, RejectCallback<Promise> fail)
         {
             if (then == null)  // 2.2.7.3
-                then = ((r, s) => CreateChild<object>((resolve, _) => resolve(r, s)));
+                then = (r, s) => CreateChild<object>((resolve, _) => resolve(r, s));
             return Then<Promise>(then, fail).Unwrap();
         }
 

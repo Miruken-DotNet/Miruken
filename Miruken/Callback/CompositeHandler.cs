@@ -55,7 +55,7 @@ namespace Miruken.Callback
 		{
             var handled = base.HandleCallback(callback, greedy, composer);
             if (handled && !greedy) { return true; }
-		    foreach (var handler in _handlers)
+		    foreach (var handler in Handlers)
 		    {
 		        if (!handler.Handle(callback, greedy, composer)) continue;
 		        if (!greedy) return true;

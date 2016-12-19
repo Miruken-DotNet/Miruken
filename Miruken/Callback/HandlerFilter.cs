@@ -31,7 +31,7 @@ namespace Miruken.Callback
         protected override bool HandleCallback(
             object callback, bool greedy, IHandler composer)
         {
-            if (!_reentrant && (callback is Composition)) {                                                                                              
+            if (!_reentrant && callback is Composition) {                                                                                              
                 return base.HandleCallback(callback, greedy, composer);                                                                                                   
             }    
             return _filter(callback, composer, () => BaseHandle(callback, greedy, composer));  

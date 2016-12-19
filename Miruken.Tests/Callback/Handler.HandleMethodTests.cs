@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Callback;
-using static Miruken.Protocol;
-
-namespace Miruken.Tests.Callback
+﻿namespace Miruken.Tests.Callback
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Callback;
+    using static Protocol;
+
     /// <summary>
     /// Summary description for Handler
     /// </summary>

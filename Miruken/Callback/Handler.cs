@@ -46,7 +46,7 @@ namespace Miruken.Callback
 
             if (resolution != null)
             {
-                handled = (Surrogate != null && resolution.TryResolve(Surrogate, false));
+                handled = Surrogate != null && resolution.TryResolve(Surrogate, false);
                 if (!handled || greedy)
                     handled = resolution.TryResolve(this, false) || handled;
                 if (handled && !greedy) return true;

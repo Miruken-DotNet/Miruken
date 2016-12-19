@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Callback;
-
-namespace Miruken.Tests.Callback
+﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Callback;
 
     /// <summary>
     /// Summary description for HandlerTests
@@ -352,7 +351,7 @@ namespace Miruken.Tests.Callback
             {
                 ++bar.Handled;
                 bar.HasComposer = true;
-                return (bar.Handled % 2) == 1;
+                return bar.Handled % 2 == 1;
             }
 
             [Handles]

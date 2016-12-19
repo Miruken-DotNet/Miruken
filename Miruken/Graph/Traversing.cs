@@ -41,8 +41,7 @@ namespace Miruken.Graph
 
         public static void Traverse(ITraversing node, TraversingAxis axis, Visitor visitor)
         {
-            if (visitor == null)
-                return;
+            if (visitor == null) return;
 
             switch (axis)
             {
@@ -109,7 +108,7 @@ namespace Miruken.Graph
         public static void TraverseChildren(
             this ITraversing node, Visitor visitor, bool withSelf)
         {
-            if ((withSelf && visitor(node))) return;
+            if (withSelf && visitor(node)) return;
             node.Children.Any(child => visitor(child));
         }
 
