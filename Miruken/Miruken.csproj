@@ -73,7 +73,6 @@
     <Compile Include="Interceptor.cs" />
     <Compile Include="Callback\RejectedException.cs" />
     <Compile Include="Callback\Resolution.cs" />
-    <Compile Include="Callback\ResolveMethod.cs" />
     <Compile Include="Concurrency\AbstractAsyncResult.cs" />
     <Compile Include="Concurrency\CancelledException.cs" />
     <Compile Include="Concurrency\LinqToPromises.cs" />

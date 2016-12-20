@@ -6,6 +6,8 @@ using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
+    using System.Collections.Generic;
+
     public class HandleMethod : ICallback
     {
         private readonly bool _duck;
@@ -68,6 +70,17 @@ namespace Miruken.Callback
                 Unhandled = oldUnhandled;
                 Composer  = oldComposer;
             }
+        }
+
+        public bool InvokeTargets(IEnumerable<object> targets, IHandler composer, bool all)
+        {
+            var handled = false;
+            foreach (var target in targets)
+            {
+                handled = InvokeOn(target, composer) || handled;
+                if (handled && !all) break;
+            }
+            return handled;
         }
 
         public static IHandler RequireComposer()

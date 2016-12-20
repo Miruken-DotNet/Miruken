@@ -4,6 +4,9 @@ using Miruken.Infrastructure;
 
 namespace Miruken.Callback
 {
+    using System.Collections;
+    using System.Linq;
+
     public interface IResolving {}
 
     public partial class Handler
@@ -35,10 +38,17 @@ namespace Miruken.Callback
 
             var handleMethod = new HandleMethod(protocol, message, duck);
             var callback     = useResolve
-                             ? new ResolveMethod(handleMethod, broadcast)
+                             ? new Resolution(protocol, true)
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);
+            if (handled && useResolve)
+            {
+                var results = ((Resolution)callback).Result;
+                var targets = results as object[] ?? ((IEnumerable)results).Cast<object>().ToArray();
+                handled = handleMethod.InvokeTargets(targets, this, broadcast);
+            }
+
             if (!handled && semantics?.HasOption(CallbackOptions.BestEffot) != true)
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
@@ -63,12 +73,6 @@ namespace Miruken.Callback
             if (!handled || greedy)
                 handled = handleMethod.InvokeOn(this, composer) || handled;
             return handled;
-        }
-
-        private bool TryResolveMethod(object callback, IHandler composer)
-        {
-            var resolveMethod = callback as ResolveMethod;
-            return resolveMethod != null && resolveMethod.InvokeResolve(this, composer);
         }
 
         public static IHandler Composer => HandleMethod.Composer;
