@@ -89,14 +89,12 @@ namespace Miruken.Callback
             {
                 if (_semantics.IsSpecified(
                     CallbackOptions.Broadcast | CallbackOptions.Resolve))
-                    greedy = _semantics.HasOption(CallbackOptions.Broadcast) &&
-                            !_semantics.HasOption(CallbackOptions.Resolve);
+                    greedy = _semantics.HasOption(CallbackOptions.Broadcast);
                 else
                 {
                     var cs = new CallbackSemantics();
                     if (Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
-                        greedy = cs.HasOption(CallbackOptions.Broadcast) &&
-                            !cs.HasOption(CallbackOptions.Resolve);
+                        greedy = cs.HasOption(CallbackOptions.Broadcast);
                 }
             }
 

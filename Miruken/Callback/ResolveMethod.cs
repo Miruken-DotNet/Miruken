@@ -22,9 +22,9 @@ namespace Miruken.Callback
             set { _handleMethod.Result = value; }
         }
 
-        public bool InvokeResolve(IHandler composer)
+        public bool InvokeResolve(IHandler handler, IHandler composer)
         {
-            var targets = composer.ResolveAll(_handleMethod.Protocol);
+            var targets = handler.ResolveAll(_handleMethod.Protocol);
             return InvokeTargets(targets, composer);
         }
 

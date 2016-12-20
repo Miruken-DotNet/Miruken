@@ -38,7 +38,7 @@ namespace Miruken.Callback
                              ? new ResolveMethod(handleMethod, broadcast)
                              : (object)handleMethod;
 
-            var handled = handler.Handle(callback, broadcast && !useResolve);
+            var handled = handler.Handle(callback, broadcast);
             if (!handled && semantics?.HasOption(CallbackOptions.BestEffot) != true)
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
@@ -65,10 +65,10 @@ namespace Miruken.Callback
             return handled;
         }
 
-        private static bool TryResolveMethod(object callback, IHandler composer)
+        private bool TryResolveMethod(object callback, IHandler composer)
         {
             var resolveMethod = callback as ResolveMethod;
-            return resolveMethod != null && resolveMethod.InvokeResolve(composer);
+            return resolveMethod != null && resolveMethod.InvokeResolve(this, composer);
         }
 
         public static IHandler Composer => HandleMethod.Composer;
