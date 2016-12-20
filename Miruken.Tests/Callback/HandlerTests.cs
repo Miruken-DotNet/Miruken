@@ -101,6 +101,39 @@
         }
 
         [TestMethod]
+        public void Should_Provide_Many_Callbacks_Implicitly()
+        {
+            var handler = new SpecialHandler();
+            var bar     = handler.Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+            var bars    = handler.ResolveAll<Bar>();
+            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(1, bars[0].Handled);
+            Assert.IsFalse(bars[0].HasComposer);
+            Assert.AreEqual(2, bars[1].Handled);
+            Assert.IsFalse(bars[1].HasComposer);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Callbacks_By_Key()
+        {
+            var handler = new SpecialHandler();
+            var boo     = handler.Resolve<Boo>();
+            Assert.IsNotNull(boo);
+            Assert.IsTrue(boo.HasComposer);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Many_Callbacks_By_Key()
+        {
+            var handler = new SpecialHandler();
+            var bees    = handler.ResolveAll<Bee>();
+            Assert.AreEqual(3, bees.Length);
+        }
+
+        [TestMethod]
         public void Should_Provide_Callbacks_Implicitly_Surrogate()
         {
             var handler = new Handler(new Controller());
@@ -147,6 +180,21 @@
             var baz     = handler.Resolve<Baz>();
             Assert.IsInstanceOfType(baz, typeof(SuperBaz));
             Assert.IsFalse(baz.HasComposer);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Many_Callbacks_Explicitly()
+        {
+            var handler = new SpecialHandler();
+            var baz     = handler.Resolve<Baz>();
+            Assert.IsInstanceOfType(baz, typeof(SuperBaz));
+            Assert.IsFalse(baz.HasComposer);
+            var bazs    = handler.ResolveAll<Baz>();
+            Assert.AreEqual(2, bazs.Length);
+            Assert.IsInstanceOfType(bazs[0], typeof(SuperBaz));
+            Assert.IsFalse(bazs[0].HasComposer);
+            Assert.IsInstanceOfType(bazs[1], typeof(Baz));
+            Assert.IsFalse(bazs[1].HasComposer);
         }
 
         [TestMethod]
@@ -404,10 +452,48 @@
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Resolution resolution)
+            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
             {
                if (Equals(resolution.Key, typeof(Baz)))
-                   resolution.Resolve(new SuperBaz());
+                   resolution.Resolve(new SuperBaz(), composer);
+            }
+        }
+
+        private class SpecialHandler : Handler
+        {
+            [Provides(Key = typeof(Boo))]
+            public object ProvideBooKey(IHandler composer)
+            {
+                return new Boo { HasComposer = true };
+            }
+
+            [Provides]
+            public Bar[] ProvideManyBar()
+            {
+                return new[]
+                {
+                    new Bar {Handled = 1},
+                    new Bar {Handled = 2}
+                };
+            }
+
+            [Provides(Key = typeof(Bee))]
+            public object ProvideManyBeeWithKey()
+            {
+                return new[]
+                {
+                    new Bee(), new Bee(), new Bee()
+                };
+            }
+
+            [Provides]
+            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            {
+                if (Equals(resolution.Key, typeof(Baz)))
+                {
+                    resolution.Resolve(new SuperBaz(), composer);
+                    resolution.Resolve(new Baz(), composer);
+                }
             }
         }
 

@@ -41,7 +41,7 @@ namespace Miruken.Callback
                 var type = resolution.Key as Type;
                 if (type?.IsAssignableFrom(typeof(R)) == true)
                 {
-                    resolution.Resolve(result);
+                    resolution.Resolve(result, composer);
                     return true;
                 }
                 return false;

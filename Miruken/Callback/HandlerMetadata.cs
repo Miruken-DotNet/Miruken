@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -233,6 +232,8 @@ namespace Miruken.Callback
         private bool _passComposer;
         private Delegate _delegate;
 
+        public object Key { get; set; }
+
         protected override bool Configure(MethodInfo method)
         {
             var parameters = method.GetParameters();
@@ -251,7 +252,7 @@ namespace Miruken.Callback
             else if (returnType != typeof (void))
                 return false;
 
-            if (!ConfigureCallbackType(method, parameters[0].ParameterType))
+            if (!ConfigureCallbackType(method, Key as Type ?? parameters[0].ParameterType))
                 return false;
 
             if (!method.ContainsGenericParameters)
@@ -315,8 +316,11 @@ namespace Miruken.Callback
 
         protected override bool Configure(MethodInfo method)
         {
-            var returnType = method.ReturnType;
-            var parameters = method.GetParameters();
+            var returnType   = method.ReturnType;
+            var parameters   = method.GetParameters();
+            var callbackType = Key as Type ?? returnType;
+            if (callbackType.IsArray)
+                callbackType = callbackType.GetElementType();
 
             _isVoid  = returnType == typeof(void);
 
@@ -334,13 +338,14 @@ namespace Miruken.Callback
                     else if (!_isVoid && typeof (IHandler).IsAssignableFrom(parameters[0].ParameterType))
                     {
                         _passComposer = true;
-                        ConfigureCallbackType(method, returnType);
+                        ConfigureCallbackType(method, callbackType);
                     }
                     else
                         return false;
                     break;
                 default:
-                    if (_isVoid || parameters.Length != 0 || !ConfigureCallbackType(method, returnType))
+                    if (_isVoid || parameters.Length != 0 ||
+                        !ConfigureCallbackType(method, callbackType))
                         return false;
                     break;
             }
@@ -415,13 +420,31 @@ namespace Miruken.Callback
 
             if (result != null)
             {
-                if (Invariant && CallbackType != null &&
-                    (CallbackType != result.GetType()))
-                    return false;
-                resolution.Resolve(result);
+                var array = result as object[];
+                if (array != null)
+                {
+                    var resolved = false;
+                    foreach (var item in array)
+                    {
+                        resolved = IsSatisfied(item) &&
+                                   resolution.Resolve(item, composer)
+                                || resolved;
+                        if (resolved && !resolution.Many)
+                            break;
+                    }
+                    return resolved;
+                }
+                return IsSatisfied(result) &&
+                    resolution.Resolve(result, composer);
             }
 
             return resolutions.Count > count;
+        }
+
+        private bool IsSatisfied(object result)
+        {
+            return !Invariant || CallbackType == null ||
+                   (CallbackType == result.GetType());
         }
     }
 

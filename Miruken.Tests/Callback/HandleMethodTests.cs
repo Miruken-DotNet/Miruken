@@ -6,10 +6,10 @@
     using static Protocol;
 
     /// <summary>
-    /// Summary description for Handler
+    /// Summary description for HandleMethodTests
     /// </summary>
     [TestClass]
-    public class HandlerHandleMethodTests
+    public class HandleMethodTests
     {
         private interface IEmailFeature
         {
@@ -165,7 +165,7 @@
         [TestMethod]
         public void Should_Handle_Void_Methods()
         {
-            var handler = new EmailHandler().Chain(new Handler(new Billing()));
+            var handler = new EmailHandler() + new Handler(new Billing());
             P<IEmailFeature>(handler).CancelEmail(1);
         }
 

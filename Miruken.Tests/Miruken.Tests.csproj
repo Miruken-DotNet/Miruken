@@ -61,7 +61,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Callback\Handler.HandleMethodTests.cs" />
+    <Compile Include="Callback\ResolveMethodTests.cs" />
+    <Compile Include="Callback\HandleMethodTests.cs" />
     <Compile Include="Callback\HandlerTests.cs" />
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\LinqToPromisesTests.cs" />

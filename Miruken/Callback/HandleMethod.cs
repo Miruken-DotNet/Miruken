@@ -1,12 +1,10 @@
-﻿using System;
-using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using Miruken.Concurrency;
-using Miruken.Infrastructure;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
-    using System.Collections.Generic;
+    using System;
+    using System.Reflection;
+    using System.Runtime.Remoting.Messaging;
+    using Concurrency;
+    using Infrastructure;
 
     public class HandleMethod : ICallback
     {
@@ -70,17 +68,6 @@ namespace Miruken.Callback
                 Unhandled = oldUnhandled;
                 Composer  = oldComposer;
             }
-        }
-
-        public bool InvokeTargets(IEnumerable<object> targets, IHandler composer, bool all)
-        {
-            var handled = false;
-            foreach (var target in targets)
-            {
-                handled = InvokeOn(target, composer) || handled;
-                if (handled && !all) break;
-            }
-            return handled;
         }
 
         public static IHandler RequireComposer()

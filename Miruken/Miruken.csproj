@@ -67,6 +67,7 @@
     <Compile Include="Callback\ICallback.cs" />
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Provider.cs" />
+    <Compile Include="Callback\ResolveMethod.cs" />
     <Compile Include="Context\Contextual.cs" />
     <Compile Include="Infrastructure\MethodSignatureComparer.cs" />
     <Compile Include="Infrastructure\PropertyChangedExtensions.cs" />

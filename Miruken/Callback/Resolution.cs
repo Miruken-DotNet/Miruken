@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Miruken.Callback
 {
@@ -40,23 +38,20 @@ namespace Miruken.Callback
             set { _result = value; }
         }
 
-        public void Resolve(params object[] resolutions)
+        public bool Resolve(object resolution, IHandler composer)
         {
-            resolutions = resolutions.SelectMany(r =>
-            {
-                var list = r as IEnumerable;
-                return list?.Cast<object>() ?? new[] {r};
-            }).ToArray();
+            if (resolution == null ||
+                (!Many && _resolutions.Count > 0)
+                || _resolutions.Contains(resolution)
+                || !IsSatisfied(resolution, composer))
+                return false;
 
-            if (resolutions.Length == 0 ||
-                (!Many && _resolutions.Count > 0)) return;
-
-            _resolutions.AddRange(resolutions
-                .Where(r => !(r == null || _resolutions.Contains(r))));
+            _resolutions.Add(resolution);
             _result = null;
+            return true;
         }
 
-        public bool TryResolve(object item, bool invariant)
+        public bool TryResolve(object item, bool invariant, IHandler composer)
         {
             var type = Key as Type;
             if (type == null) return false;
@@ -65,10 +60,12 @@ namespace Miruken.Callback
                            ? type == item.GetType()
                            : type.IsInstanceOfType(item);
 
-            if (!compatible) return false;
+            return compatible && Resolve(item, composer);
+        }
 
-            Resolve(item);
-            return true;	            
+        protected virtual bool IsSatisfied(object resolution, IHandler composer)
+        {
+            return true;
         }
     }
 }

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Runtime.Remoting.Messaging;
-using Miruken.Infrastructure;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
-    using System.Collections;
-    using System.Linq;
+    using System;
+    using System.Runtime.Remoting.Messaging;
+    using Infrastructure;
 
     public interface IResolving {}
 
@@ -15,40 +12,33 @@ namespace Miruken.Callback
         {
             protocol = protocol ?? message.MethodBase.ReflectedType;
 
-            bool broadcast  = false,
-                 duck       = typeof(IDuck).IsAssignableFrom(protocol),
-                 useResolve = typeof(IResolving).IsAssignableFrom(protocol);
+            bool broadcast = false,
+                 duck      = typeof(IDuck).IsAssignableFrom(protocol),
+                 resolving = typeof(IResolving).IsAssignableFrom(protocol);
 
             var semantics = GetSemantics(this);
             if (semantics != null)
             {
                 broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
                 duck       = duck || semantics.HasOption(CallbackOptions.Duck);
-                useResolve = useResolve || semantics.HasOption(CallbackOptions.Resolve);
+                resolving  = resolving || semantics.HasOption(CallbackOptions.Resolve);
             }
 
             var options = CallbackOptions.None;
             if (duck && semantics?.HasOption(CallbackOptions.Duck) == false)
                 options = options | CallbackOptions.Duck;
-            if (useResolve && semantics?.HasOption(CallbackOptions.Resolve) == false)
+            if (resolving && semantics?.HasOption(CallbackOptions.Resolve) == false)
                 options = options | CallbackOptions.Resolve;
             var handler = options != CallbackOptions.None
                         ? this.Semantics(options)
                         : this;
 
             var handleMethod = new HandleMethod(protocol, message, duck);
-            var callback     = useResolve
-                             ? new Resolution(protocol, true)
+            var callback     = resolving
+                             ? new ResolveMethod(protocol, broadcast, handleMethod)
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);
-            if (handled && useResolve)
-            {
-                var results = ((Resolution)callback).Result;
-                var targets = results as object[] ?? ((IEnumerable)results).Cast<object>().ToArray();
-                handled = handleMethod.InvokeTargets(targets, this, broadcast);
-            }
-
             if (!handled && semantics?.HasOption(CallbackOptions.BestEffot) != true)
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
