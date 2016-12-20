@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Miruken.Callback
 {
     public class ResolveMethod : ICallback
     {
         private readonly HandleMethod _handleMethod;
-        private readonly bool _all;
 
-        public ResolveMethod(HandleMethod handleMethod, bool all)
+        public ResolveMethod(HandleMethod handleMethod)
         {
             _handleMethod = handleMethod;
-            _all          = all;
         }
 
         public Type ResultType => _handleMethod.ResultType;
@@ -24,19 +21,8 @@ namespace Miruken.Callback
 
         public bool InvokeResolve(IHandler handler, IHandler composer)
         {
-            var targets = handler.ResolveAll(_handleMethod.Protocol);
-            return InvokeTargets(targets, composer);
-        }
-
-        private bool InvokeTargets(IEnumerable<object> targets, IHandler composer)
-        {
-            var handled = false;
-            foreach (var target in targets)
-            {
-                handled = _handleMethod.InvokeOn(target, composer) || handled;
-                if (handled && !_all) break;
-            }
-            return handled;
+            var target = handler.Resolve(_handleMethod.Protocol);
+            return target != null && _handleMethod.InvokeOn(target, composer);
         }
     }
 }
