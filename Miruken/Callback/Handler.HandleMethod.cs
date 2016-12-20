@@ -35,7 +35,7 @@ namespace Miruken.Callback
 
             var handleMethod = new HandleMethod(protocol, message, duck);
             var callback     = useResolve
-                             ? new ResolveMethod(handleMethod)
+                             ? new ResolveMethod(handleMethod, broadcast)
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);
