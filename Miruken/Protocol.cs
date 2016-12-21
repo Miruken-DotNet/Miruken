@@ -9,6 +9,10 @@ namespace Miruken
     {
     }
 
+    public interface IStrict
+    {
+    }
+
     public interface IProtocolAdapter
     {
         object Dispatch(Type protocol, IMethodCallMessage message);
@@ -21,9 +25,12 @@ namespace Miruken
             return new Interceptor(adapter).GetTransparentProxy();
         }
 
-        public static TProtocol P<TProtocol>(IProtocolAdapter adapter)
+        public static TProto P<TProto>(IProtocolAdapter adapter)
+            where TProto : class
         {
-            return (TProtocol)new Interceptor(adapter, typeof(TProtocol))
+            if (!typeof(TProto).IsInterface)
+                throw new NotSupportedException("Only protocol interfaces are supported");
+            return (TProto)new Interceptor(adapter, typeof(TProto))
                 .GetTransparentProxy();
         }
 
@@ -38,9 +45,10 @@ namespace Miruken
             return Protocol.P(adapter);
         }
 
-        public static TProtocol P<TProtocol>(this IProtocolAdapter adapter)
+        public static TProto P<TProto>(this IProtocolAdapter adapter)
+            where TProto : class
         {
-            return Protocol.P<TProtocol>(adapter);
+            return Protocol.P<TProto>(adapter);
         }
     }
 }

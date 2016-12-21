@@ -10,36 +10,38 @@
     {
         object IProtocolAdapter.Dispatch(Type protocol, IMethodCallMessage message)
         {
+            IHandler handler = this;
             protocol = protocol ?? message.MethodBase.ReflectedType;
 
-            bool broadcast = false,
-                 duck      = typeof(IDuck).IsAssignableFrom(protocol),
-                 resolving = typeof(IResolving).IsAssignableFrom(protocol);
+            var options   = CallbackOptions.None;
+            var semantics = GetSemantics(this) ?? new CallbackSemantics();
 
-            var semantics = GetSemantics(this);
-            if (semantics != null)
+            if (!semantics.IsSpecified(CallbackOptions.Duck) &&
+                typeof(IDuck).IsAssignableFrom(protocol))
+                options |= CallbackOptions.Duck;
+
+            if (!semantics.IsSpecified(CallbackOptions.Strict) &&
+                typeof(IStrict).IsAssignableFrom(protocol))
+                options |= CallbackOptions.Strict;
+
+            if (!semantics.IsSpecified(CallbackOptions.Resolve) &&
+                typeof(IResolving).IsAssignableFrom(protocol))
+                options |= CallbackOptions.Resolve;
+
+            if (options != CallbackOptions.None)
             {
-                broadcast  = semantics.HasOption(CallbackOptions.Broadcast);
-                duck       = duck || semantics.HasOption(CallbackOptions.Duck);
-                resolving  = resolving || semantics.HasOption(CallbackOptions.Resolve);
+                semantics.SetOption(options, true);
+                handler = this.Semantics(options);
             }
 
-            var options = CallbackOptions.None;
-            if (duck && semantics?.HasOption(CallbackOptions.Duck) == false)
-                options = options | CallbackOptions.Duck;
-            if (resolving && semantics?.HasOption(CallbackOptions.Resolve) == false)
-                options = options | CallbackOptions.Resolve;
-            var handler = options != CallbackOptions.None
-                        ? this.Semantics(options)
-                        : this;
-
-            var handleMethod = new HandleMethod(protocol, message, duck);
-            var callback     = resolving
+            var broadcast    = semantics.HasOption(CallbackOptions.Broadcast);
+            var handleMethod = new HandleMethod(protocol, message, semantics);
+            var callback     = semantics.HasOption(CallbackOptions.Resolve)
                              ? new ResolveMethod(protocol, broadcast, handleMethod)
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);
-            if (!handled && semantics?.HasOption(CallbackOptions.BestEffot) != true)
+            if (!(handled || semantics.HasOption(CallbackOptions.BestEffot)))
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 

@@ -3,9 +3,16 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+
+    public delegate void   OneArgDelegate(object instance, object arg);
+    public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
+    public delegate object NoArgsReturnDelegate(object instance);
+    public delegate object OneArgReturnDelegate(object instance, object arg);
+    public delegate object TwoArgsReturnDelegate(object instance, object arg1, object arg2);
 
     public static class RuntimeHelper
     {
@@ -23,6 +30,13 @@
         {
             var fullyQualifiedTypeName = t.AssemblyQualifiedName;
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
+        }
+
+        public static Type[] GetToplevelInterfaces(Type type)
+        {
+            var allInterfaces = type.GetInterfaces();
+            return allInterfaces.Except(allInterfaces.SelectMany(t => t.GetInterfaces()))
+                .ToArray();
         }
 
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,
@@ -71,7 +85,7 @@
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
-        public static Action<object, object> CreateActionOneArg(MethodInfo method)
+        public static OneArgDelegate CreateActionOneArg(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -88,12 +102,12 @@
                 method,
                 Expression.Convert(argument, parameters[0].ParameterType)
                 );
-            return Expression.Lambda<Action<object, object>>(
+            return Expression.Lambda<OneArgDelegate>(
                 methodCall, instance, argument
                 ).Compile();
         }
 
-        public static Action<object, object, object> CreateActionTwoArgs(MethodInfo method)
+        public static TwoArgsDelegate CreateActionTwoArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -112,12 +126,12 @@
                 Expression.Convert(argument1, parameters[0].ParameterType),
                 Expression.Convert(argument2, parameters[1].ParameterType)
                 );
-            return Expression.Lambda<Action<object, object, object>>(
+            return Expression.Lambda<TwoArgsDelegate>(
                 methodCall, instance, argument1, argument2
                 ).Compile();
         }
 
-        public static Func<object, object> CreateFuncNoArgs(MethodInfo method)
+        public static NoArgsReturnDelegate CreateFuncNoArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -134,13 +148,13 @@
                 Expression.Convert(instance, target),
                 method
                 );
-            return Expression.Lambda<Func<object, object>>(
+            return Expression.Lambda<NoArgsReturnDelegate>(
                 Expression.Convert(methodCall, typeof(object)),
                 instance
                 ).Compile();
         }
 
-        public static Func<object, object, object> CreateFuncOneArg(MethodInfo method)
+        public static OneArgReturnDelegate CreateFuncOneArg(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -159,13 +173,13 @@
                 method,
                 Expression.Convert(argument, parameters[0].ParameterType)
                 );
-            return Expression.Lambda<Func<object, object, object>>(
+            return Expression.Lambda<OneArgReturnDelegate>(
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument
                 ).Compile();
         }
 
-        public static Func<object, object, object, object> CreateFuncTwoArgs(MethodInfo method)
+        public static TwoArgsReturnDelegate CreateFuncTwoArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -186,7 +200,7 @@
                 Expression.Convert(argument1, parameters[0].ParameterType),
                 Expression.Convert(argument2, parameters[1].ParameterType)
                 );
-            return Expression.Lambda<Func<object, object, object, object>>(
+            return Expression.Lambda<TwoArgsReturnDelegate>(
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument1, argument2
                 ).Compile();

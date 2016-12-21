@@ -180,7 +180,7 @@
         }
 
         [TestMethod]
-        public void Should_Provide_Methods_Strictly()
+        public void Should_Provide_Methods_Polymorphically()
         {
             var provider = new EmailProvider() + new OfflineProvider();
             var id = P<IEmailFeature>(provider).Email("Hello");
@@ -188,6 +188,21 @@
             id = provider.P<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
             id = provider.P<IEmailFeature>().Email("Hello");
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod, ExpectedException(typeof(MissingMethodException))]
+        public void Should_Provide_Methods_Strictly()
+        {
+            var provider = new OfflineProvider();
+            P<IEmailFeature>(provider.Strict()).Email("22");
+        }
+
+        [TestMethod]
+        public void Should_Chain_Provide_Methods_Strictly()
+        {
+            var provider = new OfflineProvider() + new EmailProvider();
+            var id = P<IEmailFeature>(provider.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
 
@@ -208,7 +223,7 @@
         [TestMethod]
         public void Should_Provide_Void_Methods()
         {
-            var provider = new EmailHandler() + new Handler(new Billing());
+            var provider = new EmailProvider() + new BillingProvider(new Billing());
             P<IEmailFeature>(provider).CancelEmail(1);
         }
 

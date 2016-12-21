@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Linq;
     using System.Reflection;
     using System.Runtime.Remoting.Messaging;
     using Concurrency;
@@ -8,13 +9,14 @@
 
     public class HandleMethod : ICallback
     {
-        private readonly bool _duck;
         private readonly MethodInfo _method;
         private readonly object[] _args;
+        private readonly CallbackSemantics _semantics;
 
-        public HandleMethod(Type protocol, IMethodMessage methodCall, bool duck = false)
+        public HandleMethod(Type protocol, IMethodMessage methodCall, 
+            CallbackSemantics semantics = null)
         {
-            _duck      = duck;
+            _semantics = semantics;
             _method    = (MethodInfo)methodCall.MethodBase;
             _args      = methodCall.Args;
             Protocol   = protocol ?? _method.ReflectedType;
@@ -38,8 +40,7 @@
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            if (!(_duck || Protocol.IsInstanceOfType(target)))
-                return false;
+            if (!IsAcceptableTarget(target)) return false;
 
             var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType(), Binding);
             if (targetMethod == null) return false;
@@ -68,6 +69,17 @@
                 Unhandled = oldUnhandled;
                 Composer  = oldComposer;
             }
+        }
+
+        private bool IsAcceptableTarget(object target)
+        {
+            if (_semantics.HasOption(CallbackOptions.Strict))
+            {
+                var toplevelInterfaces = RuntimeHelper.GetToplevelInterfaces(target.GetType());
+                return toplevelInterfaces.Contains(Protocol);
+            }
+
+            return _semantics.HasOption(CallbackOptions.Duck) || Protocol.IsInstanceOfType(target);
         }
 
         public static IHandler RequireComposer()

@@ -134,6 +134,18 @@
         }
 
         [TestMethod]
+        public void Should_Provide_Callbacks_With_Many_Keys()
+        {
+            var handler = new SpecialHandler();
+            var baz1    = handler.Resolve<Baz<int>>();
+            Assert.AreEqual(1, baz1.Stuff);
+            var baz2    = handler.Resolve<Baz<string>>();
+            Assert.AreEqual("Hello", baz2.Stuff);
+            var baz3    = handler.Resolve<Baz<float>>();
+            Assert.IsNull(baz3);
+        }
+
+        [TestMethod]
         public void Should_Provide_Callbacks_Implicitly_Surrogate()
         {
             var handler = new Handler(new Controller());
@@ -484,6 +496,17 @@
                 {
                     new Bee(), new Bee(), new Bee()
                 };
+            }
+
+            [Provides(Key = typeof(Baz<int>)),
+             Provides(Key = typeof(Baz<string>))]
+            public object ProvideManyKeys(Resolution resolution)
+            {
+                if (Equals(resolution.Key, typeof(Baz<int>)))
+                    return new Baz<int>(1);
+                if (Equals(resolution.Key, typeof(Baz<string>)))
+                    return new Baz<string>("Hello");
+                return null;
             }
 
             [Provides]

@@ -5,7 +5,7 @@ using Miruken.Infrastructure;
 namespace Miruken.Tests
 {
     [TestClass]
-    public class ReflectionHelperTests
+    public class RuntimeHelperTests
     {
         public class Handler
         {
@@ -50,6 +50,22 @@ namespace Miruken.Tests
             }
         }
 
+        public interface IFoo {}
+        public interface IBar {}
+        public interface IBoo { }
+        public interface IBaz : IFoo, IBar {}
+        public class Bar : IBar { }
+        public class Baz : IBaz, IBoo {}
+
+        [TestMethod]
+        public void Should_Get_Toplevel_Interfaces()
+        {
+            var toplevel = RuntimeHelper.GetToplevelInterfaces(typeof(Bar));
+            CollectionAssert.AreEqual(toplevel, new [] { typeof(IBar) });
+            toplevel = RuntimeHelper.GetToplevelInterfaces(typeof(Baz));
+            CollectionAssert.AreEqual(toplevel, new[] { typeof(IBaz), typeof(IBoo) });
+        }
+
         [TestMethod]
         public void Should_Create_Single_Arg_Action()
         {
@@ -71,8 +87,7 @@ namespace Miruken.Tests
             Assert.AreEqual(new DateTime(2007, 6, 14), handler.Arg2);
         }
 
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException),
+        [TestMethod, ExpectedException(typeof(ArgumentException),
              "Method HandlerTwo expects 2 argument(s)")]
         public void Should_Fail_If_Action_Arg_Mismatch()
         {
@@ -80,8 +95,7 @@ namespace Miruken.Tests
                 typeof(Handler).GetMethod("HandleTwo"));
         }
 
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException),
+        [TestMethod, ExpectedException(typeof(ArgumentException),
             "Method Handle expects 0 arguments")]
         public void Should_Fail_If_No_Args()
         {
@@ -117,8 +131,7 @@ namespace Miruken.Tests
                 call(provider, 2, new DateTime(2003, 4, 7)));
         }
 
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException),
+        [TestMethod, ExpectedException(typeof(ArgumentException),
             "Method ProvideOne expects 1 argument(s)")]
         public void Should_Fail_If_Function_Arg_Mismatch()
         {
@@ -126,8 +139,7 @@ namespace Miruken.Tests
                 typeof(Provider).GetMethod("ProvideOne"));
         }
 
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException),
+        [TestMethod,ExpectedException(typeof(ArgumentException),
             "Method Provide is void")]
         public void Should_Fail_If_No_ReturnType()
         {

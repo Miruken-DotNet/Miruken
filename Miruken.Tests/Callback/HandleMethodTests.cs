@@ -121,14 +121,6 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Methods_Loosely()
-        {
-            var handler = new DemoHandler();
-            var id = P<IEmailFeature>(handler.Duck()).Email("22");
-            Assert.AreEqual(22, id);
-        }
-
-        [TestMethod]
         public void Should_Handle_Methods_Covariantly()
         {
             var handler = new OfflineHandler();
@@ -137,15 +129,38 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Methods_Strictly()
+        public void Should_Handle_Methods_Polymorphically()
         {
             var handler = new EmailHandler() + new OfflineHandler();
             var id = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = handler.P<IEmailFeature>().Email("Hello");
+            id = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(2, id);
-            id = handler.P<IEmailFeature>().Email("Hello");
+            id = P<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod, ExpectedException(typeof(MissingMethodException))]
+        public void Should_Handle_Methods_Strictly()
+        {
+            var handler = new OfflineHandler();
+            P<IEmailFeature>(handler.Strict()).Email("22");
+        }
+
+        [TestMethod]
+        public void Should_Chain_Handle_Methods_Strictly()
+        {
+            var handler = new OfflineHandler() + new EmailHandler();
+            var id = P<IEmailFeature>(handler.Strict()).Email("22");
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Methods_Loosely()
+        {
+            var handler = new DemoHandler();
+            var id = P<IEmailFeature>(handler.Duck()).Email("22");
+            Assert.AreEqual(22, id);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
@@ -289,6 +304,13 @@
         {
             var offline = P<IOffline>(new Handler());
             var handler = (IHandler) offline;
+        }
+
+        [TestMethod, ExpectedException(typeof(NotSupportedException),
+            "Only protocol interfaces are supported")]
+        public void Should_Reject_Non_Interface_Cast()
+        {
+            P<OfflineHandler>(new Handler());
         }
     }
 }

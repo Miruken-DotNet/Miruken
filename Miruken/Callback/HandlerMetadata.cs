@@ -95,8 +95,8 @@ namespace Miruken.Callback
             return dispatched;
         }
 
-        public const BindingFlags Binding =
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        public const BindingFlags Binding = BindingFlags.Instance 
+             | BindingFlags.Public | BindingFlags.NonPublic;
     }
 
     [AttributeUsage(AttributeTargets.Method,
@@ -282,13 +282,13 @@ namespace Miruken.Callback
             {
                 if (_returnsBool)
                     return _passComposer
-                        ? (bool) ((Func<object, object, object, object>) _delegate)(handler, callback, composer)
-                        : (bool) ((Func<object, object, object>) _delegate)(handler, callback);
+                        ? (bool) ((TwoArgsReturnDelegate)_delegate)(handler, callback, composer)
+                        : (bool) ((OneArgReturnDelegate)_delegate)(handler, callback);
 
                 if (_passComposer)
-                    ((Action<object, object, object>) _delegate)(handler, callback, composer);
+                    ((TwoArgsDelegate)_delegate)(handler, callback, composer);
                 else
-                    ((Action<object, object>)_delegate)(handler, callback);
+                    ((OneArgDelegate)_delegate)(handler, callback);
                 return true;
             }
 
@@ -322,7 +322,7 @@ namespace Miruken.Callback
             if (callbackType.IsArray)
                 callbackType = callbackType.GetElementType();
 
-            _isVoid  = returnType == typeof(void);
+            _isVoid = returnType == typeof(void);
 
             switch (parameters.Length)
             {
@@ -394,19 +394,19 @@ namespace Miruken.Callback
                     if (_passComposer)
                     {
                         if (_isVoid)
-                            ((Action<object, object, object>)_delegate)(handler, callback, composer);
+                            ((TwoArgsDelegate)_delegate)(handler, callback, composer);
                         else
-                            result = ((Func<object, object, object, object>)_delegate)(handler, callback, composer);
+                            result = ((TwoArgsReturnDelegate)_delegate)(handler, callback, composer);
                     }
                     else if (_isVoid)
-                        ((Action<object, object>)_delegate)(handler, callback);
+                        ((OneArgDelegate)_delegate)(handler, callback);
                     else
-                        result = ((Func<object, object, object>)_delegate)(handler, callback);
+                        result = ((OneArgReturnDelegate)_delegate)(handler, callback);
                 }
                 else
                     result = _passComposer
-                        ? ((Func<object, object, object>) _delegate)(handler, composer)
-                        : ((Func<object, object>) _delegate)(handler);
+                           ? ((OneArgReturnDelegate)_delegate)(handler, composer)
+                           : ((NoArgsReturnDelegate)_delegate)(handler);
             }
             else
             {
@@ -443,8 +443,7 @@ namespace Miruken.Callback
 
         private bool IsSatisfied(object result)
         {
-            return !Invariant || CallbackType == null ||
-                   (CallbackType == result.GetType());
+            return !Invariant || CallbackType == null || (CallbackType == result.GetType());
         }
     }
 

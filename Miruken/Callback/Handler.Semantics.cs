@@ -6,10 +6,11 @@ namespace Miruken.Callback
     public enum CallbackOptions
     {
         None      = 0,
-        Broadcast = 1 << 0,
-        BestEffot = 1 << 1,
-        Duck    = 1 << 2,
+        Duck      = 1 << 1,
+        Strict    = 1 << 2,
         Resolve   = 1 << 3,
+        Broadcast = 1 << 4,
+        BestEffot = 1 << 5,
         Notify    = Broadcast | BestEffot
     }
 
@@ -49,9 +50,10 @@ namespace Miruken.Callback
         public void MergeInto(CallbackSemantics semantics)
         {
             MergeInto(semantics, CallbackOptions.Duck);
+            MergeInto(semantics, CallbackOptions.Strict);
+            MergeInto(semantics, CallbackOptions.Resolve);
             MergeInto(semantics, CallbackOptions.BestEffot);
             MergeInto(semantics, CallbackOptions.Broadcast);
-            MergeInto(semantics, CallbackOptions.Resolve);
         }
 
         private void MergeInto(CallbackSemantics semantics, CallbackOptions option)
@@ -87,8 +89,7 @@ namespace Miruken.Callback
             }
             else if (!greedy)
             {
-                if (_semantics.IsSpecified(
-                    CallbackOptions.Broadcast | CallbackOptions.Resolve))
+                if (_semantics.IsSpecified(CallbackOptions.Broadcast))
                     greedy = _semantics.HasOption(CallbackOptions.Broadcast);
                 else
                 {
@@ -110,11 +111,26 @@ namespace Miruken.Callback
         public static IHandler Semantics(
             this IHandler handler, CallbackOptions options)
         {
-            return handler == null ? null : 
-                new SemanticsHandler(handler, options);
+            return handler == null ? null 
+                 : new SemanticsHandler(handler, options);
         }
 
         #region Semantics
+
+        public static IHandler Duck(this IHandler handler)
+        {
+            return Semantics(handler, CallbackOptions.Duck);
+        }
+
+        public static IHandler Strict(this IHandler handler)
+        {
+            return Semantics(handler, CallbackOptions.Strict);
+        }
+
+        public static IHandler Resolve(this IHandler handler)
+        {
+            return Semantics(handler, CallbackOptions.Resolve);
+        }
 
         public static IHandler Broadcast(this IHandler handler)
         {
@@ -126,19 +142,9 @@ namespace Miruken.Callback
             return Semantics(handler, CallbackOptions.BestEffot);
         }
 
-        public static IHandler Duck(this IHandler handler)
-        {
-            return Semantics(handler, CallbackOptions.Duck);
-        }
-
         public static IHandler Notify(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Notify);
-        }
-
-        public static IHandler Resolve(this IHandler handler)
-        {
-            return Semantics(handler, CallbackOptions.Resolve);
         }
 
         #endregion
