@@ -25,7 +25,7 @@
 
         public static bool ChangeProperty<T>(
              this EventHandler<PropertyChangedEventArgs> propertyChanged,
-             ref T field, T value, object sender, IEqualityComparer<T> comparer = null,
+             ref T field, T value, object sender = null, IEqualityComparer<T> comparer = null,
              [CallerMemberName] string propertyName = null)
         {
             if (comparer == null)
