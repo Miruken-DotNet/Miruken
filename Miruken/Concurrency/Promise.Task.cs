@@ -87,16 +87,33 @@
     {
         public static Promise ToPromise(this Task task)
         {
-            return new Promise<object>(task.ContinueWith(async t =>
+            return task.ContinueWith(async t =>
             {
                 await t;
                 return (object) null;
-            }).Unwrap());
+            }).Unwrap().ToPromise();
         }
 
+        public static Promise ToPromise(
+            this Task task, CancellationToken cancellationToken)
+        {
+            return task.ContinueWith(async t =>
+            {
+                await t;
+                return (object) null;
+            }, cancellationToken).Unwrap()
+            .ToPromise(cancellationToken);
+        }
+     
         public static Promise<T> ToPromise<T>(this Task<T> task)
         {
             return new Promise<T>(task);
+        }
+
+        public static Promise<T> ToPromise<T>(
+            this Task<T> task, CancellationToken cancellationToken)
+        {
+            return new Promise<T>(task, cancellationToken);
         }
     }
 }
