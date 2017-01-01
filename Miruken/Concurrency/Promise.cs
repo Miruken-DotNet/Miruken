@@ -37,7 +37,7 @@ namespace Miruken.Concurrency
 
     #endregion
 
-    public abstract class Promise : AbstractAsyncResult
+    public abstract partial class Promise : AbstractAsyncResult
     {
         protected ResolveCallback _fulfilled;
         protected RejectCallback _rejected;
@@ -369,7 +369,7 @@ namespace Miruken.Concurrency
         #endregion
     }
 
-    public class Promise<T> : Promise
+    public partial class Promise<T> : Promise
     {
         #region Delegates
 

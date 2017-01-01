@@ -68,6 +68,7 @@
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Callback\ResolveMethod.cs" />
+    <Compile Include="Concurrency\Promise.Task.cs" />
     <Compile Include="Context\Contextual.cs" />
     <Compile Include="Context\ContextualHandler.cs" />
     <Compile Include="Infrastructure\MethodSignatureComparer.cs" />
