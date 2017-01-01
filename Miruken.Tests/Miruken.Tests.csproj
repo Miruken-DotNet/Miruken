@@ -66,6 +66,7 @@
     <Compile Include="Callback\HandlerTests.cs" />
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\LinqToPromisesTests.cs" />
+    <Compile Include="Concurrency\Promise.Task.Tests.cs" />
     <Compile Include="Concurrency\PromiseTests.cs" />
     <Compile Include="Context\ContextTests.cs" />
     <Compile Include="Context\ContextualTests.cs" />

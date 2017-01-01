@@ -8,8 +8,6 @@ using Miruken.Infrastructure;
 
 namespace Miruken.Tests.Concurrency
 {
-    using System.Threading.Tasks;
-
     /// <summary>
     /// Summary description for PromiseTests
     /// </summary>
@@ -784,7 +782,7 @@ namespace Miruken.Tests.Concurrency
             RejectCallback failed = null;
             var promise = new Promise<object>((resolve, reject) => {
                 fulfill = resolve;
-                failed = reject;
+                failed  = reject;
             }).Then((result, s) => { called = true; })
               .Catch((ex, ss) => { called = true; })
               .Finally(() => cancel = true);
@@ -1140,158 +1138,6 @@ namespace Miruken.Tests.Concurrency
             }
             else
                 Assert.Fail("Operation timed out");
-        }
-
-        [TestMethod]
-        public void Should_Convert_Pending_Promise_To_Task()
-        {
-            var promise = new Promise<int>((resolve, reject) => {});
-            var task    = promise.ToTask();
-            Assert.AreEqual(TaskStatus.WaitingForActivation, task.Status);
-        }
-
-        [TestMethod]
-        public void Should_Convert_Fulfilled_Promise_To_Task()
-        {
-            var promise = Promise.Resolved("Hello");
-            var task    = promise.ToTask();
-            Assert.AreEqual(TaskStatus.RanToCompletion, task.Status);
-            Assert.AreEqual("Hello", task.Result);
-        }
-
-        [TestMethod]
-        public void Should_Convert_Rejected_Promise_To_Task()
-        {
-            var exception = new InvalidOperationException("Can't do that");
-            var promise   = Promise.Rejected(exception);
-            var task      = promise.ToTask();
-            Assert.AreEqual(TaskStatus.Faulted, task.Status);
-            Assert.IsNotNull(task.Exception);
-            task.Exception.Handle(ex =>
-            {
-                Assert.AreSame(exception, ex);
-                return true;
-            });
-        }
-
-        [TestMethod]
-        public void Should_Convert_Cancelled_Promise_To_Task()
-        {
-            var promise   = new Promise<int>((resolve, reject) => {});
-            var task      = promise.ToTask();
-            promise.Cancel();
-            Assert.AreEqual(TaskStatus.Canceled, task.Status);
-        }
-
-        [TestMethod]
-        public void Should_Fulfill_Asynchronously_Using_Tasks()
-        {
-            TestRunner.MTA(() =>
-            {
-                var called   = 0;
-                var promise  = new Promise<object>((resolve, reject) =>
-                    ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
-                var task     = promise.ToTask();
-                var fulfill1 = task.ContinueWith(t =>
-                {
-                    Assert.AreEqual("Hello", task.Result);
-                    ++called;
-                });
-                var fulfill2 = task.ContinueWith(t =>
-                {
-                    Assert.AreEqual("Hello", t.Result);
-                    ++called;
-                });
-                if (Task.WaitAll(new[] { fulfill1, fulfill2 }, 5.Sec()))
-                {
-                    Assert.AreEqual(2, called);
-                }
-                else
-                    Assert.Fail("Operation timed out");
-            });
-        }
-
-        [TestMethod]
-        public void Should_Reject_Asynchronously_Using_Tasks()
-        {
-            TestRunner.MTA(() =>
-            {
-                var called  = 0;
-                var promise = new Promise<object>((resolve, reject) =>
-                    ThreadPool.QueueUserWorkItem(_ =>
-                        reject(new Exception("Rejected"), false)));
-                var task    = promise.ToTask();
-                var catch1  = task.ContinueWith(t =>
-                {
-                    t.Exception?.Handle(ex =>
-                    {
-                        Assert.AreEqual("Rejected", ex.Message);
-                        ++called;
-                        return true;
-                    });
-                });
-                var catch2  = task.ContinueWith(t =>
-                {
-                    t.Exception?.Handle(ex =>
-                    {
-                        Assert.AreEqual("Rejected", ex.Message);
-                        ++called;
-                        return true;
-                    });
-                });
-                if (Task.WaitAll(new[] { catch1, catch2 }, 5.Sec()))
-                {
-                    Assert.AreEqual(2, called);
-                }
-                else
-                    Assert.Fail("Operation timed out");
-            });
-        }
-
-        [TestMethod]
-        public async Task Should_Await_Fulfilled_Promise()
-        {
-            var promise = Promise.Resolved("Hello");
-            Assert.AreEqual("Hello", await promise);
-        }
-
-        [TestMethod, ExpectedException(typeof(ArgumentException),
-            "Bad parameter")]
-        public async Task Should_Await_Rejetced_Promise()
-        {
-            var exception = new ArgumentException("Bad parameter");
-            await Promise.Rejected(exception);
-        }
-
-        [TestMethod]
-        public void Should_Await_Completed_Promises()
-        {
-            TestRunner.MTA(async () =>
-            {
-                var promise = new Promise<object>((resolve, reject) =>
-                   ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
-                Assert.AreEqual("Hello", await promise);
-                Assert.AreEqual("Hello", await promise);
-            });
-        }
-
-        [TestMethod]
-        public void Should_Await_Failed_Promises()
-        {
-            TestRunner.MTA(async () =>
-            {
-                var promise = new Promise<object>((resolve, reject) =>
-                    ThreadPool.QueueUserWorkItem(_ =>
-                        reject(new Exception("This is bad"), false)));
-                try
-                {
-                    await promise;
-                }
-                catch (Exception ex)
-                {
-                    Assert.AreEqual("This is bad", ex.Message);
-                }
-            });
         }
     }
 }
