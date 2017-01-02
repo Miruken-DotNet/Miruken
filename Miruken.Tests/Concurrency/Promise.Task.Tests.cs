@@ -232,5 +232,35 @@ namespace Miruken.Tests.Concurrency
                     Assert.Fail("Operation timed out");
             });
         }
+
+        [TestMethod]
+        public void Should_Cancel_Tasks_As_Promises_Sync()
+        {
+            var cancellation = new CancellationTokenSource();
+            var token        = cancellation.Token;
+            cancellation.Cancel();
+            var task         = new Task<string>(() => null, token);
+            var promise      = task.ToPromise();
+            Assert.AreEqual(PromiseState.Cancelled, promise.State);
+        }
+
+        [TestMethod]
+        public void Should_Cancel_Tasks_As_Promises_Async()
+        {
+            var cancellation = new CancellationTokenSource();
+            var token        = cancellation.Token;
+
+            TestRunner.MTA(() =>
+            {
+                var task = Task.Run(() =>
+                {
+                    while (true)
+                        token.ThrowIfCancellationRequested();
+                }, token);
+                var promise = task.ToPromise(token);
+                cancellation.Cancel();
+                Assert.AreEqual(PromiseState.Cancelled, promise.State);
+            });
+        }
     }
 }

@@ -33,20 +33,20 @@
         public Promise(Task<T> task)
             : this((resolve, reject) =>
             {
-                if (task.IsFaulted)
-                    reject(ExtractException(task.Exception), true);
-                else if (task.IsCompleted)
-                    resolve(task.Result, true);
-                else if (!task.IsCanceled)
+                if (!task.IsCompleted)
                 {
                     task.ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                             reject(ExtractException(t.Exception), false);
-                        else if (t.IsCompleted)
+                        else if (!t.IsCanceled)
                             resolve(t.Result, false);
                     });
                 }
+                else if (task.IsFaulted)
+                    reject(ExtractException(task.Exception), true);
+                else if (!task.IsCanceled)
+                    resolve(task.Result, true);
             })
         {
             if (task.IsCanceled) Cancel();
@@ -79,7 +79,10 @@
 
         private static Exception ExtractException(AggregateException aggregateException)
         {
-            return aggregateException.InnerExceptions.First();
+            var exceptions = aggregateException.InnerExceptions;
+            return exceptions.Count == 1
+                 ? aggregateException.InnerExceptions.First()
+                 : aggregateException;
         }
     }
 
