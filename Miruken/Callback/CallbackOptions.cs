@@ -4,6 +4,11 @@
         where T : CallbackOptions<T>
     {
         public abstract void MergeInto(T other);
+
+        public OptionsHandler<T> Decorate(IHandler handler)
+        {
+            return new OptionsHandler<T>(handler, (T)this);
+        }
     }
 
     public class OptionsHandler<T> : HandlerDecorator
