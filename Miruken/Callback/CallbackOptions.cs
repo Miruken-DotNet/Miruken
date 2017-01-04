@@ -7,7 +7,8 @@
 
         public OptionsHandler<T> Decorate(IHandler handler)
         {
-            return new OptionsHandler<T>(handler, (T)this);
+            return handler == null ? null
+                 : new OptionsHandler<T>(handler, (T)this);
         }
     }
 
