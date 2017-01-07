@@ -3,7 +3,7 @@
 namespace Miruken.Callback
 {
     public delegate bool CallbackFilter(
-        object callback, IHandler filter, Func<bool> proceed
+        object callback, IHandler composer, Func<bool> proceed
     );
 
     public class HandlerFilter : HandlerDecorator
