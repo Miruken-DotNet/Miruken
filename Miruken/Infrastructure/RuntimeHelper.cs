@@ -26,9 +26,9 @@
                  : null;
         }
 
-        public static string GetSimpleTypeName(Type t)
+        public static string GetSimpleTypeName(Type type)
         {
-            var fullyQualifiedTypeName = t.AssemblyQualifiedName;
+            var fullyQualifiedTypeName = type.AssemblyQualifiedName;
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
         }
 
@@ -37,6 +37,12 @@
             var allInterfaces = type.GetInterfaces();
             return allInterfaces.Except(allInterfaces.SelectMany(t => t.GetInterfaces()))
                 .ToArray();
+        }
+
+        public static bool IsTopLevelInterface(Type @interface, Type type)
+        {
+            return @interface.IsInterface && type.GetInterfaces().All(
+                i => i == @interface || !@interface.IsAssignableFrom(i));
         }
 
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,

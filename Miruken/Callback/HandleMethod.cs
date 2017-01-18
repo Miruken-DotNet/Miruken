@@ -73,13 +73,10 @@
 
         private bool IsAcceptableTarget(object target)
         {
-            if (_semantics.HasOption(CallbackOptions.Strict))
-            {
-                var toplevelInterfaces = RuntimeHelper.GetToplevelInterfaces(target.GetType());
-                return toplevelInterfaces.Contains(Protocol);
-            }
-
-            return _semantics.HasOption(CallbackOptions.Duck) || Protocol.IsInstanceOfType(target);
+            return _semantics.HasOption(CallbackOptions.Strict)
+                 ? RuntimeHelper.IsTopLevelInterface(Protocol, target.GetType())
+                 : _semantics.HasOption(CallbackOptions.Duck) 
+                || Protocol.IsInstanceOfType(target);
         }
 
         public static IHandler RequireComposer()

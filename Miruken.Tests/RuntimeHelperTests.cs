@@ -52,9 +52,9 @@ namespace Miruken.Tests
 
         public interface IFoo {}
         public interface IBar {}
-        public interface IBoo { }
+        public interface IBoo : IBar {}
         public interface IBaz : IFoo, IBar {}
-        public class Bar : IBar { }
+        public class Bar : IBar {}
         public class Baz : IBaz, IBoo {}
 
         [TestMethod]
@@ -64,6 +64,15 @@ namespace Miruken.Tests
             CollectionAssert.AreEqual(toplevel, new [] { typeof(IBar) });
             toplevel = RuntimeHelper.GetToplevelInterfaces(typeof(Baz));
             CollectionAssert.AreEqual(toplevel, new[] { typeof(IBaz), typeof(IBoo) });
+        }
+
+        [TestMethod]
+        public void Should_Determine_If_Toplevel_Interface()
+        {
+            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBar), typeof(Bar)));
+            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBaz), typeof(Baz)));
+            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBoo), typeof(Baz)));
+            Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IBar), typeof(Baz)));
         }
 
         [TestMethod]
