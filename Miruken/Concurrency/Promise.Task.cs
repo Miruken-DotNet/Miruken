@@ -39,17 +39,20 @@
                     {
                         if (t.IsFaulted)
                             reject(ExtractException(t.Exception), false);
-                        else if (!t.IsCanceled)
+                        else if (t.IsCanceled)
+                            reject(new CancelledException("Task was cancelled"), false);
+                        else
                             resolve(t.Result, false);
                     });
                 }
                 else if (task.IsFaulted)
                     reject(ExtractException(task.Exception), true);
-                else if (!task.IsCanceled)
+                else if (task.IsCanceled)
+                    reject(new CancelledException("Task was cancelled"), true);
+                else
                     resolve(task.Result, true);
             })
         {
-            if (task.IsCanceled) Cancel();
         }
 
         public Promise(Task<T> task, CancellationToken cancellationToken)
