@@ -14,7 +14,8 @@
             protocol = protocol ?? message.MethodBase.ReflectedType;
 
             var options   = CallbackOptions.None;
-            var semantics = GetSemantics(this) ?? new CallbackSemantics();
+            var semantics = new CallbackSemantics();
+            handler.Handle(semantics, true);
 
             if (!semantics.IsSpecified(CallbackOptions.Duck) &&
                 typeof(IDuck).IsAssignableFrom(protocol))
@@ -49,12 +50,6 @@
 
             return handled || result != null ? result 
                  : RuntimeHelper.GetDefault(handleMethod.ResultType);
-        }
-
-        private static CallbackSemantics GetSemantics(IHandler handler)
-        {
-            var semantics = new CallbackSemantics();
-            return handler.Handle(semantics, true) ? semantics : null;
         }
 
         private bool TryHandleMethod(object callback, bool greedy, IHandler composer)

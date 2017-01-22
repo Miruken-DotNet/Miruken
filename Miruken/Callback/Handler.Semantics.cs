@@ -77,7 +77,7 @@ namespace Miruken.Callback
         protected override bool HandleCallback(
             object callback, bool greedy, IHandler composer)
         {
-            var handled   = false;
+            var handled = false;
             if (Composition.IsComposed<CallbackSemantics>(callback))
                 return false;
 
