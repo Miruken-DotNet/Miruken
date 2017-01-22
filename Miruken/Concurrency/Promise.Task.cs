@@ -30,7 +30,9 @@
 
     public partial class Promise<T>
     {
-        public Promise(Task<T> task, ChildCancelMode mode = ChildCancelMode.All)
+        public Promise(Task<T> task,
+            CancellationToken cancellationToken = default(CancellationToken),
+            ChildCancelMode mode = ChildCancelMode.All)
             : this(mode, (resolve, reject) =>
             {
                 if (!task.IsCompleted)
@@ -53,13 +55,8 @@
                     resolve(task.Result, true);
             })
         {
-        }
-
-        public Promise(Task<T> task, CancellationToken cancellationToken,
-            ChildCancelMode mode = ChildCancelMode.All)
-            : this(task, mode)
-        {
-            cancellationToken.Register(Cancel);
+            if (cancellationToken != default(CancellationToken))
+                cancellationToken.Register(Cancel, false);
         }
 
         public new Task<T> ToTask()
@@ -93,17 +90,8 @@
     public static class TaskToPromiseExtensions
     {
         public static Promise ToPromise(
-            this Task task, ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return task.ContinueWith(async t =>
-            {
-                await t;
-                return (object) null;
-            }).Unwrap().ToPromise(mode);
-        }
-
-        public static Promise ToPromise(
-            this Task task, CancellationToken cancellationToken,
+            this Task task,
+            CancellationToken cancellationToken = default(CancellationToken),
             ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.ContinueWith(async t =>
@@ -113,15 +101,10 @@
             }, cancellationToken).Unwrap()
             .ToPromise(cancellationToken, mode);
         }
-     
-        public static Promise<T> ToPromise<T>(
-            this Task<T> task, ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return new Promise<T>(task, mode);
-        }
 
         public static Promise<T> ToPromise<T>(
-            this Task<T> task, CancellationToken cancellationToken,
+            this Task<T> task,
+            CancellationToken cancellationToken = default(CancellationToken),
             ChildCancelMode mode = ChildCancelMode.All)
         {
             return new Promise<T>(task, cancellationToken, mode);
