@@ -245,6 +245,19 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
+        public void Should_Cancel_Promise_When_Task_Cancellation_Requested()
+        {
+            Exception cancelException = null;
+            var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            var task    = new Task<string>(() => null);
+            var promise = task.ToPromise(cancellation);
+            promise.Cancelled(ex => cancelException = ex);
+            Assert.AreEqual(PromiseState.Cancelled, promise.State);
+            Assert.AreEqual("Task cancellation requested", cancelException.Message);
+        }
+
+        [TestMethod]
         public void Should_Cancel_Tasks_As_Promises_Async()
         {
             var cancellation = new CancellationTokenSource();
