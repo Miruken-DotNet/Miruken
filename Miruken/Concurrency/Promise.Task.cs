@@ -30,8 +30,8 @@
 
     public partial class Promise<T>
     {
-        public Promise(Task<T> task)
-            : this((resolve, reject) =>
+        public Promise(Task<T> task, ChildCancelMode mode = ChildCancelMode.All)
+            : this(mode, (resolve, reject) =>
             {
                 if (!task.IsCompleted)
                 {
@@ -55,8 +55,9 @@
         {
         }
 
-        public Promise(Task<T> task, CancellationToken cancellationToken)
-            : this(task)
+        public Promise(Task<T> task, CancellationToken cancellationToken,
+            ChildCancelMode mode = ChildCancelMode.All)
+            : this(task, mode)
         {
             cancellationToken.Register(Cancel);
         }
@@ -91,35 +92,39 @@
 
     public static class TaskToPromiseExtensions
     {
-        public static Promise ToPromise(this Task task)
+        public static Promise ToPromise(
+            this Task task, ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.ContinueWith(async t =>
             {
                 await t;
                 return (object) null;
-            }).Unwrap().ToPromise();
+            }).Unwrap().ToPromise(mode);
         }
 
         public static Promise ToPromise(
-            this Task task, CancellationToken cancellationToken)
+            this Task task, CancellationToken cancellationToken,
+            ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.ContinueWith(async t =>
             {
                 await t;
                 return (object) null;
             }, cancellationToken).Unwrap()
-            .ToPromise(cancellationToken);
+            .ToPromise(cancellationToken, mode);
         }
      
-        public static Promise<T> ToPromise<T>(this Task<T> task)
+        public static Promise<T> ToPromise<T>(
+            this Task<T> task, ChildCancelMode mode = ChildCancelMode.All)
         {
-            return new Promise<T>(task);
+            return new Promise<T>(task, mode);
         }
 
         public static Promise<T> ToPromise<T>(
-            this Task<T> task, CancellationToken cancellationToken)
+            this Task<T> task, CancellationToken cancellationToken,
+            ChildCancelMode mode = ChildCancelMode.All)
         {
-            return new Promise<T>(task, cancellationToken);
+            return new Promise<T>(task, cancellationToken, mode);
         }
     }
 }
