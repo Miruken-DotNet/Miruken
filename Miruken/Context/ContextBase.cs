@@ -12,12 +12,12 @@ namespace Miruken.Context
 		where TContext : class, IContext<TContext>
 	{
 	    private EventHandlerList _events;
-	    private readonly List<WeakReference> _children;
+	    private readonly List<TContext> _children;
  
 		protected ContextBase()
 		{
             State     = ContextState.Active;
-            _children = new List<WeakReference>();
+            _children = new List<TContext>();
             _events   = new EventHandlerList();
 		}
 
@@ -32,14 +32,7 @@ namespace Miruken.Context
 
 	    public TContext Parent { get; }
 
-	    public bool HasChildren
-	    {
-	        get
-	        {
-	            PurgeChildren();
-	            return _children.Count > 0;
-	        }
-	    }
+	    public bool HasChildren => _children.Count > 0;
 
 	    public TContext Root
         {
@@ -58,11 +51,10 @@ namespace Miruken.Context
 	        var child = InternalCreateChild();
 	        child.ContextEnding += ctx => Raise(ContextEvents.ChildContextEnding, ctx);
             child.ContextEnded += ctx => {
-                var index = _children.FindIndex(wr => wr.Target == ctx);
-                if (index >= 0) _children.RemoveAt(index);
+                _children.Remove(ctx);
                 Raise(ContextEvents.ChildContextEnded, ctx);
             };
-            _children.Add(new WeakReference(child));
+            _children.Add(child);
 	        return child;
 	    }
 
@@ -70,19 +62,11 @@ namespace Miruken.Context
         {
             get
             {
-                PurgeChildren();
-                return _children.Select(wr => wr.Target as ITraversing).ToArray();
+                return _children.Select(c => c as ITraversing).ToArray();
             }
         }
 
-	    public TContext[] Children 
-        {
-            get
-            {
-                PurgeChildren();
-                return _children.Select(wr => wr.Target as TContext).ToArray();
-            }
-        }
+	    public TContext[] Children => _children.ToArray();
 
 	    protected abstract TContext InternalCreateChild();
 
@@ -269,11 +253,6 @@ namespace Miruken.Context
 		}
 
 		#endregion
-
-	    private void PurgeChildren()
-	    {
-	        _children.RemoveAll(wr => !wr.IsAlive);
-	    }
 
         private void Raise(object key, TContext context)
         {
