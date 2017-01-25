@@ -1037,6 +1037,25 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
+        public void Should_Cancel_Parent_Timeout_Elapsed()
+        {
+            var called = false;
+            var promise = new Promise<object>((resolve, reject) => { });
+
+            var cancelled = promise.Timeout(.2.Sec())
+                .Catch<TimeoutException>((ex, s) => {
+                    called = true;
+                });
+            if (cancelled.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.IsTrue(called);
+                Assert.AreEqual(PromiseState.Cancelled, promise.State);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
         public void Should_Translate_Failed_Actions_Into_Rejected_Promises()
         {
             var called = false;

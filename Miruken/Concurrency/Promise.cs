@@ -815,6 +815,7 @@ namespace Miruken.Concurrency
                 timer = new Timer(_ => {
                     disposeTimer();
                     reject(new TimeoutException(), false);
+                    Cancel();
                 },
                 null, (int)timeout.TotalMilliseconds, System.Threading.Timeout.Infinite);
             });
