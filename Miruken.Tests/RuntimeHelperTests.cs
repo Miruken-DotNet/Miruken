@@ -73,6 +73,7 @@ namespace Miruken.Tests
             Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBaz), typeof(Baz)));
             Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBoo), typeof(Baz)));
             Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IBar), typeof(Baz)));
+            Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IFoo), typeof(Bar)));
         }
 
         [TestMethod]

@@ -41,8 +41,10 @@
 
         public static bool IsTopLevelInterface(Type @interface, Type type)
         {
-            return @interface.IsInterface && type.GetInterfaces().All(
-                i => i == @interface || !@interface.IsAssignableFrom(i));
+            return @interface.IsInterface
+                && @interface.IsAssignableFrom(type)
+                && type.GetInterfaces().All(
+                    i => i == @interface || !@interface.IsAssignableFrom(i));
         }
 
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,

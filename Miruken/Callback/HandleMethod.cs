@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Linq;
     using System.Reflection;
     using System.Runtime.Remoting.Messaging;
     using Concurrency;

@@ -6,11 +6,11 @@ namespace Miruken.Callback
     public enum CallbackOptions
     {
         None      = 0,
-        Duck      = 1 << 1,
-        Strict    = 1 << 2,
-        Resolve   = 1 << 3,
-        Broadcast = 1 << 4,
-        BestEffot = 1 << 5,
+        Duck      = 1 << 0,
+        Strict    = 1 << 1,
+        Resolve   = 1 << 2,
+        Broadcast = 1 << 3,
+        BestEffot = 1 << 4,
         Notify    = Broadcast | BestEffot
     }
 
