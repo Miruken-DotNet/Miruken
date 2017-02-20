@@ -156,6 +156,11 @@ namespace Miruken.Concurrency
 
         #region Misc
 
+        public void Wait()
+        {
+            End(this);
+        }
+
         public Promise Timeout(TimeSpan timeout)
         {
             return TimeoutT(timeout);
@@ -884,7 +889,7 @@ namespace Miruken.Concurrency
             base.Complete(synchronously);
         }
 
-        public T End()
+        public new T Wait()
         {
             return (T)End(this);
         }

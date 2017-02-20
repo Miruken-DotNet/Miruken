@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Miruken.Callback
 {
-    public class Resolution : ICallback
+    public class Resolution : IDispatchCallback
     {
         private readonly List<object> _resolutions;
         private object _result;
@@ -66,6 +66,18 @@ namespace Miruken.Callback
         protected virtual bool IsSatisfied(object resolution, IHandler composer)
         {
             return true;
+        }
+
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        {
+            // Try implicit resolution
+            var surrogate = handler.Surrogate;
+            var handled   = surrogate != null && TryResolve(surrogate, false, composer);
+            if (!handled || greedy)
+                handled = TryResolve(handler, false, composer) || handled;
+            if (handled && !greedy) return true;
+            return HandlerMetadata.Dispatch(typeof(ProvidesAttribute),
+                handler, this, greedy, composer) || handled;
         }
     }
 }

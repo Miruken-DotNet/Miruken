@@ -42,7 +42,7 @@ namespace Miruken.Tests.Concurrency
         public void Should_Fulfill_With_Value()
         {
             var promise = Promise.Resolved(2);
-            Assert.AreEqual(2, promise.End());
+            Assert.AreEqual(2, promise.Wait());
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
         }
 
@@ -52,7 +52,7 @@ namespace Miruken.Tests.Concurrency
             var promise1 = Promise.Resolved(2);
             var promise2 = Promise.Resolved(promise1);
             Assert.AreEqual(PromiseState.Fulfilled, promise2.State);
-            Assert.AreEqual(2, promise2.End());
+            Assert.AreEqual(2, promise2.Wait());
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace Miruken.Tests.Concurrency
             Assert.AreEqual(PromiseState.Rejected, promise2.State);
             try
             {
-                promise2.End();
+                promise2.Wait();
                 Assert.Fail("Should fail");
             }
             catch (Exception ex)
@@ -76,7 +76,7 @@ namespace Miruken.Tests.Concurrency
         public void Should_Fulfill_Synchronously_Using_APM()
         {
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true));
-            Assert.AreEqual("Hello", promise.End());
+            Assert.AreEqual("Hello", promise.Wait());
             Assert.IsTrue(promise.CompletedSynchronously);
         }
 
@@ -87,7 +87,7 @@ namespace Miruken.Tests.Concurrency
                 reject(new Exception("Rejected"), true));
             try
             {
-                promise.End();
+                promise.Wait();
                 Assert.Fail("Should have raised exception");
             }
             catch (Exception ex)
@@ -387,7 +387,7 @@ namespace Miruken.Tests.Concurrency
         {
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true))
                 .Then((r,s) => 12);
-            Assert.AreEqual(12, promise.End());
+            Assert.AreEqual(12, promise.Wait());
             Assert.IsTrue(promise.CompletedSynchronously);
         }
 
@@ -399,7 +399,7 @@ namespace Miruken.Tests.Concurrency
                 .Then((r,s) => 12, (ex,s) => { throw new Exception("Yeah"); });
             try
             {
-                promise.End();
+                promise.Wait();
                 Assert.Fail("Should have raised exception");
             }
             catch (Exception ex)
@@ -508,7 +508,7 @@ namespace Miruken.Tests.Concurrency
         {
             var promise = new Promise<string>((resolve, reject) => resolve("Hello", true))
                 .Then((r,s) => new Promise<int>((res, rej) => res(12, s)));
-            Assert.AreEqual(12, promise.End());
+            Assert.AreEqual(12, promise.Wait());
             Assert.IsTrue(promise.CompletedSynchronously);
         }
 
@@ -520,7 +520,7 @@ namespace Miruken.Tests.Concurrency
                     rej(new Exception("Bad Data"), s)));
             try
             {
-                promise.End();
+                promise.Wait();
                 Assert.Fail("Should have raised exception");
             }
             catch (Exception ex)
@@ -582,7 +582,7 @@ namespace Miruken.Tests.Concurrency
         {
             var promise = new Promise<string>((resolve, reject) => resolve("Hello", true))
                 .Then((r,s) => new Promise<int>((res, rej) => res(12, true)));
-            Assert.AreEqual(12, promise.End());
+            Assert.AreEqual(12, promise.Wait());
             Assert.IsTrue(promise.CompletedSynchronously);
         }
 
@@ -595,7 +595,7 @@ namespace Miruken.Tests.Concurrency
                 ;
             try
             {
-                promise.End();
+                promise.Wait();
                 Assert.Fail("Should have raised exception");
             }
             catch (Exception ex)

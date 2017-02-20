@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -40,27 +39,14 @@ namespace Miruken.Callback
         }
 
         private bool TryDefinitions(object callback, bool greedy, IHandler composer)
-	    {
-            var handled    = false;
-            var resolution = callback as Resolution;
-
-            // Try implicit resolution first
-
-            if (resolution != null)
-            {
-                handled = Surrogate != null && 
-                    resolution.TryResolve(Surrogate, false, composer);
-                if (!handled || greedy)
-                    handled = resolution.TryResolve(this, false, composer) || handled;
-                if (handled && !greedy) return true;
-            }
-
-            if (ShouldShortCircuitDefinitions(callback))
-                return handled;
-
-	        return HandlerMetadata.Dispatch(this, callback, greedy, composer) 
-                || handled;
-	    }
+        {
+            var dispatch = callback as IDispatchCallback;
+            if (dispatch != null)
+                return dispatch.Dispatch(this, greedy, composer);
+            return !ShouldShortCircuitDefinitions(callback) &&
+                HandlerMetadata.Dispatch(typeof(HandlesAttribute),
+                this, callback, greedy, composer);
+        }
 
 	    private bool ShouldShortCircuitDefinitions(object callback)
 	    {

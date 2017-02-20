@@ -18,14 +18,10 @@ namespace Miruken.Callback
             return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
         }
 
-        public static bool Dispatch(Handler handler, object callback, bool greedy, IHandler composer)
+        public static bool Dispatch(Type definition, Handler handler, object callback, bool greedy, IHandler composer)
         {
             var handled   = false;
             var surrogate = handler.Surrogate;
-
-            var definition = callback is Resolution
-                           ? typeof(ProvidesAttribute)
-                           : typeof(HandlesAttribute);
 
             if (surrogate != null)
             {

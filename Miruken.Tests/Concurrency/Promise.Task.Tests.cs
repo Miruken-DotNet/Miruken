@@ -163,7 +163,7 @@ namespace Miruken.Tests.Concurrency
             var task    = Task.FromResult("Hello");
             var promise = task.ToPromise();
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
-            Assert.AreEqual("Hello", promise.End());
+            Assert.AreEqual("Hello", promise.Wait());
         }
 
         [TestMethod, ExpectedException(typeof(NotSupportedException),
@@ -174,7 +174,7 @@ namespace Miruken.Tests.Concurrency
             var task      = Task.FromException<string>(exception);
             var promise   = task.ToPromise();
             Assert.AreEqual(PromiseState.Rejected, promise.State);
-            promise.End();
+            promise.Wait();
         }
 
         [TestMethod]
