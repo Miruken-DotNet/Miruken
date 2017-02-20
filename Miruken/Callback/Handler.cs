@@ -31,18 +31,15 @@
         {
             var compose = callback as Composition;
             if (compose != null)
+            {
                 callback = compose.Callback;
+                if (callback == null) return false;
+            }
 
-            return callback != null & 
-                 ( TryHandleMethod(callback, greedy, composer)
-                || TryDefinitions(callback, greedy, composer));
-        }
-
-        private bool TryDefinitions(object callback, bool greedy, IHandler composer)
-        {
             var dispatch = callback as IDispatchCallback;
             if (dispatch != null)
                 return dispatch.Dispatch(this, greedy, composer);
+
             return !ShouldShortCircuitDefinitions(callback) &&
                 HandlerMetadata.Dispatch(typeof(HandlesAttribute),
                 this, callback, greedy, composer);

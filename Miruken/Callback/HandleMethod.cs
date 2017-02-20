@@ -6,7 +6,7 @@
     using Concurrency;
     using Infrastructure;
 
-    public class HandleMethod : ICallback
+    public class HandleMethod : IDispatchCallback
     {
         private readonly MethodInfo _method;
         private readonly object[] _args;
@@ -68,6 +68,15 @@
                 Unhandled = oldUnhandled;
                 Composer  = oldComposer;
             }
+        }
+
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        {
+            var surrogate = handler.Surrogate;
+            var handled = surrogate != null && InvokeOn(surrogate, composer);
+            if (!handled || greedy)
+                handled = InvokeOn(handler, composer) || handled;
+            return handled;
         }
 
         private bool IsAcceptableTarget(object target)

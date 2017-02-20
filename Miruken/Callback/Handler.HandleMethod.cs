@@ -52,16 +52,6 @@
                  : RuntimeHelper.GetDefault(handleMethod.ResultType);
         }
 
-        private bool TryHandleMethod(object callback, bool greedy, IHandler composer)
-        {
-            var handleMethod = callback as HandleMethod;
-            if (handleMethod == null) return false;
-            var handled = Surrogate != null && handleMethod.InvokeOn(Surrogate, composer);
-            if (!handled || greedy)
-                handled = handleMethod.InvokeOn(this, composer) || handled;
-            return handled;
-        }
-
         public static IHandler Composer => HandleMethod.Composer;
 
         public static void Unhandled()
