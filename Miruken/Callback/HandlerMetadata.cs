@@ -17,6 +17,31 @@ namespace Miruken.Callback
         {
             return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
         }
+
+        public static bool Dispatch(Handler handler, object callback, bool greedy, IHandler composer)
+        {
+            var handled   = false;
+            var surrogate = handler.Surrogate;
+
+            var definition = callback is Resolution
+                           ? typeof(ProvidesAttribute)
+                           : typeof(HandlesAttribute);
+
+            if (surrogate != null)
+            {
+                var descriptor = GetDescriptor(surrogate.GetType());
+                handled = descriptor.Dispatch(definition, surrogate, callback, greedy, composer);
+            }
+
+            if (!handled || greedy)
+            {
+                var descriptor = GetDescriptor(handler.GetType());
+                handled = descriptor.Dispatch(definition, handler, callback, greedy, composer)
+                       || handled;
+            }
+
+            return handled;
+        }
     }
 
     public class HandlerDescriptor
@@ -63,8 +88,7 @@ namespace Miruken.Callback
             }
         }
 
-        public bool Dispatch(Type type, object handler, object callback,
-            bool greedy, IHandler composer)
+        internal bool Dispatch(Type type, object target, object callback, bool greedy, IHandler composer)
         {
             if (callback == null) return false;
 
@@ -81,7 +105,7 @@ namespace Miruken.Callback
                 foreach (var definition in definitions)
                 {
                     HandleMethod.Unhandled = false;
-                    var handled = definition.Dispatch(handler, callback, composer);
+                    var handled = definition.Dispatch(target, callback, composer);
                     dispatched = (handled && !HandleMethod.Unhandled) || dispatched;
                     if (dispatched && !greedy)
                         return true;

@@ -2,7 +2,10 @@
 
 namespace Miruken.Callback
 {
-	public partial class Handler : MarshalByRefObject, IHandler
+    using System.Collections.Generic;
+    using System.Linq;
+
+    public partial class Handler : MarshalByRefObject, IHandler
 	{
 	    public Handler()
 	    {        
@@ -55,23 +58,8 @@ namespace Miruken.Callback
             if (ShouldShortCircuitDefinitions(callback))
                 return handled;
 
-            var definition = resolution != null
-                           ? typeof(ProvidesAttribute)
-                           : typeof(HandlesAttribute);
-
-            if (Surrogate != null)
-            {
-                var descriptor = HandlerMetadata.GetDescriptor(Surrogate.GetType());
-                handled = descriptor.Dispatch(definition, Surrogate, callback, greedy, composer) || handled;
-            }
-
-            if (!handled || greedy)
-            {
-                var descriptor = HandlerMetadata.GetDescriptor(GetType());
-                handled = descriptor.Dispatch(definition, this, callback, greedy, composer) || handled;
-            }
-
-            return handled;
+	        return HandlerMetadata.Dispatch(this, callback, greedy, composer) 
+                || handled;
 	    }
 
 	    private bool ShouldShortCircuitDefinitions(object callback)
@@ -88,7 +76,12 @@ namespace Miruken.Callback
         {
             return c1.Chain(c2);
         }
-	}
+
+        public static IHandler operator +(Handler c1, IEnumerable<IHandler> c2)
+        {
+            return c1.Chain(c2.ToArray());
+        }
+    }
 
     public class CompositionScope : HandlerDecorator
     {

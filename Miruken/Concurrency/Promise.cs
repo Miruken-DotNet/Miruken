@@ -801,7 +801,7 @@ namespace Miruken.Concurrency
             Timer timer = null;
             Action disposeTimer = () => {
                 var t = Interlocked.CompareExchange(ref timer, null, timer);
-                 t?.Dispose();
+                t?.Dispose();
             };
             return CreateChild<T>((resolve, reject) => {
                 Then((r, s) => {

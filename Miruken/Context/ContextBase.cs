@@ -267,7 +267,7 @@ namespace Miruken.Context
         }
 	}
 
-    static class ContextEvents
+    internal static class ContextEvents
     {
         public static readonly object ContextEnding      = new object();
         public static readonly object ContextEnded       = new object();
