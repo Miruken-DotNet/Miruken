@@ -51,7 +51,23 @@ namespace Miruken.Callback
             return true;
         }
 
-        public bool TryResolve(object item, bool invariant, IHandler composer)
+        protected virtual bool IsSatisfied(object resolution, IHandler composer)
+        {
+            return true;
+        }
+
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        {
+            var surrogate = handler.Surrogate;
+            var handled   = surrogate != null && Implied(surrogate, false, composer);
+            if (!handled || greedy)
+                handled = Implied(handler, false, composer) || handled;
+            if (handled && !greedy) return true;
+            return HandlerMetadata.Dispatch(typeof(ProvidesAttribute),
+                handler, this, greedy, composer) || handled;
+        }
+
+        private bool Implied(object item, bool invariant, IHandler composer)
         {
             var type = Key as Type;
             if (type == null) return false;
@@ -61,23 +77,6 @@ namespace Miruken.Callback
                            : type.IsInstanceOfType(item);
 
             return compatible && Resolve(item, composer);
-        }
-
-        protected virtual bool IsSatisfied(object resolution, IHandler composer)
-        {
-            return true;
-        }
-
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
-        {
-            // Try implicit resolution
-            var surrogate = handler.Surrogate;
-            var handled   = surrogate != null && TryResolve(surrogate, false, composer);
-            if (!handled || greedy)
-                handled = TryResolve(handler, false, composer) || handled;
-            if (handled && !greedy) return true;
-            return HandlerMetadata.Dispatch(typeof(ProvidesAttribute),
-                handler, this, greedy, composer) || handled;
         }
     }
 }
