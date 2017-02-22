@@ -5,13 +5,11 @@ namespace Miruken
 {
     using System;
 
-    public interface IDuck
-    {
-    }
+    public interface IProtocol {}
 
-    public interface IStrict
-    {
-    }
+    public interface IDuck : IProtocol {}
+
+    public interface IStrict : IProtocol {}
 
     public interface IProtocolAdapter
     {

@@ -65,7 +65,7 @@
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
     <Compile Include="Callback\ICallback.cs" />
-    <Compile Include="Callback\IDispatchCallback.cs" />
+    <Compile Include="Callback\ICallbackDispatch.cs" />
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Callback\ResolveMethod.cs" />

@@ -36,7 +36,7 @@
                 if (callback == null) return false;
             }
 
-            var dispatch = callback as IDispatchCallback;
+            var dispatch = callback as ICallbackDispatch;
             if (dispatch != null)
                 return dispatch.Dispatch(this, greedy, composer);
 

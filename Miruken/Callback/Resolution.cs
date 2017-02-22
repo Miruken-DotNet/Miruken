@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Miruken.Callback
 {
-    public class Resolution : IDispatchCallback
+    public class Resolution : ICallback, ICallbackDispatch
     {
         private readonly List<object> _resolutions;
         private object _result;
@@ -56,7 +56,7 @@ namespace Miruken.Callback
             return true;
         }
 
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled   = surrogate != null && Implied(surrogate, false, composer);

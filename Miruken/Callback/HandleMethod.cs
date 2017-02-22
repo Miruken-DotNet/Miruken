@@ -6,7 +6,7 @@
     using Concurrency;
     using Infrastructure;
 
-    public class HandleMethod : IDispatchCallback
+    public class HandleMethod : ICallback, ICallbackDispatch
     {
         private readonly MethodInfo _method;
         private readonly object[] _args;
@@ -70,7 +70,7 @@
             }
         }
 
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled = surrogate != null && InvokeOn(surrogate, composer);
