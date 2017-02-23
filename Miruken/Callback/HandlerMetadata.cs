@@ -158,25 +158,7 @@ namespace Miruken.Callback
             return true;
         }
 
-        protected bool SatisfiesInvariantOrContravariant(object callback)
-        {
-            var callbackType = callback.GetType();
-            return (Invariant && (CallbackType == callbackType)) ||
-                   CallbackType.IsInstanceOfType(callback) ||
-                   SatisfiesGenericDef(callback.GetType());
-        }
-
-        protected bool SatisfiesCovariant(Type type)
-        {
-            if (type == null) return false;
-            var callbackType = CallbackType;
-            return callbackType == null || 
-                (callbackType.IsGenericType && callbackType.ContainsGenericParameters
-                    ? SatisfiesGenericDef(type)
-                    : type.IsAssignableFrom(callbackType));
-        }
-
-        private bool SatisfiesGenericDef(Type callbackType)
+        protected bool SatisfiesGenericDef(Type callbackType)
         {
             return _genericCallbackTypeDef != null && callbackType.IsGenericType &&
                    _genericCallbackTypeDef == callbackType.GetGenericTypeDefinition();
@@ -217,6 +199,14 @@ namespace Miruken.Callback
 
     public abstract class ContravariantDefinition : DefinitionAttribute
     {
+        protected bool SatisfiesInvariantOrContravariant(object callback)
+        {
+            var callbackType = callback.GetType();
+            return (Invariant && (CallbackType == callbackType)) ||
+                   CallbackType.IsInstanceOfType(callback) ||
+                   SatisfiesGenericDef(callback.GetType());
+        }
+
         public override int CompareTo(DefinitionAttribute other)
         {
             var otherHandler = other as ContravariantDefinition;
@@ -231,6 +221,16 @@ namespace Miruken.Callback
 
     public abstract class CovariantDefinition : DefinitionAttribute
     {
+        protected bool SatisfiesCovariant(Type type)
+        {
+            if (type == null) return false;
+            var callbackType = CallbackType;
+            return callbackType == null ||
+                (callbackType.IsGenericType && callbackType.ContainsGenericParameters
+                    ? SatisfiesGenericDef(type)
+                    : type.IsAssignableFrom(callbackType));
+        }
+
         public override int CompareTo(DefinitionAttribute other)
         {
             var otherProvider = other as CovariantDefinition;
@@ -358,18 +358,19 @@ namespace Miruken.Callback
         protected override bool Configure(MethodInfo method)
         {
             var keyType      = Key as Type;
+            var callbackType = keyType;
             var returnType   = method.ReturnType;
-            var callbackType = returnType;
-            if (callbackType.IsArray)
-                callbackType = returnType.GetElementType();
-            if (keyType != null)
-            {
-                if (!callbackType.IsAssignableFrom(keyType))
-                    return false;
-                callbackType = keyType;
-            }
-
             _isVoid = returnType == typeof(void);
+
+            if (!_isVoid)
+            {
+                if (returnType.IsArray)
+                    returnType = returnType.GetElementType();
+                if (keyType == null)
+                    callbackType = returnType;
+                else if (!returnType.IsAssignableFrom(keyType))
+                    return false;
+            }
 
             var parameters = method.GetParameters();
 
@@ -385,19 +386,18 @@ namespace Miruken.Callback
                     if (typeof (Resolution).IsAssignableFrom(parameters[0].ParameterType))
                         _passResolution = true;
                     else if (!_isVoid && typeof (IHandler).IsAssignableFrom(parameters[0].ParameterType))
-                    {
                         _passComposer = true;
-                        ConfigureCallbackType(method, callbackType);
-                    }
                     else
                         return false;
                     break;
                 default:
-                    if (_isVoid || parameters.Length != 0 ||
-                        !ConfigureCallbackType(method, callbackType))
+                    if (_isVoid || parameters.Length != 0)
                         return false;
                     break;
             }
+
+            if (callbackType != null && !ConfigureCallbackType(method, callbackType))
+                return false;
 
             if (!method.ContainsGenericParameters)
             {
@@ -425,8 +425,7 @@ namespace Miruken.Callback
             object handler, object callback, IHandler composer)
         {
             var resolution = callback as Resolution;
-            if (resolution == null)
-                return false;
+            if (resolution == null) return false;
 
             var typeKey = resolution.Key as Type;
             if (!SatisfiesCovariant(typeKey))
