@@ -252,7 +252,16 @@ namespace Miruken.Callback
         private bool _passComposer;
         private Delegate _delegate;
 
-        public object Key { get; set; }
+        public HandlesAttribute()
+        {         
+        }
+
+        public HandlesAttribute(object key)
+        {
+            Key = key;
+        }
+
+        public object Key { get; }
 
         protected override bool Configure(MethodInfo method)
         {
@@ -335,7 +344,16 @@ namespace Miruken.Callback
         private bool _isVoid;
         private Delegate _delegate;
 
-        public object Key { get; set; }
+        public ProvidesAttribute()
+        {          
+        }
+
+        public ProvidesAttribute(object key)
+        {
+            Key = key;
+        }
+
+        public object Key { get; }
 
         protected override bool Configure(MethodInfo method)
         {

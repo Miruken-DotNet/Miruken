@@ -482,26 +482,26 @@
 
         private class SpecialHandler : Handler
         {
-            [Handles(Key = typeof(Foo))]
+            [Handles(typeof(Foo))]
             public void HandleFooKey(object cb)
             {
                 var foo = (Foo)cb;
                 ++foo.Handled;
             }
 
-            [Handles(Key = typeof(Foo))]
+            [Handles(typeof(Foo))]
             public void HandleFooKeyReject(Bar cb)
             {
                 throw new InvalidOperationException();
             }
 
-            [Provides(Key = typeof(Boo))]
+            [Provides(typeof(Boo))]
             public object ProvideBooKey(IHandler composer)
             {
                 return new Boo { HasComposer = true };
             }
 
-            [Provides(Key = typeof(Boo))]
+            [Provides(typeof(Boo))]
             public Foo ProvideBooKeyReject(IHandler composer)
             {
                 return new Foo();
@@ -517,7 +517,7 @@
                 };
             }
 
-            [Provides(Key = typeof(Bee))]
+            [Provides(typeof(Bee))]
             public object ProvideManyBeeWithKey()
             {
                 return new[]
@@ -526,8 +526,8 @@
                 };
             }
 
-            [Provides(Key = typeof(Baz<int>)),
-             Provides(Key = typeof(Baz<string>))]
+            [Provides(typeof(Baz<int>)),
+             Provides(typeof(Baz<string>))]
             public object ProvideManyKeys(Resolution resolution)
             {
                 if (Equals(resolution.Key, typeof(Baz<int>)))
