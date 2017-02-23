@@ -11,6 +11,7 @@ namespace Miruken.Tests
         {
             public object Arg1 { get; set; }
             public object Arg2 { get; set; }
+            public object Arg3 { get; set; }
 
             public void Handle()
             {
@@ -25,6 +26,13 @@ namespace Miruken.Tests
             {
                 Arg1 = arg1;
                 Arg2 = arg2;
+            }
+
+            public void HandleThree(bool arg1, DateTime arg2, int arg3)
+            {
+                Arg1 = arg1;
+                Arg2 = arg2;
+                Arg3 = arg3;
             }
         }
 
@@ -43,6 +51,11 @@ namespace Miruken.Tests
             public DateTime ProvideTwo(int arg1, DateTime arg2)
             {
                 return arg2.AddDays(arg1);
+            }
+
+            public double ProvideThree(int arg1, float arg2, bool arg3)
+            {
+                return (arg1 + arg2) * (arg3 ? -1 : 1);
             }
 
             public void ProvideVoid()
@@ -98,6 +111,18 @@ namespace Miruken.Tests
             Assert.AreEqual(new DateTime(2007, 6, 14), handler.Arg2);
         }
 
+        [TestMethod]
+        public void Should_Create_Triple_Arg_Action()
+        {
+            var call = RuntimeHelper.CreateActionThreeArgs(
+                typeof(Handler).GetMethod("HandleThree"));
+            var handler = new Handler();
+            call(handler, false, new DateTime(2007, 6, 14), 22);
+            Assert.AreEqual(false, handler.Arg1);
+            Assert.AreEqual(new DateTime(2007, 6, 14), handler.Arg2);
+            Assert.AreEqual(22, handler.Arg3);
+        }
+
         [TestMethod, ExpectedException(typeof(ArgumentException),
              "Method HandlerTwo expects 2 argument(s)")]
         public void Should_Fail_If_Action_Arg_Mismatch()
@@ -140,6 +165,15 @@ namespace Miruken.Tests
             var provider = new Provider();
             Assert.AreEqual(new DateTime(2003, 4, 9),
                 call(provider, 2, new DateTime(2003, 4, 7)));
+        }
+
+        [TestMethod]
+        public void Should_Create_Three_Args_Function()
+        {
+            var call = RuntimeHelper.CreateFuncThreeArgs(
+                typeof(Provider).GetMethod("ProvideThree"));
+            var provider = new Provider();
+            Assert.AreEqual(-5.5, call(provider, 2, 3.5f, true));
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException),
