@@ -272,7 +272,10 @@ namespace Miruken.Callback
             else if (returnType != typeof (void))
                 return false;
 
-            if (!ConfigureCallbackType(method, Key as Type ?? parameters[0].ParameterType))
+            var keyType      = Key as Type;
+            var callbackType = parameters[0].ParameterType;
+            if ((keyType != null && !callbackType.IsAssignableFrom(keyType)) ||
+                !ConfigureCallbackType(method, keyType ?? callbackType))
                 return false;
 
             if (!method.ContainsGenericParameters)
@@ -336,13 +339,21 @@ namespace Miruken.Callback
 
         protected override bool Configure(MethodInfo method)
         {
+            var keyType      = Key as Type;
             var returnType   = method.ReturnType;
-            var parameters   = method.GetParameters();
-            var callbackType = Key as Type ?? returnType;
+            var callbackType = returnType;
             if (callbackType.IsArray)
-                callbackType = callbackType.GetElementType();
+                callbackType = returnType.GetElementType();
+            if (keyType != null)
+            {
+                if (!callbackType.IsAssignableFrom(keyType))
+                    return false;
+                callbackType = keyType;
+            }
 
             _isVoid = returnType == typeof(void);
+
+            var parameters = method.GetParameters();
 
             switch (parameters.Length)
             {

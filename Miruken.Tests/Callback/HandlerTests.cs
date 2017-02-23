@@ -75,6 +75,15 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Callbacks_With_Keys()
+        {
+            var foo     = new Foo();
+            var handler = new SpecialHandler();
+            Assert.IsTrue(handler.Handle(foo, true));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
         public void Should_Indicate_Not_Provided()
         {
             var handler = new CustomHandler();
@@ -473,10 +482,29 @@
 
         private class SpecialHandler : Handler
         {
+            [Handles(Key = typeof(Foo))]
+            public void HandleFooKey(object cb)
+            {
+                var foo = (Foo)cb;
+                ++foo.Handled;
+            }
+
+            [Handles(Key = typeof(Foo))]
+            public void HandleFooKeyReject(Bar cb)
+            {
+                throw new InvalidOperationException();
+            }
+
             [Provides(Key = typeof(Boo))]
             public object ProvideBooKey(IHandler composer)
             {
                 return new Boo { HasComposer = true };
+            }
+
+            [Provides(Key = typeof(Boo))]
+            public Foo ProvideBooKeyReject(IHandler composer)
+            {
+                return new Foo();
             }
 
             [Provides]
