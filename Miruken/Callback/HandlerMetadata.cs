@@ -221,14 +221,24 @@ namespace Miruken.Callback
 
     public abstract class CovariantDefinition : DefinitionAttribute
     {
-        protected bool SatisfiesCovariant(Type type)
+        protected bool SatisfiesCovariantType(Type type)
         {
             if (type == null) return false;
             var callbackType = CallbackType;
-            return callbackType == null ||
+            return callbackType == null || callbackType == typeof(object) ||
                 (callbackType.IsGenericType && callbackType.ContainsGenericParameters
                     ? SatisfiesGenericDef(type)
                     : type.IsAssignableFrom(callbackType));
+        }
+
+        protected bool SatisfiesCovariant(object instance)
+        {
+            var type = instance.GetType();
+            var callbackType = CallbackType;
+            if (callbackType == null) return true;
+            return Invariant ? callbackType == type
+                 : callbackType.IsInstanceOfType(instance) 
+                || SatisfiesGenericDef(type);
         }
 
         public override int CompareTo(DefinitionAttribute other)
@@ -428,7 +438,7 @@ namespace Miruken.Callback
             if (resolution == null) return false;
 
             var typeKey = resolution.Key as Type;
-            if (!SatisfiesCovariant(typeKey))
+            if (!SatisfiesCovariantType(typeKey))
                 return false;
 
             object result   = null;
@@ -474,7 +484,7 @@ namespace Miruken.Callback
                     var resolved = false;
                     foreach (var item in array)
                     {
-                        resolved = IsSatisfied(item) &&
+                        resolved = SatisfiesCovariant(item) &&
                                    resolution.Resolve(item, composer)
                                 || resolved;
                         if (resolved && !resolution.Many)
@@ -482,16 +492,11 @@ namespace Miruken.Callback
                     }
                     return resolved;
                 }
-                return IsSatisfied(result) &&
+                return SatisfiesCovariant(result) &&
                     resolution.Resolve(result, composer);
             }
 
             return resolutions.Count > count;
-        }
-
-        private bool IsSatisfied(object result)
-        {
-            return !Invariant || CallbackType == null || (CallbackType == result.GetType());
         }
     }
 
