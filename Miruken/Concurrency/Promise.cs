@@ -1,10 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-
-namespace Miruken.Concurrency
+﻿namespace Miruken.Concurrency
 {
+    using System;
+    using System.Linq;
+    using System.Reflection;
+    using System.Runtime.ExceptionServices;
+    using System.Threading;
+
     public enum PromiseState
     {
         Pending,
@@ -85,7 +86,8 @@ namespace Miruken.Concurrency
         {
             return Then(null, fail != null ? (ex, s) => {
                 var tex = ex as E;
-                if (tex == null) throw ex;
+                if (tex == null)
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                 fail((E)ex, s);
             } : (RejectCallback)null);
         }
@@ -105,7 +107,8 @@ namespace Miruken.Concurrency
         {
             return Then(null, fail != null ? (ex, s) => {
                 var tex = ex as E;
-                if (tex == null) throw ex;
+                if (tex == null)
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                 return fail((E) ex, s);                 
             } : (RejectCallback<R>)null);
         }
@@ -623,7 +626,8 @@ namespace Miruken.Concurrency
             return Then(null, fail != null ? (ex, s) =>
             {
                 var tex = ex as E;
-                if (tex == null) throw ex;
+                if (tex == null)
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                 fail((E)ex, s);
             } : (RejectCallback)null);
         }
@@ -639,7 +643,8 @@ namespace Miruken.Concurrency
             return Then(null, fail != null ? (ex, s) =>
             {
                 var tex = ex as E;
-                if (tex == null) throw ex;
+                if (tex == null)
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                 return fail((E)ex, s);
             } : (RejectCallback<Promise<R>>)null);
         }

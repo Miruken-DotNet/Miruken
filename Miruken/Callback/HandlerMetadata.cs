@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using Miruken.Infrastructure;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using System.Reflection;
+
     public static class HandlerMetadata
     {
         private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
@@ -121,8 +120,7 @@ namespace Miruken.Callback
 
     [AttributeUsage(AttributeTargets.Method,
          AllowMultiple = true, Inherited = false)]
-    public abstract class DefinitionAttribute 
-        : Attribute, IComparable<DefinitionAttribute>
+    public abstract class DefinitionAttribute : Attribute, IComparable<DefinitionAttribute>
     {
         private int[] _typeMapping;
         private Type _genericCallbackTypeDef;

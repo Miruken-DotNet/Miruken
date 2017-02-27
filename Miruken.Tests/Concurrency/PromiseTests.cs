@@ -8,12 +8,41 @@ using Miruken.Infrastructure;
 
 namespace Miruken.Tests.Concurrency
 {
+    using System.Runtime.ExceptionServices;
+
     /// <summary>
     /// Summary description for PromiseTests
     /// </summary>
     [TestClass]
     public class PromiseTests
     {
+        public void Foo()
+        {
+            throw new InvalidOperationException("Something bad");    
+        }
+
+        [TestMethod]
+        public void TestName()
+        {
+            try
+            {
+                try
+                {
+                    Foo();
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                    //throw new ArgumentException("Dude", ex);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }  
+        }
+
         [TestMethod]
         public void Should_Start_Out_In_Pending_State()
         {
