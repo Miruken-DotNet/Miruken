@@ -86,9 +86,9 @@
         {
             return Then(null, fail != null ? (ex, s) => {
                 var tex = ex as E;
-                if (tex == null)
+                if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
-                fail((E)ex, s);
+                fail(tex, s);
             } : (RejectCallback)null);
         }
 
@@ -107,9 +107,9 @@
         {
             return Then(null, fail != null ? (ex, s) => {
                 var tex = ex as E;
-                if (tex == null)
+                if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
-                return fail((E) ex, s);                 
+                return fail(tex, s);                 
             } : (RejectCallback<R>)null);
         }
 
@@ -626,9 +626,9 @@
             return Then(null, fail != null ? (ex, s) =>
             {
                 var tex = ex as E;
-                if (tex == null)
+                if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
-                fail((E)ex, s);
+                fail(tex, s);
             } : (RejectCallback)null);
         }
 
@@ -643,9 +643,9 @@
             return Then(null, fail != null ? (ex, s) =>
             {
                 var tex = ex as E;
-                if (tex == null)
+                if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
-                return fail((E)ex, s);
+                return fail(tex, s);
             } : (RejectCallback<Promise<R>>)null);
         }
 
