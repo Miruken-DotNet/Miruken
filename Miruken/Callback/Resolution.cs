@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Miruken.Callback
 {
+    using Policy;
+
     public class Resolution : ICallback, ICallbackDispatch
     {
         private readonly List<object> _resolutions;

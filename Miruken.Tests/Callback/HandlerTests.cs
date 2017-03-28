@@ -75,6 +75,17 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Callbacks_Genericly_Mapped()
+        {
+            var baz     = new Baz<int,float>(22,15.5f);
+            var handler = new CustomHandler();
+            Assert.IsTrue(handler.Handle(baz));
+            Assert.AreEqual(0, baz.Stuff);
+            Assert.AreEqual(0, baz.OtherStuff);
+            Assert.IsFalse(handler.Handle(new Baz<char,float>('M',2)));
+        }
+
+        [TestMethod]
         public void Should_Handle_Callbacks_With_Keys()
         {
             var foo     = new Foo();
@@ -390,9 +401,12 @@
 
         private class Baz<T,R> : Baz<T>
         {
-            public Baz(T stuff) : base(stuff)
-            {               
+            public Baz(T stuff, R otherStuff) : base(stuff)
+            {
+                OtherStuff = otherStuff;
             }
+
+            public R OtherStuff { get; set; }
         }
 
         private class Bee
@@ -429,6 +443,16 @@
                 if (typeof (T) == typeof (char)) 
                     return false;
                 baz.Stuff = default(T);
+                return true;
+            }
+
+            [Handles]
+            public bool HandlesGenericBazMapping<R,T>(Baz<T,R> baz)
+            {
+                if (typeof(T) == typeof(char))
+                    return false;
+                baz.Stuff      = default(T);
+                baz.OtherStuff = default(R);
                 return true;
             }
 
@@ -469,7 +493,7 @@
             [Provides]
             public Baz<T,R> ProvidesBazMapped<R,T>()
             {
-                return new Baz<T,R>(default(T));
+                return new Baz<T,R>(default(T), default(R));
             }
 
             [Provides]
@@ -489,22 +513,10 @@
                 ++foo.Handled;
             }
 
-            [Handles(typeof(Foo))]
-            public void HandleFooKeyReject(Bar cb)
-            {
-                throw new InvalidOperationException();
-            }
-
             [Provides(typeof(Boo))]
             public object ProvideBooKey(IHandler composer)
             {
                 return new Boo { HasComposer = true };
-            }
-
-            [Provides(typeof(Boo))]
-            public Foo ProvideBooKeyReject(IHandler composer)
-            {
-                return new Foo();
             }
 
             [Provides]

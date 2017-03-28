@@ -1075,10 +1075,11 @@ namespace Miruken.Tests.Concurrency
                 .Catch<TimeoutException>((ex, s) => {
                     called = true;
                 });
-            if (cancelled.AsyncWaitHandle.WaitOne(5.Sec()))
+            if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
             {
                 Assert.IsTrue(called);
                 Assert.AreEqual(PromiseState.Cancelled, promise.State);
+                Assert.AreEqual(PromiseState.Fulfilled, cancelled.State);
             }
             else
                 Assert.Fail("Operation timed out");

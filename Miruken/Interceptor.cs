@@ -1,11 +1,11 @@
-﻿using System;
-using System.Reflection;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Messaging;
-using System.Runtime.Remoting.Proxies;
-
-namespace Miruken
+﻿namespace Miruken
 {
+    using System;
+    using System.Reflection;
+    using System.Runtime.Remoting;
+    using System.Runtime.Remoting.Messaging;
+    using System.Runtime.Remoting.Proxies;
+
     public class Interceptor : RealProxy, IRemotingTypeInfo
     {
         private readonly IProtocolAdapter _adapter;

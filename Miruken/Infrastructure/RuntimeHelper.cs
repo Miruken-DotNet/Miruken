@@ -8,6 +8,7 @@
     using System.Reflection;
     using System.Text;
 
+    public delegate void   NoArgsDelegate(object instance);
     public delegate void   OneArgDelegate(object instance, object arg);
     public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
     public delegate void   ThreeArgsDelegate(object instance, object arg1, object arg2, object arg3);
@@ -94,6 +95,26 @@
 
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
+
+        public static NoArgsDelegate CreateActionNoArgs(MethodInfo method)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            var target = method.ReflectedType;
+            if (target == null || method.IsStatic)
+                throw new NotSupportedException("Only instance methods supported");
+            var parameters = method.GetParameters();
+            if (parameters.Length != 0)
+                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
+            var instance = Expression.Parameter(typeof(object), "instance");
+            var methodCall = Expression.Call(
+                Expression.Convert(instance, target),
+                method
+                );
+            return Expression.Lambda<NoArgsDelegate>(
+                methodCall, instance
+                ).Compile();
+        }
 
         public static OneArgDelegate CreateActionOneArg(MethodInfo method)
         {

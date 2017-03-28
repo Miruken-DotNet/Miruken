@@ -3,8 +3,9 @@
     using System;
     using System.Reflection;
     using Infrastructure;
+    using Policy;
 
-    public class ProvidesAttribute : CovariantDefinition
+    public class ProvidesAttribute : CovariantAttribute
     {
         private bool _passResolution;
         private bool _passComposer;
@@ -20,9 +21,7 @@
             Key = key;
         }
 
-        public object Key { get; }
-
-        protected override bool Configure(MethodInfo method)
+        protected override void Match(MethodInfo method)
         {
             var keyType = Key as Type;
             var callbackType = keyType;
@@ -36,7 +35,8 @@
                 if (keyType == null)
                     callbackType = returnType;
                 else if (!returnType.IsAssignableFrom(keyType))
-                    return false;
+                    throw new InvalidOperationException(
+                        $"{method.Name} return type does not satisify constraint {keyType.FullName}");
             }
 
             var parameters = method.GetParameters();
@@ -46,7 +46,8 @@
                 case 2:
                     if (!typeof(Resolution).IsAssignableFrom(parameters[0].ParameterType) ||
                         !typeof(IHandler).IsAssignableFrom(parameters[1].ParameterType))
-                        return false;
+                        throw new NotSupportedException(
+                            $"{method.Name}: arguments must be {typeof(Resolution).Name} and {typeof(IHandler).Name}");
                     _passComposer = _passResolution = true;
                     break;
                 case 1:
@@ -55,16 +56,17 @@
                     else if (!_isVoid && typeof(IHandler).IsAssignableFrom(parameters[0].ParameterType))
                         _passComposer = true;
                     else
-                        return false;
+                        throw new NotSupportedException(
+                            $"{method.Name}: arguments must be {typeof(Resolution).Name} or {typeof(IHandler).Name}");
                     break;
                 default:
                     if (_isVoid || parameters.Length != 0)
-                        return false;
+                        throw new NotSupportedException($"{method.Name}: cannot be void");
                     break;
             }
 
             if (callbackType != null && !ConfigureCallbackType(method, callbackType))
-                return false;
+                throw new NotSupportedException($"{method.Name}: not supported");
 
             if (!method.ContainsGenericParameters)
             {
@@ -84,18 +86,20 @@
                               ? RuntimeHelper.CreateFuncOneArg(method)
                               : (Delegate)RuntimeHelper.CreateFuncNoArgs(method);
             }
-
-            return true;
         }
 
-        protected internal override bool Dispatch(
-            object handler, object callback, IHandler composer)
+        protected override object[] ResolveArgs(object callback, IHandler composer)
+        {
+            return null;
+        }
+
+        public  override bool Dispatch(object handler, object callback, IHandler composer)
         {
             var resolution = callback as Resolution;
             if (resolution == null) return false;
 
             var typeKey = resolution.Key as Type;
-            if (!SatisfiesCovariantType(typeKey))
+            if (!IsCovariantType(typeKey))
                 return false;
 
             object result = null;
@@ -130,7 +134,7 @@
                                : _passResolution ? new[] { callback }
                                : _passComposer ? new[] { composer }
                                : null;
-                result = InvokeMethod(handler, typeKey, parameters);
+                result = InvokeLate(handler, parameters, typeKey);
             }
 
             if (result != null)
