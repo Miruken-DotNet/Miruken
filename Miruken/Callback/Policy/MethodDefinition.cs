@@ -249,9 +249,13 @@
 
         public override bool Dispatch(object target, object callback, IHandler composer)
         {
-            if (!Accepts(callback, composer)) return false;
-            return Attribute.Validate(callback, composer,
-                () => Invoke(target, callback, composer));
+            return Accepts(callback, composer) && Verify(target, callback, composer);
+        }
+
+        protected virtual bool Verify(object target, object callback, IHandler composer)
+        {
+            Invoke(target, callback, composer);
+            return true;
         }
 
         protected virtual object Invoke(object target, object callback,

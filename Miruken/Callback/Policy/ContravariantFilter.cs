@@ -8,7 +8,7 @@
         private readonly bool _invariant;
         private readonly Type _genericConstraint;
 
-        public ContravariantFilter(Type constraint, bool invariant)
+        public ContravariantFilter(Type constraint, bool invariant = false)
         {
             if (constraint == null)
                 throw new ArgumentNullException(nameof(constraint));

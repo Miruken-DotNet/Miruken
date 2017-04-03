@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Callback
 {
-    using System;
     using System.Reflection;
     using Policy;
 
@@ -20,19 +19,30 @@
             return Policy.Match(method, this);
         }
 
-        public override bool Validate(
-            object callback, IHandler composer, Func<object> dispatch)
-        {
-            var result = dispatch();
-            return result == null || true.Equals(result);
-        }
-
         static HandlesAttribute()
         {
             Policy = ContravariantPolicy.For<HandlesAttribute>(
                 x => x.MatchMethod(x.Callback)
                       .MatchMethod(x.Callback, x.Composer)
+                      .Create((m,r,a) => new HandlesMethod(m,r,a))
             );
+        }
+
+        private class HandlesMethod : ContravariantMethod<HandlesAttribute>
+        {
+            public HandlesMethod(
+                MethodInfo method, MethodRule<HandlesAttribute> rule,
+                HandlesAttribute attribute)
+                : base(method, rule, attribute)
+            {                  
+            }
+
+            protected override bool Verify(object target, object callback, 
+                                            IHandler composer)
+            {
+                var result = Invoke(target, callback, composer);
+                return result == null || true.Equals(result);
+            }
         }
 
         private static readonly ContravariantPolicy<HandlesAttribute> Policy;

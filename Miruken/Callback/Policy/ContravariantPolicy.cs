@@ -7,6 +7,7 @@
 
     public static class ContravariantPolicy
     {
+
         public static ContravariantPolicy<Attrib> For<Attrib>(
             Action<ContravariantPolicyBuilder<Attrib>> configure)
             where Attrib : DefinitionAttribute
@@ -47,15 +48,24 @@
     public class ContravariantPolicy<Attrib> : Policy<Attrib>
         where Attrib : DefinitionAttribute
     {
+        public Func<MethodInfo, MethodRule<Attrib>, Attrib,
+               ContravariantMethod<Attrib>> Creator { get; set; }
+
         protected override MethodDefinition<Attrib> Match(
             MethodInfo method, Attrib attribute,
             IEnumerable<MethodRule<Attrib>> rules)
         {
             return rules.Select(rule => {
-                var candidate = new ContravariantMethod<Attrib>(method, rule, attribute);
+                var candidate = Creator?.Invoke(method, rule, attribute)
+                    ?? new ContravariantMethod<Attrib>(method, rule, attribute);
                 return rule.Matches(candidate) ? candidate : null;
-                })
-                .FirstOrDefault(definition => definition != null);
+                }).FirstOrDefault(definition => definition != null);
+        }
+
+        protected virtual ContravariantMethod<Attrib> CreateMethod(
+            MethodInfo method, MethodRule<Attrib> rule, Attrib attribute)
+        {
+            return new ContravariantMethod<Attrib>(method, rule, attribute);
         }
     }
 
@@ -89,10 +99,17 @@
             Policy.AddMethod(new MethodRule<Attrib>(ReturnsBoolOrVoid<Attrib>.Instance, args));
             return this;
         }
+
+        public ContravariantPolicyBuilder<Attrib> Create(
+            Func<MethodInfo, MethodRule<Attrib>, Attrib,
+                ContravariantMethod<Attrib>> creator)
+        {
+            Policy.Creator = creator;
+            return this;
+        }
     }
 
-    public class ContravariantPolicyBuilder<Attrib, Cb> 
-        : ContravariantPolicyBuilder<Attrib>
+    public class ContravariantPolicyBuilder<Attrib, Cb> : ContravariantPolicyBuilder<Attrib>
         where Attrib : DefinitionAttribute
     {
         public ContravariantPolicyBuilder(ContravariantPolicy<Attrib, Cb> policy)
