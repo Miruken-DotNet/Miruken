@@ -1,4 +1,4 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback
 {
     using System;
     using System.Collections.Concurrent;

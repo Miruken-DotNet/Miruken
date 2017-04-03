@@ -1,7 +1,6 @@
 namespace Miruken.Callback.Policy
 {
     using System.Linq;
-    using System.Reflection;
 
     public class MethodRule<Attrib>
         where Attrib : DefinitionAttribute
@@ -20,23 +19,21 @@ namespace Miruken.Callback.Policy
             _args        = args;
         }
 
-        public bool Matches(Attrib definition, MethodInfo method)
+        public bool Matches(MethodDefinition<Attrib> method)
         {
-            if (_returnValue != null &&
-                !_returnValue.Matches(definition, method.ReturnType))
+            if (_returnValue != null && !_returnValue.Matches(method))
                 return false;
 
-            var parameters = method.GetParameters();
+            var parameters = method.Method.GetParameters();
             return _args.Length == parameters.Length &&
-                   _args.Zip(parameters, (arg, param) => arg.Matches(definition, param))
+                   _args.Zip(parameters, (arg, param) => arg.Matches(method, param))
                         .All(m => m);
         }
 
-        public object[] ResolveArgs(Attrib definition, object callback, IHandler handler)
+        public object[] ResolveArgs(object callback, IHandler handler)
         {
-            return _args
-                .Select(arg => arg.Resolve(definition, callback, handler))
-                .ToArray();
+            return _args.Select(arg => arg.Resolve(callback, handler))
+                        .ToArray();
         }
     }
 }

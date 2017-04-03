@@ -1,12 +1,13 @@
-namespace Miruken.Callback.Policy
+namespace Miruken.Callback
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Policy;
 
     public class HandlerDescriptor
     {
-        private readonly Dictionary<Type, List<DefinitionAttribute>> _definitions;
+        private readonly Dictionary<Type, List<MethodDefinition>> _definitions;
 
         public HandlerDescriptor(IReflect type)
         {
@@ -16,21 +17,21 @@ namespace Miruken.Callback.Policy
                     method.DeclaringType == typeof (object))
                     continue;
 
-                var definitions = (DefinitionAttribute[])
-                    Attribute.GetCustomAttributes(method, typeof (DefinitionAttribute));
+                var attributes = (DefinitionAttribute[])
+                    Attribute.GetCustomAttributes(method, typeof(DefinitionAttribute));
 
-                foreach (var definition in definitions)
+                foreach (var attribute in attributes)
                 {
-                    definition.Init(method);
+                    var definition = attribute.Accept(method);
 
                     if (_definitions == null)
-                        _definitions = new Dictionary<Type, List<DefinitionAttribute>>();
+                        _definitions = new Dictionary<Type, List<MethodDefinition>>();
 
-                    List<DefinitionAttribute> members;
-                    var definitionType = definition.GetType();
+                    List<MethodDefinition> members;
+                    var definitionType = attribute.GetType();
                     if (!_definitions.TryGetValue(definitionType, out members))
                     {
-                        members = new List<DefinitionAttribute>();
+                        members = new List<MethodDefinition>();
                         _definitions.Add(definitionType, members);
                     }
 
@@ -54,7 +55,7 @@ namespace Miruken.Callback.Policy
         {
             if (callback == null) return false;
 
-            List<DefinitionAttribute> definitions;
+            List<MethodDefinition> definitions;
             if (_definitions == null ||
                 !_definitions.TryGetValue(type, out definitions))
                 return false;

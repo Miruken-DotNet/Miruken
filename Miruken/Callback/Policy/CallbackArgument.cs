@@ -13,10 +13,11 @@ namespace Miruken.Callback.Policy
         {           
         }
 
-        public override bool Matches(Attrib definition, ParameterInfo parameter)
+        public override bool Matches(
+            MethodDefinition<Attrib> method, ParameterInfo parameter)
         {
             Type varianceType;
-            var restrict  = definition.Key as Type;
+            var restrict  = method.Attribute.Key as Type;
             var paramType = parameter.ParameterType;
             if (restrict == null || restrict.IsAssignableFrom(paramType))
                 varianceType = paramType;                
@@ -25,12 +26,13 @@ namespace Miruken.Callback.Policy
             else
                 throw new InvalidOperationException(
                     $"Key {restrict.FullName} is not related to {paramType.FullName}");
-            definition.VarianceType = varianceType;     
-            definition.AddFilters(CreateTypeFilter(definition, varianceType));
+            method.VarianceType = varianceType;     
+            method.AddFilters(new ContravariantFilter(
+                varianceType, method.Attribute.Invariant));
             return true;
         }
 
-        public override object Resolve(Attrib definition, object callback, IHandler composer)
+        public override object Resolve(object callback, IHandler composer)
         {
             return callback;
         }
@@ -46,19 +48,14 @@ namespace Miruken.Callback.Policy
         {         
         }
 
-        public override bool Matches(Attrib definition, ParameterInfo parameter)
+        public override bool Matches(
+            MethodDefinition<Attrib> method, ParameterInfo parameter)
         {
             var paramType = parameter.ParameterType;
-            if (typeof(Cb).IsAssignableFrom(paramType))
-            {
-                definition.VarianceType = typeof(Cb);
-                definition.AddFilters(CreateTypeFilter(definition, typeof(Cb)));
-                return true;
-            }
-            return false;
+            return typeof(Cb).IsAssignableFrom(paramType);
         }
 
-        public override object Resolve(Attrib definition, object callback, IHandler composer)
+        public override object Resolve(object callback, IHandler composer)
         {
             return callback;
         }

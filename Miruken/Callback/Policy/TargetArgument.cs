@@ -15,10 +15,11 @@ namespace Miruken.Callback.Policy
             _target = target;
         }
 
-        public override bool Matches(Attrib definition, ParameterInfo parameter)
+        public override bool Matches(
+            MethodDefinition<Attrib> method, ParameterInfo parameter)
         {
             Type varianceType;
-            var restrict  = definition.Key as Type;
+            var restrict  = method.Attribute.Key as Type;
             var paramType = parameter.ParameterType;
             if (restrict == null || restrict.IsAssignableFrom(paramType))
                 varianceType = paramType;
@@ -27,13 +28,13 @@ namespace Miruken.Callback.Policy
             else
                 throw new InvalidOperationException(
                     $"Key {restrict.FullName} is not related to {paramType.FullName}");
-            definition.VarianceType = varianceType;
-            definition.AddFilters(CreateTypeFilter(definition, typeof(Cb)),
-                CreateTypeFilter(definition, varianceType, cb => _target((Cb)cb)));
+            method.VarianceType = varianceType;
+            method.AddFilters(new ContravariantFilter<Cb>(
+                varianceType, method.Attribute.Invariant, _target));
             return true;
         }
 
-        public override object Resolve(Attrib definition, object callback, IHandler composer)
+        public override object Resolve(object callback, IHandler composer)
         {
             return _target((Cb)callback);
         }

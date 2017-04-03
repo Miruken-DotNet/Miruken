@@ -4,10 +4,8 @@
     using System.Reflection;
     using Policy;
 
-    public class HandlesAttribute : ContravariantAttribute
+    public class HandlesAttribute : DefinitionAttribute
     {
-        private MethodRule<HandlesAttribute> _methodRule;
-
         public HandlesAttribute()
         {
         }
@@ -17,21 +15,15 @@
             Key = key;
         }
 
-        protected override void Match(MethodInfo method)
-        {
-            _methodRule = Policy.Match(this, method);
-            if (_methodRule == null)
-                throw new InvalidOperationException(
-                    $"Policy for {GetType().FullName} rejected method {method.ReflectedType?.FullName}:{method.Name}");
+        public override MethodDefinition Match(MethodInfo method)
+        { 
+            return Policy.Match(method, this);
         }
 
-        protected override object[] ResolveArgs(object callback, IHandler composer)
+        public override bool Validate(
+            object callback, IHandler composer, Func<object> dispatch)
         {
-            return _methodRule.ResolveArgs(this, callback, composer);
-        }
-
-        protected override bool Dispatched(object result)
-        {
+            var result = dispatch();
             return result == null || true.Equals(result);
         }
 

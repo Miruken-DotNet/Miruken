@@ -1,15 +1,14 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
 
-    public class Policy<Attrib>
+    public abstract class Policy<Attrib>
         where Attrib : DefinitionAttribute
     {
         private readonly List<MethodRule<Attrib>> _methods;
 
-        public Policy()
+        protected Policy()
         {
             _methods = new List<MethodRule<Attrib>>();
         }
@@ -19,9 +18,15 @@
             _methods.Add(method);
         }
 
-        public MethodRule<Attrib> Match(Attrib definition, MethodInfo method)
+        public MethodDefinition<Attrib> Match(MethodInfo method, Attrib attribute)
         {
-            return _methods.FirstOrDefault(rule => rule.Matches(definition, method));
+            var definition = Match(method, attribute, _methods);
+            definition?.Configure();
+            return definition;
         }
+
+        protected abstract MethodDefinition<Attrib> Match(
+            MethodInfo method, Attrib attribute, 
+            IEnumerable<MethodRule<Attrib>> rules);
     }
 }

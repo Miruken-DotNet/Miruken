@@ -2,6 +2,6 @@
 {
     public interface ICallbackFilter
     {
-        bool Accepts(DefinitionAttribute definition, object callback, IHandler composer);
+        bool Accepts(object callback, IHandler composer);
     }
 }
