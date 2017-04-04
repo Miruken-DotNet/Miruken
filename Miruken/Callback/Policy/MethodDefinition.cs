@@ -34,18 +34,16 @@
 
         protected MethodDefinition(MethodInfo method)
         {
-            Method     = method;
-            ReturnType = method.ReturnType;
-            IsVoid     = ReturnType == typeof(void);
-            _filters   = new List<ICallbackFilter>();
+            Method   = method;
+            _filters = new List<ICallbackFilter>();
             Configure(method);
         }
 
         public    MethodInfo            Method       { get; }
-        public    Type                  ReturnType   { get; }
-        public    bool                  IsVoid       { get; }
+        public    Type                  ReturnType => Method.ReturnType;
+        public    bool                  IsVoid     => ReturnType == typeof(void);
         public    Type                  VarianceType { get; set; }
-        public    bool                  Untyped => 
+        public    bool                  Untyped    => 
             VarianceType == null || VarianceType == typeof(object);
 
         public bool Accepts(object callback, IHandler composer)

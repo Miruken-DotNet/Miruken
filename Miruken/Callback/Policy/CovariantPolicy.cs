@@ -40,8 +40,6 @@
             Key = key;
         }
 
-        public override Type CallbackType => typeof(Cb);
-
         public Func<Cb, object> Key { get; }
 
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,

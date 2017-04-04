@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Callback.Policy
 {
-    using System;
     using System.Collections.Generic;
     using System.Reflection;
 
@@ -13,8 +12,6 @@
         {
             _methods = new List<MethodRule<Attrib>>();
         }
-
-        public virtual Type CallbackType => null;
 
         public void AddMethod(MethodRule<Attrib> method)
         {
