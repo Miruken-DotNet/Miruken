@@ -20,9 +20,7 @@
 
         public MethodDefinition<Attrib> Match(MethodInfo method, Attrib attribute)
         {
-            var definition = Match(method, attribute, _methods);
-            definition?.Configure();
-            return definition;
+            return Match(method, attribute, _methods);
         }
 
         protected abstract MethodDefinition<Attrib> Match(

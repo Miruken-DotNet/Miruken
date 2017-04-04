@@ -12,24 +12,30 @@
             _key = key;
         }
 
-        public override bool Matches(MethodDefinition<Attrib> method)
+        public override bool Matches(Type returnType, Attrib attribute)
         {
-            if (method.IsVoid) return false;
+            if (returnType == typeof(void)) return false;
+            if (returnType.IsArray)
+                returnType = returnType.GetElementType();
+            var restrict = attribute.Key as Type;
+            if (restrict == null || restrict.IsAssignableFrom(returnType)
+                || returnType.IsAssignableFrom(restrict))
+                return true;
+            throw new InvalidOperationException(
+                $"Key {restrict.FullName} is not related to {returnType.FullName}");
+        }
+
+        public override void Configure(MethodDefinition<Attrib> method)
+        {
             var returnType = method.ReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            Type varianceType;
             var restrict = method.Attribute.Key as Type;
-            if (restrict == null || restrict.IsAssignableFrom(returnType))
-                varianceType = returnType;
-            else if (returnType.IsAssignableFrom(restrict))
-                varianceType = restrict;
-            else
-                throw new InvalidOperationException(
-                    $"Key {restrict.FullName} is not related to {returnType.FullName}");
+            var varianceType = restrict == null 
+                            || restrict.IsAssignableFrom(returnType)
+                             ? returnType : restrict;
             method.VarianceType = varianceType;
             method.AddFilters(new CovariantFilter<Cb>(varianceType, _key));
-            return true;
         }
     }
 }

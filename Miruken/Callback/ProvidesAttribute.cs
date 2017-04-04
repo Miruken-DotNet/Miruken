@@ -23,13 +23,13 @@
         static ProvidesAttribute()
         {
             Policy = CovariantPolicy.For<ProvidesAttribute>()
-                    .HandlesCallback<Resolution>(r => r.Key,
-                        x => x.MatchMethod(x.Return.Optional, x.Callback)
-                            .MatchMethod(x.Return.Optional, x.Callback, x.Composer)
-                            .MatchMethod(x.Return, x.Composer)
-                            .MatchMethod(x.Return)
-                            .Create((m,r,a,rt) => new ProvidesMethod(m,r,a,rt))
-                        );
+                .HandlesCallback<Resolution>(r => r.Key,
+                    x => x.MatchMethod(x.Return.OrVoid, x.Callback)
+                          .MatchMethod(x.Return.OrVoid, x.Callback, x.Composer)
+                          .MatchMethod(x.Return, x.Composer)
+                          .MatchMethod(x.Return)
+                          .Create((m,r,a,rt) => new ProvidesMethod(m,r,a,rt))
+                    );
         }
 
         private class ProvidesMethod : CovariantMethod<ProvidesAttribute>
@@ -41,12 +41,12 @@
             {
             }
 
-            protected override bool Verify(object target, object callback,
-                IHandler composer)
+            protected override bool Verify(
+                object target, object callback, IHandler composer)
             {
-                var resolution = (Resolution) callback;
+                var resolution  = (Resolution)callback;
                 var resolutions = resolution.Resolutions;
-                var count = resolutions.Count;
+                var count       = resolutions.Count;
 
                 var result = Invoke(target, callback, composer);
 
@@ -59,7 +59,7 @@
                         foreach (var item in array)
                         {
                             resolved = resolution.Resolve(item, composer)
-                                       || resolved;
+                                    || resolved;
                             if (resolved && !resolution.Many)
                                 break;
                         }

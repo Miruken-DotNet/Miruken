@@ -43,21 +43,20 @@
         public Func<Cb, object> Key { get; }
 
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,
-           Func<object, Type>, CovariantMethod<Attrib>>
-           Creator { get; set; }
+               Func<object, Type>, CovariantMethod<Attrib>>
+               Creator { get; set; }
 
         protected override MethodDefinition<Attrib> Match(
-             MethodInfo method, Attrib attribute,
-             IEnumerable<MethodRule<Attrib>> rules)
+            MethodInfo method, Attrib attribute,
+            IEnumerable<MethodRule<Attrib>> rules)
         {
+            var match = rules.FirstOrDefault(r => r.Matches(method, attribute));
+            if (match == null) return null;
             Func<object, Type> returnType = cb => Key((Cb)cb) as Type;
-            return rules.Select(rule =>
-            {
-                var candidate = Creator?.Invoke(method, rule, attribute, returnType)
-                    ?? new CovariantMethod<Attrib>(method, rule, attribute, returnType);
-                candidate.AddFilters(new ContravariantFilter(typeof(Cb)));
-                return rule.Matches(candidate) ? candidate : null;
-                }).FirstOrDefault(definition => definition != null);
+            var definition = Creator?.Invoke(method, match, attribute, returnType)
+                ?? new CovariantMethod<Attrib>(method, match, attribute, returnType);
+            match.Configure(definition);
+            return definition;
         }
     }
 

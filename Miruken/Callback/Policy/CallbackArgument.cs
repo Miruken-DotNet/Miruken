@@ -13,23 +13,28 @@ namespace Miruken.Callback.Policy
         {           
         }
 
-        public override bool Matches(
-            MethodDefinition<Attrib> method, ParameterInfo parameter)
+        public override bool Matches(ParameterInfo parameter, Attrib attribute)
         {
-            Type varianceType;
-            var restrict  = method.Attribute.Key as Type;
+            var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
-            if (restrict == null || restrict.IsAssignableFrom(paramType))
-                varianceType = paramType;                
-            else if (paramType.IsAssignableFrom(restrict))
-                varianceType = restrict;
-            else
-                throw new InvalidOperationException(
-                    $"Key {restrict.FullName} is not related to {paramType.FullName}");
-            method.VarianceType = varianceType;     
+            if (restrict == null || restrict.IsAssignableFrom(paramType)
+                || paramType.IsAssignableFrom(restrict))
+                return true;
+            throw new InvalidOperationException(
+                $"Key {restrict.FullName} is not related to {paramType.FullName}");
+        }
+
+        public override void Configure(
+            ParameterInfo parameter, MethodDefinition<Attrib> method)
+        {
+            var restrict     = method.Attribute.Key as Type;
+            var paramType    = parameter.ParameterType;
+            var varianceType = restrict == null 
+                            || restrict.IsAssignableFrom(paramType)
+                             ? paramType : restrict;
+            method.VarianceType = varianceType;
             method.AddFilters(new ContravariantFilter(
                 varianceType, method.Attribute.Invariant));
-            return true;
         }
 
         public override object Resolve(object callback, IHandler composer)
@@ -48,8 +53,7 @@ namespace Miruken.Callback.Policy
         {         
         }
 
-        public override bool Matches(
-            MethodDefinition<Attrib> method, ParameterInfo parameter)
+        public override bool Matches(ParameterInfo parameter, Attrib attribute)
         {
             var paramType = parameter.ParameterType;
             return typeof(Cb).IsAssignableFrom(paramType);

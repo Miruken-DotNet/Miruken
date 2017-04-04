@@ -12,8 +12,7 @@ namespace Miruken.Callback.Policy
         {    
         }
 
-        public override bool Matches(
-            MethodDefinition<Attrib> method, ParameterInfo parameter)
+        public override bool Matches(ParameterInfo parameter, Attrib attribute)
         {
             var paramType = parameter.ParameterType;
             return typeof(IHandler).IsAssignableFrom(paramType);

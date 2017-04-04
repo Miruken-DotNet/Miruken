@@ -5,27 +5,36 @@
     public abstract class ReturnRule<Attrib>
         where Attrib : DefinitionAttribute
     {
-        public OptionalReturn<Attrib> Optional => 
-            new OptionalReturn<Attrib>(this);
+        public VoidReturn<Attrib> OrVoid => 
+            new VoidReturn<Attrib>(this);
 
-        public abstract bool Matches(MethodDefinition<Attrib> method);
+        public abstract bool Matches(Type returnType, Attrib attribute);
+
+        public virtual void Configure(MethodDefinition<Attrib> method)
+        {
+        }
     }
 
-    public class OptionalReturn<Attrib> : ReturnRule<Attrib>
+    public class VoidReturn<Attrib> : ReturnRule<Attrib>
         where Attrib : DefinitionAttribute
     {
         private readonly ReturnRule<Attrib> _rule;
 
-        public OptionalReturn(ReturnRule<Attrib> rule)
+        public VoidReturn(ReturnRule<Attrib> rule)
         {
             if (rule == null)
                 throw new ArgumentNullException(nameof(rule));
             _rule = rule;
         }
 
-        public override bool Matches(MethodDefinition<Attrib> method)
+        public override bool Matches(Type returnType, Attrib attribute)
         {
-            return method.IsVoid || _rule.Matches(method);
+            return returnType == typeof(void) || _rule.Matches(returnType, attribute);
+        }
+
+        public override void Configure(MethodDefinition<Attrib> method)
+        {
+            if (!method.IsVoid) _rule.Configure(method);
         }
     }
 }

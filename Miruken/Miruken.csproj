@@ -86,7 +86,7 @@
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Policy\ReturnRule.cs" />
     <Compile Include="Callback\Policy\ReturnsKey.cs" />
-    <Compile Include="Callback\Policy\ReturnsBoolOrVoid.cs" />
+    <Compile Include="Callback\Policy\ReturnsType.cs" />
     <Compile Include="Callback\Policy\TargetArgument.cs" />
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Callback\ProvidesAttribute.cs" />

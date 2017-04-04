@@ -13,8 +13,7 @@ namespace Miruken.Callback.Policy
             _extract = extract;
         }
 
-        public override bool Matches(
-            MethodDefinition<Attrib> method, ParameterInfo parameter)
+        public override bool Matches(ParameterInfo parameter, Attrib attribute)
         {
             var paramType = parameter.ParameterType;
             return typeof(Res).IsAssignableFrom(paramType);

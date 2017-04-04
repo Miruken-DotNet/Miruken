@@ -29,6 +29,12 @@
             return -1;
         }
 
+        protected override bool Verify(object target, object callback, IHandler composer)
+        {
+            var result = Invoke(target, callback, composer);
+            return result != null;
+        }
+
         protected override object Invoke(object target, object callback,
             IHandler composer, Type returnType = null)
         {

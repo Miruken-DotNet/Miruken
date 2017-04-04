@@ -21,14 +21,7 @@ namespace Miruken.Callback
 
         public abstract MethodDefinition Match(MethodInfo method);
 
-        public virtual bool Validate(
-            object callback, IHandler composer, Func<object> dispatch)
-        {
-            dispatch();
-            return true;
-        }
-
-        protected string GetDescription(MethodInfo method)
+        private static string GetDescription(MethodInfo method)
         {
             return $"{method.ReflectedType?.FullName}:{method.Name}";
         }

@@ -38,6 +38,7 @@
             ReturnType = method.ReturnType;
             IsVoid     = ReturnType == typeof(void);
             _filters   = new List<ICallbackFilter>();
+            Configure(method);
         }
 
         public    MethodInfo            Method       { get; }
@@ -128,10 +129,10 @@
                                  CultureInfo.InvariantCulture);
         }
 
-        internal void Configure()
+        private void Configure(MethodInfo method)
         {
-            var parameters = Method.GetParameters();
-            if (!Method.IsGenericMethodDefinition)
+            var parameters = method.GetParameters();
+            if (!method.IsGenericMethodDefinition)
             {
                 switch (parameters.Length)
                 {
@@ -139,48 +140,48 @@
                     case 0:
                         if (IsVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionNoArgs(Method);
+                            _delegate = RuntimeHelper.CreateActionNoArgs(method);
                             _binding  = MethodBinding.FastNoArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncNoArgs(Method);
+                            _delegate = RuntimeHelper.CreateFuncNoArgs(method);
                             _binding  = MethodBinding.FastNoArgsReturn;
                         }
                         return;
                     case 1:
                         if (IsVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionOneArg(Method);
+                            _delegate = RuntimeHelper.CreateActionOneArg(method);
                             _binding  = MethodBinding.FastOneArgVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncOneArg(Method);
+                            _delegate = RuntimeHelper.CreateFuncOneArg(method);
                             _binding  = MethodBinding.FastOneArgReturn;
                         }
                         return;
                     case 2:
                         if (IsVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionTwoArgs(Method);
+                            _delegate = RuntimeHelper.CreateActionTwoArgs(method);
                             _binding  = MethodBinding.FastTwoArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncTwoArgs(Method);
+                            _delegate = RuntimeHelper.CreateFuncTwoArgs(method);
                             _binding  = MethodBinding.FastTwoArgsReturn;
                         }
                         return;
                     case 3:
                         if (IsVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionThreeArgs(Method);
+                            _delegate = RuntimeHelper.CreateActionThreeArgs(method);
                             _binding  = MethodBinding.FastThreeArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncThreeArgs(Method);
+                            _delegate = RuntimeHelper.CreateFuncThreeArgs(method);
                             _binding  = MethodBinding.FastThreeArgsReturn;
                         }
                         return;
@@ -195,10 +196,10 @@
                 .Where(p => p.ParameterType.ContainsGenericParameters)
                 .Select(p => Tuple.Create(p.Position, p.ParameterType))
                 .ToList();
-            var returnType = Method.ReturnType;
+            var returnType = method.ReturnType;
             if (returnType.ContainsGenericParameters)
                 argSources.Add(Tuple.Create(-1, returnType));
-            var methodArgs = Method.GetGenericArguments();
+            var methodArgs = method.GetGenericArguments();
             var typeMapping = new Tuple<int, int>[methodArgs.Length];
             foreach (var source in argSources)
             {

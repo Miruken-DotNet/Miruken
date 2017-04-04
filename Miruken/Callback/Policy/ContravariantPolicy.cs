@@ -55,11 +55,12 @@
             MethodInfo method, Attrib attribute,
             IEnumerable<MethodRule<Attrib>> rules)
         {
-            return rules.Select(rule => {
-                var candidate = Creator?.Invoke(method, rule, attribute)
-                    ?? new ContravariantMethod<Attrib>(method, rule, attribute);
-                return rule.Matches(candidate) ? candidate : null;
-                }).FirstOrDefault(definition => definition != null);
+            var match = rules.FirstOrDefault(r => r.Matches(method, attribute));
+            if (match == null) return null;
+            var definition = Creator?.Invoke(method, match, attribute)
+                ?? new ContravariantMethod<Attrib>(method, match, attribute);
+            match.Configure(definition);
+            return definition;
         }
 
         protected virtual ContravariantMethod<Attrib> CreateMethod(
@@ -96,7 +97,8 @@
         public ContravariantPolicyBuilder<Attrib> MatchMethod(
             params ArgumentRule<Attrib>[] args)
         {
-            Policy.AddMethod(new MethodRule<Attrib>(ReturnsBoolOrVoid<Attrib>.Instance, args));
+            Policy.AddMethod(new MethodRule<Attrib>(
+                ReturnsType<bool, Attrib>.OrVoid, args));
             return this;
         }
 

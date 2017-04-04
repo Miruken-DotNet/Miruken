@@ -12,6 +12,12 @@
         {        
         }
 
+        protected override bool Verify(object target, object callback, IHandler composer)
+        {
+            var result = Invoke(target, callback, composer);
+            return result == null || true.Equals(result);
+        }
+
         public override int CompareTo(MethodDefinition other)
         {
             var otherMethod = other as ContravariantMethod<Attrib>;
