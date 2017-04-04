@@ -22,7 +22,10 @@ namespace Miruken.Callback
 
                 foreach (var attribute in attributes)
                 {
-                    var definition = attribute.Accept(method);
+                    var definition = attribute.Match(method);
+                    if (definition == null)
+                        throw new InvalidOperationException(
+                            $"The policy for {attribute.GetType().FullName} rejected method {GetDescription(method)}");
 
                     if (_definitions == null)
                         _definitions = new Dictionary<Type, List<MethodDefinition>>();
@@ -80,6 +83,11 @@ namespace Miruken.Callback
             }
 
             return dispatched;
+        }
+
+        private static string GetDescription(MethodInfo method)
+        {
+            return $"{method.ReflectedType?.FullName}:{method.Name}";
         }
 
         public const BindingFlags Binding = BindingFlags.Instance 
