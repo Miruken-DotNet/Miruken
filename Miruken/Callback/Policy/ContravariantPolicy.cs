@@ -7,7 +7,6 @@
 
     public static class ContravariantPolicy
     {
-
         public static ContravariantPolicy<Attrib> For<Attrib>(
             Action<ContravariantPolicyBuilder<Attrib>> configure)
             where Attrib : DefinitionAttribute
@@ -29,7 +28,7 @@
         public class Callback<Attrib>
             where Attrib : DefinitionAttribute
         {
-            public static ContravariantPolicy<Attrib, Cb> HandlesCallback<Cb>(
+            public ContravariantPolicy<Attrib, Cb> HandlesCallback<Cb>(
                 Func<Cb, object> target,
                 Action<ContravariantPolicyBuilder<Attrib, Cb>> configure)
             {
@@ -61,12 +60,6 @@
                 ?? new ContravariantMethod<Attrib>(method, match, attribute);
             match.Configure(definition);
             return definition;
-        }
-
-        protected virtual ContravariantMethod<Attrib> CreateMethod(
-            MethodInfo method, MethodRule<Attrib> rule, Attrib attribute)
-        {
-            return new ContravariantMethod<Attrib>(method, rule, attribute);
         }
     }
 
