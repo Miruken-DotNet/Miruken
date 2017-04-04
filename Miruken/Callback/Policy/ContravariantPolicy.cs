@@ -78,6 +78,8 @@
             Target = target;
         }
 
+        public override Type CallbackType => typeof(Cb);
+
         public Func<Cb, object> Target { get; }
     }
 
