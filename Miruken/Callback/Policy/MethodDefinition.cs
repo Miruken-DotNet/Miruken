@@ -248,10 +248,10 @@
 
         public override bool Dispatch(object target, object callback, IHandler composer)
         {
-            return Accepts(callback, composer) && Verify(target, callback, composer);
+            return Accepts(callback, composer) && VerifyResult(target, callback, composer);
         }
 
-        protected virtual bool Verify(object target, object callback, IHandler composer)
+        protected virtual bool VerifyResult(object target, object callback, IHandler composer)
         {
             Invoke(target, callback, composer);
             return true;

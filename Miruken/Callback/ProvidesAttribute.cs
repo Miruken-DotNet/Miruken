@@ -41,7 +41,7 @@
             {
             }
 
-            protected override bool Verify(
+            protected override bool VerifyResult(
                 object target, object callback, IHandler composer)
             {
                 var resolution  = (Resolution)callback;
