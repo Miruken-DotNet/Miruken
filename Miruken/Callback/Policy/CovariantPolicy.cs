@@ -68,7 +68,24 @@
             var definition = Creator?.Invoke(method, match, attribute, returnType)
                 ?? new CovariantMethod<Attrib>(method, match, attribute, returnType);
             match.Configure(definition);
+            AssignVariance(definition);
             return definition;
+        }
+
+        private void AssignVariance(MethodDefinition<Attrib> method)
+        {
+            var key      = method.Attribute.Key;
+            var restrict = key as Type;
+            if (restrict != null)
+            {
+                if (method.VarianceType == null ||
+                    method.VarianceType.IsAssignableFrom(restrict))
+                    method.VarianceType = restrict;
+                if (restrict != typeof(object))
+                    method.AddFilters(new CovariantFilter<Cb>(restrict, Key));
+            }
+            else if (key != null)
+                method.AddFilters(new KeyEqualityFilter<Cb>(key, Key));
         }
     }
 

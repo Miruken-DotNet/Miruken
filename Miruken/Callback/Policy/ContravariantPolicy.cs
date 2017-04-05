@@ -69,7 +69,21 @@
             var definition = Creator?.Invoke(method, match, attribute)
                 ?? new ContravariantMethod<Attrib>(method, match, attribute);
             match.Configure(definition);
+            AssignVariance(definition);
             return definition;
+        }
+
+        private static void AssignVariance(MethodDefinition<Attrib> method)
+        {
+            var restrict = method.Attribute.Key as Type;
+            if (restrict != null)
+            {
+                if (method.VarianceType == null)
+                    method.VarianceType = restrict;
+                if (restrict != typeof(object))
+                    method.AddFilters(new ContravariantFilter(
+                        restrict, method.Attribute.Invariant));
+            }
         }
     }
 

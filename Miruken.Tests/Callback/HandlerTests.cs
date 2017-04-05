@@ -269,8 +269,16 @@
         public void Should_Provide_Empty_Array_If_No_Matches()
         {
             var handler = new Handler();
-            var bars = handler.ResolveAll<Bar>();
+            var bars    = handler.ResolveAll<Bar>();
             Assert.AreEqual(0, bars.Length);
+        }
+
+        [TestMethod]
+        public void Should_Provide_By_String_Key()
+        {
+            var handler = new CustomHandler();
+            var bar     = handler.Resolve("Bar") as Bar;
+            Assert.IsNotNull(bar);
         }
 
         [TestMethod,
@@ -521,6 +529,21 @@
             {
                if (Equals(resolution.Key, typeof(Baz)))
                    resolution.Resolve(new SuperBaz(), composer);
+            }
+
+            [Provides("Foo"),
+             Provides("Bar")]
+            public object ProvidesByName(Resolution resolution)
+            {
+                switch (resolution.Key as string)
+                {
+                    case "Foo":
+                        return new Foo();
+                    case "Bar":
+                        return new Bar();
+                    default:
+                        return null;
+                }
             }
         }
 

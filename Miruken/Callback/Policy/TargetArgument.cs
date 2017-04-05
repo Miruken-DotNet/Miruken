@@ -29,14 +29,11 @@ namespace Miruken.Callback.Policy
         public override void Configure(
             ParameterInfo parameter, MethodDefinition<Attrib> method)
         {
-            var restrict  = method.Attribute.Key as Type;
             var paramType = parameter.ParameterType;
-            var varianceType = restrict == null
-                            || restrict.IsAssignableFrom(paramType)
-                             ? paramType : restrict;
-            method.VarianceType = varianceType;
+            if (paramType == typeof(object)) return;
+            method.VarianceType = paramType;
             method.AddFilters(new ContravariantFilter<Cb>(
-                varianceType, method.Attribute.Invariant, _target));
+                paramType, method.Attribute.Invariant, _target));
         }
 
         public override object Resolve(object callback, IHandler composer)

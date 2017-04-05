@@ -30,12 +30,9 @@
             var returnType = method.ReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            var restrict = method.Attribute.Key as Type;
-            var varianceType = restrict == null 
-                            || restrict.IsAssignableFrom(returnType)
-                             ? returnType : restrict;
-            method.VarianceType = varianceType;
-            method.AddFilters(new CovariantFilter<Cb>(varianceType, _key));
+            if (returnType == typeof(object)) return;
+            method.VarianceType = returnType;
+            method.AddFilters(new CovariantFilter<Cb>(returnType, _key));
         }
     }
 }

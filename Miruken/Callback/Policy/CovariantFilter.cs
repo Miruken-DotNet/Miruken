@@ -22,7 +22,6 @@
 
         public bool Accepts(object callback, IHandler composer)
         {
-            if (!(callback is Cb)) return false;
             var key = _key((Cb)callback) as Type;
             if (key == null) return false;
             if (_constraint == typeof(object)) return true;
