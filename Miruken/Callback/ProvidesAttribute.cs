@@ -22,18 +22,6 @@
             return Policy.MatchMethod(method, this);
         }
 
-        static ProvidesAttribute()
-        {
-            Policy = CovariantPolicy.For<ProvidesAttribute>()
-                .HandlesCallback<Resolution>(r => r.Key,
-                    x => x.MatchMethod(x.Return.OrVoid, x.Callback)
-                          .MatchMethod(x.Return.OrVoid, x.Callback, x.Composer)
-                          .MatchMethod(x.Return, x.Composer)
-                          .MatchMethod(x.Return)
-                          .Create((m,r,a,rt) => new ProvidesMethod(m,r,a,rt))
-                    );
-        }
-
         private class ProvidesMethod : CovariantMethod<ProvidesAttribute>
         {
             public ProvidesMethod(
@@ -74,6 +62,14 @@
             }
         }
 
-        public static readonly CovariantPolicy<ProvidesAttribute, Resolution> Policy;
+        public static readonly CovariantPolicy<ProvidesAttribute, Resolution> Policy =
+             CovariantPolicy.For<ProvidesAttribute>()
+                .HandlesCallback<Resolution>(r => r.Key,
+                    x => x.MatchMethod(x.Return.OrVoid, x.Callback)
+                          .MatchMethod(x.Return.OrVoid, x.Callback, x.Composer)
+                          .MatchMethod(x.Return, x.Composer)
+                          .MatchMethod(x.Return)
+                          .Create((m, r, a, rt) => new ProvidesMethod(m, r, a, rt))
+                    );
     }
 }

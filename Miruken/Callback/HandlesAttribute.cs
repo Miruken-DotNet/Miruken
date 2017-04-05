@@ -21,14 +21,10 @@
             return Policy.MatchMethod(method, this);
         }
 
-        static HandlesAttribute()
-        {
-            Policy = ContravariantPolicy.For<HandlesAttribute>(
+        public static readonly ContravariantPolicy<HandlesAttribute> Policy =
+            ContravariantPolicy.For<HandlesAttribute>(
                 x => x.MatchMethod(x.Callback)
                       .MatchMethod(x.Callback, x.Composer)
             );
-        }
-
-        public static readonly ContravariantPolicy<HandlesAttribute> Policy;
     }
 }
