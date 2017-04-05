@@ -44,11 +44,21 @@
         }
     }
 
-    public class ContravariantPolicy<Attrib> : Policy<Attrib>
+    public class ContravariantPolicy<Attrib> : CallbackPolicy<Attrib>
         where Attrib : DefinitionAttribute
     {
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,
                ContravariantMethod<Attrib>> Creator { get; set; }
+
+        public override bool Accepts(object callback)
+        {
+            return true;
+        }
+
+        public override Type GetVarianceType(object callback)
+        {
+            return callback?.GetType();
+        }
 
         protected override MethodDefinition<Attrib> Match(
             MethodInfo method, Attrib attribute,
@@ -68,10 +78,22 @@
     {
         public ContravariantPolicy(Func<Cb, object> target)
         {
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
             Target = target;
         }
 
         public Func<Cb, object> Target { get; }
+
+        public override bool Accepts(object callback)
+        {
+            return callback is Cb;
+        }
+
+        public override Type GetVarianceType(object callback)
+        {
+            return Accepts(callback) ? Target((Cb)callback)?.GetType() : null;
+        }
     }
 
     public class ContravariantPolicyBuilder<Attrib>
@@ -90,7 +112,7 @@
         public ContravariantPolicyBuilder<Attrib> MatchMethod(
             params ArgumentRule<Attrib>[] args)
         {
-            Policy.AddMethod(new MethodRule<Attrib>(
+            Policy.AddMethodRule(new MethodRule<Attrib>(
                 ReturnsType<bool, Attrib>.OrVoid, args));
             return this;
         }

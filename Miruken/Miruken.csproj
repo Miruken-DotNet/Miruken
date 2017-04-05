@@ -71,7 +71,7 @@
     <Compile Include="Callback\Policy\ICallbackFilter.cs" />
     <Compile Include="Callback\Policy\MethodDefinition.cs" />
     <Compile Include="Callback\Policy\MethodRule.cs" />
-    <Compile Include="Callback\Policy\Policy.cs" />
+    <Compile Include="Callback\Policy\CallbackPolicy.cs" />
     <Compile Include="Callback\DefinitionAttribute.cs" />
     <Compile Include="Callback\HandlerDescriptor.cs" />
     <Compile Include="Callback\HandlerMetadata.cs" />

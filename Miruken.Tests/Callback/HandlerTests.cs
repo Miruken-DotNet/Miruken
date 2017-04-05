@@ -94,6 +94,16 @@
             Assert.AreEqual(1, foo.Handled);
         }
 
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException),
+            "The policy for Miruken.Callback.HandlesAttribute rejected method 'Miruken.Tests.Callback.HandlerTests + BadHandler:Add'")
+        ]
+        public void Should_Reject_Handlers()
+        {
+            var handler = new BadHandler();
+            handler.Handle(new Foo());
+        }
+
         [TestMethod]
         public void Should_Indicate_Not_Provided()
         {
@@ -261,6 +271,16 @@
             var handler = new Handler();
             var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(0, bars.Length);
+        }
+
+        [TestMethod,
+             ExpectedException(typeof(InvalidOperationException),
+                "The policy for Miruken.Callback.ProvidesAttribute rejected method 'Miruken.Tests.Callback.HandlerTests + BadProvider:Add'")
+        ]
+        public void Should_Reject_Providers()
+        {
+            var handler = new BadProvider();
+            handler.Resolve<Foo>();
         }
 
         [TestMethod]
@@ -557,6 +577,24 @@
                     resolution.Resolve(new SuperBaz(), composer);
                     resolution.Resolve(new Baz(), composer);
                 }
+            }
+        }
+
+        private class BadHandler : Handler
+        {
+            [Handles]
+            public int Add(int num1, int num2, int num3)
+            {
+                return num1 + num2 + num3;
+            }
+        }
+
+        private class BadProvider : Handler
+        {
+            [Provides]
+            public int Add(int num1, int num2, int num3)
+            {
+                return num1 + num2 + num3;
             }
         }
 

@@ -11,6 +11,8 @@ namespace Miruken.Callback
         public object Key       { get; set; }
         public bool   Invariant { get; set; }
 
-        public abstract MethodDefinition Match(MethodInfo method);  
+        public abstract CallbackPolicy MethodPolicy { get; }
+
+        public abstract MethodDefinition MatchMethod(MethodInfo method);  
     }
 }

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
-    using Policy;
+    using System;
+    using System.Collections.Generic;
 
     public class Resolution : ICallback, ICallbackDispatch
     {
@@ -65,7 +63,7 @@ namespace Miruken.Callback
             if (!handled || greedy)
                 handled = Implied(handler, false, composer) || handled;
             if (handled && !greedy) return true;
-            return HandlerMetadata.Dispatch(typeof(ProvidesAttribute),
+            return HandlerMetadata.Dispatch(ProvidesAttribute.Policy,
                 handler, this, greedy, composer) || handled;
         }
 

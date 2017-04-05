@@ -32,11 +32,13 @@
         }
     }
 
-    public class CovariantPolicy<Attrib, Cb> : Policy<Attrib>
+    public class CovariantPolicy<Attrib, Cb> : CallbackPolicy<Attrib>
         where Attrib : DefinitionAttribute
     {
         public CovariantPolicy(Func<Cb, object> key)
         {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Key = key;
         }
 
@@ -45,6 +47,16 @@
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,
                Func<object, Type>, CovariantMethod<Attrib>>
                Creator { get; set; }
+
+        public override bool Accepts(object callback)
+        {
+            return callback is Cb;
+        }
+
+        public override Type GetVarianceType(object callback)
+        {
+            return Accepts(callback) ? Key((Cb)callback) as Type : null;
+        }
 
         protected override MethodDefinition<Attrib> Match(
             MethodInfo method, Attrib attribute,
@@ -84,14 +96,14 @@
         public CovariantPolicyBuilder<Attrib, Cb> MatchMethod(
             params ArgumentRule<Attrib>[] args)
         {
-            Policy.AddMethod(new MethodRule<Attrib>(args));
+            Policy.AddMethodRule(new MethodRule<Attrib>(args));
             return this;
         }
 
         public CovariantPolicyBuilder<Attrib, Cb> MatchMethod(
             ReturnRule<Attrib> returnRule, params ArgumentRule<Attrib>[] args)
         {
-            Policy.AddMethod(new MethodRule<Attrib>(returnRule, args));
+            Policy.AddMethodRule(new MethodRule<Attrib>(returnRule, args));
             return this;
         }
 

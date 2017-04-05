@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using Policy;
 
     public static class HandlerMetadata
     {
@@ -14,8 +15,8 @@
         }
 
         public static bool Dispatch(
-            Type definition, Handler handler, object callback, bool greedy,
-            IHandler composer)
+            CallbackPolicy policy, Handler handler, object callback,
+            bool greedy, IHandler composer)
         {
             var handled   = false;
             var surrogate = handler.Surrogate;
@@ -23,13 +24,13 @@
             if (surrogate != null)
             {
                 var descriptor = GetDescriptor(surrogate.GetType());
-                handled = descriptor.Dispatch(definition, surrogate, callback, greedy, composer);
+                handled = descriptor.Dispatch(policy, surrogate, callback, greedy, composer);
             }
 
             if (!handled || greedy)
             {
                 var descriptor = GetDescriptor(handler.GetType());
-                handled = descriptor.Dispatch(definition, handler, callback, greedy, composer)
+                handled = descriptor.Dispatch(policy, handler, callback, greedy, composer)
                        || handled;
             }
 

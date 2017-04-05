@@ -14,9 +14,11 @@
             Key = key;
         }
 
-        public override MethodDefinition Match(MethodInfo method)
+        public override CallbackPolicy MethodPolicy => Policy;
+
+        public override MethodDefinition MatchMethod(MethodInfo method)
         { 
-            return Policy.Match(method, this);
+            return Policy.MatchMethod(method, this);
         }
 
         static HandlesAttribute()
@@ -27,6 +29,6 @@
             );
         }
 
-        private static readonly ContravariantPolicy<HandlesAttribute> Policy;
+        public static readonly ContravariantPolicy<HandlesAttribute> Policy;
     }
 }

@@ -42,7 +42,7 @@
                 return dispatch.Dispatch(this, greedy, composer);
 
             return !ShouldSkipDefinitions() &&
-                HandlerMetadata.Dispatch(typeof(HandlesAttribute),
+                HandlerMetadata.Dispatch(HandlesAttribute.Policy,
                 this, callback, greedy, composer);
         }
 
