@@ -39,12 +39,12 @@
             Configure(method);
         }
 
-        public    MethodInfo            Method       { get; }
-        public    Type                  ReturnType => Method.ReturnType;
-        public    bool                  IsVoid     => ReturnType == typeof(void);
-        public    Type                  VarianceType { get; set; }
-        public    bool                  Untyped    => 
-            VarianceType == null || VarianceType == typeof(object);
+        public MethodInfo Method       { get; }
+        public Type       ReturnType => Method.ReturnType;
+        public bool       IsVoid     => ReturnType == typeof(void);
+        public Type       VarianceType { get; set; }
+        public bool       Untyped    => VarianceType == null ||
+                                        VarianceType == typeof(object);
 
         public bool Accepts(object callback, IHandler composer)
         {
@@ -101,7 +101,7 @@
 
         protected object InvokeLate(object target, object[] args, Type returnType = null)
         {
-            var method = Method;
+            var method     = Method;
             var parameters = method.GetParameters();
             if (parameters.Length > (args?.Length ?? 0))
                 throw new ArgumentException($"Method {GetDescription()} expects {parameters.Length} arguments");
@@ -113,12 +113,12 @@
                     {
                         if (returnType == null)
                             throw new ArgumentException(
-                                "Return type is unknown and cannot help infer types");
+                                "Return type is unknown and cannot infer types");
                         return returnType.GetGenericArguments()[mapping.Item2];
                     }
                     var arg = args?[mapping.Item1];
                     if (arg == null)
-                        throw new ArgumentException($"Argument {mapping.Item1} is null and cannot help infer types");
+                        throw new ArgumentException($"Argument {mapping.Item1} is null and cannot infer types");
                     return arg.GetType().GetGenericArguments()[mapping.Item2];
                 }).ToArray();
                 method = method.MakeGenericMethod(argTypes);
@@ -241,6 +241,8 @@
         {
             Rule      = rule;
             Attribute = attribute;
+            var filter = attribute as ICallbackFilter;
+            if (filter != null) AddFilters(filter);
         }
 
         public MethodRule<Attrib> Rule      { get; }

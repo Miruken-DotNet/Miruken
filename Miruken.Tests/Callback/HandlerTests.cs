@@ -343,6 +343,19 @@
         }
 
         [TestMethod]
+        public void Should_Resolve_All()
+        {
+            var custom  = new CustomHandler();
+            var special = new SpecialHandler();
+            var handler = custom + special;
+            var objects = handler.ResolveAll<object>();
+            CollectionAssert.Contains(objects, custom);
+            CollectionAssert.Contains(objects, special);
+            CollectionAssert.Contains(objects, handler);
+            Assert.AreEqual(12, objects.Length);
+        }
+
+        [TestMethod]
         public void Should_Broadcast_Callbacks()
         {
             var foo   = new Foo();

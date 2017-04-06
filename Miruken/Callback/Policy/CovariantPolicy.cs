@@ -48,14 +48,14 @@
                Func<object, Type>, CovariantMethod<Attrib>>
                Creator { get; set; }
 
-        public override bool Accepts(object callback)
+        public override bool Accepts(object callback, IHandler composer)
         {
             return callback is Cb;
         }
 
         public override Type GetVarianceType(object callback)
         {
-            return Accepts(callback) ? Key((Cb)callback) as Type : null;
+            return callback is Cb ? Key((Cb)callback) as Type : null;
         }
 
         protected override MethodDefinition<Attrib> Match(
@@ -124,7 +124,7 @@
             return this;
         }
 
-        public CovariantPolicyBuilder<Attrib, Cb> Create(
+        public CovariantPolicyBuilder<Attrib, Cb> CreateUsing(
          Func<MethodInfo, MethodRule<Attrib>, Attrib, Func<object, Type>,
              CovariantMethod<Attrib>> creator)
         {

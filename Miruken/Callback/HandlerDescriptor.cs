@@ -7,9 +7,9 @@ namespace Miruken.Callback
 
     public class HandlerDescriptor
     {
-        #region DefinitionGroup
+        #region PolicyMethods
 
-        private class DefinitionGroup
+        private class PolicyMethods
         {
             private List<MethodDefinition> _untypedMethods;
             private LinkedList<MethodDefinition> _typedMethods;
@@ -25,7 +25,7 @@ namespace Miruken.Callback
                     return;
                 }
                 var typed  = _typedMethods
-                            ?? (_typedMethods = new LinkedList<MethodDefinition>());
+                          ?? (_typedMethods = new LinkedList<MethodDefinition>());
                 var type   = method.VarianceType;
                 var first  = GetFirst(type);
                 var insert = first ?? typed.First;
@@ -49,8 +49,8 @@ namespace Miruken.Callback
                 if (first == null)
                 {
                     var indexes = _indexes
-                                ?? (_indexes = new Dictionary<Type, 
-                                    LinkedListNode<MethodDefinition>>());
+                               ?? (_indexes = new Dictionary<Type, 
+                                   LinkedListNode<MethodDefinition>>());
                     indexes[type] = node;
                 }
             }
@@ -75,14 +75,13 @@ namespace Miruken.Callback
             {
                 if (_indexes == null || type == null) return null;
                 LinkedListNode<MethodDefinition> first;
-                return _indexes.TryGetValue(type, out first)
-                       ? first : null;
+                return _indexes.TryGetValue(type, out first) ? first : null;
             }
         }
 
         #endregion
 
-        private readonly Dictionary<CallbackPolicy, DefinitionGroup> _definitions;
+        private readonly Dictionary<CallbackPolicy, PolicyMethods> _methods;
 
         public HandlerDescriptor(IReflect type)
         {
@@ -102,18 +101,18 @@ namespace Miruken.Callback
                         throw new InvalidOperationException(
                             $"The policy for {attribute.GetType().FullName} rejected method '{GetDescription(method)}'");
 
-                    if (_definitions == null)
-                        _definitions = new Dictionary<CallbackPolicy, DefinitionGroup>();
+                    if (_methods == null)
+                        _methods = new Dictionary<CallbackPolicy, PolicyMethods>();
 
-                    DefinitionGroup group;
+                    PolicyMethods methods;
                     var policy = attribute.MethodPolicy;
-                    if (!_definitions.TryGetValue(policy, out group))
+                    if (!_methods.TryGetValue(policy, out methods))
                     {
-                        group = new DefinitionGroup();
-                        _definitions.Add(policy, group);
+                        methods = new PolicyMethods();
+                        _methods.Add(policy, methods);
                     }
 
-                    group.Insert(definition);
+                    methods.Insert(definition);
                 }
             }
         }
@@ -125,10 +124,10 @@ namespace Miruken.Callback
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
 
-            if (!policy.Accepts(callback)) return false;
+            if (!policy.Accepts(callback, composer)) return false;
 
-            DefinitionGroup group = null;
-            if (_definitions?.TryGetValue(policy, out group) != true)
+            PolicyMethods methods = null;
+            if (_methods?.TryGetValue(policy, out methods) != true)
                 return false;
 
             var dispatched   = false;
@@ -137,7 +136,7 @@ namespace Miruken.Callback
 
             try
             {
-                foreach (var method in group.GetMethods(varianceType))
+                foreach (var method in methods.GetMethods(varianceType))
                 {
                     HandleMethod.Unhandled = false;
                     var handled = method.Dispatch(target, callback, composer);

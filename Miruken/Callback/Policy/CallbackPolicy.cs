@@ -6,8 +6,8 @@
 
     public abstract class CallbackPolicy
     {
-        public abstract bool Accepts(object callback);
         public abstract Type GetVarianceType(object callback);
+        public abstract bool Accepts(object callback, IHandler composer);
     }
 
     public abstract class CallbackPolicy<Attrib> : CallbackPolicy

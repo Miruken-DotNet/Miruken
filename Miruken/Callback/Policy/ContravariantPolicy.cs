@@ -50,7 +50,7 @@
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,
                ContravariantMethod<Attrib>> Creator { get; set; }
 
-        public override bool Accepts(object callback)
+        public override bool Accepts(object callback, IHandler composer)
         {
             return true;
         }
@@ -99,14 +99,14 @@
 
         public Func<Cb, object> Target { get; }
 
-        public override bool Accepts(object callback)
+        public override bool Accepts(object callback, IHandler composer)
         {
             return callback is Cb;
         }
 
         public override Type GetVarianceType(object callback)
         {
-            return Accepts(callback) ? Target((Cb)callback)?.GetType() : null;
+            return callback is Cb ? Target((Cb)callback)?.GetType() : null;
         }
     }
 

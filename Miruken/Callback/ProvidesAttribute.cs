@@ -69,7 +69,7 @@
                           .MatchMethod(x.Return.OrVoid, x.Callback, x.Composer)
                           .MatchMethod(x.Return, x.Composer)
                           .MatchMethod(x.Return)
-                          .Create((m, r, a, rt) => new ProvidesMethod(m, r, a, rt))
+                          .CreateUsing((m, r, a, rt) => new ProvidesMethod(m, r, a, rt))
                     );
     }
 }

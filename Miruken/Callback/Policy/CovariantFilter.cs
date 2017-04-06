@@ -24,7 +24,6 @@
         {
             var key = _key((Cb)callback) as Type;
             if (key == null) return false;
-            if (_constraint == typeof(object)) return true;
             if (_constraint.IsGenericType && _constraint.ContainsGenericParameters)
             {
                 return _genericConstraint != null && key.IsGenericType &&
