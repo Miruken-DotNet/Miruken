@@ -17,17 +17,12 @@
             _returnType = returnType;
         }
 
-        protected override bool VerifyResult(object target, object callback, IHandler composer)
+        protected override bool VerifyResult(
+            object target, object callback, IHandler composer)
         {
-            var result = Invoke(target, callback, composer);
+            var returnType = _returnType(callback);
+            var result = Invoke(target, callback, composer, returnType);
             return result != null;
-        }
-
-        protected override object Invoke(object target, object callback,
-            IHandler composer, Type returnType = null)
-        {
-            returnType = returnType ?? _returnType(callback);
-            return base.Invoke(target, callback, composer, returnType);
         }
     }
 }

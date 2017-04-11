@@ -64,7 +64,8 @@
             if (type == null)
                 return Enumerable.Repeat(key, 1);
             var typeKeys = keys.OfType<Type>();
-            return type == typeof(object) ? typeKeys
+            return type == typeof(object) 
+                 ? typeKeys.Where(k => !k.IsGenericTypeDefinition)
                  : typeKeys.Where(k => AcceptKey(type, k))
                       .OrderBy(t => t, this);
         }
@@ -83,7 +84,7 @@
             return definition;
         }
 
-        private void AssignVariance(MethodDefinition<Attrib> method)
+        private static void AssignVariance(MethodDefinition<Attrib> method)
         {
             var key      = method.Attribute.Key;
             var restrict = key as Type;
@@ -92,18 +93,14 @@
                 if (method.VarianceType == null ||
                     method.VarianceType.IsAssignableFrom(restrict))
                     method.VarianceType = restrict;
-                if (restrict != typeof(object))
-                    method.AddFilters(new CovariantFilter<Cb>(restrict, Key));
             }
-            else if (key != null)
-                method.AddFilters(new KeyEqualityFilter<Cb>(key, Key));
         }
 
         private static bool AcceptKey(Type type, Type key)
         {
-            return type.IsAssignableFrom(key) ||
-                   (type.IsGenericType && key.IsGenericTypeDefinition &&
-                    type.GetGenericTypeDefinition() == key);
+            return key.IsGenericTypeDefinition
+                 ? type.IsGenericType && type.GetGenericTypeDefinition() == key
+                 : type.IsAssignableFrom(key);
         }
 
         int IComparer<Type>.Compare(Type x, Type y)
@@ -125,7 +122,7 @@
 
         public CallbackArgument<Attrib, Cb> Callback => CallbackArgument<Attrib, Cb>.Instance;
         public ComposerArgument<Attrib>     Composer => ComposerArgument<Attrib>.Instance;
-        public ReturnsKey<Attrib, Cb>       Return   => new ReturnsKey<Attrib, Cb>(Policy.Key);
+        public ReturnsKey<Attrib>           Return   => new ReturnsKey<Attrib>();
 
         public ExtractArgument<Attrib, Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {

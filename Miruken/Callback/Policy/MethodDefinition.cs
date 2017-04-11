@@ -276,8 +276,8 @@
             return true;
         }
 
-        protected virtual object Invoke(object target, object callback,
-            IHandler composer, Type returnType = null)
+        protected object Invoke(object target, object callback,
+                                IHandler composer, Type returnType = null)
         {
             var args = Rule.ResolveArgs(callback, composer);
             return Invoke(target, args, returnType);

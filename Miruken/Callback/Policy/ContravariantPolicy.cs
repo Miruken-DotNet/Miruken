@@ -66,9 +66,8 @@
         {
             if (type == null || type == typeof(object))
                 return Enumerable.Empty<object>();
-            var typeKeys = keys.OfType<Type>();
-            return typeKeys.Where(k => AcceptKey(type, k))
-                .OrderBy(t => t, this);
+            return keys.OfType<Type>().Where(k => AcceptKey(type, k))
+                       .OrderBy(t => t, this);
         }
 
         protected override MethodDefinition<Attrib> Match(
@@ -91,9 +90,6 @@
             {
                 if (method.VarianceType == null)
                     method.VarianceType = restrict;
-                if (restrict != typeof(object))
-                    method.AddFilters(new ContravariantFilter(
-                        restrict, method.Attribute.Invariant));
             }
         }
 

@@ -36,9 +36,10 @@
             {
                 var resolution  = (Resolution)callback;
                 var resolutions = resolution.Resolutions;
+                var returnType  = resolution.Key as Type;
                 var count       = resolutions.Count;
 
-                var result = Invoke(target, callback, composer);
+                var result = Invoke(target, callback, composer, returnType);
 
                 if (result != null)
                 {

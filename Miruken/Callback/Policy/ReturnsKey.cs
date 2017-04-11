@@ -2,16 +2,9 @@
 {
     using System;
 
-    public class ReturnsKey<Attrib, Cb> : ReturnRule<Attrib>
+    public class ReturnsKey<Attrib> : ReturnRule<Attrib>
         where Attrib : DefinitionAttribute
     {
-        private readonly Func<Cb, object> _key;
-
-        public ReturnsKey(Func<Cb, object> key)
-        {
-            _key = key;
-        }
-
         public override bool Matches(Type returnType, Attrib attribute)
         {
             if (returnType == typeof(void)) return false;
@@ -32,7 +25,6 @@
                 returnType = returnType.GetElementType();
             if (returnType == typeof(object)) return;
             method.VarianceType = returnType;
-            method.AddFilters(new CovariantFilter<Cb>(returnType, _key));
         }
     }
 }

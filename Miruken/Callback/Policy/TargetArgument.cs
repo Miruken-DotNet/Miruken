@@ -32,8 +32,6 @@ namespace Miruken.Callback.Policy
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
             method.VarianceType = paramType;
-            method.AddFilters(new ContravariantFilter<Cb>(
-                paramType, method.Attribute.Invariant, _target));
         }
 
         public override object Resolve(object callback, IHandler composer)
