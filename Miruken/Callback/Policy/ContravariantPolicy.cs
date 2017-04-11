@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -44,7 +45,8 @@
         }
     }
 
-    public class ContravariantPolicy<Attrib> : CallbackPolicy<Attrib>
+    public class ContravariantPolicy<Attrib> 
+        : CallbackPolicy<Attrib>, IComparer<Type>
         where Attrib : DefinitionAttribute
     {
         public Func<MethodInfo, MethodRule<Attrib>, Attrib,
@@ -55,9 +57,18 @@
             return true;
         }
 
-        public override Type GetVarianceType(object callback)
+        public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
-            return callback?.GetType();
+            return SelectKeys(callback?.GetType(), keys);
+        }
+
+        protected IEnumerable SelectKeys(Type type, ICollection keys)
+        {
+            if (type == null || type == typeof(object))
+                return Enumerable.Empty<object>();
+            var typeKeys = keys.OfType<Type>();
+            return typeKeys.Where(k => AcceptKey(type, k))
+                .OrderBy(t => t, this);
         }
 
         protected override MethodDefinition<Attrib> Match(
@@ -85,6 +96,19 @@
                         restrict, method.Attribute.Invariant));
             }
         }
+
+        private static bool AcceptKey(Type type, Type key)
+        {
+            return key.IsAssignableFrom(type) ||
+                   (type.IsGenericType && key.IsGenericTypeDefinition &&
+                    type.GetGenericTypeDefinition() == key);
+        }
+
+        int IComparer<Type>.Compare(Type x, Type y)
+        {
+            if (x == y) return 0;
+            return x?.IsAssignableFrom(y) == true ? 1 : -1;
+        }
     }
 
     public class ContravariantPolicy<Attrib, Cb> : ContravariantPolicy<Attrib>
@@ -104,9 +128,12 @@
             return callback is Cb;
         }
 
-        public override Type GetVarianceType(object callback)
+        public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
-            return callback is Cb ? Target((Cb)callback)?.GetType() : null;
+            if (!(callback is Cb))
+                return Enumerable.Empty<object>();
+            var type = Target((Cb)callback)?.GetType();
+            return SelectKeys(type, keys);
         }
     }
 

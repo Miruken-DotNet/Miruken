@@ -25,8 +25,9 @@
 
     #endregion
 
-    public abstract class MethodDefinition : IComparable<MethodDefinition>
+    public abstract class MethodDefinition
     {
+        private Type _varianceType;
         private Delegate _delegate;
         private MethodBinding _binding;
         private Tuple<int, int>[] _mapping;
@@ -42,9 +43,21 @@
         public MethodInfo Method       { get; }
         public Type       ReturnType => Method.ReturnType;
         public bool       IsVoid     => ReturnType == typeof(void);
-        public Type       VarianceType { get; set; }
-        public bool       Untyped    => VarianceType == null ||
-                                        VarianceType == typeof(object);
+
+        public Type VarianceType
+        {
+            get { return _varianceType; }
+            set
+            {
+                if (value?.ContainsGenericParameters == true &&
+                    !value.IsGenericTypeDefinition)
+                    _varianceType = value.GetGenericTypeDefinition();
+                else
+                    _varianceType = value;
+            }
+        }
+
+        public abstract object GetKey();
 
         public bool Accepts(object callback, IHandler composer)
         {
@@ -57,8 +70,6 @@
         {
             _filters.AddRange(filters);
         }
-
-        public abstract int CompareTo(MethodDefinition other);
 
         protected object Invoke(object target, object[] args, Type returnType = null)
         {
@@ -239,14 +250,20 @@
                                    Attrib attribute)
             : base(method)
         {
-            Rule      = rule;
-            Attribute = attribute;
+            Rule       = rule;
+            Attribute  = attribute;
             var filter = attribute as ICallbackFilter;
             if (filter != null) AddFilters(filter);
         }
 
         public MethodRule<Attrib> Rule      { get; }
         public Attrib             Attribute { get; }
+
+        public override object GetKey()
+        {
+            var key = Attribute.Key;
+            return key == null || key is Type ? VarianceType : key;
+        }
 
         public override bool Dispatch(object target, object callback, IHandler composer)
         {

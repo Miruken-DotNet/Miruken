@@ -1,6 +1,7 @@
 namespace Miruken.Callback
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
     using Policy;
@@ -11,71 +12,51 @@ namespace Miruken.Callback
 
         private class PolicyMethods
         {
-            private List<MethodDefinition> _untypedMethods;
-            private LinkedList<MethodDefinition> _typedMethods;
-            private Dictionary<Type, LinkedListNode<MethodDefinition>> _indexes;
+            private List<MethodDefinition> _unknown;
+            private Dictionary<object, List<MethodDefinition>> _indexed;
+
+            public ICollection Keys => _indexed?.Keys;
 
             public void Insert(MethodDefinition method)
             {
-                if (method.Untyped)
+                var key = method.GetKey();
+                if (key == null)
                 {
-                    var untyped = _untypedMethods
-                               ?? (_untypedMethods = new List<MethodDefinition>());
-                    untyped.Add(method);
+                    var unknown = _unknown ??
+                        (_unknown = new List<MethodDefinition>());
+                    unknown.Add(method);
                     return;
                 }
-                var typed  = _typedMethods
-                          ?? (_typedMethods = new LinkedList<MethodDefinition>());
-                var type   = method.VarianceType;
-                var first  = GetFirst(type);
-                var insert = first ?? typed.First;
-                LinkedListNode<MethodDefinition> node;
 
-                while (true)
+                var indexed = _indexed ??
+                    (_indexed = new Dictionary<object, List<MethodDefinition>>());
+
+                List<MethodDefinition> methods;
+                if (!indexed.TryGetValue(key, out methods))
                 {
-                    if (insert == null)
-                    {
-                        node = typed.AddLast(method);
-                        break;
-                    }
-                    if (method.CompareTo(insert.Value) < 0)
-                    {
-                        node = typed.AddBefore(insert, method);
-                        break;
-                    }
-                    insert = insert.Next;
+                    methods = new List<MethodDefinition>();
+                    indexed.Add(key, methods);
                 }
- 
-                if (first == null)
-                {
-                    var indexes = _indexes
-                               ?? (_indexes = new Dictionary<Type, 
-                                   LinkedListNode<MethodDefinition>>());
-                    indexes[type] = node;
-                }
+                methods.Add(method);
             }
 
-            public IEnumerable<MethodDefinition> GetMethods(Type type)
+            public IEnumerable<MethodDefinition> GetMethods(IEnumerable keys)
             {
-                if (_typedMethods != null)
+                if (keys != null && _indexed != null)
                 {
-                    var node = GetFirst(type) ?? _typedMethods.First;
-                    while (node != null)
+                    foreach (var key in keys)
                     {
-                        yield return node.Value;
-                        node = node.Next;
+                        List<MethodDefinition> methods;
+
+                        if (_indexed.TryGetValue(key, out methods))
+                            foreach (var method in methods)
+                                yield return method;
                     }
                 }
-                if (_untypedMethods != null)
-                    foreach (var method in _untypedMethods)
+
+                if (_unknown != null)
+                    foreach (var method in _unknown)
                         yield return method;
-            }
-
-            private LinkedListNode<MethodDefinition> GetFirst(Type type)
-            {
-                if (_indexes == null || type == null) return null;
-                LinkedListNode<MethodDefinition> first;
-                return _indexes.TryGetValue(type, out first) ? first : null;
             }
         }
 
@@ -132,11 +113,13 @@ namespace Miruken.Callback
 
             var dispatched   = false;
             var oldUnhandled = HandleMethod.Unhandled;
-            var varianceType = policy.GetVarianceType(callback);
+            var indexes      = methods.Keys;
+            var keys         = indexes == null ? null 
+                             : policy.SelectKeys(callback, indexes);
 
             try
             {
-                foreach (var method in methods.GetMethods(varianceType))
+                foreach (var method in methods.GetMethods(keys))
                 {
                     HandleMethod.Unhandled = false;
                     var handled = method.Dispatch(target, callback, composer);

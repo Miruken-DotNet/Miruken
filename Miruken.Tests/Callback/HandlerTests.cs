@@ -274,7 +274,7 @@
         }
 
         [TestMethod]
-        public void Should_Provide_By_String_Key()
+        public void Should_Provide_Callbacks_By_String_Key()
         {
             var handler = new CustomHandler();
             var bar     = handler.Resolve("Bar") as Bar;

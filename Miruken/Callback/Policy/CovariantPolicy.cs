@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -32,7 +33,8 @@
         }
     }
 
-    public class CovariantPolicy<Attrib, Cb> : CallbackPolicy<Attrib>
+    public class CovariantPolicy<Attrib, Cb> 
+        : CallbackPolicy<Attrib>, IComparer<Type>
         where Attrib : DefinitionAttribute
     {
         public CovariantPolicy(Func<Cb, object> key)
@@ -53,9 +55,18 @@
             return callback is Cb;
         }
 
-        public override Type GetVarianceType(object callback)
+        public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
-            return callback is Cb ? Key((Cb)callback) as Type : null;
+            if (!(callback is Cb))
+                return Enumerable.Empty<object>();
+            var key  = Key((Cb)callback);
+            var type = key as Type;
+            if (type == null)
+                return Enumerable.Repeat(key, 1);
+            var typeKeys = keys.OfType<Type>();
+            return type == typeof(object) ? typeKeys
+                 : typeKeys.Where(k => AcceptKey(type, k))
+                      .OrderBy(t => t, this);
         }
 
         protected override MethodDefinition<Attrib> Match(
@@ -86,6 +97,19 @@
             }
             else if (key != null)
                 method.AddFilters(new KeyEqualityFilter<Cb>(key, Key));
+        }
+
+        private static bool AcceptKey(Type type, Type key)
+        {
+            return type.IsAssignableFrom(key) ||
+                   (type.IsGenericType && key.IsGenericTypeDefinition &&
+                    type.GetGenericTypeDefinition() == key);
+        }
+
+        int IComparer<Type>.Compare(Type x, Type y)
+        {
+            if (x == y) return 0;
+            return x?.IsAssignableFrom(y) == true ? -1 : 1;
         }
     }
 

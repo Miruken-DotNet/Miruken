@@ -17,18 +17,6 @@
             _returnType = returnType;
         }
 
-        public override int CompareTo(MethodDefinition other)
-        {
-            var otherMethod = other as CovariantMethod<Attrib>;
-            if (otherMethod == null) return -1;
-            if (otherMethod.VarianceType == VarianceType)
-                return 0;
-            if (VarianceType == null ||
-                !VarianceType.IsAssignableFrom(otherMethod.VarianceType))
-                return 1;
-            return -1;
-        }
-
         protected override bool VerifyResult(object target, object callback, IHandler composer)
         {
             var result = Invoke(target, callback, composer);

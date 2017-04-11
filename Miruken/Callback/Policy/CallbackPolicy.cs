@@ -1,13 +1,13 @@
 ﻿namespace Miruken.Callback.Policy
 {
-    using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
 
     public abstract class CallbackPolicy
     {
-        public abstract Type GetVarianceType(object callback);
         public abstract bool Accepts(object callback, IHandler composer);
+        public abstract IEnumerable SelectKeys(object callback, ICollection keys);
     }
 
     public abstract class CallbackPolicy<Attrib> : CallbackPolicy
