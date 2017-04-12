@@ -10,7 +10,7 @@ namespace Miruken.Callback.Policy
 
         public ExtractArgument(Func<Cb, Res> extract)
         {
-            if (_extract == null)
+            if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
             _extract = extract;
         }
