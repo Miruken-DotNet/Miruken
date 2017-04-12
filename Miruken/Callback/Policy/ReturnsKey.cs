@@ -5,6 +5,12 @@
     public class ReturnsKey<Attrib> : ReturnRule<Attrib>
         where Attrib : DefinitionAttribute
     {
+        public static readonly ReturnsKey<Attrib> Instance = new ReturnsKey<Attrib>();
+
+        private ReturnsKey()
+        {        
+        }
+
         public override bool Matches(Type returnType, Attrib attribute)
         {
             if (returnType == typeof(void)) return false;

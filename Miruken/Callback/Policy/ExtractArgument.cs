@@ -10,6 +10,8 @@ namespace Miruken.Callback.Policy
 
         public ExtractArgument(Func<Cb, Res> extract)
         {
+            if (_extract == null)
+                throw new ArgumentNullException(nameof(extract));
             _extract = extract;
         }
 
@@ -17,6 +19,12 @@ namespace Miruken.Callback.Policy
         {
             var paramType = parameter.ParameterType;
             return typeof(Res).IsAssignableFrom(paramType);
+        }
+
+        public override void Configure(
+            ParameterInfo parameter, MethodDefinition<Attrib> method)
+        {
+            method.AddFilters(GetFilters(parameter, cb => _extract((Cb)cb)));
         }
 
         public override object Resolve(object callback, IHandler composer)

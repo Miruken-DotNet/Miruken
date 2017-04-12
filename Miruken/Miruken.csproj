@@ -60,12 +60,14 @@
     <Compile Include="Callback\HandlerFilter.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
     <Compile Include="Callback\Policy\CallbackArgument.cs" />
+    <Compile Include="Callback\Policy\CallbackDependencyFilter.cs" />
     <Compile Include="Callback\Policy\ComposerArgument.cs" />
     <Compile Include="Callback\Policy\CovariantMethod.cs" />
     <Compile Include="Callback\Policy\ContravariantMethod.cs" />
     <Compile Include="Callback\Policy\ContravariantPolicy.cs" />
     <Compile Include="Callback\Policy\CovariantPolicy.cs" />
     <Compile Include="Callback\Policy\ExtractArgument.cs" />
+    <Compile Include="Callback\Policy\CallbackFilterAttribute.cs" />
     <Compile Include="Callback\Policy\ICallbackFilter.cs" />
     <Compile Include="Callback\Policy\KeyEqualityFilter.cs" />
     <Compile Include="Callback\Policy\MethodDefinition.cs" />

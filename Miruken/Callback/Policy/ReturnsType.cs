@@ -6,21 +6,17 @@
         where Attrib : DefinitionAttribute
     {
         private readonly Type _type;
-        private readonly bool _invariant;
 
-        public ReturnsType(Type type, bool invariant = false)
+        public ReturnsType(Type type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
-            _type      = type;
-            _invariant = invariant;
+            _type = type;
         }
 
         public override bool Matches(Type returnType, Attrib attribute)
         {
-            return _invariant
-                 ? returnType == _type
-                 : _type.IsAssignableFrom(returnType);
+            return _type.IsAssignableFrom(returnType);
         }
     }
 

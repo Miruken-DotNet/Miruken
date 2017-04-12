@@ -122,7 +122,7 @@
 
         public CallbackArgument<Attrib, Cb> Callback => CallbackArgument<Attrib, Cb>.Instance;
         public ComposerArgument<Attrib>     Composer => ComposerArgument<Attrib>.Instance;
-        public ReturnsKey<Attrib>           Return   => new ReturnsKey<Attrib>();
+        public ReturnsKey<Attrib>           Return   => ReturnsKey<Attrib>.Instance;
 
         public ExtractArgument<Attrib, Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {

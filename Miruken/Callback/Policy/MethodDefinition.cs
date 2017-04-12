@@ -31,12 +31,13 @@
         private Delegate _delegate;
         private MethodBinding _binding;
         private Tuple<int, int>[] _mapping;
-        private readonly List<ICallbackFilter> _filters;
+        private List<ICallbackFilter> _filters;
 
         protected MethodDefinition(MethodInfo method)
         {
-            Method   = method;
-            _filters = new List<ICallbackFilter>();
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            Method = method;
             Configure(method);
         }
 
@@ -61,13 +62,15 @@
 
         public bool Accepts(object callback, IHandler composer)
         {
-            return _filters.All(f => f.Accepts(callback, composer));
+            return _filters?.All(f => f.Accepts(callback, composer)) != false;
         }
 
         public abstract bool Dispatch(object target, object callback, IHandler composer);
 
         internal void AddFilters(params ICallbackFilter[] filters)
         {
+            if (filters == null || filters.Length == 0) return;
+            if (_filters == null) _filters = new List<ICallbackFilter>();
             _filters.AddRange(filters);
         }
 

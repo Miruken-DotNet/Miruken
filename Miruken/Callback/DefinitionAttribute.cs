@@ -8,8 +8,7 @@ namespace Miruken.Callback
         AllowMultiple = true, Inherited = false)]
     public abstract class DefinitionAttribute : Attribute
     {
-        public object Key       { get; set; }
-        public bool   Invariant { get; set; }
+        public object Key { get; set; }
 
         public abstract CallbackPolicy MethodPolicy { get; }
 
