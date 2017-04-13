@@ -23,8 +23,7 @@
 
         public static readonly ContravariantPolicy<HandlesAttribute> Policy =
             ContravariantPolicy.For<HandlesAttribute>(
-                x => x.MatchMethod(x.Callback)
-                      .MatchMethod(x.Callback, x.Composer)
+                x => x.MatchMethod(x.Callback, x.Composer.Optional)
             );
     }
 }

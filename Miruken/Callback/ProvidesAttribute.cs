@@ -66,10 +66,8 @@
         public static readonly CovariantPolicy<ProvidesAttribute, Resolution> Policy =
              CovariantPolicy.For<ProvidesAttribute>()
                 .HandlesCallback<Resolution>(r => r.Key,
-                    x => x.MatchMethod(x.Return.OrVoid, x.Callback)
-                          .MatchMethod(x.Return.OrVoid, x.Callback, x.Composer)
-                          .MatchMethod(x.Return, x.Composer)
-                          .MatchMethod(x.Return)
+                    x => x.MatchMethod(x.Return.OrVoid, x.Callback, x.Composer.Optional)
+                          .MatchMethod(x.Return, x.Composer.Optional)
                           .CreateUsing((m, r, a, rt) => new ProvidesMethod(m, r, a, rt))
                     );
     }

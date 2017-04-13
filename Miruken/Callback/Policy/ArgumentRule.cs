@@ -7,6 +7,10 @@
     public abstract class ArgumentRule<Attrib>
         where Attrib : DefinitionAttribute
     {
+        public OptionalArgument<Attrib> Optional =>
+            this as OptionalArgument<Attrib> ??
+            new OptionalArgument<Attrib>(this);
+
         public abstract bool Matches(
            ParameterInfo parameter, Attrib attribute);
 

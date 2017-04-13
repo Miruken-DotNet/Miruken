@@ -37,11 +37,14 @@
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            Method = method;
-            Configure(method);
+            var parameters = method.GetParameters();
+            ConfigureMethod(method, parameters);
+            ArgumentCount = parameters.Length;
+            Method        = method;
         }
 
-        public MethodInfo Method       { get; }
+        public MethodInfo Method        { get; }
+        public int        ArgumentCount { get; }
         public Type       ReturnType => Method.ReturnType;
         public bool       IsVoid     => ReturnType == typeof(void);
 
@@ -116,9 +119,8 @@
         protected object InvokeLate(object target, object[] args, Type returnType = null)
         {
             var method     = Method;
-            var parameters = method.GetParameters();
-            if (parameters.Length > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {GetDescription()} expects {parameters.Length} arguments");
+            if (ArgumentCount > (args?.Length ?? 0))
+                throw new ArgumentException($"Method {GetDescription()} expects {ArgumentCount} arguments");
             if (_mapping != null)
             {
                 var argTypes = _mapping.Select(mapping =>
@@ -141,16 +143,16 @@
                                  CultureInfo.InvariantCulture);
         }
 
-        private void Configure(MethodInfo method)
+        private void ConfigureMethod(MethodInfo method, ParameterInfo[] parameters)
         {
-            var parameters = method.GetParameters();
             if (!method.IsGenericMethodDefinition)
             {
+                var isVoid = method.ReturnType == typeof(void);
                 switch (parameters.Length)
                 {
                     #region Early Bound
                     case 0:
-                        if (IsVoid)
+                        if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionNoArgs(method);
                             _binding  = MethodBinding.FastNoArgsVoid;
@@ -162,7 +164,7 @@
                         }
                         return;
                     case 1:
-                        if (IsVoid)
+                        if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionOneArg(method);
                             _binding  = MethodBinding.FastOneArgVoid;
@@ -174,7 +176,7 @@
                         }
                         return;
                     case 2:
-                        if (IsVoid)
+                        if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionTwoArgs(method);
                             _binding  = MethodBinding.FastTwoArgsVoid;
@@ -186,7 +188,7 @@
                         }
                         return;
                     case 3:
-                        if (IsVoid)
+                        if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionThreeArgs(method);
                             _binding  = MethodBinding.FastThreeArgsVoid;
@@ -282,7 +284,7 @@
         protected object Invoke(object target, object callback,
                                 IHandler composer, Type returnType = null)
         {
-            var args = Rule.ResolveArgs(callback, composer);
+            var args = Rule.ResolveArgs(this, callback, composer);
             return Invoke(target, args, returnType);
         }
     }

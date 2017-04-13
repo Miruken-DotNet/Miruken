@@ -1,23 +1,34 @@
 namespace Miruken.Callback.Policy
 {
+    using System;
     using System.Linq;
     using System.Reflection;
 
     public class MethodRule<Attrib>
         where Attrib : DefinitionAttribute
     {
+        private readonly int _minArgs;
         private readonly ArgumentRule<Attrib>[] _args;
         private readonly ReturnRule<Attrib> _returnValue;
 
         public MethodRule(params ArgumentRule<Attrib>[] args)
         {
-            _args = args;
+            _minArgs = args.Length - args.Aggregate(0, (opt, arg) =>
+            {
+                if (arg is IOptional) return opt + 1;        
+                if (opt > 0)
+                    throw new ArgumentException(
+                        "Optional arguments must appear after all required arguments");
+                return opt;
+            });
+
+            _args  = args;
         }
 
         public MethodRule(ReturnRule<Attrib> returnValue, params ArgumentRule<Attrib>[] args)
+            : this(args)
         {
             _returnValue = returnValue;
-            _args        = args;
         }
 
         public bool Matches(MethodInfo method, Attrib attribute)
@@ -27,8 +38,9 @@ namespace Miruken.Callback.Policy
                 return false;
 
             var parameters = method.GetParameters();
-            return _args.Length == parameters.Length &&
-                   _args.Zip(parameters, (arg, param) => arg.Matches(param, attribute))
+            var paramCount = parameters.Length;
+            return paramCount >= _minArgs && paramCount <= _args.Length &&
+                   parameters.Zip(_args, (param, arg) => arg.Matches(param, attribute))
                         .All(m => m);
         }
 
@@ -40,9 +52,11 @@ namespace Miruken.Callback.Policy
                 _args[i].Configure(parameters[i], method);
         }
 
-        public object[] ResolveArgs(object callback, IHandler handler)
+        public object[] ResolveArgs(
+            MethodDefinition method, object callback, IHandler handler)
         {
-            return _args.Select(arg => arg.Resolve(callback, handler))
+            return _args.Take(method.ArgumentCount)
+                        .Select(arg => arg.Resolve(callback, handler))
                         .ToArray();
         }
     }
