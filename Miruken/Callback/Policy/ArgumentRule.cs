@@ -4,18 +4,16 @@
     using System.Linq;
     using System.Reflection;
 
-    public abstract class ArgumentRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public abstract class ArgumentRule
     {
-        public OptionalArgument<Attrib> Optional =>
-            this as OptionalArgument<Attrib> ??
-            new OptionalArgument<Attrib>(this);
+        public OptionalArgument Optional => this as OptionalArgument ??
+                                            new OptionalArgument(this);
 
         public abstract bool Matches(
-           ParameterInfo parameter, Attrib attribute);
+           ParameterInfo parameter, DefinitionAttribute attribute);
 
         public virtual void Configure(
-            ParameterInfo parameter, MethodDefinition<Attrib> method)
+            ParameterInfo parameter, MethodBinding binding)
         {         
         }
 

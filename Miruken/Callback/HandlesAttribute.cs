@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Callback
 {
-    using System.Reflection;
     using Policy;
 
     public class HandlesAttribute : DefinitionAttribute
@@ -14,15 +13,10 @@
             Key = key;
         }
 
-        public override CallbackPolicy MethodPolicy => Policy;
+        public override CallbackPolicy CallbackPolicy => Policy;
 
-        public override MethodDefinition MatchMethod(MethodInfo method)
-        { 
-            return Policy.MatchMethod(method, this);
-        }
-
-        public static readonly ContravariantPolicy<HandlesAttribute> Policy =
-            ContravariantPolicy.For<HandlesAttribute>(
+        public static readonly ContravariantPolicy Policy =
+            ContravariantPolicy.Create(
                 x => x.MatchMethod(x.Callback, x.Composer.Optional)
             );
     }

@@ -10,8 +10,11 @@ namespace Miruken.Callback
     {
         public object Key { get; set; }
 
-        public abstract CallbackPolicy MethodPolicy { get; }
+        public abstract CallbackPolicy CallbackPolicy { get; }
 
-        public abstract MethodDefinition MatchMethod(MethodInfo method);  
+        public MethodRule MatchMethod(MethodInfo method)
+        {
+            return CallbackPolicy.MatchMethod(method, this);
+        }
     }
 }

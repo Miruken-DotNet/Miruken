@@ -1,18 +1,16 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Reflection;
 
-    public class CovariantMethod<Attrib> : MethodDefinition<Attrib>
-        where Attrib : DefinitionAttribute
+    public class CovariantMethod : MethodBinding
     {
         private readonly Func<object, Type> _returnType;
 
-        public CovariantMethod(MethodInfo method,
-                               MethodRule<Attrib> rule,
-                               Attrib attribute,
+        public CovariantMethod(MethodRule rule,
+                               MethodDispatch dispatch,
+                               DefinitionAttribute attribute,
                                Func<object, Type> returnType)
-            : base(method, rule, attribute)
+            : base(rule, dispatch, attribute)
         {
             _returnType = returnType;
         }

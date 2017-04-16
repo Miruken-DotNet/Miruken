@@ -1,39 +1,34 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using Infrastructure;
 
-    #region Method Binding
-
-    public enum MethodBinding
+    public class MethodDispatch
     {
-        LateBound,
-        OpenGeneric,
-        FastNoArgsVoid,
-        FastOneArgVoid,
-        FastTwoArgsVoid,
-        FastThreeArgsVoid,
-        FastNoArgsReturn,
-        FastOneArgReturn,
-        FastTwoArgsReturn,
-        FastThreeArgsReturn
-    }
-
-    #endregion
-
-    public abstract class MethodDefinition
-    {
-        private Type _varianceType;
         private Delegate _delegate;
-        private MethodBinding _binding;
+        private DispatchType _dispatchType;
         private Tuple<int, int>[] _mapping;
-        private List<ICallbackFilter> _filters;
 
-        protected MethodDefinition(MethodInfo method)
+        private enum DispatchType
+        {
+            LateBound,
+            OpenGeneric,
+            FastNoArgsVoid,
+            FastOneArgVoid,
+            FastTwoArgsVoid,
+            FastThreeArgsVoid,
+            FastFourArgsVoid,
+            FastNoArgsReturn,
+            FastOneArgReturn,
+            FastTwoArgsReturn,
+            FastThreeArgsReturn,
+            FastFourArgsReturn
+        }
+
+        public MethodDispatch(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -48,68 +43,47 @@
         public Type       ReturnType => Method.ReturnType;
         public bool       IsVoid     => ReturnType == typeof(void);
 
-        public Type VarianceType
+        public object Invoke(object target, object[] args, Type returnType = null)
         {
-            get { return _varianceType; }
-            set
-            {
-                if (value?.ContainsGenericParameters == true &&
-                    !value.IsGenericTypeDefinition)
-                    _varianceType = value.GetGenericTypeDefinition();
-                else
-                    _varianceType = value;
-            }
-        }
-
-        public abstract object GetKey();
-
-        public bool Accepts(object callback, IHandler composer)
-        {
-            return _filters?.All(f => f.Accepts(callback, composer)) != false;
-        }
-
-        public abstract bool Dispatch(object target, object callback, IHandler composer);
-
-        internal void AddFilters(params ICallbackFilter[] filters)
-        {
-            if (filters == null || filters.Length == 0) return;
-            if (_filters == null) _filters = new List<ICallbackFilter>();
-            _filters.AddRange(filters);
-        }
-
-        protected object Invoke(object target, object[] args, Type returnType = null)
-        {
-            switch (_binding)
+            switch (_dispatchType)
             {
                 #region Fast Invocation
-                case MethodBinding.FastNoArgsVoid:
+                case DispatchType.FastNoArgsVoid:
                     AssertArgsCount(0, args);
                     ((NoArgsDelegate)_delegate)(target);
                     return null;
-                case MethodBinding.FastOneArgVoid:
+                case DispatchType.FastOneArgVoid:
                     AssertArgsCount(1, args);
                     ((OneArgDelegate)_delegate)(target, args[0]);
                     return null;
-                case MethodBinding.FastTwoArgsVoid:
+                case DispatchType.FastTwoArgsVoid:
                     AssertArgsCount(2, args);
                     ((TwoArgsDelegate)_delegate)(target, args[0], args[1]);
                     return null;
-                case MethodBinding.FastThreeArgsVoid:
+                case DispatchType.FastThreeArgsVoid:
                     AssertArgsCount(3, args);
                     ((ThreeArgsDelegate)_delegate)(target, args[0], args[1], args[2]);
                     return null;
-                case MethodBinding.FastNoArgsReturn:
+                case DispatchType.FastFourArgsVoid:
+                    AssertArgsCount(4, args);
+                    ((FourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
+                    return null;
+                case DispatchType.FastNoArgsReturn:
                     AssertArgsCount(0, args);
                     return ((NoArgsReturnDelegate)_delegate)(target);
-                case MethodBinding.FastOneArgReturn:
+                case DispatchType.FastOneArgReturn:
                     AssertArgsCount(1, args);
                     return ((OneArgReturnDelegate)_delegate)(target, args[0]);
-                case MethodBinding.FastTwoArgsReturn:
+                case DispatchType.FastTwoArgsReturn:
                     AssertArgsCount(2, args);
                     return ((TwoArgsReturnDelegate)_delegate)(target, args[0], args[1]);
-                case MethodBinding.FastThreeArgsReturn:
+                case DispatchType.FastThreeArgsReturn:
                     AssertArgsCount(3, args);
                     return ((ThreeArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2]);
+                case DispatchType.FastFourArgsReturn:
+                    AssertArgsCount(4, args);
+                    ((FourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
+                    return null;
                 #endregion
                 default:
                     return InvokeLate(target, args, returnType);
@@ -118,7 +92,7 @@
 
         protected object InvokeLate(object target, object[] args, Type returnType = null)
         {
-            var method     = Method;
+            var method = Method;
             if (ArgumentCount > (args?.Length ?? 0))
                 throw new ArgumentException($"Method {GetDescription()} expects {ArgumentCount} arguments");
             if (_mapping != null)
@@ -155,53 +129,65 @@
                         if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionNoArgs(method);
-                            _binding  = MethodBinding.FastNoArgsVoid;
+                            _dispatchType = DispatchType.FastNoArgsVoid;
                         }
                         else
                         {
                             _delegate = RuntimeHelper.CreateFuncNoArgs(method);
-                            _binding  = MethodBinding.FastNoArgsReturn;
+                            _dispatchType = DispatchType.FastNoArgsReturn;
                         }
                         return;
                     case 1:
                         if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionOneArg(method);
-                            _binding  = MethodBinding.FastOneArgVoid;
+                            _dispatchType = DispatchType.FastOneArgVoid;
                         }
                         else
                         {
                             _delegate = RuntimeHelper.CreateFuncOneArg(method);
-                            _binding  = MethodBinding.FastOneArgReturn;
+                            _dispatchType = DispatchType.FastOneArgReturn;
                         }
                         return;
                     case 2:
                         if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionTwoArgs(method);
-                            _binding  = MethodBinding.FastTwoArgsVoid;
+                            _dispatchType = DispatchType.FastTwoArgsVoid;
                         }
                         else
                         {
                             _delegate = RuntimeHelper.CreateFuncTwoArgs(method);
-                            _binding  = MethodBinding.FastTwoArgsReturn;
+                            _dispatchType = DispatchType.FastTwoArgsReturn;
                         }
                         return;
                     case 3:
                         if (isVoid)
                         {
                             _delegate = RuntimeHelper.CreateActionThreeArgs(method);
-                            _binding  = MethodBinding.FastThreeArgsVoid;
+                            _dispatchType = DispatchType.FastThreeArgsVoid;
                         }
                         else
                         {
                             _delegate = RuntimeHelper.CreateFuncThreeArgs(method);
-                            _binding  = MethodBinding.FastThreeArgsReturn;
+                            _dispatchType = DispatchType.FastThreeArgsReturn;
+                        }
+                        return;
+                    case 4:
+                        if (isVoid)
+                        {
+                            _delegate = RuntimeHelper.CreateActionFourArgs(method);
+                            _dispatchType = DispatchType.FastFourArgsVoid;
+                        }
+                        else
+                        {
+                            _delegate = RuntimeHelper.CreateFuncFourArgs(method);
+                            _dispatchType = DispatchType.FastFourArgsReturn;
                         }
                         return;
                     #endregion
                     default:
-                        _binding = MethodBinding.LateBound;
+                        _dispatchType = DispatchType.LateBound;
                         return;
                 }
             }
@@ -213,7 +199,7 @@
             var returnType = method.ReturnType;
             if (returnType.ContainsGenericParameters)
                 argSources.Add(Tuple.Create(-1, returnType));
-            var methodArgs = method.GetGenericArguments();
+            var methodArgs  = method.GetGenericArguments();
             var typeMapping = new Tuple<int, int>[methodArgs.Length];
             foreach (var source in argSources)
             {
@@ -230,8 +216,8 @@
                 throw new InvalidOperationException(
                     $"Type mapping for {GetDescription()} could not be inferred");
 
-            _mapping = typeMapping;
-            _binding = MethodBinding.OpenGeneric;
+            _mapping     = typeMapping;
+            _dispatchType = DispatchType.OpenGeneric;
         }
 
         protected string GetDescription()
@@ -244,48 +230,6 @@
             if (args.Length != expected)
                 throw new ArgumentException(
                     $"Expected {expected} arguments, but {args.Length} provided");
-        }
-    }
-
-    public abstract class MethodDefinition<Attrib> : MethodDefinition
-        where Attrib : DefinitionAttribute
-    {
-        protected MethodDefinition(MethodInfo method, 
-                                   MethodRule<Attrib> rule, 
-                                   Attrib attribute)
-            : base(method)
-        {
-            Rule       = rule;
-            Attribute  = attribute;
-            var filter = attribute as ICallbackFilter;
-            if (filter != null) AddFilters(filter);
-        }
-
-        public MethodRule<Attrib> Rule      { get; }
-        public Attrib             Attribute { get; }
-
-        public override object GetKey()
-        {
-            var key = Attribute.Key;
-            return key == null || key is Type ? VarianceType : key;
-        }
-
-        public override bool Dispatch(object target, object callback, IHandler composer)
-        {
-            return Accepts(callback, composer) && VerifyResult(target, callback, composer);
-        }
-
-        protected virtual bool VerifyResult(object target, object callback, IHandler composer)
-        {
-            Invoke(target, callback, composer);
-            return true;
-        }
-
-        protected object Invoke(object target, object callback,
-                                IHandler composer, Type returnType = null)
-        {
-            var args = Rule.ResolveArgs(this, callback, composer);
-            return Invoke(target, args, returnType);
         }
     }
 }

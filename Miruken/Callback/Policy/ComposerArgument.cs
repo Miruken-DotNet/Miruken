@@ -2,26 +2,25 @@ namespace Miruken.Callback.Policy
 {
     using System.Reflection;
 
-    public class ComposerArgument<Attrib> : ArgumentRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ComposerArgument : ArgumentRule
     {
-        public static readonly ComposerArgument<Attrib> 
-            Instance = new ComposerArgument<Attrib>();
+        public static readonly ComposerArgument 
+            Instance = new ComposerArgument();
 
         private ComposerArgument()
         {    
         }
 
-        public override bool Matches(ParameterInfo parameter, Attrib attribute)
+        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
         {
             var paramType = parameter.ParameterType;
             return typeof(IHandler).IsAssignableFrom(paramType);
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodDefinition<Attrib> method)
+            ParameterInfo parameter, MethodBinding binding)
         {
-            method.AddFilters(GetFilters(parameter));
+            binding.AddFilters(GetFilters(parameter));
         }
 
         public override object Resolve(object callback, IHandler composer)

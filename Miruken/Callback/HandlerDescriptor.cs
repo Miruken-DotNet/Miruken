@@ -12,41 +12,41 @@ namespace Miruken.Callback
 
         private class PolicyMethods
         {
-            private List<MethodDefinition> _unknown;
-            private Dictionary<object, List<MethodDefinition>> _indexed;
+            private List<MethodBinding> _unknown;
+            private Dictionary<object, List<MethodBinding>> _indexed;
 
             public ICollection Keys => _indexed?.Keys;
 
-            public void Insert(MethodDefinition method)
+            public void Insert(MethodBinding method)
             {
                 var key = method.GetKey();
                 if (key == null)
                 {
                     var unknown = _unknown ??
-                        (_unknown = new List<MethodDefinition>());
+                        (_unknown = new List<MethodBinding>());
                     unknown.Add(method);
                     return;
                 }
 
                 var indexed = _indexed ??
-                    (_indexed = new Dictionary<object, List<MethodDefinition>>());
+                    (_indexed = new Dictionary<object, List<MethodBinding>>());
 
-                List<MethodDefinition> methods;
+                List<MethodBinding> methods;
                 if (!indexed.TryGetValue(key, out methods))
                 {
-                    methods = new List<MethodDefinition>();
+                    methods = new List<MethodBinding>();
                     indexed.Add(key, methods);
                 }
                 methods.Add(method);
             }
 
-            public IEnumerable<MethodDefinition> GetMethods(IEnumerable keys)
+            public IEnumerable<MethodBinding> GetMethods(IEnumerable keys)
             {
                 if (keys != null && _indexed != null)
                 {
                     foreach (var key in keys)
                     {
-                        List<MethodDefinition> methods;
+                        List<MethodBinding> methods;
 
                         if (_indexed.TryGetValue(key, out methods))
                             foreach (var method in methods)
@@ -68,6 +68,8 @@ namespace Miruken.Callback
         {
             foreach (var method in type.GetMethods(Binding))
             {
+                MethodDispatch dispatch = null;
+
                 if (method.IsSpecialName || method.IsFamily ||
                     method.DeclaringType == typeof (object))
                     continue;
@@ -77,23 +79,26 @@ namespace Miruken.Callback
 
                 foreach (var attribute in attributes)
                 {
-                    var definition = attribute.MatchMethod(method);
-                    if (definition == null)
+                    var rule = attribute.MatchMethod(method);
+                    if (rule == null)
                         throw new InvalidOperationException(
                             $"The policy for {attribute.GetType().FullName} rejected method '{GetDescription(method)}'");
+
+                    dispatch = dispatch ?? new MethodDispatch(method);
+                    var binding = rule.Bind(dispatch, attribute);
 
                     if (_methods == null)
                         _methods = new Dictionary<CallbackPolicy, PolicyMethods>();
 
                     PolicyMethods methods;
-                    var policy = attribute.MethodPolicy;
+                    var policy = attribute.CallbackPolicy;
                     if (!_methods.TryGetValue(policy, out methods))
                     {
                         methods = new PolicyMethods();
                         _methods.Add(policy, methods);
                     }
 
-                    methods.Insert(definition);
+                    methods.Insert(binding);
                 }
             }
         }
@@ -104,8 +109,6 @@ namespace Miruken.Callback
         {
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
-
-            if (!policy.Accepts(callback, composer)) return false;
 
             PolicyMethods methods = null;
             if (_methods?.TryGetValue(policy, out methods) != true)

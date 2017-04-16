@@ -1,14 +1,11 @@
 ﻿namespace Miruken.Callback.Policy
 {
-    using System.Reflection;
-
-    public class ContravariantMethod<Attrib> : MethodDefinition<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ContravariantMethod : MethodBinding
     {
-        public ContravariantMethod(MethodInfo method,
-                                   MethodRule<Attrib> rule,
-                                   Attrib attribute)
-            : base(method, rule, attribute)
+        public ContravariantMethod(MethodRule rule,
+                                   MethodDispatch dispatch,
+                                   DefinitionAttribute attribute)
+            : base(rule, dispatch, attribute)
         {        
         }
 

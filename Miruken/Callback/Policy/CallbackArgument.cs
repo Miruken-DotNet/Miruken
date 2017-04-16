@@ -3,17 +3,16 @@ namespace Miruken.Callback.Policy
     using System;
     using System.Reflection;
 
-    public class CallbackArgument<Attrib> : ArgumentRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public class CallbackArgument : ArgumentRule
     {
-        public static readonly CallbackArgument<Attrib>
-            Instance = new CallbackArgument<Attrib>();
+        public static readonly CallbackArgument
+            Instance = new CallbackArgument();
 
         private CallbackArgument()
         {           
         }
 
-        public override bool Matches(ParameterInfo parameter, Attrib attribute)
+        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
         {
             var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
@@ -25,12 +24,12 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodDefinition<Attrib> method)
+            ParameterInfo parameter, MethodBinding binding)
         {
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
-            method.VarianceType = paramType;
-            method.AddFilters(GetFilters(parameter));
+            binding.VarianceType = paramType;
+            binding.AddFilters(GetFilters(parameter));
         }
 
         public override object Resolve(object callback, IHandler composer)
@@ -39,26 +38,25 @@ namespace Miruken.Callback.Policy
         }
     }
 
-    public class CallbackArgument<Attrib, Cb> : ArgumentRule<Attrib>
-         where Attrib : DefinitionAttribute
+    public class CallbackArgument<Cb> : ArgumentRule
     {
-        public static readonly CallbackArgument<Attrib, Cb>
-             Instance = new CallbackArgument<Attrib, Cb>();
+        public static readonly CallbackArgument<Cb>
+             Instance = new CallbackArgument<Cb>();
 
         private CallbackArgument()
         {         
         }
 
-        public override bool Matches(ParameterInfo parameter, Attrib attribute)
+        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
         {
             var paramType = parameter.ParameterType;
             return typeof(Cb).IsAssignableFrom(paramType);
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodDefinition<Attrib> method)
+            ParameterInfo parameter, MethodBinding binding)
         {
-            method.AddFilters(GetFilters(parameter));
+            binding.AddFilters(GetFilters(parameter));
         }
 
         public override object Resolve(object callback, IHandler composer)

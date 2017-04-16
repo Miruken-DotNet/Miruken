@@ -3,8 +3,7 @@ namespace Miruken.Callback.Policy
     using System;
     using System.Reflection;
 
-    public class TargetArgument<Attrib, Cb> : ArgumentRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public class TargetArgument<Cb> : ArgumentRule
     {
         private readonly Func<Cb, object> _target;
 
@@ -15,7 +14,7 @@ namespace Miruken.Callback.Policy
             _target = target;
         }
 
-        public override bool Matches(ParameterInfo parameter, Attrib attribute)
+        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
         {
             var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
@@ -27,12 +26,12 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodDefinition<Attrib> method)
+            ParameterInfo parameter, MethodBinding binding)
         {
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
-            method.VarianceType = paramType;
-            method.AddFilters(GetFilters(parameter, cb => _target((Cb)cb)));
+            binding.VarianceType = paramType;
+            binding.AddFilters(GetFilters(parameter, cb => _target((Cb)cb)));
         }
 
         public override object Resolve(object callback, IHandler composer)

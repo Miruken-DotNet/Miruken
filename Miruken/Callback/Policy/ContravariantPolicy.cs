@@ -4,58 +4,11 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
 
-    public static class ContravariantPolicy
+    public class ContravariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public static ContravariantPolicy<Attrib> For<Attrib>(
-            Action<ContravariantPolicyBuilder<Attrib>> configure)
-            where Attrib : DefinitionAttribute
-        {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-            var policy  = new ContravariantPolicy<Attrib>();
-            var builder = new ContravariantPolicyBuilder<Attrib>(policy);
-            configure(builder);
-            return policy;
-        }
-
-        public static Callback<Attrib> For<Attrib>()
-            where Attrib : DefinitionAttribute
-        {
-            return new Callback<Attrib>();
-        }
-
-        public class Callback<Attrib>
-            where Attrib : DefinitionAttribute
-        {
-            public ContravariantPolicy<Attrib, Cb> HandlesCallback<Cb>(
-                Func<Cb, object> target,
-                Action<ContravariantPolicyBuilder<Attrib, Cb>> configure)
-            {
-                if (target == null)
-                    throw new ArgumentNullException(nameof(target));
-                if (configure == null)
-                    throw new ArgumentNullException(nameof(configure));
-                var policy  = new ContravariantPolicy<Attrib, Cb>(target);
-                var builder = new ContravariantPolicyBuilder<Attrib, Cb>(policy);
-                configure(builder);
-                return policy;
-            }
-        }
-    }
-
-    public class ContravariantPolicy<Attrib> 
-        : CallbackPolicy<Attrib>, IComparer<Type>
-        where Attrib : DefinitionAttribute
-    {
-        public Func<MethodInfo, MethodRule<Attrib>, Attrib,
-               ContravariantMethod<Attrib>> Creator { get; set; }
-
-        public override bool Accepts(object callback, IHandler composer)
-        {
-            return true;
-        }
+        public Func<MethodRule, MethodDispatch, DefinitionAttribute,
+               ContravariantMethod> Binder { get; set; }
 
         public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
@@ -70,20 +23,16 @@
                        .OrderBy(t => t, this);
         }
 
-        protected override MethodDefinition<Attrib> Match(
-            MethodInfo method, Attrib attribute,
-            IEnumerable<MethodRule<Attrib>> rules)
+        public MethodBinding Bind(MethodRule rule, MethodDispatch dispatch,
+                                  DefinitionAttribute attribute)
         {
-            var match = rules.FirstOrDefault(r => r.Matches(method, attribute));
-            if (match == null) return null;
-            var definition = Creator?.Invoke(method, match, attribute)
-                ?? new ContravariantMethod<Attrib>(method, match, attribute);
-            match.Configure(definition);
-            AssignVariance(definition);
+            var definition = Binder?.Invoke(rule, dispatch, attribute)
+                ?? new ContravariantMethod(rule, dispatch, attribute);
+            InferVariance(definition);
             return definition;
         }
 
-        private static void AssignVariance(MethodDefinition<Attrib> method)
+        private static void InferVariance(MethodBinding method)
         {
             var restrict = method.Attribute.Key as Type;
             if (restrict != null)
@@ -105,10 +54,32 @@
             if (x == y) return 0;
             return x?.IsAssignableFrom(y) == true ? 1 : -1;
         }
+
+        public static ContravariantPolicy Create(
+            Action<ContravariantPolicyBuilder> build)
+        {
+            if (build == null)
+                throw new ArgumentNullException(nameof(build));
+            var policy  = new ContravariantPolicy();
+            var builder = new ContravariantPolicyBuilder(policy);
+            build(builder);
+            return policy;
+        }
+
+        public static ContravariantPolicy<Cb> Create<Cb>(
+            Func<Cb, object> target,
+            Action<ContravariantPolicyBuilder<Cb>> build)
+        {
+            if (build == null)
+                throw new ArgumentNullException(nameof(build));
+            var policy  = new ContravariantPolicy<Cb>(target);
+            var builder = new ContravariantPolicyBuilder<Cb>(policy);
+            build(builder);
+            return policy;
+        }
     }
 
-    public class ContravariantPolicy<Attrib, Cb> : ContravariantPolicy<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ContravariantPolicy<Cb> : ContravariantPolicy
     {
         public ContravariantPolicy(Func<Cb, object> target)
         {
@@ -119,11 +90,6 @@
 
         public Func<Cb, object> Target { get; }
 
-        public override bool Accepts(object callback, IHandler composer)
-        {
-            return callback is Cb;
-        }
-
         public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
             if (!(callback is Cb))
@@ -133,64 +99,57 @@
         }
     }
 
-    public class ContravariantPolicyBuilder<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ContravariantPolicyBuilder
     {
-        public ContravariantPolicyBuilder(ContravariantPolicy<Attrib> policy)
+        public ContravariantPolicyBuilder(ContravariantPolicy policy)
         {
             Policy = policy;
         }
 
-        protected ContravariantPolicy<Attrib> Policy { get; }
+        protected ContravariantPolicy Policy { get; }
 
-        public CallbackArgument<Attrib> Callback => CallbackArgument<Attrib>.Instance;
-        public ComposerArgument<Attrib> Composer => ComposerArgument<Attrib>.Instance;
+        public CallbackArgument Callback => CallbackArgument.Instance;
+        public ComposerArgument Composer => ComposerArgument.Instance;
 
-        public ContravariantPolicyBuilder<Attrib> MatchMethod(
-            params ArgumentRule<Attrib>[] args)
+        public ContravariantPolicyBuilder MatchMethod(params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule<Attrib>(
-                ReturnsType<bool, Attrib>.OrVoid, args));
+            Policy.AddMethodRule(new MethodRule(Policy.Bind,
+                ReturnsType<bool>.OrVoid, args));
             return this;
         }
 
-        public ContravariantPolicyBuilder<Attrib> Create(
-            Func<MethodInfo, MethodRule<Attrib>, Attrib,
-                ContravariantMethod<Attrib>> creator)
+        public ContravariantPolicyBuilder Binder(
+            Func<MethodRule, MethodDispatch, DefinitionAttribute,
+                 ContravariantMethod> creator)
         {
-            Policy.Creator = creator;
+            Policy.Binder = creator;
             return this;
         }
     }
 
-    public class ContravariantPolicyBuilder<Attrib, Cb> : ContravariantPolicyBuilder<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ContravariantPolicyBuilder<Cb> : ContravariantPolicyBuilder
     {
-        public ContravariantPolicyBuilder(ContravariantPolicy<Attrib, Cb> policy)
+        public ContravariantPolicyBuilder(ContravariantPolicy<Cb> policy)
             : base(policy)
         {
         }
 
-        protected new ContravariantPolicy<Attrib, Cb> Policy =>
-            (ContravariantPolicy<Attrib, Cb>)base.Policy;
+        protected new ContravariantPolicy<Cb> Policy =>
+            (ContravariantPolicy<Cb>)base.Policy;
 
-        public new CallbackArgument<Attrib, Cb> Callback =>
-            CallbackArgument<Attrib, Cb>.Instance;
+        public new CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
+        public TargetArgument<Cb> Target =>  new TargetArgument<Cb>(Policy.Target);
 
-        public TargetArgument<Attrib, Cb> Target => 
-            new TargetArgument<Attrib, Cb>(Policy.Target);
-
-        public ExtractArgument<Attrib, Cb, Res> Extract<Res>(Func<Cb, Res> extract)
+        public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<Attrib, Cb, Res>(extract);
+            return new ExtractArgument<Cb, Res>(extract);
         }
 
-        public new ContravariantPolicyBuilder<Attrib, Cb> MatchMethod(
-            params ArgumentRule<Attrib>[] args)
+        public new ContravariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
         {
-            return (ContravariantPolicyBuilder<Attrib, Cb>)base.MatchMethod(args);
+            return (ContravariantPolicyBuilder<Cb>)base.MatchMethod(args);
         }
     }
 }

@@ -5,19 +5,18 @@
 
     public interface IOptional {}
 
-    public class OptionalArgument<Attrib> : ArgumentRule<Attrib>, IOptional
-        where Attrib : DefinitionAttribute
+    public class OptionalArgument : ArgumentRule, IOptional
     {
-        private readonly ArgumentRule<Attrib> _argument;
+        private readonly ArgumentRule _argument;
 
-        public OptionalArgument(ArgumentRule<Attrib> argument)
+        public OptionalArgument(ArgumentRule argument)
         {
             if (argument == null)
                 throw new ArgumentNullException(nameof(argument));
             _argument = argument;
         }
 
-        public override bool Matches(ParameterInfo parameter, Attrib attribute)
+        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
         {
             return _argument.Matches(parameter, attribute);
         }

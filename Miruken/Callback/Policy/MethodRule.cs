@@ -4,15 +4,20 @@ namespace Miruken.Callback.Policy
     using System.Linq;
     using System.Reflection;
 
-    public class MethodRule<Attrib>
-        where Attrib : DefinitionAttribute
-    {
-        private readonly int _minArgs;
-        private readonly ArgumentRule<Attrib>[] _args;
-        private readonly ReturnRule<Attrib> _returnValue;
+    public delegate MethodBinding MethodBinder(
+        MethodRule rule, MethodDispatch dispatch, DefinitionAttribute attribute);
 
-        public MethodRule(params ArgumentRule<Attrib>[] args)
+    public class MethodRule
+    {
+        private readonly ArgumentRule[] _args;
+        private readonly ReturnRule _returnValue;
+        private readonly MethodBinder _binder;
+        private readonly int _minArgs;
+
+        public MethodRule(MethodBinder binder, params ArgumentRule[] args)
         {
+            if (binder == null)
+                throw new ArgumentNullException(nameof(binder));
             _minArgs = args.Length - args.Aggregate(0, (opt, arg) =>
             {
                 if (arg is IOptional) return opt + 1;        
@@ -21,17 +26,18 @@ namespace Miruken.Callback.Policy
                         "Optional arguments must appear after all required arguments");
                 return opt;
             });
-
-            _args  = args;
+            _binder = binder;
+            _args   = args;
         }
 
-        public MethodRule(ReturnRule<Attrib> returnValue, params ArgumentRule<Attrib>[] args)
-            : this(args)
+        public MethodRule(MethodBinder binder, ReturnRule returnValue,
+                          params ArgumentRule[] args)
+            : this(binder, args)
         {
             _returnValue = returnValue;
         }
 
-        public bool Matches(MethodInfo method, Attrib attribute)
+        public bool Matches(MethodInfo method, DefinitionAttribute attribute)
         {
             if (_returnValue != null && 
                 !_returnValue.Matches(method.ReturnType, attribute))
@@ -44,18 +50,20 @@ namespace Miruken.Callback.Policy
                         .All(m => m);
         }
 
-        public void Configure(MethodDefinition<Attrib> method)
+        public MethodBinding Bind(MethodDispatch dispatch, DefinitionAttribute attribute)
         {
-            _returnValue?.Configure(method);
-            var parameters = method.Method.GetParameters();
+            var binding = _binder(this, dispatch, attribute);
+            _returnValue?.Configure(binding);
+            var parameters = dispatch.Method.GetParameters();
             for (var i = 0; i < parameters.Length; ++i)
-                _args[i].Configure(parameters[i], method);
+                _args[i].Configure(parameters[i], binding);
+            return binding;
         }
 
         public object[] ResolveArgs(
-            MethodDefinition method, object callback, IHandler handler)
+            MethodBinding method, object callback, IHandler handler)
         {
-            return _args.Take(method.ArgumentCount)
+            return _args.Take(method.Dispatcher.ArgumentCount)
                         .Select(arg => arg.Resolve(callback, handler))
                         .ToArray();
         }

@@ -2,8 +2,7 @@
 {
     using System;
 
-    public class ReturnsType<Attrib> : ReturnRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ReturnsType : ReturnRule
     {
         private readonly Type _type;
 
@@ -14,20 +13,17 @@
             _type = type;
         }
 
-        public override bool Matches(Type returnType, Attrib attribute)
+        public override bool Matches(Type returnType, DefinitionAttribute attribute)
         {
             return _type.IsAssignableFrom(returnType);
         }
     }
 
-    public class ReturnsType<T, Attrib> : ReturnsType<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ReturnsType<T> : ReturnsType
     {
-        public static readonly ReturnRule<Attrib>
-            Instance = new ReturnsType<T, Attrib>();
+        public static readonly ReturnRule Instance = new ReturnsType<T>();
 
-        public new static readonly ReturnRule<Attrib>
-            OrVoid = Instance.OrVoid;
+        public new static readonly ReturnRule OrVoid = Instance.OrVoid;
 
         private ReturnsType() : base(typeof(T))
         {         

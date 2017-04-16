@@ -4,38 +4,23 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
 
-    public static class CovariantPolicy
+    public abstract class CovariantPolicy : CallbackPolicy
     {
-        public static Key<Attrib> For<Attrib>()
-            where Attrib : DefinitionAttribute
+        public static CovariantPolicy<Cb> Create<Cb>(
+            Func<Cb, object> target,
+            Action<CovariantPolicyBuilder<Cb>> build)
         {
-            return new Key<Attrib>();
-        }
-
-        public class Key<Attrib>
-            where Attrib : DefinitionAttribute
-        {
-            public CovariantPolicy<Attrib, Cb> HandlesCallback<Cb>(
-                Func<Cb, object> key,
-                Action<CovariantPolicyBuilder<Attrib, Cb>> configure)
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-                if (configure == null)
-                    throw new ArgumentNullException(nameof(configure));
-                var policy  = new CovariantPolicy<Attrib, Cb>(key);
-                var builder = new CovariantPolicyBuilder<Attrib, Cb>(policy);
-                configure(builder);
-                return policy;
-            }
+            if (build == null)
+                throw new ArgumentNullException(nameof(build));
+            var policy  = new CovariantPolicy<Cb>(target);
+            var builder = new CovariantPolicyBuilder<Cb>(policy);
+            build(builder);
+            return policy;
         }
     }
 
-    public class CovariantPolicy<Attrib, Cb> 
-        : CallbackPolicy<Attrib>, IComparer<Type>
-        where Attrib : DefinitionAttribute
+    public class CovariantPolicy<Cb> : CovariantPolicy, IComparer<Type>
     {
         public CovariantPolicy(Func<Cb, object> key)
         {
@@ -46,14 +31,8 @@
 
         public Func<Cb, object> Key { get; }
 
-        public Func<MethodInfo, MethodRule<Attrib>, Attrib,
-               Func<object, Type>, CovariantMethod<Attrib>>
-               Creator { get; set; }
-
-        public override bool Accepts(object callback, IHandler composer)
-        {
-            return callback is Cb;
-        }
+        public Func<MethodRule, MethodDispatch, DefinitionAttribute,
+               Func<object, Type>, CovariantMethod> Binder { get; set; }
 
         public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
@@ -70,21 +49,17 @@
                       .OrderBy(t => t, this);
         }
 
-        protected override MethodDefinition<Attrib> Match(
-            MethodInfo method, Attrib attribute,
-            IEnumerable<MethodRule<Attrib>> rules)
+        public MethodBinding Bind(MethodRule rule, MethodDispatch dispatch,
+                                  DefinitionAttribute attribute)
         {
-            var match = rules.FirstOrDefault(r => r.Matches(method, attribute));
-            if (match == null) return null;
             Func<object, Type> returnType = cb => Key((Cb)cb) as Type;
-            var definition = Creator?.Invoke(method, match, attribute, returnType)
-                ?? new CovariantMethod<Attrib>(method, match, attribute, returnType);
-            match.Configure(definition);
-            AssignVariance(definition);
+            var definition = Binder?.Invoke(rule, dispatch, attribute, returnType)
+                ?? new CovariantMethod(rule, dispatch, attribute, returnType);
+            InferVariance(definition);
             return definition;
         }
 
-        private static void AssignVariance(MethodDefinition<Attrib> method)
+        private static void InferVariance(MethodBinding method)
         {
             var key      = method.Attribute.Key;
             var restrict = key as Type;
@@ -110,46 +85,44 @@
         }
     }
 
-    public class CovariantPolicyBuilder<Attrib, Cb>
-        where Attrib : DefinitionAttribute
+    public class CovariantPolicyBuilder<Cb>
     {
-        public CovariantPolicyBuilder(CovariantPolicy<Attrib, Cb> policy)
+        public CovariantPolicyBuilder(CovariantPolicy<Cb> policy)
         {
             Policy = policy;
         }
 
-        protected CovariantPolicy<Attrib, Cb>  Policy { get; }
+        protected CovariantPolicy<Cb> Policy { get; }
 
-        public CallbackArgument<Attrib, Cb> Callback => CallbackArgument<Attrib, Cb>.Instance;
-        public ComposerArgument<Attrib>     Composer => ComposerArgument<Attrib>.Instance;
-        public ReturnsKey<Attrib>           Return   => ReturnsKey<Attrib>.Instance;
+        public CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
+        public ComposerArgument     Composer => ComposerArgument.Instance;
+        public ReturnsKey           Return   => ReturnsKey.Instance;
 
-        public ExtractArgument<Attrib, Cb, Res> Extract<Res>(Func<Cb, Res> extract)
+        public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<Attrib, Cb, Res>(extract);
+            return new ExtractArgument<Cb, Res>(extract);
         }
 
-        public CovariantPolicyBuilder<Attrib, Cb> MatchMethod(
-            params ArgumentRule<Attrib>[] args)
+        public CovariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule<Attrib>(args));
+            Policy.AddMethodRule(new MethodRule(Policy.Bind, args));
             return this;
         }
 
-        public CovariantPolicyBuilder<Attrib, Cb> MatchMethod(
-            ReturnRule<Attrib> returnRule, params ArgumentRule<Attrib>[] args)
+        public CovariantPolicyBuilder<Cb> MatchMethod(
+            ReturnRule returnRule, params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule<Attrib>(returnRule, args));
+            Policy.AddMethodRule(new MethodRule(Policy.Bind, returnRule, args));
             return this;
         }
 
-        public CovariantPolicyBuilder<Attrib, Cb> CreateUsing(
-         Func<MethodInfo, MethodRule<Attrib>, Attrib, Func<object, Type>,
-             CovariantMethod<Attrib>> creator)
+        public CovariantPolicyBuilder<Cb> BindMethod(
+         Func<MethodRule, MethodDispatch, DefinitionAttribute, Func<object, Type>,
+             CovariantMethod> creator)
         {
-            Policy.Creator = creator;
+            Policy.Binder = creator;
             return this;
         }
     }

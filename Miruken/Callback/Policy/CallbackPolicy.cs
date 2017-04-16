@@ -2,32 +2,23 @@
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
 
     public abstract class CallbackPolicy
     {
-        public abstract bool Accepts(object callback, IHandler composer);
-        public abstract IEnumerable SelectKeys(object callback, ICollection keys);
-    }
+        private readonly List<MethodRule> _rules = new List<MethodRule>();
 
-    public abstract class CallbackPolicy<Attrib> : CallbackPolicy
-        where Attrib : DefinitionAttribute
-    {
-        private readonly List<MethodRule<Attrib>> _rules
-            = new List<MethodRule<Attrib>>();
-
-        public void AddMethodRule(MethodRule<Attrib> rule)
+        public void AddMethodRule(MethodRule rule)
         {
             _rules.Add(rule);
         }
 
-        public MethodDefinition<Attrib> MatchMethod(MethodInfo method, Attrib attribute)
+        public MethodRule MatchMethod(MethodInfo method, DefinitionAttribute attribute)
         {
-            return Match(method, attribute, _rules);
+            return _rules.FirstOrDefault(r => r.Matches(method, attribute));
         }
 
-        protected abstract MethodDefinition<Attrib> Match(
-            MethodInfo method, Attrib attribute, 
-            IEnumerable<MethodRule<Attrib>> rules);
+        public abstract IEnumerable SelectKeys(object callback, ICollection keys);
     }
 }

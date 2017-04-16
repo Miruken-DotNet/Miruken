@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Reflection;
     using Policy;
 
     public class ProvidesAttribute : DefinitionAttribute
@@ -15,19 +14,14 @@
             Key = key;
         }
 
-        public override CallbackPolicy MethodPolicy => Policy;
+        public override CallbackPolicy CallbackPolicy => Policy;
 
-        public override MethodDefinition MatchMethod(MethodInfo method)
-        {
-            return Policy.MatchMethod(method, this);
-        }
-
-        private class ProvidesMethod : CovariantMethod<ProvidesAttribute>
+        private class ProvidesMethod : CovariantMethod
         {
             public ProvidesMethod(
-                MethodInfo method, MethodRule<ProvidesAttribute> rule,
-                ProvidesAttribute attribute, Func<object, Type> returnType)
-                : base(method, rule, attribute, returnType)
+                MethodRule rule, MethodDispatch dispatch,
+                DefinitionAttribute attribute, Func<object, Type> returnType)
+                : base(rule, dispatch, attribute, returnType)
             {
             }
 
@@ -63,12 +57,11 @@
             }
         }
 
-        public static readonly CovariantPolicy<ProvidesAttribute, Resolution> Policy =
-             CovariantPolicy.For<ProvidesAttribute>()
-                .HandlesCallback<Resolution>(r => r.Key,
-                    x => x.MatchMethod(x.Return.OrVoid, x.Callback, x.Composer.Optional)
-                          .MatchMethod(x.Return, x.Composer.Optional)
-                          .CreateUsing((m, r, a, rt) => new ProvidesMethod(m, r, a, rt))
-                    );
+        public static readonly CovariantPolicy<Resolution> Policy =
+             CovariantPolicy.Create<Resolution>(r => r.Key,
+                x => x.MatchMethod(x.Return.OrVoid, x.Callback, x.Composer.Optional)
+                      .MatchMethod(x.Return, x.Composer.Optional)
+                      .BindMethod((r,d,a,rt) => new ProvidesMethod(r,d,a,rt))
+                );
     }
 }

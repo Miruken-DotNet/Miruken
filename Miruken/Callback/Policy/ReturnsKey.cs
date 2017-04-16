@@ -2,16 +2,15 @@
 {
     using System;
 
-    public class ReturnsKey<Attrib> : ReturnRule<Attrib>
-        where Attrib : DefinitionAttribute
+    public class ReturnsKey : ReturnRule
     {
-        public static readonly ReturnsKey<Attrib> Instance = new ReturnsKey<Attrib>();
+        public static readonly ReturnsKey Instance = new ReturnsKey();
 
         private ReturnsKey()
         {        
         }
 
-        public override bool Matches(Type returnType, Attrib attribute)
+        public override bool Matches(Type returnType, DefinitionAttribute attribute)
         {
             if (returnType == typeof(void)) return false;
             if (returnType.IsArray)
@@ -24,13 +23,13 @@
                 $"Key {restrict.FullName} is not related to {returnType.FullName}");
         }
 
-        public override void Configure(MethodDefinition<Attrib> method)
+        public override void Configure(MethodBinding binding)
         {
-            var returnType = method.ReturnType;
+            var returnType = binding.Dispatcher.ReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
             if (returnType == typeof(object)) return;
-            method.VarianceType = returnType;
+            binding.VarianceType = returnType;
         }
     }
 }
