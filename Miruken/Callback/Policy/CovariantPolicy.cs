@@ -120,9 +120,9 @@
 
         public CovariantPolicyBuilder<Cb> BindMethod(
          Func<MethodRule, MethodDispatch, DefinitionAttribute, Func<object, Type>,
-             CovariantMethod> creator)
+             CovariantMethod> binder)
         {
-            Policy.Binder = creator;
+            Policy.Binder = binder;
             return this;
         }
     }

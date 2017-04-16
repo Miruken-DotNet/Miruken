@@ -120,9 +120,9 @@
 
         public ContravariantPolicyBuilder Binder(
             Func<MethodRule, MethodDispatch, DefinitionAttribute,
-                 ContravariantMethod> creator)
+                 ContravariantMethod> binder)
         {
-            Policy.Binder = creator;
+            Policy.Binder = binder;
             return this;
         }
     }
