@@ -138,7 +138,7 @@
             (ContravariantPolicy<Cb>)base.Policy;
 
         public new CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
-        public TargetArgument<Cb> Target =>  new TargetArgument<Cb>(Policy.Target);
+        public TargetArgument<Cb> Target => new TargetArgument<Cb>(Policy.Target);
 
         public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {

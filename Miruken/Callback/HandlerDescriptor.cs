@@ -115,24 +115,15 @@ namespace Miruken.Callback
                 return false;
 
             var dispatched   = false;
-            var oldUnhandled = HandleMethod.Unhandled;
             var indexes      = methods.Keys;
             var keys         = indexes == null ? null 
                              : policy.SelectKeys(callback, indexes);
 
-            try
+            foreach (var method in methods.GetMethods(keys))
             {
-                foreach (var method in methods.GetMethods(keys))
-                {
-                    HandleMethod.Unhandled = false;
-                    var handled = method.Dispatch(target, callback, composer);
-                    dispatched = (handled && !HandleMethod.Unhandled) || dispatched;
-                    if (dispatched && !greedy) return true;
-                }
-            }
-            finally
-            {
-                HandleMethod.Unhandled = oldUnhandled;
+                dispatched = method.Dispatch(target, callback, composer)
+                          || dispatched;
+                if (dispatched && !greedy) return true;
             }
 
             return dispatched;
