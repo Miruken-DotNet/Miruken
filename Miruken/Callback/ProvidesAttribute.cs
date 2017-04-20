@@ -25,7 +25,7 @@
             {
             }
 
-            protected override bool VerifyResult(
+            public override bool Dispatch(
                 object target, object callback, IHandler composer)
             {
                 var resolution  = (Resolution)callback;

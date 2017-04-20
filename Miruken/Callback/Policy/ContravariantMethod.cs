@@ -9,7 +9,10 @@
         {        
         }
 
-        protected override bool VerifyResult(object target, object callback, IHandler composer)
+        protected override object NoResult => false;
+
+        public override bool Dispatch(
+            object target, object callback, IHandler composer)
         {
             var result = Invoke(target, callback, composer);
             return result == null || true.Equals(result);

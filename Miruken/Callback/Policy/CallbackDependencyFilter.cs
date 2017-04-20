@@ -19,9 +19,10 @@
             _dependency = dependency;
         }
 
-        public bool Accepts(object callback, IHandler composer)
+        public object Filter(
+            object callback, IHandler composer, ProceedDelegate proceed)
         {
-            return _filter.Accepts(_dependency(callback), composer);
+            return _filter.Filter(_dependency(callback), composer, proceed);
         }
     }
 }

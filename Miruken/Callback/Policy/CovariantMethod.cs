@@ -15,7 +15,7 @@
             _returnType = returnType;
         }
 
-        protected override bool VerifyResult(
+        public override bool Dispatch(
             object target, object callback, IHandler composer)
         {
             var returnType = _returnType(callback);

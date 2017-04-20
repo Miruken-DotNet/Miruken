@@ -1,7 +1,9 @@
 ﻿namespace Miruken.Callback
 {
+    public delegate object ProceedDelegate(bool proceed = true);
+
     public interface ICallbackFilter
     {
-        bool Accepts(object callback, IHandler composer);
+        object Filter(object callback, IHandler composer, ProceedDelegate proceed);
     }
 }
