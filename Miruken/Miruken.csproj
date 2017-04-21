@@ -70,6 +70,7 @@
     <Compile Include="Callback\ICallbackFilter.cs" />
     <Compile Include="Callback\Policy\MethodDispatch.cs" />
     <Compile Include="Callback\Policy\MethodBinding.cs" />
+    <Compile Include="Callback\Policy\MethodPipeline.cs" />
     <Compile Include="Callback\Policy\MethodRule.cs" />
     <Compile Include="Callback\Policy\CallbackPolicy.cs" />
     <Compile Include="Callback\DefinitionAttribute.cs" />

@@ -44,15 +44,30 @@
 
         private static bool AcceptKey(Type type, Type key)
         {
-            return key.IsAssignableFrom(type) ||
-                   (type.IsGenericType && key.IsGenericTypeDefinition &&
-                    type.GetGenericTypeDefinition() == key);
+            if (key.IsAssignableFrom(type))
+                return true;
+            if (key.IsGenericTypeDefinition)
+            {
+                if (type.IsGenericType)
+                {
+                    if (key.IsInterface)
+                        return type.GetInterface(key.FullName) != null;
+                    while (type != typeof(object) &&
+                           type?.IsGenericType == true)
+                    {
+                        if (type.GetGenericTypeDefinition() == key)
+                            return true;
+                        type = type.BaseType;
+                    }
+                }
+            }
+            return false;
         }
 
         int IComparer<Type>.Compare(Type x, Type y)
         {
             if (x == y) return 0;
-            return x?.IsAssignableFrom(y) == true ? 1 : -1;
+            return x == null || AcceptKey(x, y) ? -1 : 1;
         }
 
         public static ContravariantPolicy Create(

@@ -1,31 +1,29 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Linq;
 
     [AttributeUsage(AttributeTargets.Method,
         AllowMultiple = true, Inherited = false)]
-    public abstract class CallbackFilterAttribute 
-        : Attribute, IComparable<CallbackFilterAttribute>
+    public class CallbackFilterAttribute : Attribute
     {
-        protected CallbackFilterAttribute(Type filterType)
+        public CallbackFilterAttribute(params Type[] filterTypes)
         {
-            if (filterType == null)
-                throw new ArgumentNullException(nameof(filterType));
-            if (!typeof(ICallbackFilter).IsAssignableFrom(filterType))
-                throw new ArgumentException($"{filterType.FullName} must implement ICallbackFilter");
-            FilterType = filterType;
+            if (filterTypes.Any(InvalidCallbackFilterType))
+                throw new ArgumentException("All filter types must implement ICallbackFilter<,>");
+            FilterTypes = filterTypes;
         }
 
-        public Type FilterType { get; }
+        public Type[] FilterTypes { get; }
 
-        public int? Order      { get; set; }
+        public bool   Many        { get; set; }
 
-        public int CompareTo(CallbackFilterAttribute other)
+        private static bool InvalidCallbackFilterType(Type filterType)
         {
-            if (Order == other.Order) return 0;
-            if (Order == null) return 1;
-            if (other.Order == null) return -1;
-            return Order.Value - other.Order.Value;
+            return filterType == null     ||
+                   filterType.IsInterface || 
+                   filterType.IsAbstract  ||
+                   filterType.GetInterface(typeof(ICallbackFilter<,>).FullName) == null;
         }
     }
 }

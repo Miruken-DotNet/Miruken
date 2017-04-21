@@ -396,6 +396,23 @@
             Assert.IsNull(foo);
         }
 
+        [TestMethod]
+        public void Should_Call_Pipelines()
+        {
+            var bar     = new Bar();
+            var handler = new RequestHandler();
+            Assert.IsTrue(handler.Handle(bar));
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod]
+        public void TestName()
+        {
+            var filter  = new LogFilter<string, int>();
+            var handler = new RequestHandler();
+            Assert.IsTrue(handler.Handle(filter));    
+        }
+
         private class Foo
         {     
             public int  Handled     { get; set; }
@@ -646,6 +663,43 @@
             public Bar ProvideBarImplicitly()
             {
                 return new Bar { Handled = 1 };
+            }
+        }
+
+        private class RequestHandler : Handler
+        {
+            [Handles,
+             CallbackFilter(typeof(LogFilter<,>))]
+            public void HandleBar(Bar bar)
+            {
+                bar.Handled++;
+            }
+
+            [Handles(typeof(ICallbackFilter<,>)),
+             CallbackFilter(typeof(LogFilter<,>))]
+            public void Test(object callback)
+            {
+                
+            }
+
+            [Provides(typeof(ICallbackFilter<,>))]
+            public object CreateFilter(Resolution resolution)
+            {
+                return Activator.CreateInstance((Type)resolution.Key);
+            }
+        }
+
+        public abstract class Middleware<Cb, Res> : ICallbackFilter<Cb, Res>
+        {
+            public abstract Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed);
+        }
+
+        private class LogFilter<Cb, Res> : Middleware<Cb, Res>
+        {
+            public override Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed)
+            {
+                Console.WriteLine($"Handle {callback}");
+                return proceed();
             }
         }
     }

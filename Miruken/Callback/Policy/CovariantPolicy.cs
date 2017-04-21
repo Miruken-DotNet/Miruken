@@ -73,15 +73,29 @@
 
         private static bool AcceptKey(Type type, Type key)
         {
-            return key.IsGenericTypeDefinition
-                 ? type.IsGenericType && type.GetGenericTypeDefinition() == key
-                 : type.IsAssignableFrom(key);
+            if (key.IsGenericTypeDefinition)
+            {
+                if (type.IsGenericType)
+                {
+                    if (key.IsInterface)
+                        return type.GetInterface(key.FullName) != null;
+                    while (type != typeof(object) && 
+                           type?.IsGenericType == true)
+                    {
+                        if (type.GetGenericTypeDefinition() == key)
+                            return true;
+                        type = type.BaseType;
+                    }
+                }
+                return false;
+            }
+            return type.IsAssignableFrom(key);
         }
 
         int IComparer<Type>.Compare(Type x, Type y)
         {
             if (x == y) return 0;
-            return x?.IsAssignableFrom(y) == true ? -1 : 1;
+            return y == null || AcceptKey(x, y) ? -1 : 1;
         }
     }
 
