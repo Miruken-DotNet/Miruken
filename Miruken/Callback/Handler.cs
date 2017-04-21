@@ -51,7 +51,7 @@
 	        if (Surrogate != null) return false;
 	        var handlerType = GetType();
 	        return handlerType == typeof(Handler) ||
-	               handlerType == typeof(CallbackFilter);
+	               handlerType == typeof(HandlerFilterDelegate);
 	    }
 
         public static IHandler operator +(Handler c1, IHandler c2)

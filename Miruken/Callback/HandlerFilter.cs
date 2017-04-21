@@ -2,23 +2,23 @@
 
 namespace Miruken.Callback
 {
-    public delegate bool CallbackFilter(
+    public delegate bool HandlerFilterDelegate(
         object callback, IHandler composer, Func<bool> proceed
     );
 
     public class HandlerFilter : HandlerDecorator
     {
-        private readonly CallbackFilter _filter;
+        private readonly HandlerFilterDelegate _filter;
         private readonly bool _reentrant;
 
         public HandlerFilter(
-            IHandler handler, CallbackFilter filter
+            IHandler handler, HandlerFilterDelegate filter
             ) : this(handler, filter, false)
         {           
         }
 
         public HandlerFilter(
-            IHandler handler, CallbackFilter filter, 
+            IHandler handler, HandlerFilterDelegate filter, 
             bool reentrant) : base(handler)
         {
             if (filter == null)

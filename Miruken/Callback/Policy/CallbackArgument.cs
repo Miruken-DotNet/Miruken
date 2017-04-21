@@ -29,7 +29,6 @@ namespace Miruken.Callback.Policy
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
             binding.VarianceType = paramType;
-            binding.AddFilters(GetFilters(parameter));
         }
 
         public override object Resolve(object callback, IHandler composer)
@@ -51,12 +50,6 @@ namespace Miruken.Callback.Policy
         {
             var paramType = parameter.ParameterType;
             return typeof(Cb).IsAssignableFrom(paramType);
-        }
-
-        public override void Configure(
-            ParameterInfo parameter, MethodBinding binding)
-        {
-            binding.AddFilters(GetFilters(parameter));
         }
 
         public override object Resolve(object callback, IHandler composer)

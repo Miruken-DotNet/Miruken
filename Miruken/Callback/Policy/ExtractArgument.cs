@@ -20,12 +20,6 @@ namespace Miruken.Callback.Policy
             return typeof(Res).IsAssignableFrom(paramType);
         }
 
-        public override void Configure(
-            ParameterInfo parameter, MethodBinding binding)
-        {
-            binding.AddFilters(GetFilters(parameter, cb => _extract((Cb)cb)));
-        }
-
         public override object Resolve(object callback, IHandler composer)
         {
             return _extract((Cb)callback);

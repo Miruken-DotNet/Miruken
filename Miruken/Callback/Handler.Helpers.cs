@@ -54,13 +54,13 @@ namespace Miruken.Callback
         }
 
         public static HandlerFilter Filter(
-            this IHandler handler, CallbackFilter filter)
+            this IHandler handler, HandlerFilterDelegate filter)
         {
             return Filter(handler, filter, false);
         }
 
         public static HandlerFilter Filter(
-            this IHandler handler, CallbackFilter filter, bool reentrant)
+            this IHandler handler, HandlerFilterDelegate filter, bool reentrant)
         {
             return handler == null ? null
                  : new HandlerFilter(handler, filter, reentrant);
