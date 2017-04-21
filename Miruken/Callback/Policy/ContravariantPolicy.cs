@@ -118,7 +118,7 @@
             return this;
         }
 
-        public ContravariantPolicyBuilder Binder(
+        public ContravariantPolicyBuilder BindMethod(
             Func<MethodRule, MethodDispatch, DefinitionAttribute,
                  ContravariantMethod> binder)
         {
