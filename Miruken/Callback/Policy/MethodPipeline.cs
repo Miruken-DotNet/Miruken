@@ -8,7 +8,7 @@
     {
         public abstract object Invoke(MethodBinding binding,
             object target, object callback, object[] args, Type returnType,
-            IEnumerable<CallbackFilterAttribute> filters, IHandler composer,
+            IEnumerable<PipelineAttribute> filters, IHandler composer,
             out bool handled);
     }
 
@@ -16,13 +16,13 @@
     {
         public override object Invoke(MethodBinding binding,
             object target, object callback, object[] args, Type returnType,
-            IEnumerable<CallbackFilterAttribute> filters, IHandler composer,
+            IEnumerable<PipelineAttribute> filters, IHandler composer,
             out bool handled)
         {
             var completed = false;
             using (var pipeline = GetPipeline(filters, composer).GetEnumerator())
             {
-                CallbackDelegate<Res> next = null;
+                PipelineDelegate<Res> next = null;
                 next = proceed =>
                 {
                     if (!proceed) return default(Res);
@@ -38,8 +38,8 @@
             }
         }
 
-        private static IEnumerable<ICallbackFilter<Cb, Res>> GetPipeline(
-            IEnumerable<CallbackFilterAttribute> filters, IHandler composer)
+        private static IEnumerable<IPieplineFilter<Cb, Res>> GetPipeline(
+            IEnumerable<PipelineAttribute> filters, IHandler composer)
         {
             return filters.SelectMany(filter =>
                 filter.FilterTypes.SelectMany(filterType =>
@@ -50,7 +50,7 @@
                          ? composer.ResolveAll(filterType)
                          : new[] {composer.Resolve(filterType)};
                 }))
-                .OfType<ICallbackFilter<Cb, Res>>();
+                .OfType<IPieplineFilter<Cb, Res>>();
         }
     }
 }

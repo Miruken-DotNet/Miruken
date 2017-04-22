@@ -5,12 +5,12 @@
 
     [AttributeUsage(AttributeTargets.Method,
         AllowMultiple = true, Inherited = false)]
-    public class CallbackFilterAttribute : Attribute
+    public class PipelineAttribute : Attribute
     {
-        public CallbackFilterAttribute(params Type[] filterTypes)
+        public PipelineAttribute(params Type[] filterTypes)
         {
-            if (filterTypes.Any(InvalidCallbackFilterType))
-                throw new ArgumentException("All filter types must implement ICallbackFilter<,>");
+            if (filterTypes.Any(InvalidPipelineFilter))
+                throw new ArgumentException("All filter types must be instantiable IPipelineFilter<,>");
             FilterTypes = filterTypes;
         }
 
@@ -18,12 +18,12 @@
 
         public bool   Many        { get; set; }
 
-        private static bool InvalidCallbackFilterType(Type filterType)
+        private static bool InvalidPipelineFilter(Type filterType)
         {
             return filterType == null     ||
                    filterType.IsInterface || 
                    filterType.IsAbstract  ||
-                   filterType.GetInterface(typeof(ICallbackFilter<,>).FullName) == null;
+                   filterType.GetInterface(typeof(IPieplineFilter<,>).FullName) == null;
         }
     }
 }

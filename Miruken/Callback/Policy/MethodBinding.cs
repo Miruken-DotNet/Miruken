@@ -8,7 +8,7 @@
     public class MethodBinding
     {
         private Type _varianceType;
-        private List<CallbackFilterAttribute> _filters;
+        private List<PipelineAttribute> _filters;
         private MethodPipeline _pipeline;
         private bool _initialized;
         private object _lock;
@@ -82,18 +82,18 @@
             return handled ? result : NoResult;
         }
 
-        protected void AddCallbackFilters(params CallbackFilterAttribute[] filters)
+        protected void AddCallbackFilters(params PipelineAttribute[] filters)
         {
             if (filters == null || filters.Length == 0) return;
             if (_filters == null)
-                _filters = new List<CallbackFilterAttribute>();
+                _filters = new List<PipelineAttribute>();
             _filters.AddRange(filters.Where(f => f != null));
         }
 
         private void AddMethodFilters()
         {
-            AddCallbackFilters((CallbackFilterAttribute[])Dispatcher.Method
-                .GetCustomAttributes(typeof(CallbackFilterAttribute), true));
+            AddCallbackFilters((PipelineAttribute[])Dispatcher.Method
+                .GetCustomAttributes(typeof(PipelineAttribute), true));
         }
     }
 }

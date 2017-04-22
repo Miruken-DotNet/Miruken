@@ -66,8 +66,8 @@
     <Compile Include="Callback\Policy\ContravariantPolicy.cs" />
     <Compile Include="Callback\Policy\CovariantPolicy.cs" />
     <Compile Include="Callback\Policy\ExtractArgument.cs" />
-    <Compile Include="Callback\CallbackFilterAttribute.cs" />
-    <Compile Include="Callback\ICallbackFilter.cs" />
+    <Compile Include="Callback\PipelineAttribute.cs" />
+    <Compile Include="Callback\IPieplineFilter.cs" />
     <Compile Include="Callback\Policy\MethodDispatch.cs" />
     <Compile Include="Callback\Policy\MethodBinding.cs" />
     <Compile Include="Callback\Policy\MethodPipeline.cs" />

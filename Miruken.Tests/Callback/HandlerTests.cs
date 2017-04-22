@@ -661,22 +661,22 @@
         private class RequestHandler : Handler
         {
             [Handles,
-             CallbackFilter(typeof(LogFilter<,>))]
+             Pipeline(typeof(LogFilter<,>))]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
             }
 
-            [Provides(typeof(ICallbackFilter<,>))]
+            [Provides(typeof(IPieplineFilter<,>))]
             public object CreateFilter(Resolution resolution)
             {
                 return Activator.CreateInstance((Type)resolution.Key);
             }
         }
 
-        private class LogFilter<Cb, Res> : ICallbackFilter<Cb, Res>
+        private class LogFilter<Cb, Res> : IPieplineFilter<Cb, Res>
         {
-            public Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed)
+            public Res Filter(Cb callback, IHandler composer, PipelineDelegate<Res> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
                 return proceed();
