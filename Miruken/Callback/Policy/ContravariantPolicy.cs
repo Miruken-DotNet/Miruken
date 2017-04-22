@@ -7,8 +7,21 @@
 
     public class ContravariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public Func<MethodRule, MethodDispatch, DefinitionAttribute,
-               ContravariantMethod> Binder { get; set; }
+        public ContravariantPolicy()
+        {
+            NoResult  = false;
+            HasResult = IsResult;
+        }
+
+        public MethodBinding Bind(
+            MethodRule rule, MethodDispatch dispatch,
+            DefinitionAttribute attribute)
+        {
+            var binding = Binder?.Invoke(rule, dispatch, this, attribute)
+                ?? new MethodBinding(rule, dispatch, this, attribute);
+            InferVariance(binding);
+            return binding;
+        }
 
         public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
@@ -21,15 +34,6 @@
                 return Enumerable.Empty<object>();
             return keys.OfType<Type>().Where(k => AcceptKey(type, k))
                        .OrderBy(t => t, this);
-        }
-
-        public MethodBinding Bind(MethodRule rule, MethodDispatch dispatch,
-                                  DefinitionAttribute attribute)
-        {
-            var definition = Binder?.Invoke(rule, dispatch, attribute)
-                ?? new ContravariantMethod(rule, dispatch, attribute);
-            InferVariance(definition);
-            return definition;
         }
 
         private static void InferVariance(MethodBinding method)
@@ -62,6 +66,11 @@
                 }
             }
             return false;
+        }
+
+        private static bool IsResult(object result)
+        {
+            return result == null || true.Equals(result);
         }
 
         int IComparer<Type>.Compare(Type x, Type y)
@@ -115,16 +124,14 @@
     }
 
     public class ContravariantPolicyBuilder
+        : CallbackPolicyBuilder<ContravariantPolicy, ContravariantPolicyBuilder>
     {
         public ContravariantPolicyBuilder(ContravariantPolicy policy)
+            : base(policy)
         {
-            Policy = policy;
         }
 
-        protected ContravariantPolicy Policy { get; }
-
         public CallbackArgument Callback => CallbackArgument.Instance;
-        public ComposerArgument Composer => ComposerArgument.Instance;
 
         public ContravariantPolicyBuilder MatchMethod(params ArgumentRule[] args)
         {
@@ -132,28 +139,18 @@
                 ReturnsType<bool>.OrVoid, args));
             return this;
         }
-
-        public ContravariantPolicyBuilder BindMethod(
-            Func<MethodRule, MethodDispatch, DefinitionAttribute,
-                 ContravariantMethod> binder)
-        {
-            Policy.Binder = binder;
-            return this;
-        }
     }
 
-    public class ContravariantPolicyBuilder<Cb> : ContravariantPolicyBuilder
+    public class ContravariantPolicyBuilder<Cb>
+         : CallbackPolicyBuilder<ContravariantPolicy<Cb>, ContravariantPolicyBuilder<Cb>>
     {
         public ContravariantPolicyBuilder(ContravariantPolicy<Cb> policy)
             : base(policy)
         {
         }
 
-        protected new ContravariantPolicy<Cb> Policy =>
-            (ContravariantPolicy<Cb>)base.Policy;
-
-        public new CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
-        public TargetArgument<Cb> Target => new TargetArgument<Cb>(Policy.Target);
+        public CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
+        public TargetArgument<Cb>   Target   => new TargetArgument<Cb>(Policy.Target);
 
         public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {
@@ -162,9 +159,11 @@
             return new ExtractArgument<Cb, Res>(extract);
         }
 
-        public new ContravariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
+        public ContravariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
         {
-            return (ContravariantPolicyBuilder<Cb>)base.MatchMethod(args);
+            Policy.AddMethodRule(new MethodRule(Policy.Bind,
+                 ReturnsType<bool>.OrVoid, args));
+            return this;
         }
     }
 }

@@ -6,18 +6,18 @@
 
     internal abstract class MethodPipeline
     {
-        public abstract object Invoke(MethodBinding binding,
+        public abstract bool Invoke(MethodBinding binding,
             object target, object callback, object[] args, Type returnType,
             IEnumerable<PipelineAttribute> filters, IHandler composer,
-            out bool handled);
+            out object result);
     }
 
     internal class MethodPipeline<Cb, Res> : MethodPipeline
     {
-        public override object Invoke(MethodBinding binding,
+        public override bool Invoke(MethodBinding binding,
             object target, object callback, object[] args, Type returnType,
             IEnumerable<PipelineAttribute> filters, IHandler composer,
-            out bool handled)
+            out object result)
         {
             var completed = false;
             using (var pipeline = GetPipeline(filters, composer).GetEnumerator())
@@ -32,9 +32,8 @@
                     return (Res)binding.Dispatcher.Invoke(target, args, returnType);
                 };
 
-                var result = next();
-                handled = completed;
-                return result;
+                result = next();
+                return completed;
             }
         }
 

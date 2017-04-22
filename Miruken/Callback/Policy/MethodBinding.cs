@@ -5,6 +5,10 @@
     using System.Linq;
     using System.Threading;
 
+    public delegate MethodBinding BindMethodDelegate(
+        MethodRule rule, MethodDispatch dispatch,
+        CallbackPolicy policy,DefinitionAttribute attribute);
+
     public class MethodBinding
     {
         private Type _varianceType;
@@ -15,6 +19,7 @@
 
         public MethodBinding(MethodRule rule,
                              MethodDispatch dispatch,
+                             CallbackPolicy policy,
                              DefinitionAttribute attribute)
         {
             if (rule == null)
@@ -22,14 +27,16 @@
             if (dispatch == null)
                 throw new ArgumentNullException(nameof(dispatch));
             Rule       = rule;
-            Attribute  = attribute;
             Dispatcher = dispatch;
+            Policy     = policy;
+            Attribute  = attribute;
             AddMethodFilters();
         }
 
         public MethodRule          Rule       { get; }
         public DefinitionAttribute Attribute  { get; }
         public MethodDispatch      Dispatcher { get; }
+        public CallbackPolicy      Policy     { get; }
 
         public Type VarianceType
         {
@@ -44,9 +51,7 @@
             }
         }
 
-        protected virtual object NoResult => null;
-
-        public virtual object GetKey()
+        public object GetKey()
         {
             var key = Attribute.Key;
             return key == null || key is Type ? VarianceType : key;
@@ -54,8 +59,17 @@
 
         public virtual bool Dispatch(object target, object callback, IHandler composer)
         {
-            Invoke(target, callback, composer);
-            return true;
+            var resultType = Policy.ResultType?.Invoke(callback);
+            var result     = Invoke(target, callback, composer, resultType);
+            return Policy.HasResult?.Invoke(result) ?? result != null;
+        }
+
+        public void AddPipelineFilters(params PipelineAttribute[] filters)
+        {
+            if (filters == null || filters.Length == 0) return;
+            if (_filters == null)
+                _filters = new List<PipelineAttribute>();
+            _filters.AddRange(filters.Where(f => f != null));
         }
 
         protected object Invoke(object target, object callback,
@@ -76,23 +90,15 @@
                     return (MethodPipeline)Activator.CreateInstance(pipelineType);
                 });
 
-            bool handled;
-            var result = pipeline.Invoke(this, target, callback, args,
-                returnType, _filters, composer, out handled);
-            return handled ? result : NoResult;
-        }
-
-        protected void AddCallbackFilters(params PipelineAttribute[] filters)
-        {
-            if (filters == null || filters.Length == 0) return;
-            if (_filters == null)
-                _filters = new List<PipelineAttribute>();
-            _filters.AddRange(filters.Where(f => f != null));
+            object result;
+            return pipeline.Invoke(this, target, callback, args,
+                returnType, _filters, composer, out result)
+                ? result : Policy.NoResult;
         }
 
         private void AddMethodFilters()
         {
-            AddCallbackFilters((PipelineAttribute[])Dispatcher.Method
+            AddPipelineFilters((PipelineAttribute[])Dispatcher.Method
                 .GetCustomAttributes(typeof(PipelineAttribute), true));
         }
     }

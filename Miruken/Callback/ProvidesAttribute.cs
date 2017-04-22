@@ -16,12 +16,12 @@
 
         public override CallbackPolicy CallbackPolicy => Policy;
 
-        private class ProvidesMethod : CovariantMethod
+        private class ProvidesMethod : MethodBinding
         {
             public ProvidesMethod(
                 MethodRule rule, MethodDispatch dispatch,
-                DefinitionAttribute attribute, Func<object, Type> returnType)
-                : base(rule, dispatch, attribute, returnType)
+                CallbackPolicy policy, DefinitionAttribute attribute)
+                : base(rule, dispatch, policy, attribute)
             {
             }
 
