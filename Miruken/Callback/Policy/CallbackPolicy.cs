@@ -25,6 +25,13 @@
             return _rules.FirstOrDefault(r => r.Matches(method, attribute));
         }
 
+        public MethodBinding BindMethod(MethodRule rule, MethodDispatch dispatch,
+                                        DefinitionAttribute attribute)
+        {
+            return Binder?.Invoke(rule, dispatch, this, attribute)
+                ?? new MethodBinding(rule, dispatch, this, attribute);
+        }
+
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);
     }
 

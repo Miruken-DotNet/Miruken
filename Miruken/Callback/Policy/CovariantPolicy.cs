@@ -7,12 +7,11 @@
 
     public abstract class CovariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public MethodBinding Bind(
+        public new MethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
-            var binding = Binder?.Invoke(rule, dispatch, this, attribute)
-                ?? new MethodBinding(rule, dispatch, this, attribute);
+            var binding = base.BindMethod(rule, dispatch, attribute);
             InferVariance(binding);
             return binding;
         }
@@ -122,14 +121,14 @@
 
         public CovariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule(Policy.Bind, args));
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, args));
             return this;
         }
 
         public CovariantPolicyBuilder<Cb> MatchMethod(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule(Policy.Bind, returnRule, args));
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, returnRule, args));
             return this;
         }
     }

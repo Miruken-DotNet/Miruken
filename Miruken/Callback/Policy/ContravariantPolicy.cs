@@ -13,12 +13,11 @@
             HasResult = IsResult;
         }
 
-        public MethodBinding Bind(
+        public new MethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
-            var binding = Binder?.Invoke(rule, dispatch, this, attribute)
-                ?? new MethodBinding(rule, dispatch, this, attribute);
+            var binding = base.BindMethod(rule, dispatch, attribute);
             InferVariance(binding);
             return binding;
         }
@@ -135,7 +134,7 @@
 
         public ContravariantPolicyBuilder MatchMethod(params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule(Policy.Bind,
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod,
                 ReturnsType<bool>.OrVoid, args));
             return this;
         }
@@ -161,7 +160,7 @@
 
         public ContravariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
         {
-            Policy.AddMethodRule(new MethodRule(Policy.Bind,
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod,
                  ReturnsType<bool>.OrVoid, args));
             return this;
         }
