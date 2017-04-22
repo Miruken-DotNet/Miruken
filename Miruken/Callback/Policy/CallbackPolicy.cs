@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -10,6 +11,9 @@
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
         private List<IPipleineFilterProvider> _filters;
+
+        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
 
         public object             NoResult   { get; set; }
         public Func<object, bool> HasResult  { get; set; }
@@ -45,6 +49,33 @@
         }
 
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);
+
+        public bool Dispatch(
+            Handler handler, object callback, bool greedy, IHandler composer)
+        {
+            var handled   = false;
+            var surrogate = handler.Surrogate;
+
+            if (surrogate != null)
+            {
+                var descriptor = GetDescriptor(surrogate.GetType());
+                handled = descriptor.Dispatch(this, surrogate, callback, greedy, composer);
+            }
+
+            if (!handled || greedy)
+            {
+                var descriptor = GetDescriptor(handler.GetType());
+                handled = descriptor.Dispatch(this, handler, callback, greedy, composer)
+                       || handled;
+            }
+
+            return handled;
+        }
+
+        public static HandlerDescriptor GetDescriptor(Type type)
+        {
+            return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
+        }
     }
 
     public class CallbackPolicyBuilder<TPolicy, TBuilder>

@@ -1,7 +1,6 @@
 namespace Miruken.Callback
 {
     using System;
-    using System.Reflection;
     using Policy;
 
     [AttributeUsage(AttributeTargets.Method,
@@ -11,10 +10,5 @@ namespace Miruken.Callback
         public object Key { get; set; }
 
         public abstract CallbackPolicy CallbackPolicy { get; }
-
-        public MethodRule MatchMethod(MethodInfo method)
-        {
-            return CallbackPolicy.MatchMethod(method, this);
-        }
     }
 }

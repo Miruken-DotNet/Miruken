@@ -1,10 +1,9 @@
-namespace Miruken.Callback
+namespace Miruken.Callback.Policy
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Reflection;
-    using Policy;
 
     public class HandlerDescriptor
     {
@@ -79,7 +78,8 @@ namespace Miruken.Callback
 
                 foreach (var attribute in attributes)
                 {
-                    var rule = attribute.MatchMethod(method);
+                    var policy = attribute.CallbackPolicy;
+                    var rule   = policy.MatchMethod(method, attribute);
                     if (rule == null)
                         throw new InvalidOperationException(
                             $"The policy for {attribute.GetType().FullName} rejected method '{GetDescription(method)}'");
@@ -91,7 +91,6 @@ namespace Miruken.Callback
                         _methods = new Dictionary<CallbackPolicy, PolicyMethods>();
 
                     PolicyMethods methods;
-                    var policy = attribute.CallbackPolicy;
                     if (!_methods.TryGetValue(policy, out methods))
                     {
                         methods = new PolicyMethods();

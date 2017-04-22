@@ -63,7 +63,7 @@
             if (!handled || greedy)
                 handled = Implied(handler, false, composer) || handled;
             if (handled && !greedy) return true;
-            return HandlerMetadata.Dispatch(ProvidesAttribute.Policy,
+            return ProvidesAttribute.Policy.Dispatch(
                 handler, this, greedy, composer) || handled;
         }
 

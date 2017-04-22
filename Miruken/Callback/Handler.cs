@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Policy;
 
     public partial class Handler : MarshalByRefObject, IHandler
 	{
@@ -42,8 +41,7 @@
                 return dispatch.Dispatch(this, greedy, composer);
 
             return !ShouldSkipDefinitions() &&
-                HandlerMetadata.Dispatch(HandlesAttribute.Policy,
-                this, callback, greedy, composer);
+                HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
         }
 
 	    private bool ShouldSkipDefinitions()
