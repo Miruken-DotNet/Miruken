@@ -405,14 +405,6 @@
             Assert.AreEqual(1, bar.Handled);
         }
 
-        [TestMethod]
-        public void TestName()
-        {
-            var filter  = new LogFilter<string, int>();
-            var handler = new RequestHandler();
-            Assert.IsTrue(handler.Handle(filter));    
-        }
-
         private class Foo
         {     
             public int  Handled     { get; set; }
@@ -675,13 +667,6 @@
                 bar.Handled++;
             }
 
-            [Handles(typeof(ICallbackFilter<,>)),
-             CallbackFilter(typeof(LogFilter<,>))]
-            public void Test(object callback)
-            {
-                
-            }
-
             [Provides(typeof(ICallbackFilter<,>))]
             public object CreateFilter(Resolution resolution)
             {
@@ -689,14 +674,9 @@
             }
         }
 
-        public abstract class Middleware<Cb, Res> : ICallbackFilter<Cb, Res>
+        private class LogFilter<Cb, Res> : ICallbackFilter<Cb, Res>
         {
-            public abstract Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed);
-        }
-
-        private class LogFilter<Cb, Res> : Middleware<Cb, Res>
-        {
-            public override Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed)
+            public Res Filter(Cb callback, IHandler composer, CallbackDelegate<Res> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
                 return proceed();

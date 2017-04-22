@@ -82,7 +82,7 @@
             return handled ? result : NoResult;
         }
 
-        protected void AddFilters(params CallbackFilterAttribute[] filters)
+        protected void AddCallbackFilters(params CallbackFilterAttribute[] filters)
         {
             if (filters == null || filters.Length == 0) return;
             if (_filters == null)
@@ -92,7 +92,7 @@
 
         private void AddMethodFilters()
         {
-            AddFilters((CallbackFilterAttribute[])Dispatcher.Method
+            AddCallbackFilters((CallbackFilterAttribute[])Dispatcher.Method
                 .GetCustomAttributes(typeof(CallbackFilterAttribute), true));
         }
     }
