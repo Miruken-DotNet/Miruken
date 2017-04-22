@@ -7,20 +7,20 @@
     internal abstract class MethodPipeline
     {
         public abstract bool Invoke(MethodBinding binding,
-            object target, object callback, object[] args, Type returnType,
-            IEnumerable<PipelineAttribute> filters, IHandler composer,
+            object target, object callback, object[] args, 
+            Type returnType, IHandler composer,
             out object result);
     }
 
     internal class MethodPipeline<Cb, Res> : MethodPipeline
     {
         public override bool Invoke(MethodBinding binding,
-            object target, object callback, object[] args, Type returnType,
-            IEnumerable<PipelineAttribute> filters, IHandler composer,
+            object target, object callback, object[] args, 
+            Type returnType, IHandler composer,
             out object result)
         {
             var completed = false;
-            using (var pipeline = GetPipeline(filters, composer).GetEnumerator())
+            using (var pipeline = GetPipeline(binding.Filters, composer).GetEnumerator())
             {
                 PipelineDelegate<Res> next = null;
                 next = proceed =>
@@ -38,18 +38,38 @@
         }
 
         private static IEnumerable<IPieplineFilter<Cb, Res>> GetPipeline(
-            IEnumerable<PipelineAttribute> filters, IHandler composer)
+            IEnumerable<IPipleineFilterProvider> providers, IHandler composer)
         {
-            return filters.SelectMany(filter =>
-                filter.FilterTypes.SelectMany(filterType =>
-                {
-                    if (filterType.IsGenericTypeDefinition)
-                        filterType = filterType.MakeGenericType(typeof(Cb), typeof(Res));
-                    return filter.Many
-                         ? composer.ResolveAll(filterType)
-                         : new[] {composer.Resolve(filterType)};
-                }))
+            composer = composer.Provide(ResolveOpenFilters);
+            return providers
+                .SelectMany(provider => provider.GetPipelineFilters(composer))
+                .OrderByDescending(f => f.Order ?? int.MaxValue)             
                 .OfType<IPieplineFilter<Cb, Res>>();
+        }
+
+        private static bool ResolveOpenFilters(
+            Resolution resolution, IHandler composer)
+        {
+            var filterType = resolution.Key as Type;
+            if (filterType?.IsGenericTypeDefinition != true ||
+                !typeof(IPipelineFilter).IsAssignableFrom(filterType))
+                return false;
+            filterType = filterType.MakeGenericType(typeof(Cb), typeof(Res));
+            if (resolution.Many)
+            {
+                var filters = composer.ResolveAll(filterType);
+                if (filters == null || filters.Length == 0)
+                    return false;
+                foreach (var filter in filters)
+                    resolution.Resolve(filter, composer);
+            }
+            else
+            {
+                var filter = composer.Resolve(filterType);
+                if (filter == null) return false;
+                resolution.Resolve(filter, composer);
+            }
+            return true;
         }
     }
 }

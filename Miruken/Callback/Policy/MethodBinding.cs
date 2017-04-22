@@ -7,20 +7,20 @@
 
     public delegate MethodBinding BindMethodDelegate(
         MethodRule rule, MethodDispatch dispatch,
-        CallbackPolicy policy,DefinitionAttribute attribute);
+        DefinitionAttribute attribute, CallbackPolicy policy);
 
     public class MethodBinding
     {
         private Type _varianceType;
-        private List<PipelineAttribute> _filters;
+        private List<IPipleineFilterProvider> _filters;
         private MethodPipeline _pipeline;
         private bool _initialized;
         private object _lock;
 
         public MethodBinding(MethodRule rule,
                              MethodDispatch dispatch,
-                             CallbackPolicy policy,
-                             DefinitionAttribute attribute)
+                             DefinitionAttribute attribute,
+                             CallbackPolicy policy)
         {
             if (rule == null)
                 throw new ArgumentNullException(nameof(rule));
@@ -28,8 +28,8 @@
                 throw new ArgumentNullException(nameof(dispatch));
             Rule       = rule;
             Dispatcher = dispatch;
-            Policy     = policy;
             Attribute  = attribute;
+            Policy     = policy;
             AddMethodFilters();
         }
 
@@ -51,6 +51,9 @@
             }
         }
 
+        public IEnumerable<IPipleineFilterProvider> Filters =>
+            _filters ?? Enumerable.Empty<IPipleineFilterProvider>();
+
         public object GetKey()
         {
             var key = Attribute.Key;
@@ -64,19 +67,19 @@
             return Policy.HasResult?.Invoke(result) ?? result != null;
         }
 
-        public void AddPipelineFilters(params PipelineAttribute[] filters)
+        public void AddPipelineFilters(params IPipleineFilterProvider[] providers)
         {
-            if (filters == null || filters.Length == 0) return;
+            if (providers == null || providers.Length == 0) return;
             if (_filters == null)
-                _filters = new List<PipelineAttribute>();
-            _filters.AddRange(filters.Where(f => f != null));
+                _filters = new List<IPipleineFilterProvider>();
+            _filters.AddRange(providers.Where(p => p != null));
         }
 
         protected object Invoke(object target, object callback,
                                 IHandler composer, Type returnType = null)
         {
             var args = Rule.ResolveArgs(this, callback, composer);
-            if (_filters == null)
+            if (_filters == null || _filters.Count == 0)
                 return Dispatcher.Invoke(target, args, returnType);
 
             var pipeline = LazyInitializer.EnsureInitialized(
@@ -92,7 +95,7 @@
 
             object result;
             return pipeline.Invoke(this, target, callback, args,
-                returnType, _filters, composer, out result)
+                returnType, composer, out result)
                 ? result : Policy.NoResult;
         }
 

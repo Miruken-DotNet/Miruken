@@ -20,8 +20,8 @@
         {
             public ProvidesMethod(
                 MethodRule rule, MethodDispatch dispatch,
-                CallbackPolicy policy, DefinitionAttribute attribute)
-                : base(rule, dispatch, policy, attribute)
+                DefinitionAttribute attribute, CallbackPolicy policy)
+                : base(rule, dispatch, attribute, policy)
             {
             }
 
@@ -61,7 +61,7 @@
              CovariantPolicy.Create<Resolution>(r => r.Key,
                 x => x.MatchMethod(x.Return.OrVoid, x.Callback, x.Composer.Optional)
                       .MatchMethod(x.Return, x.Composer.Optional)
-                      .BindMethod((r,d,a,rt) => new ProvidesMethod(r,d,a,rt))
+                      .BindMethod((r,d,a,p) => new ProvidesMethod(r,d,a,p))
                 );
     }
 }

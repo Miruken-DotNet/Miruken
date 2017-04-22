@@ -28,8 +28,8 @@
         public MethodBinding BindMethod(MethodRule rule, MethodDispatch dispatch,
                                         DefinitionAttribute attribute)
         {
-            return Binder?.Invoke(rule, dispatch, this, attribute)
-                ?? new MethodBinding(rule, dispatch, this, attribute);
+            return Binder?.Invoke(rule, dispatch, attribute, this)
+                ?? new MethodBinding(rule, dispatch, attribute, this);
         }
 
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);

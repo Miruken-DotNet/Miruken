@@ -676,6 +676,8 @@
 
         private class LogFilter<Cb, Res> : IPieplineFilter<Cb, Res>
         {
+            public int? Order { get; set; }
+
             public Res Filter(Cb callback, IHandler composer, PipelineDelegate<Res> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
