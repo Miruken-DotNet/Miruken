@@ -51,8 +51,19 @@
             }
         }
 
-        public IEnumerable<IPipleineFilterProvider> Filters =>
-            _filters ?? Enumerable.Empty<IPipleineFilterProvider>();
+        public IEnumerable<IPipleineFilterProvider> Filters
+        {
+            get
+            {
+                if (_filters != null)
+                {
+                    foreach (var filter in _filters)
+                        yield return filter;
+                }
+                foreach (var policyFilter in Policy.Filters)
+                    yield return policyFilter;
+            }
+        }
 
         public object GetKey()
         {

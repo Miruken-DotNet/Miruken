@@ -9,11 +9,15 @@
     public abstract class CallbackPolicy
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
+        private List<IPipleineFilterProvider> _filters;
 
         public object             NoResult   { get; set; }
         public Func<object, bool> HasResult  { get; set; }
         public Func<object, Type> ResultType { get; set; }
         public BindMethodDelegate Binder     { get; set; }
+
+        public IEnumerable<IPipleineFilterProvider> Filters =>
+            _filters ?? Enumerable.Empty<IPipleineFilterProvider>();
 
         public void AddMethodRule(MethodRule rule)
         {
@@ -30,6 +34,14 @@
         {
             return Binder?.Invoke(rule, dispatch, attribute, this)
                 ?? new MethodBinding(rule, dispatch, attribute, this);
+        }
+
+        public void AddPipelineFilters(params IPipleineFilterProvider[] providers)
+        {
+            if (providers == null || providers.Length == 0) return;
+            if (_filters == null)
+                _filters = new List<IPipleineFilterProvider>();
+            _filters.AddRange(providers.Where(p => p != null));
         }
 
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);
@@ -69,6 +81,12 @@
         public TBuilder BindMethod(BindMethodDelegate binder)
         {
             Policy.Binder = binder;
+            return (TBuilder)this;
+        }
+
+        public TBuilder Pipeline(params IPipleineFilterProvider[] providers)
+        {
+            Policy.AddPipelineFilters(providers);
             return (TBuilder)this;
         }
     }
