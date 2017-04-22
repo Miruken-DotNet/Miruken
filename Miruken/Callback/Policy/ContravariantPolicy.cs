@@ -4,6 +4,8 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using Infrastructure;
 
     public class ContravariantPolicy : CallbackPolicy, IComparer<Type>
     {
@@ -13,7 +15,7 @@
             HasResult = IsResult;
         }
 
-        public new MethodBinding BindMethod(
+        public override MethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
@@ -47,24 +49,8 @@
 
         private static bool AcceptKey(Type type, Type key)
         {
-            if (key.IsAssignableFrom(type))
-                return true;
-            if (key.IsGenericTypeDefinition)
-            {
-                if (type.IsGenericType)
-                {
-                    if (key.IsInterface)
-                        return type.GetInterface(key.FullName) != null;
-                    while (type != typeof(object) &&
-                           type?.IsGenericType == true)
-                    {
-                        if (type.GetGenericTypeDefinition() == key)
-                            return true;
-                        type = type.BaseType;
-                    }
-                }
-            }
-            return false;
+            return key.IsAssignableFrom(type) ||
+                   type.GetOpenImplementation(key) != null;
         }
 
         private static bool IsResult(object result)
@@ -131,13 +117,6 @@
         }
 
         public CallbackArgument Callback => CallbackArgument.Instance;
-
-        public ContravariantPolicyBuilder MatchMethod(params ArgumentRule[] args)
-        {
-            Policy.AddMethodRule(new MethodRule(Policy.BindMethod,
-                ReturnsType<bool>.OrVoid, args));
-            return this;
-        }
     }
 
     public class ContravariantPolicyBuilder<Cb>
@@ -156,13 +135,6 @@
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
             return new ExtractArgument<Cb, Res>(extract);
-        }
-
-        public ContravariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
-        {
-            Policy.AddMethodRule(new MethodRule(Policy.BindMethod,
-                 ReturnsType<bool>.OrVoid, args));
-            return this;
         }
     }
 }

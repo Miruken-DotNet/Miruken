@@ -17,7 +17,7 @@
 
         public static readonly ContravariantPolicy Policy =
             ContravariantPolicy.Create(
-                x => x.MatchMethod(x.Callback, x.Composer.Optional)
+                x => x.MatchMethod(Return<bool>.OrVoid, x.Callback, x.Composer.Optional)
             );
     }
 }

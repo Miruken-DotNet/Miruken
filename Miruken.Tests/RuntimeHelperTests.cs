@@ -73,9 +73,9 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Get_Toplevel_Interfaces()
         {
-            var toplevel = RuntimeHelper.GetToplevelInterfaces(typeof(Bar));
+            var toplevel = typeof(Bar).GetToplevelInterfaces();
             CollectionAssert.AreEqual(toplevel, new [] { typeof(IBar) });
-            toplevel = RuntimeHelper.GetToplevelInterfaces(typeof(Baz));
+            toplevel = typeof(Baz).GetToplevelInterfaces();
             CollectionAssert.AreEqual(toplevel, new[] { typeof(IBaz), typeof(IBoo) });
         }
 

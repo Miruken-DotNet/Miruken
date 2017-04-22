@@ -660,8 +660,7 @@
 
         private class RequestHandler : Handler
         {
-            [Handles,
-             Pipeline(typeof(LogFilter<,>))]
+            [Log, Handles]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
@@ -672,6 +671,14 @@
             {
                 return Activator.CreateInstance((Type)resolution.Key);
             }
+        }
+
+        public class LogAttribute : PipelineAttribute
+        {
+            public LogAttribute()
+                : base(typeof(LogFilter<,>))
+            {              
+            }    
         }
 
         private class LogFilter<Cb, Res> : IPieplineFilter<Cb, Res>

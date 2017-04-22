@@ -31,25 +31,48 @@
                  : null;
         }
 
-        public static string GetSimpleTypeName(Type type)
+        public static string GetSimpleTypeName(this Type type)
         {
+            if (type == null) return "";
             var fullyQualifiedTypeName = type.AssemblyQualifiedName;
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
         }
 
-        public static Type[] GetToplevelInterfaces(Type type)
+        public static Type[] GetToplevelInterfaces(this Type type)
         {
+            if (type == null) return new Type[0];
             var allInterfaces = type.GetInterfaces();
             return allInterfaces.Except(allInterfaces.SelectMany(t => t.GetInterfaces()))
                 .ToArray();
         }
 
-        public static bool IsTopLevelInterface(Type @interface, Type type)
+        public static bool IsTopLevelInterface(this Type @interface, Type type)
         {
+            if (@interface == null || type == null) return false;
             return @interface.IsInterface
                 && @interface.IsAssignableFrom(type)
                 && type.GetInterfaces().All(
                     i => i == @interface || !@interface.IsAssignableFrom(i));
+        }
+
+        public static Type GetOpenImplementation(this Type type, Type openType)
+        {
+            if (openType.IsGenericTypeDefinition)
+            {
+                if (type.IsGenericType)
+                {
+                    if (openType.IsInterface)
+                        return type.GetInterface(openType.FullName);
+                    while (type != typeof(object) &&
+                           type?.IsGenericType == true)
+                    {
+                        if (type.GetGenericTypeDefinition() == openType)
+                            return type;
+                        type = type.BaseType;
+                    }
+                }
+            }
+            return null;
         }
 
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,

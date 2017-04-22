@@ -4,10 +4,11 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using Infrastructure;
 
     public abstract class CovariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public new MethodBinding BindMethod(
+        public override MethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
@@ -30,23 +31,9 @@
 
         protected static bool AcceptKey(Type type, Type key)
         {
-            if (key.IsGenericTypeDefinition)
-            {
-                if (type.IsGenericType)
-                {
-                    if (key.IsInterface)
-                        return type.GetInterface(key.FullName) != null;
-                    while (type != typeof(object) &&
-                           type?.IsGenericType == true)
-                    {
-                        if (type.GetGenericTypeDefinition() == key)
-                            return true;
-                        type = type.BaseType;
-                    }
-                }
-                return false;
-            }
-            return type.IsAssignableFrom(key);
+            return key.IsGenericTypeDefinition
+                 ? type.GetOpenImplementation(key) != null
+                 : type.IsAssignableFrom(key);
         }
 
         int IComparer<Type>.Compare(Type x, Type y)
@@ -117,19 +104,6 @@
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
             return new ExtractArgument<Cb, Res>(extract);
-        }
-
-        public CovariantPolicyBuilder<Cb> MatchMethod(params ArgumentRule[] args)
-        {
-            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, args));
-            return this;
-        }
-
-        public CovariantPolicyBuilder<Cb> MatchMethod(
-            ReturnRule returnRule, params ArgumentRule[] args)
-        {
-            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, returnRule, args));
-            return this;
         }
     }
 }

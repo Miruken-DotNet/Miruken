@@ -33,8 +33,8 @@
             return _rules.FirstOrDefault(r => r.Matches(method, attribute));
         }
 
-        public MethodBinding BindMethod(MethodRule rule, MethodDispatch dispatch,
-                                        DefinitionAttribute attribute)
+        public virtual MethodBinding BindMethod(MethodRule rule,
+            MethodDispatch dispatch, DefinitionAttribute attribute)
         {
             return Binder?.Invoke(rule, dispatch, attribute, this)
                 ?? new MethodBinding(rule, dispatch, attribute, this);
@@ -91,6 +91,14 @@
 
         public ComposerArgument Composer => ComposerArgument.Instance;
 
+        public static ReturnArgConstraint Arg(int argIndex)
+        {
+            if (argIndex < 1)
+                throw new ArgumentOutOfRangeException(nameof(argIndex),
+                    "Argument index must be >= 1");
+            return new ReturnArgConstraint(argIndex - 1);
+        }
+
         public TBuilder NoResult(object value)
         {
             Policy.NoResult = value;
@@ -118,6 +126,19 @@
         public TBuilder Pipeline(params IPipleineFilterProvider[] providers)
         {
             Policy.AddPipelineFilters(providers);
+            return (TBuilder)this;
+        }
+
+        public TBuilder MatchMethod(params ArgumentRule[] args)
+        {
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, args));
+            return (TBuilder)this;
+        }
+
+        public TBuilder MatchMethod(
+            ReturnRule returnRule, params ArgumentRule[] args)
+        {
+            Policy.AddMethodRule(new MethodRule(Policy.BindMethod, returnRule, args));
             return (TBuilder)this;
         }
     }

@@ -82,7 +82,7 @@
         private bool IsAcceptableTarget(object target)
         {
             return _semantics.HasOption(CallbackOptions.Strict)
-                 ? RuntimeHelper.IsTopLevelInterface(Protocol, target.GetType())
+                 ? Protocol.IsTopLevelInterface(target.GetType())
                  : _semantics.HasOption(CallbackOptions.Duck) 
                 || Protocol.IsInstanceOfType(target);
         }

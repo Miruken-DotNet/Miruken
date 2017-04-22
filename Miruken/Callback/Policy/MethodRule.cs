@@ -39,15 +39,13 @@ namespace Miruken.Callback.Policy
 
         public bool Matches(MethodInfo method, DefinitionAttribute attribute)
         {
-            if (_returnValue != null && 
-                !_returnValue.Matches(method.ReturnType, attribute))
-                return false;
-
             var parameters = method.GetParameters();
             var paramCount = parameters.Length;
             return paramCount >= _minArgs && paramCount <= _args.Length &&
                    parameters.Zip(_args, (param, arg) => arg.Matches(param, attribute))
-                        .All(m => m);
+                             .All(m => m)
+               && _returnValue?.Matches(
+                   method.ReturnType, parameters, attribute) != false;
         }
 
         public MethodBinding Bind(MethodDispatch dispatch, DefinitionAttribute attribute)
