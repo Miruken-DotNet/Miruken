@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Linq;
     using System.Reflection;
     using System.Runtime.Remoting.Messaging;
     using Concurrency;
@@ -8,22 +9,26 @@
 
     public class HandleMethod : ICallback, ICallbackDispatch
     {
-        private readonly MethodInfo _method;
-        private readonly object[] _args;
         private readonly CallbackSemantics _semantics;
 
         public HandleMethod(Type protocol, IMethodMessage methodCall, 
             CallbackSemantics semantics = null)
         {
             _semantics = semantics;
-            _method    = (MethodInfo)methodCall.MethodBase;
-            _args      = methodCall.Args;
-            Protocol   = protocol ?? _method.ReflectedType;
-            ResultType = _method.ReturnType == typeof(void) ? null
-                       : _method.ReturnType;
+            Method     = (MethodInfo)methodCall.MethodBase;
+            Arguments  = methodCall.Args;
+            Protocol   = protocol ?? Method.ReflectedType;
+            ResultType = Method.ReturnType == typeof(void) ? null
+                       : Method.ReturnType;
         }
 
+        public Type Protocol { get; }
+
+        public MethodInfo Method { get; }
+
         public Type ResultType { get; }
+
+        public object[] Arguments { get; }
 
         public object Result
         {
@@ -35,13 +40,11 @@
 
         public Exception Exception { get; set; }
 
-        public Type Protocol { get; }
-
         public bool InvokeOn(object target, IHandler composer)
         {
             if (!IsAcceptableTarget(target)) return false;
 
-            var targetMethod = RuntimeHelper.SelectMethod(_method, target.GetType(), Binding);
+            var targetMethod = RuntimeHelper.SelectMethod(Method, target.GetType(), Binding);
             if (targetMethod == null) return false;
 
             var oldComposer  = Composer;
@@ -51,7 +54,7 @@
             {
                 Composer    = composer;
                 Unhandled   = false;
-                ReturnValue = targetMethod.Invoke(target, Binding, null, _args, null);
+                ReturnValue = Invoke(targetMethod, target, composer);
                 return !Unhandled;
             }
             catch (Exception exception)
@@ -70,6 +73,46 @@
             }
         }
 
+        private bool IsAcceptableTarget(object target)
+        {
+            return _semantics.HasOption(CallbackOptions.Strict)
+                 ? Protocol.IsTopLevelInterface(target.GetType())
+                 : _semantics.HasOption(CallbackOptions.Duck)
+                || Protocol.IsInstanceOfType(target);
+        }
+
+        protected object Invoke(
+            MethodInfo method, object target, IHandler composer)
+        {
+            var options = composer.GetFilterOptions();
+            if (options?.SuppressFilters == true)
+                return method.Invoke(target, Binding, null, Arguments, null);
+
+            var filters = composer.GetOrderedFilters(
+                options?.SuppressedFilters,
+                    FilterAttribute.GetFilters(target.GetType(), true),
+                    FilterAttribute.GetFilters(method),
+                    options?.AdditionalFilters)
+                .OfType<IFilter<HandleMethod, object>>()
+                .ToArray();
+
+            if (filters.Length == 0)
+                return method.Invoke(target, Binding, null, Arguments, null);
+
+            var index = -1;
+            FilterDelegate<object> next = null;
+            next = proceed =>
+            {
+                if (!proceed)
+                    return RuntimeHelper.GetDefault(method.ReturnType);
+                return ++index < filters.Length
+                        ? filters[index].Filter(this, composer, next) 
+                        : method.Invoke(target, Binding, null, Arguments, null);
+            };
+
+            return next();
+        }
+
         bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
@@ -77,14 +120,6 @@
             if (!handled || greedy)
                 handled = InvokeOn(handler, composer) || handled;
             return handled;
-        }
-
-        private bool IsAcceptableTarget(object target)
-        {
-            return _semantics.HasOption(CallbackOptions.Strict)
-                 ? Protocol.IsTopLevelInterface(target.GetType())
-                 : _semantics.HasOption(CallbackOptions.Duck) 
-                || Protocol.IsInstanceOfType(target);
         }
 
         public static IHandler RequireComposer()

@@ -1,7 +1,7 @@
 ﻿namespace Miruken.Callback
 {
-    public abstract class CallbackOptions<T> : Composition
-        where T : CallbackOptions<T>
+    public abstract class Options<T> : Composition
+        where T : Options<T>
     {
         public abstract void MergeInto(T other);
 
@@ -13,7 +13,7 @@
     }
 
     public class OptionsHandler<T> : HandlerDecorator
-        where T : CallbackOptions<T>
+        where T : Options<T>
     {
         private readonly T _options;
 

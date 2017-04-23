@@ -22,8 +22,7 @@
             Type returnType, ParameterInfo[] parameters,
             DefinitionAttribute attribute)
         {
-            return _type.IsAssignableFrom(returnType) ||
-                   returnType.GetOpenImplementation(_type) != null;
+            return returnType.IsClassOf(_type);
         }
 
         public static readonly Return Void = new Return(typeof(void));

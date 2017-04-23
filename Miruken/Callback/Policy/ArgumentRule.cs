@@ -72,9 +72,7 @@
         public override bool Matches(
             ParameterInfo parameter, DefinitionAttribute attribute)
         {
-            var parameterType = parameter.ParameterType;
-            return _type.IsAssignableFrom(parameterType) ||
-                   parameterType.GetOpenImplementation(_type) != null;
+            return parameter.ParameterType.IsClassOf(_type);
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Collections.Generic;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
 
@@ -666,14 +667,14 @@
                 bar.Handled++;
             }
 
-            [Provides(typeof(IPieplineFilter<,>))]
+            [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Resolution resolution)
             {
                 return Activator.CreateInstance((Type)resolution.Key);
             }
         }
 
-        public class LogAttribute : PipelineAttribute
+        public class LogAttribute : FilterAttribute
         {
             public LogAttribute()
                 : base(typeof(LogFilter<,>))
@@ -681,11 +682,11 @@
             }    
         }
 
-        private class LogFilter<Cb, Res> : IPieplineFilter<Cb, Res>
+        private class LogFilter<Cb, Res> : IFilter<Cb, Res>
         {
             public int? Order { get; set; }
 
-            public Res Filter(Cb callback, IHandler composer, PipelineDelegate<Res> proceed)
+            public Res Filter(Cb callback, IHandler composer, FilterDelegate<Res> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
                 return proceed();

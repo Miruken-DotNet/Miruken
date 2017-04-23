@@ -12,7 +12,7 @@
     public class MethodBinding
     {
         private Type _varianceType;
-        private List<IPipleineFilterProvider> _filters;
+        private List<IFilterProvider> _filters;
         private MethodPipeline _pipeline;
         private bool _initialized;
         private object _lock;
@@ -51,69 +51,72 @@
             }
         }
 
-        public IEnumerable<IPipleineFilterProvider> Filters
-        {
-            get
-            {
-                if (_filters != null)
-                {
-                    foreach (var filter in _filters)
-                        yield return filter;
-                }
-                foreach (var policyFilter in Policy.Filters)
-                    yield return policyFilter;
-            }
-        }
-
         public object GetKey()
         {
             var key = Attribute.Key;
             return key == null || key is Type ? VarianceType : key;
         }
 
-        public virtual bool Dispatch(object target, object callback, IHandler composer)
-        {
-            var resultType = Policy.ResultType?.Invoke(callback);
-            var result     = Invoke(target, callback, composer, resultType);
-            return Policy.HasResult?.Invoke(result) ?? result != null;
-        }
-
-        public void AddPipelineFilters(params IPipleineFilterProvider[] providers)
+        public void AddFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
             if (_filters == null)
-                _filters = new List<IPipleineFilterProvider>();
+                _filters = new List<IFilterProvider>();
             _filters.AddRange(providers.Where(p => p != null));
         }
 
+        public virtual bool Dispatch(object target, object callback, 
+            IHandler composer, IEnumerable<IFilterProvider> providers)
+        {
+            var resultType = Policy.ResultType?.Invoke(callback);
+            var result     = Invoke(target, callback, composer,providers, resultType);
+            return Policy.HasResult?.Invoke(result) ?? result != null;
+        }
+
         protected object Invoke(object target, object callback,
-                                IHandler composer, Type returnType = null)
+            IHandler composer, IEnumerable<IFilterProvider> providers,
+            Type returnType = null)
         {
             var args = Rule.ResolveArgs(this, callback, composer);
-            if (_filters == null || _filters.Count == 0)
+
+            if (callback is FilterOptions)
+                return Dispatcher.Invoke(target, args, returnType);
+
+            var options = composer.GetFilterOptions();
+            if (options?.SuppressFilters == true)
+                return Dispatcher.Invoke(target, args, returnType);
+
+            var callbackType = callback.GetType();
+            var resultType   = Dispatcher.ReturnType;
+            if (resultType == typeof(void))
+                resultType = typeof(object);
+            var filters = composer.SuppressFilters()
+                .ResolveOpenFilters(callbackType, resultType)
+                .GetOrderedFilters(options?.SuppressedFilters,
+                    _filters, providers, options?.AdditionalFilters,
+                    Policy.Filters)
+                .ToArray();
+
+            if (filters.Length == 0)
                 return Dispatcher.Invoke(target, args, returnType);
 
             var pipeline = LazyInitializer.EnsureInitialized(
                 ref _pipeline, ref _initialized, ref _lock, () =>
                 {
-                    var resultType = Dispatcher.ReturnType;
-                    if (resultType == typeof(void))
-                        resultType = typeof(object);
-                    var pipelineType = typeof(MethodPipeline<,>).MakeGenericType(
-                        callback.GetType(), resultType);
+                    var pipelineType = typeof(MethodPipeline<,>)
+                        .MakeGenericType(callbackType, resultType);
                     return (MethodPipeline)Activator.CreateInstance(pipelineType);
                 });
 
             object result;
             return pipeline.Invoke(this, target, callback, args,
-                returnType, composer, out result)
+                returnType, composer, filters, out result)
                 ? result : Policy.NoResult;
         }
 
         private void AddMethodFilters()
         {
-            AddPipelineFilters((PipelineAttribute[])Dispatcher.Method
-                .GetCustomAttributes(typeof(PipelineAttribute), true));
+            AddFilters(FilterAttribute.GetFilters(Dispatcher.Method));
         }
     }
 }

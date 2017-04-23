@@ -49,8 +49,7 @@
 
         private static bool AcceptKey(Type type, Type key)
         {
-            return key.IsAssignableFrom(type) ||
-                   type.GetOpenImplementation(key) != null;
+            return type.IsClassOf(key);
         }
 
         private static bool IsResult(object result)

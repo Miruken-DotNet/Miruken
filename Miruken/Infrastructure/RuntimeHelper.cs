@@ -26,7 +26,7 @@
 
         public static object GetDefault(Type type)
         {
-            return type != null && type.IsValueType
+            return type != null && type.IsValueType && type != typeof(void)
                  ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
                  : null;
         }
@@ -55,21 +55,24 @@
                     i => i == @interface || !@interface.IsAssignableFrom(i));
         }
 
+        public static bool IsClassOf(this Type type, Type @class)
+        {
+            return @class.IsAssignableFrom(type) ||
+                   type.GetOpenImplementation(@class) != null;
+        }
+
         public static Type GetOpenImplementation(this Type type, Type openType)
         {
             if (openType.IsGenericTypeDefinition)
             {
-                if (type.IsGenericType)
+                if (openType.IsInterface)
+                    return type.GetInterface(openType.FullName);
+                while (type != typeof(object) &&
+                        type?.IsGenericType == true)
                 {
-                    if (openType.IsInterface)
-                        return type.GetInterface(openType.FullName);
-                    while (type != typeof(object) &&
-                           type?.IsGenericType == true)
-                    {
-                        if (type.GetGenericTypeDefinition() == openType)
-                            return type;
-                        type = type.BaseType;
-                    }
+                    if (type.GetGenericTypeDefinition() == openType)
+                        return type;
+                    type = type.BaseType;
                 }
             }
             return null;

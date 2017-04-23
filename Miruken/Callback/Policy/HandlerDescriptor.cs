@@ -62,8 +62,9 @@ namespace Miruken.Callback.Policy
         #endregion
 
         private readonly Dictionary<CallbackPolicy, PolicyMethods> _methods;
+        private readonly IFilterProvider[] _filters;
 
-        public HandlerDescriptor(IReflect type)
+        public HandlerDescriptor(Type type)
         {
             foreach (var method in type.GetMethods(Binding))
             {
@@ -74,7 +75,7 @@ namespace Miruken.Callback.Policy
                     continue;
 
                 var attributes = (DefinitionAttribute[])
-                    Attribute.GetCustomAttributes(method, typeof(DefinitionAttribute));
+                    Attribute.GetCustomAttributes(method, typeof(DefinitionAttribute), false);
 
                 foreach (var attribute in attributes)
                 {
@@ -100,6 +101,10 @@ namespace Miruken.Callback.Policy
                     methods.Insert(binding);
                 }
             }
+
+            _filters = _methods != null
+                     ? FilterAttribute.GetFilters(type, true)
+                     : FilterAttribute.NoFilters;
         }
 
         internal bool Dispatch(
@@ -120,8 +125,9 @@ namespace Miruken.Callback.Policy
 
             foreach (var method in methods.GetMethods(keys))
             {
-                dispatched = method.Dispatch(target, callback, composer)
-                          || dispatched;
+                dispatched = 
+                    method.Dispatch(target, callback, composer, _filters)
+                    || dispatched;
                 if (dispatched && !greedy) return true;
             }
 

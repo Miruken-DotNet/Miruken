@@ -20,6 +20,7 @@
             void CancelEmail(int id);
         }
 
+        [Log]
         private class EmailHandler : Handler, IEmailFeature
         {
             public int Count { get; private set; }
@@ -38,6 +39,12 @@
                              : Composer;
                 P<IBilling>(composer).Bill(4M);
             }
+
+            [Provides(typeof(IFilter<,>))]
+            public object CreateFilter(Resolution resolution)
+            {
+                return Activator.CreateInstance((Type)resolution.Key);
+            }
         }
 
         private interface IBilling : IResolving
@@ -45,6 +52,7 @@
             decimal Bill(decimal amount);
         }
 
+        [Log]
         private class Billing : IBilling
         {
             private readonly decimal _fee;
@@ -68,6 +76,7 @@
         {      
         }
 
+        [Log]
         private class OfflineHandler : Handler, IOffline
         {
             private int _count;
@@ -89,6 +98,7 @@
             }
         }
 
+        [Log]
         private class DemoHandler : Handler
         {
             public int Email(string message)
@@ -99,6 +109,26 @@
             public decimal Bill(decimal amount)
             {
                 return amount * 2;
+            }
+        }
+
+        public class LogAttribute : FilterAttribute
+        {
+            public LogAttribute()
+                : base(typeof(LogFilter))
+            {
+            }
+        }
+
+        private class LogFilter : IFilter<HandleMethod, object>
+        {
+            public int? Order { get; set; }
+
+            public object Filter(HandleMethod method, IHandler composer,
+                FilterDelegate<object> proceed)
+            {
+                Console.WriteLine($"Handle method {method.Method.Name}");
+                return proceed();
             }
         }
 

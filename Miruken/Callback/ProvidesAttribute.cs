@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections.Generic;
     using Policy;
 
     public class ProvidesAttribute : DefinitionAttribute
@@ -26,14 +27,15 @@
             }
 
             public override bool Dispatch(
-                object target, object callback, IHandler composer)
+                object target, object callback, IHandler composer,
+                IEnumerable<IFilterProvider> providers)
             {
                 var resolution  = (Resolution)callback;
                 var resolutions = resolution.Resolutions;
                 var returnType  = resolution.Key as Type;
                 var count       = resolutions.Count;
 
-                var result = Invoke(target, callback, composer, returnType);
+                var result = Invoke(target, callback, composer, providers, returnType);
 
                 if (result != null)
                 {

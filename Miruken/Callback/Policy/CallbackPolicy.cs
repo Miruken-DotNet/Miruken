@@ -10,7 +10,7 @@
     public abstract class CallbackPolicy
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
-        private List<IPipleineFilterProvider> _filters;
+        private List<IFilterProvider> _filters;
 
         private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
             _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
@@ -20,8 +20,8 @@
         public Func<object, Type> ResultType { get; set; }
         public BindMethodDelegate Binder     { get; set; }
 
-        public IEnumerable<IPipleineFilterProvider> Filters =>
-            _filters ?? Enumerable.Empty<IPipleineFilterProvider>();
+        public IEnumerable<IFilterProvider> Filters =>
+            _filters ?? Enumerable.Empty<IFilterProvider>();
 
         public void AddMethodRule(MethodRule rule)
         {
@@ -40,11 +40,11 @@
                 ?? new MethodBinding(rule, dispatch, attribute, this);
         }
 
-        public void AddPipelineFilters(params IPipleineFilterProvider[] providers)
+        public void AddFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
             if (_filters == null)
-                _filters = new List<IPipleineFilterProvider>();
+                _filters = new List<IFilterProvider>();
             _filters.AddRange(providers.Where(p => p != null));
         }
 
@@ -123,9 +123,9 @@
             return (TBuilder)this;
         }
 
-        public TBuilder Pipeline(params IPipleineFilterProvider[] providers)
+        public TBuilder Pipeline(params IFilterProvider[] providers)
         {
-            Policy.AddPipelineFilters(providers);
+            Policy.AddFilters(providers);
             return (TBuilder)this;
         }
 
