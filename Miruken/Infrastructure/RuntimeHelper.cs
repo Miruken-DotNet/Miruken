@@ -58,15 +58,23 @@
         public static bool IsClassOf(this Type type, Type @class)
         {
             return @class.IsAssignableFrom(type) ||
-                   type.GetOpenImplementation(@class) != null;
+                   type.GetOpenTypeConformance(@class) != null;
         }
 
-        public static Type GetOpenImplementation(this Type type, Type openType)
+        public static Type GetOpenTypeConformance(this Type type, Type openType)
         {
             if (openType.IsGenericTypeDefinition)
             {
                 if (openType.IsInterface)
-                    return type.GetInterface(openType.FullName);
+                {
+                    if (type == openType) return type;
+                    if (type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == openType)
+                        return type;
+                    return type.GetInterfaces()
+                        .Select(t => GetOpenTypeConformance(t, openType))
+                        .FirstOrDefault(t => t != null);
+                }
                 while (type != typeof(object) &&
                         type?.IsGenericType == true)
                 {

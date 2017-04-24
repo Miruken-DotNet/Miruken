@@ -32,7 +32,7 @@
         protected static bool AcceptKey(Type type, Type key)
         {
             return key.IsGenericTypeDefinition
-                 ? type.GetOpenImplementation(key) != null
+                 ? type.GetOpenTypeConformance(key) != null
                  : type.IsAssignableFrom(key);
         }
 

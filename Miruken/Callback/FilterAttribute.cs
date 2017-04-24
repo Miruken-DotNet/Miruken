@@ -20,7 +20,7 @@
             if (filterTypes == null)
                 throw new ArgumentNullException(nameof(filterTypes));
             if (filterTypes.Any(InvalidFilter))
-                throw new ArgumentException("All filter types must be instantiable IFilter<,>");
+                throw new ArgumentException("All filter types must conform to IFilter<,>");
             FilterTypes = filterTypes;
         }
 
@@ -58,10 +58,9 @@
 
         private static bool InvalidFilter(Type filterType)
         {
-            return filterType == null     ||
-                   filterType.IsInterface || 
-                   filterType.IsAbstract  ||
-                   filterType.GetInterface(typeof(IFilter<,>).FullName) == null;
+            var anyFilter = typeof(IFilter<,>);
+            return filterType == null || (filterType != anyFilter &&
+                   filterType.GetInterface(anyFilter.FullName) == null);
         }
     }
 }

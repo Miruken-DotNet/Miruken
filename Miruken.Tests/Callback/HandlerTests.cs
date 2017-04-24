@@ -402,7 +402,7 @@
             var bar     = new Bar();
             var handler = new RequestHandler();
             Assert.IsTrue(handler.Handle(bar));
-            Assert.AreEqual(1, bar.Handled);
+            Assert.AreEqual(2, bar.Handled);
         }
 
         private class Foo
@@ -658,9 +658,12 @@
             }
         }
 
-        private class RequestHandler : Handler
+        [Filter(typeof(IFilter<,>), Many = true)]
+        private class RequestHandler : Handler, IFilter<Bar, object>
         {
-            [Log, Handles]
+            int? IFilter.Order { get; set; }
+
+            [Handles]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
@@ -669,16 +672,22 @@
             [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Resolution resolution)
             {
-                return Activator.CreateInstance((Type)resolution.Key);
+                var type = (Type)resolution.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(LogFilter<,>).
+                        MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                     : Activator.CreateInstance(type);
             }
-        }
 
-        public class LogAttribute : FilterAttribute
-        {
-            public LogAttribute()
-                : base(typeof(LogFilter<,>))
-            {              
-            }    
+            object IFilter<Bar, object>.Filter(
+                Bar callback, IHandler composer, FilterDelegate<object> proceed)
+            {
+                callback.Handled++;
+                return proceed();
+            }
         }
 
         private class LogFilter<Cb, Res> : IFilter<Cb, Res>
