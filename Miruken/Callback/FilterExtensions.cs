@@ -22,10 +22,18 @@
         }
 
         public static IHandler WithFilters(
-             this IHandler handler, params IFilterProvider[] filters)
+            this IHandler handler, params IFilter[] filters)
         {
             return handler == null ? null :
-                new FilterOptions { ExtraProviders = filters }
+                new FilterOptions { ExtraFilters = filters }
+                .Decorate(handler);
+        }
+
+        public static IHandler WithFilters(
+             this IHandler handler, params IFilterProvider[] providers)
+        {
+            return handler == null ? null :
+                new FilterOptions { ExtraProviders = providers }
                 .Decorate(handler);
         }
 

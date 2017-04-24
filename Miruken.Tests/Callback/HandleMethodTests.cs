@@ -154,7 +154,8 @@
         public void Should_Handle_Methods_Covariantly()
         {
             var handler = new OfflineHandler();
-            var id = P<IEmailFeature>(handler).Email("Hello");
+            var id = P<IEmailFeature>(handler
+                .WithFilters(new LogFilter())).Email("Hello");
             Assert.AreEqual(1, id);
         }
 

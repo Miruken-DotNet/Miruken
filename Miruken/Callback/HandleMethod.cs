@@ -42,7 +42,7 @@
 
         public bool InvokeOn(object target, IHandler composer)
         {
-            if (!IsAcceptableTarget(target)) return false;
+            if (!IsTargetAccepted(target)) return false;
 
             var targetMethod = RuntimeHelper.SelectMethod(Method, target.GetType(), Binding);
             if (targetMethod == null) return false;
@@ -73,7 +73,7 @@
             }
         }
 
-        private bool IsAcceptableTarget(object target)
+        private bool IsTargetAccepted(object target)
         {
             return _semantics.HasOption(CallbackOptions.Strict)
                  ? Protocol.IsTopLevelInterface(target.GetType())
@@ -118,15 +118,6 @@
             if (!handled || greedy)
                 handled = InvokeOn(handler, composer) || handled;
             return handled;
-        }
-
-        public static IHandler RequireComposer()
-        {
-            var composer = Composer;
-            if (composer == null)
-                throw new InvalidOperationException(
-                    "Composer not available.  Did you call this method directly?");
-            return composer;
         }
 
         [ThreadStatic] public static IHandler Composer;
