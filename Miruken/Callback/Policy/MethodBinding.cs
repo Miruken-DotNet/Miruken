@@ -30,7 +30,7 @@
             Dispatcher = dispatch;
             Attribute  = attribute;
             Policy     = policy;
-            AddMethodFilters();
+            AddFilters(FilterAttribute.GetFilters(Dispatcher.Method));
         }
 
         public MethodRule          Rule       { get; }
@@ -90,11 +90,9 @@
             var resultType   = Dispatcher.ReturnType;
             if (resultType == typeof(void))
                 resultType = typeof(object);
-            var filters = composer.SuppressFilters()
+            var filters = composer
                 .ResolveOpenFilters(callbackType, resultType)
-                .GetOrderedFilters(options?.SuppressedFilters,
-                    _filters, providers, options?.AdditionalFilters,
-                    Policy.Filters)
+                .GetOrderedFilters(options, _filters, providers, Policy.Filters)
                 .ToArray();
 
             if (filters.Length == 0)
@@ -112,11 +110,6 @@
             return pipeline.Invoke(this, target, callback, args,
                 returnType, composer, filters, out result)
                 ? result : Policy.NoResult;
-        }
-
-        private void AddMethodFilters()
-        {
-            AddFilters(FilterAttribute.GetFilters(Dispatcher.Method));
         }
     }
 }

@@ -88,11 +88,9 @@
             if (options?.SuppressFilters == true)
                 return method.Invoke(target, Binding, null, Arguments, null);
 
-            var filters = composer.GetOrderedFilters(
-                options?.SuppressedFilters,
+            var filters = composer.GetOrderedFilters(options,
                     FilterAttribute.GetFilters(target.GetType(), true),
-                    FilterAttribute.GetFilters(method),
-                    options?.AdditionalFilters)
+                    FilterAttribute.GetFilters(method))
                 .OfType<IFilter<HandleMethod, object>>()
                 .ToArray();
 

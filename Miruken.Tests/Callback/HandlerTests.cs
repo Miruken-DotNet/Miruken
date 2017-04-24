@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
-    using System.Collections.Generic;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
 
@@ -398,7 +397,7 @@
         }
 
         [TestMethod]
-        public void Should_Call_Pipelines()
+        public void Should_Create_Pipelines()
         {
             var bar     = new Bar();
             var handler = new RequestHandler();
