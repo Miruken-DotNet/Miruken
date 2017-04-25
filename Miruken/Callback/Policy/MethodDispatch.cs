@@ -21,11 +21,13 @@
             FastTwoArgsVoid,
             FastThreeArgsVoid,
             FastFourArgsVoid,
+            FastFiveArgsVoid,
             FastNoArgsReturn,
             FastOneArgReturn,
             FastTwoArgsReturn,
             FastThreeArgsReturn,
-            FastFourArgsReturn
+            FastFourArgsReturn,
+            FastFiveArgsReturn
         }
 
         public MethodDispatch(MethodInfo method)
@@ -38,10 +40,25 @@
             Method        = method;
         }
 
+        private MethodDispatch(
+            MethodInfo method, int argCount, DispatchType dispatchType)
+        {
+            Method        = method;
+            ArgumentCount = argCount;
+            _dispatchType = dispatchType;
+        }
+
         public MethodInfo Method        { get; }
         public int        ArgumentCount { get; }
         public Type       ReturnType => Method.ReturnType;
         public bool       IsVoid     => ReturnType == typeof(void);
+
+        public MethodDispatch CloseMethod(object[] args, Type returnType = null)
+        {
+            return _mapping == null ? this 
+                 : new MethodDispatch(GetClosedMethod(args, returnType),
+                    ArgumentCount, DispatchType.LateBound);
+        }
 
         public object Invoke(object target, object[] args, Type returnType = null)
         {
@@ -68,6 +85,10 @@
                     AssertArgsCount(4, args);
                     ((FourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
                     return null;
+                case DispatchType.FastFiveArgsVoid:
+                    AssertArgsCount(5, args);
+                    ((FiveArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
+                    return null;
                 case DispatchType.FastNoArgsReturn:
                     AssertArgsCount(0, args);
                     return ((NoArgsReturnDelegate)_delegate)(target);
@@ -82,8 +103,10 @@
                     return ((ThreeArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2]);
                 case DispatchType.FastFourArgsReturn:
                     AssertArgsCount(4, args);
-                    ((FourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
-                    return null;
+                    return ((FourArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
+                case DispatchType.FastFiveArgsReturn:
+                    AssertArgsCount(5, args);
+                    return ((FiveArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
                 #endregion
                 default:
                     return InvokeLate(target, args, returnType);
@@ -96,25 +119,27 @@
             if (ArgumentCount > (args?.Length ?? 0))
                 throw new ArgumentException($"Method {GetDescription()} expects {ArgumentCount} arguments");
             if (_mapping != null)
+                method = GetClosedMethod(args, returnType);
+            return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
+        }
+
+        private MethodInfo GetClosedMethod(object[] args, Type returnType)
+        {
+            var argTypes = _mapping.Select(mapping =>
             {
-                var argTypes = _mapping.Select(mapping =>
+                if (mapping.Item1 < 0)  // return type
                 {
-                    if (mapping.Item1 < 0)  // return type
-                    {
-                        if (returnType == null)
-                            throw new ArgumentException(
-                                "Return type is unknown and cannot infer types");
-                        return returnType.GetGenericArguments()[mapping.Item2];
-                    }
-                    var arg = args?[mapping.Item1];
-                    if (arg == null)
-                        throw new ArgumentException($"Argument {mapping.Item1} is null and cannot infer types");
-                    return arg.GetType().GetGenericArguments()[mapping.Item2];
-                }).ToArray();
-                method = method.MakeGenericMethod(argTypes);
-            }
-            return method.Invoke(target, HandlerDescriptor.Binding, null, args,
-                                 CultureInfo.InvariantCulture);
+                    if (returnType == null)
+                        throw new ArgumentException(
+                            "Return type is unknown and cannot infer types");
+                    return returnType.GetGenericArguments()[mapping.Item2];
+                }
+                var arg = args?[mapping.Item1];
+                if (arg == null)
+                    throw new ArgumentException($"Argument {mapping.Item1} is null and cannot infer types");
+                return arg.GetType().GetGenericArguments()[mapping.Item2];
+            }).ToArray();
+           return Method.MakeGenericMethod(argTypes);
         }
 
         private void ConfigureMethod(MethodInfo method, ParameterInfo[] parameters)
@@ -128,61 +153,73 @@
                     case 0:
                         if (isVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionNoArgs(method);
+                            _delegate     = RuntimeHelper.CreateActionNoArgs(method);
                             _dispatchType = DispatchType.FastNoArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncNoArgs(method);
+                            _delegate     = RuntimeHelper.CreateFuncNoArgs(method);
                             _dispatchType = DispatchType.FastNoArgsReturn;
                         }
                         return;
                     case 1:
                         if (isVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionOneArg(method);
+                            _delegate     = RuntimeHelper.CreateActionOneArg(method);
                             _dispatchType = DispatchType.FastOneArgVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncOneArg(method);
+                            _delegate     = RuntimeHelper.CreateFuncOneArg(method);
                             _dispatchType = DispatchType.FastOneArgReturn;
                         }
                         return;
                     case 2:
                         if (isVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionTwoArgs(method);
+                            _delegate     = RuntimeHelper.CreateActionTwoArgs(method);
                             _dispatchType = DispatchType.FastTwoArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncTwoArgs(method);
+                            _delegate     = RuntimeHelper.CreateFuncTwoArgs(method);
                             _dispatchType = DispatchType.FastTwoArgsReturn;
                         }
                         return;
                     case 3:
                         if (isVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionThreeArgs(method);
+                            _delegate     = RuntimeHelper.CreateActionThreeArgs(method);
                             _dispatchType = DispatchType.FastThreeArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncThreeArgs(method);
+                            _delegate     = RuntimeHelper.CreateFuncThreeArgs(method);
                             _dispatchType = DispatchType.FastThreeArgsReturn;
                         }
                         return;
                     case 4:
                         if (isVoid)
                         {
-                            _delegate = RuntimeHelper.CreateActionFourArgs(method);
+                            _delegate     = RuntimeHelper.CreateActionFourArgs(method);
                             _dispatchType = DispatchType.FastFourArgsVoid;
                         }
                         else
                         {
-                            _delegate = RuntimeHelper.CreateFuncFourArgs(method);
+                            _delegate     = RuntimeHelper.CreateFuncFourArgs(method);
                             _dispatchType = DispatchType.FastFourArgsReturn;
+                        }
+                        return;
+                    case 5:
+                        if (isVoid)
+                        {
+                            _delegate     = RuntimeHelper.CreateActionFiveArgs(method);
+                            _dispatchType = DispatchType.FastFiveArgsVoid;
+                        }
+                        else
+                        {
+                            _delegate     = RuntimeHelper.CreateFuncFiveArgs(method);
+                            _dispatchType = DispatchType.FastFiveArgsReturn;
                         }
                         return;
                     #endregion
@@ -231,5 +268,9 @@
                 throw new ArgumentException(
                     $"Expected {expected} arguments, but {args.Length} provided");
         }
+
+        private const BindingFlags Binding = BindingFlags.Instance
+                                           | BindingFlags.Public
+                                           | BindingFlags.NonPublic;
     }
 }

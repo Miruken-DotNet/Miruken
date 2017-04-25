@@ -24,7 +24,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodBinding binding)
+            ParameterInfo parameter, PolicyMethodBinding binding)
         {
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;

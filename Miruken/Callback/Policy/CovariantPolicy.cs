@@ -8,7 +8,7 @@
 
     public abstract class CovariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public override MethodBinding BindMethod(
+        public override PolicyMethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
@@ -17,7 +17,7 @@
             return binding;
         }
 
-        protected static void InferVariance(MethodBinding method)
+        protected static void InferVariance(PolicyMethodBinding method)
         {
             var key = method.Attribute.Key;
             var restrict = key as Type;

@@ -2,6 +2,7 @@ namespace Miruken.Callback.Policy
 {
     using System;
     using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Reflection;
 
@@ -11,41 +12,41 @@ namespace Miruken.Callback.Policy
 
         private class PolicyMethods
         {
-            private List<MethodBinding> _unknown;
-            private Dictionary<object, List<MethodBinding>> _indexed;
+            private List<PolicyMethodBinding> _unknown;
+            private Dictionary<object, List<PolicyMethodBinding>> _indexed;
 
             public ICollection Keys => _indexed?.Keys;
 
-            public void Insert(MethodBinding method)
+            public void Insert(PolicyMethodBinding method)
             {
                 var key = method.GetKey();
                 if (key == null)
                 {
                     var unknown = _unknown ??
-                        (_unknown = new List<MethodBinding>());
+                        (_unknown = new List<PolicyMethodBinding>());
                     unknown.Add(method);
                     return;
                 }
 
                 var indexed = _indexed ??
-                    (_indexed = new Dictionary<object, List<MethodBinding>>());
+                    (_indexed = new Dictionary<object, List<PolicyMethodBinding>>());
 
-                List<MethodBinding> methods;
+                List<PolicyMethodBinding> methods;
                 if (!indexed.TryGetValue(key, out methods))
                 {
-                    methods = new List<MethodBinding>();
+                    methods = new List<PolicyMethodBinding>();
                     indexed.Add(key, methods);
                 }
                 methods.Add(method);
             }
 
-            public IEnumerable<MethodBinding> GetMethods(IEnumerable keys)
+            public IEnumerable<PolicyMethodBinding> GetMethods(IEnumerable keys)
             {
                 if (keys != null && _indexed != null)
                 {
                     foreach (var key in keys)
                     {
-                        List<MethodBinding> methods;
+                        List<PolicyMethodBinding> methods;
 
                         if (_indexed.TryGetValue(key, out methods))
                             foreach (var method in methods)
@@ -62,7 +63,9 @@ namespace Miruken.Callback.Policy
         #endregion
 
         private readonly Dictionary<CallbackPolicy, PolicyMethods> _methods;
-        private readonly IFilterProvider[] _filters;
+
+        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
 
         public HandlerDescriptor(Type type)
         {
@@ -101,10 +104,6 @@ namespace Miruken.Callback.Policy
                     methods.Insert(binding);
                 }
             }
-
-            _filters = _methods != null
-                     ? FilterAttribute.GetFilters(type, true)
-                     : FilterAttribute.NoFilters;
         }
 
         internal bool Dispatch(
@@ -126,7 +125,7 @@ namespace Miruken.Callback.Policy
             foreach (var method in methods.GetMethods(keys))
             {
                 dispatched = 
-                    method.Dispatch(target, callback, composer, _filters)
+                    method.Dispatch(target, callback, composer)
                     || dispatched;
                 if (dispatched && !greedy) return true;
             }
@@ -134,13 +133,18 @@ namespace Miruken.Callback.Policy
             return dispatched;
         }
 
+        public static HandlerDescriptor GetDescriptor(Type type)
+        {
+            return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
+        }
+
         private static string GetDescription(MethodInfo method)
         {
             return $"{method.ReflectedType?.FullName}:{method.Name}";
         }
 
-        public const BindingFlags Binding = BindingFlags.Instance 
-                                          | BindingFlags.Public 
-                                          | BindingFlags.NonPublic;
+        private const BindingFlags Binding = BindingFlags.Instance 
+                                           | BindingFlags.Public 
+                                           | BindingFlags.NonPublic;
     }
 }

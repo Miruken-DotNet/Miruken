@@ -11,8 +11,7 @@
             Type returnType, ParameterInfo[] parameters,
             DefinitionAttribute attribute);
 
-        public virtual void Configure(MethodBinding binding) { }
-
+        public virtual void Configure(PolicyMethodBinding binding) { }
     }
 
     public abstract class ReturnRuleDecorator : ReturnRule
@@ -33,7 +32,7 @@
             return Rule.Matches(returnType, parameters, attribute);
         }
 
-        public override void Configure(MethodBinding binding)
+        public override void Configure(PolicyMethodBinding binding)
         {
             Rule.Configure(binding);
         }
@@ -53,7 +52,7 @@
                 Rule.Matches(returnType, parameters, attribute);
         }
 
-        public override void Configure(MethodBinding binding)
+        public override void Configure(PolicyMethodBinding binding)
         {
             if (!binding.Dispatcher.IsVoid) Rule.Configure(binding);
         }

@@ -13,11 +13,13 @@
     public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
     public delegate void   ThreeArgsDelegate(object instance, object arg1, object arg2, object arg3);
     public delegate void   FourArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
+    public delegate void   FiveArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
     public delegate object NoArgsReturnDelegate(object instance);
     public delegate object OneArgReturnDelegate(object instance, object arg);
     public delegate object TwoArgsReturnDelegate(object instance, object arg1, object arg2);
     public delegate object ThreeArgsReturnDelegate(object instance, object arg1, object arg2, object arg3);
     public delegate object FourArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
+    public delegate object FiveArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
 
     public static class RuntimeHelper
     {
@@ -252,6 +254,36 @@
                 ).Compile();
         }
 
+        public static FiveArgsDelegate CreateActionFiveArgs(MethodInfo method)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            var target = method.ReflectedType;
+            if (target == null || method.IsStatic)
+                throw new NotSupportedException("Only instance methods supported");
+            var parameters = method.GetParameters();
+            if (parameters.Length != 5)
+                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
+            var instance  = Expression.Parameter(typeof(object), "instance");
+            var argument1 = Expression.Parameter(typeof(object), "argument1");
+            var argument2 = Expression.Parameter(typeof(object), "argument2");
+            var argument3 = Expression.Parameter(typeof(object), "argument3");
+            var argument4 = Expression.Parameter(typeof(object), "argument4");
+            var argument5 = Expression.Parameter(typeof(object), "argument5");
+            var methodCall = Expression.Call(
+                Expression.Convert(instance, target),
+                method,
+                Expression.Convert(argument1, parameters[0].ParameterType),
+                Expression.Convert(argument2, parameters[1].ParameterType),
+                Expression.Convert(argument3, parameters[2].ParameterType),
+                Expression.Convert(argument4, parameters[3].ParameterType),
+                Expression.Convert(argument5, parameters[4].ParameterType)
+                );
+            return Expression.Lambda<FiveArgsDelegate>(
+                methodCall, instance, argument1, argument2, argument3, argument4, argument5
+                ).Compile();
+        }
+
         public static NoArgsReturnDelegate CreateFuncNoArgs(MethodInfo method)
         {
             if (method == null)
@@ -364,7 +396,7 @@
             if (target == null || method.IsStatic)
                 throw new NotSupportedException("Only instance methods supported");
             var parameters = method.GetParameters();
-            if (parameters.Length != 3)
+            if (parameters.Length != 4)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
             if (method.ReturnType == typeof(void))
                 throw new ArgumentException($"Method {method.Name} is void");
@@ -378,11 +410,45 @@
                 method,
                 Expression.Convert(argument1, parameters[0].ParameterType),
                 Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType)
+                Expression.Convert(argument3, parameters[2].ParameterType),
+                Expression.Convert(argument4, parameters[3].ParameterType)
                 );
             return Expression.Lambda<FourArgsReturnDelegate>(
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument1, argument2, argument3, argument4
+                ).Compile();
+        }
+
+        public static FiveArgsReturnDelegate CreateFuncFiveArgs(MethodInfo method)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            var target = method.ReflectedType;
+            if (target == null || method.IsStatic)
+                throw new NotSupportedException("Only instance methods supported");
+            var parameters = method.GetParameters();
+            if (parameters.Length != 5)
+                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
+            if (method.ReturnType == typeof(void))
+                throw new ArgumentException($"Method {method.Name} is void");
+            var instance  = Expression.Parameter(typeof(object), "instance");
+            var argument1 = Expression.Parameter(typeof(object), "argument1");
+            var argument2 = Expression.Parameter(typeof(object), "argument2");
+            var argument3 = Expression.Parameter(typeof(object), "argument3");
+            var argument4 = Expression.Parameter(typeof(object), "argument4");
+            var argument5 = Expression.Parameter(typeof(object), "argument5");
+            var methodCall = Expression.Call(
+                Expression.Convert(instance, target),
+                method,
+                Expression.Convert(argument1, parameters[0].ParameterType),
+                Expression.Convert(argument2, parameters[1].ParameterType),
+                Expression.Convert(argument3, parameters[2].ParameterType),
+                Expression.Convert(argument4, parameters[3].ParameterType),
+                Expression.Convert(argument3, parameters[4].ParameterType)
+                );
+            return Expression.Lambda<FiveArgsReturnDelegate>(
+                Expression.Convert(methodCall, typeof(object)),
+                instance, argument1, argument2, argument3, argument4, argument5
                 ).Compile();
         }
 

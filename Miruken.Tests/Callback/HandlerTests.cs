@@ -3,6 +3,7 @@
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
 
     /// <summary>
     /// Summary description for HandlerTests
@@ -658,12 +659,12 @@
             }
         }
 
-        [Filter(typeof(IFilter<,>), Many = true)]
         private class RequestHandler : Handler, IFilter<Bar, object>
         {
             int? IFilter.Order { get; set; }
 
-            [Handles]
+            [Handles,
+             Filter(typeof(IFilter<,>), Many = true)]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
@@ -683,7 +684,8 @@
             }
 
             object IFilter<Bar, object>.Filter(
-                Bar callback, IHandler composer, FilterDelegate<object> proceed)
+                Bar callback, MethodBinding binding, IHandler composer,
+                FilterDelegate<object> proceed)
             {
                 callback.Handled++;
                 return proceed();
@@ -694,7 +696,8 @@
         {
             public int? Order { get; set; }
 
-            public Res Filter(Cb callback, IHandler composer, FilterDelegate<Res> proceed)
+            public Res Filter(Cb callback, MethodBinding binding,
+                IHandler composer, FilterDelegate<Res> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
                 return proceed();

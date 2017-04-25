@@ -3,6 +3,7 @@
     using System;
     using System.Runtime.Remoting.Messaging;
     using Infrastructure;
+    using Policy;
 
     public interface IResolving {}
 
@@ -52,16 +53,16 @@
                  : RuntimeHelper.GetDefault(handleMethod.ResultType);
         }
 
-        public static IHandler Composer => HandleMethod.Composer;
+        public static IHandler Composer => HandleMethodBinding.Composer;
 
         public static void Unhandled()
         {
-            HandleMethod.Unhandled = true;
+            HandleMethodBinding.Unhandled = true;
         }
 
         public static Ret Unhandled<Ret>(Ret result = default(Ret))
         {
-            HandleMethod.Unhandled = true;
+            HandleMethodBinding.Unhandled = true;
             return result;
         }
     }

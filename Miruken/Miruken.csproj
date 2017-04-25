@@ -62,14 +62,17 @@
     <Compile Include="Callback\HandlerFilter.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
     <Compile Include="Callback\Policy\CallbackArgument.cs" />
+    <Compile Include="Callback\Policy\CallbackPolicyBuilder.cs" />
     <Compile Include="Callback\Policy\ComposerArgument.cs" />
     <Compile Include="Callback\Policy\ContravariantPolicy.cs" />
     <Compile Include="Callback\Policy\CovariantPolicy.cs" />
     <Compile Include="Callback\Policy\ExtractArgument.cs" />
     <Compile Include="Callback\FilterAttribute.cs" />
     <Compile Include="Callback\IFilter.cs" />
+    <Compile Include="Callback\Policy\HandleMethodBinding.cs" />
     <Compile Include="Callback\Policy\MethodDispatch.cs" />
     <Compile Include="Callback\Policy\MethodBinding.cs" />
+    <Compile Include="Callback\Policy\PolicyMethodBinding.cs" />
     <Compile Include="Callback\Policy\MethodPipeline.cs" />
     <Compile Include="Callback\Policy\MethodRule.cs" />
     <Compile Include="Callback\Policy\CallbackPolicy.cs" />

@@ -23,7 +23,7 @@
            ParameterInfo parameter, DefinitionAttribute attribute);
 
         public virtual void Configure(
-            ParameterInfo parameter, MethodBinding binding) { }
+            ParameterInfo parameter, PolicyMethodBinding binding) { }
 
         public abstract object Resolve(object callback, IHandler composer);
     }
@@ -46,7 +46,7 @@
         }
 
         public override void Configure(
-            ParameterInfo parameter, MethodBinding binding)
+            ParameterInfo parameter, PolicyMethodBinding binding)
         {
             Argument.Configure(parameter, binding);
         }

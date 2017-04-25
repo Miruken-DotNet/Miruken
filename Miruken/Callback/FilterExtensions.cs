@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Infrastructure;
 
     public static class FilterExtensions
     {
@@ -14,18 +13,17 @@
             return handler.Handle(options, true) ? options : null;
         }
 
-        public static IHandler SuppressFilters(this IHandler handler)
-        {
-            return handler == null ? null :
-                 new FilterOptions { SuppressFilters = true }
-                 .Decorate(handler);
-        }
-
         public static IHandler WithFilters(
             this IHandler handler, params IFilter[] filters)
         {
             return handler == null ? null :
-                new FilterOptions { ExtraFilters = filters }
+                new FilterOptions
+                {
+                    ExtraFilters = new []
+                    {
+                        new FilterInstancesProvider(filters)
+                    }
+                }
                 .Decorate(handler);
         }
 
@@ -33,15 +31,7 @@
              this IHandler handler, params IFilterProvider[] providers)
         {
             return handler == null ? null :
-                new FilterOptions { ExtraProviders = providers }
-                .Decorate(handler);
-        }
-
-        public static IHandler WithoutFilters(
-            this IHandler handler, params Type[] filterTypes)
-        {
-            return handler == null ? null :
-                new FilterOptions { SuppressedFilters = filterTypes }
+                new FilterOptions { ExtraFilters = providers }
                 .Decorate(handler);
         }
 
@@ -49,14 +39,8 @@
             this IHandler composer, FilterOptions options,
             params IEnumerable<IFilterProvider>[] providers)
         {
-            if (options == null && providers.Length == 0)
-                yield break;
-
-            var suppress       = options?.SuppressedFilters;
-            var extraProviders = options?.ExtraProviders
+            var extraProviders = options?.ExtraFilters
                               ?? Enumerable.Empty<IFilterProvider>();
-
-            composer = composer.SuppressFilters();
 
             foreach (var provider in providers
                 .Where(p => p != null).SelectMany(p => p)
@@ -64,17 +48,10 @@
             {
                 if (provider == null) continue;
                 var filters = provider.GetFilters(composer)
-                    .Where(f => AcceptFilter(suppress, f));
+                    .Where(filter => filter != null);
                 foreach (var filter in filters)
                     yield return filter;
             }
-
-            var extraFilters = options?.ExtraFilters
-                .Where(f => AcceptFilter(suppress, f));
-            if (extraFilters != null)
-                foreach (var filter in extraFilters)
-                    yield return filter;
-
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
@@ -114,13 +91,6 @@
                 }
                 return true;
             });
-        }
-
-        private static bool AcceptFilter(Type[] suppress, IFilter filter)
-        {
-            if (filter == null) return false;
-            if (suppress == null || suppress.Length == 0) return true;
-            return !suppress.Any(type => filter.GetType().IsClassOf(type));
         }
     }
 }

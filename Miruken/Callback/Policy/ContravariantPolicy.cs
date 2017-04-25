@@ -15,7 +15,7 @@
             HasResult = IsResult;
         }
 
-        public override MethodBinding BindMethod(
+        public override PolicyMethodBinding BindMethod(
             MethodRule rule, MethodDispatch dispatch,
             DefinitionAttribute attribute)
         {
@@ -37,7 +37,7 @@
                        .OrderBy(t => t, this);
         }
 
-        private static void InferVariance(MethodBinding method)
+        private static void InferVariance(PolicyMethodBinding method)
         {
             var restrict = method.Attribute.Key as Type;
             if (restrict != null)

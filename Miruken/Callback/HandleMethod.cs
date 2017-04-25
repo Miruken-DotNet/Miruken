@@ -1,15 +1,18 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Linq;
+    using System.Collections.Concurrent;
     using System.Reflection;
     using System.Runtime.Remoting.Messaging;
-    using Concurrency;
     using Infrastructure;
+    using Policy;
 
     public class HandleMethod : ICallback, ICallbackDispatch
     {
         private readonly CallbackSemantics _semantics;
+
+        private static readonly ConcurrentDictionary<MethodInfo, HandleMethodBinding>
+            _bindings = new ConcurrentDictionary<MethodInfo, HandleMethodBinding>();
 
         public HandleMethod(Type protocol, IMethodMessage methodCall, 
             CallbackSemantics semantics = null)
@@ -44,71 +47,12 @@
         {
             if (!IsTargetAccepted(target)) return false;
 
-            var targetMethod = RuntimeHelper.SelectMethod(Method, target.GetType(), Binding);
-            if (targetMethod == null) return false;
+            var method = RuntimeHelper.SelectMethod(Method, target.GetType(), Binding);
+            if (method == null) return false;
 
-            var oldComposer  = Composer;
-            var oldUnhandled = Unhandled;
-
-            try
-            {
-                Composer    = composer;
-                Unhandled   = false;
-                ReturnValue = Invoke(targetMethod, target, composer);
-                return !Unhandled;
-            }
-            catch (Exception exception)
-            {
-                var tie = exception as TargetException;
-                if (tie != null) exception = tie.InnerException;
-                Exception = exception;
-                if (!typeof(Promise).IsAssignableFrom(ResultType)) throw;
-                ReturnValue = Promise.Rejected(exception).Coerce(ResultType);
-                return true;
-            }
-            finally
-            {
-                Unhandled = oldUnhandled;
-                Composer  = oldComposer;
-            }
-        }
-
-        private bool IsTargetAccepted(object target)
-        {
-            return _semantics.HasOption(CallbackOptions.Strict)
-                 ? Protocol.IsTopLevelInterface(target.GetType())
-                 : _semantics.HasOption(CallbackOptions.Duck)
-                || Protocol.IsInstanceOfType(target);
-        }
-
-        protected object Invoke(
-            MethodInfo method, object target, IHandler composer)
-        {
-            var options = composer.GetFilterOptions();
-            if (options?.SuppressFilters == true)
-                return method.Invoke(target, Binding, null, Arguments, null);
-
-            var filters = composer.GetOrderedFilters(options,
-                    FilterAttribute.GetFilters(target.GetType(), true),
-                    FilterAttribute.GetFilters(method))
-                .OfType<IFilter<HandleMethod, object>>()
-                .ToArray();
-
-            if (filters.Length == 0)
-                return method.Invoke(target, Binding, null, Arguments, null);
-
-            var index = -1;
-            FilterDelegate<object> next = null;
-            next = proceed =>
-            {
-                if (!proceed)
-                    return RuntimeHelper.GetDefault(method.ReturnType);
-                return ++index < filters.Length
-                        ? filters[index].Filter(this, composer, next) 
-                        : method.Invoke(target, Binding, null, Arguments, null);
-            };
-
-            return next();
+            var binding = _bindings.GetOrAdd(method, 
+                m => new HandleMethodBinding(new MethodDispatch(m)));
+            return binding.Dispatch(target, this, composer);
         }
 
         bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
@@ -129,8 +73,16 @@
             return composer;
         }
 
-        [ThreadStatic] public static IHandler Composer;
-        [ThreadStatic] public static bool     Unhandled;
+        private bool IsTargetAccepted(object target)
+        {
+            return _semantics.HasOption(CallbackOptions.Strict)
+                 ? Protocol.IsTopLevelInterface(target.GetType())
+                 : _semantics.HasOption(CallbackOptions.Duck)
+                || Protocol.IsInstanceOfType(target);
+        }
+
+        public static IHandler Composer  => HandleMethodBinding.Composer;
+        public static bool     Unhandled => HandleMethodBinding.Unhandled;
 
         private const BindingFlags Binding = BindingFlags.Instance
                                            | BindingFlags.Public

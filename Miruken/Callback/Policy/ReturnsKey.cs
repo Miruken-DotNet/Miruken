@@ -26,7 +26,7 @@
                 $"Key {restrict.FullName} is not related to {returnType.FullName}");
         }
 
-        public override void Configure(MethodBinding binding)
+        public override void Configure(PolicyMethodBinding binding)
         {
             var returnType = binding.Dispatcher.ReturnType;
             if (returnType.IsArray)

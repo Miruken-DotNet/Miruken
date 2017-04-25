@@ -4,7 +4,7 @@ namespace Miruken.Callback.Policy
     using System.Linq;
     using System.Reflection;
 
-    public delegate MethodBinding MethodBinder(
+    public delegate PolicyMethodBinding MethodBinder(
         MethodRule rule, MethodDispatch dispatch, DefinitionAttribute attribute);
 
     public class MethodRule
@@ -48,7 +48,7 @@ namespace Miruken.Callback.Policy
                    method.ReturnType, parameters, attribute) != false;
         }
 
-        public MethodBinding Bind(MethodDispatch dispatch, DefinitionAttribute attribute)
+        public PolicyMethodBinding Bind(MethodDispatch dispatch, DefinitionAttribute attribute)
         {
             var binding = _binder(this, dispatch, attribute);
             _returnValue?.Configure(binding);
@@ -59,7 +59,7 @@ namespace Miruken.Callback.Policy
         }
 
         public object[] ResolveArgs(
-            MethodBinding method, object callback, IHandler handler)
+            PolicyMethodBinding method, object callback, IHandler handler)
         {
             return _args.Take(method.Dispatcher.ArgumentCount)
                         .Select(arg => arg.Resolve(callback, handler))

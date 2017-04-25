@@ -3,6 +3,7 @@
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using static Protocol;
 
     /// <summary>
@@ -20,11 +21,11 @@
             void CancelEmail(int id);
         }
 
-        [Log]
         private class EmailHandler : Handler, IEmailFeature
         {
             public int Count { get; private set; }
 
+            [Log]
             public int Email(string message)
             {
                 if (Count > 0 && Count % 2 == 0)
@@ -32,6 +33,7 @@
                 return ++Count;
             }
 
+            [Log]
             public void CancelEmail(int id)
             {
                 var composer = id > 4
@@ -124,8 +126,8 @@
         {
             public int? Order { get; set; }
 
-            public object Filter(HandleMethod method, IHandler composer,
-                FilterDelegate<object> proceed)
+            public object Filter(HandleMethod method, MethodBinding binding,
+                IHandler composer, FilterDelegate<object> proceed)
             {
                 Console.WriteLine($"Handle method {method.Method.Name}");
                 return proceed();
