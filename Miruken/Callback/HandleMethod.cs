@@ -120,6 +120,15 @@
             return handled;
         }
 
+        public static IHandler RequireComposer()
+        {
+            var composer = Composer;
+            if (composer == null)
+                throw new InvalidOperationException(
+                    "Composer not available.  Did you call this method directly?");
+            return composer;
+        }
+
         [ThreadStatic] public static IHandler Composer;
         [ThreadStatic] public static bool     Unhandled;
 
