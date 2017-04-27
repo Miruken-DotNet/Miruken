@@ -390,6 +390,16 @@
         }
 
         [TestMethod]
+        public void Should_Override_Providers_Many()
+        {
+            var foo1    = new Foo();
+            var foo2    = new Foo();
+            var handler = new Handler();
+            var foos    = handler.ProvideMany(new [] {foo1, foo2}).ResolveAll<Foo>();
+            CollectionAssert.AreEqual(new [] {foo1, foo2}, foos);
+        }
+
+        [TestMethod]
         public void Should_Ignore_Providers()
         {
             var handler = new Handler();

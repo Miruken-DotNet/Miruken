@@ -3,7 +3,8 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate Res FilterDelegate<out Res>(bool proceed = true);
+    public delegate Res FilterDelegate<out Res>(
+        bool proceed = true, IHandler composer = null);
 
     public interface IFilter
     {

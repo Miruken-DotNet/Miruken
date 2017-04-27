@@ -52,6 +52,7 @@
     </Compile>
     <Compile Include="Callback\FilterExtensions.cs" />
     <Compile Include="Callback\FilterOptions.cs" />
+    <Compile Include="Callback\Handler.Aspect.cs" />
     <Compile Include="Callback\Handler.cs" />
     <Compile Include="Callback\Handler.HandleMethod.cs" />
     <Compile Include="Callback\Handler.Helpers.cs" />
@@ -129,6 +130,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Miruken.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

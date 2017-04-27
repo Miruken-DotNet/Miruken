@@ -26,8 +26,7 @@
             {
                 Composer  = composer;
                 Unhandled = false;
-                handleMethod.ReturnValue = Invoke(handleMethod, target, composer);
-                return !Unhandled;
+                return Invoke(handleMethod, target, composer);
             }
             catch (Exception exception)
             {
@@ -46,28 +45,38 @@
             }
         }
 
-        private object Invoke(
+        private bool Invoke(
             HandleMethod handleMethod, object target, IHandler composer)
         {
-            var method    = Dispatcher.Method;
             var arguments = handleMethod.Arguments;
-            var options   = composer.GetFilterOptions();
-            var filters   = composer.GetOrderedFilters(options,
+            var filters   = composer.GetOrderedFilters(
                     FilterAttribute.GetFilters(target.GetType(), true),
-                    FilterAttribute.GetFilters(method))
-                .OfType<IFilter<HandleMethod, object>>()
+                    FilterAttribute.GetFilters(Dispatcher.Method))
                 .ToArray();
 
-            if (filters.Length == 0)
-                return Dispatcher.Invoke(target, arguments);
-
+            bool handled;
             object returnValue;
-            if (!Pipeline.Invoke(this, target, handleMethod,
-                () => Dispatcher.Invoke(target, arguments),
-                composer, filters, out returnValue))
-                returnValue = RuntimeHelper.GetDefault(handleMethod.ResultType);
-            handleMethod.ReturnValue = returnValue;
-            return returnValue;
+
+            if (filters.Length == 0)
+            {
+                returnValue = Dispatcher.Invoke(target, arguments);
+                handled     = !Unhandled;
+            }
+            else
+            {
+                handled = Pipeline.Invoke(
+                    this, target, handleMethod, comp =>
+                    {
+                        if (comp != null && !ReferenceEquals(composer, comp))
+                            Composer = comp;
+                        return Dispatcher.Invoke(target, arguments);
+                    },
+                    composer, filters, out returnValue) && !Unhandled;
+            }
+
+            handleMethod.ReturnValue = handled ? returnValue
+                : RuntimeHelper.GetDefault(handleMethod.ResultType);
+            return handled;
         }
 
         private static readonly MethodPipeline Pipeline =

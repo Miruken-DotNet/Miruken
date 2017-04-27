@@ -54,8 +54,7 @@
                          ? result : null;
                 }
 
-                return resolutions.Count <= count ? null
-                     : resolution.Resolutions.Last();
+                return resolutions.Count > count ? resolutions.Last() : null;
             }
         }
 

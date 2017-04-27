@@ -65,14 +65,13 @@
             if (callback is FilterOptions)
                 return Dispatcher.Invoke(target, args, returnType);
 
-            var options      = composer.GetFilterOptions();
             var dispatcher   = Dispatcher.CloseMethod(args, returnType);
             var callbackType = callback.GetType();
             var resultType   = dispatcher.ReturnType;
 
             var filters = composer
                 .ResolveOpenFilters(callbackType, resultType)
-                .GetOrderedFilters(options, Filters,
+                .GetOrderedFilters(Filters,
                     FilterAttribute.GetFilters(target.GetType(), true), 
                     Policy.Filters)
                 .ToArray();
@@ -82,10 +81,18 @@
 
             object result;
             var pipeline  = MethodPipeline.GetPipeline(callbackType, resultType);
-            var completed = pipeline.Invoke(this, target, callback,
-                () => dispatcher.Invoke(target, args, returnType),
+            var completed = pipeline.Invoke(
+                this, target, callback, comp => dispatcher.Invoke(
+                    target, GetArgs(callback, args, composer, comp), returnType),
                 composer, filters, out result);
             return completed ? result : Policy.NoResult;
+        }
+
+        private object[] GetArgs(object callback, object[] args,
+            IHandler oldComposer, IHandler newComposer)
+        {
+            return ReferenceEquals(oldComposer, newComposer) 
+                 ? args : Rule.ResolveArgs(this, callback, newComposer);
         }
     }
 }

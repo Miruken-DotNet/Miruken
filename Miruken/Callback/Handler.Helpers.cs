@@ -1,19 +1,11 @@
 ﻿using System;
-using Miruken.Concurrency;
 
 namespace Miruken.Callback
 {
-    public delegate object BeforeCallback(object callback, IHandler composer);
-    public delegate void AfterCallback(object callback, IHandler composer, object state);
+    using System.Collections.Generic;
 
     public static class HandlerHelpers
     {
-        public static IHandler ToHandler(this object instance)
-        {
-            var handler = instance as IHandler;
-            return handler ?? new Handler(instance);
-        }
-
         public static IHandler Chain(
             this IHandler handler, params IHandler[] chain)
         {
@@ -34,6 +26,27 @@ namespace Miruken.Callback
             }
         }
 
+        public static IHandler Resolve<R>(
+            this IHandler handler, Func<R> provider, out R result)
+        {
+            var resolution = new Resolution(typeof(R));
+            if (handler.Handle(resolution))
+            {
+                result = (R)resolution.Result;
+                return handler;
+            }
+            result = provider();
+            return handler.Provide(result);
+        }
+
+        public static R Rssolve<R>(
+            this IHandler handler, Func<R> provider, out IHandler composer)
+        {
+            R result;
+            composer = Resolve(handler, provider, out result);
+            return result;
+        }
+
         public static IHandler Provide<R>(this IHandler handler, R result)
         {
             return Provide(handler, (resolution, composer) =>
@@ -45,6 +58,24 @@ namespace Miruken.Callback
                     return true;
                 }
                 return false;
+            });
+        }
+
+        public static IHandler ProvideMany<R>(this IHandler handler, IEnumerable<R> result)
+        {
+            return Provide(handler, (resolution, composer) =>
+            {
+                var resolved = false;
+                var type     = resolution.Key as Type;
+                if (type?.IsAssignableFrom(typeof(R)) == true)
+                {
+                    foreach (var r in result)
+                    {
+                        resolved = resolution.Resolve(r, composer) || resolved;
+                        if (resolved && !resolution.Many) return true;
+                    }
+                }
+                return resolved;
             });
         }
 
@@ -66,102 +97,10 @@ namespace Miruken.Callback
                  : new HandlerFilter(handler, filter, reentrant);
         }
 
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before)
+        public static IHandler ToHandler(this object instance)
         {
-            return Aspect(handler, before, false);
-        }
-
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before, bool reentrant)
-        {
-            return Aspect(handler, before, null, reentrant);
-        }
-
-        public static HandlerFilter Aspect(
-            this IHandler handler, AfterCallback after)
-        {
-            return Aspect(handler, after, false);
-        }
-
-        public static HandlerFilter Aspect(
-                 this IHandler handler, AfterCallback after, bool reentrant)
-        {
-            return Aspect(handler, null, after, reentrant);
-        }
-
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before, AfterCallback after)
-        {
-            return Aspect(handler, before, after, false);
-        }
-
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before, AfterCallback after,
-            bool reentrant)
-        {
-            return handler?.Filter((callback, composer, proceed) =>
-            {
-                object state = null;
-                var cb = callback as ICallback;
-
-                if (before != null)
-                {
-                    state = before(callback, composer);
-                    var promise = state as Promise;
-                    if (promise != null)
-                    {
-                        // TODO: Use Promise.End if cb.ResultType is not a Promise
-                        // TODO: or you will get an InvalidCastException
-                        var accept = promise.Then((accepted,s) => {
-                            if (!Equals(accepted, false))
-                            {
-                                AspectProceed(callback, composer, proceed, after, state);
-                                return Promise.Resolved(cb?.Result);
-                            }
-                            return Promise.Rejected(new RejectedException(callback), s);
-                        });                     
-                        if (cb != null)
-                            cb.Result = accept;
-                        return true;
-                    }
-                    if (Equals(state, false))
-                    {
-                        var resultType = cb?.ResultType;
-                        if (resultType != null && typeof(Promise).IsAssignableFrom(cb.ResultType))
-                        {
-                            cb.Result = Promise.Rejected(new RejectedException(callback))
-                                .Coerce(resultType);
-                            return true;
-                        }
-                        throw new RejectedException(callback);
-                    }
-                }
-                return AspectProceed(callback, composer, proceed, after, state);
-            }, reentrant);
-        }
-
-        private static bool AspectProceed(
-            object callback, IHandler composer,
-            Func<bool> proceed, AfterCallback after, object state)
-        {
-            Promise promise = null;
-            try
-            {
-                var handled = proceed();
-                var cb = callback as ICallback;
-                if (cb == null) return handled;
-                promise = cb.Result as Promise;
-                if (promise == null) return handled;
-                if (after != null)
-                    promise.Finally(() => after(callback, composer, state));
-                return handled;
-            }
-            finally
-            {
-                if (after != null && promise == null)
-                    after(callback, composer, state);
-            }
+            var handler = instance as IHandler;
+            return handler ?? new Handler(instance);
         }
     }
 }

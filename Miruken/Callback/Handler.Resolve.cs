@@ -27,7 +27,7 @@ namespace Miruken.Callback
         public static T Resolve<T>(this IHandler handler)
         {
             if (handler == null) return default(T);
-            return (T) Resolve(handler, typeof(T));
+            return (T)Resolve(handler, typeof(T));
         }
 
         public static object[] ResolveAll(this IHandler handler, object key)

@@ -55,10 +55,10 @@
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
-            this IHandler composer, FilterOptions options,
-            params IEnumerable<IFilterProvider>[] providers)
+            this IHandler handler, params IEnumerable<IFilterProvider>[] providers)
         {
-            return composer.GetFilters(options, providers)
+            var options = handler.GetFilterOptions();
+            return handler.GetFilters(options, providers)
                 .OrderByDescending(f => f.Order ?? int.MaxValue);
         }
 

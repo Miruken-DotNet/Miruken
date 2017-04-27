@@ -68,7 +68,7 @@
                 _fee = fee;
             }
 
-            public decimal Bill(decimal amount)
+            decimal IBilling.Bill(decimal amount)
             {
                 return amount + _fee;
             }
