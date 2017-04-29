@@ -36,9 +36,11 @@
         }
 
         public static IEnumerable<IFilter> GetFilters(
-            this IHandler composer, FilterOptions options,
-            params IEnumerable<IFilterProvider>[] providers)
+            this IHandler composer, Type callbackType, Type resultType,
+            FilterOptions options, params IEnumerable<IFilterProvider>[] providers)
         {
+            if (resultType == typeof(void))
+                resultType = typeof(object);
             var extraProviders = options?.ExtraFilters
                               ?? Enumerable.Empty<IFilterProvider>();
 
@@ -47,7 +49,8 @@
                 .Concat(extraProviders))
             {
                 if (provider == null) continue;
-                var filters = provider.GetFilters(composer)
+                var filters = provider.GetFilters(
+                    callbackType, resultType, composer)
                     .Where(filter => filter != null);
                 foreach (var filter in filters)
                     yield return filter;
@@ -55,42 +58,13 @@
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
-            this IHandler handler, params IEnumerable<IFilterProvider>[] providers)
+            this IHandler handler, Type callbackType, Type resultType, 
+            params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetFilterOptions();
-            return handler.GetFilters(options, providers)
+            return handler.GetFilters(
+                callbackType, resultType, options, providers)
                 .OrderByDescending(f => f.Order ?? int.MaxValue);
-        }
-
-        public static IHandler ResolveOpenFilters(
-            this IHandler handler, Type callbackType, Type resultType)
-        {
-            if (resultType == typeof(void))
-                resultType = typeof(object);
-
-            return handler.Provide((resolution, composer) =>
-            {
-                var filterType = resolution.Key as Type;
-                if (filterType?.IsGenericTypeDefinition != true ||
-                    !typeof(IFilter).IsAssignableFrom(filterType))
-                    return false;
-                filterType = filterType.MakeGenericType(callbackType, resultType);
-                if (resolution.Many)
-                {
-                    var filters = composer.ResolveAll(filterType);
-                    if (filters == null || filters.Length == 0)
-                        return false;
-                    foreach (var filter in filters)
-                        resolution.Resolve(filter, composer);
-                }
-                else
-                {
-                    var filter = composer.Resolve(filterType);
-                    if (filter == null) return false;
-                    resolution.Resolve(filter, composer);
-                }
-                return true;
-            });
         }
     }
 }

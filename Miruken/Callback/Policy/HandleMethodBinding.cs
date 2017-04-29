@@ -50,8 +50,9 @@
         {
             var arguments = handleMethod.Arguments;
             var filters   = composer.GetOrderedFilters(
-                    FilterAttribute.GetFilters(target.GetType(), true),
-                    FilterAttribute.GetFilters(Dispatcher.Method))
+                typeof(HandleMethod), typeof(object),
+                FilterAttribute.GetFilters(target.GetType(), true),
+                FilterAttribute.GetFilters(Dispatcher.Method))
                 .ToArray();
 
             bool handled;

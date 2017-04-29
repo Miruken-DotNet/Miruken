@@ -1,9 +1,11 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Infrastructure;
 
     /// <summary>
     /// Summary description for HandlerTests
@@ -414,6 +416,79 @@
             var handler = new RequestHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(2, bar.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Infer_Callback_Filter_Generic_Types()
+        {
+            var handler  = new FilterResolver();
+            var provider = new FilterAttribute(typeof(RequestFilterCb<>));
+            var filter   = provider.GetFilters(typeof(string), typeof(int), handler)
+                .ToArray();
+            Assert.AreEqual(typeof(RequestFilterCb<string>), handler.RequestedType);
+        }
+
+        [TestMethod]
+        public void Should_Infer_Result_Filter_Generic_Types()
+        {
+            var handler  = new FilterResolver();
+            var provider = new FilterAttribute(typeof(RequestFilterRes<>));
+            var filter   = provider.GetFilters(typeof(string), typeof(int), handler)
+                .ToArray();
+            Assert.AreEqual(typeof(RequestFilterRes<int>), handler.RequestedType);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(ArgumentException),
+            "Miruken.Tests.Callback.HandlerTests+RequestFilterBad`1 generic arg 0 cannot be inferred")]
+        public void Should_Reject_Generic_Types_Not_Inferred()
+        {
+            var provider = new FilterAttribute(typeof(RequestFilterBad<>));
+            Assert.IsNull(provider);
+        }
+
+        public class FilterResolver : Handler
+        {
+            public Type RequestedType { get; set; }
+
+            [Provides]
+            public object ResolveFilter(Resolution resolution)
+            {
+                RequestedType = resolution.Key as Type;
+                return null;
+            }
+        }
+
+        public class RequestFilterCb<T> : IFilter<T, object>
+        {
+            public int? Order { get; set; }
+
+            public object Filter(
+                T callback, MethodBinding method, IHandler composer, FilterDelegate<object> proceed)
+            {
+                return null;
+            }
+        }
+
+        public class RequestFilterRes<T> : IFilter<object, T>
+        {
+            public int? Order { get; set; }
+
+            public T Filter(object callback, MethodBinding method, IHandler composer, FilterDelegate<T> proceed)
+            {
+                return default(T);
+            }
+        }
+
+        public class RequestFilterBad<T> : IFilter<object, object>
+        {
+            public int? Order { get; set; }
+
+            public object Filter(
+                object callback, MethodBinding method, IHandler composer, FilterDelegate<object> proceed)
+            {
+                return null;
+            }
         }
 
         private class Foo

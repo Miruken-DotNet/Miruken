@@ -70,8 +70,7 @@
             var resultType   = dispatcher.ReturnType;
 
             var filters = composer
-                .ResolveOpenFilters(callbackType, resultType)
-                .GetOrderedFilters(Filters,
+                .GetOrderedFilters(callbackType, resultType, Filters,
                     FilterAttribute.GetFilters(target.GetType(), true), 
                     Policy.Filters)
                 .ToArray();

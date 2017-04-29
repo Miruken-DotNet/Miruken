@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Callback
 {
+    using System;
     using System.Collections.Generic;
     using Policy;
 
@@ -25,7 +26,8 @@
 
     public interface IFilterProvider
     {
-        IEnumerable<IFilter> GetFilters(IHandler composer);
+        IEnumerable<IFilter> GetFilters(
+            Type callbackType, Type resulType, IHandler composer);
     }
 
     public class FilterInstancesProvider : IFilterProvider
@@ -37,7 +39,8 @@
             _filters = filters;
         }
 
-        public IEnumerable<IFilter> GetFilters(IHandler composer)
+        public IEnumerable<IFilter> GetFilters(
+            Type callbackType, Type resulType, IHandler composer)
         {
             return _filters;
         }
