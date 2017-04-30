@@ -67,14 +67,14 @@
             var genericArgs  = filterType.GetGenericArguments();
             var conformance  = filterType.GetOpenTypeConformance(openFilterType);
             var inferredArgs = conformance.GetGenericArguments();
-            return filterType.MakeGenericType(genericArgs.Select(arg =>
+            return filterType.MakeGenericType(genericArgs.Select((arg, i) =>
             {
                 switch (Array.IndexOf(inferredArgs, arg))
                 {
                     case 0: return callbackType;
                     case 1: return resulType;
                 }
-                throw new InvalidOperationException("Filter generic args could not be inferred");   
+                throw new InvalidOperationException($"{filterType.FullName} generic arg {i} could not be inferred");   
             }).ToArray());
         }
 
@@ -97,7 +97,7 @@
                 {
                     var genericArgs = filterType.GetGenericArguments();
                     if (genericArgs.Length > 2)
-                        throw new ArgumentException($"{filterType.FullName} has {genericArgs.Length} generic args, but ony two can be inferred");
+                        throw new ArgumentException($"{filterType.FullName} has {genericArgs.Length} generic args, but only two can be inferred");
                     var inferredArgs = conformance.GetGenericArguments();
                     for (var i = 0; i < genericArgs.Length; ++i)
                     {
