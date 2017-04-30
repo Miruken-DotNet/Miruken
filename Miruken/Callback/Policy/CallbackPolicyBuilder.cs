@@ -68,6 +68,10 @@ namespace Miruken.Callback.Policy
         public TBuilder MatchMethod(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
+            if (returnRule == null)
+                throw new ArgumentNullException(nameof(returnRule));
+            if (returnRule.GetSubRule<ReturnAsync>() == null)
+                returnRule = new ReturnAsync(returnRule, false);
             Policy.AddMethodRule(new MethodRule(Policy.BindMethod, returnRule, args));
             return (TBuilder)this;
         }

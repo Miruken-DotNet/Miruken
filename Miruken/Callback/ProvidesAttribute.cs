@@ -54,7 +54,9 @@
                          ? result : null;
                 }
 
-                return resolutions.Count > count ? resolutions.Last() : null;
+                return resolutions.Count > count 
+                     ? resolutions.Last()
+                     : null;
             }
         }
 

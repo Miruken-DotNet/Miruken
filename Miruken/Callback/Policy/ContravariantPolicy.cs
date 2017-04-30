@@ -4,7 +4,6 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using Infrastructure;
 
     public class ContravariantPolicy : CallbackPolicy, IComparer<Type>

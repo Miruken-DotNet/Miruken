@@ -5,13 +5,19 @@
 
     public abstract class ReturnRule
     {
-        public VoidReturn OrVoid => new VoidReturn(this);
+        public ReturnVoid  OrVoid => new ReturnVoid(this);
+        public ReturnAsync Async  => new ReturnAsync(this);
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
             DefinitionAttribute attribute);
 
         public virtual void Configure(PolicyMethodBinding binding) { }
+
+        public virtual R GetSubRule<R>() where R : ReturnRule
+        {
+            return this as R;
+        }
     }
 
     public abstract class ReturnRuleDecorator : ReturnRule
@@ -36,11 +42,16 @@
         {
             Rule.Configure(binding);
         }
+
+        public override R GetSubRule<R>()
+        {
+            return base.GetSubRule<R>() ?? Rule.GetSubRule<R>();
+        }
     }
 
-    public class VoidReturn : ReturnRuleDecorator
+    public class ReturnVoid : ReturnRuleDecorator
     {
-        public VoidReturn(ReturnRule rule) : base(rule)
+        public ReturnVoid(ReturnRule rule) : base(rule)
         {
         }
 
@@ -49,7 +60,7 @@
             DefinitionAttribute attribute)
         {
             return returnType == typeof(void) ||
-                Rule.Matches(returnType, parameters, attribute);
+                base.Matches(returnType, parameters, attribute);
         }
 
         public override void Configure(PolicyMethodBinding binding)

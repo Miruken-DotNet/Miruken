@@ -5,7 +5,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
-    using Miruken.Infrastructure;
+    using Miruken.Concurrency;
 
     /// <summary>
     /// Summary description for HandlerTests

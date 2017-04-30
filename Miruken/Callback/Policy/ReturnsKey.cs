@@ -28,6 +28,7 @@
 
         public override void Configure(PolicyMethodBinding binding)
         {
+            base.Configure(binding);
             var returnType = binding.Dispatcher.ReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();

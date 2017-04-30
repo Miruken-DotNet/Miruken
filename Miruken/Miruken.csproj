@@ -88,6 +88,7 @@
     <Compile Include="Callback\ICallback.cs" />
     <Compile Include="Callback\ICallbackDispatch.cs" />
     <Compile Include="Callback\IHandler.cs" />
+    <Compile Include="Callback\Policy\ReturnAsync.cs" />
     <Compile Include="Callback\Policy\ReturnRule.cs" />
     <Compile Include="Callback\Policy\ReturnsKey.cs" />
     <Compile Include="Callback\Policy\Return.cs" />
