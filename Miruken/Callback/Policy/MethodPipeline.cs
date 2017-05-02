@@ -10,6 +10,32 @@
             object callback, Func<IHandler, object> complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result);
 
+        public static bool InvokeDynamic(MethodBinding binding, object target,
+            object callback, Func<IHandler, object> complete, IHandler composer,
+            IEnumerable<IDynamicFilter> filters, out object result)
+        {
+            var completed = false;
+            using (var pipeline = filters.GetEnumerator())
+            {
+                FilterDelegate<object> next = null;
+                next = (proceed, comp) =>
+                {
+                    if (!proceed) return null;
+                    if (pipeline.MoveNext())
+                    {
+                        comp = comp ?? composer;
+                        var filter = pipeline.Current;
+                        return filter?.Filter(callback, binding, comp, next);
+                    }
+                    completed = true;
+                    return complete(comp);
+                };
+
+                result = next();
+                return completed;
+            }
+        }
+
         public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
         {
             if (resultType == typeof(void))
@@ -46,9 +72,8 @@
                         if (typedFilter != null)
                             return typedFilter.Filter((Cb)callback, binding, comp, next);
                         var dynamicFilter = filter as IDynamicFilter;
-                        if (dynamicFilter != null)
-                            return (Res)dynamicFilter.Filter(
-                                callback, binding, comp, (p,c) => next(p,c));
+                        return (Res)dynamicFilter?.Filter(
+                            callback, binding, comp, (p,c) => next(p,c));
                     }
                     completed = true;
                     return (Res)complete(comp);

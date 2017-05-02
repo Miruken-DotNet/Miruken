@@ -1,6 +1,8 @@
 ﻿namespace Miruken.Callback
 {
+    using System.Collections;
     using System.Linq;
+    using Infrastructure;
     using Policy;
 
     public class ProvidesAttribute : DefinitionAttribute
@@ -37,11 +39,10 @@
 
                 if (result != null)
                 {
-                    var many = result as object[];
-                    if (many != null)
+                    if (RuntimeHelper.IsCollection(result))
                     {
                         var resolved = false;
-                        foreach (var item in many)
+                        foreach (var item in (IEnumerable)result)
                         {
                             resolved = resolution.Resolve(item, composer)
                                     || resolved;

@@ -1,10 +1,12 @@
 ﻿namespace Miruken.Concurrency
 {
     using System;
-    using System.Linq;
+    using System.Collections.Concurrent;
     using System.Runtime.CompilerServices;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Infrastructure;
 
     public partial class Promise
     {
@@ -45,19 +47,17 @@
                     onCancel(cancellationTokenSource.Cancel);
                 }
                 if (!task.IsCompleted)
-                {
                     task.ContinueWith(t =>
                     {
                         if (t.IsFaulted)
-                            reject(ExtractException(t.Exception), false);
+                            reject(ExtractException(t), false);
                         else if (t.IsCanceled)
                             reject(new CancelledException("Task was cancelled"), false);
                         else
                             resolve(t.Result, false);
                     });
-                }
                 else if (task.IsFaulted)
-                    reject(ExtractException(task.Exception), true);
+                    reject(ExtractException(task), true);
                 else if (task.IsCanceled)
                     reject(new CancelledException("Task was cancelled"), true);
                 else
@@ -94,12 +94,9 @@
             return promise.ToTask();
         }
 
-        private static Exception ExtractException(AggregateException aggregateException)
+        private static Exception ExtractException(Task task)
         {
-            var exceptions = aggregateException.InnerExceptions;
-            return exceptions.Count == 1
-                 ? aggregateException.InnerExceptions.First()
-                 : aggregateException;
+            return task.Exception?.Flatten().InnerException;
         }
     }
 
@@ -110,11 +107,7 @@
             CancellationToken cancellationToken = default(CancellationToken),
             ChildCancelMode mode = ChildCancelMode.All)
         {
-            return task.ContinueWith(async t =>
-            {
-                await t;
-                return (object) null;
-            }, cancellationToken).Unwrap()
+            return task.ContinueWith(GetResult, cancellationToken)
             .ToPromise(cancellationToken, mode);
         }
 
@@ -123,11 +116,7 @@
             CancellationTokenSource cancellationTokenSource,
             ChildCancelMode mode = ChildCancelMode.All)
         {
-            return task.ContinueWith(async t =>
-            {
-                await t;
-                return (object)null;
-            }, cancellationTokenSource.Token).Unwrap()
+            return task.ContinueWith(GetResult, cancellationTokenSource.Token)
             .ToPromise(cancellationTokenSource, mode);
         }
 
@@ -146,5 +135,26 @@
         {
             return new Promise<T>(task, cancellationTokenSource, mode);
         }
+
+        private static object GetResult(Task task)
+        {
+            var exception = task.Exception;
+            if (exception != null)
+            {
+                var ex = exception.Flatten().InnerException;
+                ExceptionDispatchInfo.Capture(ex ?? exception).Throw();
+            }
+            var taskType = task.GetType();
+            if (taskType.GetOpenTypeConformance(typeof(Task<>)) != null)
+            {
+                var getter = TaskResultGetters.GetOrAdd(taskType, type =>
+                    RuntimeHelper.CreatePropertyGetter("Result", type));
+                return getter(task);
+            }
+            return null;
+        }
+
+        private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>
+            TaskResultGetters = new ConcurrentDictionary<Type, PropertyGetDelegate>();
     }
 }

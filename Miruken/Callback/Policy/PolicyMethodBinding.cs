@@ -79,11 +79,24 @@
                 return dispatcher.Invoke(target, args, returnType);
 
             object result;
-            var pipeline  = MethodPipeline.GetPipeline(callbackType, resultType);
-            var completed = pipeline.Invoke(
-                this, target, callback, comp => dispatcher.Invoke(
-                    target, GetArgs(callback, args, composer, comp), returnType),
-                composer, filters, out result);
+            bool   completed;
+
+            if (filters.All(filter => filter is IDynamicFilter))
+            {
+                completed = MethodPipeline.InvokeDynamic(
+                    this, target, callback, comp => dispatcher.Invoke(
+                        target, GetArgs(callback, args, composer, comp), returnType),
+                    composer, filters.Cast<IDynamicFilter>(), out result);
+            }
+            else
+            {
+                var pipeline = MethodPipeline.GetPipeline(callbackType, resultType);
+                completed = pipeline.Invoke(
+                    this, target, callback, comp => dispatcher.Invoke(
+                        target, GetArgs(callback, args, composer, comp), returnType),
+                    composer, filters, out result);
+            }
+  
             return completed ? result : Policy.NoResult;
         }
 

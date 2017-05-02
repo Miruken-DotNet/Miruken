@@ -32,7 +32,6 @@
                            | FastFourArgs | FastFiveArgs
         }
 
-
         public MethodDispatch(MethodInfo method)
         {
             if (method == null)
@@ -50,13 +49,15 @@
             _dispatchType = dispatchType;
         }
 
-        public MethodInfo Method        { get; }
-        public int        ArgumentCount { get; }
-        public Type       ReturnType => Method.ReturnType;
-        public bool       IsVoid     => (_dispatchType & DispatchType.Void) > 0;
-        public bool       IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
-        public bool       IsTask     => (_dispatchType & DispatchType.Task) > 0;
-        public bool       IsAsync    => IsPromise || IsTask;
+        public MethodInfo Method            { get; }
+        public int        ArgumentCount     { get; }
+        public Type       LogicalReturnType { get; private set; }
+
+        public Type ReturnType => Method.ReturnType;
+        public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;
+        public bool IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
+        public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
+        public bool IsAsync    => IsPromise || IsTask;
 
         public MethodDispatch CloseMethod(object[] args, Type returnType = null)
         {
@@ -122,7 +123,7 @@
         {
             var method = Method;
             if (ArgumentCount > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {GetDescription()} expects {ArgumentCount} arguments");
+                throw new ArgumentException($"Method {GetDescription(Method)} expects {ArgumentCount} arguments");
             if (_mapping != null)
                 method = GetClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
@@ -153,11 +154,28 @@
             var isVoid     = returnType == typeof(void);
 
             if (isVoid)
+            {
                 _dispatchType |= DispatchType.Void;
+                LogicalReturnType = returnType;
+            }
             else if (typeof(Promise).IsAssignableFrom(returnType))
+            {
                 _dispatchType |= DispatchType.Promise;
+                var promise = returnType.GetOpenTypeConformance(typeof(Promise<>));
+                LogicalReturnType = promise != null
+                    ? promise.GetGenericArguments()[0]
+                    : typeof(object);
+            }
             else if (typeof(Task).IsAssignableFrom(returnType))
+            {
                 _dispatchType |= DispatchType.Task;
+                var task = returnType.GetOpenTypeConformance(typeof(Task<>));
+                LogicalReturnType = task != null
+                    ? task.GetGenericArguments()[0]
+                    : typeof(object);
+            }
+            else
+                LogicalReturnType = returnType;
 
             if (!method.IsGenericMethodDefinition)
             {
@@ -212,7 +230,11 @@
                 .Select(p => Tuple.Create(p.Position, p.ParameterType))
                 .ToList();
             if (returnType.ContainsGenericParameters)
+            {
+                if (IsAsync)
+                    returnType = returnType.GenericTypeArguments[0];
                 argSources.Add(Tuple.Create(-1, returnType));
+            }
             var methodArgs  = method.GetGenericArguments();
             var typeMapping = new Tuple<int, int>[methodArgs.Length];
             foreach (var source in argSources)
@@ -228,15 +250,10 @@
             }
             if (typeMapping.Contains(null))
                 throw new InvalidOperationException(
-                    $"Type mapping for {GetDescription()} could not be inferred");
+                    $"Type mapping for {GetDescription(method)} could not be inferred");
 
             _dispatchType |= DispatchType.LateBound;
             _mapping = typeMapping;
-        }
-
-        protected string GetDescription()
-        {
-            return $"{Method.ReflectedType?.FullName}:{Method.Name}";
         }
 
         private static void AssertArgsCount(int expected, params object[] args)
@@ -244,6 +261,11 @@
             if (args.Length != expected)
                 throw new ArgumentException(
                     $"Expected {expected} arguments, but {args.Length} provided");
+        }
+
+        private static string GetDescription(MethodInfo method)
+        {
+            return $"{method.ReflectedType?.FullName}:{method.Name}";
         }
 
         private const BindingFlags Binding = BindingFlags.Instance

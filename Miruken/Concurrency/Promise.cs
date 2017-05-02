@@ -159,9 +159,9 @@
 
         #region Misc
 
-        public void Wait()
+        public object Wait()
         {
-            End(this);
+            return End(this);
         }
 
         public Promise Timeout(TimeSpan timeout)

@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Infrastructure
 {
     using System;
+    using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
@@ -20,6 +21,7 @@
     public delegate object ThreeArgsReturnDelegate(object instance, object arg1, object arg2, object arg3);
     public delegate object FourArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
     public delegate object FiveArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
+    public delegate object PropertyGetDelegate(object instance);
 
     public static class RuntimeHelper
     {
@@ -31,6 +33,11 @@
             return type != null && type.IsValueType && type != typeof(void)
                  ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
                  : null;
+        }
+
+        public static bool IsCollection(object instance)
+        {
+            return instance is IEnumerable && !(instance is string);
         }
 
         public static string GetSimpleTypeName(this Type type)
@@ -450,6 +457,22 @@
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument1, argument2, argument3, argument4, argument5
                 ).Compile();
+        }
+
+        public static PropertyGetDelegate CreatePropertyGetter(string name, Type owner)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Name cannot be empty", nameof(name));
+            if (owner == null)
+                throw new ArgumentNullException(nameof(owner));
+            var instance = Expression.Parameter(typeof(object), "instance");
+            var target   = Expression.Convert(instance, owner);
+            return Expression.Lambda<PropertyGetDelegate>(
+                Expression.Convert(
+                    Expression.Property(target, name),
+                    typeof(object)
+                ), instance
+            ).Compile();
         }
 
         private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)

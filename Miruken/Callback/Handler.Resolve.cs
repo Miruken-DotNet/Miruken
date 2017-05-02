@@ -4,6 +4,7 @@ using System.Linq;
 namespace Miruken.Callback
 {
     using System;
+    using Concurrency;
 
     public partial class Handler
     {
@@ -19,24 +20,70 @@ namespace Miruken.Callback
         {
             if (handler == null) return null;
             var resolution = key as Resolution ?? new Resolution(key);
-            return handler.Handle(resolution)
-                 ? resolution.Result
-                 : null;
+            if (handler.Handle(resolution))
+            {
+                var result = resolution.Result;
+                return resolution.IsAsync 
+                     ? ((Promise)result).Wait()
+                     : result;
+            }
+            return null;
+        }
+
+        public static Promise ResolveAsync(this IHandler handler, object key)
+        {
+            if (handler == null) return null;
+            var resolution = key as Resolution ?? new Resolution(key);
+            if (handler.Handle(resolution))
+            {
+                var result = resolution.Result;
+                return resolution.IsAsync
+                     ? (Promise)result
+                     : Promise.Resolved(result);
+            }
+            return Promise.Empty;
         }
 
         public static T Resolve<T>(this IHandler handler)
         {
-            if (handler == null) return default(T);
-            return (T)Resolve(handler, typeof(T));
+            return handler == null ? default(T)
+                 : (T)Resolve(handler, typeof(T));
+        }
+
+        public static Promise<T> ResolveAsync<T>(this IHandler handler)
+        {
+            return handler == null ? Promise<T>.Empty
+                 : (Promise<T>)ResolveAsync(handler, typeof(T))
+                 .Coerce(typeof(Promise<T>));
         }
 
         public static object[] ResolveAll(this IHandler handler, object key)
         {
             if (handler == null) return new object[0];
             var resolution = key as Resolution ?? new Resolution(key, true);
-            return handler.Handle(resolution, true)
-                 ? EnsureArray(resolution.Result)
-                 : new object[0];
+            if (handler.Handle(resolution, true))
+            {
+                var result = resolution.Result;
+                return resolution.IsAsync
+                     ? ((Promise)result).Then((a, s) => EnsureArray(a)).Wait()
+                     : EnsureArray(result);
+            }
+            return new object[0];
+        }
+
+        public static Promise<object[]> ResolveAllAsync(this IHandler handler, object key)
+        {
+            if (handler == null)
+                return Promise.Resolved(new object[0]);
+            var resolution = key as Resolution ?? new Resolution(key, true);
+            if (handler.Handle(resolution, true))
+            {
+                var result = resolution.Result;
+                return resolution.IsAsync
+                     ? ((Promise)result).Then((a,s) => EnsureArray(a))
+                     : Promise.Resolved(EnsureArray(result));
+            }
+            return Promise.Resolved(new object[0]);
         }
 
         public static T[] ResolveAll<T>(this IHandler handler)
@@ -46,9 +93,17 @@ namespace Miruken.Callback
             return results?.Cast<T>().ToArray() ?? new T[0];
         }
 
+        public static Promise<T[]> ResolveAllAsync<T>(this IHandler handler)
+        {
+            return handler == null ? Promise.Resolved(new T[0])
+                 : ResolveAllAsync(handler, typeof(T))
+                      .Then((r, s) => r?.Cast<T>().ToArray() ?? new T[0]);
+        }
+
         private static object[] EnsureArray(object array)
         {
-            return array as object[] ?? ((IEnumerable)array).Cast<object>().ToArray();
+            return array as object[] 
+                ?? ((IEnumerable)array).Cast<object>().ToArray();
         }
     }
 }

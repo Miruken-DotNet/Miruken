@@ -17,11 +17,9 @@
         }
 
         public override bool Matches(
-            Type returnType, ParameterInfo[] parameters, 
+            Type returnType, ParameterInfo[] parameters,
             DefinitionAttribute attribute)
         {
-            if (returnType == typeof(void))
-                return !_required && base.Matches(returnType, parameters, attribute);
             if (typeof(Promise).IsAssignableFrom(returnType))
             {
                 var promiseType = returnType.GetOpenTypeConformance(typeof(Promise<>));

@@ -18,6 +18,11 @@
         {
             return this as R;
         }
+
+        protected static bool IsLogicalVoid(Type returnType)
+        {
+            return returnType == typeof(void);
+        }
     }
 
     public abstract class ReturnRuleDecorator : ReturnRule

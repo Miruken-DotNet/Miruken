@@ -15,7 +15,7 @@
             Type returnType, ParameterInfo[] parameters,
             DefinitionAttribute attribute)
         {
-            if (returnType == typeof(void)) return false;
+            if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
             var restrict = attribute.Key as Type;
@@ -29,7 +29,7 @@
         public override void Configure(PolicyMethodBinding binding)
         {
             base.Configure(binding);
-            var returnType = binding.Dispatcher.ReturnType;
+            var returnType = binding.Dispatcher.LogicalReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
             if (returnType == typeof(object)) return;

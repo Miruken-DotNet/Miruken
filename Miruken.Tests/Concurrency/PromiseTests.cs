@@ -1068,7 +1068,7 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Cancel_Parent_Timeout_Elapsed()
         {
-            var called = false;
+            var called  = false;
             var promise = new Promise<object>((resolve, reject) => { });
 
             var cancelled = promise.Timeout(.2.Sec())

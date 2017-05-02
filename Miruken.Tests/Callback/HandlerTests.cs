@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
@@ -134,6 +135,26 @@
         }
 
         [TestMethod]
+        public async Task Should_Provide_Callbacks_Implicitly_Async()
+        {
+            var handler = new CustomAsyncHandler();
+            var bar     = await handler.ResolveAsync<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Callbacks_Implicitly_Waiting()
+        {
+            var handler = new CustomAsyncHandler();
+            var bar     = handler.Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod]
         public void Should_Provide_Many_Callbacks_Implicitly()
         {
             var handler = new SpecialHandler();
@@ -142,6 +163,22 @@
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
             var bars    = handler.ResolveAll<Bar>();
+            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(1, bars[0].Handled);
+            Assert.IsFalse(bars[0].HasComposer);
+            Assert.AreEqual(2, bars[1].Handled);
+            Assert.IsFalse(bars[1].HasComposer);
+        }
+
+        [TestMethod]
+        public async Task Should_Provide_Many_Callbacks_Implicitly_Async()
+        {
+            var handler = new SpecialHandlerAsync();
+            var bar     = await handler.ResolveAsync<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+            var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(2, bars.Length);
             Assert.AreEqual(1, bars[0].Handled);
             Assert.IsFalse(bars[0].HasComposer);
@@ -159,10 +196,27 @@
         }
 
         [TestMethod]
+        public async Task Should_Provide_Callbacks_By_Key_Async()
+        {
+            var handler = new SpecialHandlerAsync();
+            var boo     = await handler.ResolveAsync<Boo>();
+            Assert.IsNotNull(boo);
+            Assert.IsTrue(boo.HasComposer);
+        }
+
+        [TestMethod]
         public void Should_Provide_Many_Callbacks_By_Key()
         {
             var handler = new SpecialHandler();
             var bees    = handler.ResolveAll<Bee>();
+            Assert.AreEqual(3, bees.Length);
+        }
+
+        [TestMethod]
+        public async Task Should_Provide_Many_Callbacks_By_Key_Async()
+        {
+            var handler = new SpecialHandlerAsync();
+            var bees    = await handler.ResolveAllAsync<Bee>();
             Assert.AreEqual(3, bees.Length);
         }
 
@@ -175,6 +229,18 @@
             var baz2    = handler.Resolve<Baz<string>>();
             Assert.AreEqual("Hello", baz2.Stuff);
             var baz3    = handler.Resolve<Baz<float>>();
+            Assert.IsNull(baz3);
+        }
+
+        [TestMethod]
+        public async Task Should_Provide_Callbacks_With_Many_Keys_Async()
+        {
+            var handler = new SpecialHandlerAsync();
+            var baz1    = await handler.ResolveAsync<Baz<int>>();
+            Assert.AreEqual(1, baz1.Stuff);
+            var baz2 = handler.Resolve<Baz<string>>();
+            Assert.AreEqual("Hello", baz2.Stuff);
+            var baz3 = handler.Resolve<Baz<float>>();
             Assert.IsNull(baz3);
         }
 
@@ -617,7 +683,7 @@
             [Provides]
             public Baz ProvidesBazButIgnores()
             {
-                return Unhandled<Baz>();
+                return null;
             }
 
             [Provides]
@@ -651,6 +717,71 @@
                         return new Bar();
                     default:
                         return null;
+                }
+            }
+        }
+
+        private class CustomAsyncHandler : Handler
+        {
+            [Provides]
+            public Promise<Bar> ProvideBarImplicitly()
+            {
+                return Promise.Resolved(new Bar { Handled = 1 });
+            }
+
+            [Provides]
+            public Promise<Boo> ProvideBooImplicitly(IHandler composer)
+            {
+                return Promise.Resolved(new Boo { HasComposer = true });
+            }
+
+            [Provides]
+            public Promise<SuperBar> ProvideSuperBarImplicitly(IHandler composer)
+            {
+                return Promise.Resolved(new SuperBar
+                {
+                    Handled = 1,
+                    HasComposer = true
+                });
+            }
+
+            [Provides]
+            public Promise<Baz> ProvidesBazButIgnores()
+            {
+                return Promise<Baz>.Empty;
+            }
+
+            [Provides]
+            public Promise<Baz<T>> ProvidesBazGenerically<T>()
+            {
+                return Promise.Resolved(new Baz<T>(default(T)));
+            }
+
+            [Provides]
+            public Promise<Baz<T, R>> ProvidesBazMapped<R, T>()
+            {
+                return Promise.Resolved(new Baz<T, R>(default(T), default(R)));
+            }
+
+            [Provides]
+            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            {
+                if (Equals(resolution.Key, typeof(Baz)))
+                    resolution.Resolve(Promise.Resolved(new SuperBaz()), composer);
+            }
+
+            [Provides("Foo"),
+             Provides("Bar")]
+            public Promise ProvidesByName(Resolution resolution)
+            {
+                switch (resolution.Key as string)
+                {
+                    case "Foo":
+                        return Promise.Resolved(new Foo());
+                    case "Bar":
+                        return Promise.Resolved(new Bar());
+                    default:
+                        return Promise.Empty;
                 }
             }
         }
@@ -707,6 +838,55 @@
                 {
                     resolution.Resolve(new SuperBaz(), composer);
                     resolution.Resolve(new Baz(), composer);
+                }
+            }
+        }
+
+        private class SpecialHandlerAsync : Handler
+        {
+            [Provides(typeof(Boo))]
+            public Promise ProvideBooKey(IHandler composer)
+            {
+                return Promise.Resolved(new Boo { HasComposer = true });
+            }
+
+            [Provides]
+            public Task<Bar[]> ProvideManyBar()
+            {
+                return Task.FromResult(new[]
+                {
+                    new Bar {Handled = 1},
+                    new Bar {Handled = 2}
+                });
+            }
+
+            [Provides(typeof(Bee))]
+            public Promise ProvideManyBeeWithKey()
+            {
+                return Promise.Resolved(new[]
+                {
+                    new Bee(), new Bee(), new Bee()
+                });
+            }
+
+            [Provides(typeof(Baz<int>)),
+             Provides(typeof(Baz<string>))]
+            public Promise ProvideManyKeys(Resolution resolution)
+            {
+                if (Equals(resolution.Key, typeof(Baz<int>)))
+                    return Promise.Resolved(new Baz<int>(1));
+                if (Equals(resolution.Key, typeof(Baz<string>)))
+                    return Promise.Resolved(new Baz<string>("Hello"));
+                return Promise.Empty;
+            }
+
+            [Provides]
+            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            {
+                if (Equals(resolution.Key, typeof(Baz)))
+                {
+                    resolution.Resolve(Promise.Resolved(new SuperBaz()), composer);
+                    resolution.Resolve(Promise.Resolved(new Baz()), composer);
                 }
             }
         }

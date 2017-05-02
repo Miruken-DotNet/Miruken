@@ -1,7 +1,12 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Concurrency;
+    using Infrastructure;
 
     public class Resolution : ICallback, ICallbackDispatch
     {
@@ -15,9 +20,9 @@
             _resolutions = new List<object>();
         }
 
-        public object Key  { get; }
-
-        public bool   Many { get; }
+        public object Key     { get; }
+        public bool   Many    { get; }
+        public bool   IsAsync { get; private set; }
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
@@ -28,11 +33,29 @@
             get
             {
                 if (_result != null) return _result;
-                if (Many)
-                    _result = _resolutions.ToArray();
-                else if (_resolutions.Count > 0)
-                    _result = _resolutions[0];
-
+                if (!Many)
+                {
+                    if (_resolutions.Count > 0)
+                    {
+                        var result  = _resolutions[0];
+                        var promise = result as Promise;
+                        _result = promise?.Then((r,s) => 
+                            RuntimeHelper.IsCollection(r)
+                                ? ((IEnumerable)r).Cast<object>().FirstOrDefault()
+                                : r) ?? result;
+                    }
+                }
+                else if (IsAsync)
+                {
+                    _result = Promise.All(_resolutions
+                        .Select(r => (r as Promise) ?? Promise.Resolved(r))
+                        .ToArray())
+                        .Then((results, s) => Flatten(results));
+                }
+                else
+                {
+                    _result = Flatten(_resolutions);
+                }
                 return _result;
             }
             set { _result = value; }
@@ -40,14 +63,42 @@
 
         public bool Resolve(object resolution, IHandler composer)
         {
-            if (resolution == null ||
-                (!Many && _resolutions.Count > 0)
-                || _resolutions.Contains(resolution)
-                || !IsSatisfied(resolution, composer))
+            if (resolution == null) return false;
+            var resolved = RuntimeHelper.IsCollection(resolution)
+                 ? ((IEnumerable)resolution).Cast<object>()
+                    .Aggregate(false, (s, res) => Include(res, composer) || s)
+                 : Include(resolution, composer);
+
+            if (resolved) _result = null;
+            return resolved;
+        }
+
+        private bool Include(object resolution, IHandler composer)
+        {
+            if (resolution == null || (!Many && _resolutions.Count > 0))
+                return false;
+
+            var promise = resolution as Promise
+                ?? (resolution as Task)?.ToPromise();
+
+            if (promise != null)
+            {
+                IsAsync = true;
+                if (Many) promise = promise.Catch((ex,s) => null);
+                promise = promise.Then((result, s) =>
+                {
+                    if (RuntimeHelper.IsCollection(result))
+                        return ((IEnumerable)result).Cast<object>()
+                            .Where(r => r != null && IsSatisfied(r, composer));
+                    return result != null && IsSatisfied(result, composer)
+                         ? result : null;
+                });
+                resolution = promise;
+            }
+            else if (!IsSatisfied(resolution, composer))
                 return false;
 
             _resolutions.Add(resolution);
-            _result = null;
             return true;
         }
 
@@ -77,6 +128,16 @@
                            : type.IsInstanceOfType(item);
 
             return compatible && Resolve(item, composer);
+        }
+
+        private static IEnumerable<object> Flatten(IEnumerable<object> collection)
+        {
+            return collection
+                .Where(item => item != null)
+                .SelectMany(item => RuntimeHelper.IsCollection(item)
+                    ? ((IEnumerable)item).Cast<object>()
+                    : new[] {item})
+                .Distinct();
         }
     }
 }
