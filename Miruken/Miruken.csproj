@@ -50,6 +50,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Callback\Handler.Request.cs" />
+    <Compile Include="Callback\Request.cs" />
     <Compile Include="Callback\FilterExtensions.cs" />
     <Compile Include="Callback\FilterOptions.cs" />
     <Compile Include="Callback\Handler.Aspect.cs" />
@@ -103,7 +105,7 @@
     <Compile Include="Infrastructure\PropertyChangedExtensions.cs" />
     <Compile Include="Interceptor.cs" />
     <Compile Include="Callback\RejectedException.cs" />
-    <Compile Include="Callback\Resolution.cs" />
+    <Compile Include="Callback\Inquiry.cs" />
     <Compile Include="Concurrency\AbstractAsyncResult.cs" />
     <Compile Include="Concurrency\CancelledException.cs" />
     <Compile Include="Concurrency\LinqToPromises.cs" />

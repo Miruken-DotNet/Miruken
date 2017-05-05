@@ -1,6 +1,6 @@
 ﻿namespace Miruken.Callback
 {
-    public class ResolveMethod : Resolution
+    public class ResolveMethod : Inquiry
     {
         private readonly HandleMethod _handleMethod;
 

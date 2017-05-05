@@ -108,7 +108,7 @@ namespace Miruken.Callback.Policy
 
         internal bool Dispatch(
             CallbackPolicy policy, object target, object callback,
-            bool greedy, IHandler composer)
+            bool greedy, IHandler composer, Func<object, bool> results = null)
         {
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
@@ -117,16 +117,15 @@ namespace Miruken.Callback.Policy
             if (_methods?.TryGetValue(policy, out methods) != true)
                 return false;
 
-            var dispatched   = false;
-            var indexes      = methods.Keys;
-            var keys         = indexes == null ? null 
-                             : policy.SelectKeys(callback, indexes);
+            var dispatched  = false;
+            var indexes     = methods.Keys;
+            var keys        = indexes == null ? null 
+                            : policy.SelectKeys(callback, indexes);
 
             foreach (var method in methods.GetMethods(keys))
             {
-                dispatched = 
-                    method.Dispatch(target, callback, composer)
-                    || dispatched;
+                dispatched = method.Dispatch(target, callback,
+                    composer, results) || dispatched;
                 if (dispatched && !greedy) return true;
             }
 

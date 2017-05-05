@@ -96,8 +96,8 @@
         {
         }
 
-        public CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
-        public ReturnsKey           Return   => ReturnsKey.Instance;
+        public CallbackArgument<Cb> Callback  => CallbackArgument<Cb>.Instance;
+        public ReturnsKey           ReturnKey => ReturnsKey.Instance;
 
         public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
         {

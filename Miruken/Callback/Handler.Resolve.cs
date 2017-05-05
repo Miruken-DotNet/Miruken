@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Linq;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections;
+    using System.Linq;
     using Concurrency;
 
     public partial class Handler
@@ -19,11 +18,11 @@ namespace Miruken.Callback
         public static object Resolve(this IHandler handler, object key)
         {
             if (handler == null) return null;
-            var resolution = key as Resolution ?? new Resolution(key);
-            if (handler.Handle(resolution))
+            var inquiry = key as Inquiry ?? new Inquiry(key);
+            if (handler.Handle(inquiry))
             {
-                var result = resolution.Result;
-                return resolution.IsAsync 
+                var result = inquiry.Result;
+                return inquiry.IsAsync 
                      ? ((Promise)result).Wait()
                      : result;
             }
@@ -33,11 +32,11 @@ namespace Miruken.Callback
         public static Promise ResolveAsync(this IHandler handler, object key)
         {
             if (handler == null) return null;
-            var resolution = key as Resolution ?? new Resolution(key);
-            if (handler.Handle(resolution))
+            var inquiry = key as Inquiry ?? new Inquiry(key);
+            if (handler.Handle(inquiry))
             {
-                var result = resolution.Result;
-                return resolution.IsAsync
+                var result = inquiry.Result;
+                return inquiry.IsAsync
                      ? (Promise)result
                      : Promise.Resolved(result);
             }
@@ -60,11 +59,11 @@ namespace Miruken.Callback
         public static object[] ResolveAll(this IHandler handler, object key)
         {
             if (handler == null) return new object[0];
-            var resolution = key as Resolution ?? new Resolution(key, true);
-            if (handler.Handle(resolution, true))
+            var inquiry = key as Inquiry ?? new Inquiry(key, true);
+            if (handler.Handle(inquiry, true))
             {
-                var result = resolution.Result;
-                return resolution.IsAsync
+                var result = inquiry.Result;
+                return inquiry.IsAsync
                      ? ((Promise)result).Then((a, s) => EnsureArray(a)).Wait()
                      : EnsureArray(result);
             }
@@ -75,11 +74,11 @@ namespace Miruken.Callback
         {
             if (handler == null)
                 return Promise.Resolved(new object[0]);
-            var resolution = key as Resolution ?? new Resolution(key, true);
-            if (handler.Handle(resolution, true))
+            var inquiry = key as Inquiry ?? new Inquiry(key, true);
+            if (handler.Handle(inquiry, true))
             {
-                var result = resolution.Result;
-                return resolution.IsAsync
+                var result = inquiry.Result;
+                return inquiry.IsAsync
                      ? ((Promise)result).Then((a,s) => EnsureArray(a))
                      : Promise.Resolved(EnsureArray(result));
             }

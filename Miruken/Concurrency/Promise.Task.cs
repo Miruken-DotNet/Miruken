@@ -145,13 +145,10 @@
                 ExceptionDispatchInfo.Capture(ex ?? exception).Throw();
             }
             var taskType = task.GetType();
-            if (taskType.GetOpenTypeConformance(typeof(Task<>)) != null)
-            {
-                var getter = TaskResultGetters.GetOrAdd(taskType, type =>
-                    RuntimeHelper.CreatePropertyGetter("Result", type));
-                return getter(task);
-            }
-            return null;
+            var getter   = TaskResultGetters.GetOrAdd(taskType, type =>
+                type.GetOpenTypeConformance(typeof(Task<>)) == null ? null
+                    : RuntimeHelper.CreatePropertyGetter("Result", type));
+            return getter?.Invoke(task);
         }
 
         private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>

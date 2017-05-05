@@ -29,10 +29,10 @@ namespace Miruken.Callback
         public static IHandler Resolve<R>(
             this IHandler handler, Func<R> provider, out R result)
         {
-            var resolution = new Resolution(typeof(R));
-            if (handler.Handle(resolution))
+            var inquiry = new Inquiry(typeof(R));
+            if (handler.Handle(inquiry))
             {
-                result = (R)resolution.Result;
+                result = (R)inquiry.Result;
                 return handler;
             }
             result = provider();
@@ -49,12 +49,12 @@ namespace Miruken.Callback
 
         public static IHandler Provide<R>(this IHandler handler, R result)
         {
-            return Provide(handler, (resolution, composer) =>
+            return Provide(handler, (inquiry, composer) =>
             {
-                var type = resolution.Key as Type;
+                var type = inquiry.Key as Type;
                 if (type?.IsAssignableFrom(typeof(R)) == true)
                 {
-                    resolution.Resolve(result, composer);
+                    inquiry.Resolve(result, composer);
                     return true;
                 }
                 return false;
@@ -63,16 +63,16 @@ namespace Miruken.Callback
 
         public static IHandler ProvideMany<R>(this IHandler handler, IEnumerable<R> result)
         {
-            return Provide(handler, (resolution, composer) =>
+            return Provide(handler, (inquiry, composer) =>
             {
                 var resolved = false;
-                var type     = resolution.Key as Type;
+                var type     = inquiry.Key as Type;
                 if (type?.IsAssignableFrom(typeof(R)) == true)
                 {
                     foreach (var r in result)
                     {
-                        resolved = resolution.Resolve(r, composer) || resolved;
-                        if (resolved && !resolution.Many) return true;
+                        resolved = inquiry.Resolve(r, composer) || resolved;
+                        if (resolved && !inquiry.Many) return true;
                     }
                 }
                 return resolved;

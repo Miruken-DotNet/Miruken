@@ -2,7 +2,7 @@
 {
     using System;
 
-    public delegate bool ProviderDelegate(Resolution resolution, IHandler composer);
+    public delegate bool ProviderDelegate(Inquiry inquiry, IHandler composer);
 
     public class Provider : Handler
     {
@@ -22,8 +22,8 @@
             if (compose != null)
                 callback = compose.Callback;
 
-            var resolution = callback as Resolution;
-            return resolution != null && _provider(resolution, composer);
+            var inquiry = callback as Inquiry;
+            return inquiry != null && _provider(inquiry, composer);
         }
     }
 }

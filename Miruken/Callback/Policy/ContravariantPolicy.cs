@@ -10,8 +10,8 @@
     {
         public ContravariantPolicy()
         {
-            NoResult  = false;
-            HasResult = IsResult;
+            NoResult     = false;
+            AcceptResult = VerifyResult;
         }
 
         public override PolicyMethodBinding BindMethod(
@@ -51,9 +51,9 @@
             return type.IsClassOf(key);
         }
 
-        private static bool IsResult(object result)
+        private static bool VerifyResult(object result, MethodBinding binding)
         {
-            return result == null || true.Equals(result);
+            return result != null || binding.Dispatcher.IsVoid;
         }
 
         int IComparer<Type>.Compare(Type x, Type y)

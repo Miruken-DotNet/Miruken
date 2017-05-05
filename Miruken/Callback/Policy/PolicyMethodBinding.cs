@@ -3,6 +3,9 @@
     using System;
     using System.Linq;
 
+    public delegate bool AcceptResultDelegate(
+        object result, MethodBinding binding);
+
     public delegate PolicyMethodBinding BindMethodDelegate(
         MethodRule rule, MethodDispatch dispatch,
         DefinitionAttribute attribute, CallbackPolicy policy);
@@ -49,12 +52,15 @@
             return key == null || key is Type ? VarianceType : key;
         }
 
-        public override bool Dispatch(
-            object target, object callback, IHandler composer)
+        public override bool Dispatch(object target, object callback, 
+            IHandler composer, Func<object, bool> results = null)
         {
             var resultType = Policy.ResultType?.Invoke(callback);
             var result     = Invoke(target, callback, composer, resultType);
-            return Policy.HasResult?.Invoke(result) ?? result != null;
+            var accepted   = Policy.AcceptResult?.Invoke(result, this) ?? result != null;
+            return accepted && result != null
+                 ? results?.Invoke(result) != false
+                 : accepted;
         }
 
         protected object Invoke(object target, object callback,

@@ -8,13 +8,15 @@
     using Concurrency;
     using Infrastructure;
 
-    public class Resolution : ICallback, ICallbackDispatch
+    public class Inquiry : ICallback, ICallbackDispatch
     {
         private readonly List<object> _resolutions;
         private object _result;
 
-        public Resolution(object key, bool many = false)
+        public Inquiry(object key, bool many = false)
         {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Key          = key;
             Many         = many;
             _resolutions = new List<object>();
@@ -26,7 +28,7 @@
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
-        public Type ResultType => Key as Type;
+        public Type ResultType => IsAsync ? typeof(Promise) : null;
 
         public object Result
         {
@@ -68,7 +70,6 @@
                  ? ((IEnumerable)resolution).Cast<object>()
                     .Aggregate(false, (s, res) => Include(res, composer) || s)
                  : Include(resolution, composer);
-
             if (resolved) _result = null;
             return resolved;
         }
@@ -114,8 +115,12 @@
             if (!handled || greedy)
                 handled = Implied(handler, false, composer) || handled;
             if (handled && !greedy) return true;
-            return ProvidesAttribute.Policy.Dispatch(
-                handler, this, greedy, composer) || handled;
+
+            var count = _resolutions.Count;
+            handled = ProvidesAttribute.Policy.Dispatch(
+                handler, this, greedy, composer, r => Resolve(r, composer))
+                || handled;
+            return handled || (_resolutions.Count > count);
         }
 
         private bool Implied(object item, bool invariant, IHandler composer)

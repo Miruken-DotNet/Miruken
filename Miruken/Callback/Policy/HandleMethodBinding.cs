@@ -13,8 +13,8 @@
         {       
         }
 
-        public override bool Dispatch(
-            object target, object callback, IHandler composer)
+        public override bool Dispatch(object target, object callback,
+            IHandler composer, Func<object, bool> results = null)
         {
             var handleMethod = (HandleMethod)callback;
             var resultType   = handleMethod.ResultType;
@@ -75,8 +75,9 @@
                     composer, filters, out returnValue) && !Unhandled;
             }
 
-            handleMethod.ReturnValue = handled ? returnValue
-                : RuntimeHelper.GetDefault(handleMethod.ResultType);
+            handleMethod.ReturnValue = handled 
+                   ? returnValue
+                   : RuntimeHelper.GetDefault(handleMethod.ResultType);
             return handled;
         }
 

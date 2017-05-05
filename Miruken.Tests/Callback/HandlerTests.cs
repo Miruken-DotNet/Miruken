@@ -479,7 +479,7 @@
         public void Should_Create_Pipelines()
         {
             var bar     = new Bar();
-            var handler = new RequestHandler();
+            var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(2, bar.Handled);
         }
@@ -518,9 +518,9 @@
             public Type RequestedType { get; set; }
 
             [Provides]
-            public object ResolveFilter(Resolution resolution)
+            public object ResolveFilter(Inquiry inquiry)
             {
-                RequestedType = resolution.Key as Type;
+                RequestedType = inquiry.Key as Type;
                 return null;
             }
         }
@@ -624,35 +624,35 @@
             }
 
             [Handles]
-            public bool HandleSuperFooImplict(SuperFoo foo, IHandler composer)
+            public bool? HandleSuperFooImplict(SuperFoo foo, IHandler composer)
             {
                 ++foo.Handled;
                 foo.HasComposer = true;
-                return false;
+                return null;
             }
 
             [Handles]
-            public bool HandleBarExplicit(Bar bar, IHandler composer)
+            public bool? HandleBarExplicit(Bar bar, IHandler composer)
             {
                 ++bar.Handled;
                 bar.HasComposer = true;
-                return bar.Handled % 2 == 1;
+                return bar.Handled % 2 == 1 ? true : (bool?)null;
             }
 
             [Handles]
-            public bool HandlesGenericBaz<T>(Baz<T> baz)
+            public bool? HandlesGenericBaz<T>(Baz<T> baz)
             {
                 if (typeof (T) == typeof (char)) 
-                    return false;
+                    return null;
                 baz.Stuff = default(T);
                 return true;
             }
 
             [Handles]
-            public bool HandlesGenericBazMapping<R,T>(Baz<T,R> baz)
+            public bool? HandlesGenericBazMapping<R,T>(Baz<T,R> baz)
             {
                 if (typeof(T) == typeof(char))
-                    return false;
+                    return null;
                 baz.Stuff      = default(T);
                 baz.OtherStuff = default(R);
                 return true;
@@ -699,17 +699,17 @@
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
-               if (Equals(resolution.Key, typeof(Baz)))
-                   resolution.Resolve(new SuperBaz(), composer);
+               if (Equals(inquiry.Key, typeof(Baz)))
+                   inquiry.Resolve(new SuperBaz(), composer);
             }
 
             [Provides("Foo"),
              Provides("Bar")]
-            public object ProvidesByName(Resolution resolution)
+            public object ProvidesByName(Inquiry inquiry)
             {
-                switch (resolution.Key as string)
+                switch (inquiry.Key as string)
                 {
                     case "Foo":
                         return new Foo();
@@ -764,17 +764,17 @@
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
-                if (Equals(resolution.Key, typeof(Baz)))
-                    resolution.Resolve(Promise.Resolved(new SuperBaz()), composer);
+                if (Equals(inquiry.Key, typeof(Baz)))
+                    inquiry.Resolve(Promise.Resolved(new SuperBaz()), composer);
             }
 
             [Provides("Foo"),
              Provides("Bar")]
-            public Promise ProvidesByName(Resolution resolution)
+            public Promise ProvidesByName(Inquiry inquiry)
             {
-                switch (resolution.Key as string)
+                switch (inquiry.Key as string)
                 {
                     case "Foo":
                         return Promise.Resolved(new Foo());
@@ -822,22 +822,22 @@
 
             [Provides(typeof(Baz<int>)),
              Provides(typeof(Baz<string>))]
-            public object ProvideManyKeys(Resolution resolution)
+            public object ProvideManyKeys(Inquiry inquiry)
             {
-                if (Equals(resolution.Key, typeof(Baz<int>)))
+                if (Equals(inquiry.Key, typeof(Baz<int>)))
                     return new Baz<int>(1);
-                if (Equals(resolution.Key, typeof(Baz<string>)))
+                if (Equals(inquiry.Key, typeof(Baz<string>)))
                     return new Baz<string>("Hello");
                 return null;
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
-                if (Equals(resolution.Key, typeof(Baz)))
+                if (Equals(inquiry.Key, typeof(Baz)))
                 {
-                    resolution.Resolve(new SuperBaz(), composer);
-                    resolution.Resolve(new Baz(), composer);
+                    inquiry.Resolve(new SuperBaz(), composer);
+                    inquiry.Resolve(new Baz(), composer);
                 }
             }
         }
@@ -871,22 +871,22 @@
 
             [Provides(typeof(Baz<int>)),
              Provides(typeof(Baz<string>))]
-            public Promise ProvideManyKeys(Resolution resolution)
+            public Promise ProvideManyKeys(Inquiry inquiry)
             {
-                if (Equals(resolution.Key, typeof(Baz<int>)))
+                if (Equals(inquiry.Key, typeof(Baz<int>)))
                     return Promise.Resolved(new Baz<int>(1));
-                if (Equals(resolution.Key, typeof(Baz<string>)))
+                if (Equals(inquiry.Key, typeof(Baz<string>)))
                     return Promise.Resolved(new Baz<string>("Hello"));
                 return Promise.Empty;
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Resolution resolution, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
-                if (Equals(resolution.Key, typeof(Baz)))
+                if (Equals(inquiry.Key, typeof(Baz)))
                 {
-                    resolution.Resolve(Promise.Resolved(new SuperBaz()), composer);
-                    resolution.Resolve(Promise.Resolved(new Baz()), composer);
+                    inquiry.Resolve(Promise.Resolved(new SuperBaz()), composer);
+                    inquiry.Resolve(Promise.Resolved(new Baz()), composer);
                 }
             }
         }
@@ -924,7 +924,7 @@
             }
         }
 
-        private class RequestHandler : Handler, IFilter<Bar, object>
+        private class FilteredHandler : Handler, IFilter<Bar, object>
         {
             int? IFilter.Order { get; set; }
 
@@ -936,9 +936,9 @@
             }
 
             [Provides(typeof(IFilter<,>))]
-            public object CreateFilter(Resolution resolution)
+            public object CreateFilter(Inquiry inquiry)
             {
-                var type = (Type)resolution.Key;
+                var type = (Type)inquiry.Key;
                 if (type.IsGenericTypeDefinition) return null;
                 if (type.IsInterface)
                     return Activator.CreateInstance(

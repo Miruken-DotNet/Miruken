@@ -29,7 +29,7 @@
             _filters.AddRange(providers.Where(p => p != null));
         }
 
-        public abstract bool Dispatch(
-            object target, object callback, IHandler composer);
+        public abstract bool Dispatch(object target, object callback, 
+            IHandler composer, Func<object, bool> results = null);
     }
 }

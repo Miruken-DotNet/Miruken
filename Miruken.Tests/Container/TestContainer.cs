@@ -13,7 +13,7 @@
 
         object IContainer.Resolve(object key)
         {
-            var resolution = new Resolution(key);
+            var resolution = new Inquiry(key);
             return Handle(resolution, false, Composer)
                  ? resolution.Result
                  : Unhandled<object>();
@@ -34,9 +34,9 @@
         }
 
         [Provides]
-        private object Resolve(Resolution resolution, IHandler composer)
+        private object Resolve(Inquiry inquiry, IHandler composer)
         {
-            var type = resolution.Key as Type;
+            var type = inquiry.Key as Type;
             return type == null ? Unhandled<object>() : Activator.CreateInstance(type);
         }
     }

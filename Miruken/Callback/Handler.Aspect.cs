@@ -71,7 +71,7 @@
                     if (Equals(state, false))
                     {
                         var resultType = cb?.ResultType;
-                        if (resultType != null && typeof(Promise).IsAssignableFrom(cb.ResultType))
+                        if (resultType != null && typeof(Promise).IsAssignableFrom(resultType))
                         {
                             cb.Result = Promise.Rejected(new RejectedException(callback))
                                 .Coerce(resultType);

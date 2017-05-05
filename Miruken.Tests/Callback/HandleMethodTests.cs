@@ -43,9 +43,9 @@
             }
 
             [Provides(typeof(IFilter<,>))]
-            public object CreateFilter(Resolution resolution)
+            public object CreateFilter(Inquiry inquiry)
             {
-                return Activator.CreateInstance((Type)resolution.Key);
+                return Activator.CreateInstance((Type)inquiry.Key);
             }
         }
 

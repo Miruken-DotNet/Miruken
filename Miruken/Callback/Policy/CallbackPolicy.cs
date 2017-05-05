@@ -11,10 +11,10 @@
         private readonly List<MethodRule> _rules = new List<MethodRule>();
         private readonly List<IFilterProvider> _filters = new List<IFilterProvider>();
 
-        public object             NoResult   { get; set; }
-        public Func<object, bool> HasResult  { get; set; }
-        public Func<object, Type> ResultType { get; set; }
-        public BindMethodDelegate Binder     { get; set; }
+        public object               NoResult     { get; set; }
+        public AcceptResultDelegate AcceptResult { get; set; }
+        public Func<object, Type>   ResultType   { get; set; }
+        public BindMethodDelegate   Binder       { get; set; }
 
         public IEnumerable<IFilterProvider> Filters => _filters;
 
@@ -43,8 +43,8 @@
 
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);
 
-        public bool Dispatch(
-            Handler handler, object callback, bool greedy, IHandler composer)
+        public bool Dispatch(Handler handler, object callback, bool greedy,
+            IHandler composer, Func<object, bool> results = null)
         {
             var handled   = false;
             var surrogate = handler.Surrogate;
@@ -52,13 +52,15 @@
             if (surrogate != null)
             {
                 var descriptor = HandlerDescriptor.GetDescriptor(surrogate.GetType());
-                handled = descriptor.Dispatch(this, surrogate, callback, greedy, composer);
+                handled = descriptor.Dispatch(
+                    this, surrogate, callback, greedy, composer, results);
             }
 
             if (!handled || greedy)
             {
                 var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
-                handled = descriptor.Dispatch(this, handler, callback, greedy, composer)
+                handled = descriptor.Dispatch(
+                    this, handler, callback, greedy, composer, results)
                        || handled;
             }
 

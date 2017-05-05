@@ -1,8 +1,5 @@
 ﻿namespace Miruken.Callback
 {
-    using System.Collections;
-    using System.Linq;
-    using Infrastructure;
     using Policy;
 
     public class ProvidesAttribute : DefinitionAttribute
@@ -18,54 +15,10 @@
 
         public override CallbackPolicy CallbackPolicy => Policy;
 
-        private class ResolutionFilter : IDynamicFilter
-        {
-            public ResolutionFilter()
-            {
-                Order = int.MinValue;
-            }
-
-            public int? Order { get; set; }
-
-            public object Filter(object callback, MethodBinding method, 
-                IHandler composer, FilterDelegate<object> proceed)
-            {
-                var resolution  = callback as Resolution;
-                if (resolution == null) return null;
-                var resolutions = resolution.Resolutions;
-                var count       = resolutions.Count;
-
-                var result = proceed();
-
-                if (result != null)
-                {
-                    if (RuntimeHelper.IsCollection(result))
-                    {
-                        var resolved = false;
-                        foreach (var item in (IEnumerable)result)
-                        {
-                            resolved = resolution.Resolve(item, composer)
-                                    || resolved;
-                            if (resolved && !resolution.Many)
-                                break;
-                        }
-                        return resolved ? result : null;
-                    }
-                    return resolution.Resolve(result, composer) 
-                         ? result : null;
-                }
-
-                return resolutions.Count > count 
-                     ? resolutions.Last()
-                     : null;
-            }
-        }
-
-        public static readonly CovariantPolicy<Resolution> Policy =
-             CovariantPolicy.Create<Resolution>(r => r.Key,
-                x => x.MatchMethod(x.Return.OrVoid, x.Callback, x.Composer.Optional)
-                      .MatchMethod(x.Return, x.Composer.Optional)
-                      .Filters(new ResolutionFilter())
+        public static readonly CovariantPolicy<Inquiry> Policy =
+             CovariantPolicy.Create<Inquiry>(r => r.Key,
+                x => x.MatchMethod(x.ReturnKey.OrVoid, x.Callback, x.Composer.Optional)
+                      .MatchMethod(x.ReturnKey, x.Composer.Optional)
                 );
     }
 }

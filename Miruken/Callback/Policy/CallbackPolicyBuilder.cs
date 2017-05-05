@@ -29,9 +29,9 @@ namespace Miruken.Callback.Policy
             return (TBuilder)this;
         }
 
-        public TBuilder HasResult(Func<object, bool> value)
+        public TBuilder AcceptResult(AcceptResultDelegate value)
         {
-            Policy.HasResult = value;
+            Policy.AcceptResult = value;
             return (TBuilder)this;
         }
 
