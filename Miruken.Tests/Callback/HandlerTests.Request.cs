@@ -1,6 +1,8 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Collections;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
@@ -44,6 +46,17 @@
             var tracking = await handler.RequestAsync<Guid>(deliver);
             Assert.AreNotEqual(Guid.Empty, tracking);
             Assert.AreEqual(1, deliver.OrderId);
+        }
+
+        [TestMethod]
+        public async Task Should_Request_All_Asycnhronously()
+        {
+            var handler   = new OrderHandler();
+            var fulfill   = new FulfillOrder { OrderId = 1 };
+            var results   = await handler.RequestAllAsync(fulfill);
+            var responses = ((IEnumerable)results).Cast<bool>().ToArray();
+            Assert.AreEqual(2, responses.Length);
+            Assert.IsTrue(responses.All(b => b));
         }
 
         [TestMethod,
@@ -113,6 +126,15 @@
             {
                 return new Promise<Guid>((resolve, reject) => 
                     resolve(Guid.NewGuid(), true));
+            }
+
+            [Handles]
+            public Promise Process(Request request, IHandler composer)
+            {
+                var callback = request.Callback;
+                if (callback is FulfillOrder)
+                    return new Promise<bool>((resolve, reject) => resolve(true, true));
+                return null;
             }
         }
     }

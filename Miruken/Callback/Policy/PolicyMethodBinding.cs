@@ -57,7 +57,8 @@
         {
             var resultType = Policy.ResultType?.Invoke(callback);
             var result     = Invoke(target, callback, composer, resultType);
-            var accepted   = Policy.AcceptResult?.Invoke(result, this) ?? result != null;
+            var accepted   = Policy.AcceptResult?.Invoke(result, this) 
+                          ?? result != null;
             return accepted && result != null
                  ? results?.Invoke(result) != false
                  : accepted;

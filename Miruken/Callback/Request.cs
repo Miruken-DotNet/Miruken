@@ -71,7 +71,10 @@
             var count   = _responses.Count;
             var handled = HandlesAttribute.Policy.Dispatch(
                 handler, Callback, greedy, composer, r => Respond(r, composer));
-            return handled || _responses.Count > count;
+            if (!greedy && (handled || _responses.Count > count)) return true;
+            return HandlesAttribute.Policy.Dispatch(
+                handler, this, greedy, composer, r => Respond(r, composer))
+                || handled || (_responses.Count > count);
         }
     }
 }

@@ -57,5 +57,27 @@
             }
             throw new NotSupportedException($"{callback.GetType()} not handled");
         }
+
+        public static void RequestAll(this IHandler handler, object callback)
+        {
+            if (handler == null) return;
+            if (!handler.Handle(new Request(callback, true), true))
+                throw new NotSupportedException($"{callback.GetType()} not handled");
+        }
+
+        public static Promise RequestAllAsync(this IHandler handler, object callback)
+        {
+            if (handler == null) return Promise.Empty;
+            var request = new Request(callback, true);
+            if (handler.Handle(request, true))
+            {
+                var result = request.Result;
+                return request.IsAsync
+                     ? (Promise)result
+                     : Promise.Resolved(result);
+            }
+            return Promise.Rejected(new NotSupportedException(
+                $"{callback.GetType()} not handled"));
+        }
     }
 }
