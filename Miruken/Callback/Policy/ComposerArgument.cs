@@ -1,5 +1,7 @@
 namespace Miruken.Callback.Policy
 {
+    using System;
+    using System.Collections.Generic;
     using System.Reflection;
 
     public class ComposerArgument : ArgumentRule
@@ -11,7 +13,9 @@ namespace Miruken.Callback.Policy
         {    
         }
 
-        public override bool Matches(ParameterInfo parameter, DefinitionAttribute attribute)
+        public override bool Matches(
+            ParameterInfo parameter, DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
             return typeof(IHandler).IsAssignableFrom(paramType);

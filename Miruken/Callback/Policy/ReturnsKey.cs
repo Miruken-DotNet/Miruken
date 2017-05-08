@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
 
     public class ReturnsKey : ReturnRule
@@ -13,7 +14,8 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute)
+            DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases)
         {
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)

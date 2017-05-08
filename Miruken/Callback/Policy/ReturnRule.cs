@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
 
     public abstract class ReturnRule
@@ -10,7 +11,8 @@
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute);
+            DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases);
 
         public virtual void Configure(PolicyMethodBinding binding) { }
 
@@ -38,9 +40,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute)
+            DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases)
         {
-            return Rule.Matches(returnType, parameters, attribute);
+            return Rule.Matches(returnType, parameters, attribute, aliases);
         }
 
         public override void Configure(PolicyMethodBinding binding)
@@ -62,10 +65,11 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute)
+            DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases)
         {
             return returnType == typeof(void) ||
-                base.Matches(returnType, parameters, attribute);
+                base.Matches(returnType, parameters, attribute, aliases);
         }
 
         public override void Configure(PolicyMethodBinding binding)

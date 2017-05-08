@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
+    using Policy;
 
     public class Request : ICallback, ICallbackDispatch
     {
@@ -20,10 +21,10 @@
             _responses = new List<object>();
         }
 
-        public bool   Many     { get; }
-        public object Callback { get; }
-        public bool   IsAsync  { get; private set; }
-
+        public bool            Many     { get; }
+        public object          Callback { get; }
+        public bool            IsAsync  { get; private set; }
+        public CallbackPolicy  Policy   { get; set; }
         public ICollection<object> Responses => _responses.AsReadOnly();
 
         public Type ResultType => IsAsync ? typeof(Promise) : null;
@@ -69,11 +70,14 @@
         bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var count   = _responses.Count;
-            var handled = HandlesAttribute.Policy.Dispatch(
-                handler, Callback, greedy, composer, r => Respond(r, composer));
-            if (!greedy && (handled || _responses.Count > count)) return true;
-            return HandlesAttribute.Policy.Dispatch(
-                handler, this, greedy, composer, r => Respond(r, composer))
+            var policy  = Policy ?? HandlesAttribute.Policy;
+            var handled = policy.Dispatch( 
+                handler, Callback, greedy, composer,
+                r => Respond(r, composer));
+            if (!greedy && (handled || _responses.Count > count))
+                return true;
+            return policy.Dispatch(handler, this, greedy, composer,
+                                   r => Respond(r, composer))
                 || handled || (_responses.Count > count);
         }
     }

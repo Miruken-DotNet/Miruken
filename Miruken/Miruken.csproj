@@ -127,6 +127,10 @@
     <Compile Include="Infrastructure\ExceptionEventArgs.cs" />
     <Compile Include="Infrastructure\RuntimeHelper.cs" />
     <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
+    <Compile Include="Mediator\Handler.Mediator.cs" />
+    <Compile Include="Mediator\INotification.cs" />
+    <Compile Include="Mediator\IRequest.cs" />
+    <Compile Include="Mediator\MediatesAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />
     <Compile Include="Protocol.cs" />

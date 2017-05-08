@@ -10,5 +10,7 @@ namespace Miruken.Callback
         public object Key { get; set; }
 
         public abstract CallbackPolicy CallbackPolicy { get; }
+
+        protected const string _ = null;
     }
 }

@@ -15,14 +15,6 @@ namespace Miruken.Callback.Policy
 
         public ComposerArgument Composer => ComposerArgument.Instance;
 
-        public static ReturnArgConstraint Arg(int argIndex)
-        {
-            if (argIndex < 1)
-                throw new ArgumentOutOfRangeException(nameof(argIndex),
-                    "Argument index must be >= 1");
-            return new ReturnArgConstraint(argIndex - 1);
-        }
-
         public TBuilder NoResult(object value)
         {
             Policy.NoResult = value;

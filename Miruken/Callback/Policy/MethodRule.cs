@@ -1,6 +1,7 @@
 namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
 
@@ -41,11 +42,12 @@ namespace Miruken.Callback.Policy
         {
             var parameters = method.GetParameters();
             var paramCount = parameters.Length;
+            var aliases    = new Dictionary<string, Type>();
             return paramCount >= _minArgs && paramCount <= _args.Length &&
-                   parameters.Zip(_args, (param, arg) => arg.Matches(param, attribute))
-                             .All(m => m)
-               && _returnValue?.Matches(
-                   method.ReturnType, parameters, attribute) != false;
+                   parameters.Zip(_args, (param, arg) => 
+                       arg.Matches(param, attribute, aliases)).All(m => m)
+                && _returnValue?.Matches(method.ReturnType, parameters,
+                                         attribute, aliases) != false;
         }
 
         public PolicyMethodBinding Bind(MethodDispatch dispatch, DefinitionAttribute attribute)

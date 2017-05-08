@@ -1,11 +1,13 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
     using Infrastructure;
 
     public delegate bool ReturnTestDelegate(
-        Type returnType, ParameterInfo[] parameters);
+        Type returnType, ParameterInfo[] parameters,
+        IDictionary<string, Type> aliases);
 
     public class Return : ReturnRule
     {
@@ -20,7 +22,8 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute)
+            DefinitionAttribute attribute,
+            IDictionary<string, Type> aliases)
         {
             return returnType.IsClassOf(_type);
         }
@@ -30,6 +33,11 @@
         public static Return Type(Type type)
         {
             return new Return(type);
+        }
+
+        public static TestReturn Is(string alias)
+        {
+            return Is((returnType, p, aliases) => aliases[alias] == returnType);
         }
 
         public static TestReturn Is(ReturnTestDelegate test)
@@ -62,37 +70,10 @@
 
         public override bool Matches(
              Type returnType, ParameterInfo[] parameters,
-             DefinitionAttribute attribute)
+             DefinitionAttribute attribute,
+             IDictionary<string, Type> aliases)
         {
-            return _test(returnType, parameters);
-        }
-    }
-
-    public class ReturnArgConstraint
-    {
-        private readonly int _argIndex;
-
-        public ReturnArgConstraint(int argIndex)
-        {
-            _argIndex = argIndex;
-        }
-
-        public ReturnTestDelegate GenericArg(int genericArgIndex)
-        {
-            if (genericArgIndex < 1)
-                throw new ArgumentOutOfRangeException(nameof(genericArgIndex),
-                    "Generic argument index must be >= 1");
-
-            --genericArgIndex;
-            return (returnType, args) =>
-            {
-                if (args.Length <= _argIndex) return false;
-                var arg = args[_argIndex].ParameterType;
-                if (!arg.IsGenericType) return false;
-                var genericArgs = arg.GetGenericArguments();
-                if (genericArgs.Length <= genericArgIndex) return false;
-                return genericArgs[genericArgIndex] == returnType;
-            };
+            return _test(returnType, parameters, aliases);
         }
     }
 }
