@@ -459,13 +459,12 @@
                 ).Compile();
         }
 
-        public static NoArgsReturnDelegate CreateGenericFuncNoArgs(
-            Type targetType, string methodName, params Type[] genericParams)
+        public static Func<T, Ret> CreateGenericFuncNoArgs<T, Ret>(
+            string methodName, params Type[] genericParams)
         {
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var target     = Expression.Convert(instance, targetType);
-            var methodCall = Expression.Call(target, methodName, genericParams);
-            return Expression.Lambda<NoArgsReturnDelegate>(
+            var instance   = Expression.Parameter(typeof(T), "instance");
+            var methodCall = Expression.Call(instance, methodName, genericParams);
+            return Expression.Lambda<Func<T, Ret>>(
                methodCall, instance
                ).Compile();
         }

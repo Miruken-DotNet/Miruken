@@ -29,6 +29,9 @@
         protected virtual bool HandleCallback(
             object callback, bool greedy, IHandler composer)
         {
+            if (Surrogate == null && SkippedTypes.Contains(GetType()))
+                return false;
+
             var compose = callback as Composition;
             if (compose != null)
             {
@@ -37,22 +40,9 @@
             }
 
             var dispatch = callback as ICallbackDispatch;
-            if (dispatch != null)
-                return dispatch.Dispatch(this, greedy, composer);
-
-            return !ShouldSkipDefinitions() &&
-                HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
+            return dispatch?.Dispatch(this, greedy, composer)
+                ?? HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
         }
-
-	    private bool ShouldSkipDefinitions()
-	    {
-	        if (Surrogate != null) return false;
-	        var handlerType = GetType();
-	        return handlerType == typeof(Handler) ||
-	               handlerType == typeof(HandlerFilter) ||
-                   handlerType == typeof(CascadeHandler) ||
-                   handlerType == typeof(CompositeHandler);
-	    }
 
         public static IHandler operator +(Handler c1, IHandler c2)
         {
@@ -63,6 +53,12 @@
         {
             return c1.Chain(c2.ToArray());
         }
+
+        private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>
+        {
+            typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),
+            typeof(CompositeHandler), typeof(CompositionScope)
+        };
     }
 
     public class CompositionScope : HandlerDecorator

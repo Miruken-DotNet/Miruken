@@ -343,7 +343,7 @@
 
         #endregion
 
-        #region Coerce
+        #region Cast
 
         public Promise<T> Cast<T>()
         {
@@ -351,24 +351,27 @@
             return this as Promise<T> ?? Then((r, s) => (T)r);
         }
 
-        public Promise Cast(Type promiseType)
+        public Promise Coerce(Type promiseType)
         {
-            if (promiseType == null ||
-                promiseType.IsInstanceOfType(this) ||
-                !promiseType.IsGenericType ||
+            if (promiseType == null)
+                throw new ArgumentNullException(nameof(promiseType));
+
+            if (!promiseType.IsGenericType ||
                 promiseType.GetGenericTypeDefinition() != typeof(Promise<>))
-                return this;
+                throw new ArgumentException($"{promiseType.FullName} is not a Promise<>");
+
+            if (promiseType.IsInstanceOfType(this)) return this;
 
             var resultType = promiseType.GetGenericArguments()[0];
-            var cast       = CastPromise.GetOrAdd(resultType, rt =>
-                RuntimeHelper.CreateGenericFuncNoArgs(typeof(Promise), "Cast", rt)
+            var cast       = CoercePromise.GetOrAdd(resultType, rt =>
+                RuntimeHelper.CreateGenericFuncNoArgs<Promise, Promise>("Cast", rt)
             );
 
-            return (Promise)cast(this);
+            return cast(this);
         }
 
-        private static readonly ConcurrentDictionary<Type, NoArgsReturnDelegate>
-            CastPromise = new ConcurrentDictionary<Type, NoArgsReturnDelegate>();
+        private static readonly ConcurrentDictionary<Type, Func<Promise, Promise>>
+            CoercePromise = new ConcurrentDictionary<Type, Func<Promise, Promise>>();
 
         #endregion
     }

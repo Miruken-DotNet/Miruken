@@ -35,7 +35,7 @@
                 handleMethod.Exception = exception;
                 if (!typeof(Promise).IsAssignableFrom(resultType)) throw;
                 handleMethod.ReturnValue = 
-                    Promise.Rejected(exception).Cast(resultType);
+                    Promise.Rejected(exception).Coerce(resultType);
                 return true;
             }
             finally
