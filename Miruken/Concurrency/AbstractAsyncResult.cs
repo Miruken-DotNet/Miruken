@@ -78,30 +78,29 @@ namespace Miruken.Concurrency
             return result._result;
         }
 
-        protected bool Complete(object result, bool synchronously)
+        protected bool Complete(object result, bool synchronously, Action action = null)
         {
             if (Interlocked.CompareExchange(ref _completed, 1, 0) != 0) 
                 return false;
             _result = result;
-            Complete(synchronously);
+            Complete(synchronously, action);
             return true;
         }
 
-        protected bool Complete(Exception exception, bool synchronously)
+        protected bool Complete(Exception exception, bool synchronously, Action action = null)
         {
             if (Interlocked.CompareExchange(ref _completed, 1, 0) != 0)
                 return false;
             _exception = exception;
-            Complete(synchronously);
+            Complete(synchronously, action);
             return true;
         }
 
-        protected virtual void Complete(bool synchronously)
+        private void Complete(bool synchronously, Action action = null)
         {
             _completedSynchronously = synchronously;
-
+            action?.Invoke();
             ((ManualResetEvent) _waitEvent)?.Set();
-
             _callback?.Invoke(this);
         }
     }

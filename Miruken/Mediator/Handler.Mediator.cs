@@ -4,6 +4,11 @@
     using Callback;
     using Concurrency;
 
+    /// <summary>
+    /// Miruken.Mediator is modeled after the awesome MediatR package
+    /// from Jimmy Bogard
+    /// https://github.com/jbogard/MediatR
+    /// </summary>
     public static class HandlerMediatorExtensions
     {
         public static void Send(this IHandler handler, IRequest request)
@@ -44,7 +49,7 @@
                 throw new NotSupportedException($"{request.GetType()} not handled");
             var result = req.Result;
             return req.IsAsync
-                 ? (Resp)((Promise)result).Coerce(typeof(Promise<Resp>)).Wait()
+                 ? (Resp)((Promise)result).Cast(typeof(Promise<Resp>)).Wait()
                  : (Resp)result;
         }
 
@@ -64,7 +69,7 @@
             var promise = req.IsAsync
                         ? (Promise)result
                         : Promise.Resolved(result);
-            return (Promise<Resp>)promise.Coerce(typeof(Promise<Resp>));
+            return (Promise<Resp>)promise.Cast(typeof(Promise<Resp>));
         }
 
         public static void Publish(this IHandler handler, INotification notification)

@@ -80,7 +80,7 @@
                 return false;
 
             var promise = resolution as Promise
-                ?? (resolution as Task)?.ToPromise();
+                       ?? (resolution as Task)?.ToPromise();
 
             if (promise != null)
             {

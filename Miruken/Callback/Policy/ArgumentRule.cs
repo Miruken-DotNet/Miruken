@@ -85,7 +85,7 @@
                 if (_aliases != null && _aliases.Length > 0)
                     throw new InvalidOperationException(
                         $"{_type.FullName} is not a generic definition and cannot bind aliases");
-                return true;
+                return base.Matches(parameter, attribute, aliases);
             }
             var openGeneric = paramType.GetOpenTypeConformance(_type);
             if (openGeneric == null) return false;
@@ -100,7 +100,7 @@
                 if (!string.IsNullOrEmpty(alias))
                     aliases.Add(_aliases[i], genericArgs[i]);
             }
-            return true;
+            return base.Matches(parameter, attribute, aliases);
         }
     }
 

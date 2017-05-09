@@ -93,7 +93,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Single_Arg_Action()
         {
-            var call = RuntimeHelper.CreateActionOneArg(
+            var call = RuntimeHelper.CreateCallOneArg(
                 typeof(Handler).GetMethod("HandleOne"));
             var handler = new Handler();
             call(handler, "Hello");
@@ -103,7 +103,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Double_Arg_Action()
         {
-            var call = RuntimeHelper.CreateActionTwoArgs(
+            var call = RuntimeHelper.CreateCallTwoArgs(
                 typeof(Handler).GetMethod("HandleTwo"));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14));
@@ -114,7 +114,7 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Create_Triple_Arg_Action()
         {
-            var call = RuntimeHelper.CreateActionThreeArgs(
+            var call = RuntimeHelper.CreateCallThreeArgs(
                 typeof(Handler).GetMethod("HandleThree"));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14), 22);
@@ -135,7 +135,7 @@ namespace Miruken.Tests
             "Method Handle expects 0 arguments")]
         public void Should_Fail_If_No_Args()
         {
-            RuntimeHelper.CreateActionOneArg(
+            RuntimeHelper.CreateCallOneArg(
                 typeof(Handler).GetMethod("Handle"));
         }
 
@@ -188,7 +188,7 @@ namespace Miruken.Tests
             "Method Provide is void")]
         public void Should_Fail_If_No_ReturnType()
         {
-            RuntimeHelper.CreateActionOneArg(
+            RuntimeHelper.CreateCallOneArg(
                 typeof(Provider).GetMethod("ProvideVoid"));
         }
     }

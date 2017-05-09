@@ -74,7 +74,7 @@
                         if (resultType != null && typeof(Promise).IsAssignableFrom(resultType))
                         {
                             cb.Result = Promise.Rejected(new RejectedException(callback))
-                                .Coerce(resultType);
+                                .Cast(resultType);
                             return true;
                         }
                         throw new RejectedException(callback);

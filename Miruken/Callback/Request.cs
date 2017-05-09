@@ -59,8 +59,13 @@
                 return false;
 
             var promise = response as Promise
-                 ?? (response as Task)?.ToPromise();
-            IsAsync = promise != null;
+                       ?? (response as Task)?.ToPromise();
+
+            if (promise != null)
+            {
+                response = promise;
+                IsAsync  = true;
+            }
 
             _responses.Add(response);
             _result = null;
@@ -71,9 +76,8 @@
         {
             var count   = _responses.Count;
             var policy  = Policy ?? HandlesAttribute.Policy;
-            var handled = policy.Dispatch( 
-                handler, Callback, greedy, composer,
-                r => Respond(r, composer));
+            var handled = policy.Dispatch(handler, Callback, greedy, composer,
+                                          r => Respond(r, composer));
             if (!greedy && (handled || _responses.Count > count))
                 return true;
             return policy.Dispatch(handler, this, greedy, composer,

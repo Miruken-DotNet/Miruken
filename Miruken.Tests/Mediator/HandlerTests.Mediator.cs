@@ -1,10 +1,12 @@
 ﻿namespace Miruken.Tests.Mediator
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Concurrency;
     using Miruken.Mediator;
 
@@ -128,10 +130,22 @@
                 composer.Publish(new TeamRemoved {Team = team});
             }
 
-            [Mediates(typeof(IRequest))]
+            [Mediates]
             public void Notify(INotification notification)
             {
                 _notifications.Add(notification);
+            }
+        }
+
+        private class LogFilter<Cb, Res> : IFilter<Cb, Res>
+        {
+            public int? Order { get; set; }
+
+            public Res Filter(Cb callback, MethodBinding binding,
+                IHandler composer, FilterDelegate<Res> proceed)
+            {
+                Console.WriteLine($"Handle {callback}");
+                return proceed();
             }
         }
     }

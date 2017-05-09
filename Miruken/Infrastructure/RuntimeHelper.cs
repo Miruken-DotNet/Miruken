@@ -141,7 +141,7 @@
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
-        public static NoArgsDelegate CreateActionNoArgs(MethodInfo method)
+        public static NoArgsDelegate CreateCallNoArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -151,7 +151,7 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 0)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance = Expression.Parameter(typeof(object), "instance");
+            var instance   = Expression.Parameter(typeof(object), "instance");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method
@@ -161,7 +161,7 @@
                 ).Compile();
         }
 
-        public static OneArgDelegate CreateActionOneArg(MethodInfo method)
+        public static OneArgDelegate CreateCallOneArg(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -183,7 +183,7 @@
                 ).Compile();
         }
 
-        public static TwoArgsDelegate CreateActionTwoArgs(MethodInfo method)
+        public static TwoArgsDelegate CreateCallTwoArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -207,7 +207,7 @@
                 ).Compile();
         }
 
-        public static ThreeArgsDelegate CreateActionThreeArgs(MethodInfo method)
+        public static ThreeArgsDelegate CreateCallThreeArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -217,7 +217,7 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 3)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance = Expression.Parameter(typeof(object), "instance");
+            var instance  = Expression.Parameter(typeof(object), "instance");
             var argument1 = Expression.Parameter(typeof(object), "argument1");
             var argument2 = Expression.Parameter(typeof(object), "argument2");
             var argument3 = Expression.Parameter(typeof(object), "argument3");
@@ -233,7 +233,7 @@
                 ).Compile();
         }
 
-        public static FourArgsDelegate CreateActionFourArgs(MethodInfo method)
+        public static FourArgsDelegate CreateCallFourArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -243,7 +243,7 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 4)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance = Expression.Parameter(typeof(object), "instance");
+            var instance  = Expression.Parameter(typeof(object), "instance");
             var argument1 = Expression.Parameter(typeof(object), "argument1");
             var argument2 = Expression.Parameter(typeof(object), "argument2");
             var argument3 = Expression.Parameter(typeof(object), "argument3");
@@ -261,7 +261,7 @@
                 ).Compile();
         }
 
-        public static FiveArgsDelegate CreateActionFiveArgs(MethodInfo method)
+        public static FiveArgsDelegate CreateCallFiveArgs(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -457,6 +457,17 @@
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument1, argument2, argument3, argument4, argument5
                 ).Compile();
+        }
+
+        public static NoArgsReturnDelegate CreateGenericFuncNoArgs(
+            Type targetType, string methodName, params Type[] genericParams)
+        {
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var target     = Expression.Convert(instance, targetType);
+            var methodCall = Expression.Call(target, methodName, genericParams);
+            return Expression.Lambda<NoArgsReturnDelegate>(
+               methodCall, instance
+               ).Compile();
         }
 
         public static PropertyGetDelegate CreatePropertyGetter(string name, Type owner)

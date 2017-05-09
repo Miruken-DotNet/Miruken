@@ -1,10 +1,11 @@
 ﻿namespace Miruken.Concurrency
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Linq;
-    using System.Reflection;
     using System.Runtime.ExceptionServices;
     using System.Threading;
+    using Infrastructure;
 
     public enum PromiseState
     {
@@ -347,10 +348,10 @@
         public Promise<T> Cast<T>()
         {
             // InvalidCastException if types don't match
-            return Then((r, s) => (T)r);
+            return this as Promise<T> ?? Then((r, s) => (T)r);
         }
 
-        public Promise Coerce(Type promiseType)
+        public Promise Cast(Type promiseType)
         {
             if (promiseType == null ||
                 promiseType.IsInstanceOfType(this) ||
@@ -359,20 +360,15 @@
                 return this;
 
             var resultType = promiseType.GetGenericArguments()[0];
-            var coerceType = CoercePromise.MakeGenericMethod(resultType);
-            return (Promise) coerceType.Invoke(null, 
-                BindingFlags.Static | BindingFlags.NonPublic, null,
-                new object[] { this }, null);
+            var cast       = CastPromise.GetOrAdd(resultType, rt =>
+                RuntimeHelper.CreateGenericFuncNoArgs(typeof(Promise), "Cast", rt)
+            );
+
+            return (Promise)cast(this);
         }
 
-        private static Promise Coerce<R>(Promise promise)
-        {
-            return promise.Cast<R>();
-        }
-
-        private static readonly MethodInfo CoercePromise =
-            typeof(Promise).GetMethod("Coerce",
-                BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly ConcurrentDictionary<Type, NoArgsReturnDelegate>
+            CastPromise = new ConcurrentDictionary<Type, NoArgsReturnDelegate>();
 
         #endregion
     }
@@ -835,30 +831,45 @@
 
         protected void Resolve(T result, bool synchronous)
         {
-            if (!Complete(result, synchronous)) return;
-            lock (_guard)
+            Complete(result, synchronous, () =>
             {
-                State = PromiseState.Fulfilled;
-                var fulfilled = _fulfilled;
-                _fulfilled = null;
-                _rejected  = null;
-                fulfilled?.Invoke((T)_result, synchronous);
-            }
+                lock (_guard)
+                {
+                    State = PromiseState.Fulfilled;
+                    var fulfilled = _fulfilled;
+                    _fulfilled = null;
+                    _rejected  = null;
+                    fulfilled?.Invoke((T) _result, synchronous);
+                }
+            });
         }
 
         protected void Reject(Exception exception, bool synchronous)
         {
-            if (!Complete(exception, synchronous)) return;
-            lock (_guard)
+            Complete(exception, synchronous, () =>
             {
-                State = exception is CancelledException
-                      ? PromiseState.Cancelled
-                      : PromiseState.Rejected;
-                var rejected = _rejected;
-                _fulfilled = null;
-                _rejected  = null;
-                rejected?.Invoke(exception, synchronous);
-            }
+                if (_onCancel != null && exception is CancelledException)
+                {
+                    try
+                    {
+                        _onCancel();
+                    }
+                    catch
+                    {
+                        // consume errors
+                    }
+                }
+                lock (_guard)
+                {
+                    State = exception is CancelledException
+                          ? PromiseState.Cancelled
+                          : PromiseState.Rejected;
+                    var rejected = _rejected;
+                    _fulfilled = null;
+                    _rejected  = null;
+                    rejected?.Invoke(exception, synchronous);
+                }
+            });
         }
 
         protected virtual Promise<R> CreateChild<R>(Promise<R>.PromiseOwner owner)
@@ -876,22 +887,6 @@
             if (_mode == ChildCancelMode.All)
                 Interlocked.Increment(ref _childCount);
             return child;
-        }
-
-        protected override void Complete(bool synchronously)
-        {
-            if (_onCancel != null && _exception is CancelledException)
-            {
-                try
-                {
-                    _onCancel();
-                }
-                catch
-                {
-                    // consume errors
-                }
-            }
-            base.Complete(synchronously);
         }
 
         public new T Wait()

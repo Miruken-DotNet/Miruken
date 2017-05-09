@@ -63,18 +63,11 @@ namespace Miruken.Callback.Policy
 
     public class CallbackArgument<Cb> : ArgumentRule
     {
-        private readonly Func<Cb, object> _target;
-
         public static readonly CallbackArgument<Cb>
              Instance = new CallbackArgument<Cb>();
 
         private CallbackArgument()
         {         
-        }
-
-        public CallbackArgument(Func<Cb, object> target)
-        {
-            _target = target;
         }
 
         public override bool Matches(

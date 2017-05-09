@@ -49,7 +49,7 @@
             var promise = request.IsAsync
                         ? (Promise)result
                         : Promise.Resolved(result);
-            return (Promise<Resp>)promise.Coerce(typeof(Promise<Resp>));
+            return (Promise<Resp>)promise.Cast(typeof(Promise<Resp>));
         }
 
         public static void RequestAll(this IHandler handler, object callback)

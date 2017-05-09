@@ -42,7 +42,7 @@ namespace Miruken.Error
                                 return  P<IErrors>(composer).HandleException(ex, context)
                                      ? Promise.Rejected(new RejectedException(cb))
                                      : Promise.Rejected(ex);
-                            }).Coerce(cb.ResultType);
+                            }).Cast(cb.ResultType);
                         }
                     }
                     return handled;

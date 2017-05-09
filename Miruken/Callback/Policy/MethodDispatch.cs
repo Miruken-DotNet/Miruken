@@ -184,37 +184,37 @@
                     #region Early Bound
                     case 0:
                         _delegate  = isVoid
-                                   ? (Delegate)RuntimeHelper.CreateActionNoArgs(method)
+                                   ? (Delegate)RuntimeHelper.CreateCallNoArgs(method)
                                    : RuntimeHelper.CreateFuncNoArgs(method);
                         _dispatchType |= DispatchType.FastNoArgs;
                         return;
                     case 1:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateActionOneArg(method)
+                                  ? (Delegate)RuntimeHelper.CreateCallOneArg(method)
                                   : RuntimeHelper.CreateFuncOneArg(method);
                         _dispatchType |= DispatchType.FastOneArg;
                         return;
                     case 2:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateActionTwoArgs(method)
+                                  ? (Delegate)RuntimeHelper.CreateCallTwoArgs(method)
                                   : RuntimeHelper.CreateFuncTwoArgs(method);
                         _dispatchType |= DispatchType.FastTwoArgs;
                         return;
                     case 3:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateActionThreeArgs(method)
+                                  ? (Delegate)RuntimeHelper.CreateCallThreeArgs(method)
                                   : RuntimeHelper.CreateFuncThreeArgs(method);
                         _dispatchType |= DispatchType.FastThreeArgs;
                         return;
                     case 4:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateActionFourArgs(method)
+                                  ? (Delegate)RuntimeHelper.CreateCallFourArgs(method)
                                   : RuntimeHelper.CreateFuncFourArgs(method);
                         _dispatchType |= DispatchType.FastFourArgs;
                         return;
                     case 5:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateActionFiveArgs(method)
+                                  ? (Delegate)RuntimeHelper.CreateCallFiveArgs(method)
                                   : RuntimeHelper.CreateFuncFiveArgs(method);
                         _dispatchType |= DispatchType.FastFiveArgs;
                         return;

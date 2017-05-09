@@ -53,7 +53,7 @@
         {
             return handler == null ? Promise<T>.Empty
                  : (Promise<T>)ResolveAsync(handler, typeof(T))
-                 .Coerce(typeof(Promise<T>));
+                 .Cast(typeof(Promise<T>));
         }
 
         public static object[] ResolveAll(this IHandler handler, object key)
