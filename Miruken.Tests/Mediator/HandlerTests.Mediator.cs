@@ -14,10 +14,10 @@
     public class HandlerMediatorTests
     {
         [TestMethod]
-        public void Should_Send_Request_With_Response()
+        public async Task Should_Send_Request_With_Response()
         {
             var handler = new TeamHandler();
-            var team    = handler.Send(new CreateTeam
+            var team    = await handler.Send(new CreateTeam
             {
                 Team = new Team
                 { 
@@ -32,7 +32,7 @@
         public async Task Should_Send_Request_With_Response_Async()
         {
             var handler = new TeamHandler();
-            var team = await handler.SendAsync(new CreateTeam
+            var team = await handler.Send(new CreateTeam
             {
                 Team = new Team
                 {
@@ -44,7 +44,7 @@
         }
 
         [TestMethod]
-        public void Should_Send_Request_Without_Response()
+        public async Task Should_Send_Request_Without_Response()
         {
             var handler = new TeamHandler();
             var team    = new Team
@@ -54,15 +54,15 @@
                 Active = true
             };
 
-            handler.Send(new RemoveTeam { Team = team });
+            await handler.Send(new RemoveTeam { Team = team });
             Assert.IsFalse(team.Active);
         }
 
         [TestMethod]
-        public void Should_Publish_Notifiations()
+        public async Task Should_Publish_Notifiations()
         {
             var handler = new TeamHandler();
-            var team    = handler.Send(new CreateTeam
+            var team    = await handler.Send(new CreateTeam
             {
                 Team = new Team
                 {
@@ -103,6 +103,7 @@
             public Team Team { get; set; }
         }
 
+        [Pipeline]
         public class TeamHandler : Handler
         {
             public int _teamId;

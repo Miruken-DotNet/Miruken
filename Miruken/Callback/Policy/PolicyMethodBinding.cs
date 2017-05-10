@@ -65,25 +65,25 @@
         }
 
         protected object Invoke(object target, object callback,
-            IHandler composer, Type returnType = null)
+            IHandler composer, Type resultType = null)
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
             if (callback is FilterOptions)
-                return Dispatcher.Invoke(target, args, returnType);
+                return Dispatcher.Invoke(target, args, resultType);
 
-            var dispatcher   = Dispatcher.CloseMethod(args, returnType);
+            var dispatcher   = Dispatcher.CloseMethod(args, resultType);
             var callbackType = callback.GetType();
-            var resultType   = dispatcher.ReturnType;
+            var returnType   = dispatcher.ReturnType;
 
             var filters = composer
-                .GetOrderedFilters(callbackType, resultType, Filters,
+                .GetOrderedFilters(callbackType, returnType, Filters,
                     FilterAttribute.GetFilters(target.GetType(), true), 
                     Policy.Filters)
                 .ToArray();
 
             if (filters.Length == 0)
-                return dispatcher.Invoke(target, args, returnType);
+                return dispatcher.Invoke(target, args, resultType);
 
             object result;
             bool   completed;
@@ -92,15 +92,15 @@
             {
                 completed = MethodPipeline.InvokeDynamic(
                     this, target, callback, comp => dispatcher.Invoke(
-                        target, GetArgs(callback, args, composer, comp), returnType),
+                        target, GetArgs(callback, args, composer, comp), resultType),
                     composer, filters.Cast<IDynamicFilter>(), out result);
             }
             else
             {
-                var pipeline = MethodPipeline.GetPipeline(callbackType, resultType);
+                var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
                 completed = pipeline.Invoke(
                     this, target, callback, comp => dispatcher.Invoke(
-                        target, GetArgs(callback, args, composer, comp), returnType),
+                        target, GetArgs(callback, args, composer, comp), resultType),
                     composer, filters, out result);
             }
   

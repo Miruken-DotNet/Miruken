@@ -16,7 +16,7 @@
 
         public override CallbackPolicy CallbackPolicy => Policy;
 
-        public static readonly ContravariantPolicy Policy =
+        public static readonly CallbackPolicy Policy =
             ContravariantPolicy.Create<Request>(r => r.Callback,
                 x => x.MatchMethod(x.Target.OfType<IRequest>(),
                                    x.Composer.Optional)

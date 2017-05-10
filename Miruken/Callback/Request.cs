@@ -25,6 +25,7 @@
         public object          Callback { get; }
         public bool            IsAsync  { get; private set; }
         public CallbackPolicy  Policy   { get; set; }
+
         public ICollection<object> Responses => _responses.AsReadOnly();
 
         public Type ResultType => IsAsync ? typeof(Promise) : null;

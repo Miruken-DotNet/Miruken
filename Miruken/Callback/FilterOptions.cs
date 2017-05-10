@@ -4,7 +4,7 @@
 
     public class FilterOptions : Options<FilterOptions>
     {
-        public IFilterProvider[] ExtraFilters      { get; set; }
+        public IFilterProvider[] ExtraFilters { get; set; }
 
         public override void MergeInto(FilterOptions other)
         {

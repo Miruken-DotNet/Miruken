@@ -21,7 +21,7 @@
                 next = (proceed, comp) =>
                 {
                     if (!proceed) return null;
-                    if (pipeline.MoveNext())
+                    while (pipeline.MoveNext())
                     {
                         comp = comp ?? composer;
                         var filter = pipeline.Current;
@@ -64,7 +64,7 @@
                 next = (proceed, comp) =>
                 {
                     if (!proceed) return default(Res);
-                    if (pipeline.MoveNext())
+                    while (pipeline.MoveNext())
                     {
                         comp = comp ?? composer;
                         var filter      = pipeline.Current;
