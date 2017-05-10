@@ -23,15 +23,15 @@
                     if (!proceed) return null;
                     while (pipeline.MoveNext())
                     {
-                        comp = comp ?? composer;
+                        composer = comp ?? composer;
                         var filter = pipeline.Current;
-                        return filter?.Filter(callback, binding, comp, next);
+                        return filter?.Filter(callback, binding, composer, next);
                     }
                     completed = true;
-                    return complete(comp);
+                    return complete(composer);
                 };
 
-                result = next();
+                result = next(true, composer);
                 return completed;
             }
         }
@@ -66,20 +66,20 @@
                     if (!proceed) return default(Res);
                     while (pipeline.MoveNext())
                     {
-                        comp = comp ?? composer;
+                        composer = comp ?? composer;
                         var filter      = pipeline.Current;
                         var typedFilter = filter as IFilter<Cb, Res>;
                         if (typedFilter != null)
-                            return typedFilter.Filter((Cb)callback, binding, comp, next);
+                            return typedFilter.Filter((Cb)callback, binding, composer, next);
                         var dynamicFilter = filter as IDynamicFilter;
                         return (Res)dynamicFilter?.Filter(
-                            callback, binding, comp, (p,c) => next(p,c));
+                            callback, binding, composer, (p,c) => next(p,c));
                     }
                     completed = true;
-                    return (Res)complete(comp);
+                    return (Res)complete(composer);
                 };
 
-                result = next();
+                result = next(true, composer);
                 return completed;
             }
         }

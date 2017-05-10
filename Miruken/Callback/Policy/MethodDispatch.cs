@@ -36,28 +36,28 @@
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            var parameters = method.GetParameters();
-            ConfigureMethod(method, parameters);
-            ArgumentCount = parameters.Length;
-            Method        = method;
+            Parameters = method.GetParameters();
+            ConfigureMethod(method, Parameters);
+            Method = method;
         }
 
         private MethodDispatch(MethodInfo method, DispatchType dispatchType)
         {
             Method        = method;
-            ArgumentCount = method.GetParameters().Length;
+            Parameters    = method.GetParameters();
             _dispatchType = dispatchType;
         }
 
-        public MethodInfo Method            { get; }
-        public int        ArgumentCount     { get; }
-        public Type       LogicalReturnType { get; private set; }
+        public MethodInfo      Method            { get; }
+        public ParameterInfo[] Parameters        { get; }
+        public Type            LogicalReturnType { get; private set; }
 
-        public Type ReturnType => Method.ReturnType;
-        public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;
-        public bool IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
-        public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
-        public bool IsAsync    => IsPromise || IsTask;
+        public int  ArgumentCount => Parameters.Length;
+        public Type ReturnType    => Method.ReturnType;
+        public bool IsVoid        => (_dispatchType & DispatchType.Void) > 0;
+        public bool IsPromise     => (_dispatchType & DispatchType.Promise) > 0;
+        public bool IsTask        => (_dispatchType & DispatchType.Task) > 0;
+        public bool IsAsync       => IsPromise || IsTask;
 
         public MethodDispatch CloseMethod(object[] args, Type returnType = null)
         {

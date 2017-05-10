@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Concurrency;
     using Infrastructure;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
@@ -62,25 +63,42 @@
         }
 
         private static Type CloseFilterType(
-            Type filterType, Type callbackType, Type resulType)
+            Type filterType, Type callbackType, Type resultType)
         {
             if (!filterType.IsGenericTypeDefinition)
                 return filterType;
             var openFilterType = typeof(IFilter<,>);
             if (filterType == openFilterType)
-                return filterType.MakeGenericType(callbackType, resulType);
-            var genericArgs  = filterType.GetGenericArguments();
+                return filterType.MakeGenericType(callbackType, resultType);
             var conformance  = filterType.GetOpenTypeConformance(openFilterType);
             var inferredArgs = conformance.GetGenericArguments();
-            return filterType.MakeGenericType(genericArgs.Select((arg, i) =>
+            return filterType.MakeGenericType(inferredArgs.Select((arg, i) =>
             {
-                switch (Array.IndexOf(inferredArgs, arg))
+                switch (i)
                 {
-                    case 0: return callbackType;
-                    case 1: return resulType;
-                }
+                    case 0:
+                        return arg.IsGenericParameter ? callbackType : null;
+                    case 1:
+                        return arg.IsGenericParameter ? resultType
+                             : InferPromiseType(arg, resultType);
+                }  
                 throw new InvalidOperationException($"{filterType.FullName} generic arg {i} could not be inferred");   
-            }).ToArray());
+            }).Where(arg => arg != null).ToArray());
+        }
+
+        private static Type InferPromiseType(Type genericArg, Type resultType)
+        {
+            if (genericArg.ContainsGenericParameters)
+            {
+                var promiseType = typeof(Promise<>);
+                var promiseOpen = genericArg.GetOpenTypeConformance(promiseType);
+                if (promiseOpen != null)
+                {
+                    var promiseClosed = resultType.GetOpenTypeConformance(promiseType);
+                    return promiseClosed?.GenericTypeArguments[0];
+                }
+            }
+            return null;
         }
 
         private static void ValidateFilters(Type[] filterTypes)
@@ -98,18 +116,8 @@
                 var conformance = filterType.GetOpenTypeConformance(anyFilter);
                 if (conformance == null)
                     throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
-                if (filterType.IsGenericTypeDefinition)
-                {
-                    var genericArgs = filterType.GetGenericArguments();
-                    if (genericArgs.Length > 2)
-                        throw new ArgumentException($"{filterType.FullName} has {genericArgs.Length} generic args, but only two can be inferred");
-                    var inferredArgs = conformance.GetGenericArguments();
-                    for (var i = 0; i < genericArgs.Length; ++i)
-                    {
-                        if (Array.IndexOf(inferredArgs, genericArgs[i]) < 0)
-                            throw new ArgumentException($"{filterType.FullName} generic arg {i} cannot be inferred");
-                    }
-                }
+                if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
+                    throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
             }
         }
     }

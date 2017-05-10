@@ -16,7 +16,7 @@
         [TestMethod]
         public async Task Should_Send_Request_With_Response()
         {
-            var handler = new TeamHandler();
+            var handler = new TeamHandler() + new PipelineBehaviorProvider();
             var team    = await handler.Send(new CreateTeam
             {
                 Team = new Team
@@ -31,8 +31,8 @@
         [TestMethod]
         public async Task Should_Send_Request_With_Response_Async()
         {
-            var handler = new TeamHandler();
-            var team = await handler.Send(new CreateTeam
+            var handler = new TeamHandler() + new PipelineBehaviorProvider();
+            var team    = await handler.Send(new CreateTeam
             {
                 Team = new Team
                 {
@@ -46,7 +46,7 @@
         [TestMethod]
         public async Task Should_Send_Request_Without_Response()
         {
-            var handler = new TeamHandler();
+            var handler = new TeamHandler() + new PipelineBehaviorProvider();
             var team    = new Team
             {
                 Id     = 1,
@@ -61,7 +61,8 @@
         [TestMethod]
         public async Task Should_Publish_Notifiations()
         {
-            var handler = new TeamHandler();
+            var teams   = new TeamHandler();
+            var handler = teams + new PipelineBehaviorProvider();
             var team    = await handler.Send(new CreateTeam
             {
                 Team = new Team
@@ -69,7 +70,7 @@
                     Name = "Liverpool Owen"
                 }
             });
-            var notifications = handler.Notifications;
+            var notifications = teams.Notifications;
             Assert.AreEqual(1, notifications.Count);
             var teamCreated = notifications.First() as TeamCreated;
             Assert.IsNotNull(teamCreated);
@@ -138,15 +139,27 @@
             }
         }
 
-        private class LogFilter<Cb, Res> : IFilter<Cb, Res>
+        private class LogFilter<Cb, Res> : IPipelineBehavior<Cb, Res>
         {
             public int? Order { get; set; }
 
-            public Res Filter(Cb callback, MethodBinding binding,
-                IHandler composer, FilterDelegate<Res> proceed)
+            public Promise<Res> Filter(Cb callback, MethodBinding method,
+                IHandler composer, FilterDelegate<Promise<Res>> proceed)
             {
                 Console.WriteLine($"Handle {callback}");
                 return proceed();
+            }
+        }
+
+        private class PipelineBehaviorProvider : Handler
+        {
+            [Provides]
+            public IPipelineBehavior<TRequest, TResponse>[] GetBehavior<TRequest, TResponse>()
+            {
+                return new[]
+                {
+                    new LogFilter<TRequest, TResponse>()
+                };
             }
         }
     }

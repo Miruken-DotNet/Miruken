@@ -14,14 +14,15 @@
         {
             if (handler == null)
                 return Promise.Empty;
-            var req = new Request(request)
+            var command = new Command(request)
             {
-                Policy = MediatesAttribute.Policy
+                WantsAsync = true,
+                Policy     = MediatesAttribute.Policy
             };
-            if (!handler.Handle(req))
+            if (!handler.Handle(command))
                 return Promise.Rejected(new NotSupportedException(
                     $"{request.GetType()} not handled"));
-            return req.IsAsync ? (Promise)req.Result : Promise.Empty;
+            return command.IsAsync ? (Promise)command.Result : Promise.Empty;
         }
 
         public static Promise<Resp> Send<Resp>(
@@ -29,15 +30,16 @@
         {
             if (handler == null)
                 return Promise<Resp>.Empty;
-            var req = new Request(request)
+            var command = new Command(request)
             {
-                Policy = MediatesAttribute.Policy
+                WantsAsync = true,
+                Policy     = MediatesAttribute.Policy
             };
-            if (!handler.Handle(req))
+            if (!handler.Handle(command))
                 return Promise<Resp>.Rejected(new NotSupportedException(
                     $"{request.GetType()} not handled"));
-            var result  = req.Result;
-            var promise = req.IsAsync
+            var result  = command.Result;
+            var promise = command.IsAsync
                         ? (Promise)result
                         : Promise.Resolved(result);
             return (Promise<Resp>)promise.Coerce(typeof(Promise<Resp>));
@@ -47,12 +49,13 @@
         {
             if (handler == null)
                 return Promise.Empty;
-            var req = new Request(notification, true)
+            var command = new Command(notification, true)
             {
-                Policy = MediatesAttribute.Policy
+                WantsAsync = true,
+                Policy     = MediatesAttribute.Policy
             };
-            return handler.Handle(req, true) && req.IsAsync
-                 ? (Promise)req.Result
+            return handler.Handle(command, true) && command.IsAsync
+                 ? (Promise)command.Result
                  : Promise.Empty;
         }
     }

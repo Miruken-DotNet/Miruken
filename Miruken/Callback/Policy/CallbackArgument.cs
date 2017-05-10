@@ -52,7 +52,8 @@ namespace Miruken.Callback.Policy
             base.Configure(parameter, binding);
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
-            binding.VarianceType = paramType;
+            binding.CallbackIndex = parameter.Position;
+            binding.VarianceType  = paramType;
         }
 
         public override object Resolve(object callback, IHandler composer)
@@ -76,6 +77,12 @@ namespace Miruken.Callback.Policy
         {
             var paramType = parameter.ParameterType;
             return typeof(Cb).IsAssignableFrom(paramType);
+        }
+
+        public override void Configure(
+            ParameterInfo parameter, PolicyMethodBinding binding)
+        {
+            binding.CallbackIndex = parameter.Position;
         }
 
         public override object Resolve(object callback, IHandler composer)

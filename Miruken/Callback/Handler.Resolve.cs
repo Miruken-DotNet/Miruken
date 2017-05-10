@@ -33,6 +33,7 @@
         {
             if (handler == null) return null;
             var inquiry = key as Inquiry ?? new Inquiry(key);
+            inquiry.WantsAsync = true;
             if (handler.Handle(inquiry))
             {
                 var result = inquiry.Result;
@@ -75,6 +76,7 @@
             if (handler == null)
                 return Promise.Resolved(new object[0]);
             var inquiry = key as Inquiry ?? new Inquiry(key, true);
+            inquiry.WantsAsync = true;
             if (handler.Handle(inquiry, true))
             {
                 var result = inquiry.Result;

@@ -2,6 +2,8 @@
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
+    using Concurrency;
 
     public delegate bool AcceptResultDelegate(
         object result, MethodBinding binding);
@@ -29,9 +31,10 @@
             Policy     = policy;
         }
 
-        public MethodRule          Rule      { get; }
-        public DefinitionAttribute Attribute { get; }
-        public CallbackPolicy      Policy    { get; }
+        public MethodRule          Rule          { get; }
+        public DefinitionAttribute Attribute     { get; }
+        public CallbackPolicy      Policy        { get; }
+        public int?                CallbackIndex { get; set; }
 
         public Type VarianceType
         {
@@ -72,9 +75,23 @@
             if (callback is FilterOptions)
                 return Dispatcher.Invoke(target, args, resultType);
 
-            var dispatcher   = Dispatcher.CloseMethod(args, resultType);
-            var callbackType = callback.GetType();
-            var returnType   = dispatcher.ReturnType;
+            Type callbackType;
+            var dispatcher     = Dispatcher.CloseMethod(args, resultType);
+            var actualCallback = GetCallbackInfo(callback, args, dispatcher, out callbackType);
+            var returnType     = dispatcher.ReturnType;
+            var asyncCallback  = callback as IAsyncCallback;
+
+            Func<object, Type, object> convertResult = PassResult;
+            if (asyncCallback?.WantsAsync == true && !dispatcher.IsPromise)
+            {
+                var logicalType = dispatcher.LogicalReturnType;
+                returnType      = logicalType != typeof(void)
+                                ? typeof(Promise<>).MakeGenericType(logicalType)
+                                : typeof(Promise<object>);
+                convertResult   = dispatcher.IsTask
+                                ? (Func<object, Type, object>)PromisifyTask
+                                : PromisifyResult;
+            }
 
             var filters = composer
                 .GetOrderedFilters(callbackType, returnType, Filters,
@@ -83,7 +100,11 @@
                 .ToArray();
 
             if (filters.Length == 0)
-                return dispatcher.Invoke(target, args, resultType);
+            {
+                return convertResult(
+                    dispatcher.Invoke(target, args, resultType),
+                    returnType);
+            }
 
             object result;
             bool   completed;
@@ -91,20 +112,36 @@
             if (filters.All(filter => filter is IDynamicFilter))
             {
                 completed = MethodPipeline.InvokeDynamic(
-                    this, target, callback, comp => dispatcher.Invoke(
+                    this, target, actualCallback, comp => 
+                        convertResult(dispatcher.Invoke(
                         target, GetArgs(callback, args, composer, comp), resultType),
+                        returnType),
                     composer, filters.Cast<IDynamicFilter>(), out result);
             }
             else
             {
                 var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
                 completed = pipeline.Invoke(
-                    this, target, callback, comp => dispatcher.Invoke(
+                    this, target, actualCallback, comp => convertResult(dispatcher.Invoke(
                         target, GetArgs(callback, args, composer, comp), resultType),
+                        returnType),
                     composer, filters, out result);
             }
   
             return completed ? result : Policy.NoResult;
+        }
+
+        private object GetCallbackInfo(object callback, object[] args,
+            MethodDispatch dispatcher, out Type callbackType)
+        {
+            if (CallbackIndex.HasValue)
+            {
+                var index = CallbackIndex.Value;
+                callbackType = dispatcher.Parameters[index].ParameterType;
+                return args[index];
+            }
+            callbackType = callback.GetType();
+            return callback;
         }
 
         private object[] GetArgs(object callback, object[] args,
@@ -112,6 +149,21 @@
         {
             return ReferenceEquals(oldComposer, newComposer) 
                  ? args : Rule.ResolveArgs(this, callback, newComposer);
+        }
+
+        private static object PromisifyResult(object result, Type promiseType)
+        {
+            return Promise.Resolved(result).Coerce(promiseType);
+        }
+
+        private static object PromisifyTask(object result, Type promiseType)
+        {
+            return ((Task)result)?.ToPromise().Coerce(promiseType);
+        }
+
+        private static object PassResult(object result, Type promiseType)
+        {
+            return result;
         }
     }
 }

@@ -50,7 +50,8 @@ namespace Miruken.Callback.Policy
             base.Configure(parameter, binding);
             var paramType = parameter.ParameterType;
             if (paramType == typeof(object)) return;
-            binding.VarianceType = paramType;
+            binding.CallbackIndex = parameter.Position;
+            binding.VarianceType  = paramType;
         }
 
         public override object Resolve(object callback, IHandler composer)

@@ -7,7 +7,7 @@
     using Infrastructure;
     using Policy;
 
-    public class HandleMethod : ICallback, ICallbackDispatch
+    public class HandleMethod : ICallback, IDispatchCallback
     {
         private readonly CallbackSemantics _semantics;
 
@@ -55,7 +55,7 @@
             return binding.Dispatch(target, this, composer);
         }
 
-        bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled = surrogate != null && InvokeOn(surrogate, composer);

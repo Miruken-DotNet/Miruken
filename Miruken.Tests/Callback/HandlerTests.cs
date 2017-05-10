@@ -99,9 +99,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException),
-            "The policy for Miruken.Callback.HandlesAttribute rejected method 'Miruken.Tests.Callback.HandlerTests + BadHandler:Add'")
-        ]
+         ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Handlers()
         {
             var handler = new BadHandler();
@@ -351,9 +349,7 @@
         }
 
         [TestMethod,
-             ExpectedException(typeof(InvalidOperationException),
-                "The policy for Miruken.Callback.ProvidesAttribute rejected method 'Miruken.Tests.Callback.HandlerTests + BadProvider:Add'")
-        ]
+         ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Providers()
         {
             var handler = new BadProvider();
@@ -504,8 +500,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(ArgumentException),
-            "Miruken.Tests.Callback.HandlerTests+RequestFilterBad`1 generic arg 0 cannot be inferred")]
+         ExpectedException(typeof(ArgumentException))]
         public void Should_Reject_Generic_Types_Not_Inferred()
         {
             var provider = new FilterAttribute(typeof(RequestFilterBad<>));

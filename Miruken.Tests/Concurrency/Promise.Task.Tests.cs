@@ -118,8 +118,7 @@ namespace Miruken.Tests.Concurrency
             Assert.AreEqual("Hello", await promise);
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentException),
-            "Bad parameter")]
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
         public async Task Should_Await_Rejetced_Promise()
         {
             var exception = new ArgumentException("Bad parameter");
@@ -166,8 +165,7 @@ namespace Miruken.Tests.Concurrency
             Assert.AreEqual("Hello", promise.Wait());
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException),
-            "No Scanner Found")]
+        [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Convert_Failed_Task_To_Promise()
         {
             var exception = new NotSupportedException("No Scanner Found");
@@ -274,6 +272,13 @@ namespace Miruken.Tests.Concurrency
                 cancellation.Cancel();
                 Assert.AreEqual(PromiseState.Cancelled, promise.State);
             });
+        }
+
+        [TestMethod]
+        public async Task Should_Convert_Value_Type_To_Promise()
+        {
+            Task result = Task.FromResult(22);
+            Assert.AreEqual(22, await result.ToPromise());
         }
     }
 }

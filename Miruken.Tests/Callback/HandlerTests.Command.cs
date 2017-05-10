@@ -9,72 +9,70 @@
     using Miruken.Concurrency;
 
     [TestClass]
-    public class HandlerRequestTests
+    public class HandlerCommandTests
     {
         [TestMethod]
-        public void Should_Request_With_Response()
+        public void Should_Command_With_Result()
         {
             var handler = new OrderHandler();
             var order   = new PlaceOrder();
-            var orderId = handler.Request<int>(order);
+            var orderId = handler.Command<int>(order);
             Assert.AreEqual(1, orderId);
         }
 
         [TestMethod]
-        public void Should_Request_Without_Response()
+        public void Should_Command_Without_Result()
         {
             var handler = new OrderHandler();
             var change  = new CancelOrder {OrderId = 1};
-            handler.Request(change);
+            handler.Command(change);
             Assert.AreEqual(1, change.OrderId);
         }
 
         [TestMethod]
-        public async Task Should_Request_Asynchronously()
+        public async Task Should_Command_Asynchronously()
         {
             var handler = new OrderHandler();
             var fulfill = new FulfillOrder {OrderId = 1};
-            await handler.RequestAsync(fulfill);
+            await handler.CommandAsync(fulfill);
             Assert.AreEqual(1, fulfill.OrderId);
         }
 
         [TestMethod]
-        public async Task Should_Request_With_Response_Asynchronously()
+        public async Task Should_Command_With_Result_Asynchronously()
         {
             var handler  = new OrderHandler();
             var deliver  = new DeliverOrder { OrderId = 1 };
-            var tracking = await handler.RequestAsync<Guid>(deliver);
+            var tracking = await handler.CommandAsync<Guid>(deliver);
             Assert.AreNotEqual(Guid.Empty, tracking);
             Assert.AreEqual(1, deliver.OrderId);
         }
 
         [TestMethod]
-        public async Task Should_Request_All_Asycnhronously()
+        public async Task Should_Command_All_Asycnhronously()
         {
             var handler   = new OrderHandler();
             var fulfill   = new FulfillOrder { OrderId = 1 };
-            var results   = await handler.RequestAllAsync(fulfill);
+            var results   = await handler.CommandAllAsync(fulfill);
             var responses = ((IEnumerable)results).Cast<bool>().ToArray();
             Assert.AreEqual(2, responses.Length);
             Assert.IsTrue(responses.All(b => b));
         }
 
         [TestMethod,
-         ExpectedException(typeof(NotSupportedException),
-            "Miruken.Tests.Callback.HandlerRequestTests+UpdateOrder not handled")]
-        public void Should_Reject_Unhandled_Request()
+         ExpectedException(typeof(NotSupportedException))]
+        public void Should_Reject_Unhandled_Command()
         {
             var handler = new OrderHandler();
-            handler.Request(new UpdateOrder());
+            handler.Command(new UpdateOrder());
         }
 
         [TestMethod,
-         ExpectedException(typeof(NotSupportedException),
-            "Miruken.Tests.Callback.HandlerRequestTests+UpdateOrder not handled")]
-        public async Task Should_Reject_Unhandled_Request_Async()
+         ExpectedException(typeof(NotSupportedException))]
+        public async Task Should_Reject_Unhandled_Command_Async()
         {
             var handler = new OrderHandler();
-            await handler.RequestAsync(new UpdateOrder());
+            await handler.CommandAsync(new UpdateOrder());
         }
 
         private class PlaceOrder
@@ -129,9 +127,9 @@
             }
 
             [Handles]
-            public Promise Process(Request request, IHandler composer)
+            public Promise Process(Command command, IHandler composer)
             {
-                var callback = request.Callback;
+                var callback = command.Callback;
                 if (callback is FulfillOrder)
                     return new Promise<bool>((resolve, reject) => resolve(true, true));
                 return null;

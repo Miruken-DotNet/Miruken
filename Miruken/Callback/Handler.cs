@@ -39,7 +39,7 @@
                 if (callback == null) return false;
             }
 
-            var dispatch = callback as ICallbackDispatch;
+            var dispatch = callback as IDispatchCallback;
             return dispatch?.Dispatch(this, greedy, composer)
                 ?? HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
         }

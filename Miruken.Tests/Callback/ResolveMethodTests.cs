@@ -234,8 +234,7 @@
             P<IEmailFeature>(provider).CancelEmail(13);
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException),
-            "Not supported offline")]
+        [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Find_Matching_Method()
         {
             var provider = new OfflineHandler() + new EmailProvider();

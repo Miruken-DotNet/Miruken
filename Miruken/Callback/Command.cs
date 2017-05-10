@@ -7,26 +7,28 @@
     using Concurrency;
     using Policy;
 
-    public class Request : ICallback, ICallbackDispatch
+    public class Command 
+        : ICallback, IAsyncCallback, IDispatchCallback
     {
-        private readonly List<object> _responses;
+        private readonly List<object> _results;
         private object _result;
 
-        public Request(object callback, bool many = false)
+        public Command(object callback, bool many = false)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
-            Callback   = callback;
-            Many       = many;
-            _responses = new List<object>();
+            Callback = callback;
+            Many     = many;
+            _results = new List<object>();
         }
 
-        public bool            Many     { get; }
-        public object          Callback { get; }
-        public bool            IsAsync  { get; private set; }
-        public CallbackPolicy  Policy   { get; set; }
+        public bool            Many       { get; }
+        public object          Callback   { get; }
+        public bool            WantsAsync { get; set; }
+        public bool            IsAsync    { get; private set; }
+        public CallbackPolicy  Policy     { get; set; }
 
-        public ICollection<object> Responses => _responses.AsReadOnly();
+        public ICollection<object> Results => _results.AsReadOnly();
 
         public Type ResultType => IsAsync ? typeof(Promise) : null;
 
@@ -37,18 +39,18 @@
                 if (_result != null) return _result;
                 if (!Many)
                 {
-                    if (_responses.Count > 0)
-                        _result = _responses[0];
+                    if (_results.Count > 0)
+                        _result = _results[0];
                 }
                 else if (IsAsync)
                 {
-                    _result = Promise.All(_responses
+                    _result = Promise.All(_results
                         .Select(r => (r as Promise) ?? Promise.Resolved(r))
                         .ToArray())
                         .Then((results, s) => results.Where(r => r != null));
                 }
                 else
-                    _result = _responses;
+                    _result = _results;
                 return _result;
             }
             set { _result = value; }
@@ -56,7 +58,7 @@
 
         public bool Respond(object response, IHandler composer)
         {
-            if (response == null || (!Many && _responses.Count > 0))
+            if (response == null || (!Many && _results.Count > 0))
                 return false;
 
             var promise = response as Promise
@@ -68,25 +70,25 @@
                 IsAsync  = true;
             }
 
-            _responses.Add(response);
+            _results.Add(response);
             _result = null;
             return true;
         }
 
-        bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var handled = false;
-            var count   = _responses.Count;
+            var count   = _results.Count;
             if (Policy == null)
             {
                 handled = HandlesAttribute.Policy.Dispatch(
                     handler, Callback, greedy, composer, r => Respond(r, composer));
-                if (!greedy && (handled || _responses.Count > count))
+                if (!greedy && (handled || _results.Count > count))
                     return true;
             }
             var policy = Policy ?? HandlesAttribute.Policy;
             return policy.Dispatch(handler, this, greedy, composer, r => Respond(r, composer))
-                || handled || (_responses.Count > count);
+                || handled || (_results.Count > count);
         }
     }
 }

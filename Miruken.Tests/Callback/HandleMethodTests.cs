@@ -339,8 +339,7 @@
             var handler = (IHandler) offline;
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException),
-            "Only protocol interfaces are supported")]
+        [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Reject_Non_Interface_Cast()
         {
             P<OfflineHandler>(new Handler());

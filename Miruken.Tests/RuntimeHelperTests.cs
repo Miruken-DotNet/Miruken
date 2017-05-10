@@ -123,16 +123,14 @@ namespace Miruken.Tests
             Assert.AreEqual(22, handler.Arg3);
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentException),
-             "Method HandlerTwo expects 2 argument(s)")]
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_Action_Arg_Mismatch()
         {
             RuntimeHelper.CreateFuncOneArg(
                 typeof(Handler).GetMethod("HandleTwo"));
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentException),
-            "Method Handle expects 0 arguments")]
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_Args()
         {
             RuntimeHelper.CreateCallOneArg(
@@ -176,16 +174,14 @@ namespace Miruken.Tests
             Assert.AreEqual(-5.5, call(provider, 2, 3.5f, true));
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentException),
-            "Method ProvideOne expects 1 argument(s)")]
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_Function_Arg_Mismatch()
         {
             RuntimeHelper.CreateFuncTwoArgs(
                 typeof(Provider).GetMethod("ProvideOne"));
         }
 
-        [TestMethod,ExpectedException(typeof(ArgumentException),
-            "Method Provide is void")]
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_ReturnType()
         {
             RuntimeHelper.CreateCallOneArg(

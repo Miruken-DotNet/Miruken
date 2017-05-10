@@ -108,7 +108,7 @@
             ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.ContinueWith(GetResult, cancellationToken)
-            .ToPromise(cancellationToken, mode);
+                .ToPromise(cancellationToken, mode);
         }
 
         public static Promise ToPromise(
@@ -117,7 +117,7 @@
             ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.ContinueWith(GetResult, cancellationTokenSource.Token)
-            .ToPromise(cancellationTokenSource, mode);
+                .ToPromise(cancellationTokenSource, mode);
         }
 
         public static Promise<T> ToPromise<T>(

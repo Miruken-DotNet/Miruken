@@ -1,6 +1,6 @@
 ﻿namespace Miruken.Callback
 {
-    public interface ICallbackDispatch
+    public interface IDispatchCallback
     {
         bool Dispatch(Handler handler, bool greedy, IHandler composer);
     }

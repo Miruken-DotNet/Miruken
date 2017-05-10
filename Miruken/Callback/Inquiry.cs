@@ -8,7 +8,8 @@
     using Concurrency;
     using Infrastructure;
 
-    public class Inquiry : ICallback, ICallbackDispatch
+    public class Inquiry 
+        : ICallback, IAsyncCallback, IDispatchCallback
     {
         private readonly List<object> _resolutions;
         private object _result;
@@ -22,9 +23,10 @@
             _resolutions = new List<object>();
         }
 
-        public object Key     { get; }
-        public bool   Many    { get; }
-        public bool   IsAsync { get; private set; }
+        public object Key        { get; }
+        public bool   Many       { get; }
+        public bool   WantsAsync { get; set; }
+        public bool   IsAsync    { get; private set; }
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
@@ -108,7 +110,7 @@
             return true;
         }
 
-        bool ICallbackDispatch.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled   = surrogate != null && Implied(surrogate, false, composer);
