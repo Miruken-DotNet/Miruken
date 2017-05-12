@@ -2,6 +2,7 @@
 {
     using System;
     using Miruken.Callback;
+    using Miruken.Concurrency;
     using Miruken.Container;
 
     public class TestContainer : Handler, IContainer
@@ -19,6 +20,18 @@
                  : Unhandled<object>();
         }
 
+        Promise<T> IContainer.ResolveAsync<T>()
+        {
+            var container = (IContainer)this;
+            return Promise.Resolved(container.Resolve<T>());
+        }
+
+        Promise IContainer.ResolveAsync(object key)
+        {
+            var container = (IContainer)this;
+            return Promise.Resolved(container.Resolve(key));
+        }
+
         T[] IContainer.ResolveAll<T>()
         {
             return new T[0];
@@ -27,6 +40,18 @@
         object[] IContainer.ResolveAll(object key)
         {
             return new object[0];
+        }
+
+        Promise<T[]> IContainer.ResolveAllAsync<T>()
+        {
+            var container = (IContainer)this;
+            return Promise.Resolved(container.ResolveAll<T>());
+        }
+
+        Promise IContainer.ResolveAllAsync(object key)
+        {
+            var container = (IContainer)this;
+            return Promise.Resolved(container.ResolveAll(key));
         }
 
         void IContainer.Release(object component)

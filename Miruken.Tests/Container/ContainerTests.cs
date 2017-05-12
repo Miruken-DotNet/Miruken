@@ -2,6 +2,7 @@
 
 namespace Miruken.Tests.Container
 {
+    using System.Threading.Tasks;
     using Miruken.Callback;
     using Miruken.Container;
     using Miruken.Context;
@@ -36,6 +37,14 @@ namespace Miruken.Tests.Container
         {
             _rootContext.AddHandler<MyHandler>();
             var handler = _rootContext.Resolve<MyHandler>();
+            Assert.IsNotNull(handler);
+        }
+
+        [TestMethod]
+        public async Task Should_Resolve_Handler_From_Container_Async()
+        {
+            _rootContext.AddHandler<MyHandler>();
+            var handler = await _rootContext.ResolveAsync<MyHandler>();
             Assert.IsNotNull(handler);
         }
     }
