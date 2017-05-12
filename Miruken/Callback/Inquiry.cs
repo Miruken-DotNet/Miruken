@@ -54,11 +54,12 @@
                     _result = Promise.All(_resolutions
                         .Select(r => (r as Promise) ?? Promise.Resolved(r))
                         .ToArray())
-                        .Then((results, s) => Flatten(results));
+                        .Then((results, s) => Flatten(results)
+                        .ToArray());
                 }
                 else
                 {
-                    _result = Flatten(_resolutions);
+                    _result = Flatten(_resolutions).ToArray();
                 }
                 return _result;
             }
