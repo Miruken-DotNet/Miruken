@@ -39,6 +39,12 @@ namespace Miruken.Callback.Policy
             return (TBuilder)this;
         }
 
+        public TBuilder UseTargetFilters()
+        {
+            Policy.UseTargetFilters = true;
+            return (TBuilder)this;
+        }
+
         public TBuilder Filters(params IFilter[] filters)
         {
             Policy.AddFilters(new FilterInstancesProvider(filters));

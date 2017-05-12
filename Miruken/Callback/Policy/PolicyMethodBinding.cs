@@ -136,7 +136,7 @@
         private object GetCallbackInfo(object callback, object[] args,
             MethodDispatch dispatcher, out Type callbackType)
         {
-            if (CallbackIndex.HasValue)
+            if (CallbackIndex.HasValue && Policy.UseTargetFilters)
             {
                 var index = CallbackIndex.Value;
                 callbackType = dispatcher.Parameters[index].ParameterType;

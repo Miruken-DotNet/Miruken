@@ -11,10 +11,11 @@
         private readonly List<MethodRule> _rules = new List<MethodRule>();
         private readonly List<IFilterProvider> _filters = new List<IFilterProvider>();
 
-        public object               NoResult     { get; set; }
-        public AcceptResultDelegate AcceptResult { get; set; }
-        public Func<object, Type>   ResultType   { get; set; }
-        public BindMethodDelegate   Binder       { get; set; }
+        public object               NoResult         { get; set; }
+        public AcceptResultDelegate AcceptResult     { get; set; }
+        public Func<object, Type>   ResultType       { get; set; }
+        public BindMethodDelegate   Binder           { get; set; }
+        public bool                 UseTargetFilters { get; set; }
 
         public IEnumerable<IFilterProvider> Filters => _filters;
 

@@ -26,6 +26,7 @@
                       .MatchMethod(x.Target.OfType<INotification>(),
                                    x.Composer.Optional)
                       .MatchMethod(x.Callback, x.Composer.Optional)
+                      .UseTargetFilters()
             );
     }
 }

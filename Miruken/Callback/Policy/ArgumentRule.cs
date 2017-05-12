@@ -10,9 +10,9 @@
         public OptionalArgument Optional =>
             this as OptionalArgument ?? new OptionalArgument(this);
 
-        public TypedArgument OfType<TArg>()
+        public TypedArgument OfType<TArg>(params string[] aliases)
         {
-            return OfType(typeof(TArg));
+            return OfType(typeof(TArg), aliases);
         }
 
         public TypedArgument OfType(Type argType, params string[] aliases)
