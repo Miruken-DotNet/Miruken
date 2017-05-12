@@ -12,6 +12,6 @@
         object[]     ResolveAll(object key);
         Promise<T[]> ResolveAllAsync<T>();
         Promise      ResolveAllAsync(object ke);
-        void Release(object component);
+        void         Release(object component);
     }
 }

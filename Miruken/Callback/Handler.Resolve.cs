@@ -59,7 +59,8 @@
 
         public static object[] ResolveAll(this IHandler handler, object key)
         {
-            if (handler == null) return new object[0];
+            if (handler == null)
+                return Array.Empty<object>();
             var inquiry = key as Inquiry ?? new Inquiry(key, true);
             if (handler.Handle(inquiry, true))
             {
@@ -68,13 +69,13 @@
                      ? ((Promise)result).Then((a, s) => EnsureArray(a)).Wait()
                      : EnsureArray(result);
             }
-            return new object[0];
+            return Array.Empty<object>();
         }
 
         public static Promise<object[]> ResolveAllAsync(this IHandler handler, object key)
         {
             if (handler == null)
-                return Promise.Resolved(new object[0]);
+                return Promise.Resolved(Array.Empty<object>());
             var inquiry = key as Inquiry ?? new Inquiry(key, true);
             inquiry.WantsAsync = true;
             if (handler.Handle(inquiry, true))
@@ -84,21 +85,22 @@
                      ? ((Promise)result).Then((a,s) => EnsureArray(a))
                      : Promise.Resolved(EnsureArray(result));
             }
-            return Promise.Resolved(new object[0]);
+            return Promise.Resolved(Array.Empty<object>());
         }
 
         public static T[] ResolveAll<T>(this IHandler handler)
         {
-            if (handler == null) return new T[0];
-            var results = ResolveAll(handler, typeof (T));
-            return results?.Cast<T>().ToArray() ?? new T[0];
+            if (handler == null)
+                return Array.Empty<T>();
+            var results = ResolveAll(handler, typeof(T));
+            return results?.Cast<T>().ToArray() ?? Array.Empty<T>();
         }
 
         public static Promise<T[]> ResolveAllAsync<T>(this IHandler handler)
         {
-            return handler == null ? Promise.Resolved(new T[0])
+            return handler == null ? Promise.Resolved(Array.Empty<T>())
                  : ResolveAllAsync(handler, typeof(T))
-                      .Then((r, s) => r?.Cast<T>().ToArray() ?? new T[0]);
+                      .Then((r, s) => r?.Cast<T>().ToArray() ?? Array.Empty<T>());
         }
 
         private static object[] EnsureArray(object array)

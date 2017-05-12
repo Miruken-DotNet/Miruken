@@ -49,7 +49,7 @@
 
         public static Type[] GetToplevelInterfaces(this Type type)
         {
-            if (type == null) return new Type[0];
+            if (type == null) return Array.Empty<Type>();
             var allInterfaces = type.GetInterfaces();
             return allInterfaces.Except(allInterfaces.SelectMany(t => t.GetInterfaces()))
                 .ToArray();

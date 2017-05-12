@@ -15,8 +15,6 @@
         private static readonly ConcurrentDictionary<MemberInfo, FilterAttribute[]>
             _filters = new ConcurrentDictionary<MemberInfo, FilterAttribute[]>();
 
-        public static readonly FilterAttribute[] NoFilters = new FilterAttribute[0];
-
         public FilterAttribute(params Type[] filterTypes)
         {
             ValidateFilters(filterTypes);
@@ -59,7 +57,7 @@
 
         private static FilterAttribute[] Normalize(FilterAttribute[] filters)
         {
-            return filters.Length > 0 ? filters : NoFilters;
+            return filters.Length > 0 ? filters : Array.Empty<FilterAttribute>();
         }
 
         private static Type CloseFilterType(

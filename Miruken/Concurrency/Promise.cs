@@ -180,7 +180,7 @@
         public static Promise<T[]> All<T>(params Promise<T>[] promises)
         {
             if (promises == null || promises.Length == 0)
-                return Resolved(new T[0]);
+                return Resolved(Array.Empty<T>());
 
             var pending     = 0;
             var fulfilled   = new T[promises.Length];

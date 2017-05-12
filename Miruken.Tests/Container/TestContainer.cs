@@ -34,12 +34,12 @@
 
         T[] IContainer.ResolveAll<T>()
         {
-            return new T[0];
+            return Array.Empty<T>();
         }
 
         object[] IContainer.ResolveAll(object key)
         {
-            return new object[0];
+            return Array.Empty<object>();
         }
 
         Promise<T[]> IContainer.ResolveAllAsync<T>()
