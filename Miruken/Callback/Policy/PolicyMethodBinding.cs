@@ -77,7 +77,8 @@
 
             Type callbackType;
             var dispatcher     = Dispatcher.CloseMethod(args, resultType);
-            var actualCallback = GetCallbackInfo(callback, args, dispatcher, out callbackType);
+            var actualCallback = GetCallbackInfo(callback, args, dispatcher, 
+                                                 out callbackType);
             var returnType     = dispatcher.ReturnType;
             var asyncCallback  = callback as IAsyncCallback;
 
@@ -113,18 +114,19 @@
             {
                 completed = MethodPipeline.InvokeDynamic(
                     this, target, actualCallback, comp => 
-                        convertResult(dispatcher.Invoke(
-                        target, GetArgs(callback, args, composer, comp), resultType),
-                        returnType),
+                        convertResult(dispatcher.Invoke(target,
+                        GetArgs(callback, args, composer, comp),
+                        resultType), returnType),
                     composer, filters.Cast<IDynamicFilter>(), out result);
             }
             else
             {
                 var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
                 completed = pipeline.Invoke(
-                    this, target, actualCallback, comp => convertResult(dispatcher.Invoke(
-                        target, GetArgs(callback, args, composer, comp), resultType),
-                        returnType),
+                    this, target, actualCallback, comp => 
+                        convertResult(dispatcher.Invoke(target,
+                        GetArgs(callback, args, composer, comp),
+                        resultType), returnType),
                     composer, filters, out result);
             }
   

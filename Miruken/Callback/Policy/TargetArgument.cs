@@ -33,6 +33,12 @@ namespace Miruken.Callback.Policy
         {
             var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
+            if (paramType.IsGenericParameter)
+            {
+                var contraints = paramType.GetGenericParameterConstraints();
+                if (contraints.Length != 1) return false;
+                paramType = contraints[0];
+            }
             if (restrict == null || restrict.IsAssignableFrom(paramType)
                 || paramType.IsAssignableFrom(restrict))
             {
@@ -49,6 +55,11 @@ namespace Miruken.Callback.Policy
         {
             base.Configure(parameter, binding);
             var paramType = parameter.ParameterType;
+            if (paramType.IsGenericParameter)
+            {
+                var contraints = paramType.GetGenericParameterConstraints();
+                paramType = contraints[0];
+            }
             if (paramType == typeof(object)) return;
             binding.CallbackIndex = parameter.Position;
             binding.VarianceType  = paramType;

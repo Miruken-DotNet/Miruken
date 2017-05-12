@@ -154,7 +154,7 @@
         private class PipelineBehaviorProvider : Handler
         {
             [Provides]
-            public IPipelineBehavior<TRequest, TResponse>[] GetBehavior<TRequest, TResponse>()
+            public IPipelineBehavior<TRequest, TResponse>[] GetBehaviors<TRequest, TResponse>()
             {
                 return new[]
                 {

@@ -32,6 +32,9 @@
                            | FastFourArgs | FastFiveArgs
         }
 
+        private const int UseReturn   = -1;
+        private const int UseArgument = -2;
+
         public MethodDispatch(MethodInfo method)
         {
             if (method == null)
@@ -43,21 +46,20 @@
 
         private MethodDispatch(MethodInfo method, DispatchType dispatchType)
         {
-            Method        = method;
-            Parameters    = method.GetParameters();
-            _dispatchType = dispatchType;
+            Parameters = method.GetParameters();
+            ConfigureMethod(method, Parameters, dispatchType);
+            Method = method;
         }
 
         public MethodInfo      Method            { get; }
         public ParameterInfo[] Parameters        { get; }
         public Type            LogicalReturnType { get; private set; }
 
-        public int  ArgumentCount => Parameters.Length;
-        public Type ReturnType    => Method.ReturnType;
-        public bool IsVoid        => (_dispatchType & DispatchType.Void) > 0;
-        public bool IsPromise     => (_dispatchType & DispatchType.Promise) > 0;
-        public bool IsTask        => (_dispatchType & DispatchType.Task) > 0;
-        public bool IsAsync       => IsPromise || IsTask;
+        public Type ReturnType => Method.ReturnType;
+        public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;
+        public bool IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
+        public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
+        public bool IsAsync    => IsPromise || IsTask;
 
         public MethodDispatch CloseMethod(object[] args, Type returnType = null)
         {
@@ -122,8 +124,8 @@
         protected object InvokeLate(object target, object[] args, Type returnType = null)
         {
             var method = Method;
-            if (ArgumentCount > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {GetDescription(Method)} expects {ArgumentCount} arguments");
+            if (Parameters.Length > (args?.Length ?? 0))
+                throw new ArgumentException($"Method {GetDescription(Method)} expects {Parameters.Length} arguments");
             if (_mapping != null)
                 method = GetClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
@@ -133,12 +135,16 @@
         {
             var argTypes = _mapping.Select(mapping =>
             {
-                if (mapping.Item1 < 0)  // use return type
+                if (mapping.Item1 == UseReturn)
                 {
                     if (returnType == null)
                         throw new ArgumentException(
                             "Return type is unknown and cannot infer types");
                     return returnType.GetGenericArguments()[mapping.Item2];
+                }
+                if (mapping.Item2 == UseArgument)
+                {
+                    return args[mapping.Item1].GetType();
                 }
                 var arg = args?[mapping.Item1];
                 if (arg == null)
@@ -148,7 +154,8 @@
            return Method.MakeGenericMethod(argTypes);
         }
 
-        private void ConfigureMethod(MethodInfo method, ParameterInfo[] parameters)
+        private void ConfigureMethod(
+            MethodInfo method, ParameterInfo[] parameters, DispatchType? dispatchType = null)
         {
             var returnType = method.ReturnType;
             var isVoid     = returnType == typeof(void);
@@ -176,6 +183,12 @@
             }
             else
                 LogicalReturnType = returnType;
+
+            if (dispatchType.HasValue)
+            {
+                _dispatchType = dispatchType.Value;
+                return;
+            }
 
             if (!method.IsGenericMethodDefinition)
             {
@@ -233,17 +246,24 @@
             {
                 if (IsAsync)
                     returnType = returnType.GenericTypeArguments[0];
-                argSources.Add(Tuple.Create(-1, returnType));
+                argSources.Add(Tuple.Create(UseReturn, returnType));
             }
             var methodArgs  = method.GetGenericArguments();
             var typeMapping = new Tuple<int, int>[methodArgs.Length];
             foreach (var source in argSources)
             {
-                var typeArgs = source.Item2.GetGenericArguments();
+                var sourceArg = source.Item2;
+                if (sourceArg.IsGenericParameter)
+                {
+                    if (methodArgs.Length == 1 && methodArgs[0] == sourceArg)
+                        typeMapping[0] = Tuple.Create(source.Item1, UseArgument);
+                    continue;
+                }
+                var sourceGenericArgs = sourceArg.GetGenericArguments();
                 for (var i = 0; i < methodArgs.Length; ++i)
                 {
                     if (typeMapping[i] != null) continue;
-                    var index = Array.IndexOf(typeArgs, methodArgs[i]);
+                    var index = Array.IndexOf(sourceGenericArgs, methodArgs[i]);
                     if (index >= 0)
                         typeMapping[i] = Tuple.Create(source.Item1, index);
                 }
