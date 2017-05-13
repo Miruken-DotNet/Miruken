@@ -56,7 +56,7 @@
             set { _result = value; }
         }
 
-        public bool Respond(object response, IHandler composer)
+        public bool Respond(object response)
         {
             if (response == null || (!Many && _results.Count > 0))
                 return false;
@@ -82,12 +82,12 @@
             if (Policy == null)
             {
                 handled = HandlesAttribute.Policy.Dispatch(
-                    handler, Callback, greedy, composer, r => Respond(r, composer));
+                    handler, Callback, greedy, composer, Respond);
                 if (!greedy && (handled || _results.Count > count))
                     return true;
             }
             var policy = Policy ?? HandlesAttribute.Policy;
-            return policy.Dispatch(handler, this, greedy, composer, r => Respond(r, composer))
+            return policy.Dispatch(handler, this, greedy, composer, Respond)
                 || handled || (_results.Count > count);
         }
     }
