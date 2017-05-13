@@ -127,10 +127,10 @@
             public int? Order { get; set; }
 
             public object Filter(HandleMethod method, MethodBinding binding,
-                IHandler composer, FilterDelegate<object> proceed)
+                IHandler composer, FilterDelegate<object> next)
             {
                 Console.WriteLine($"Handle method {method.Method.Name}");
-                return proceed();
+                return next();
             }
         }
 

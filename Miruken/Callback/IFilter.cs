@@ -15,13 +15,13 @@
     public interface IFilter<in Cb, Res> : IFilter
     {
         Res Filter(Cb callback, MethodBinding method,
-                   IHandler composer, FilterDelegate<Res> proceed);
+                   IHandler composer, FilterDelegate<Res> next);
     }
 
     public interface IDynamicFilter : IFilter
     {
         object Filter(object callback, MethodBinding method,
-           IHandler composer, FilterDelegate<object> proceed);
+           IHandler composer, FilterDelegate<object> next);
     }
 
     public interface IFilterProvider

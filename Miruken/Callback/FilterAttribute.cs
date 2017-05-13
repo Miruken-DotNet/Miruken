@@ -39,7 +39,7 @@
             foreach (var filter in filters)
             {
                 filter.Order = relativeOrder.HasValue ? relativeOrder++ : null;
-                yield return DecorateFilter(filter);
+                yield return filter;
             }
         }
 
@@ -48,11 +48,6 @@
             return _filters.GetOrAdd(member, t => Normalize(
                     (FilterAttribute[])member.GetCustomAttributes(
                         typeof(FilterAttribute), inherit)));
-        }
-
-        protected virtual IFilter DecorateFilter(IFilter fliter)
-        {
-            return fliter;
         }
 
         private static FilterAttribute[] Normalize(FilterAttribute[] filters)

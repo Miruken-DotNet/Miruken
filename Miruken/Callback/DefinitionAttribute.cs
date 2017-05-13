@@ -11,6 +11,11 @@ namespace Miruken.Callback
 
         public abstract CallbackPolicy CallbackPolicy { get; }
 
+        public virtual bool Approve(object callback, PolicyMethodBinding binding)
+        {
+            return true;
+        }
+
         protected const string _ = null;
     }
 }

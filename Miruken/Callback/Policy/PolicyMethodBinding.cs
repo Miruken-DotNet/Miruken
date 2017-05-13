@@ -58,6 +58,8 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, Func<object, bool> results = null)
         {
+            if (Attribute?.Approve(callback, this) == false)
+                return false;
             var resultType = Policy.ResultType?.Invoke(callback);
             var result     = Invoke(target, callback, composer, resultType);
             var accepted   = Policy.AcceptResult?.Invoke(result, this) 

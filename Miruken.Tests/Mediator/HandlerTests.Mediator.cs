@@ -144,10 +144,10 @@
             public int? Order { get; set; }
 
             public Promise<Res> Filter(Cb callback, MethodBinding method,
-                IHandler composer, FilterDelegate<Promise<Res>> proceed)
+                IHandler composer, FilterDelegate<Promise<Res>> next)
             {
                 Console.WriteLine($"Handle {callback}");
-                return proceed();
+                return next();
             }
         }
 

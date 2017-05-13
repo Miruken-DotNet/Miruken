@@ -524,7 +524,7 @@
             public int? Order { get; set; }
 
             public object Filter(
-                T callback, MethodBinding method, IHandler composer, FilterDelegate<object> proceed)
+                T callback, MethodBinding method, IHandler composer, FilterDelegate<object> next)
             {
                 return null;
             }
@@ -534,7 +534,7 @@
         {
             public int? Order { get; set; }
 
-            public T Filter(object callback, MethodBinding method, IHandler composer, FilterDelegate<T> proceed)
+            public T Filter(object callback, MethodBinding method, IHandler composer, FilterDelegate<T> next)
             {
                 return default(T);
             }
@@ -545,7 +545,7 @@
             public int? Order { get; set; }
 
             public object Filter(
-                object callback, MethodBinding method, IHandler composer, FilterDelegate<object> proceed)
+                object callback, MethodBinding method, IHandler composer, FilterDelegate<object> next)
             {
                 return null;
             }
@@ -944,10 +944,10 @@
 
             object IFilter<Bar, object>.Filter(
                 Bar callback, MethodBinding binding, IHandler composer,
-                FilterDelegate<object> proceed)
+                FilterDelegate<object> next)
             {
                 callback.Handled++;
-                return proceed();
+                return next();
             }
         }
 
@@ -956,10 +956,10 @@
             public int? Order { get; set; }
 
             public Res Filter(Cb callback, MethodBinding binding,
-                IHandler composer, FilterDelegate<Res> proceed)
+                IHandler composer, FilterDelegate<Res> next)
             {
                 Console.WriteLine($"Handle {callback}");
-                return proceed();
+                return next();
             }
         }
     }
