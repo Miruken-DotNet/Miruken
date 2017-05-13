@@ -19,12 +19,10 @@
         {
             if (handler == null) return Promise.Empty;
             var command = new Command(callback) { WantsAsync = true };
-            if (!handler.Handle(command))
-                return Promise.Rejected(new NotSupportedException(
-                    $"{callback.GetType()} not handled"));
-
-            var result = command.Result;
-            return command.IsAsync ? (Promise)result : Promise.Resolved(result);
+            return handler.Handle(command)
+                 ? (Promise)command.Result
+                 : Promise.Rejected(new NotSupportedException(
+                      $"{callback.GetType()} not handled"));
         }
 
         public static Result Command<Result>(this IHandler handler, object callback)
@@ -34,7 +32,9 @@
             if (!handler.Handle(request))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
             var result = request.Result;
-            return request.IsAsync ? (Result)((Promise)result).Wait() : (Result)result;
+            return request.IsAsync 
+                 ? (Result)((Promise)result).Wait()
+                 : (Result)result;
         }
 
         public static Promise<Result> CommandAsync<Result>(
@@ -45,10 +45,7 @@
             var command = new Command(callback) { WantsAsync = true };
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
-            var result  = command.Result;
-            var promise = command.IsAsync
-                        ? (Promise)result
-                        : Promise.Resolved(result);
+            var promise  = (Promise)command.Result;
             return (Promise<Result>)promise.Coerce(typeof(Promise<Result>));
         }
 
@@ -66,8 +63,7 @@
             if (!handler.Handle(command, true))
                 return Promise.Rejected(new NotSupportedException(
                     $"{callback.GetType()} not handled"));
-            var result = command.Result;
-            return command.IsAsync ? (Promise)result : Promise.Resolved(result);
+            return (Promise)command.Result;
         }
     }
 }

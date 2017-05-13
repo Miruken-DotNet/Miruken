@@ -34,14 +34,9 @@
             if (handler == null) return null;
             var inquiry = key as Inquiry ?? new Inquiry(key);
             inquiry.WantsAsync = true;
-            if (handler.Handle(inquiry))
-            {
-                var result = inquiry.Result;
-                return inquiry.IsAsync
-                     ? (Promise)result
-                     : Promise.Resolved(result);
-            }
-            return Promise.Empty;
+            return handler.Handle(inquiry)
+                 ? (Promise)inquiry.Result
+                 : Promise.Empty;
         }
 
         public static T Resolve<T>(this IHandler handler)
@@ -66,8 +61,8 @@
             {
                 var result = inquiry.Result;
                 return inquiry.IsAsync
-                     ? ((Promise)result).Then((a, s) => EnsureArray(a)).Wait()
-                     : EnsureArray(result);
+                     ? ((Promise<object[]>)result).Wait()
+                     : (object[])result;
             }
             return Array.Empty<object>();
         }
@@ -82,8 +77,8 @@
             {
                 var result = inquiry.Result;
                 return inquiry.IsAsync
-                     ? ((Promise)result).Then((a,s) => EnsureArray(a))
-                     : Promise.Resolved(EnsureArray(result));
+                     ? (Promise<object[]>)result
+                     : Promise.Resolved((object[])result);
             }
             return Promise.Resolved(Array.Empty<object>());
         }
@@ -100,13 +95,8 @@
         {
             return handler == null ? Promise.Resolved(Array.Empty<T>())
                  : ResolveAllAsync(handler, typeof(T))
-                      .Then((r, s) => r?.Cast<T>().ToArray() ?? Array.Empty<T>());
-        }
-
-        private static object[] EnsureArray(object array)
-        {
-            return array as object[] 
-                ?? ((IEnumerable)array).Cast<object>().ToArray();
+                      .Then((r, s) => r?.Cast<T>().ToArray() 
+                                   ?? Array.Empty<T>());
         }
     }
 }

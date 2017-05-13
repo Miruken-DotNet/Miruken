@@ -47,10 +47,13 @@
                     _result = Promise.All(_results
                         .Select(r => (r as Promise) ?? Promise.Resolved(r))
                         .ToArray())
-                        .Then((results, s) => results.Where(r => r != null));
+                        .Then((results, s) => results.Where(r => r != null)
+                        .ToArray());
                 }
                 else
                     _result = _results;
+                if (WantsAsync && !IsAsync)
+                    _result = Promise.Resolved(_result);
                 return _result;
             }
             set { _result = value; }

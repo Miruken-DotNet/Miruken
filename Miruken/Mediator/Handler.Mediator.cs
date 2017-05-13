@@ -22,7 +22,7 @@
             if (!handler.Handle(command))
                 return Promise.Rejected(new NotSupportedException(
                     $"{request.GetType()} not handled"));
-            return command.IsAsync ? (Promise)command.Result : Promise.Empty;
+            return (Promise)command.Result;
         }
 
         public static Promise<Resp> Send<Resp>(
@@ -38,10 +38,7 @@
             if (!handler.Handle(command))
                 return Promise<Resp>.Rejected(new NotSupportedException(
                     $"{request.GetType()} not handled"));
-            var result  = command.Result;
-            var promise = command.IsAsync
-                        ? (Promise)result
-                        : Promise.Resolved(result);
+            var promise = (Promise)command.Result;
             return (Promise<Resp>)promise.Coerce(typeof(Promise<Resp>));
         }
 
@@ -54,7 +51,7 @@
                 WantsAsync = true,
                 Policy     = MediatesAttribute.Policy
             };
-            return handler.Handle(command, true) && command.IsAsync
+            return handler.Handle(command, true)
                  ? (Promise)command.Result
                  : Promise.Empty;
         }

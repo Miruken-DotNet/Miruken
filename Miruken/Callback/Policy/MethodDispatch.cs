@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -13,6 +14,7 @@
         private Delegate _delegate;
         private DispatchType _dispatchType;
         private Tuple<int, int>[] _mapping;
+        private ConcurrentDictionary<MethodInfo, MethodDispatch> _closed;
 
         [Flags]
         private enum DispatchType
@@ -44,13 +46,6 @@
             Method = method;
         }
 
-        private MethodDispatch(MethodInfo method, DispatchType dispatchType)
-        {
-            Parameters = method.GetParameters();
-            ConfigureMethod(method, Parameters, dispatchType);
-            Method = method;
-        }
-
         public MethodInfo      Method            { get; }
         public ParameterInfo[] Parameters        { get; }
         public Type            LogicalReturnType { get; private set; }
@@ -60,13 +55,6 @@
         public bool IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
         public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
         public bool IsAsync    => IsPromise || IsTask;
-
-        public MethodDispatch CloseMethod(object[] args, Type returnType = null)
-        {
-            return _mapping == null ? this 
-                 : new MethodDispatch(GetClosedMethod(args, returnType),
-                    (_dispatchType & ~DispatchType.Fast) | DispatchType.LateBound);
-        }
 
         public object Invoke(object target, object[] args, Type returnType = null)
         {
@@ -121,17 +109,24 @@
             }
         }
 
+        public MethodDispatch CloseDispatch(object[] args, Type returnType = null)
+        {
+            if (_mapping == null) return this;
+            var closedMethod = ClosedMethod(args, returnType);
+            return _closed.GetOrAdd(closedMethod, m => new MethodDispatch(m));
+        }
+
         protected object InvokeLate(object target, object[] args, Type returnType = null)
         {
             var method = Method;
             if (Parameters.Length > (args?.Length ?? 0))
                 throw new ArgumentException($"Method {GetDescription(Method)} expects {Parameters.Length} arguments");
             if (_mapping != null)
-                method = GetClosedMethod(args, returnType);
+                method = ClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
         }
 
-        private MethodInfo GetClosedMethod(object[] args, Type returnType)
+        private MethodInfo ClosedMethod(object[] args, Type returnType)
         {
             var argTypes = _mapping.Select(mapping =>
             {
@@ -154,8 +149,7 @@
            return Method.MakeGenericMethod(argTypes);
         }
 
-        private void ConfigureMethod(
-            MethodInfo method, ParameterInfo[] parameters, DispatchType? dispatchType = null)
+        private void ConfigureMethod(MethodInfo method, ParameterInfo[] parameters)
         {
             var returnType = method.ReturnType;
             var isVoid     = returnType == typeof(void);
@@ -183,12 +177,6 @@
             }
             else
                 LogicalReturnType = returnType;
-
-            if (dispatchType.HasValue)
-            {
-                _dispatchType = dispatchType.Value;
-                return;
-            }
 
             if (!method.IsGenericMethodDefinition)
             {
@@ -272,8 +260,9 @@
                 throw new InvalidOperationException(
                     $"Type mapping for {GetDescription(method)} could not be inferred");
 
-            _dispatchType |= DispatchType.LateBound;
             _mapping = typeMapping;
+            _dispatchType |= DispatchType.LateBound;
+            _closed  = new ConcurrentDictionary<MethodInfo, MethodDispatch>();
         }
 
         private static void AssertArgsCount(int expected, params object[] args)

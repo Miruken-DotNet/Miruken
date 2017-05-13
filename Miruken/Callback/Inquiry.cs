@@ -61,6 +61,8 @@
                 {
                     _result = Flatten(_resolutions).ToArray();
                 }
+                if (WantsAsync && !IsAsync)
+                    _result = Promise.Resolved(_result);
                 return _result;
             }
             set { _result = value; }

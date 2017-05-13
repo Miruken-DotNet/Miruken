@@ -78,7 +78,7 @@
                 return Dispatcher.Invoke(target, args, resultType);
 
             Type callbackType;
-            var dispatcher     = Dispatcher.CloseMethod(args, resultType);
+            var dispatcher     = Dispatcher.CloseDispatch(args, resultType);
             var actualCallback = GetCallbackInfo(callback, args, dispatcher, 
                                                  out callbackType);
             var returnType     = dispatcher.ReturnType;
