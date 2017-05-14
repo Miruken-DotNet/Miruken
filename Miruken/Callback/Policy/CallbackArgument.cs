@@ -38,8 +38,17 @@ namespace Miruken.Callback.Policy
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();
-                if (contraints.Length != 1) return false;
-                paramType = contraints[0];
+                switch (contraints.Length)
+                {
+                    case 0:
+                        paramType = typeof(object);
+                        break;
+                    case 1:
+                        paramType = contraints[0];
+                        break;
+                    default:
+                        return false;
+                }
             }
             if (restrict == null || restrict.IsAssignableFrom(paramType)
                 || paramType.IsAssignableFrom(restrict))
@@ -60,7 +69,9 @@ namespace Miruken.Callback.Policy
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();
-                paramType = contraints[0];
+                paramType = contraints.Length == 1
+                        ? contraints[0]
+                        : typeof(object);
             }
             if (paramType == typeof(object)) return;
             binding.CallbackIndex = parameter.Position;
