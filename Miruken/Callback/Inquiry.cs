@@ -30,7 +30,7 @@
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
-        public Type ResultType => IsAsync ? typeof(Promise) : null;
+        public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
 
         public object Result
         {
@@ -65,7 +65,11 @@
                     _result = Promise.Resolved(_result);
                 return _result;
             }
-            set { _result = value; }
+            set
+            {
+                _result = value;
+                IsAsync = _result is Promise;
+            }
         }
 
         public bool Resolve(object resolution, IHandler composer)

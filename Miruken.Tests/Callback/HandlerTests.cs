@@ -357,6 +357,68 @@
         }
 
         [TestMethod]
+        public async Task Should_Filter_Async_Resolution()
+        {
+            var handler = new CustomHandler();
+            var bar     = await handler.Aspect((_, c) => true)
+                                       .ResolveAsync<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Async_Filter_Resolution()
+        {
+            var handler = new CustomHandler();
+            var bar     = handler.Aspect((_, c) => Promise.Resolved(true))
+                                 .Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod]
+        public async Task Should_Async_Filter_Async_Resolution()
+        {
+            var handler = new CustomHandler();
+            var bar     = await handler.Aspect((_,c) => Promise.Resolved(true))
+                                       .ResolveAsync<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(bar.HasComposer);
+            Assert.AreEqual(1, bar.Handled);
+        }
+
+        [TestMethod,
+          ExpectedException(typeof(RejectedException))]
+        public void Should_Async_Cancel_Resolution()
+        {
+            var handler = new CustomHandler();
+            handler.Aspect((_, c) => Promise.Resolved(false)).Resolve<Bar>();
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(OperationCanceledException),
+            AllowDerivedTypes = true)]
+        public async Task Should_Cancel_Async_Resolution()
+        {
+            var handler = new CustomHandler();
+            var promise = handler.Aspect((_, c) => false).ResolveAsync<Bar>();
+            Assert.IsInstanceOfType(promise, typeof(Promise<Bar>));
+            await promise;
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(OperationCanceledException),
+            AllowDerivedTypes = true)]
+        public async Task Should_Async_Cancel_Async_Resolution()
+        {
+            var handler = new CustomHandler();
+            await handler.Aspect((_, c) => Promise.Resolved(false))
+                         .ResolveAsync<Bar>();
+        }
+
+        [TestMethod]
         public void Should_Compose_Callbacks()
         {
             var handler = new CustomHandler();

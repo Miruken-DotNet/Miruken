@@ -356,11 +356,11 @@
             if (promiseType == null)
                 throw new ArgumentNullException(nameof(promiseType));
 
+            if (promiseType.IsInstanceOfType(this)) return this;
+
             if (!promiseType.IsGenericType ||
                 promiseType.GetGenericTypeDefinition() != typeof(Promise<>))
                 throw new ArgumentException($"{promiseType.FullName} is not a Promise<>");
-
-            if (promiseType.IsInstanceOfType(this)) return this;
 
             var resultType = promiseType.GetGenericArguments()[0];
             var cast       = CoercePromise.GetOrAdd(resultType, rt =>

@@ -30,7 +30,7 @@
 
         public ICollection<object> Results => _results.AsReadOnly();
 
-        public Type ResultType => IsAsync ? typeof(Promise) : null;
+        public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
 
         public object Result
         {
@@ -56,7 +56,11 @@
                     _result = Promise.Resolved(_result);
                 return _result;
             }
-            set { _result = value; }
+            set
+            {
+                _result = value;
+                IsAsync = _result is Promise;
+            }
         }
 
         public bool Respond(object response)

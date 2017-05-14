@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Collections;
     using System.Linq;
     using Concurrency;
 
