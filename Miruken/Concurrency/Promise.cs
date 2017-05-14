@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Runtime.ExceptionServices;
     using System.Threading;
+    using System.Threading.Tasks;
     using Infrastructure;
 
     public enum PromiseState
@@ -302,12 +303,18 @@
 
         #region Build
 
-        public static readonly Promise Empty = Resolved<object>((object)null);
+        public static readonly Promise<bool> True  = Resolved(true);
+        public static readonly Promise<bool> False = Resolved(false);
+        public static readonly Promise       Empty = Resolved<object>((object)null);
 
         public static Promise<object> Resolved(object value)
         {
             var promise = value as Promise;
-            return promise != null  ? Resolved(promise) : Resolved<object>(value); // 2.3.2
+            if (promise != null) return Resolved(promise);
+            var task = value as Task;
+            return task == null  
+                 ? Resolved<object>(value) 
+                 : task.ToPromise(); // 2.3.2
         }
 
         public static Promise<object> Resolved(Promise promise)
@@ -316,9 +323,16 @@
                 promise.Then((r, s) => resolve(r, s), reject));
         }
 
+        public static Promise<object> Resolved(Task task)
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+            return task.ToPromise();
+        }
+
         public static Promise<T> Resolved<T>(T value)
         {
-            return new Promise<T>((resolve, reject) => resolve(value, true));
+            return Resolved(value, true);
         }
 
         public static Promise<T> Resolved<T>(T value, bool synchronous)
@@ -329,6 +343,13 @@
         public static Promise<T> Resolved<T>(Promise<T> promise)
         {
             return new Promise<T>((resolve, reject) => promise.Then(resolve, reject));
+        }
+
+        public static Promise<T> Resolved<T>(Task<T> task)
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+            return task.ToPromise();
         }
 
         public static Promise Rejected(Exception exception)

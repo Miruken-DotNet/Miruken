@@ -280,5 +280,61 @@ namespace Miruken.Tests.Concurrency
             Task result = Task.FromResult(22);
             Assert.AreEqual(22, await result.ToPromise());
         }
+
+        [TestMethod]
+        public void Should_Follow_Task_When_Resolved()
+        {
+            TestRunner.MTA(() =>
+            {
+                var called   = 0;
+                var task     = Task.Run(() => "Hello");
+                var promise  = Promise.Resolved(task);
+                var fulfill1 = promise.Then((r, s) =>
+                {
+                    Assert.AreEqual("Hello", r);
+                    ++called;
+                });
+                var fulfill2 = promise.Then((r, s) =>
+                {
+                    Assert.AreEqual("Hello", r);
+                    ++called;
+                });
+                if (WaitHandle.WaitAll(
+                    new[] { fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle }, 5.Sec()))
+                {
+                    Assert.AreEqual(2, called);
+                }
+                else
+                    Assert.Fail("Operation timed out");
+            });
+        }
+
+        [TestMethod]
+        public void Should_Follow_Task_When_Faulted()
+        {
+            TestRunner.MTA(() =>
+            {
+                var called  = 0;
+                var task    = Task.Run(() => { throw new Exception("Rejected"); });
+                var promise = Promise.Resolved(task);
+                var catch1  = promise.Catch((ex, s) =>
+                {
+                    Assert.AreEqual("Rejected", ex.Message);
+                    ++called;
+                });
+                var catch2 = promise.Catch((ex, s) =>
+                {
+                    Assert.AreEqual("Rejected", ex.Message);
+                    ++called;
+                });
+                if (WaitHandle.WaitAll(
+                    new[] { catch1.AsyncWaitHandle, catch2.AsyncWaitHandle }, 5.Sec()))
+                {
+                    Assert.AreEqual(2, called);
+                }
+                else
+                    Assert.Fail("Operation timed out");
+            });
+        }
     }
 }

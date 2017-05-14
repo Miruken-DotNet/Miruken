@@ -102,7 +102,7 @@
 
     public static class TaskToPromiseExtensions
     {
-        public static Promise ToPromise(
+        public static Promise<object> ToPromise(
             this Task task,
             CancellationToken cancellationToken = default(CancellationToken),
             ChildCancelMode mode = ChildCancelMode.All)
@@ -111,7 +111,7 @@
                 .ToPromise(cancellationToken, mode);
         }
 
-        public static Promise ToPromise(
+        public static Promise<object> ToPromise(
             this Task task,
             CancellationTokenSource cancellationTokenSource,
             ChildCancelMode mode = ChildCancelMode.All)

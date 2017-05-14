@@ -371,7 +371,7 @@
         public void Should_Async_Filter_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Aspect((_, c) => Promise.Resolved(true))
+            var bar     = handler.Aspect((_, c) => Promise.True)
                                  .Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -382,7 +382,7 @@
         public async Task Should_Async_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = await handler.Aspect((_,c) => Promise.Resolved(true))
+            var bar     = await handler.Aspect((_,c) => Promise.True)
                                        .ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -394,7 +394,7 @@
         public void Should_Async_Cancel_Resolution()
         {
             var handler = new CustomHandler();
-            handler.Aspect((_, c) => Promise.Resolved(false)).Resolve<Bar>();
+            handler.Aspect((_, c) => Promise.False).Resolve<Bar>();
         }
 
         [TestMethod,
@@ -414,7 +414,7 @@
         public async Task Should_Async_Cancel_Async_Resolution()
         {
             var handler = new CustomHandler();
-            await handler.Aspect((_, c) => Promise.Resolved(false))
+            await handler.Aspect((_, c) => Promise.False)
                          .ResolveAsync<Bar>();
         }
 
