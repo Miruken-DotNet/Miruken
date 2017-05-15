@@ -244,7 +244,7 @@
             var master = new EmailHandler();
             var mirror = new EmailHandler();
             var backup = new EmailHandler();
-            var email  = master.Chain(mirror, backup);
+            var email  = master + mirror + backup;
             var id     = P<IEmailFeature>(email.Broadcast()).Email("Hello");
             Assert.AreEqual(1, id);
             Assert.AreEqual(1, master.Count);
@@ -262,7 +262,7 @@
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Reject_Unhandled_Method_Broadcast()
         {
-            var handler = new Handler().Chain(new Handler());
+            var handler = new Handler() + new Handler();
             P<IEmailFeature>(handler).Email("Hello");
         }
 

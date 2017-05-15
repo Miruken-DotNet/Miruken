@@ -19,7 +19,7 @@ namespace Miruken.Callback
                 default:
                 {
                     var h = new object[chain.Length + 1];
-                    h[0]  = handler;
+                    h[0] = handler;
                     chain.CopyTo(h, 1);
                     return new CompositeHandler(h);
                 }

@@ -269,7 +269,7 @@
             var master = new EmailProvider();
             var mirror = new EmailProvider();
             var backup = new EmailProvider();
-            var email  = master.Chain(mirror, backup);
+            var email  = master + mirror + backup;
             var id     = P<IEmailFeature>(email.Broadcast()).Email("Hello");
             Assert.AreEqual(1, id);
             Assert.AreEqual(1, master.Resolve<EmailHandler>().Count);

@@ -44,14 +44,18 @@
                 ?? HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
         }
 
-        public static IHandler operator +(Handler c1, IHandler c2)
+        public static CascadeHandler operator +(Handler c1, IHandler c2)
         {
-            return c1.Chain(c2);
+            return new CascadeHandler(c1, c2);
         }
 
-        public static IHandler operator +(Handler c1, IEnumerable<IHandler> c2)
+	    public static CompositeHandler operator +(Handler c1, IEnumerable<IHandler> c2)
         {
-            return c1.Chain(c2.ToArray());
+            var rest = c2.ToArray();
+            var h    = new object[rest.Length + 1];
+            h[0] = c1;
+            rest.CopyTo(h, 1);
+            return new CompositeHandler(h);
         }
 
         private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>

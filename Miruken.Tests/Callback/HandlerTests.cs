@@ -275,7 +275,7 @@
         [TestMethod]
         public void Should_Provide_Callbacks_Greedily()
         {
-            var handler = new CustomHandler().Chain(new CustomHandler());
+            var handler = new CustomHandler() + new CustomHandler();
             var bars    = handler.ResolveAll<Bar>();
             Assert.AreEqual(4, bars.Length);
             bars = handler.ResolveAll<SuperBar>();
@@ -486,7 +486,8 @@
         {
             var foo   = new Foo();
             var group = new CustomHandler()
-                .Chain(new CustomHandler(), new CustomHandler());
+                      + new CustomHandler()
+                      + new CustomHandler();
             Assert.IsTrue(group.Broadcast().Handle(foo));
             Assert.AreEqual(3, foo.Handled);
         }
