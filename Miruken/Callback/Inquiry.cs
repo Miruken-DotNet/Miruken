@@ -1,12 +1,10 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
-    using Infrastructure;
 
     public class Inquiry 
         : ICallback, IAsyncCallback, IDispatchCallback
@@ -41,19 +39,18 @@
                 {
                     if (_resolutions.Count > 0)
                     {
-                        var result  = _resolutions[0];
-                        var promise = result as Promise;
-                        _result = promise?.Then((r,s) => 
-                            RuntimeHelper.IsCollection(r)
-                                ? ((IEnumerable)r).Cast<object>().FirstOrDefault()
-                                : r) ?? result;
+                        var result = _resolutions[0];
+                        _result = (result as Promise)?.Then((r, s) =>
+                        {
+                            var array = r as object[];
+                            return array != null ? array.FirstOrDefault() : r;
+                        }) ?? result;
                     }
                 }
                 else if (IsAsync)
                 {
                     _result = Promise.All(_resolutions
-                        .Select(r => (r as Promise) ?? Promise.Resolved(r))
-                        .ToArray())
+                        .Select(Promise.Resolved).ToArray())
                         .Then((results, s) => Flatten(results)
                         .ToArray());
                 }
@@ -75,10 +72,10 @@
         public bool Resolve(object resolution, IHandler composer)
         {
             if (resolution == null) return false;
-            var resolved = RuntimeHelper.IsCollection(resolution)
-                 ? ((IEnumerable)resolution).Cast<object>()
-                    .Aggregate(false, (s, res) => Include(res, composer) || s)
-                 : Include(resolution, composer);
+            var array    = resolution as object[];
+            var resolved = array?.Aggregate(false, 
+                (s, res) => Include(res, composer) || s) 
+                         ?? Include(resolution, composer);
             if (resolved) _result = null;
             return resolved;
         }
@@ -95,14 +92,9 @@
             {
                 IsAsync = true;
                 if (Many) promise = promise.Catch((ex,s) => null);
-                promise = promise.Then((result, s) =>
-                {
-                    if (RuntimeHelper.IsCollection(result))
-                        return ((IEnumerable)result).Cast<object>()
-                            .Where(r => r != null && IsSatisfied(r, composer));
-                    return result != null && IsSatisfied(result, composer)
-                         ? result : null;
-                });
+                promise = promise.Then((result, s) => 
+                    result != null && IsSatisfied(result, composer)
+                    ? result : null);
                 resolution = promise;
             }
             else if (!IsSatisfied(resolution, composer))
@@ -148,9 +140,7 @@
         {
             return collection
                 .Where(item => item != null)
-                .SelectMany(item => RuntimeHelper.IsCollection(item)
-                    ? ((IEnumerable)item).Cast<object>()
-                    : new[] {item})
+                .SelectMany(item => item as object[] ?? new[] {item})
                 .Distinct();
         }
     }
