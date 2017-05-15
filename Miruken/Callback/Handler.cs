@@ -21,8 +21,8 @@
             object callback, bool greedy = false, IHandler composer = null)
 	    {
             if (callback == null) return false;
-            if (composer == null)
-                composer = new CompositionScope(this);
+	        if (composer == null)
+	            composer = this as CompositionScope ?? new CompositionScope(this);
 	        return HandleCallback(callback, greedy, composer);
 	    }
 

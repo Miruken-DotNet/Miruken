@@ -23,10 +23,15 @@
             _options = options;
         }
 
-        [Handles]
-        private void Options(T options)
+        protected override bool HandleCallback(
+            object callback, bool greedy, IHandler composer)
         {
+            var composition = callback as Composition;
+            var options     = (composition?.Callback ?? callback) as T;
+            if (options == null)
+                return base.HandleCallback(callback, greedy, composer);
             _options.MergeInto(options);
+            return true;
         }
     }
 }
