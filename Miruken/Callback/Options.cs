@@ -28,10 +28,10 @@
         {
             var composition = callback as Composition;
             var options     = (composition?.Callback ?? callback) as T;
-            if (options == null)
-                return base.HandleCallback(callback, greedy, composer);
-            _options.MergeInto(options);
-            return true;
+            var handled     = options != null;
+            if (handled) _options.MergeInto(options);
+            return handled && !greedy ||
+                (base.HandleCallback(callback, greedy, composer) || handled);
         }
     }
 }

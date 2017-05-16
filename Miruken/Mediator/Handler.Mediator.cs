@@ -5,7 +5,7 @@
     using Concurrency;
 
     /// <summary>
-    /// Miruken.Mediator imitates the behavior of the 'MediatR' package from Jimmy Bogard
+    /// Miruken.Mediator imitates the behavior of 'MediatR' from Jimmy Bogard
     /// https://github.com/jbogard/MediatR
     /// </summary>
     public static class HandlerMediatorExtensions
@@ -19,10 +19,10 @@
                 WantsAsync = true,
                 Policy     = MediatesAttribute.Policy
             };
-            if (!handler.Handle(command))
-                return Promise.Rejected(new NotSupportedException(
-                    $"{request.GetType()} not handled"));
-            return (Promise)command.Result;
+            return handler.Handle(command)
+                 ? (Promise)command.Result
+                 : Promise.Rejected(new NotSupportedException(
+                       $"{request.GetType()} not handled"));
         }
 
         public static Promise<Resp> Send<Resp>(
