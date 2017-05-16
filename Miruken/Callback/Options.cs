@@ -1,6 +1,8 @@
 ﻿namespace Miruken.Callback
 {
-    public abstract class Options<T> : Composition
+    using System;
+
+    public abstract class Options<T> : Composition, IScopedCallback
         where T : Options<T>
     {
         public abstract void MergeInto(T other);
@@ -20,6 +22,8 @@
         public OptionsHandler(IHandler handler, T options)
             : base(handler)
         {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
             _options = options;
         }
 
@@ -31,7 +35,7 @@
             var handled     = options != null;
             if (handled) _options.MergeInto(options);
             return handled && !greedy ||
-                (base.HandleCallback(callback, greedy, composer) || handled);
+                (Decoratee.Handle(callback, greedy, composer) || handled);
         }
     }
 }

@@ -570,6 +570,17 @@
             Assert.IsNull(provider);
         }
 
+        [TestMethod]
+        public void Should_Ignore_Option_At_Scope_Boundary()
+        {
+            var handler = new Handler()
+                .WithFilters(new LogFilter<string, int>());
+            var options = new FilterOptions();
+            Assert.IsTrue(handler.Handle(options));
+            Assert.AreEqual(1, options.ExtraFilters.Length);
+            Assert.IsFalse(handler.Scope().Handle(new FilterOptions()));
+        }
+
         public class FilterResolver : Handler
         {
             public Type RequestedType { get; set; }

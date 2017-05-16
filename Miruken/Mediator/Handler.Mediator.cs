@@ -5,7 +5,7 @@
     using Concurrency;
 
     /// <summary>
-    /// Miruken.Mediator imitates the behavior of 'MediatR' from Jimmy Bogard
+    /// Miruken.Mediator imitates the behavior of Jimmy Bogard's 'MediatR'
     /// https://github.com/jbogard/MediatR
     /// </summary>
     public static class HandlerMediatorExtensions
