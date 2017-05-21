@@ -10,7 +10,7 @@
     /// </summary>
     public static class HandlerMediatorExtensions
     {
-        public static Promise Send(this IHandler handler, IRequest request)
+        public static Promise Send(this IHandler handler, object request)
         {
             if (handler == null)
                 return Promise.Empty;
@@ -42,7 +42,7 @@
             return (Promise<Resp>)promise.Coerce(typeof(Promise<Resp>));
         }
 
-        public static Promise Publish(this IHandler handler, INotification notification)
+        public static Promise Publish(this IHandler handler, object notification)
         {
             if (handler == null)
                 return Promise.Empty;

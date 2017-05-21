@@ -1,4 +1,7 @@
 ﻿namespace Miruken.Callback
 {
-    public interface IScopedCallback { }
+    public interface IScopedCallback
+    {
+        object Scope { get; }
+    }
 }

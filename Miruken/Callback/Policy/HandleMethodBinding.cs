@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using System.Reflection;
-    using Concurrency;
     using Infrastructure;
 
     public class HandleMethodBinding : MethodBinding
@@ -16,11 +15,9 @@
         public override bool Dispatch(object target, object callback,
             IHandler composer, Func<object, bool> results = null)
         {
-            var handleMethod = (HandleMethod)callback;
-            var resultType   = handleMethod.ResultType;
-
             var oldComposer  = Composer;
             var oldUnhandled = Unhandled;
+            var handleMethod = (HandleMethod)callback;
 
             try
             {
@@ -33,10 +30,7 @@
                 var tie = exception as TargetException;
                 if (tie != null) exception = tie.InnerException;
                 handleMethod.Exception = exception;
-                if (!typeof(Promise).IsAssignableFrom(resultType)) throw;
-                handleMethod.ReturnValue = 
-                    Promise.Rejected(exception).Coerce(resultType);
-                return true;
+                throw;
             }
             finally
             {

@@ -496,15 +496,15 @@
         public void Should_Get_Target_If_Not_Decorated()
         {
             var handler = new Handler();
-            Assert.AreSame(handler, HandlerDecorator.Decorated(handler, true));
+            Assert.AreSame(handler, handler.Decorated(true));
         }
 
         [TestMethod]
         public void Should_Get_Deepest_Decorated_Handler()
         {
             var handler = new Handler();
-            Assert.AreSame(handler, HandlerDecorator.Decorated(
-                handler.Broadcast().BestEffort().Notify(), true));
+            Assert.AreSame(handler, handler.Broadcast().BestEffort()
+                .Notify().Decorated(true));
         }
 
         [TestMethod]

@@ -2,13 +2,7 @@
 
 namespace Miruken.Callback
 {
-    public interface IHandlerDecorator
-    {
-        IHandler Decoratee { get; }
-    }
-
-    public abstract class HandlerDecorator 
-        : Handler, IHandlerDecorator
+    public abstract class HandlerDecorator  : Handler, IDecorator
     {
         protected HandlerDecorator(IHandler decoratee)
         {
@@ -19,6 +13,8 @@ namespace Miruken.Callback
 
         public IHandler Decoratee { get; }
 
+        object IDecorator.Decoratee => Decoratee;
+
         protected override bool HandleCallback(
             object callback, bool greedy, IHandler composer)
         {
@@ -26,19 +22,6 @@ namespace Miruken.Callback
             if (!handled || greedy)
                 handled = Decoratee.Handle(callback, greedy, composer) || handled;
             return handled;
-        }
-
-        public static IHandler Decorated(IHandler handler, bool deepest)
-        {
-            var decoratee = handler;
-            while (handler != null)
-            {
-                var decorator = handler as IHandlerDecorator;
-                if (decorator == null || (handler = decorator.Decoratee) == null) break;
-                if (!deepest) return handler;
-                decoratee = handler;
-            }
-            return decoratee;
         }
     }
 }

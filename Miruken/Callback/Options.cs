@@ -5,6 +5,8 @@
     public abstract class Options<T> : Composition, IScopedCallback
         where T : Options<T>
     {
+        public object Scope { get; set; }
+
         public abstract void MergeInto(T other);
 
         public OptionsHandler<T> Decorate(IHandler handler)

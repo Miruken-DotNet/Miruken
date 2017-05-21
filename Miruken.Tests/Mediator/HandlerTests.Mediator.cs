@@ -104,8 +104,7 @@
             public Team Team { get; set; }
         }
 
-        [Pipeline]
-        public class TeamHandler : Handler
+        public class TeamHandler : Mediator
         {
             public int _teamId;
             private readonly List<INotification> 

@@ -2,25 +2,29 @@
 {
     public class HandlerScope : HandlerDecorator
     {
-        public HandlerScope(IHandler handler)
+        private readonly object _scope;
+
+        public HandlerScope(IHandler handler, object scope = null)
             : base(handler)
         {
+            _scope = scope;
         }
 
         protected override bool HandleCallback(
             object callback, bool greedy, IHandler composer)
         {
             var composition = callback as Composition;
-            return !((composition?.Callback ?? callback) is IScopedCallback)
-                   && base.HandleCallback(callback, greedy, composer);
+            var scoped = (composition?.Callback ?? callback) as IScopedCallback;
+            return (scoped == null || scoped.Scope != _scope) &&
+                base.HandleCallback(callback, greedy, composer);
         }
     }
 
     public static class HandlerScopeExtensions
     {
-        public static IHandler Scope(this IHandler handler)
+        public static IHandler Scope(this IHandler handler, object scope = null)
         {
-            return handler != null ? new HandlerScope(handler) : null;
+            return handler != null ? new HandlerScope(handler, scope) : null;
         }
     }
 }

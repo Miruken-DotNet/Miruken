@@ -50,6 +50,10 @@
                         typeof(FilterAttribute), inherit)));
         }
 
+        protected virtual void VerifyFilterType(Type filterType)
+        {          
+        }
+
         private static FilterAttribute[] Normalize(FilterAttribute[] filters)
         {
             return filters.Length > 0 ? filters : Array.Empty<FilterAttribute>();
@@ -94,7 +98,7 @@
             return null;
         }
 
-        private static void ValidateFilters(Type[] filterTypes)
+        private void ValidateFilters(Type[] filterTypes)
         {
             if (filterTypes == null)
                 throw new ArgumentNullException(nameof(filterTypes));
@@ -111,6 +115,7 @@
                     throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
                 if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
                     throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
+                VerifyFilterType(filterType);
             }
         }
     }

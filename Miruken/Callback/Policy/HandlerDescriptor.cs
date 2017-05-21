@@ -117,10 +117,10 @@ namespace Miruken.Callback.Policy
             if (_methods?.TryGetValue(policy, out methods) != true)
                 return false;
 
-            var dispatched  = false;
-            var indexes     = methods.Keys;
-            var keys        = indexes == null ? null 
-                            : policy.SelectKeys(callback, indexes);
+            var dispatched = false;
+            var indexes    = methods.Keys;
+            var keys       = indexes == null ? null 
+                           : policy.SelectKeys(callback, indexes);
 
             foreach (var method in methods.GetMethods(keys))
             {

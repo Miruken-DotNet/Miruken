@@ -58,6 +58,22 @@
 
         public object Invoke(object target, object[] args, Type returnType = null)
         {
+            if (!IsPromise)
+                return Dispatch(target, args, returnType);
+            try
+            {
+                return Dispatch(target, args, returnType);
+            }
+            catch (Exception exception)
+            {
+                var tie = exception as TargetException;
+                if (tie != null) exception = tie.InnerException;
+                return Promise.Rejected(exception).Coerce(ReturnType);
+            }
+        }
+
+        private object Dispatch(object target, object[] args, Type returnType)
+        {
             switch (_dispatchType & (DispatchType.Fast | DispatchType.Void))
             {
                 #region Fast Invocation
@@ -105,7 +121,7 @@
                     return ((FiveArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
                 #endregion
                 default:
-                    return InvokeLate(target, args, returnType);
+                    return DispatchLate(target, args, returnType);
             }
         }
 
@@ -116,7 +132,7 @@
             return _closed.GetOrAdd(closedMethod, m => new MethodDispatch(m));
         }
 
-        protected object InvokeLate(object target, object[] args, Type returnType = null)
+        protected object DispatchLate(object target, object[] args, Type returnType = null)
         {
             var method = Method;
             if (Parameters.Length > (args?.Length ?? 0))
@@ -255,6 +271,7 @@
                     if (index >= 0)
                         typeMapping[i] = Tuple.Create(source.Item1, index);
                 }
+                if (!typeMapping.Contains(null)) break;
             }
             if (typeMapping.Contains(null))
                 throw new InvalidOperationException(
