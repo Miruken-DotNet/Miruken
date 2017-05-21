@@ -78,7 +78,10 @@
     <Compile Include="Graph\TreeNode.cs" />
     <Compile Include="Infrastructure\PropertyChangeExtensionsTests.cs" />
     <Compile Include="Mediator\Cache\CacheHandlerTests.cs" />
+    <Compile Include="Mediator\GetStockQuote.cs" />
+    <Compile Include="Mediator\StockQuoteHandler.cs" />
     <Compile Include="Mediator\HandlerTests.Mediator.cs" />
+    <Compile Include="Mediator\OnewayHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeHelperTests.cs" />
     <Compile Include="TestRunner.cs" />

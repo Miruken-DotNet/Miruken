@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Concurrency;
     using Miruken.Mediator;
     using Miruken.Mediator.Cache;
 
@@ -98,49 +97,6 @@
                 Assert.AreEqual("Stock Exchange is down", ex.Message);
             }
             Assert.AreEqual(2, StockQuoteHandler.Called);
-        }
-
-        public class GetStockQuote : IRequest<StockQuote>, IEquatable<GetStockQuote>
-        {
-            public GetStockQuote(string symbol)
-            {
-                Symbol = symbol;
-            }
-
-            public string Symbol { get; set; }
-
-            public bool Equals(GetStockQuote other)
-            {
-                return Symbol == other?.Symbol;
-            }
-        }
-
-        public class StockQuote
-        {
-            public string Symbol { get; set; }
-            public double Value  { get; set; }
-        }
-
-        public class StockQuoteHandler : Mediator
-        {
-            public static int Called;
-
-            private readonly Random random = new Random();
-
-            [Mediates]
-            public Promise<StockQuote> Handle(GetStockQuote quote)
-            {
-                ++Called;
-
-                if (quote.Symbol == "EX")
-                    throw new Exception("Stock Exchange is down");
-
-                return Promise.Resolved(new StockQuote
-                {
-                    Symbol = quote.Symbol,
-                    Value  = random.NextDouble() * 10.0
-                });
-            }
         }
     }
 }

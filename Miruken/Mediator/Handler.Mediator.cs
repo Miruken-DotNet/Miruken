@@ -25,8 +25,7 @@
                        $"{request.GetType()} not handled"));
         }
 
-        public static Promise<Resp> Send<Resp>(
-            this IHandler handler, IRequest<Resp> request)
+        public static Promise<Resp> Send<Resp>(this IHandler handler, IRequest<Resp> request)
         {
             if (handler == null)
                 return Promise<Resp>.Empty;
