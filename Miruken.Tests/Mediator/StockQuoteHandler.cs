@@ -21,7 +21,7 @@ namespace Miruken.Tests.Mediator
             return Promise.Resolved(new StockQuote
             {
                 Symbol = quote.Symbol,
-                Value = random.NextDouble() * 10.0
+                Value  = Convert.ToDecimal(random.NextDouble() * 10.0)
             });
         }
     }

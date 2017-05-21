@@ -5,8 +5,8 @@
 
     public class StockQuote
     {
-        public string Symbol { get; set; }
-        public double Value { get; set; }
+        public string  Symbol { get; set; }
+        public decimal Value  { get; set; }
     }
 
     public class GetStockQuote : IRequest<StockQuote>, IEquatable<GetStockQuote>
