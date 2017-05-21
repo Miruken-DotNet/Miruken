@@ -578,7 +578,7 @@
             var options = new FilterOptions();
             Assert.IsTrue(handler.Handle(options));
             Assert.AreEqual(1, options.ExtraFilters.Length);
-            Assert.IsFalse(handler.Scope().Handle(new FilterOptions()));
+            Assert.IsFalse(handler.Stop().Handle(new FilterOptions()));
         }
 
         public class FilterResolver : Handler

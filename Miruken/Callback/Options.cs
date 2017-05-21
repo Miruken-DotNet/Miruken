@@ -2,10 +2,10 @@
 {
     using System;
 
-    public abstract class Options<T> : Composition, IScopedCallback
+    public abstract class Options<T> : Composition, IBoundCallback
         where T : Options<T>
     {
-        public object Scope { get; set; }
+        public object Boundary { get; set; }
 
         public abstract void MergeInto(T other);
 
