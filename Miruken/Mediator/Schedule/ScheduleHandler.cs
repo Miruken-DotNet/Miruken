@@ -9,9 +9,9 @@
     public class ScheduleHandler : Handler
     {
         [Mediates]
-        public async Task<ScheduleResult> Concurrent(Concurrent request, IHandler composer)
+        public async Task<ScheduleResult> Concurrent(Concurrent concurrent, IHandler composer)
         {
-            var requests  = request.Requests;
+            var requests  = concurrent.Requests;
             var responses = requests?.Length > 0
                 ? await Task.WhenAll(requests.Select(req => Process(req, composer)))
                 : Array.Empty<object>();
@@ -22,12 +22,12 @@
         }
 
         [Mediates]
-        public async Task<ScheduleResult> Sequential(Sequential request, IHandler composer)
+        public async Task<ScheduleResult> Sequential(Sequential sequential, IHandler composer)
         {
             var responses = new List<object>();
-            if (request.Requests?.Length > 0)
+            if (sequential.Requests?.Length > 0)
             {
-                foreach (var req in request.Requests)
+                foreach (var req in sequential.Requests)
                     responses.Add(await Process(req, composer));
             }
             return new ScheduleResult
@@ -37,9 +37,9 @@
         }
 
         [Mediates]
-        public ScheduleResult Parallel(Parallel request, IHandler composer)
+        public ScheduleResult Parallel(Parallel parallel, IHandler composer)
         {
-            var requests  = request.Requests;
+            var requests  = parallel.Requests;
             var responses = requests?.Length > 0
                 ? requests.AsParallel().Select(
                     req => Process(req, composer).Result).ToArray()

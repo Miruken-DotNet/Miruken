@@ -64,6 +64,7 @@
     <Compile Include="Callback\Handler.Traverse.cs" />
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="Callback\ICancelCallback.cs" />
     <Compile Include="Callback\IDecorator.cs" />
     <Compile Include="Callback\IBoundCallback.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
@@ -141,11 +142,15 @@
     <Compile Include="Mediator\IPipelineBehavior.cs" />
     <Compile Include="Mediator\IRequest.cs" />
     <Compile Include="Mediator\MediatesAttribute.cs" />
+    <Compile Include="Mediator\NotificationDecorator.cs" />
     <Compile Include="Mediator\Oneway.cs" />
     <Compile Include="Mediator\OnewayHandler.cs" />
     <Compile Include="Mediator\PipelineAttribute.cs" />
     <Compile Include="Mediator\Mediator.cs" />
     <Compile Include="Mediator\RequestDecorator.cs" />
+    <Compile Include="Mediator\Route\IRouter.cs" />
+    <Compile Include="Mediator\Route\Routed.cs" />
+    <Compile Include="Mediator\Route\RoutedHandler.cs" />
     <Compile Include="Mediator\Schedule\Concurrent.cs" />
     <Compile Include="Mediator\Schedule\Parallel.cs" />
     <Compile Include="Mediator\Schedule\Scheduled.cs" />
@@ -161,6 +166,7 @@
   <ItemGroup>
     <None Include="Miruken.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

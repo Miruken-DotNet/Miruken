@@ -3,18 +3,17 @@
     using System;
     using Callback;
 
-    public interface IRequestDecorator
+    public interface IRequestDecorator : IRequest
     {
         IRequest Request { get; }
     }
 
-    public interface IRequestDecorator<out TResponse>
+    public interface IRequestDecorator<out TResponse> : IRequest<TResponse>
     {
         IRequest<TResponse> Request { get; }
     }
 
-    public abstract class RequestDecorator
-        : IRequestDecorator, IRequest, IDecorator
+    public abstract class RequestDecorator : IRequestDecorator, IDecorator
     {
         protected RequestDecorator()
         {
@@ -34,7 +33,7 @@
     }
 
     public abstract class RequestDecorator<TResponse>
-        : IRequestDecorator<TResponse>, IRequest<TResponse>, IDecorator
+        : IRequestDecorator<TResponse>, IDecorator
     {
         protected RequestDecorator()
         {

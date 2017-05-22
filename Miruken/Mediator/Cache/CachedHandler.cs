@@ -5,7 +5,7 @@
     using Callback;
     using Concurrency;
 
-    public class CachedHandler : Handler
+    public class CachedHandler : Mediator
     {
         private static readonly
             ConcurrentDictionary<object, CacheResponse> Cache
