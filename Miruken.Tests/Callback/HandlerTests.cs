@@ -571,7 +571,7 @@
         }
 
         [TestMethod]
-        public void Should_Ignore_Option_At_Scope_Boundary()
+        public void Should_Ignore_Option_At_Boundary()
         {
             var handler = new Handler()
                 .WithFilters(new LogFilter<string, int>());
@@ -857,14 +857,14 @@
         private class SpecialHandler : Handler
         {
             [Handles(typeof(Foo))]
-            public void HandleFooKey(object cb)
+            public void HandleFooKey(object cb, PolicyMethodBinding binding)
             {
                 var foo = (Foo)cb;
                 ++foo.Handled;
             }
 
             [Provides(typeof(Boo))]
-            public object ProvideBooKey(IHandler composer)
+            public object ProvideBooKey(PolicyMethodBinding binding, IHandler composer)
             {
                 return new Boo { HasComposer = true };
             }
@@ -913,13 +913,13 @@
         private class SpecialHandlerAsync : Handler
         {
             [Provides(typeof(Boo))]
-            public Promise ProvideBooKey(IHandler composer)
+            public Promise ProvideBooKey(PolicyMethodBinding binding, IHandler composer)
             {
                 return Promise.Resolved(new Boo { HasComposer = true });
             }
 
             [Provides]
-            public Task<Bar[]> ProvideManyBar()
+            public Task<Bar[]> ProvideManyBar(PolicyMethodBinding binding)
             {
                 return Task.FromResult(new[]
                 {

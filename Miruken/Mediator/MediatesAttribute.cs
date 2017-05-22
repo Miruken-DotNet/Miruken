@@ -26,6 +26,14 @@
                       .MatchMethod(x.Target.OfType<INotification>(),
                                    x.Composer.Optional)
                       .MatchMethod(x.Callback, x.Composer.Optional)
+                      .MatchMethod(x.Target.OfType<IRequest>(),
+                                   x.Binding, x.Composer.Optional)
+                      .MatchMethod(Return.Is("resp"),
+                                   x.Target.OfType(typeof(IRequest<>), "resp"),
+                                   x.Binding, x.Composer.Optional)
+                      .MatchMethod(x.Target.OfType<INotification>(),
+                                   x.Binding, x.Composer.Optional)
+                      .MatchMethod(x.Callback, x.Binding, x.Composer.Optional)
                       .UseTargetFilters()
             );
     }

@@ -61,10 +61,10 @@ namespace Miruken.Callback.Policy
         }
 
         public object[] ResolveArgs(
-            PolicyMethodBinding method, object callback, IHandler handler)
+            PolicyMethodBinding binding, object callback, IHandler handler)
         {
-            return _args.Take(method.Dispatcher.Parameters.Length)
-                        .Select(arg => arg.Resolve(callback, handler))
+            return _args.Take(binding.Dispatcher.Parameters.Length)
+                        .Select(arg => arg.Resolve(callback, binding, handler))
                         .ToArray();
         }
     }

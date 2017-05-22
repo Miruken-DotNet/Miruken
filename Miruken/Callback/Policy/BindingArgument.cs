@@ -1,30 +1,30 @@
-namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy
 {
     using System;
     using System.Collections.Generic;
     using System.Reflection;
 
-    public class ComposerArgument : ArgumentRule
+    public class BindingArgument : ArgumentRule
     {
-        public static readonly ComposerArgument 
-            Instance = new ComposerArgument();
+        public static readonly BindingArgument
+            Instance = new BindingArgument();
 
-        private ComposerArgument()
-        {    
+        private BindingArgument()
+        {
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, DefinitionAttribute attribute, 
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            return typeof(IHandler).IsAssignableFrom(paramType);
+            return typeof(PolicyMethodBinding).IsAssignableFrom(paramType);
         }
 
         public override object Resolve(
             object callback, PolicyMethodBinding binding, IHandler composer)
         {
-            return composer;
+            return binding;
         }
     }
 }

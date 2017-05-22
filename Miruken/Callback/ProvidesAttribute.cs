@@ -19,6 +19,8 @@
              CovariantPolicy.Create<Inquiry>(r => r.Key,
                 x => x.MatchMethod(x.ReturnKey.OrVoid, x.Callback, x.Composer.Optional)
                       .MatchMethod(x.ReturnKey, x.Composer.Optional)
+                      .MatchMethod(x.ReturnKey.OrVoid, x.Callback, x.Binding, x.Composer.Optional)
+                      .MatchMethod(x.ReturnKey, x.Binding, x.Composer.Optional)
                 );
     }
 }

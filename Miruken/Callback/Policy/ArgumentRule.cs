@@ -27,7 +27,8 @@
         public virtual void Configure(
             ParameterInfo parameter, PolicyMethodBinding binding) { }
 
-        public abstract object Resolve(object callback, IHandler composer);
+        public abstract object Resolve(
+            object callback, PolicyMethodBinding binding, IHandler composer);
     }
 
     public abstract class ArgumentRuleDecorator : ArgumentRule
@@ -54,9 +55,10 @@
             Argument.Configure(parameter, binding);
         }
 
-        public override object Resolve(object callback, IHandler composer)
+        public override object Resolve(
+            object callback, PolicyMethodBinding binding, IHandler composer)
         {
-            return Argument.Resolve(callback, composer);
+            return Argument.Resolve(callback, binding, composer);
         }
     }
 

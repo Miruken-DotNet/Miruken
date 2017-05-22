@@ -2,6 +2,6 @@
 {
     public interface IBoundCallback
     {
-        object Boundary { get; }
+        object Bounds { get; }
     }
 }

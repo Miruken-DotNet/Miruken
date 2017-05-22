@@ -5,7 +5,7 @@
     public abstract class Options<T> : Composition, IBoundCallback
         where T : Options<T>
     {
-        public object Boundary { get; set; }
+        public object Bounds { get; set; }
 
         public abstract void MergeInto(T other);
 
