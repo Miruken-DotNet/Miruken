@@ -857,14 +857,14 @@
         private class SpecialHandler : Handler
         {
             [Handles(typeof(Foo))]
-            public void HandleFooKey(object cb, PolicyMethodBinding binding)
+            public void HandleFooKey(object cb)
             {
                 var foo = (Foo)cb;
                 ++foo.Handled;
             }
 
             [Provides(typeof(Boo))]
-            public object ProvideBooKey(PolicyMethodBinding binding, IHandler composer)
+            public object ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
             {
                 return new Boo { HasComposer = true };
             }
@@ -900,7 +900,8 @@
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer,
+                                             PolicyMethodBinding binding)
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {
@@ -913,13 +914,13 @@
         private class SpecialHandlerAsync : Handler
         {
             [Provides(typeof(Boo))]
-            public Promise ProvideBooKey(PolicyMethodBinding binding, IHandler composer)
+            public Promise ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
             {
                 return Promise.Resolved(new Boo { HasComposer = true });
             }
 
             [Provides]
-            public Task<Bar[]> ProvideManyBar(PolicyMethodBinding binding)
+            public Task<Bar[]> ProvideManyBar()
             {
                 return Task.FromResult(new[]
                 {
@@ -949,7 +950,8 @@
             }
 
             [Provides]
-            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
+            public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer,
+                                             PolicyMethodBinding binding)
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {

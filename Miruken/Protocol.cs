@@ -1,9 +1,7 @@
-﻿using System.Runtime.Remoting.Messaging;
-using Miruken.Callback;
-
-namespace Miruken
+﻿namespace Miruken
 {
     using System;
+    using System.Runtime.Remoting.Messaging;
 
     public interface IProtocol {}
 
@@ -31,9 +29,6 @@ namespace Miruken
             return (TProto)new Interceptor(adapter, typeof(TProto))
                 .GetTransparentProxy();
         }
-
-        public static IHandler Composer  => HandleMethod.Composer;
-        public static bool     Unhandled => HandleMethod.Unhandled;
     }
 
     public static class ProtocolExtensions
