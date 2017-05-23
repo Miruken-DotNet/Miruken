@@ -581,6 +581,11 @@
             Assert.IsFalse(handler.Stop().Handle(new FilterOptions()));
         }
 
+        public interface IPipelineBehavior<in TRequest, TResponse>
+            : IFilter<TRequest, Promise<TResponse>>
+        {
+        }
+
         public class FilterResolver : Handler
         {
             public Type RequestedType { get; set; }

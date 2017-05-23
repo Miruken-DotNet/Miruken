@@ -31,8 +31,8 @@
             var filters = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, resulType))
                 .SelectMany(filterType => Many
-                    ? composer.ResolveAll(filterType)
-                    : new[] {composer.Resolve(filterType)})
+                    ? composer.Stop().ResolveAll(filterType)
+                    : new[] {composer.Stop().Resolve(filterType)})
                 .OfType<IFilter>();
 
             var relativeOrder = Order;
@@ -92,7 +92,7 @@
                 if (promiseOpen != null)
                 {
                     var promiseClosed = resultType.GetOpenTypeConformance(promiseType);
-                    return promiseClosed?.GenericTypeArguments[0];
+                    return promiseClosed?.GenericTypeArguments[0] ?? resultType;
                 }
             }
             return null;

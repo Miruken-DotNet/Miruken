@@ -42,7 +42,7 @@
             if (resultType == typeof(void))
                 resultType = typeof(object);
             var extraProviders = options?.ExtraFilters
-                              ?? Enumerable.Empty<IFilterProvider>();
+                ?? Enumerable.Empty<IFilterProvider>();
 
             foreach (var provider in providers
                 .Where(p => p != null).SelectMany(p => p)

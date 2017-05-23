@@ -51,7 +51,6 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Callback\Handler.Command.cs" />
-    <Compile Include="Callback\IAsyncCallback.cs" />
     <Compile Include="Callback\Command.cs" />
     <Compile Include="Callback\FilterExtensions.cs" />
     <Compile Include="Callback\FilterOptions.cs" />
@@ -64,9 +63,7 @@
     <Compile Include="Callback\Handler.Traverse.cs" />
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
-    <Compile Include="Callback\ICancelCallback.cs" />
     <Compile Include="Callback\IDecorator.cs" />
-    <Compile Include="Callback\IBoundCallback.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
     <Compile Include="Callback\Policy\BindingArgument.cs" />
     <Compile Include="Callback\Policy\CallbackArgument.cs" />
@@ -93,7 +90,6 @@
     <Compile Include="Callback\HandleMethod.cs" />
     <Compile Include="Callback\HandlesAttribute.cs" />
     <Compile Include="Callback\ICallback.cs" />
-    <Compile Include="Callback\IDispatchCallback.cs" />
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Policy\ReturnAsync.cs" />
     <Compile Include="Callback\Policy\ReturnRule.cs" />
