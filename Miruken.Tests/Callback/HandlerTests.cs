@@ -581,11 +581,6 @@
             Assert.IsFalse(handler.Stop().Handle(new FilterOptions()));
         }
 
-        public interface IPipelineBehavior<in TRequest, TResponse>
-            : IFilter<TRequest, Promise<TResponse>>
-        {
-        }
-
         public class FilterResolver : Handler
         {
             public Type RequestedType { get; set; }
@@ -603,7 +598,7 @@
             public int? Order { get; set; }
 
             public object Filter(
-                T callback, MethodBinding method, IHandler composer, FilterDelegate<object> next)
+                T callback, MethodBinding method, IHandler composer, NextDelegate<object> next)
             {
                 return null;
             }
@@ -613,7 +608,7 @@
         {
             public int? Order { get; set; }
 
-            public T Filter(object callback, MethodBinding method, IHandler composer, FilterDelegate<T> next)
+            public T Filter(object callback, MethodBinding method, IHandler composer, NextDelegate<T> next)
             {
                 return default(T);
             }
@@ -624,7 +619,7 @@
             public int? Order { get; set; }
 
             public object Filter(
-                object callback, MethodBinding method, IHandler composer, FilterDelegate<object> next)
+                object callback, MethodBinding method, IHandler composer, NextDelegate<object> next)
             {
                 return null;
             }
@@ -1025,7 +1020,7 @@
 
             object IFilter<Bar, object>.Filter(
                 Bar callback, MethodBinding binding, IHandler composer,
-                FilterDelegate<object> next)
+                NextDelegate<object> next)
             {
                 callback.Handled++;
                 return next();
@@ -1037,7 +1032,7 @@
             public int? Order { get; set; }
 
             public Res Filter(Cb callback, MethodBinding binding,
-                IHandler composer, FilterDelegate<Res> next)
+                IHandler composer, NextDelegate<Res> next)
             {
                 Console.WriteLine($"Handle {callback}");
                 return next();

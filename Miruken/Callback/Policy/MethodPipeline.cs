@@ -17,7 +17,7 @@
             var completed = false;
             using (var pipeline = filters.GetEnumerator())
             {
-                FilterDelegate<object> next = null;
+                NextDelegate<object> next = null;
                 next = (proceed, comp) =>
                 {
                     if (!proceed) return null;
@@ -60,7 +60,7 @@
             var completed = false;
             using (var pipeline = filters.GetEnumerator())
             {
-                FilterDelegate<Res> next = null;
+                NextDelegate<Res> next = null;
                 next = (proceed, comp) =>
                 {
                     if (!proceed) return default(Res);

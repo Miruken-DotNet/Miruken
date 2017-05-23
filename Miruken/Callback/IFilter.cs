@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate Res FilterDelegate<out Res>(
+    public delegate Res NextDelegate<out Res>(
         bool proceed = true, IHandler composer = null);
 
     public interface IFilter
@@ -15,13 +15,13 @@
     public interface IFilter<in Cb, Res> : IFilter
     {
         Res Filter(Cb callback, MethodBinding method,
-                   IHandler composer, FilterDelegate<Res> next);
+                   IHandler composer, NextDelegate<Res> next);
     }
 
     public interface IDynamicFilter : IFilter
     {
         object Filter(object callback, MethodBinding method,
-           IHandler composer, FilterDelegate<object> next);
+           IHandler composer, NextDelegate<object> next);
     }
 
     public interface IFilterProvider
