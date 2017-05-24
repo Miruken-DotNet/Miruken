@@ -125,7 +125,7 @@
         {
             public int? Order { get; set; }
 
-            public object Filter(HandleMethod method, MethodBinding binding,
+            public object Next(HandleMethod method, MethodBinding binding,
                 IHandler composer, NextDelegate<object> next)
             {
                 Console.WriteLine($"Handle method {method.Method.Name}");

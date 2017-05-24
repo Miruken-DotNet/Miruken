@@ -597,7 +597,7 @@
         {
             public int? Order { get; set; }
 
-            public object Filter(
+            public object Next(
                 T callback, MethodBinding method, IHandler composer, NextDelegate<object> next)
             {
                 return null;
@@ -608,7 +608,7 @@
         {
             public int? Order { get; set; }
 
-            public T Filter(object callback, MethodBinding method, IHandler composer, NextDelegate<T> next)
+            public T Next(object callback, MethodBinding method, IHandler composer, NextDelegate<T> next)
             {
                 return default(T);
             }
@@ -618,7 +618,7 @@
         {
             public int? Order { get; set; }
 
-            public object Filter(
+            public object Next(
                 object callback, MethodBinding method, IHandler composer, NextDelegate<object> next)
             {
                 return null;
@@ -1018,7 +1018,7 @@
                      : Activator.CreateInstance(type);
             }
 
-            object IFilter<Bar, object>.Filter(
+            object IFilter<Bar, object>.Next(
                 Bar callback, MethodBinding binding, IHandler composer,
                 NextDelegate<object> next)
             {
@@ -1031,7 +1031,7 @@
         {
             public int? Order { get; set; }
 
-            public Res Filter(Cb callback, MethodBinding binding,
+            public Res Next(Cb callback, MethodBinding binding,
                 IHandler composer, NextDelegate<Res> next)
             {
                 Console.WriteLine($"Handle {callback}");

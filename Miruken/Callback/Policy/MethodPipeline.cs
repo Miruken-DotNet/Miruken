@@ -25,7 +25,7 @@
                     {
                         composer = comp ?? composer;
                         var filter = pipeline.Current;
-                        return filter?.Filter(callback, binding, composer, next);
+                        return filter?.Next(callback, binding, composer, next);
                     }
                     completed = true;
                     return complete(composer);
@@ -70,9 +70,9 @@
                         var filter      = pipeline.Current;
                         var typedFilter = filter as IFilter<Cb, Res>;
                         if (typedFilter != null)
-                            return typedFilter.Filter((Cb)callback, binding, composer, next);
+                            return typedFilter.Next((Cb)callback, binding, composer, next);
                         var dynamicFilter = filter as IDynamicFilter;
-                        return (Res)dynamicFilter?.Filter(
+                        return (Res)dynamicFilter?.Next(
                             callback, binding, composer, (p,c) => next(p,c));
                     }
                     completed = true;
