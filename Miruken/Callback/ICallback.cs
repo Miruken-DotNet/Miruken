@@ -19,12 +19,6 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
-    public interface ICancelCallback
-    {
-        bool ShouldCancel { get; }
-        void Cancel();
-    }
-
     public interface IDispatchCallback
     {
         bool Dispatch(Handler handler, bool greedy, IHandler composer);
