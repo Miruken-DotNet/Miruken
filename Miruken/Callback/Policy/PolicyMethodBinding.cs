@@ -64,7 +64,7 @@
             var result     = Invoke(target, callback, composer, resultType);
             var accepted   = Policy.AcceptResult?.Invoke(result, this) 
                           ?? result != null;
-            return accepted && result != null
+            return accepted && (result != null) && !Dispatcher.IsVoid
                  ? results?.Invoke(result) != false
                  : accepted;
         }
@@ -74,7 +74,7 @@
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
-            if (callback is FilterOptions)
+            if (callback is INoFiltersCallback)
                 return Dispatcher.Invoke(target, args, resultType);
 
             Type callbackType;

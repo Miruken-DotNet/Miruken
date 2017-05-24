@@ -19,6 +19,8 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
+    public interface INoFiltersCallback {}
+
     public interface IDispatchCallback
     {
         bool Dispatch(Handler handler, bool greedy, IHandler composer);

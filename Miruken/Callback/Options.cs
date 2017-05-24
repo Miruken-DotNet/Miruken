@@ -2,7 +2,8 @@
 {
     using System;
 
-    public abstract class Options<T> : Composition, IBoundCallback
+    public abstract class Options<T> : Composition,
+        IBoundCallback, INoFiltersCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }
