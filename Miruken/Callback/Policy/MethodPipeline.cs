@@ -10,32 +10,6 @@
             object callback, Func<IHandler, object> complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result);
 
-        public static bool InvokeDynamic(MethodBinding binding, object target,
-            object callback, Func<IHandler, object> complete, IHandler composer,
-            IEnumerable<IDynamicFilter> filters, out object result)
-        {
-            var completed = false;
-            using (var pipeline = filters.GetEnumerator())
-            {
-                NextDelegate<object> next = null;
-                next = (proceed, comp) =>
-                {
-                    if (!proceed) return null;
-                    while (pipeline.MoveNext())
-                    {
-                        composer = comp ?? composer;
-                        var filter = pipeline.Current;
-                        return filter?.Next(callback, binding, composer, next);
-                    }
-                    completed = true;
-                    return complete(composer);
-                };
-
-                result = next(true, composer);
-                return completed;
-            }
-        }
-
         public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
         {
             if (resultType == typeof(void))
@@ -57,13 +31,17 @@
             object callback, Func<IHandler, object> complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result)
         {
-            var completed = false;
+            var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
                 NextDelegate<Res> next = null;
                 next = (proceed, comp) =>
                 {
-                    if (!proceed) return default(Res);
+                    if (!proceed)
+                    {
+                        completed = false;
+                        return default(Res);
+                    }
                     while (pipeline.MoveNext())
                     {
                         composer = comp ?? composer;
@@ -75,10 +53,8 @@
                         return (Res)dynamicFilter?.Next(
                             callback, binding, composer, (p,c) => next(p,c));
                     }
-                    completed = true;
                     return (Res)complete(composer);
                 };
-
                 result = next(true, composer);
                 return completed;
             }

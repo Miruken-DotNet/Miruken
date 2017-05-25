@@ -16,12 +16,6 @@ namespace Miruken.Callback.Policy
         public ComposerArgument Composer => ComposerArgument.Instance;
         public BindingArgument  Binding  => BindingArgument.Instance;
 
-        public TBuilder NoResult(object value)
-        {
-            Policy.NoResult = value;
-            return (TBuilder)this;
-        }
-
         public TBuilder AcceptResult(AcceptResultDelegate value)
         {
             Policy.AcceptResult = value;

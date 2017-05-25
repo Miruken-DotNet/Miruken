@@ -10,7 +10,6 @@
     {
         public ContravariantPolicy()
         {
-            NoResult     = false;
             AcceptResult = VerifyResult;
         }
 

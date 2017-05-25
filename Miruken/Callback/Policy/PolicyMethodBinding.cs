@@ -60,8 +60,10 @@
         {
             if (Attribute?.Approve(callback, this) == false)
                 return false;
+            object result;
             var resultType = Policy.ResultType?.Invoke(callback);
-            var result     = Invoke(target, callback, composer, resultType);
+            if (!Invoke(target, callback, composer, resultType, out result))
+                return false;
             var accepted   = Policy.AcceptResult?.Invoke(result, this) 
                           ?? result != null;
             return accepted && (result != null) && !Dispatcher.IsVoid
@@ -69,13 +71,16 @@
                  : accepted;
         }
 
-        protected object Invoke(object target, object callback,
-            IHandler composer, Type resultType = null)
+        private bool Invoke(object target, object callback,
+            IHandler composer, Type resultType, out object result)
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
             if (callback is INoFiltersCallback)
-                return Dispatcher.Invoke(target, args, resultType);
+            {
+                result = Dispatcher.Invoke(target, args, resultType);
+                return true;
+            }
 
             Type callbackType;
             var dispatcher     = Dispatcher.CloseDispatch(args, resultType);
@@ -104,35 +109,19 @@
 
             if (filters.Length == 0)
             {
-                return convertResult(
+                result = convertResult(
                     dispatcher.Invoke(target, args, resultType),
                     returnType);
+                return true;
             }
 
-            object result;
-            bool   completed;
-
-            if (filters.All(filter => filter is IDynamicFilter))
-            {
-                completed = MethodPipeline.InvokeDynamic(
-                    this, target, actualCallback, comp => 
-                        convertResult(dispatcher.Invoke(target,
-                        GetArgs(callback, args, composer, comp),
-                        resultType), returnType),
-                    composer, filters.Cast<IDynamicFilter>(), out result);
-            }
-            else
-            {
-                var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
-                completed = pipeline.Invoke(
-                    this, target, actualCallback, comp => 
-                        convertResult(dispatcher.Invoke(target,
-                        GetArgs(callback, args, composer, comp),
-                        resultType), returnType),
-                    composer, filters, out result);
-            }
-  
-            return completed ? result : Policy.NoResult;
+            var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
+            return pipeline.Invoke(
+                this, target, actualCallback, comp => 
+                    convertResult(dispatcher.Invoke(target,
+                    GetArgs(callback, args, composer, comp),
+                    resultType), returnType),
+                composer, filters, out result);  
         }
 
         private object GetCallbackInfo(object callback, object[] args,
