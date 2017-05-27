@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using Concurrency;
+    using Infrastructure;
 
     public partial class Handler
     {
@@ -25,7 +26,10 @@
                      ? ((Promise)result).Wait()
                      : result;
             }
-            return null;
+            var type = key as Type;
+            return type != null 
+                 ? RuntimeHelper.GetDefault(type)
+                 : null;
         }
 
         public static Promise ResolveAsync(this IHandler handler, object key)
@@ -33,8 +37,11 @@
             if (handler == null) return null;
             var inquiry = key as Inquiry ?? new Inquiry(key);
             inquiry.WantsAsync = true;
-            return handler.Handle(inquiry)
-                 ? (Promise)inquiry.Result
+            if (handler.Handle(inquiry))
+                return (Promise)inquiry.Result;
+            var type = key as Type;
+            return type != null 
+                 ? Promise.Resolved(RuntimeHelper.GetDefault(type))
                  : Promise.Empty;
         }
 

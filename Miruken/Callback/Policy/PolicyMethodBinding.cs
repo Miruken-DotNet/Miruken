@@ -115,13 +115,12 @@
                 return true;
             }
 
-            var pipeline = MethodPipeline.GetPipeline(callbackType, returnType);
-            return pipeline.Invoke(
-                this, target, actualCallback, comp => 
-                    convertResult(dispatcher.Invoke(target,
-                    GetArgs(callback, args, composer, comp),
-                    resultType), returnType),
-                composer, filters, out result);  
+            return MethodPipeline.GetPipeline(callbackType, returnType)
+                .Invoke(this, target, actualCallback, comp => 
+                        convertResult(dispatcher.Invoke(target,
+                            GetArgs(callback, args, composer, comp),
+                            resultType), returnType),
+                        composer, filters, out result);  
         }
 
         private object GetCallbackInfo(object callback, object[] args,

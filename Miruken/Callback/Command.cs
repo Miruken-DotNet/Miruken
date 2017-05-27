@@ -84,18 +84,10 @@
 
         bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
         {
-            var handled = false;
-            var count   = _results.Count;
-            if (Policy == null)
-            {
-                handled = HandlesAttribute.Policy.Dispatch(
-                    handler, Callback, greedy, composer, Respond);
-                if (!greedy && (handled || _results.Count > count))
-                    return true;
-            }
-            var policy = Policy ?? HandlesAttribute.Policy;
-            return policy.Dispatch(handler, this, greedy, composer, Respond)
-                || handled || (_results.Count > count);
+            var count = _results.Count;
+            return (Policy ?? HandlesAttribute.Policy)
+                .Dispatch(handler, this, greedy, composer, Respond)
+                    || (_results.Count > count);
         }
     }
 }

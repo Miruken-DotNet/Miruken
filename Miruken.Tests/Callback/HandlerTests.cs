@@ -543,6 +543,20 @@
         }
 
         [TestMethod]
+        public void Should_Infer_Pipelines()
+        {
+            var handler = new FilteredHandler();
+            var resp = handler.Command<Foo>(new Foo());
+        }
+
+        [TestMethod]
+        public async Task Should_Infer_Async_Pipelines()
+        {
+            var handler = new FilteredHandler();
+            var resp = await handler.CommandAsync<Foo>(new Foo());
+        }
+
+        [TestMethod]
         public void Should_Infer_Callback_Filter_Generic_Types()
         {
             var handler  = new FilterResolver();
@@ -994,6 +1008,10 @@
             }
         }
 
+        public interface IBehavior<in TReq, TResp> : IFilter<TReq, Promise<TResp>>
+        {
+        }
+
         private class FilteredHandler : Handler, IFilter<Bar, object>
         {
             int? IFilter.Order { get; set; }
@@ -1005,6 +1023,13 @@
                 bar.Handled++;
             }
 
+            [Handles,
+             Filter(typeof(IBehavior<,>), Many = true)]
+            public SuperFoo HandleFoo(Foo foo, IHandler composer)
+            {
+                return new SuperFoo {HasComposer = true};
+            }
+
             [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
@@ -1013,6 +1038,19 @@
                 if (type.IsInterface)
                     return Activator.CreateInstance(
                         typeof(LogFilter<,>).
+                        MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                     : Activator.CreateInstance(type);
+            }
+
+            [Provides(typeof(IBehavior<,>))]
+            public object CreateBehavior(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(LogBehavior<,>).
                         MakeGenericType(type.GenericTypeArguments));
                 return type.IsAbstract ? null
                      : Activator.CreateInstance(type);
@@ -1035,6 +1073,18 @@
                 IHandler composer, NextDelegate<Res> next)
             {
                 Console.WriteLine($"Handle {callback}");
+                return next();
+            }
+        }
+
+        private class LogBehavior<Req, Res> : IBehavior<Req, Res>
+        {
+            public int? Order { get; set; }
+
+            public Promise<Res> Next(Req request, MethodBinding binding,
+                IHandler composer, NextDelegate<Promise<Res>> next)
+            {
+                Console.WriteLine($"Handle {request}");
                 return next();
             }
         }

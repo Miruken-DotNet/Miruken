@@ -33,6 +33,8 @@ namespace Miruken.Callback.Policy
         {
             var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
+            if (typeof(Cb).IsAssignableFrom(paramType))
+                return false;
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();
@@ -68,8 +70,8 @@ namespace Miruken.Callback.Policy
             {
                 var contraints = paramType.GetGenericParameterConstraints();
                 paramType = contraints.Length == 1
-                        ? contraints[0]
-                        : typeof(object);
+                          ? contraints[0]
+                          : typeof(object);
             }
             if (paramType == typeof(object)) return;
             binding.CallbackIndex = parameter.Position;
@@ -79,7 +81,7 @@ namespace Miruken.Callback.Policy
         public override object Resolve(
             object callback, PolicyMethodBinding binding, IHandler composer)
         {
-            return _target((Cb)callback);
+            return callback is Cb ? _target((Cb)callback) : callback;
         }
     }
 }

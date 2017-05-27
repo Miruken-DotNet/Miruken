@@ -50,8 +50,9 @@
                         if (typedFilter != null)
                             return typedFilter.Next((Cb)callback, binding, composer, next);
                         var dynamicFilter = filter as IDynamicFilter;
-                        return (Res)dynamicFilter?.Next(
-                            callback, binding, composer, (p,c) => next(p,c));
+                        if (dynamicFilter != null)
+                            return (Res)dynamicFilter.Next(
+                                callback, binding, composer, (p,c) => next(p,c));
                     }
                     return (Res)complete(composer);
                 };

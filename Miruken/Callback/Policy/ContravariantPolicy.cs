@@ -99,7 +99,7 @@
         public override IEnumerable SelectKeys(object callback, ICollection keys)
         {
             if (!(callback is Cb))
-                return Enumerable.Empty<object>();
+                return SelectKeys(callback.GetType(), keys);
             var type = Target((Cb)callback)?.GetType();
             return SelectKeys(type, keys);
         }
