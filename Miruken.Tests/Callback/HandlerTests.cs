@@ -546,14 +546,24 @@
         public void Should_Infer_Pipelines()
         {
             var handler = new FilteredHandler();
-            var resp = handler.Command<Foo>(new Foo());
+            var resp    = handler.Command<Foo>(new Foo());
+            Assert.IsInstanceOfType(resp, typeof(SuperFoo));
         }
 
         [TestMethod]
         public async Task Should_Infer_Async_Pipelines()
         {
             var handler = new FilteredHandler();
-            var resp = await handler.CommandAsync<Foo>(new Foo());
+            var resp    = await handler.CommandAsync<Foo>(new Foo());
+            Assert.IsInstanceOfType(resp, typeof(SuperFoo));
+        }
+
+        [TestMethod]
+        public async Task Should_Coerce_Async_Pipelines()
+        {
+            var handler = new FilteredHandler();
+            var resp    = await handler.CommandAsync<Boo>(new Boo());
+            Assert.IsInstanceOfType(resp, typeof(Boo));
         }
 
         [TestMethod]
@@ -1030,6 +1040,13 @@
                 return new SuperFoo {HasComposer = true};
             }
 
+            [Handles,
+                Filter(typeof(IBehavior<,>), Many = true)]
+            public Promise HandleBoo(Boo boo, IHandler composer)
+            {
+                return Promise.Resolved(new Boo {HasComposer = true});
+            }
+
             [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
@@ -1072,7 +1089,7 @@
             public Res Next(Cb callback, MethodBinding binding,
                 IHandler composer, NextDelegate<Res> next)
             {
-                Console.WriteLine($"Handle {callback}");
+                Console.WriteLine($"Filter log {callback}");
                 return next();
             }
         }
@@ -1084,7 +1101,7 @@
             public Promise<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Promise<Res>> next)
             {
-                Console.WriteLine($"Handle {request}");
+                Console.WriteLine($"Behavior log {request}");
                 return next();
             }
         }

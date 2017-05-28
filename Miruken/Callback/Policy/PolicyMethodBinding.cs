@@ -90,15 +90,23 @@
             var asyncCallback  = callback as IAsyncCallback;
 
             Func<object, Type, object> convertResult = PassResult;
-            if (asyncCallback?.WantsAsync == true && !dispatcher.IsPromise)
+            if (asyncCallback?.WantsAsync == true)
             {
-                var logicalType = dispatcher.LogicalReturnType;
-                returnType      = logicalType != typeof(void)
-                                ? typeof(Promise<>).MakeGenericType(logicalType)
-                                : typeof(Promise<object>);
-                convertResult   = dispatcher.IsTask
-                                ? (Func<object, Type, object>)PromisifyTask
-                                : PromisifyResult;
+                if (!dispatcher.IsPromise)
+                {
+                    var logicalType = dispatcher.LogicalReturnType;
+                    returnType      = logicalType != typeof(void)
+                                    ? typeof(Promise<>).MakeGenericType(logicalType)
+                                    : typeof(Promise<object>);
+                    convertResult   = dispatcher.IsTask
+                                    ? (Func<object, Type, object>)PromisifyTask
+                                    : PromisifyResult;
+                }
+                else if (returnType == typeof(Promise))
+                {
+                    returnType    = typeof(Promise<object>);
+                    convertResult = CoercePromise;
+                }
             }
 
             var filters = composer
@@ -151,6 +159,11 @@
         private static object PromisifyTask(object result, Type promiseType)
         {
             return ((Task)result)?.ToPromise().Coerce(promiseType);
+        }
+
+        private static object CoercePromise(object result, Type promiseType)
+        {
+            return ((Promise)result)?.Coerce(promiseType);
         }
 
         private static object PassResult(object result, Type promiseType)

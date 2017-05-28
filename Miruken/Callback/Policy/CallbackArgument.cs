@@ -33,7 +33,6 @@ namespace Miruken.Callback.Policy
             ParameterInfo parameter, DefinitionAttribute attribute,
             IDictionary<string, Type> aliases)
         {
-            var restrict  = attribute.Key as Type;
             var paramType = parameter.ParameterType;
             if (paramType.IsGenericParameter)
             {
@@ -50,6 +49,7 @@ namespace Miruken.Callback.Policy
                         return false;
                 }
             }
+            var restrict = attribute.Key as Type;
             if (restrict == null || restrict.IsAssignableFrom(paramType)
                 || paramType.IsAssignableFrom(restrict))
             {
