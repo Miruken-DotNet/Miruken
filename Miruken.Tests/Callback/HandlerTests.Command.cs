@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
-    using System.Collections;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,12 +48,23 @@
         }
 
         [TestMethod]
+        public void Should_Command_All()
+        {
+            var handler   = new OrderHandler();
+            var fulfill   = new FulfillOrder { OrderId = 1 };
+            var results   = handler.CommandAll<bool>(fulfill);
+            var responses = results.ToArray();
+            Assert.AreEqual(2, responses.Length);
+            Assert.IsTrue(responses.All(b => b));
+        }
+
+        [TestMethod]
         public async Task Should_Command_All_Asycnhronously()
         {
             var handler   = new OrderHandler();
             var fulfill   = new FulfillOrder { OrderId = 1 };
-            var results   = await handler.CommandAllAsync(fulfill);
-            var responses = ((IEnumerable)results).Cast<bool>().ToArray();
+            var results   = await handler.CommandAllAsync<bool>(fulfill);
+            var responses = results.ToArray();
             Assert.AreEqual(2, responses.Length);
             Assert.IsTrue(responses.All(b => b));
         }

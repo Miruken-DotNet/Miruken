@@ -964,7 +964,7 @@
 
             [Provides(typeof(Baz<int>)),
              Provides(typeof(Baz<string>))]
-            public Promise ProvideManyKeys(Inquiry inquiry)
+            public Task ProvideManyKeys(Inquiry inquiry)
             {
                 if (Equals(inquiry.Key, typeof(Baz<int>)))
                     return Promise.Resolved(new Baz<int>(1));

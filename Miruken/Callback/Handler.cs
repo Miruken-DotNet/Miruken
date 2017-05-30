@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Policy;
 
     public partial class Handler : MarshalByRefObject, IHandler
 	{
@@ -41,7 +42,7 @@
 
             var dispatch = callback as IDispatchCallback;
             return dispatch?.Dispatch(this, greedy, composer)
-                ?? HandlesAttribute.Policy.Dispatch(this, callback, greedy, composer);
+                ?? HandlesPolicy.Dispatch(this, callback, greedy, composer);
         }
 
         public static CascadeHandler operator +(Handler c1, IHandler c2)
@@ -63,7 +64,9 @@
             typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)
         };
-    }
+
+	    private static readonly CallbackPolicy HandlesPolicy = HandlesAttribute.Policy;
+	}
 
     public class CompositionScope : HandlerDecorator
     {

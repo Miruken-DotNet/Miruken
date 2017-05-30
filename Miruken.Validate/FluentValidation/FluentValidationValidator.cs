@@ -24,7 +24,8 @@
 
             foreach (var validator in validators)
             {
-                var result = await validator.ValidateAsync(context);
+                var result = await validator.ValidateAsync(context)
+                    .ConfigureAwait(false);
                 if (!result.IsValid) AddErrors(result, outcome);
             }
         }

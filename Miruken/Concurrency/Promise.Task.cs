@@ -8,7 +8,12 @@
     using System.Threading.Tasks;
     using Infrastructure;
 
-    public partial class Promise
+    public interface ITaskConversion
+    {
+        Task ToTask();
+    }
+
+    public partial class Promise : ITaskConversion
     {
         public Task<object> ToTask()
         {
@@ -24,9 +29,24 @@
             return ToTask().GetAwaiter();
         }
 
+        Task ITaskConversion.ToTask()
+        {
+            return ToTaskInternal();
+        }
+
+        protected virtual Task ToTaskInternal()
+        {
+            return ToTask();
+        }
+
         public static implicit operator Task<object>(Promise promise)
         {
             return promise.ToTask();
+        }
+
+        public static implicit operator Promise(Task task)
+        {
+            return task.ToPromise();
         }
     }
 
@@ -89,9 +109,24 @@
             return ToTask().GetAwaiter();
         }
 
+        protected override Task ToTaskInternal()
+        {
+            return ToTask();
+        }
+
         public static implicit operator Task<T>(Promise<T> promise)
         {
             return promise.ToTask();
+        }
+
+        public static implicit operator Task(Promise<T> promise)
+        {
+            return promise.ToTask();
+        }
+
+        public static implicit operator Promise<T>(Task<T> task)
+        {
+            return task.ToPromise();
         }
 
         private static Exception ExtractException(Task task)
