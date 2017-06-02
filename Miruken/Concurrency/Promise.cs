@@ -124,12 +124,46 @@
             return FinallyT(final);
         }
 
+        public Promise Finally(FinallyCallbackR final)
+        {
+            return FinallyT(final);
+        }
+
         protected abstract Promise FinallyT(FinallyCallback final);
 
-        public Promise Decorate(ResolveDecorator resolve)
+        protected abstract Promise FinallyT(FinallyCallbackR final);
+
+        #endregion
+
+        #region Tap
+
+        public Promise Tap(ResolveCallback tap)
         {
-            return Decorate(resolve, null);
+            return TapT(tap);
         }
+
+        public Promise Finally(ResolveCallback<Promise> tap)
+        {
+            return TapT(tap);
+        }
+
+        protected abstract Promise TapT(ResolveCallback tap);
+
+        protected abstract Promise TapT(ResolveCallback<Promise> tap);
+
+        public Promise TapCatch(RejectCallback tap)
+        {
+            return TapCatchT(tap);
+        }
+
+        public Promise TapCatch(RejectCallback<Promise> tap)
+        {
+            return TapCatchT(tap);
+        }
+
+        public abstract Promise TapCatchT(RejectCallback tap);
+
+        public abstract Promise TapCatchT(RejectCallback<Promise> tap);
 
         #endregion
 
@@ -160,6 +194,11 @@
         #endregion
 
         #region Misc
+
+        public Promise Decorate(ResolveDecorator resolve)
+        {
+            return Decorate(resolve, null);
+        }
 
         public object Wait()
         {
@@ -728,12 +767,7 @@
             });
         }
 
-        protected override Promise FinallyT(FinallyCallback final)
-        {
-            return Finally(final);
-        }
-
-        public Promise<T> Finally(FinallyCallbackR final)
+        public new Promise<T> Finally(FinallyCallbackR final)
         {
             return CreateChild<T>((resolve, reject) =>
             {
@@ -743,7 +777,7 @@
                     {
                         try
                         {
-                            var result = final();
+                            var result  = final();
                             var promise = result as Promise;
                             promise?.Then((_, ss) => resolve((T)r, s & ss),
                                 (ex, ss) => reject(ex, s & ss));
@@ -789,6 +823,192 @@
                     }
                 }
             });
+        }
+
+        protected override Promise FinallyT(FinallyCallback final)
+        {
+            return Finally(final);
+        }
+
+        protected override Promise FinallyT(FinallyCallbackR final)
+        {
+            return Finally(final);
+        }
+
+        #endregion
+
+        #region Tap
+
+        public new Promise Tap(ResolveCallback tap)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                ResolveCallback res = (r, s) =>
+                {
+                    if (tap != null)
+                    {
+                        try
+                        {
+                            tap(r, s);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                    resolve((T)r, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            reject(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += reject;
+                    }
+                }
+            });
+        }
+
+        public Promise<T> Tap(ResolveCallbackT<Promise> tap)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                ResolveCallback res = (r, s) =>
+                {
+                    if (tap != null)
+                    {
+                        try
+                        {
+                            var promise = tap((T) r, s);
+                            if (promise?.Finally(() => resolve((T) r, s)) != null)
+                                return;
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                    resolve((T)r, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            res(_result, CompletedSynchronously);
+                        else
+                            reject(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += res;
+                        _rejected += reject;
+                    }
+                }
+            });
+        }
+
+        protected override Promise TapT(ResolveCallback tap)
+        {
+            return Tap(tap);
+        }
+
+        protected override Promise TapT(ResolveCallback<Promise> tap)
+        {
+            return Tap((T r, bool s) => tap(r, s));
+        }
+
+        public new Promise<T> TapCatch(RejectCallback tap)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                RejectCallback rej = (ex, s) =>
+                {
+                    if (tap != null)
+                    {
+                        try
+                        {
+                            tap(ex, s);
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                    reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            resolve((T)_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += (r,s) => resolve((T)r,s);
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        public new Promise<T> TapCatch(RejectCallback<Promise> tap)
+        {
+            return CreateChild<T>((resolve, reject) =>
+            {
+                RejectCallback rej = (ex, s) =>
+                {
+                    if (tap != null)
+                    {
+                        try
+                        {
+                            var promise = tap(ex, s);
+                            if (promise?.Finally(() => reject(ex, s)) != null)
+                                return;
+                        }
+                        catch
+                        {
+                            // ignore
+                        }
+                    }
+                    reject(ex, s);
+                };
+                lock (_guard)
+                {
+                    if (IsCompleted)
+                    {
+                        if (State == PromiseState.Fulfilled)
+                            resolve((T)_result, CompletedSynchronously);
+                        else
+                            rej(_exception, CompletedSynchronously);
+                    }
+                    else
+                    {
+                        _fulfilled += (r, s) => resolve((T)r, s);
+                        _rejected += rej;
+                    }
+                }
+            });
+        }
+
+        public override Promise TapCatchT(RejectCallback tap)
+        {
+            return TapCatch(tap);
+        }
+
+        public override Promise TapCatchT(RejectCallback<Promise> tap)
+        {
+            return TapCatch(tap);
         }
 
         #endregion

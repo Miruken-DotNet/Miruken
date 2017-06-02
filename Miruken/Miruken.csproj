@@ -103,6 +103,7 @@
     <Compile Include="Callback\Handler.Bounds.cs" />
     <Compile Include="Callback\VarianceOptions.cs" />
     <Compile Include="Concurrency\Promise.Task.cs" />
+    <Compile Include="Concurrency\TaskExtensions.cs" />
     <Compile Include="Context\Contextual.cs" />
     <Compile Include="Context\ContextualHandler.cs" />
     <Compile Include="Infrastructure\MethodSignatureComparer.cs" />

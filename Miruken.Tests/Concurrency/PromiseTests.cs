@@ -763,6 +763,7 @@ namespace Miruken.Tests.Concurrency
             var final = promise.Finally(() =>
             {
                 ++called;
+                return Promise.Delay(10.Millis());
             }).Then((r, s) =>
             {
                 Assert.AreEqual("Hello", r);
@@ -787,6 +788,7 @@ namespace Miruken.Tests.Concurrency
             var final = promise.Finally(() =>
             {
                 ++called;
+                return Promise.Delay(10.Millis());
             })
             .Catch((ex, s) =>
             {
@@ -796,6 +798,171 @@ namespace Miruken.Tests.Concurrency
             if (final.AsyncWaitHandle.WaitOne(5.Sec()))
             {
                 Assert.AreEqual(2, called);
+                Assert.IsFalse(promise.CompletedSynchronously);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
+        public void Should_Tap_Fulfill_Synchronously_Using_callbacks()
+        {
+            var called = 0;
+            object result = null;
+            var promise = new Promise<object>((resolve, reject) => resolve("Hello", true));
+            promise.Tap((r,s) =>
+            {
+                result = r;
+            }).Then((r, s) => {
+                Assert.AreEqual("Hello", r);
+                ++called;
+            });
+            Assert.AreEqual(1, called);
+            Assert.AreEqual("Hello", result);
+            Assert.IsTrue(promise.CompletedSynchronously);
+        }
+
+        [TestMethod]
+        public void Should_Tap_Fulfill_Asynchronously_Using_callbacks()
+        {
+            var called = 0;
+            object result = null;
+            var promise = new Promise<string>((resolve, reject) =>
+                ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
+            var final = promise.Tap((r,s) =>
+            {
+                result = r;
+                return Promise.Delay(10.Millis());
+            }).Then((r, s) =>
+            {
+                Assert.AreEqual("Hello", r);
+                ++called;
+            });
+            if (final.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.AreEqual(1, called);
+                Assert.AreEqual("Hello", result);
+                Assert.IsFalse(promise.CompletedSynchronously);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
+        public void Should_Reject_Tap_Fulfill_Asynchronously_Using_callbacks()
+        {
+            var called = 0;
+            object result = null;
+            var promise = new Promise<string>((resolve, reject) =>
+                ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
+            var final = promise.Tap((r, s) =>
+            {
+                result = r;
+                return Promise.Rejected(new Exception());
+            }).Then((r, s) =>
+            {
+                Assert.AreEqual("Hello", r);
+                ++called;
+            });
+            if (final.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.AreEqual(1, called);
+                Assert.AreEqual("Hello", result);
+                Assert.IsFalse(promise.CompletedSynchronously);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
+        public void Should_Not_Tap_Reject_Synchronously_Using_Callbacks()
+        {
+            var called = 0;
+            object result = null;
+            var promise = new Promise<object>((resolve, reject) =>
+                reject(new Exception("Rejected"), true));
+            promise.Tap((r,s) =>
+            {
+                result = r;
+            })
+            .Catch((ex, s) => {
+                Assert.AreEqual("Rejected", ex.Message);
+                ++called;
+            });
+            Assert.AreEqual(1, called);
+            Assert.IsNull(result);
+            Assert.IsTrue(promise.CompletedSynchronously);
+        }
+
+        [TestMethod]
+        public void Should_Tap_Reject_Asynchronously_Using_Callbacks()
+        {
+            var called = 0;
+            object result = null;
+            var promise = new Promise<object>((resolve, reject) =>
+                ThreadPool.QueueUserWorkItem(_ =>
+                    reject(new Exception("Rejected"), false)));
+            var final = promise.Tap((r,s) =>
+            {
+                result = r;
+                return Promise.Delay(10.Millis());
+            })
+            .Catch((ex, s) =>
+            {
+                Assert.AreEqual("Rejected", ex.Message);
+                ++called;
+            });
+            if (final.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.AreEqual(1, called);
+                Assert.IsNull(result);
+                Assert.IsFalse(promise.CompletedSynchronously);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
+        public void Should_Tap_Catch_Reject_Synchronously_Using_Callbacks()
+        {
+            var called = 0;
+            Exception exception = null;
+            var promise = new Promise<object>((resolve, reject) =>
+                reject(new Exception("Rejected"), true));
+            promise.TapCatch((ex, s) =>
+            {
+                exception = ex;
+            })
+            .Catch((ex, s) => {
+                Assert.AreEqual("Rejected", ex.Message);
+                ++called;
+            });
+            Assert.AreEqual(1, called);
+            Assert.IsNotNull(exception);
+            Assert.AreEqual("Rejected", exception.Message);
+            Assert.IsTrue(promise.CompletedSynchronously);
+        }
+
+        [TestMethod]
+        public void Should_Not_Tap_Catch_Fulfill_Asynchronously_Using_callbacks()
+        {
+            var called = 0;
+            Exception exception = null;
+            var promise = new Promise<string>((resolve, reject) =>
+                ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
+            var final = promise.TapCatch((ex, s) =>
+            {
+                exception = ex;
+                return Promise.Delay(10.Millis());
+            }).Then((r, s) =>
+            {
+                Assert.AreEqual("Hello", r);
+                ++called;
+            });
+            if (final.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.AreEqual(1, called);
+                Assert.IsNull(exception);
                 Assert.IsFalse(promise.CompletedSynchronously);
             }
             else

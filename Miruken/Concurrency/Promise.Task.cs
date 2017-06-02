@@ -1,12 +1,9 @@
 ﻿namespace Miruken.Concurrency
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Runtime.CompilerServices;
-    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Infrastructure;
 
     public interface ITaskConversion
     {
@@ -133,60 +130,5 @@
         {
             return task.Exception?.Flatten().InnerException;
         }
-    }
-
-    public static class TaskToPromiseExtensions
-    {
-        public static Promise<object> ToPromise(
-            this Task task,
-            CancellationToken cancellationToken = default(CancellationToken),
-            ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return task.ContinueWith(GetResult, cancellationToken)
-                .ToPromise(cancellationToken, mode);
-        }
-
-        public static Promise<object> ToPromise(
-            this Task task,
-            CancellationTokenSource cancellationTokenSource,
-            ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return task.ContinueWith(GetResult, cancellationTokenSource.Token)
-                .ToPromise(cancellationTokenSource, mode);
-        }
-
-        public static Promise<T> ToPromise<T>(
-            this Task<T> task,
-            CancellationToken cancellationToken = default(CancellationToken),
-            ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return new Promise<T>(task, cancellationToken, mode);
-        }
-
-        public static Promise<T> ToPromise<T>(
-            this Task<T> task,
-            CancellationTokenSource cancellationTokenSource,
-            ChildCancelMode mode = ChildCancelMode.All)
-        {
-            return new Promise<T>(task, cancellationTokenSource, mode);
-        }
-
-        private static object GetResult(Task task)
-        {
-            var exception = task.Exception;
-            if (exception != null)
-            {
-                var ex = exception.Flatten().InnerException;
-                ExceptionDispatchInfo.Capture(ex ?? exception).Throw();
-            }
-            var taskType = task.GetType();
-            var getter   = TaskResultGetters.GetOrAdd(taskType, type =>
-                type.GetOpenTypeConformance(typeof(Task<>)) == null ? null
-                    : RuntimeHelper.CreatePropertyGetter("Result", type));
-            return getter?.Invoke(task);
-        }
-
-        private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>
-            TaskResultGetters = new ConcurrentDictionary<Type, PropertyGetDelegate>();
     }
 }
