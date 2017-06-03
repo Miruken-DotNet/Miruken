@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+    using Concurrency;
 
     public abstract class MethodBinding
     {
@@ -29,7 +31,25 @@
             _filters.AddRange(providers.Where(p => p != null));
         }
 
-        public abstract bool Dispatch(object target, object callback, 
+        public abstract bool Dispatch(object target, object callback,
             IHandler composer, Func<object, bool> results = null);
+
+        internal object CoerceResult(
+            object result, Type resultType, bool? wantsAsync = null)
+        {
+            if (wantsAsync == true)
+            {
+                var promise = result as Promise;
+                return promise ?? Promise.Resolved(result);
+            }
+            if (result != null && !resultType.IsInstanceOfType(result))
+            {
+                if (typeof(Task).IsAssignableFrom(resultType))
+                    return Task.FromResult(result).Coerce(resultType);
+                if (typeof(Promise).IsAssignableFrom(resultType))
+                    return Promise.Resolved(result).Coerce(resultType);
+            }
+            return result;
+        }
     }
 }

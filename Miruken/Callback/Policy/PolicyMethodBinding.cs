@@ -2,8 +2,6 @@
 {
     using System;
     using System.Linq;
-    using System.Threading.Tasks;
-    using Concurrency;
 
     public delegate bool AcceptResultDelegate(
         object result, MethodBinding binding);
@@ -62,17 +60,13 @@
                 return false;
             object result;
             var resultType = Policy.ResultType?.Invoke(callback);
-            if (!Invoke(target, callback, composer, resultType, out result))
-                return false;
-            var accepted   = Policy.AcceptResult?.Invoke(result, this) 
-                          ?? result != null;
-            return accepted && (result != null) && !Dispatcher.IsVoid
-                 ? results?.Invoke(result) != false
-                 : accepted;
+            return Invoke(target, callback, composer, resultType,
+                results, out result);
         }
 
         private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, out object result)
+            IHandler composer, Type resultType, Func<object, bool> results,
+            out object result)
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
@@ -84,51 +78,35 @@
 
             Type callbackType;
             var dispatcher     = Dispatcher.CloseDispatch(args, resultType);
-            var actualCallback = GetCallbackInfo(callback, args, dispatcher, 
-                                                 out callbackType);
+            var actualCallback = GetCallbackInfo(
+                callback, args, dispatcher, out callbackType);
             var returnType     = dispatcher.ReturnType;
-            var asyncCallback  = callback as IAsyncCallback;
-
-            Func<object, Type, object> convertResult = PassResult;
-            if (asyncCallback?.WantsAsync == true)
-            {
-                if (!dispatcher.IsPromise)
-                {
-                    var logicalType = dispatcher.LogicalReturnType;
-                    returnType      = logicalType != typeof(void)
-                                    ? typeof(Promise<>).MakeGenericType(logicalType)
-                                    : typeof(Promise<object>);
-                    convertResult   = dispatcher.IsTask
-                                    ? (Func<object, Type, object>)PromisifyTask
-                                    : PromisifyResult;
-                }
-                else if (returnType == typeof(Promise))
-                {
-                    returnType    = typeof(Promise<object>);
-                    convertResult = CoercePromise;
-                }
-            }
+            var logicalType    = dispatcher.LogicalReturnType;
 
             var filters = composer
-                .GetOrderedFilters(callbackType, returnType, Filters,
+                .GetOrderedFilters(callbackType, logicalType, Filters,
                     FilterAttribute.GetFilters(target.GetType(), true), 
                     Policy.Filters)
                 .ToArray();
 
             if (filters.Length == 0)
+                result = dispatcher.Invoke(target, args, resultType);
+            else if (!MethodPipeline.GetPipeline(callbackType, returnType, logicalType)
+                .Invoke(this, target, actualCallback, comp => dispatcher.Invoke(
+                    target, GetArgs(callback, args, composer, comp),
+                        resultType), composer, filters, out result))
+                return false;
+
+            var accepted = Policy.AcceptResult?.Invoke(result, this)
+                          ?? result != null;
+            if (accepted && (result != null) && !Dispatcher.IsVoid)
             {
-                result = convertResult(
-                    dispatcher.Invoke(target, args, resultType),
-                    returnType);
-                return true;
+                var asyncCallback = callback as IAsyncCallback;
+                result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
+                return results?.Invoke(result) != false;
             }
 
-            return MethodPipeline.GetPipeline(callbackType, returnType)
-                .Invoke(this, target, actualCallback, comp => 
-                        convertResult(dispatcher.Invoke(target,
-                            GetArgs(callback, args, composer, comp),
-                            resultType), returnType),
-                        composer, filters, out result);  
+            return accepted;
         }
 
         private object GetCallbackInfo(object callback, object[] args,
@@ -149,26 +127,6 @@
         {
             return ReferenceEquals(oldComposer, newComposer) 
                  ? args : Rule.ResolveArgs(this, callback, newComposer);
-        }
-
-        private static object PromisifyResult(object result, Type promiseType)
-        {
-            return Promise.Resolved(result).Coerce(promiseType);
-        }
-
-        private static object PromisifyTask(object result, Type promiseType)
-        {
-            return ((Task)result)?.ToPromise().Coerce(promiseType);
-        }
-
-        private static object CoercePromise(object result, Type promiseType)
-        {
-            return ((Promise)result)?.Coerce(promiseType);
-        }
-
-        private static object PassResult(object result, Type promiseType)
-        {
-            return result;
         }
     }
 }

@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Concurrency;
     using Infrastructure;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
@@ -26,10 +25,10 @@
         public int?   Order       { get; set; }
 
         public IEnumerable<IFilter> GetFilters(
-            Type callbackType, Type resulType, IHandler composer)
+            Type callbackType, Type logicalResultType, IHandler composer)
         {
             var filters = FilterTypes
-                .Select(f => CloseFilterType(f, callbackType, resulType))
+                .Select(f => CloseFilterType(f, callbackType, logicalResultType))
                 .SelectMany(filterType => Many
                     ? composer.Stop().ResolveAll(filterType)
                     : new[] {composer.Stop().Resolve(filterType)})
@@ -59,43 +58,21 @@
             return filters.Length > 0 ? filters : Array.Empty<FilterAttribute>();
         }
 
-        private static Type CloseFilterType(
-            Type filterType, Type callbackType, Type resultType)
+        private static Type CloseFilterType(Type filterType, Type callbackType,
+            Type logicalResultType)
         {
             if (!filterType.IsGenericTypeDefinition)
                 return filterType;
             var openFilterType = typeof(IFilter<,>);
             if (filterType == openFilterType)
-                return filterType.MakeGenericType(callbackType, resultType);
+                return filterType.MakeGenericType(callbackType, logicalResultType);
             var conformance  = filterType.GetOpenTypeConformance(openFilterType);
             var inferredArgs = conformance.GetGenericArguments();
             return filterType.MakeGenericType(inferredArgs.Select((arg, i) =>
             {
-                switch (i)
-                {
-                    case 0:
-                        return arg.IsGenericParameter ? callbackType : null;
-                    case 1:
-                        return arg.IsGenericParameter ? resultType
-                             : InferPromiseType(arg, resultType);
-                }  
-                throw new InvalidOperationException($"{filterType.FullName} generic arg {i} could not be inferred");   
+                if (!arg.ContainsGenericParameters) return null;
+                return i == 0 ? callbackType : logicalResultType;
             }).Where(arg => arg != null).ToArray());
-        }
-
-        private static Type InferPromiseType(Type genericArg, Type resultType)
-        {
-            if (genericArg.ContainsGenericParameters)
-            {
-                var promiseType = typeof(Promise<>);
-                var promiseOpen = genericArg.GetOpenTypeConformance(promiseType);
-                if (promiseOpen != null)
-                {
-                    var promiseClosed = resultType.GetOpenTypeConformance(promiseType);
-                    return promiseClosed?.GenericTypeArguments[0] ?? resultType;
-                }
-            }
-            return null;
         }
 
         private void ValidateFilters(Type[] filterTypes)

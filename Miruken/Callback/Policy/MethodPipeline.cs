@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Concurrency;
 
     internal abstract class MethodPipeline
     {
@@ -10,22 +12,26 @@
             object callback, Func<IHandler, object> complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result);
 
-        public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
+        public static MethodPipeline GetPipeline(
+            Type callbackType, Type resultType, Type logicalType)
         {
             if (resultType == typeof(void))
-                resultType = typeof(object);
-            var key = Tuple.Create(callbackType, resultType);
+            {
+                resultType  = typeof(object);
+                logicalType = typeof(object);
+            }
+            var key = Tuple.Create(callbackType, resultType, logicalType);
             return _pipelines.GetOrAdd(key, k =>
                 (MethodPipeline)Activator.CreateInstance(
-                    typeof(MethodPipeline<,>).MakeGenericType(k.Item1, k.Item2)
+                    typeof(MethodPipeline<,,>).MakeGenericType(k.Item1, k.Item2, k.Item3)
             ));
         }
 
-        private static readonly ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>
-            _pipelines = new ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>();
+        private static readonly ConcurrentDictionary<Tuple<Type, Type, Type>, MethodPipeline>
+            _pipelines = new ConcurrentDictionary<Tuple<Type, Type, Type>, MethodPipeline>();
     }
 
-    internal class MethodPipeline<Cb, Res> : MethodPipeline
+    internal class MethodPipeline<Cb, Res, LRes> : MethodPipeline
     {
         public override bool Invoke(MethodBinding binding, object target, 
             object callback, Func<IHandler, object> complete, IHandler composer,
@@ -34,7 +40,7 @@
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
-                NextDelegate<Res> next = null;
+                NextDelegate<object> next = null;
                 next = (proceed, comp) =>
                 {
                     if (!proceed)
@@ -48,13 +54,24 @@
                         var filter      = pipeline.Current;
                         var typedFilter = filter as IFilter<Cb, Res>;
                         if (typedFilter != null)
-                            return typedFilter.Next((Cb)callback, binding, composer, next);
+                            return typedFilter.Next((Cb)callback, binding, composer, 
+                                (p,c) => (Res)binding.CoerceResult(next(p, c), typeof(Res)));
+                        var taskFilter = filter as IFilter<Cb, Task<Res>>;
+                        if (taskFilter != null)
+                            return taskFilter.Next((Cb)callback, binding, composer,
+                                (p, c) => (Task<Res>)binding.CoerceResult(next(p, c),
+                                           typeof(Task<Res>)));
+                        var promiseFilter = filter as IFilter<Cb, Promise<Res>>;
+                        if (promiseFilter != null)
+                            return promiseFilter.Next((Cb)callback, binding, composer,
+                                (p, c) => (Promise<Res>)binding.CoerceResult(next(p, c),
+                                           typeof(Promise<Res>)));
                         var dynamicFilter = filter as IDynamicFilter;
                         if (dynamicFilter != null)
-                            return (Res)dynamicFilter.Next(
-                                callback, binding, composer, (p,c) => next(p,c));
+                            return (Res)dynamicFilter.Next(callback, binding, composer,
+                                (p,c) => binding.CoerceResult(next(p, c), typeof(Res)));
                     }
-                    return (Res)complete(composer);
+                    return (Res)binding.CoerceResult(complete(composer), typeof(Res));
                 };
                 result = next(true, composer);
                 return completed;

@@ -551,11 +551,19 @@
         }
 
         [TestMethod]
-        public async Task Should_Infer_Async_Pipelines()
+        public async Task Should_Infer_Async_Behvaior_Pipelines()
         {
             var handler = new FilteredHandler();
             var resp    = await handler.CommandAsync<Foo>(new Foo());
             Assert.IsInstanceOfType(resp, typeof(SuperFoo));
+        }
+
+        [TestMethod]
+        public async Task Should_Infer_Async_Task_Pipelines()
+        {
+            var handler = new FilteredHandler();
+            var resp    = await handler.CommandAsync<Baz>(new Baz());
+            Assert.IsInstanceOfType(resp, typeof(SuperBaz));
         }
 
         [TestMethod]
@@ -1022,6 +1030,10 @@
         {
         }
 
+        public interface IBehaviorT<in TReq, TResp> : IFilter<TReq, Task<TResp>>
+        {
+        }
+
         private class FilteredHandler : Handler, IFilter<Bar, object>
         {
             int? IFilter.Order { get; set; }
@@ -1041,10 +1053,17 @@
             }
 
             [Handles,
-                Filter(typeof(IBehavior<,>), Many = true)]
-            public Promise HandleBoo(Boo boo, IHandler composer)
+             Filter(typeof(IBehavior<,>), Many = true)]
+            public Promise<Boo> HandleBoo(Boo boo, IHandler composer)
             {
                 return Promise.Resolved(new Boo {HasComposer = true});
+            }
+
+            [Handles,
+             Filter(typeof(IBehaviorT<,>), Many = true)]
+            public Task<SuperBaz> HandleBaz(Baz baz, IHandler composer)
+            {
+                return Task.FromResult(new SuperBaz {HasComposer = true});
             }
 
             [Provides(typeof(IFilter<,>))]
@@ -1068,6 +1087,19 @@
                 if (type.IsInterface)
                     return Activator.CreateInstance(
                         typeof(LogBehavior<,>).
+                        MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                     : Activator.CreateInstance(type);
+            }
+
+            [Provides(typeof(IBehaviorT<,>))]
+            public object CreateBehaviorT(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(LogBehaviorT<,>).
                         MakeGenericType(type.GenericTypeArguments));
                 return type.IsAbstract ? null
                      : Activator.CreateInstance(type);
@@ -1101,7 +1133,19 @@
             public Promise<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Promise<Res>> next)
             {
-                Console.WriteLine($"Behavior log {request}");
+                Console.WriteLine($"Behavior Promise log {request}");
+                return next();
+            }
+        }
+
+        private class LogBehaviorT<Req, Res> : IBehaviorT<Req, Res>
+        {
+            public int? Order { get; set; }
+
+            public Task<Res> Next(Req request, MethodBinding binding,
+                IHandler composer, NextDelegate<Task<Res>> next)
+            {
+                Console.WriteLine($"Behavior Task log {request}");
                 return next();
             }
         }

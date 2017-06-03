@@ -36,11 +36,11 @@
         }
 
         public static IEnumerable<IFilter> GetFilters(
-            this IHandler composer, Type callbackType, Type resultType,
+            this IHandler composer, Type callbackType, Type logicalResultType,
             FilterOptions options, params IEnumerable<IFilterProvider>[] providers)
         {
-            if (resultType == typeof(void))
-                resultType = typeof(object);
+            if (logicalResultType == typeof(void))
+                logicalResultType = typeof(object);
             var extraProviders = options?.ExtraFilters
                 ?? Enumerable.Empty<IFilterProvider>();
 
@@ -50,7 +50,7 @@
             {
                 if (provider == null) continue;
                 var filters = provider.GetFilters(
-                    callbackType, resultType, composer)
+                    callbackType, logicalResultType, composer)
                     .Where(filter => filter != null);
                 foreach (var filter in filters)
                     yield return filter;
@@ -58,12 +58,12 @@
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
-            this IHandler handler, Type callbackType, Type resultType, 
+            this IHandler handler, Type callbackType, Type logicalResultType, 
             params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetFilterOptions();
-            return handler.GetFilters(
-                callbackType, resultType, options, providers)
+            return handler.GetFilters(callbackType, logicalResultType,
+                                      options, providers)
                 .OrderByDescending(f => f.Order ?? int.MaxValue);
         }
     }

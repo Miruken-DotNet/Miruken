@@ -27,7 +27,7 @@
     public interface IFilterProvider
     {
         IEnumerable<IFilter> GetFilters(
-            Type callbackType, Type resulType, IHandler composer);
+            Type callbackType, Type logicalResultType, IHandler composer);
     }
 
     public class FilterInstancesProvider : IFilterProvider
@@ -40,7 +40,7 @@
         }
 
         public IEnumerable<IFilter> GetFilters(
-            Type callbackType, Type resulType, IHandler composer)
+            Type callbackType, Type logicalResultType, IHandler composer)
         {
             return _filters;
         }
