@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -540,38 +541,52 @@
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(2, bar.Handled);
+            Assert.AreEqual(1, bar.Filters.Count);
+            Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, object>));
         }
 
         [TestMethod]
         public void Should_Infer_Pipelines()
         {
+            var foo     = new Foo();
             var handler = new FilteredHandler();
-            var resp    = handler.Command<Foo>(new Foo());
+            var resp    = handler.Command<Foo>(foo);
             Assert.IsInstanceOfType(resp, typeof(SuperFoo));
+            Assert.AreEqual(1, foo.Filters.Count);
+            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Command, SuperFoo>));
         }
 
         [TestMethod]
         public async Task Should_Infer_Async_Behvaior_Pipelines()
         {
+            var foo     = new Foo();
             var handler = new FilteredHandler();
-            var resp    = await handler.CommandAsync<Foo>(new Foo());
+            var resp    = await handler.CommandAsync<Foo>(foo);
             Assert.IsInstanceOfType(resp, typeof(SuperFoo));
+            Assert.AreEqual(1, foo.Filters.Count);
+            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Command, SuperFoo>));
         }
 
         [TestMethod]
         public async Task Should_Infer_Async_Task_Pipelines()
         {
+            var baz     = new Baz();
             var handler = new FilteredHandler();
-            var resp    = await handler.CommandAsync<Baz>(new Baz());
+            var resp    = await handler.CommandAsync<Baz>(baz);
             Assert.IsInstanceOfType(resp, typeof(SuperBaz));
+            Assert.AreEqual(1, baz.Filters.Count);
+            Assert.IsInstanceOfType(baz.Filters[0], typeof(LogBehaviorT<Command, SuperBaz>));
         }
 
         [TestMethod]
         public async Task Should_Coerce_Async_Pipelines()
         {
+            var boo     = new Boo();
             var handler = new FilteredHandler();
-            var resp    = await handler.CommandAsync<Boo>(new Boo());
+            var resp    = await handler.CommandAsync<Boo>(boo);
             Assert.IsInstanceOfType(resp, typeof(Boo));
+            Assert.AreEqual(1, boo.Filters.Count);
+            Assert.IsInstanceOfType(boo.Filters[0], typeof(LogBehavior<Command, Boo>));
         }
 
         [TestMethod]
@@ -657,7 +672,12 @@
             }
         }
 
-        private class Foo
+        internal class Callback
+        {
+            public List<object> Filters = new List<object>();
+        }
+
+        private class Foo : Callback
         {     
             public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
@@ -667,7 +687,7 @@
         {
         }
 
-        private class Bar
+        private class Bar : Callback
         {
             public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
@@ -678,12 +698,12 @@
         {         
         }
 
-        private class Boo
+        private class Boo : Callback
         {
             public bool HasComposer { get; set; }
         }
 
-        private class Baz
+        private class Baz : Callback
         {
             public bool HasComposer { get; set; }
         }
@@ -711,7 +731,7 @@
             public R OtherStuff { get; set; }
         }
 
-        private class Bee
+        private class Bee : Callback
         {       
         }
 
@@ -1114,6 +1134,18 @@
             }
         }
 
+        internal static Callback ExtractCallback(object callback)
+        {
+            var cb = callback as Callback;
+            if (cb == null)
+            {
+                var command = callback as Command;
+                if (command != null)
+                    cb = command.Callback as Callback;
+            }
+            return cb;
+        }
+
         private class LogFilter<Cb, Res> : IFilter<Cb, Res>
         {
             public int? Order { get; set; }
@@ -1121,6 +1153,8 @@
             public Res Next(Cb callback, MethodBinding binding,
                 IHandler composer, NextDelegate<Res> next)
             {
+                var cb = ExtractCallback(callback);
+                cb?.Filters.Add(this);
                 Console.WriteLine($"Filter log {callback}");
                 return next();
             }
@@ -1133,6 +1167,8 @@
             public Promise<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Promise<Res>> next)
             {
+                var cb = ExtractCallback(request);
+                cb?.Filters.Add(this);
                 Console.WriteLine($"Behavior Promise log {request}");
                 return next();
             }
@@ -1145,6 +1181,8 @@
             public Task<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Task<Res>> next)
             {
+                var cb = ExtractCallback(request);
+                cb?.Filters.Add(this);
                 Console.WriteLine($"Behavior Task log {request}");
                 return next();
             }

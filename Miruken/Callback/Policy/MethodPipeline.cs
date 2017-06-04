@@ -12,26 +12,22 @@
             object callback, Func<IHandler, object> complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result);
 
-        public static MethodPipeline GetPipeline(
-            Type callbackType, Type resultType, Type logicalType)
+        public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
         {
             if (resultType == typeof(void))
-            {
                 resultType  = typeof(object);
-                logicalType = typeof(object);
-            }
-            var key = Tuple.Create(callbackType, resultType, logicalType);
+            var key = Tuple.Create(callbackType, resultType);
             return _pipelines.GetOrAdd(key, k =>
                 (MethodPipeline)Activator.CreateInstance(
-                    typeof(MethodPipeline<,,>).MakeGenericType(k.Item1, k.Item2, k.Item3)
+                    typeof(MethodPipeline<,>).MakeGenericType(k.Item1, k.Item2)
             ));
         }
 
-        private static readonly ConcurrentDictionary<Tuple<Type, Type, Type>, MethodPipeline>
-            _pipelines = new ConcurrentDictionary<Tuple<Type, Type, Type>, MethodPipeline>();
+        private static readonly ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>
+            _pipelines = new ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>();
     }
 
-    internal class MethodPipeline<Cb, Res, LRes> : MethodPipeline
+    internal class MethodPipeline<Cb, Res> : MethodPipeline
     {
         public override bool Invoke(MethodBinding binding, object target, 
             object callback, Func<IHandler, object> complete, IHandler composer,

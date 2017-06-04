@@ -31,9 +31,12 @@
 
         protected static bool AcceptKey(Type type, Type key)
         {
-            return key.IsGenericTypeDefinition
-                 ? type.GetOpenTypeConformance(key) != null
-                 : type.IsAssignableFrom(key);
+            if (type.IsGenericTypeDefinition)
+                return key.GetOpenTypeConformance(type) != null;
+            if (key.IsGenericTypeDefinition)
+                return type.IsGenericType && 
+                    type.GetGenericTypeDefinition() == key;
+            return type.IsAssignableFrom(key);
         }
 
         int IComparer<Type>.Compare(Type x, Type y)

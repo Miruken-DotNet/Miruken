@@ -95,6 +95,11 @@
             return null;
         }
 
+        public static string GetDescription(this MethodInfo method)
+        {
+            return $"{method.ReflectedType?.FullName}:{method.Name}";
+        }
+
         public static MethodInfo SelectMethod(MethodInfo sourceMethod, Type type,
             BindingFlags binding = BindingFlags.Public)
         {

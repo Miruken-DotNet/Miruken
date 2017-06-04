@@ -5,6 +5,7 @@ namespace Miruken.Callback.Policy
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Reflection;
+    using Infrastructure;
 
     public class HandlerDescriptor
     {
@@ -86,7 +87,7 @@ namespace Miruken.Callback.Policy
                     var rule   = policy.MatchMethod(method, attribute);
                     if (rule == null)
                         throw new InvalidOperationException(
-                            $"The policy for {attribute.GetType().FullName} rejected method '{GetDescription(method)}'");
+                            $"The policy for {attribute.GetType().FullName} rejected method '{method.GetDescription()}'");
 
                     dispatch = dispatch ?? new MethodDispatch(method);
                     var binding = rule.Bind(dispatch, attribute);
@@ -135,11 +136,6 @@ namespace Miruken.Callback.Policy
         public static HandlerDescriptor GetDescriptor(Type type)
         {
             return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
-        }
-
-        private static string GetDescription(MethodInfo method)
-        {
-            return $"{method.ReflectedType?.FullName}:{method.Name}";
         }
 
         private const BindingFlags Binding = BindingFlags.Instance 

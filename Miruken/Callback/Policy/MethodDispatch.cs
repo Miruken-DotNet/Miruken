@@ -136,7 +136,7 @@
         {
             var method = Method;
             if (Parameters.Length > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {GetDescription(Method)} expects {Parameters.Length} arguments");
+                throw new ArgumentException($"Method {Method.GetDescription()} expects {Parameters.Length} arguments");
             if (_mapping != null)
                 method = ClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
@@ -275,7 +275,7 @@
             }
             if (typeMapping.Contains(null))
                 throw new InvalidOperationException(
-                    $"Type mapping for {GetDescription(method)} could not be inferred");
+                    $"Type mapping for {method.GetDescription()} could not be inferred");
 
             _mapping = typeMapping;
             _dispatchType |= DispatchType.LateBound;
@@ -287,11 +287,6 @@
             if (args.Length != expected)
                 throw new ArgumentException(
                     $"Expected {expected} arguments, but {args.Length} provided");
-        }
-
-        private static string GetDescription(MethodInfo method)
-        {
-            return $"{method.ReflectedType?.FullName}:{method.Name}";
         }
 
         private const BindingFlags Binding = BindingFlags.Instance

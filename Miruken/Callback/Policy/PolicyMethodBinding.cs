@@ -91,7 +91,7 @@
 
             if (filters.Length == 0)
                 result = dispatcher.Invoke(target, args, resultType);
-            else if (!MethodPipeline.GetPipeline(callbackType, returnType, logicalType)
+            else if (!MethodPipeline.GetPipeline(callbackType, returnType)
                 .Invoke(this, target, actualCallback, comp => dispatcher.Invoke(
                     target, GetArgs(callback, args, composer, comp),
                         resultType), composer, filters, out result))

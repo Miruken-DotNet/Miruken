@@ -76,7 +76,7 @@
         }
 
         private static readonly MethodPipeline Pipeline = MethodPipeline
-            .GetPipeline(typeof(HandleMethod), typeof(object), typeof(object));
+            .GetPipeline(typeof(HandleMethod), typeof(object));
 
         [ThreadStatic] internal static IHandler Composer;
         [ThreadStatic] internal static bool     Unhandled;
