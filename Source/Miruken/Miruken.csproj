@@ -113,7 +113,6 @@
     <Compile Include="Callback\Inquiry.cs" />
     <Compile Include="Concurrency\AbstractAsyncResult.cs" />
     <Compile Include="Concurrency\CancelledException.cs" />
-    <Compile Include="Concurrency\LinqToPromises.cs" />
     <Compile Include="Concurrency\Promise.cs" />
     <Compile Include="Container\ContainerExtensions.cs" />
     <Compile Include="Container\IContainer.cs" />
