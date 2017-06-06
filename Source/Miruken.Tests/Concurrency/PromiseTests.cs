@@ -1339,9 +1339,10 @@ namespace Miruken.Tests.Concurrency
         {
             var called = false;
             var promise = Promise.Try(() =>
-                Promise.Delay(100.Millis()).Then((r, s) => {
-                    throw new ArgumentException("Bad param", "foo");
-                }))
+                Promise.Delay(100.Millis()).Then(
+                    (ResolveCallback)((r, s) => {
+                        throw new ArgumentException("Bad param", "foo");
+                })))
             .Catch((ArgumentException ex, bool s) =>
             {
                 Assert.AreEqual("foo", ex.ParamName);

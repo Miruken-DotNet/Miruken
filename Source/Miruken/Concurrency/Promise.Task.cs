@@ -12,6 +12,24 @@
 
     public partial class Promise : ITaskConversion
     {
+        public Promise Then(ResolveCallback<Task> then)
+        {
+            return Then(then != null ? (ResolveCallback<Promise>)(
+                (r, s) => then(r, s).ToPromise()) : null);
+        }
+
+        public Promise<R> Then<R>(ResolveCallback<Task<R>> then)
+        {
+            return Then(then != null ? (ResolveCallback<Promise<R>>)(
+                (r, s) => then(r, s).ToPromise()) : null);
+        }
+
+        public Promise Catch(RejectCallback<Task> fail)
+        {
+            return Catch(fail != null ? (RejectCallback<Promise>)(
+                (ex, s) => fail(ex, s).ToPromise()) : null);
+        }
+
         public Task<object> ToTask()
         {
             var tcs = new TaskCompletionSource<object>();
@@ -90,6 +108,26 @@
             : this(task, null, mode)
         {
             cancellationToken.Register(Cancel, false);
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<Task<R>> then)
+        {
+            return Then(then, null);
+        }
+
+        public Promise<R> Then<R>(ResolveCallbackT<Task<R>> then, RejectCallback<Task<R>> fail)
+        {
+            return Then(then != null ? (ResolveCallbackT<Promise<R>>)(
+                (r, s) => then(r, s).ToPromise()) : null, fail != null 
+                ? (RejectCallback<Promise<R>>)((ex, s) => fail(ex, s).ToPromise()) 
+                : null);
+        }
+
+        public Promise<R> Catch<R>(RejectCallback<Task<R>> fail)
+        {
+            return Catch(fail != null
+                 ? (RejectCallback<Promise<R>>) ((ex, s) => fail(ex, s).ToPromise())
+                 : null);
         }
 
         public new Task<T> ToTask()

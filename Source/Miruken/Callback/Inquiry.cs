@@ -91,7 +91,7 @@
             if (promise != null)
             {
                 IsAsync = true;
-                if (Many) promise = promise.Catch((ex,s) => null);
+                if (Many) promise = promise.Catch((ex,s) => (object)null);
                 promise = promise.Then((result, s) => 
                     result != null && IsSatisfied(result, composer)
                     ? result : null);
