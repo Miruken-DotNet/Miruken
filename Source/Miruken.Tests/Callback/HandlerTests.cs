@@ -640,6 +640,15 @@
             Assert.IsInstanceOfType(bar.Filters[2], typeof(LogBehaviorT<Bar, SuperBar>));
         }
 
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
+        public async Task Should_Propogate_Rejected_Filter_Promise()
+        {
+            var boo     = new Boo();
+            var handler = new SpecialFilteredHandler() + new FilteredHandler();
+            await handler.CommandAsync(boo);
+        }
+
         [TestMethod]
         public void Should_Infer_Callback_Filter_Generic_Types()
         {
@@ -1185,6 +1194,19 @@
                      : Activator.CreateInstance(type);
             }
 
+            [Provides(typeof(ExceptionBehaviorT<,>))]
+            public object CreateExceptionBehaviorT(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(ExceptionBehaviorT<,>).
+                        MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                     : Activator.CreateInstance(type);
+            }
+
             object IFilter<Bar, object>.Next(
                 Bar callback, MethodBinding binding, IHandler composer,
                 NextDelegate<object> next)
@@ -1223,6 +1245,12 @@
             public Task<SuperBar> HandleBaz(Bar bar)
             {
                 return Task.FromResult(new SuperBar());
+            }
+
+            [Handles,
+             Filter(typeof(ExceptionBehaviorT<,>))]
+            public void Remove(Boo boo)
+            {          
             }
         }
 
@@ -1277,6 +1305,18 @@
                 cb?.Filters.Add(this);
                 Console.WriteLine($"Behavior Task log {request}");
                 return next();
+            }
+        }
+
+        private class ExceptionBehaviorT<Req, Res> : IBehaviorT<Req, Res>
+        {
+            public int? Order { get; set; } = 2;
+
+            public Task<Res> Next(Req request, MethodBinding binding,
+                IHandler composer, NextDelegate<Task<Res>> next)
+            {
+                return Promise<Res>.Rejected(
+                    new InvalidOperationException("System shutdown"));
             }
         }
     }

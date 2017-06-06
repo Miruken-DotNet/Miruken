@@ -49,7 +49,7 @@ namespace Miruken.Callback.Policy
                 .All(m => m)) return false;
             if (_returnValue?.Matches(method.ReturnType, parameters, attribute, aliases) == false)
                 throw new InvalidOperationException(
-                     $"Method '{method.GetDescription()} satisfied the arguments but rejected the return'");
+                     $"Method '{method.GetDescription()}' satisfied the arguments but rejected the return");
             return true;
         }
 

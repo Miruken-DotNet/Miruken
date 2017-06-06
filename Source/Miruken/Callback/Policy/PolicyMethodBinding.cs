@@ -98,8 +98,8 @@
                 return false;
 
             var accepted = Policy.AcceptResult?.Invoke(result, this)
-                          ?? result != null;
-            if (accepted && (result != null) && !Dispatcher.IsVoid)
+                        ?? result != null;
+            if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
