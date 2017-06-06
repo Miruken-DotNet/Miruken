@@ -67,7 +67,7 @@
                             return (Res)dynamicFilter.Next(callback, binding, composer,
                                 (p,c) => binding.CoerceResult(next(p, c), typeof(Res)));
                     }
-                    return (Res)binding.CoerceResult(complete(composer), typeof(Res));
+                    return complete(composer);
                 };
                 result = next(true, composer);
                 return completed;

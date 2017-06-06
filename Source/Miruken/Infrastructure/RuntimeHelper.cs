@@ -474,6 +474,16 @@
                ).Compile();
         }
 
+        public static Func<TArg, Ret> CreateStaticFuncOneArg<T, TArg, Ret>(
+             string methodName, params Type[] genericParams)
+        {
+            var arg        = Expression.Parameter(typeof(TArg), "arg");
+            var methodCall = Expression.Call(typeof(T), methodName, genericParams, arg);
+            return Expression.Lambda<Func<TArg, Ret>>(
+               methodCall, arg
+               ).Compile();
+        }
+
         public static PropertyGetDelegate CreatePropertyGetter(string name, Type owner)
         {
             if (string.IsNullOrEmpty(name))

@@ -541,8 +541,9 @@
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(2, bar.Handled);
-            Assert.AreEqual(1, bar.Filters.Count);
-            Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, object>));
+            Assert.AreEqual(2, bar.Filters.Count);
+            Assert.AreSame(handler, bar.Filters[0]);
+            Assert.IsInstanceOfType(bar.Filters[1], typeof(LogFilter<Bar, object>));
         }
 
         [TestMethod]
@@ -553,40 +554,90 @@
             var resp    = handler.Command<Foo>(foo);
             Assert.IsInstanceOfType(resp, typeof(SuperFoo));
             Assert.AreEqual(1, foo.Filters.Count);
-            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Command, SuperFoo>));
+            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Foo, SuperFoo>));
         }
 
         [TestMethod]
-        public async Task Should_Infer_Async_Behvaior_Pipelines()
+        public async Task Should_Promote_Promise_Behvaior_Pipelines()
         {
             var foo     = new Foo();
             var handler = new FilteredHandler();
             var resp    = await handler.CommandAsync<Foo>(foo);
             Assert.IsInstanceOfType(resp, typeof(SuperFoo));
             Assert.AreEqual(1, foo.Filters.Count);
-            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Command, SuperFoo>));
+            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogBehavior<Foo, SuperFoo>));
         }
 
         [TestMethod]
-        public async Task Should_Infer_Async_Task_Pipelines()
+        public async Task Should_Infer_Task_Pipelines()
         {
             var baz     = new Baz();
             var handler = new FilteredHandler();
             var resp    = await handler.CommandAsync<Baz>(baz);
             Assert.IsInstanceOfType(resp, typeof(SuperBaz));
             Assert.AreEqual(1, baz.Filters.Count);
-            Assert.IsInstanceOfType(baz.Filters[0], typeof(LogBehaviorT<Command, SuperBaz>));
+            Assert.IsInstanceOfType(baz.Filters[0], typeof(LogBehaviorT<Baz, SuperBaz>));
         }
 
         [TestMethod]
-        public async Task Should_Coerce_Async_Pipelines()
+        public async Task Should_Infer_Promise_Pipelines()
         {
             var boo     = new Boo();
             var handler = new FilteredHandler();
             var resp    = await handler.CommandAsync<Boo>(boo);
             Assert.IsInstanceOfType(resp, typeof(Boo));
             Assert.AreEqual(1, boo.Filters.Count);
-            Assert.IsInstanceOfType(boo.Filters[0], typeof(LogBehavior<Command, Boo>));
+            Assert.IsInstanceOfType(boo.Filters[0], typeof(LogBehavior<Boo, Boo>));
+        }
+
+        [TestMethod]
+        public async Task Should_Infer_Command_Behvaior_Pipelines()
+        {
+            var bee     = new Bee();
+            var handler = new FilteredHandler();
+            var resp    = await handler.CommandAsync<Bee>(bee);
+            Assert.IsInstanceOfType(resp, typeof(Bee));
+            Assert.AreEqual(1, bee.Filters.Count);
+            Assert.IsInstanceOfType(bee.Filters[0], typeof(LogBehavior<Command, object>));
+        }
+
+        [TestMethod]
+        public void Should_Coerce_Pipelines()
+        {
+            var foo     = new Foo();
+            var handler = new SpecialFilteredHandler() + new FilteredHandler();
+            var resp    = handler.Command<Foo>(foo);
+            Assert.IsInstanceOfType(resp, typeof(SuperFoo));
+            Assert.AreEqual(3, foo.Filters.Count);
+            Assert.IsInstanceOfType(foo.Filters[0], typeof(LogFilter<Foo, SuperFoo>));
+            Assert.IsInstanceOfType(foo.Filters[1], typeof(LogBehavior<Foo, SuperFoo>));
+            Assert.IsInstanceOfType(foo.Filters[2], typeof(LogBehaviorT<Foo, SuperFoo>));
+        }
+
+        [TestMethod]
+        public async Task Should_Coerce_Promise_Pipelines()
+        {
+            var baz     = new Baz();
+            var handler = new SpecialFilteredHandler() + new FilteredHandler();
+            var resp    = await handler.CommandAsync<Baz>(baz);
+            Assert.IsInstanceOfType(resp, typeof(SuperBaz));
+            Assert.AreEqual(3, baz.Filters.Count);
+            Assert.IsInstanceOfType(baz.Filters[0], typeof(LogFilter<Baz, SuperBaz>));
+            Assert.IsInstanceOfType(baz.Filters[1], typeof(LogBehavior<Baz, SuperBaz>));
+            Assert.IsInstanceOfType(baz.Filters[2], typeof(LogBehaviorT<Baz, SuperBaz>));
+        }
+
+        [TestMethod]
+        public async Task Should_Coerce_Task_Pipelines()
+        {
+            var bar     = new Bar();
+            var handler = new SpecialFilteredHandler() + new FilteredHandler();
+            var resp    = await handler.CommandAsync<Bar>(bar);
+            Assert.IsInstanceOfType(resp, typeof(SuperBar));
+            Assert.AreEqual(3, bar.Filters.Count);
+            Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, SuperBar>));
+            Assert.IsInstanceOfType(bar.Filters[1], typeof(LogBehavior<Bar, SuperBar>));
+            Assert.IsInstanceOfType(bar.Filters[2], typeof(LogBehaviorT<Bar, SuperBar>));
         }
 
         [TestMethod]
@@ -1086,6 +1137,15 @@
                 return Task.FromResult(new SuperBaz {HasComposer = true});
             }
 
+            [Handles,
+             Filter(typeof(IBehavior<,>), Many = true)]
+            public Promise HandleStuff(Command command)
+            {
+                if (command.Callback is Bee)
+                    return Promise.Resolved(new Bee());
+                return null;
+            }
+
             [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
@@ -1129,8 +1189,40 @@
                 Bar callback, MethodBinding binding, IHandler composer,
                 NextDelegate<object> next)
             {
+                var cb = ExtractCallback(callback);
+                cb?.Filters.Add(this);
                 callback.Handled++;
                 return next();
+            }
+        }
+
+        private class SpecialFilteredHandler : Handler
+        {
+            [Handles,
+             Filter(typeof(IFilter<,>), Many = true),
+             Filter(typeof(IBehavior<,>), Many = true),
+             Filter(typeof(IBehaviorT<,>), Many = true)]
+            public SuperFoo HandleFoo(Foo foo)
+            {
+                return new SuperFoo();
+            }
+
+            [Handles,
+             Filter(typeof(IFilter<,>), Many = true),
+             Filter(typeof(IBehavior<,>), Many = true),
+             Filter(typeof(IBehaviorT<,>), Many = true)]
+            public Promise<SuperBaz> HandleBaz(Baz baz)
+            {
+                return Promise.Resolved(new SuperBaz());
+            }
+
+            [Handles,
+             Filter(typeof(IFilter<,>), Many = true),
+             Filter(typeof(IBehavior<,>), Many = true),
+             Filter(typeof(IBehaviorT<,>), Many = true)]
+            public Task<SuperBar> HandleBaz(Bar bar)
+            {
+                return Task.FromResult(new SuperBar());
             }
         }
 
@@ -1148,7 +1240,7 @@
 
         private class LogFilter<Cb, Res> : IFilter<Cb, Res>
         {
-            public int? Order { get; set; }
+            public int? Order { get; set; } = 1;
 
             public Res Next(Cb callback, MethodBinding binding,
                 IHandler composer, NextDelegate<Res> next)
@@ -1162,7 +1254,7 @@
 
         private class LogBehavior<Req, Res> : IBehavior<Req, Res>
         {
-            public int? Order { get; set; }
+            public int? Order { get; set; } = 2;
 
             public Promise<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Promise<Res>> next)
@@ -1176,7 +1268,7 @@
 
         private class LogBehaviorT<Req, Res> : IBehaviorT<Req, Res>
         {
-            public int? Order { get; set; }
+            public int? Order { get; set; } = 3;
 
             public Task<Res> Next(Req request, MethodBinding binding,
                 IHandler composer, NextDelegate<Task<Res>> next)

@@ -91,7 +91,7 @@
 
             if (filters.Length == 0)
                 result = dispatcher.Invoke(target, args, resultType);
-            else if (!MethodPipeline.GetPipeline(callbackType, returnType)
+            else if (!MethodPipeline.GetPipeline(callbackType, logicalType)
                 .Invoke(this, target, actualCallback, comp => dispatcher.Invoke(
                     target, GetArgs(callback, args, composer, comp),
                         resultType), composer, filters, out result))
@@ -112,7 +112,7 @@
         private object GetCallbackInfo(object callback, object[] args,
             MethodDispatch dispatcher, out Type callbackType)
         {
-            if (CallbackIndex.HasValue && Policy.UseTargetFilters)
+            if (CallbackIndex.HasValue)
             {
                 var index = CallbackIndex.Value;
                 callbackType = dispatcher.Parameters[index].ParameterType;

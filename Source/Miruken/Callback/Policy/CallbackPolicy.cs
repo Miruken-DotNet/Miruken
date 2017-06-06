@@ -14,7 +14,6 @@
         public AcceptResultDelegate AcceptResult     { get; set; }
         public Func<object, Type>   ResultType       { get; set; }
         public BindMethodDelegate   Binder           { get; set; }
-        public bool                 UseTargetFilters { get; set; }
 
         public IEnumerable<IFilterProvider> Filters => _filters;
 

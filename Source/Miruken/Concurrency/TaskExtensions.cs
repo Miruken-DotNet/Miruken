@@ -9,10 +9,18 @@
 
     public static class TaskExtensions
     {
+        internal class Helper
+        {
+            internal static Task<T> Coerce<T>(Task task)
+            {
+                return task as Task<T> ??
+                    task.ContinueWith(t => (T)GetResult(t, typeof(T)));
+            }
+        }
+
         public static Task<T> Cast<T>(this Task task)
         {
-            return task as Task<T> ??
-                task.ContinueWith(t => (T)GetResult(t, typeof(T)));
+            return Helper.Coerce<T>(task);
         }
 
         public static Task Coerce(this Task task, Type taskType)
@@ -28,7 +36,7 @@
 
             var resultType = taskType.GetGenericArguments()[0];
             var cast       = CoerceTask.GetOrAdd(resultType, rt =>
-                RuntimeHelper.CreateGenericFuncNoArgs<Task, Task>("Cast", rt)
+                RuntimeHelper.CreateStaticFuncOneArg<Helper, Task, Task>("Coerce", rt)
             );
 
             return cast(task);

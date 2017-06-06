@@ -45,9 +45,16 @@
             if (result != null && !resultType.IsInstanceOfType(result))
             {
                 if (typeof(Task).IsAssignableFrom(resultType))
-                    return Task.FromResult(result).Coerce(resultType);
+                    return Promise.Resolved(result).ToTask().Coerce(resultType);
                 if (typeof(Promise).IsAssignableFrom(resultType))
                     return Promise.Resolved(result).Coerce(resultType);
+                var promise = result as Promise;
+                if (promise == null)
+                {
+                    var task = result as Task;
+                    if (task != null) promise = Promise.Resolved(task);
+                }
+                if (promise != null) return promise.Wait();
             }
             return result;
         }
