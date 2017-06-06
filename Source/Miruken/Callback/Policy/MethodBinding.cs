@@ -42,7 +42,7 @@
                 var promise = result as Promise;
                 return promise ?? Promise.Resolved(result);
             }
-            if (result != null && !resultType.IsInstanceOfType(result))
+            if (result == null || !resultType.IsInstanceOfType(result))
             {
                 if (typeof(Task).IsAssignableFrom(resultType))
                     return Promise.Resolved(result).ToTask().Coerce(resultType);
