@@ -1173,7 +1173,7 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Cancel_Timeout_If_Resolved_Asynchronously()
         {
-            var called = false;
+            var called  = false;
             var promise = new Promise<string>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => Promise.Delay(.2.Sec())
                     .Then((r, s) => reject(new Exception("Something went wrong"), false))))

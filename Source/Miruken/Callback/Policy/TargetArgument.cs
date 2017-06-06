@@ -73,9 +73,9 @@ namespace Miruken.Callback.Policy
                           ? contraints[0]
                           : typeof(object);
             }
-            if (paramType == typeof(object)) return;
             binding.CallbackIndex = parameter.Position;
-            binding.VarianceType  = paramType;
+            if (paramType != typeof(object))
+                binding.VarianceType  = paramType;
         }
 
         public override object Resolve(
