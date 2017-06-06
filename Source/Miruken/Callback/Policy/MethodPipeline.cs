@@ -64,7 +64,7 @@
                                            typeof(Promise<Res>)));
                         var dynamicFilter = filter as IDynamicFilter;
                         if (dynamicFilter != null)
-                            return (Res)dynamicFilter.Next(callback, binding, composer,
+                            return dynamicFilter.Next(callback, binding, composer,
                                 (p,c) => binding.CoerceResult(next(p, c), typeof(Res)));
                     }
                     return complete(composer);
