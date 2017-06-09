@@ -75,7 +75,7 @@ namespace Miruken.Callback
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             var handled = false;
             if (Composition.IsComposed<CallbackSemantics>(callback))
@@ -94,13 +94,13 @@ namespace Miruken.Callback
                 else
                 {
                     var cs = new CallbackSemantics();
-                    if (Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
+                    if (this.Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
                         greedy = cs.HasOption(CallbackOptions.Broadcast);
                 }
             }
 
             if (greedy || !handled)
-                handled = base.HandleCallback(callback, greedy, composer) || handled;
+                handled = base.HandleCallback(callback, ref greedy, composer) || handled;
 
             return handled;
         }

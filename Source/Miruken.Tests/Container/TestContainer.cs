@@ -15,7 +15,7 @@
         object IContainer.Resolve(object key)
         {
             var resolution = new Inquiry(key);
-            return Handle(resolution, false, Composer)
+            return this.Handle(resolution, false, Composer)
                  ? resolution.Result
                  : Unhandled<object>();
         }

@@ -16,7 +16,7 @@
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             var compose = callback as Composition;
             if (compose != null)

@@ -17,12 +17,16 @@
 
         public object Scope { get; set; }
 
+        public bool SkipIfInvalid { get; set; }
+
         public override CallbackPolicy CallbackPolicy => Policy;
 
         public override bool Approve(object callback, PolicyMethodBinding binding)
         {
             var validation = (Validation)callback;
-            return validation.ScopeMatcher.Matches(Scope);
+            return (validation.Outcome.IsValid || 
+                   !(validation.StopOnFailure || SkipIfInvalid))
+                && validation.ScopeMatcher.Matches(Scope);
         }
 
         public static readonly CallbackPolicy Policy =

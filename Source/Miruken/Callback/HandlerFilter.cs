@@ -29,17 +29,21 @@ namespace Miruken.Callback
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             if (!_reentrant && callback is Composition) {                                                                                              
-                return base.HandleCallback(callback, greedy, composer);                                                                                                   
-            }    
-            return _filter(callback, composer, () => BaseHandle(callback, greedy, composer));  
+                return base.HandleCallback(callback, ref greedy, composer);                                                                                                   
+            }
+            var g = greedy;
+            var handled = _filter(callback, composer,
+                () => BaseHandle(callback, ref g, composer));
+            greedy = g;
+            return handled;
         }
 
-        private bool BaseHandle(object callback, bool greedy, IHandler composer)
+        private bool BaseHandle(object callback, ref bool greedy, IHandler composer)
         {
-            return base.HandleCallback(callback, greedy, composer);
+            return base.HandleCallback(callback, ref greedy, composer);
         }
     }
 }

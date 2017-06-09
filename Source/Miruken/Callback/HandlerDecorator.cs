@@ -16,11 +16,11 @@ namespace Miruken.Callback
         object IDecorator.Decoratee => Decoratee;
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
-            var handled = base.HandleCallback(callback, greedy, composer);
+            var handled = base.HandleCallback(callback, ref greedy, composer);
             if (!handled || greedy)
-                handled = Decoratee.Handle(callback, greedy, composer) || handled;
+                handled = Decoratee.Handle(callback, ref greedy, composer) || handled;
             return handled;
         }
     }

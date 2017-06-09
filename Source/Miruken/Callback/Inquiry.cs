@@ -109,7 +109,8 @@
             return true;
         }
 
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(
+            Handler handler, ref bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled   = surrogate != null && Implied(surrogate, false, composer);

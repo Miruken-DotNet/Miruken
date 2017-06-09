@@ -76,39 +76,40 @@ namespace Miruken.Context
 	    }
 
 	    protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
 	    {
-	        var handled = base.HandleCallback(callback, greedy, composer);
+	        var handled = base.HandleCallback(callback, ref greedy, composer);
 	        if (handled && !greedy)
 	            return true;
 	        var parent = Parent;
 	        if (parent != null)
-	            handled = handled | parent.Handle(callback, greedy, composer);
+	            handled = handled | parent.Handle(callback, ref greedy, composer);
 	        return handled;
 	    }
 
 	    public virtual bool Handle(
-            TraversingAxis axis, object callback,
-            bool greedy, IHandler composer)
+            TraversingAxis axis, object callback, ref bool greedy, IHandler composer)
 	    {
             if (axis == TraversingAxis.Self)                                                                                                              
-                return base.HandleCallback(callback, greedy, composer);
+                return base.HandleCallback(callback, ref greedy, composer);
 
+	        var g = greedy;
 	        var handled = false;                                                                                    
             Traverse(axis, node =>
             {                                                                                                           
                 handled = handled | (node == this                                                                                                   
-                        ? BaseHandle(callback, greedy, composer)                                                                                             
+                        ? BaseHandle(callback, ref g, composer)                                                                                             
                         : ((TContext)node).Handle(
-                            TraversingAxis.Self, callback, greedy, composer));                                                                
-                return handled && !greedy;                                                                                                                  
+                            TraversingAxis.Self, callback, ref g, composer));                                                                
+                return handled && !g;                                                                                                                  
             });
+	        greedy = g;
 	        return handled;
 	    }
 
-        private bool BaseHandle(object callback, bool greedy, IHandler composer)
+        private bool BaseHandle(object callback, ref bool greedy, IHandler composer)
         {
-            return base.HandleCallback(callback, greedy, composer);
+            return base.HandleCallback(callback, ref greedy, composer);
         }
 
         public void Traverse(TraversingAxis axis, Visitor visitor)

@@ -11,10 +11,13 @@
             _inquiries = inquiries;
         }
 
-        public bool Dispatch(Handler handler, bool greedy, IHandler composer)
+        public bool Dispatch(Handler handler, ref bool greedy, IHandler composer)
         {
-            return _inquiries.AsParallel().All((IDispatchCallback inquiry) =>
-                inquiry.Dispatch(handler, greedy, composer));
+            var g = greedy;
+            var handled = _inquiries.AsParallel().All((IDispatchCallback inquiry) =>
+                inquiry.Dispatch(handler, ref g, composer));
+            greedy = g;
+            return handled;
         }
     }
 }

@@ -31,14 +31,14 @@
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             var composition = callback as Composition;
             var options     = (composition?.Callback ?? callback) as T;
             var handled     = options != null;
             if (handled) _options.MergeInto(options);
             return handled && !greedy ||
-                (Decoratee.Handle(callback, greedy, composer) || handled);
+                (Decoratee.Handle(callback, ref greedy, composer) || handled);
         }
     }
 }

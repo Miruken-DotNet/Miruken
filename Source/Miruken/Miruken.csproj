@@ -128,7 +128,6 @@
     <Compile Include="Infrastructure\DisposableAction.cs" />
     <Compile Include="Infrastructure\DisposableObject.cs" />
     <Compile Include="Infrastructure\EventExtensions.cs" />
-    <Compile Include="Infrastructure\ExceptionEventArgs.cs" />
     <Compile Include="Infrastructure\RuntimeHelper.cs" />
     <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

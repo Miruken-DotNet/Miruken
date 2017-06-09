@@ -12,14 +12,14 @@
 		}
 
 		protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
 		{
-		    var handled = base.HandleCallback(callback, greedy, composer);
+		    var handled = base.HandleCallback(callback, ref greedy, composer);
 			return greedy
-				? handled | _handlerA.Handle(callback, true, composer) 
-                   | _handlerB.Handle(callback, true, composer)
-				: handled || _handlerA.Handle(callback, false, composer)
-                  || _handlerB.Handle(callback, false, composer);
+				? handled | _handlerA.Handle(callback, ref greedy, composer) 
+                   | _handlerB.Handle(callback, ref greedy, composer)
+				: handled || _handlerA.Handle(callback, ref greedy, composer)
+                  || _handlerB.Handle(callback, ref greedy, composer);
 		}
 	}
 }

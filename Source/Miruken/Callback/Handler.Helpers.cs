@@ -6,6 +6,12 @@ namespace Miruken.Callback
 
     public static class HandlerHelpers
     {
+        public static bool Handle(this IHandler handler, object callback, 
+            bool greedy = false, IHandler composer = null)
+        {
+            return handler.Handle(callback, ref greedy, composer);
+        }
+
         public static IHandler Chain(
             this IHandler handler, params IHandler[] chain)
         {

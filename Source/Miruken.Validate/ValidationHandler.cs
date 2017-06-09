@@ -8,8 +8,13 @@
         public ValidationOutcome Validate(
             object target, params object[] scopes)
         {
-            var validation = new Validation(target, scopes);
-            Composer.Handle(validation, true);
+            var composer   = Composer;
+            var options    = GetOptions(composer);
+            var validation = new Validation(target, scopes)
+            {
+                StopOnFailure = options?.StopOnFailure == true
+            };
+            composer.Handle(validation, true);
 
             var outcome         = validation.Outcome;
             var validationAware = target as IValidationAware;
@@ -21,8 +26,14 @@
         public Promise<ValidationOutcome> ValidateAsync(
             object target, params object[] scopes)
         {
-            var validation = new Validation(target, scopes) { WantsAsync = true };
-            Composer.Handle(validation, true);
+            var composer   = Composer;
+            var options    = GetOptions(composer);
+            var validation = new Validation(target, scopes)
+            {
+                StopOnFailure = options?.StopOnFailure == true,
+                WantsAsync = true
+            };
+            composer.Handle(validation, true);
 
             return ((Promise)validation.Result).Then((r, s) =>
             {
@@ -32,6 +43,12 @@
                     validationAware.ValidationOutcome = outcome;
                 return outcome;
             });
+        }
+
+        private static ValidationOptions GetOptions(IHandler composer)
+        {
+            var options = new ValidationOptions();
+            return composer.Handle(options) ? options : null;
         }
     }
 

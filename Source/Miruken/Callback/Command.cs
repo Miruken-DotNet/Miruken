@@ -82,7 +82,8 @@
             return true;
         }
 
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(
+            Handler handler, ref bool greedy, IHandler composer)
         {
             var count = _results.Count;
             return (Policy ?? HandlesAttribute.Policy)

@@ -19,16 +19,16 @@
 	    public object Surrogate { get; }
 
 	    public virtual bool Handle(
-            object callback, bool greedy = false, IHandler composer = null)
+            object callback, ref bool greedy, IHandler composer = null)
 	    {
             if (callback == null) return false;
 	        if (composer == null)
 	            composer = this as CompositionScope ?? new CompositionScope(this);
-	        return HandleCallback(callback, greedy, composer);
+	        return HandleCallback(callback, ref greedy, composer);
 	    }
 
         protected virtual bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             if (Surrogate == null && SkippedTypes.Contains(GetType()))
                 return false;
@@ -41,7 +41,7 @@
             }
 
             var dispatch = callback as IDispatchCallback;
-            return dispatch?.Dispatch(this, greedy, composer)
+            return dispatch?.Dispatch(this, ref greedy, composer)
                 ?? HandlesPolicy.Dispatch(this, callback, greedy, composer);
         }
 
@@ -76,11 +76,11 @@
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             if (callback.GetType() != typeof(Composition))
                 callback = new Composition(callback);
-            return base.HandleCallback(callback, greedy, composer);
+            return base.HandleCallback(callback, ref greedy, composer);
         }
     }
 }

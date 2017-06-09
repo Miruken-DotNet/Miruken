@@ -55,7 +55,8 @@
             return binding.Dispatch(target, this, composer);
         }
 
-        bool IDispatchCallback.Dispatch(Handler handler, bool greedy, IHandler composer)
+        bool IDispatchCallback.Dispatch(
+            Handler handler, ref bool greedy, IHandler composer)
         {
             var surrogate = handler.Surrogate;
             var handled = surrogate != null && InvokeOn(surrogate, composer);

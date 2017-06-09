@@ -23,11 +23,12 @@
             _asyncResults = new List<Promise>();
         }
 
-        public object            Target       { get; }
-        public ValidationOutcome Outcome      { get; }
-        public IScopeMatching    ScopeMatcher { get; }
-        public bool              WantsAsync   { get; set; }
-        public bool              IsAsync      { get; private set; }
+        public object            Target        { get; }
+        public ValidationOutcome Outcome       { get; }
+        public IScopeMatching    ScopeMatcher  { get; }
+        public bool              WantsAsync    { get; set; }
+        public bool              IsAsync       { get; private set; }
+        public bool              StopOnFailure { get; set; }
 
         public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
 
@@ -71,10 +72,13 @@
         }
 
         bool IDispatchCallback.Dispatch(
-            Handler handler, bool greedy, IHandler composer)
+            Handler handler, ref bool greedy, IHandler composer)
         {
-            return ValidatesAttribute.Policy.Dispatch(
+            var handled = ValidatesAttribute.Policy.Dispatch(
                 handler, this, greedy, composer, AddAsyncResult);
+            if (greedy && StopOnFailure && !Outcome.IsValid)
+                greedy = false;
+            return handled;
         }
 
         private static IScopeMatching CreateScopeMatcher(object[] scopes)

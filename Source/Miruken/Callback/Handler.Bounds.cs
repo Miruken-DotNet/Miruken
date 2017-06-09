@@ -11,12 +11,12 @@
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             var composition = callback as Composition;
             var bounded     = (composition?.Callback ?? callback) as IBoundCallback;
             return (bounded == null || bounded.Bounds != _bounds) &&
-                base.HandleCallback(callback, greedy, composer);
+                base.HandleCallback(callback, ref greedy, composer);
         }
     }
 

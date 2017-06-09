@@ -5,8 +5,8 @@ namespace Miruken.Callback
 {
     public interface IHandlerAxis : IHandler
     {
-        bool Handle(
-            TraversingAxis axis, object callback, bool greedy, IHandler composer);
+        bool Handle(TraversingAxis axis, object callback, 
+            ref bool greedy, IHandler composer);
     }
 
     public class HandlerAxis : Handler, IHandlerAxis
@@ -23,19 +23,19 @@ namespace Miruken.Callback
         }
 
         protected override bool HandleCallback(
-            object callback, bool greedy, IHandler composer)
+            object callback, ref bool greedy, IHandler composer)
         {
             var composition = callback as Composition;
             var handled = composition == null
-                 ? _handler.Handle(_axis, callback, greedy, composer)
+                 ? _handler.Handle(_axis, callback, ref greedy, composer)
                  : _handler.Handle(callback, greedy, composer);
-            return handled || base.HandleCallback(callback, greedy, composer);
+            return handled || base.HandleCallback(callback, ref greedy, composer);
         }
 
-        public bool Handle(
-            TraversingAxis axis, object callback, bool greedy, IHandler composer)
+        public bool Handle(TraversingAxis axis, object callback, 
+            ref bool greedy, IHandler composer)
         {
-            return _handler.Handle(axis, callback, greedy, composer);
+            return _handler.Handle(axis, callback, ref greedy, composer);
         }
     }
 
