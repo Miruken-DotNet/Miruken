@@ -70,11 +70,11 @@
     <Compile Include="ValidationTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Miruken.Validate\Miruken.Validate.csproj">
+    <ProjectReference Include="..\..\Source\Miruken.Validate\Miruken.Validate.csproj">
       <Project>{9aa29653-c40f-4f9a-9e1c-df5b72489a3a}</Project>
       <Name>Miruken.Validate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Miruken\Miruken.csproj">
+    <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>
     </ProjectReference>
