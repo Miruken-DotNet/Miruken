@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Miruken.Castle</id>
+    <version>$version$</version>
+    <title>Miruken Castle</title>
+    <authors>cneuwirt</authors>
+    <owners>cneuwirt</owners>
+    <licenseUrl>https://github.com/Miruken-DotNet/Miruken.Castle/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Miruken-DotNet/Miruken.Castle</projectUrl>
+    <iconUrl>https://avatars0.githubusercontent.com/u/20844317</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Miruken Castle</description>
+    <copyright>Copyright 2016</copyright>
+    <tags>Miruken miruken Castle castle</tags>
+    <dependencies>
+      <dependency id="Miruken" version="(1.0,)"/>
+    </dependencies>
+  </metadata>
+</package>
