@@ -1,7 +1,8 @@
-﻿using System;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
+    using System;
+    using Infrastructure;
+
     public abstract class HandlerDecorator  : Handler, IDecorator
     {
         protected HandlerDecorator(IHandler decoratee)

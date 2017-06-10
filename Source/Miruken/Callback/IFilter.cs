@@ -18,12 +18,6 @@
                  IHandler composer, NextDelegate<Res> next);
     }
 
-    public interface IDynamicFilter : IFilter
-    {
-        object Next(object callback, MethodBinding method,
-           IHandler composer, NextDelegate<object> next);
-    }
-
     public interface IFilterProvider
     {
         IEnumerable<IFilter> GetFilters(

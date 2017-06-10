@@ -48,9 +48,9 @@
                     {
                         composer = comp ?? composer;
                         var filter      = pipeline.Current;
-                        var typedFilter = filter as IFilter<Cb, Res>;
-                        if (typedFilter != null)
-                            return typedFilter.Next((Cb)callback, binding, composer, 
+                        var typeFilter = filter as IFilter<Cb, Res>;
+                        if (typeFilter != null)
+                            return typeFilter.Next((Cb)callback, binding, composer, 
                                 (p,c) => (Res)binding.CoerceResult(next(p, c), typeof(Res)));
                         var taskFilter = filter as IFilter<Cb, Task<Res>>;
                         if (taskFilter != null)
@@ -62,10 +62,6 @@
                             return promiseFilter.Next((Cb)callback, binding, composer,
                                 (p, c) => (Promise<Res>)binding.CoerceResult(next(p, c),
                                            typeof(Promise<Res>)));
-                        var dynamicFilter = filter as IDynamicFilter;
-                        if (dynamicFilter != null)
-                            return dynamicFilter.Next(callback, binding, composer,
-                                (p,c) => binding.CoerceResult(next(p, c), typeof(Res)));
                     }
                     return complete(composer);
                 };
