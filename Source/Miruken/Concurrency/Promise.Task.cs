@@ -81,22 +81,25 @@
                     }
                     onCancel(cancellationTokenSource.Cancel);
                 }
-                if (!task.IsCompleted)
-                    task.ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                            reject(ExtractException(t), false);
-                        else if (t.IsCanceled)
-                            reject(new CancelledException("Task was cancelled"), false);
-                        else
-                            resolve(t.Result, false);
-                    });
-                else if (task.IsFaulted)
-                    reject(ExtractException(task), true);
-                else if (task.IsCanceled)
-                    reject(new CancelledException("Task was cancelled"), true);
-                else
-                    resolve(task.Result, true);
+                if (task.IsCompleted)
+                {
+                    var completedSync = (task as IAsyncResult).CompletedSynchronously;
+                    if (task.IsFaulted)
+                        reject(task.FlattenException(), completedSync);
+                    else if (task.IsCanceled)
+                        reject(new CancelledException("Task was cancelled"), completedSync);
+                    else
+                        resolve(task.Result, completedSync);
+                }
+                else task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        reject(t.FlattenException(), false);
+                    else if (t.IsCanceled)
+                        reject(new CancelledException("Task was cancelled"), false);
+                    else
+                        resolve(t.Result, false);
+                });
             })
         {
             cancellationTokenSource?.Token.Register(Cancel, false);
@@ -110,9 +113,22 @@
             cancellationToken.Register(Cancel, false);
         }
 
+        public Promise Then(ResolveCallbackT<Task> then)
+        {
+            return Then(then, null);
+        }
+
         public Promise<R> Then<R>(ResolveCallbackT<Task<R>> then)
         {
             return Then(then, null);
+        }
+
+        public Promise Then(ResolveCallbackT<Task> then, RejectCallback<Task> fail)
+        {
+            return Then(then != null ? (ResolveCallbackT<Promise>)(
+                (r, s) => then(r, s).ToPromise()) : null, fail != null
+                ? (RejectCallback<Promise>)((ex, s) => fail(ex, s).ToPromise())
+                : null);
         }
 
         public Promise<R> Then<R>(ResolveCallbackT<Task<R>> then, RejectCallback<Task<R>> fail)
@@ -162,11 +178,6 @@
         public static implicit operator Promise<T>(Task<T> task)
         {
             return task.ToPromise();
-        }
-
-        private static Exception ExtractException(Task task)
-        {
-            return task.Exception?.Flatten().InnerException;
         }
     }
 }

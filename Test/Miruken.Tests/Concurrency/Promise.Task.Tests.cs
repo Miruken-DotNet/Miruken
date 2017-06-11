@@ -336,5 +336,23 @@ namespace Miruken.Tests.Concurrency
                     Assert.Fail("Operation timed out");
             });
         }
+
+        [TestMethod]
+        public void Should_Unwrap_Fulfilled_Task_Asynchronously()
+        {
+            var promise = Promise.Resolved(1)
+                .Then((r, s) => Task.Delay(1).ContinueWith(t => 3));
+            Assert.AreEqual(3, promise.Wait());
+            Assert.IsFalse(promise.CompletedSynchronously);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(ArgumentException))]
+        public void Should_Unwrap_Rejected_Task_Synchronously()
+        {
+            var promise = Promise.Resolved(1)
+                .Then((r, s) => Task.FromException(new ArgumentException("Bad value")));
+            Assert.AreEqual(2, promise.Wait());
+        }
     }
 }
