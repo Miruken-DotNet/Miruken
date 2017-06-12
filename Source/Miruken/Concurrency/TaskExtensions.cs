@@ -2,22 +2,12 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Infrastructure;
 
     public static class TaskExtensions
     {
-        internal class Helper
-        {
-            internal static Task<T> Coerce<T>(Task task)
-            {
-                return task as Task<T> ??
-                    task.ContinueWith(t => (T)GetResult(t, typeof(T)));
-            }
-        }
-
         public static Task<T> Cast<T>(this Task task)
         {
             return Helper.Coerce<T>(task);
@@ -47,8 +37,7 @@
              CancellationToken cancellationToken = default(CancellationToken),
              ChildCancelMode mode = ChildCancelMode.All)
         {
-            return task.ContinueWith(t => GetResult(t), cancellationToken)
-                .ToPromise(cancellationToken, mode);
+            return task.Cast<object>().ToPromise(cancellationToken, mode);
         }
 
         public static Promise<object> ToPromise(
@@ -56,8 +45,7 @@
             CancellationTokenSource cancellationTokenSource,
             ChildCancelMode mode = ChildCancelMode.All)
         {
-            return task.ContinueWith(t => GetResult(t), cancellationTokenSource.Token)
-                .ToPromise(cancellationTokenSource, mode);
+            return task.Cast<object>().ToPromise(cancellationTokenSource, mode);
         }
 
         public static Promise<T> ToPromise<T>(
@@ -76,25 +64,52 @@
             return new Promise<T>(task, cancellationTokenSource, mode);
         }
 
-        private static object GetResult(Task task, Type type = null)
+        public static Exception FlattenException(this Task task)
         {
-            var exception = task.Exception;
-            if (exception != null)
-            {
-                var ex = exception.Flatten().InnerException;
-                ExceptionDispatchInfo.Capture(ex ?? exception).Throw();
-            }
-            var taskType = task.GetType();
-            var getter   = TaskResultGetters.GetOrAdd(taskType, ttype =>
-              ttype.GetOpenTypeConformance(typeof(Task<>)) == null ? null
-                  : RuntimeHelper.CreatePropertyGetter("Result", ttype));
-            return getter?.Invoke(task) ?? RuntimeHelper.GetDefault(type);
+            return task?.Exception?.Flatten().InnerException;
         }
-
-        private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>
-            TaskResultGetters = new ConcurrentDictionary<Type, PropertyGetDelegate>();
 
         private static readonly ConcurrentDictionary<Type, Func<Task, Task>>
             CoerceTask = new ConcurrentDictionary<Type, Func<Task, Task>>();
+
+        #region Helper
+
+        internal class Helper
+        {
+            internal static Task<T> Coerce<T>(Task task)
+            {
+                var ttask = task as Task<T>;
+                if (ttask != null) return ttask;
+                return task.IsCompleted 
+                     ? Complete<T>(task) 
+                     : task.ContinueWith(Complete<T>).Unwrap();
+            }
+
+            private static Task<T> Complete<T>(Task task)
+            {
+                var source = new TaskCompletionSource<T>();
+                if (task.IsFaulted)
+                    source.SetException(task.FlattenException());
+                else if (task.IsCanceled)
+                    source.SetCanceled();
+                else
+                    source.SetResult((T)GetResult(task, typeof(T)));
+                return source.Task;
+            }
+
+            private static object GetResult(Task task, Type type = null)
+            {
+                var taskType = task.GetType();
+                var getter = TaskResultGetters.GetOrAdd(taskType, ttype =>
+                ttype.GetOpenTypeConformance(typeof(Task<>)) == null ? null
+                    : RuntimeHelper.CreatePropertyGetter("Result", ttype));
+                return getter?.Invoke(task) ?? RuntimeHelper.GetDefault(type);
+            }
+
+            private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>
+                TaskResultGetters = new ConcurrentDictionary<Type, PropertyGetDelegate>();
+        }
+
+        #endregion
     }
 }

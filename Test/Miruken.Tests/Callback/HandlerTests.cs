@@ -8,6 +8,7 @@
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Concurrency;
+    using Miruken.Infrastructure;
 
     /// <summary>
     /// Summary description for HandlerTests

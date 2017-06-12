@@ -61,6 +61,7 @@
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\Promise.Task.Tests.cs" />
     <Compile Include="Concurrency\PromiseTests.cs" />
+    <Compile Include="Concurrency\TaskExtensionsTests.cs" />
     <Compile Include="Container\ContainerTests.cs" />
     <Compile Include="Container\TestContainer.cs" />
     <Compile Include="Context\ContextTests.cs" />

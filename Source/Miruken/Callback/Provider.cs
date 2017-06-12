@@ -2,13 +2,13 @@
 {
     using System;
 
-    public delegate bool ProviderDelegate(Inquiry inquiry, IHandler composer);
+    public delegate bool ProvidesDelegate(Inquiry inquiry, IHandler composer);
 
     public class Provider : Handler
     {
-        private readonly ProviderDelegate _provider;
+        private readonly ProvidesDelegate _provider;
 
-        public Provider(ProviderDelegate provider)
+        public Provider(ProvidesDelegate provider)
         {
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));

@@ -85,7 +85,7 @@ namespace Miruken.Callback
             });
         }
 
-        public static IHandler Provide(this IHandler handler, ProviderDelegate provider)
+        public static IHandler Provide(this IHandler handler, ProvidesDelegate provider)
         {
             return new Provider(provider) + handler;
         }

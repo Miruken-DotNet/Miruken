@@ -26,7 +26,12 @@
             {
                 var result = await validator.ValidateAsync(context)
                     .ConfigureAwait(false);
-                if (!result.IsValid) AddErrors(result, outcome);
+                if (!result.IsValid)
+                {
+                    AddErrors(result, outcome);
+                    if (validation.StopOnFailure)
+                        break;
+                }
             }
         }
 

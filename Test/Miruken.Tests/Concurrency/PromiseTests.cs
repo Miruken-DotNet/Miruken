@@ -327,7 +327,7 @@ namespace Miruken.Tests.Concurrency
                 Assert.AreEqual("Hello", r);
                 ++called; 
             });
-            promise.Then((r,s) => { throw new Exception("Bad"); })
+            promise.Then(new ResolveCallback((r,s) => { throw new Exception("Bad"); }))
                 .Then((r, s) => { Assert.Fail("Should skip"); return 12;})
                 .Catch((ex, s) =>
                 {
@@ -347,7 +347,7 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
-                .Then((r,s) => { throw new Exception("Bad"); })
+                .Then(new ResolveCallback((r,s) => { throw new Exception("Bad"); }))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -372,7 +372,10 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 reject(new Exception("Foo"), true))
-                .Then(null, (ex, s) => { throw new Exception("Bar"); })
+                .Then(null, new RejectCallback((ex, s) =>
+                {
+                    throw new Exception("Bar");
+                }))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -393,7 +396,10 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ =>
                     reject(new Exception("Rejected"), false)))
-                .Then(null, (ex, s) => { throw new Exception("Bar"); })
+                .Then(null, new RejectCallback((ex, s) =>
+                {
+                    throw new Exception("Bar");
+                }))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -489,7 +495,7 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
-                .Then((r,s) => { throw new Exception("Bar"); })
+                .Then(new ResolveCallback((r,s) => { throw new Exception("Bar"); }))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex,s) =>
                 {
@@ -663,8 +669,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
                 .Then((r,s) => new Promise<int>((res, rej) =>
-                    rej(new Exception("Bad Data"), true)))
-                
+                    rej(new Exception("Bad Data"), true)))       
                 .Catch((ex, s) =>
                 {
                     Thread.Sleep(100);
@@ -1001,7 +1006,7 @@ namespace Miruken.Tests.Concurrency
             var called  = false;
             var cancel  = false;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true))
-                .Then((result, s) => { throw new CancelledException(); })
+                .Then(new ResolveCallback((result, s) => { throw new CancelledException(); }))
                 .Then((result, s) => { called = true; }, (ex, ss) => { called = true; });
             promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
@@ -1039,7 +1044,7 @@ namespace Miruken.Tests.Concurrency
             var called = false;
             var cancel = false;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true))
-            .Then((result, s) => { throw new CancelledException(); })
+            .Then(new ResolveCallback((result, s) => { throw new CancelledException(); }))
             .Finally(() => { called = true; });
             promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))

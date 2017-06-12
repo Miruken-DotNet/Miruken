@@ -80,13 +80,11 @@
             if (filterTypes == null)
                 throw new ArgumentNullException(nameof(filterTypes));
             var anyFilter     = typeof(IFilter<,>);
-            var dynamicFilter = typeof(IDynamicFilter);
             foreach (var filterType in filterTypes)
             {
                 if (filterType == null)
                     throw new ArgumentException("Filter types cannot be nulll");  
-                if (filterType == anyFilter ||
-                    dynamicFilter.IsAssignableFrom(filterType)) continue;
+                if (filterType == anyFilter) continue;
                 var conformance = filterType.GetOpenTypeConformance(anyFilter);
                 if (conformance == null)
                     throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");

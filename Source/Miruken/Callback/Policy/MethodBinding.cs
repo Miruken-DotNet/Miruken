@@ -54,7 +54,8 @@
                     var task = result as Task;
                     if (task != null) promise = Promise.Resolved(task);
                 }
-                if (promise != null) return promise.Wait();
+                if (promise != null)
+                    return promise.Wait();
             }
             return result;
         }

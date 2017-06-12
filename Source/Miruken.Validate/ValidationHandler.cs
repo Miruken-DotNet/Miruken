@@ -31,7 +31,7 @@
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true,
-                WantsAsync = true
+                WantsAsync    = true
             };
             composer.Handle(validation, true);
 
