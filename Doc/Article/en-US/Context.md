@@ -20,7 +20,9 @@ This means you can use any container you choose.
 ```
 
 ## Hierarchical
-Contexts are also hierarchical. They know their parent, and can create children.  This is where things start to get really powerfulld.
+Contexts are also hierarchical. They know their parent and can create children.
+
+![Self Or Ancestor](../../Img/context/Hierarchical.png)
 
 ```
 - Context.CreateChild
@@ -32,8 +34,6 @@ Traversal is the concept of finding a handler for a message in the current conte
 
 By default when Miruken is trying to handle a message it starts with the current context. If the current context cannot handle
 the message, the message will be passed to the parent to be handled.
-
-![Self Or Ancestor](SelfOrAncestor.png)
 
 ## Lifecycle
 
