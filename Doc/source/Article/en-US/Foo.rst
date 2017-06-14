@@ -1,32 +1,23 @@
+.. highlight:: c#
+	:linenothreshold: 2
+
 =====
  Foo
 =====
 
-Level 1
--------
+.. image:: ..\..\img\context\hierarchical.png
 
-Level a
-~~~~~~~
+This was imported from a C# project
 
-Level b
-~~~~~~~
+.. literalinclude:: /Example/Examples/MirukenExamples/Context/CreatingAContext.cs
+   :emphasize-lines: 11
+   :linenos:
 
-Level 2
--------
+This was typed in the rst::
 
-Level a
-~~~~~~~
+	public static void Main()
+	{
+		//Do some work here
+	}
 
-Level b
-~~~~~~~
-	
-Level 3
--------
-
-Level a
-~~~~~~~
-
-Level b
-~~~~~~~
-
-
+Something else
