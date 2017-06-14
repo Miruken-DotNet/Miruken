@@ -5,7 +5,7 @@
  Foo
 =====
 
-.. image:: ..\..\img\context\hierarchical.png
+.. image:: /img/context/hierarchical.png
 
 This was imported from a C# project
 
