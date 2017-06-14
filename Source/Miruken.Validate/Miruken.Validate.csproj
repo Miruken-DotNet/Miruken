@@ -46,9 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\GlobalAssemblyInfo.cs">
-      <Link>Properties\GlobalAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="DataAnnotations\CompositeResult.cs" />
     <Compile Include="DataAnnotations\DataAnnotationsValidator.cs" />
     <Compile Include="DataAnnotations\ValidAttribute.cs" />
@@ -56,6 +53,7 @@
     <Compile Include="FluentValidation\FluentValidator.cs" />
     <Compile Include="FluentValidation\ScopeSelector.cs" />
     <Compile Include="FluentValidation\OutcomeFailure.cs" />
+    <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IScopeMatching.cs" />
     <Compile Include="IValidationAware.cs" />
     <Compile Include="IValidator.cs" />

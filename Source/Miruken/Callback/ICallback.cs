@@ -19,7 +19,7 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
-    public interface INoFiltersCallback {}
+    public interface IInvokeCallback {}
 
     public interface IDispatchCallback
     {

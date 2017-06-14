@@ -3,7 +3,7 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, INoFiltersCallback
+        IBoundCallback, IInvokeCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }

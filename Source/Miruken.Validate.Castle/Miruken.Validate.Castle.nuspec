@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Miruken.Validate</id>
+    <version>$version$</version>
+    <title>Miruken Validate</title>
+    <authors>cneuwirt</authors>
+    <owners>cneuwirt</owners>
+    <licenseUrl>https://github.com/Miruken-DotNet/Miruken.Mvc/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Miruken-DotNet/Miruken.Mvc</projectUrl>
+    <iconUrl>https://avatars0.githubusercontent.com/u/20844317</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Miruken Validate</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Miruken miruken Validate validate</tags>
+    <dependencies>
+      <dependency id="Miruken" version="(1.0,)"/>
+      <dependency id="Miruken.Castle" version="(1.0,)"/>
+      <dependency id="FluentValidation" version="(6.4,)"/>
+    </dependencies>
+  </metadata>
+</package>

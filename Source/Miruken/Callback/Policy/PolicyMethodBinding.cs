@@ -70,7 +70,7 @@
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
-            if (callback is INoFiltersCallback)
+            if (callback is IInvokeCallback)
             {
                 result = Dispatcher.Invoke(target, args, resultType);
                 return true;
