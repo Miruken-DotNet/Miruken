@@ -24,7 +24,6 @@ All you need is a handler in the context that implements `IContainer`
 and it will create the handler instances for you. My simple container here just instantiates instances and returns them. 
 
 .. literalinclude:: /example/mirukenExamples/context/relyingOnAContainerToResolveHandlers.cs
-   :linenos:
    :end-before: //end
    :append: ...
 
