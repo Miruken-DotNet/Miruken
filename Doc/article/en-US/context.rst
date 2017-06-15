@@ -8,6 +8,8 @@ The context is one of the three major components of Miruken.  The other two majo
 
 At the simplest level a context is a collection of handlers. You can simply add instances of handlers to a context.
 
+.. image:: /img/context/collectionOfHandlers.png
+
 .. literalinclude:: /example/mirukenExamples/context/aContextWithHandlerInstances.cs
    :linenos:
 
@@ -17,6 +19,9 @@ This means you can use any container you choose.
 
 .. literalinclude:: /example/mirukenExamples/context/relyingOnAContainerToResolveHandlers.cs
    :linenos:
+   :end-before: //end
+   :append: ...
+
 
 Hierarchical
 ------------
