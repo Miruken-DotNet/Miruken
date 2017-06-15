@@ -1,4 +1,4 @@
-﻿namespace Examples.MirukenExamples.Context
+﻿namespace Example.MirukenExamples.Context
 {
     using System;
     using Miruken.Callback;

@@ -1,7 +1,6 @@
-﻿namespace ExamplesTests
+﻿namespace ExampleTests
 {
-    using Examples.MirukenExamples;
-    using Examples.MirukenExamples.Context;
+    using Example.MirukenExamples.Context;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
