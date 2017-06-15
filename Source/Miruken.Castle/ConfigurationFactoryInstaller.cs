@@ -5,31 +5,25 @@
     using System.Linq;
     using global::Castle.Components.DictionaryAdapter;
     using global::Castle.MicroKernel.Registration;
-    using global::Castle.MicroKernel.SubSystems.Configuration;
-    using global::Castle.Windsor;
 
-    public class ConfigurationFactoryInstaller : IWindsorInstaller
+    public class ConfigurationFactoryInstaller : PluginInstaller
     {
-        private readonly FromAssemblyDescriptor[] _fromAssemblies;
         private readonly DictionaryAdapterFactory _configFactory;
 
-        public ConfigurationFactoryInstaller(params FromAssemblyDescriptor[] fromAssemblies)
+        public ConfigurationFactoryInstaller()
         {
-            _fromAssemblies = fromAssemblies;
             _configFactory  = new DictionaryAdapterFactory();
         }
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        protected override void InstallPlugin(Plugin plugin)
         {
             var appSettings = ConfigurationManager.AppSettings;
 
-            foreach (var assemebly in _fromAssemblies)
-            {
-                container.Register(assemebly.Where(IsConfiguration)
-                    .Configure(reg => reg.UsingFactoryMethod(
-                        (k, m, c) => _configFactory.GetAdapter(m.Services.First(), appSettings))
-                    ));
-            }
+            Container.Register(Types.FromAssembly(plugin.Assembly)
+                .Where(IsConfiguration)
+                .Configure(reg => reg.UsingFactoryMethod(
+                    (k,m,c) => _configFactory.GetAdapter(m.Services.First(), appSettings))
+                ));
         }
 
         protected virtual bool IsConfiguration(Type type)

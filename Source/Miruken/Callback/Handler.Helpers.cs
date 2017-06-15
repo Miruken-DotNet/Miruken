@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
+    using System;
     using System.Collections.Generic;
 
     public static class HandlerHelpers
