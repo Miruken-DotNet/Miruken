@@ -1,7 +1,9 @@
 ﻿namespace Miruken.Castle.Tests
 {
     using System.Collections.Generic;
+    using System.IO;
     using System.Reflection;
+    using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::Castle.Windsor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,10 +44,10 @@
         {
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
-            _container.Install(new Plugins(), myInstaller);
+            _container.Install(myInstaller);
             Assert.IsTrue(myInstaller.Installed);
             Assert.IsTrue(myInstaller.InstalledPlugins.Length == 0);
-            _container.Register(Plugin.FromAssembly(assembly));
+            _container.Install(new Plugins(Plugin.FromAssembly(assembly)));
             CollectionAssert.AreEqual(
                 new[] { Plugin.FromAssembly(assembly) },
                 myInstaller.InstalledPlugins);
@@ -61,12 +63,19 @@
                 Plugin.FromAssembly(assembly)),
                 myInstaller);
             Assert.IsTrue(myInstaller.Installed);
-            _container.Register(Plugin.FromAssembly(assembly));
+            _container.Install(new Plugins(Plugin.FromAssembly(assembly)));
             CollectionAssert.AreEqual(
                 new[] { Plugin.FromAssembly(assembly) },
                 myInstaller.InstalledPlugins);
-
         }
+
+        [TestMethod,
+         ExpectedException(typeof(FileNotFoundException))]
+        public void Should_Reject_Invalid_Plugin()
+        {
+            Plugin.FromAssemblyNamed("foo");
+        }
+
         public class MyInstaller : PluginInstaller
         {
             private readonly List<Plugin> _plugins = new List<Plugin>();

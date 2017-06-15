@@ -1,7 +1,7 @@
-﻿namespace ExamplesTests
+﻿namespace ExampleTests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Examples.MirukenExamples.Context;
+    using Example.MirukenExamples.Context;
 
     [TestClass]
     public class CreatingAChildContextTests

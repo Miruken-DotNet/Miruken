@@ -22,7 +22,7 @@
 
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
-            foreach (var plugin in _plugins) container.Register(plugin);
+            foreach (var plugin in _plugins) container.Install(plugin);
         }
 
         public static Plugins InDirectory(AssemblyFilter filter)

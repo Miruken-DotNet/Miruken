@@ -3,10 +3,12 @@
     using System;
     using System.Reflection;
     using global::Castle.Core.Internal;
-    using global::Castle.MicroKernel;
     using global::Castle.MicroKernel.Registration;
+    using global::Castle.MicroKernel.SubSystems.Configuration;
+    using global::Castle.Windsor;
+    using From = global::Castle.Windsor.Installer.FromAssembly;
 
-    public class Plugin : IRegistration, IEquatable<Plugin>
+    public class Plugin : IWindsorInstaller, IEquatable<Plugin>
     {
         private Plugin(Assembly assembly)
         {
@@ -15,11 +17,12 @@
 
         public Assembly Assembly { get; }
 
-        void IRegistration.Register(IKernelInternal kernel)
+        void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
             var name = Assembly.FullName;
-            if (kernel.HasComponent(name)) return;
-            kernel.Register(Component.For<Plugin>().Instance(this).Named(name));
+            if (container.Kernel.HasComponent(name)) return;
+            container.Install(From.Instance(Assembly));
+            container.Register(Component.For<Plugin>().Instance(this).Named(name));
         }
 
         public bool Equals(Plugin other)

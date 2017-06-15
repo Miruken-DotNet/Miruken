@@ -1,4 +1,4 @@
-﻿namespace Examples.MirukenExamples.Context
+﻿namespace Example.MirukenExamples.Context
 {
     using System;
     using Miruken.Callback;
@@ -24,24 +24,21 @@
     {
         public T Resolve<T>()
         {
-            object instance;
-
-            var type = typeof(T);
-            if (type == typeof(SomeHandler))
-                instance = new SomeHandler();
-            else if (type == typeof(AnotherHandler))
-                instance = new AnotherHandler();
-            else
-                throw new ArgumentException("Unknown type");
-
-            return (T) instance;
+            return (T) Resolve(typeof(T));
         }
 
-        public object Resolve(Type type)
+        private object Resolve(Type type)
         {
-            throw new NotImplementedException();
+            if (type == typeof(SomeHandler))
+                return new SomeHandler();
 
+            if (type == typeof(AnotherHandler))
+                return new AnotherHandler();
+
+            throw new ArgumentException("Unknown type");
         }
+
+//endExample
 
         public object Resolve(object key)
         {
