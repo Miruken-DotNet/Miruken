@@ -1,10 +1,8 @@
-:orphan:
-
 =============
-Documentation
+Miruken Docs
 =============
 
-  View the documentation `here <http://miruken.readthedocs.io/>`_
+  View the docs `here <http://miruken.readthedocs.io/>`_
 
 reStructuredText (reST)
 -----------------------
