@@ -7,7 +7,6 @@ The context is one of the three major components of Miruken.  The other two majo
 In this example we are simply creating a new context:
 
 .. literalinclude:: /example/mirukenExamples/context/creatingAContext.cs
-   :linenos:
 
 At the simplest level a context is a collection of handlers.
 
@@ -36,7 +35,6 @@ Contexts are also hierarchical. They have a context graph witch mean they know t
 In this example we use the CreateChild() method to create a child context from an existing context:
 
 .. literalinclude:: /example/mirukenExamples/context/creatingAChildContext.cs
-   :linenos:
 
 Context Traversal
 -----------------
