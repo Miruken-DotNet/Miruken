@@ -59,12 +59,15 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValidationInstallerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Miruken.Castle\Miruken.Castle.csproj">
@@ -82,6 +85,10 @@
     <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Miruken.Validate.Tests\Miruken.Validate.Tests.csproj">
+      <Project>{bb9461d8-b913-4aae-92d7-98b85f28fe32}</Project>
+      <Name>Miruken.Validate.Tests</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

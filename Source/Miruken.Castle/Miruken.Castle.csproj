@@ -59,6 +59,7 @@
     <Compile Include="ConfigurationFactoryInstaller.cs" />
     <Compile Include="ContextualLifestyleManager.cs" />
     <Compile Include="ContextualScopeAccessor.cs" />
+    <Compile Include="ContravariantFilter.cs" />
     <Compile Include="DependencyResolution.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="PluginInstaller.cs" />
