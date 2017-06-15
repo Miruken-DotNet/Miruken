@@ -12,7 +12,7 @@ This documentation is written with
 and 
 `Sphinx <http://www.sphinx-doc.org/>`_
 
-How to including source code in docs 
+How to include source code in docs 
   http://docutils.sourceforge.net/docs/ref/rst/directives.html#include
   http://sphinx.readthedocs.io/en/stable/markup/code.html#directive-literalinclude
   
