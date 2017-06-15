@@ -4,23 +4,17 @@
 Documentation
 =============
 
-View the documentation
-----------------------
+  View the documentation `here <http://miruken.readthedocs.io/>`_
 
-http://miruken.readthedocs.io/
+reStructuredText (reST)
+-----------------------
 
-reStructuredText
-----------------
+This documentation is written with 
+`reStructuredText <http://docutils.sourceforge.net/docs/user/rst/quickstart.html>`_
+and 
+`Sphinx <http://www.sphinx-doc.org/>`_
 
-This documentation is written in reStructuredText using Sphinx
-
-Primer
-http://docutils.sourceforge.net/docs/user/rst/quickstart.html
-
-Including Source Code
-http://docutils.sourceforge.net/docs/ref/rst/directives.html#include
-
-http://www.sphinx-doc.org/
+How to including Source Code in docs `here <http://docutils.sourceforge.net/docs/ref/rst/directives.html#include>`_
 
 ReadTheDocs
 -----------
