@@ -3,13 +3,11 @@
     using System;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
-    using global::Castle.Windsor;
     using global::FluentValidation;
     using Miruken.Castle;
 
     public class ValidationInstaller : PluginInstaller
     {
-        private IWindsorContainer _container;
         private Action<ComponentRegistration> _configure;
 
         public ValidationInstaller ConfigureValidators(Action<ComponentRegistration> configure)
@@ -18,10 +16,9 @@
             return this;
         }
 
-        protected override void Install(IWindsorContainer container, IConfigurationStore store)
+        protected override void Install(IConfigurationStore store)
         {
-            _container = container;
-            _container.Register(Component.For<IValidatorFactory>()
+            Container.Register(Component.For<IValidatorFactory>()
                 .ImplementedBy<WindsorValidatorFactory>()
                 .OnlyNewServices());
         }
@@ -33,7 +30,7 @@
                 .WithServiceBase();
             if (_configure != null)
                 validators.Configure(_configure);
-            _container.Register(validators);
+            Container.Register(validators);
         }
     }
 }

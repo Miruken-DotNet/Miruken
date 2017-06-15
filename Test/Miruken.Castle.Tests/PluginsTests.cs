@@ -84,7 +84,7 @@
 
             public Plugin[] InstalledPlugins => _plugins.ToArray();
 
-            protected override void Install(IWindsorContainer container, IConfigurationStore store)
+            protected override void Install(IConfigurationStore store)
             {
                 Installed = true;
             }

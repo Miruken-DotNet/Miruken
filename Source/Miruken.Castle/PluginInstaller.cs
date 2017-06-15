@@ -6,9 +6,12 @@
 
     public abstract class PluginInstaller : IWindsorInstaller
     {
+        protected IWindsorContainer Container { get; private set; }
+
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
-            Install(container, store);
+            Container = container;
+            Install(store);
 
             container.Kernel.ComponentRegistered += (key, handler) =>
             {
@@ -23,7 +26,7 @@
             foreach (var plugin in plugins) InstallPlugin(plugin);
         }
 
-        protected virtual void Install(IWindsorContainer container, IConfigurationStore store)
+        protected virtual void Install(IConfigurationStore store)
         {
         }
 

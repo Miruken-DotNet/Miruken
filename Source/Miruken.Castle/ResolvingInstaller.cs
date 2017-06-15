@@ -1,27 +1,27 @@
-﻿using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.SubSystems.Configuration;
-using Castle.Windsor;
-using Miruken.Callback;
-
-namespace Miruken.Castle
+﻿namespace Miruken.Castle
 {
-    public class ResolvingInstaller : IWindsorInstaller
-    {
-        private readonly FromAssemblyDescriptor[] _fromAssemblies;
+    using System;
+    using Callback;
+    using global::Castle.MicroKernel.Registration;
 
-        public ResolvingInstaller(params FromAssemblyDescriptor[] fromAssemblies)
+    public class ResolvingInstaller : PluginInstaller
+    {
+        private Action<ComponentRegistration> _configure;
+
+        public ResolvingInstaller ConfigureResolving(Action<ComponentRegistration> configure)
         {
-            _fromAssemblies = fromAssemblies;
+            _configure += configure;
+            return this;
         }
 
-        public void Install(IWindsorContainer container, IConfigurationStore store)
+        protected override void InstallPlugin(Plugin plugin)
         {
-            foreach (var assemebly in _fromAssemblies)
-            {
-                container.Register(assemebly.BasedOn(typeof(IResolving))
-                    .WithServiceFromInterface()
-                    );
-            }
+            var resolving = Classes.FromAssembly(plugin.Assembly)
+                .BasedOn(typeof(IResolving))
+                .WithServiceFromInterface();
+            if (_configure != null)
+                resolving.Configure(_configure);
+            Container.Register(resolving);
         }
     }
 }
