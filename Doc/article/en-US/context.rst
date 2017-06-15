@@ -28,6 +28,7 @@ and it will create the handler instances for you. My simple container here just 
 
 Hierarchical
 ------------
+
 Contexts are also hierarchical. They have a context graph witch mean they know their parent and can create children.
 
 .. image:: ../../img/context/hierarchical.png
