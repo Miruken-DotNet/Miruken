@@ -1,6 +1,8 @@
 Miruken-DotNet
 ==============
 
+.. image:: img/miruken_stacked_net.png
+
 .. toctree::
    :maxdepth: 2
 
