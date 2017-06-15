@@ -4,6 +4,9 @@
 # Mac
 .DS_Store
 
+# Sphinx
+Doc/_build
+
 # User-specific files
 *.suo
 *.user

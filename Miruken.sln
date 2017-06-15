@@ -24,13 +24,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Castle", "Source\Mi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{D62B99D5-EC18-4845-9A29-33547ACF2B38}"
 	ProjectSection(SolutionItems) = preProject
-		Doc\Article\en-US\Context.md = Doc\Article\en-US\Context.md
-		Promise.md = Promise.md
+		Doc\conf.py = Doc\conf.py
+		Doc\index.rst = Doc\index.rst
+		Doc\make.bat = Doc\make.bat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Doc\Example\Examples\Examples.csproj", "{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesTests", "Test\ExamplesTests\ExamplesTests.csproj", "{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example", "Doc\example\example.csproj", "{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "article", "article", "{9D487B52-0A2C-440A-A2C2-3C0EBA9B6B9F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "en-US", "en-US", "{B61A577A-3E1F-4831-8295-64AF66CA8CEE}"
+	ProjectSection(SolutionItems) = preProject
+		Doc\article\en-US\context.rst = Doc\article\en-US\context.rst
+		Doc\article\en-US\promise.rst = Doc\article\en-US\promise.rst
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,18 +119,6 @@ Global
 		{31B658C0-2A41-40BB-BD3A-4E87F37B986B}.Release|x64.Build.0 = Release|Any CPU
 		{31B658C0-2A41-40BB-BD3A-4E87F37B986B}.Release|x86.ActiveCfg = Release|Any CPU
 		{31B658C0-2A41-40BB-BD3A-4E87F37B986B}.Release|x86.Build.0 = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x64.Build.0 = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x86.Build.0 = Debug|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x64.ActiveCfg = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x64.Build.0 = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x86.ActiveCfg = Release|Any CPU
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x86.Build.0 = Release|Any CPU
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -134,6 +131,18 @@ Global
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Release|x64.Build.0 = Release|Any CPU
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Release|x86.ActiveCfg = Release|Any CPU
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4}.Release|x86.Build.0 = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x64.Build.0 = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Debug|x86.Build.0 = Debug|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x64.ActiveCfg = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x64.Build.0 = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x86.ActiveCfg = Release|Any CPU
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,7 +151,9 @@ Global
 		{F64C666E-3A12-4FD4-B4BC-DE7BBD0A52BB} = {CD5678E1-7B60-4B53-AACF-299A8383EF71}
 		{BB9461D8-B913-4AAE-92D7-98B85F28FE32} = {CD5678E1-7B60-4B53-AACF-299A8383EF71}
 		{BD01AE54-9AC5-48FB-BE2C-D782831029EB} = {CD5678E1-7B60-4B53-AACF-299A8383EF71}
-		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4} = {D62B99D5-EC18-4845-9A29-33547ACF2B38}
 		{A5FF5796-A38E-41C7-AC49-E3E59E61FCE4} = {CD5678E1-7B60-4B53-AACF-299A8383EF71}
+		{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4} = {D62B99D5-EC18-4845-9A29-33547ACF2B38}
+		{9D487B52-0A2C-440A-A2C2-3C0EBA9B6B9F} = {D62B99D5-EC18-4845-9A29-33547ACF2B38}
+		{B61A577A-3E1F-4831-8295-64AF66CA8CEE} = {9D487B52-0A2C-440A-A2C2-3C0EBA9B6B9F}
 	EndGlobalSection
 EndGlobal

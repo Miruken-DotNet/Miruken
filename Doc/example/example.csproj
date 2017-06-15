@@ -50,7 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Source\Miruken\Miruken.csproj">
+    <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>
     </ProjectReference>
