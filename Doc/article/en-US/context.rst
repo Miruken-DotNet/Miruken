@@ -14,8 +14,7 @@ At the simplest level a context is a collection of handlers.
 
 Here we are instantiating handlers and adding them to the context: 
 
-.. literalinclude:: example/mirukenExamples/context/aContextWithHandlerInstances.cs
-   :linenos:
+.. literalinclude:: /example/mirukenExamples/context/aContextWithHandlerInstances.cs
 
 You can also rely on a container to create the handler instances.  We like to use Castle Windsor,
 but as you can see by this example you can use any container you want. 
