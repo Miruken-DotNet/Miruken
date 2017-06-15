@@ -60,6 +60,9 @@
     <Compile Include="ContextualLifestyleManager.cs" />
     <Compile Include="ContextualScopeAccessor.cs" />
     <Compile Include="DependencyResolution.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="PluginInstaller.cs" />
+    <Compile Include="Plugins.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolvingInstaller.cs" />

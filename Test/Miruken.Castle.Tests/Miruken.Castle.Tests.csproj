@@ -66,6 +66,7 @@
     <Compile Include="CompositeHandlerExtensionsTests.cs" />
     <Compile Include="ConfigurationFactoryInstallerTests.cs" />
     <Compile Include="ContextualLifestyleManagerTests.cs" />
+    <Compile Include="PluginsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindsorHandlerTests.cs" />
   </ItemGroup>
