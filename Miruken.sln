@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{D62B99D5-EC1
 		Doc\make.bat = Doc\make.bat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Doc\example\Example.csproj", "{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example", "Doc\example\example.csproj", "{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "article", "article", "{9D487B52-0A2C-440A-A2C2-3C0EBA9B6B9F}"
 EndProject

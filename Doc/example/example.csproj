@@ -41,12 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MirukenExamples\Context\AContextWithHandlerInstances.cs" />
-    <Compile Include="MirukenExamples\Context\CreatingAChildContext.cs" />
-    <Compile Include="MirukenExamples\Context\RelyingOnAContainerToResolveHandlers.cs" />
-    <Compile Include="MirukenExamples\Context\AnotherHandler.cs" />
-    <Compile Include="MirukenExamples\Context\CreatingAContext.cs" />
-    <Compile Include="MirukenExamples\Context\SomeHandler.cs" />
+    <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
+    <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
+    <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
+    <Compile Include="mirukenExamples\context\anotherHandler.cs" />
+    <Compile Include="mirukenExamples\context\creatingAContext.cs" />
+    <Compile Include="mirukenExamples\context\someHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
