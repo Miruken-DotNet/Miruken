@@ -1,58 +1,54 @@
+=======
 Context
 =======
 
 The context is one of the three major components of Miruken.  The other two major components being the protocol and the handler.
 
+In this example we are simply creating a new context:
+
 .. literalinclude:: /example/mirukenExamples/context/creatingAContext.cs
    :linenos:
 
-At the simplest level a context is a collection of handlers. You can simply add instances of handlers to a context.
+At the simplest level a context is a collection of handlers.
 
 .. image:: /img/context/collectionOfHandlers.png
+
+Here we are instantiating handlers and adding them to the context: 
 
 .. literalinclude:: /example/mirukenExamples/context/aContextWithHandlerInstances.cs
    :linenos:
 
-You can also rely on a container to create the handler instance.  We like to use Castle Windsor,
-but as you can see by this example all you need is a handler that implements `IContainer`.
-This means you can use any container you choose.
+You can also rely on a container to create the handler instances.  We like to use Castle Windsor,
+but as you can see by this example you can use any container you want. 
+All you need is a handler in the context that implements `IContainer` 
+and it will create the handler instances for you. My simple container here just instantiates instances and returns them. 
 
 .. literalinclude:: /example/mirukenExamples/context/relyingOnAContainerToResolveHandlers.cs
    :linenos:
    :end-before: //end
    :append: ...
 
-
 Hierarchical
 ------------
-Contexts are also hierarchical. They know their parent and can create children.
+Contexts are also hierarchical. They have a context graph witch mean they know their parent and can create children.
 
 .. image:: /img/context/hierarchical.png
+
+In this example we use the CreateChild() method to create a child context from an existing context:
 
 .. literalinclude:: /example/mirukenExamples/context/creatingAChildContext.cs
    :linenos:
 
-Traversal
----------
+Context Traversal
+-----------------
 
-Traversal is the concept of finding a handler for a message in the current context.
+Context traversal is the concept of finding a handler for a message in the current context graph.
 
-SelfOrAncestor
-^^^^^^^^^^^^^^
-
-SelfOrAncestor is the default. When Miruken is trying to handle a message it starts with the current context. If the current context cannot handle the message, the message will be passed to the parent to be handled.
+SelfOrAncestor is the default TraversingAxis which means that when Miruken is trying to handle a message it starts with the current context. If the current context cannot handle the message, the message will be passed to the parent to be handled. There are several other TraversingAxis. You can see them all described below.
 
 .. image:: /img/context/selfOrAncestor.png
 
-There are several other TraversingAxis
-
-Ancestor
-^^^^^^^^
-
 .. image:: /img/context/ancestor.png
-
-Child
-^^^^^^^^
 
 .. image:: /img/context/child.png
 
