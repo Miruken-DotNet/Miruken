@@ -12,9 +12,11 @@ This documentation is written with
 and 
 `Sphinx <http://www.sphinx-doc.org/>`_
 
-How to including Source Code in docs `here <http://docutils.sourceforge.net/docs/ref/rst/directives.html#include>`_
-
+How to including source code in docs 
+  http://docutils.sourceforge.net/docs/ref/rst/directives.html#include
+  http://sphinx.readthedocs.io/en/stable/markup/code.html#directive-literalinclude
+  
 ReadTheDocs
 -----------
 
-This documentation is build and hosted by www.ReadTheDocs.io
+This documentation is built and hosted with www.ReadTheDocs.io
