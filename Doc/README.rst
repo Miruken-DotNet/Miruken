@@ -2,7 +2,7 @@
 Miruken Docs
 =============
 
-  View the docs `here <http://miruken.readthedocs.io/>`_
+  View the docs `here <http://miruken-dotnet-miruken.readthedocs.io/>`_
 
 reStructuredText (reST)
 -----------------------
