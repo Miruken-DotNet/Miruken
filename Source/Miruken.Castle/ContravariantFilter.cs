@@ -18,8 +18,8 @@
 
         public IHandler[] SelectHandlers(Type service, IHandler[] handlers)
         {
-            return handlers // prefer concrete handlers
-                .Where(h => !h.ComponentModel.Implementation.IsGenericTypeDefinition)
+            return handlers.OrderBy(h =>
+                h.ComponentModel.Implementation.IsGenericTypeDefinition ? 1 : 0)
                 .ToArray();
         }
     }
