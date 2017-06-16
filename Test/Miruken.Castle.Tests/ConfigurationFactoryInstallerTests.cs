@@ -20,9 +20,8 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                    new ConfigurationFactoryInstaller());
+                .Install(Plugin.FromAssembly(Assembly.GetExecutingAssembly()),
+                         new ConfigurationFactoryInstaller());
         }
 
         [TestCleanup]

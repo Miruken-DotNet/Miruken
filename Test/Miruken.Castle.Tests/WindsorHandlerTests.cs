@@ -147,9 +147,9 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+                .Install(Plugin.FromAssembly(
+                            Assembly.GetExecutingAssembly()),
+                         new ResolvingInstaller());
 
             var auctions = context.ResolveAll<IAuction>();
             Assert.AreEqual(2, auctions.Length);
@@ -161,9 +161,9 @@ namespace Miruken.Castle.Tests
         {
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+                .Install(Plugin.FromAssembly(
+                            Assembly.GetExecutingAssembly()),
+                         new ResolvingInstaller());
 
             var cars = P<IAuction>(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
@@ -176,9 +176,9 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Register_All_IResolving_Services()
         {
-            _container.Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+            _container.Install(Plugin.FromAssembly(
+                                   Assembly.GetExecutingAssembly()),
+                               new ResolvingInstaller());
             var auction = P<IContainer>(_handler).Resolve<IAuction>();
             var closing = P<IContainer>(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
@@ -187,9 +187,9 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Skip_IResolving_Service()
         {
-            _container.Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+            _container.Install(Plugin.FromAssembly(
+                                   Assembly.GetExecutingAssembly()),
+                               new ResolvingInstaller());
             var resolving = P<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
@@ -202,9 +202,8 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+                .Install(Plugin.FromAssembly(Assembly.GetExecutingAssembly()),
+                         new ResolvingInstaller());
 
             var auction = P<IContainer>(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
@@ -226,9 +225,8 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().Instance(ferrari))
-                .Install(new Plugins(Plugin.FromAssembly(
-                    Assembly.GetExecutingAssembly())),
-                new ResolvingInstaller());
+                .Install(Plugin.FromAssembly(Assembly.GetExecutingAssembly()),
+                         new ResolvingInstaller());
 
             P<IAuction>(context.Publish()).Dispose(ferrari);
 
