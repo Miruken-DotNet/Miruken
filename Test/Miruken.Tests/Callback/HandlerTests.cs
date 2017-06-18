@@ -543,8 +543,8 @@
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(2, bar.Handled);
             Assert.AreEqual(2, bar.Filters.Count);
-            Assert.AreSame(handler, bar.Filters[0]);
-            Assert.IsInstanceOfType(bar.Filters[1], typeof(LogFilter<Bar, object>));
+            Assert.AreSame(handler, bar.Filters[1]);
+            Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, object>));
         }
 
         [TestMethod]

@@ -64,7 +64,7 @@
             var options = handler.GetFilterOptions();
             return handler.GetFilters(callbackType, logicalResultType,
                                       options, providers)
-                .OrderByDescending(f => f.Order ?? int.MaxValue);
+                .OrderBy(f => f.Order ?? int.MaxValue);
         }
     }
 }

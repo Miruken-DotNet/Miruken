@@ -37,7 +37,8 @@
             var relativeOrder = Order;
             foreach (var filter in filters)
             {
-                filter.Order = relativeOrder.HasValue ? relativeOrder++ : null;
+                if (!filter.Order.HasValue && relativeOrder.HasValue)
+                    filter.Order = relativeOrder++;
                 yield return filter;
             }
         }
