@@ -27,10 +27,15 @@
         public static IWindsorInstaller InDirectory(AssemblyFilter filter)
         {
             var installer = new CompositeInstaller();
-            var plugins   = ReflectionUtil.GetAssemblies(filter);
+            var plugins = ReflectionUtil.GetAssemblies(filter);
             foreach (var plugin in plugins.Distinct())
                 installer.Add(Plugin.FromAssembly(plugin));
             return installer;
+        }
+
+        public static IWindsorInstaller InDirectory(string directory)
+        {
+            return InDirectory(new AssemblyFilter(directory));
         }
     }
 }

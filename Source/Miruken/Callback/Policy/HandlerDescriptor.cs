@@ -70,6 +70,7 @@ namespace Miruken.Callback.Policy
 
         public HandlerDescriptor(Type type)
         {
+            HandlerType = type;
             foreach (var method in type.GetMethods(Binding))
             {
                 MethodDispatch dispatch = null;
@@ -106,6 +107,8 @@ namespace Miruken.Callback.Policy
                 }
             }
         }
+
+        public Type HandlerType { get; }
 
         internal bool Dispatch(
             CallbackPolicy policy, object target, object callback,
