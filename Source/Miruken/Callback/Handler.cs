@@ -60,11 +60,6 @@
             return new CompositeHandler(h);
         }
 
-	    protected static IHandler AsHandler(object handler)
-	    {
-	        return handler as IHandler ?? new Handler(handler);
-	    }
-
         private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>
         {
             typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),

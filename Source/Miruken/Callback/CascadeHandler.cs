@@ -7,8 +7,8 @@
 
 		internal CascadeHandler(object handlerA, object handlerB)
 		{
-		    _handlerA = AsHandler(handlerA);
-		    _handlerB = AsHandler(handlerB);
+		    _handlerA = handlerA.ToHandler();
+		    _handlerB = handlerB.ToHandler();
 		}
 
 		protected override bool HandleCallback(

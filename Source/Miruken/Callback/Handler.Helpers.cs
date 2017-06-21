@@ -104,8 +104,7 @@
 
         public static IHandler ToHandler(this object instance)
         {
-            var handler = instance as IHandler;
-            return handler ?? new Handler(instance);
+            return instance as IHandler ?? new Handler(instance);
         }
     }
 }
