@@ -72,7 +72,7 @@
         }
 
         bool IDispatchCallback.Dispatch(
-            Handler handler, ref bool greedy, IHandler composer)
+            object handler, ref bool greedy, IHandler composer)
         {
             var handled = ValidatesAttribute.Policy.Dispatch(
                 handler, this, greedy, composer, AddAsyncResult);

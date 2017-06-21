@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using Infrastructure;
 
     public abstract class HandlerDecorator  : Handler, IDecorator
     {

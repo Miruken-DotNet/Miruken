@@ -5,10 +5,10 @@
 		private readonly IHandler _handlerA;
 		private readonly IHandler _handlerB;
 
-		internal CascadeHandler(IHandler handlerA, IHandler handlerB)
+		internal CascadeHandler(object handlerA, object handlerB)
 		{
-			_handlerA = handlerA;
-			_handlerB = handlerB;
+		    _handlerA = AsHandler(handlerA);
+		    _handlerB = AsHandler(handlerB);
 		}
 
 		protected override bool HandleCallback(

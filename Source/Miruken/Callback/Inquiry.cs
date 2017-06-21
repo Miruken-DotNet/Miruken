@@ -110,9 +110,9 @@
         }
 
         bool IDispatchCallback.Dispatch(
-            Handler handler, ref bool greedy, IHandler composer)
+            object handler, ref bool greedy, IHandler composer)
         {
-            var surrogate = handler.Surrogate;
+            var surrogate = (handler as ISurrogate)?.Surrogate;
             var handled   = surrogate != null && Implied(surrogate, false, composer);
             if (!handled || greedy)
                 handled = Implied(handler, false, composer) || handled;

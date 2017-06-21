@@ -12,7 +12,7 @@
         }
 
         public static IHandler Chain(
-            this IHandler handler, params IHandler[] chain)
+            this IHandler handler, params object[] chain)
         {
             if (handler == null) return null;
             switch (chain.Length)

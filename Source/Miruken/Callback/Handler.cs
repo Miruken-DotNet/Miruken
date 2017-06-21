@@ -1,11 +1,12 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using Policy;
 
-    public partial class Handler : MarshalByRefObject, IHandler
+    public partial class Handler : MarshalByRefObject, IHandler, ISurrogate
 	{
 	    public Handler()
 	    {        
@@ -45,19 +46,24 @@
                 ?? HandlesPolicy.Dispatch(this, callback, greedy, composer);
         }
 
-        public static CascadeHandler operator +(Handler c1, IHandler c2)
+        public static CascadeHandler operator +(Handler h1, object h2)
         {
-            return new CascadeHandler(c1, c2);
+            return new CascadeHandler(h1, h2);
         }
 
-	    public static CompositeHandler operator +(Handler c1, IEnumerable<IHandler> c2)
+	    public static CompositeHandler operator +(Handler h1, IEnumerable handlers)
         {
-            var rest = c2.ToArray();
+            var rest = handlers.Cast<object>().ToArray();
             var h    = new object[rest.Length + 1];
-            h[0] = c1;
+            h[0] = h1;
             rest.CopyTo(h, 1);
             return new CompositeHandler(h);
         }
+
+	    protected static IHandler AsHandler(object handler)
+	    {
+	        return handler as IHandler ?? new Handler(handler);
+	    }
 
         private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>
         {

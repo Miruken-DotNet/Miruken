@@ -42,11 +42,11 @@
 
         public abstract IEnumerable SelectKeys(object callback, ICollection keys);
 
-        public bool Dispatch(Handler handler, object callback, bool greedy,
+        public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, Func<object, bool> results = null)
         {
             var handled   = false;
-            var surrogate = handler.Surrogate;
+            var surrogate = (handler as ISurrogate)?.Surrogate;
 
             if (surrogate != null)
             {

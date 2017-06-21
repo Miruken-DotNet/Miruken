@@ -56,10 +56,10 @@
         }
 
         bool IDispatchCallback.Dispatch(
-            Handler handler, ref bool greedy, IHandler composer)
+            object handler, ref bool greedy, IHandler composer)
         {
-            var surrogate = handler.Surrogate;
-            var handled = surrogate != null && InvokeOn(surrogate, composer);
+            var surrogate = (handler as ISurrogate)?.Surrogate;
+            var handled   = surrogate != null && InvokeOn(surrogate, composer);
             if (!handled || greedy)
                 handled = InvokeOn(handler, composer) || handled;
             return handled;

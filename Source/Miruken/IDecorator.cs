@@ -1,4 +1,4 @@
-﻿namespace Miruken.Infrastructure
+﻿namespace Miruken
 {
     public interface IDecorator
     {

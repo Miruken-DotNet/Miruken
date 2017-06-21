@@ -47,7 +47,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Callback\BatchInquiry.cs" />
     <Compile Include="Callback\Handler.Command.cs" />
     <Compile Include="Callback\Command.cs" />
     <Compile Include="Callback\FilterExtensions.cs" />
@@ -61,8 +60,9 @@
     <Compile Include="Callback\Handler.Traverse.cs" />
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="ISurrogate.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
-    <Compile Include="Infrastructure\IDecorator.cs" />
+    <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
     <Compile Include="Callback\Policy\BindingArgument.cs" />
     <Compile Include="Callback\Policy\CallbackArgument.cs" />
