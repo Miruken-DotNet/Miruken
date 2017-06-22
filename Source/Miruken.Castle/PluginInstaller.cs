@@ -42,9 +42,12 @@
 
         protected virtual bool ShouldInstallPlugin(Plugin plugin)
         {
-            return _referenced == null || _referenced.Length == 0
-                || plugin.Assembly.GetReferencedAssemblies().Select(r => r.FullName)
-                    .Intersect(_referenced.Select(r => r.FullName)).Any();
+            if (_referenced == null || _referenced.Length == 0)
+                return true;
+            var assembly = plugin.Assembly;
+            if (_referenced.Contains(assembly)) return true;
+            var referenced = assembly.GetReferencedAssemblies();
+            return _referenced.Any(p => referenced.Any(r => r.FullName == p.FullName));
         }
 
         protected abstract void InstallPlugin(Plugin plugin);
