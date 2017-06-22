@@ -43,8 +43,8 @@
         protected virtual bool ShouldInstallPlugin(Plugin plugin)
         {
             return _referenced == null || _referenced.Length == 0
-                || plugin.Assembly.GetReferencedAssemblies()
-                    .Intersect(_referenced.Select(r => r.GetName())).Any();
+                || plugin.Assembly.GetReferencedAssemblies().Select(r => r.FullName)
+                    .Intersect(_referenced.Select(r => r.FullName)).Any();
         }
 
         protected abstract void InstallPlugin(Plugin plugin);

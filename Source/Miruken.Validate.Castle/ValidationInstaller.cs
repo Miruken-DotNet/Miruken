@@ -10,6 +10,11 @@
     {
         private Action<ComponentRegistration> _configure;
 
+        public ValidationInstaller()
+            : base(typeof(IValidator<>).Assembly)
+        {           
+        }
+
         public ValidationInstaller ConfigureValidators(Action<ComponentRegistration> configure)
         {
             _configure += configure;
