@@ -46,8 +46,8 @@
                 return true;
             var assembly = plugin.Assembly;
             if (_referenced.Contains(assembly)) return true;
-            var referenced = assembly.GetReferencedAssemblies();
-            return _referenced.Any(p => referenced.Any(r => r.FullName == p.FullName));
+            var references = assembly.GetReferencedAssemblies();
+            return _referenced.Any(p => references.Any(r => r.FullName == p.FullName));
         }
 
         protected abstract void InstallPlugin(Plugin plugin);
