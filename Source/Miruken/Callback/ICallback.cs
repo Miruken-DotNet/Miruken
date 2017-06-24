@@ -1,6 +1,7 @@
 namespace Miruken.Callback
 {
     using System;
+    using Policy;
 
     public interface ICallback
     {
@@ -19,10 +20,12 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
-    public interface IInvokeCallback {}
+    public interface IInvokeOnlyCallback {}
 
     public interface IDispatchCallback
     {
+        CallbackPolicy Policy { get; }
+
         bool Dispatch(object handler, ref bool greedy, IHandler composer);
     }
 }

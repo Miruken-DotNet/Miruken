@@ -10,6 +10,7 @@
     public class Command 
         : ICallback, IAsyncCallback, IDispatchCallback
     {
+        private CallbackPolicy _policy;
         private readonly List<object> _results;
         private object _result;
 
@@ -22,11 +23,16 @@
             _results = new List<object>();
         }
 
-        public bool            Many       { get; }
-        public object          Callback   { get; }
-        public bool            WantsAsync { get; set; }
-        public bool            IsAsync    { get; private set; }
-        public CallbackPolicy  Policy     { get; set; }
+        public bool   Many       { get; }
+        public object Callback   { get; }
+        public bool   WantsAsync { get; set; }
+        public bool   IsAsync    { get; private set; }
+
+        public CallbackPolicy Policy
+        {
+            get { return _policy ?? HandlesAttribute.Policy; }
+            set { _policy = value; }
+        }
 
         public ICollection<object> Results => _results.AsReadOnly();
 
@@ -86,9 +92,8 @@
             object handler, ref bool greedy, IHandler composer)
         {
             var count = _results.Count;
-            return (Policy ?? HandlesAttribute.Policy)
-                .Dispatch(handler, this, greedy, composer, Respond)
-                    || (_results.Count > count);
+            return Policy.Dispatch(handler, this, greedy, composer, Respond)
+                || (_results.Count > count);
         }
     }
 }

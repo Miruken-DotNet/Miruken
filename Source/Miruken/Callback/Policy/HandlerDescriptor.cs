@@ -4,6 +4,7 @@ namespace Miruken.Callback.Policy
     using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Infrastructure;
 
@@ -79,19 +80,18 @@ namespace Miruken.Callback.Policy
                     method.DeclaringType == typeof (object))
                     continue;
 
-                var attributes = (DefinitionAttribute[])
-                    Attribute.GetCustomAttributes(method, typeof(DefinitionAttribute), false);
+                var attributes = Attribute.GetCustomAttributes(method, false);
 
-                foreach (var attribute in attributes)
+                foreach (var definition in attributes.OfType<DefinitionAttribute>())
                 {
-                    var policy = attribute.CallbackPolicy;
-                    var rule   = policy.MatchMethod(method, attribute);
+                    var policy = definition.CallbackPolicy;
+                    var rule   = policy.MatchMethod(method, definition);
                     if (rule == null)
                         throw new InvalidOperationException(
-                            $"The policy for {attribute.GetType().FullName} rejected method '{method.GetDescription()}'");
+                            $"The policy for {definition.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                    dispatch = dispatch ?? new MethodDispatch(method);
-                    var binding = rule.Bind(dispatch, attribute);
+                    dispatch = dispatch ?? new MethodDispatch(method, attributes);
+                    var binding = rule.Bind(dispatch, definition);
 
                     if (_methods == null)
                         _methods = new Dictionary<CallbackPolicy, PolicyMethods>();

@@ -25,13 +25,12 @@
                        : Method.ReturnType;
         }
 
-        public Type Protocol { get; }
-
-        public MethodInfo Method { get; }
-
-        public Type ResultType { get; }
-
-        public object[] Arguments { get; }
+        public Type       Protocol    { get; }
+        public MethodInfo Method      { get; }
+        public Type       ResultType  { get; }
+        public object[]   Arguments   { get; }
+        public object     ReturnValue { get; set; }
+        public Exception  Exception   { get; set; }
 
         public object Result
         {
@@ -39,9 +38,7 @@
             set { ReturnValue = value; }
         }
 
-        public object ReturnValue { get; set; }
-
-        public Exception Exception { get; set; }
+        public CallbackPolicy Policy { get; } = null;
 
         public bool InvokeOn(object target, IHandler composer)
         {

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Concurrency;
 
     public class Validation :
@@ -29,6 +30,8 @@
         public bool              WantsAsync    { get; set; }
         public bool              IsAsync       { get; private set; }
         public bool              StopOnFailure { get; set; }
+
+        public CallbackPolicy Policy { get; } = ValidatesAttribute.Policy;
 
         public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
 
@@ -74,7 +77,7 @@
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var handled = ValidatesAttribute.Policy.Dispatch(
+            var handled = Policy.Dispatch(
                 handler, this, greedy, composer, AddAsyncResult);
             if (greedy && StopOnFailure && !Outcome.IsValid)
                 greedy = false;

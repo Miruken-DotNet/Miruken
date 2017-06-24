@@ -70,7 +70,7 @@
         {
             var args = Rule.ResolveArgs(this, callback, composer);
 
-            if (callback is IInvokeCallback)
+            if (callback is IInvokeOnlyCallback)
             {
                 result = Dispatcher.Invoke(target, args, resultType);
                 return true;
