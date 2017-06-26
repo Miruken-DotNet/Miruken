@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="mirukenCastleExamples\basicWindsorContainer.cs" />
-    <Compile Include="mirukenCastleExamples\FeaturesFromAssembly.cs" />
+    <Compile Include="mirukenCastleExamples\featuresFromAssembly.cs" />
     <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
     <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
     <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
