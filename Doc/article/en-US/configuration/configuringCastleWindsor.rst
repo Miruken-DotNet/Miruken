@@ -1,8 +1,8 @@
-============================
-Castle Windsor Configuration
-============================
+==========================
+Configuring Castle Windsor
+==========================
 
-:note: Miruken has first class integration with Castle Windsor, but Miruken does not require you to use Castle Windsor for your container. Miruken does not even require you to use a container.  All of that being said, we love Castle Windsor and use it in our own projects.
+.. note:: Miruken has first class integration with Castle Windsor, but Miruken does not require you to use Castle Windsor for your container. Miruken does not even require you to use a container.  All of that being said, we love Castle Windsor and use it in our own projects.
 
 One of the main ways of configuring a Castle Windsor container is the :code:`Container.Install()` method.  It accepts a comma seperated list of :code:`IWindsorInstaller` instances.  These installers do all the work of registering objects and configuring the container.
 

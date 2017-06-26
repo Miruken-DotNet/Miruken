@@ -9,4 +9,4 @@ Miruken handle()'s your application!
    :maxdepth: 2
    :caption: Table of Contents
 
-   castleWindsorConfiguration.rst
+   configuringCastleWindsor.rst
