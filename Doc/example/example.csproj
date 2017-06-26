@@ -31,6 +31,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Castle.Core.3.3.3\lib\net45\Castle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="mirukenCastleExamples\basicWindsorContainer.cs" />
+    <Compile Include="mirukenCastleExamples\FeaturesFromAssembly.cs" />
     <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
     <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
     <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
@@ -50,10 +60,30 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\Miruken.Castle\Miruken.Castle.csproj">
+      <Project>{31b658c0-2a41-40bb-bd3a-4e87f37b986b}</Project>
+      <Name>Miruken.Castle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Miruken.Validate.Castle\Miruken.Validate.Castle.csproj">
+      <Project>{A7124572-6B7E-4AF3-BB5D-0953E66A13DF}</Project>
+      <Name>Miruken.Validate.Castle</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>
     </ProjectReference>
+    <ProjectReference Include="..\league\League\league.csproj">
+      <Project>{ac218ded-c524-45f1-8720-94a80b0e72cc}</Project>
+      <Name>league</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\school\School\school.csproj">
+      <Project>{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}</Project>
+      <Name>school</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

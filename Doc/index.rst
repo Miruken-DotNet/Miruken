@@ -14,4 +14,5 @@ Miruken handle()'s your application!
    article/en-US/handler.rst
    article/en-US/provide.rst
    article/en-US/promise.rst
+   article/en-US/mirukenCastle/index.rst
 

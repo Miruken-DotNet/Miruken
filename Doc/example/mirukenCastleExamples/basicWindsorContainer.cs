@@ -1,0 +1,17 @@
+﻿namespace Example.MirukenCastleExamples
+{
+    using Castle.MicroKernel.Resolvers.SpecializedResolvers;
+    using Castle.Windsor;
+
+    public class BasicWindsorContainer
+    {
+        public IWindsorContainer Container { get; set; }
+
+        public BasicWindsorContainer()
+        {
+            Container = new WindsorContainer();
+            Container.Kernel.Resolver.AddSubResolver(
+                new CollectionResolver(Container.Kernel, true));
+        }
+    }
+}
