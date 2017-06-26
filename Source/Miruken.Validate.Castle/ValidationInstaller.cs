@@ -6,7 +6,7 @@
     using global::FluentValidation;
     using Miruken.Castle;
 
-    public class ValidationInstaller : PluginInstaller
+    public class ValidationInstaller : FeatureInstaller
     {
         private Action<ComponentRegistration> _configure;
 
@@ -28,9 +28,9 @@
                 .OnlyNewServices());
         }
 
-        protected override void InstallPlugin(Plugin plugin)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
-            var validators = Classes.FromAssembly(plugin.Assembly)
+            var validators = Classes.FromAssembly(feature.Assembly)
                 .BasedOn(typeof(IValidator<>))
                 .WithServiceBase();
             if (_configure != null)

@@ -37,17 +37,19 @@
         private const int UseReturn   = -1;
         private const int UseArgument = -2;
 
-        public MethodDispatch(MethodInfo method)
+        public MethodDispatch(MethodInfo method, Attribute[] attributes = null)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
             Parameters = method.GetParameters();
             ConfigureMethod(method, Parameters);
-            Method = method;
+            Method     = method;
+            Attributes = attributes;
         }
 
         public MethodInfo      Method            { get; }
         public ParameterInfo[] Parameters        { get; }
+        public Attribute[]     Attributes        { get; }
         public Type            LogicalReturnType { get; private set; }
 
         public Type ReturnType => Method.ReturnType;
@@ -129,7 +131,7 @@
         {
             if (_mapping == null) return this;
             var closedMethod = ClosedMethod(args, returnType);
-            return _closed.GetOrAdd(closedMethod, m => new MethodDispatch(m));
+            return _closed.GetOrAdd(closedMethod, m => new MethodDispatch(m, Attributes));
         }
 
         protected object DispatchLate(object target, object[] args, Type returnType = null)

@@ -1,72 +1,15 @@
 namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Infrastructure;
 
     public class HandlerDescriptor
     {
-        #region PolicyMethods
-
-        private class PolicyMethods
-        {
-            private List<PolicyMethodBinding> _unknown;
-            private Dictionary<object, List<PolicyMethodBinding>> _indexed;
-
-            public ICollection Keys => _indexed?.Keys;
-
-            public void Insert(PolicyMethodBinding method)
-            {
-                var key = method.GetKey();
-                if (key == null)
-                {
-                    var unknown = _unknown ??
-                        (_unknown = new List<PolicyMethodBinding>());
-                    unknown.Add(method);
-                    return;
-                }
-
-                var indexed = _indexed ??
-                    (_indexed = new Dictionary<object, List<PolicyMethodBinding>>());
-
-                List<PolicyMethodBinding> methods;
-                if (!indexed.TryGetValue(key, out methods))
-                {
-                    methods = new List<PolicyMethodBinding>();
-                    indexed.Add(key, methods);
-                }
-                methods.Add(method);
-            }
-
-            public IEnumerable<PolicyMethodBinding> GetMethods(IEnumerable keys)
-            {
-                if (keys != null && _indexed != null)
-                {
-                    foreach (var key in keys)
-                    {
-                        List<PolicyMethodBinding> methods;
-
-                        if (_indexed.TryGetValue(key, out methods))
-                            foreach (var method in methods)
-                                yield return method;
-                    }
-                }
-
-                if (_unknown != null)
-                    foreach (var method in _unknown)
-                        yield return method;
-            }
-        }
-
-        #endregion
-
-        private readonly Dictionary<CallbackPolicy, PolicyMethods> _methods;
-
-        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
-            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
+        private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
 
         public HandlerDescriptor(Type type)
         {
@@ -76,31 +19,30 @@ namespace Miruken.Callback.Policy
                 MethodDispatch dispatch = null;
 
                 if (method.IsSpecialName || method.IsFamily ||
-                    method.DeclaringType == typeof (object))
+                    method.DeclaringType == typeof(object))
                     continue;
 
-                var attributes = (DefinitionAttribute[])
-                    Attribute.GetCustomAttributes(method, typeof(DefinitionAttribute), false);
+                var attributes = Attribute.GetCustomAttributes(method, false);
 
-                foreach (var attribute in attributes)
+                foreach (var definition in attributes.OfType<DefinitionAttribute>())
                 {
-                    var policy = attribute.CallbackPolicy;
-                    var rule   = policy.MatchMethod(method, attribute);
+                    var policy = definition.CallbackPolicy;
+                    var rule   = policy.MatchMethod(method, definition);
                     if (rule == null)
                         throw new InvalidOperationException(
-                            $"The policy for {attribute.GetType().FullName} rejected method '{method.GetDescription()}'");
+                            $"The policy for {definition.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                    dispatch = dispatch ?? new MethodDispatch(method);
-                    var binding = rule.Bind(dispatch, attribute);
+                    dispatch = dispatch ?? new MethodDispatch(method, attributes);
+                    var binding = rule.Bind(dispatch, definition);
 
-                    if (_methods == null)
-                        _methods = new Dictionary<CallbackPolicy, PolicyMethods>();
+                    if (_policies == null)
+                        _policies = new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>();
 
-                    PolicyMethods methods;
-                    if (!_methods.TryGetValue(policy, out methods))
+                    CallbackPolicyDescriptor methods;
+                    if (!_policies.TryGetValue(policy, out methods))
                     {
-                        methods = new PolicyMethods();
-                        _methods.Add(policy, methods);
+                        methods = new CallbackPolicyDescriptor();
+                        _policies.Add(policy, methods);
                     }
 
                     methods.Insert(binding);
@@ -110,6 +52,12 @@ namespace Miruken.Callback.Policy
 
         public Type HandlerType { get; }
 
+        public CallbackPolicyDescriptor GetPolicyDescriptor(CallbackPolicy policy)
+        {
+            CallbackPolicyDescriptor descriptor;
+            return _policies.TryGetValue(policy, out descriptor) ? descriptor : null;
+        }
+
         internal bool Dispatch(
             CallbackPolicy policy, object target, object callback,
             bool greedy, IHandler composer, Func<object, bool> results = null)
@@ -117,8 +65,8 @@ namespace Miruken.Callback.Policy
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
 
-            PolicyMethods methods = null;
-            if (_methods?.TryGetValue(policy, out methods) != true)
+            CallbackPolicyDescriptor methods = null;
+            if (_policies?.TryGetValue(policy, out methods) != true)
                 return false;
 
             var dispatched = false;
@@ -140,6 +88,9 @@ namespace Miruken.Callback.Policy
         {
             return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
         }
+
+        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
 
         private const BindingFlags Binding = BindingFlags.Instance 
                                            | BindingFlags.Public 

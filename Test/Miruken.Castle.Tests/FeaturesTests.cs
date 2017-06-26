@@ -8,7 +8,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class PluginsTests
+    public class FeaturesTests
     {
         protected IWindsorContainer _container;
 
@@ -25,70 +25,70 @@
         }
 
         [TestMethod]
-        public void Should_Process_Existing_Plugins()
+        public void Should_Process_Existing_Features()
         {
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
-            _container.Install(Plugin.FromAssembly(assembly), myInstaller);
+            _container.Install(Features.FromAssembly(assembly), myInstaller);
             Assert.IsTrue(myInstaller.Installed);
             CollectionAssert.AreEqual(
-                new [] { Plugin.FromAssembly(assembly) },
-                myInstaller.InstalledPlugins);
+                new [] { Features.FromAssembly(assembly) },
+                myInstaller.InstalledFeatures);
         }
 
         [TestMethod]
-        public void Should_Process_New_Plugins()
+        public void Should_Process_New_Features()
         {
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
             _container.Install(myInstaller);
             Assert.IsTrue(myInstaller.Installed);
-            Assert.IsTrue(myInstaller.InstalledPlugins.Length == 0);
-            _container.Install(Plugin.FromAssembly(assembly));
+            Assert.IsTrue(myInstaller.InstalledFeatures.Length == 0);
+            _container.Install(Features.FromAssembly(assembly));
             CollectionAssert.AreEqual(
-                new[] { Plugin.FromAssembly(assembly) },
-                myInstaller.InstalledPlugins);
+                new[] { Features.FromAssembly(assembly) },
+                myInstaller.InstalledFeatures);
         }
 
         [TestMethod]
-        public void Should_Ignore_Duplicate_Plugins()
+        public void Should_Ignore_Duplicate_Features()
         {
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
             _container.Install(
-                Plugin.FromAssembly(assembly), 
-                Plugin.FromAssembly(assembly),
+                Features.FromAssembly(assembly), 
+                Features.FromAssembly(assembly),
                 myInstaller);
             Assert.IsTrue(myInstaller.Installed);
-            _container.Install(Plugin.FromAssembly(assembly));
+            _container.Install(Features.FromAssembly(assembly));
             CollectionAssert.AreEqual(
-                new[] { Plugin.FromAssembly(assembly) },
-                myInstaller.InstalledPlugins);
+                new[] { Features.FromAssembly(assembly) },
+                myInstaller.InstalledFeatures);
         }
 
         [TestMethod,
          ExpectedException(typeof(FileNotFoundException))]
-        public void Should_Reject_Invalid_Plugin()
+        public void Should_Reject_Invalid_Feature()
         {
-            Plugin.FromAssemblyNamed("foo");
+            Features.FromAssemblyNamed("foo");
         }
 
-        public class MyInstaller : PluginInstaller
+        public class MyInstaller : FeatureInstaller
         {
-            private readonly List<Plugin> _plugins = new List<Plugin>();
+            private readonly List<FeatureAssembly> _features = new List<FeatureAssembly>();
 
             public bool Installed { get; set; }
 
-            public Plugin[] InstalledPlugins => _plugins.ToArray();
+            public FeatureAssembly[] InstalledFeatures => _features.ToArray();
 
             protected override void Install(IConfigurationStore store)
             {
                 Installed = true;
             }
 
-            protected override void InstallPlugin(Plugin plugin)
+            protected override void InstallFeature(FeatureAssembly feature)
             {
-                _plugins.Add(plugin);
+                _features.Add(feature);
             }
         }
     }

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
+    using Policy;
 
     public class Inquiry 
         : ICallback, IAsyncCallback, IDispatchCallback
@@ -25,6 +26,8 @@
         public bool   Many       { get; }
         public bool   WantsAsync { get; set; }
         public bool   IsAsync    { get; private set; }
+
+        public CallbackPolicy Policy => ProvidesAttribute.Policy;
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
@@ -119,9 +122,8 @@
             if (handled && !greedy) return true;
 
             var count = _resolutions.Count;
-            handled = ProvidesAttribute.Policy.Dispatch(
-                handler, this, greedy, composer, r => Resolve(r, composer))
-                || handled;
+            handled = Policy.Dispatch(handler, this, greedy, composer, 
+                r => Resolve(r, composer)) || handled;
             return handled || (_resolutions.Count > count);
         }
 
