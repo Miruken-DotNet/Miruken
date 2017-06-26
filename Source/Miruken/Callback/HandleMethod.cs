@@ -38,7 +38,7 @@
             set { ReturnValue = value; }
         }
 
-        public CallbackPolicy Policy { get; } = null;
+        public CallbackPolicy Policy => null;
 
         public bool InvokeOn(object target, IHandler composer)
         {

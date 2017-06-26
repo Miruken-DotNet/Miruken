@@ -6,12 +6,12 @@
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::Castle.Windsor;
 
-    public abstract class PluginInstaller : IWindsorInstaller
+    public abstract class FeatureInstaller : IWindsorInstaller
     {
         private readonly Assembly[] _referenced;
         protected IWindsorContainer Container { get; private set; }
 
-        protected PluginInstaller(params Assembly[] referenced)
+        protected FeatureInstaller(params Assembly[] referenced)
         {
             _referenced = referenced;
         }
@@ -23,33 +23,33 @@
 
             container.Kernel.ComponentRegistered += (key, handler) =>
             {
-                if (typeof(Plugin).IsAssignableFrom(handler.ComponentModel.Implementation))
+                if (typeof(FeatureAssembly).IsAssignableFrom(handler.ComponentModel.Implementation))
                 {
-                    var plugin = container.Kernel.Resolve<Plugin>(key);
-                    if (ShouldInstallPlugin(plugin))
-                        InstallPlugin(plugin);
+                    var feature = container.Kernel.Resolve<FeatureAssembly>(key);
+                    if (ShouldInstallFeature(feature))
+                        InstallFeature(feature);
                 }
             };
 
-            var plugins = container.ResolveAll<Plugin>();
-            foreach (var plugin in plugins.Where(ShouldInstallPlugin))
-                InstallPlugin(plugin);
+            var features = container.ResolveAll<FeatureAssembly>();
+            foreach (var feature in features.Where(ShouldInstallFeature))
+                InstallFeature(feature);
         }
 
         protected virtual void Install(IConfigurationStore store)
         {
         }
 
-        protected virtual bool ShouldInstallPlugin(Plugin plugin)
+        protected virtual bool ShouldInstallFeature(FeatureAssembly feature)
         {
             if (_referenced == null || _referenced.Length == 0)
                 return true;
-            var assembly = plugin.Assembly;
+            var assembly = feature.Assembly;
             if (_referenced.Contains(assembly)) return true;
             var references = assembly.GetReferencedAssemblies();
             return _referenced.Any(p => references.Any(r => r.FullName == p.FullName));
         }
 
-        protected abstract void InstallPlugin(Plugin plugin);
+        protected abstract void InstallFeature(FeatureAssembly feature);
     }
 }

@@ -6,7 +6,7 @@
     using global::Castle.Components.DictionaryAdapter;
     using global::Castle.MicroKernel.Registration;
 
-    public class ConfigurationFactoryInstaller : PluginInstaller
+    public class ConfigurationFactoryInstaller : FeatureInstaller
     {
         private readonly DictionaryAdapterFactory _configFactory;
 
@@ -15,11 +15,11 @@
             _configFactory  = new DictionaryAdapterFactory();
         }
 
-        protected override void InstallPlugin(Plugin plugin)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
             var appSettings = ConfigurationManager.AppSettings;
 
-            Container.Register(Types.FromAssembly(plugin.Assembly)
+            Container.Register(Types.FromAssembly(feature.Assembly)
                 .Where(IsConfiguration)
                 .Configure(reg => reg.UsingFactoryMethod(
                     (k,m,c) => _configFactory.GetAdapter(m.Services.First(), appSettings))

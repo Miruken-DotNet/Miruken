@@ -4,7 +4,7 @@
     using Callback;
     using global::Castle.MicroKernel.Registration;
 
-    public class ResolvingInstaller : PluginInstaller
+    public class ResolvingInstaller : FeatureInstaller
     {
         private Action<ComponentRegistration> _configure;
 
@@ -14,9 +14,9 @@
             return this;
         }
 
-        protected override void InstallPlugin(Plugin plugin)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
-            var resolving = Classes.FromAssembly(plugin.Assembly)
+            var resolving = Classes.FromAssembly(feature.Assembly)
                 .BasedOn(typeof(IResolving))
                 .WithServiceFromInterface();
             if (_configure != null)

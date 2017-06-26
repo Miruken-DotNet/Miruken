@@ -27,7 +27,7 @@
         public bool   WantsAsync { get; set; }
         public bool   IsAsync    { get; private set; }
 
-        public CallbackPolicy Policy { get; } = ProvidesAttribute.Policy;
+        public CallbackPolicy Policy => ProvidesAttribute.Policy;
 
         public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
