@@ -50,7 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="mirukenCastleExamples\basicWindsorContainer.cs" />
-    <Compile Include="mirukenCastleExamples\featuresFromAssembly.cs" />
+    <Compile Include="mirukenCastleExamples\featuresInDirectory.cs" />
+    <Compile Include="mirukenCastleExamples\featuresFromAssembliesNamed.cs" />
+    <Compile Include="mirukenCastleExamples\featuresFromAssemblies.cs" />
     <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
     <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
     <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
@@ -72,13 +74,13 @@
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>
     </ProjectReference>
-    <ProjectReference Include="..\league\League\league.csproj">
+    <ProjectReference Include="..\league\League\example.league.csproj">
       <Project>{ac218ded-c524-45f1-8720-94a80b0e72cc}</Project>
-      <Name>league</Name>
+      <Name>example.league</Name>
     </ProjectReference>
-    <ProjectReference Include="..\school\School\school.csproj">
+    <ProjectReference Include="..\school\School\example.school.csproj">
       <Project>{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}</Project>
-      <Name>school</Name>
+      <Name>example.school</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

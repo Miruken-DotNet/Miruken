@@ -26,15 +26,20 @@ Using Features allows you to specify your assemblies in one place, and it guaran
 Next, you specify which Miruken installers you want to run. These installers inherit from 
 :code:`FeatureInstaller`, and do all the work of registering objects and configuring the container for that specific feature across all your feature assemblies.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
-.. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembly.cs
+.. literalinclude:: /example/mirukenCastleExamples/featuresFromAssemblies.cs
+   :emphasize-lines: 21-25
 
 FromAssembliesNamed(params string[] assemblyNames)
 --------------------------------------------------
 
+.. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembliesNamed.cs
+   :emphasize-lines: 19-21
+
 InDirectory(AssemblyFilter filter)
 ----------------------------------
 
-InDirectory(string directory)
------------------------------
+.. literalinclude:: /example/mirukenCastleExamples/featuresInDirectory.cs
+   :emphasize-lines: 20-21
+
 
 

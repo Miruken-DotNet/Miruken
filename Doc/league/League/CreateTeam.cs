@@ -1,4 +1,4 @@
-﻿namespace League
+﻿namespace Example.League
 {
     public class CreateTeam
     {

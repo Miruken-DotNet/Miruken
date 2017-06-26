@@ -45,9 +45,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Validate.Castle", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Validate.Castle.Tests", "Test\Miruken.Validate.Castle.Tests\Miruken.Validate.Castle.Tests.csproj", "{1BFF367C-1399-4179-AA98-CB00D47D06B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "league", "Doc\league\League\league.csproj", "{AC218DED-C524-45F1-8720-94A80B0E72CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example.league", "Doc\league\League\example.league.csproj", "{AC218DED-C524-45F1-8720-94A80B0E72CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "school", "Doc\school\School\school.csproj", "{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example.school", "Doc\school\School\example.school.csproj", "{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

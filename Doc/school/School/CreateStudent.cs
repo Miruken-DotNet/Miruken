@@ -1,4 +1,4 @@
-﻿namespace School
+﻿namespace Example.School
 {
     public class CreateStudent
     {

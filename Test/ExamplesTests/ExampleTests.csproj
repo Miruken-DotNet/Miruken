@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Windsor, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc" />
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -55,6 +56,10 @@
   <ItemGroup>
     <Compile Include="AContextWithHandlerInstancesTests.cs" />
     <Compile Include="CreatingAChildContextTests.cs" />
+    <Compile Include="MirukenCastleExamplesTests\FeaturesInDirectoryTests.cs" />
+    <Compile Include="MirukenCastleExamplesTests\FeaturesFromAssembliesNamedTests.cs" />
+    <Compile Include="MirukenCastleExamplesTests\FeaturesFromAssembliesTests.cs" />
+    <Compile Include="MirukenCastleExamplesTests\BasicWindosorContainerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelyingOnAContainerToResolveHandlersTests.cs" />
     <Compile Include="CreatingAContextTests.cs" />
@@ -63,6 +68,14 @@
     <ProjectReference Include="..\..\Doc\example\example.csproj">
       <Project>{f73c6936-e41e-49c6-9e2b-c7a87daf81d4}</Project>
       <Name>example</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Doc\league\League\example.league.csproj">
+      <Project>{AC218DED-C524-45F1-8720-94A80B0E72CC}</Project>
+      <Name>example.league</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Miruken.Castle\Miruken.Castle.csproj">
+      <Project>{31B658C0-2A41-40BB-BD3A-4E87F37B986B}</Project>
+      <Name>Miruken.Castle</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
