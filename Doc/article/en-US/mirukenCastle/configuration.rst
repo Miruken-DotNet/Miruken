@@ -1,17 +1,26 @@
-=============
-Configuration
-=============
+============================
+Castle Windsor Configuration
+============================
 
-Miruken does not require that you use Castle Windsor, or even that you use a container, but we have really nice integration with Castle Windsor if you choose to use it. 
+:note: Miruken does not require you to use Castle Windsor. Miruken does not even require you to use a container, but we really like Castle Windsor!
 
-This is a basic Castle Windsor Container:
+One of the main ways of configuring Castle Windsor is the :code:`Container.Install()` method.  It accepts a comma seperated list of :code:`IWindsorInstaller` instances.  These installers do all the work of registering objects and configuring the container.
+
+In this very basic Castle Windsor Container all the :code:`IWindsorInstaller` classes in the current assembly will be run. :code:`FromAssembly.This()` returns an :code:`IWindsorInstaller`.
 
 .. literalinclude:: /example/mirukenCastleExamples/basicWindsorContainer.cs
 
-At a conceptual level Miruken embraces concepts and features. Miruken has very few concepts, and these concepts are used to build many features. When configuring a Castle container, concepts are brought in by installers, and features are your specific application assemblies. 
+Features.FromAssemblies(params Assembly[] assemblies)
+=====================================================
+
+Miruken has first class integration with Castle Windsor. 
+The :code:`Features` object has several ways to specify your application assemblies. In this example we pass a comma seperated list of application assemblies into :code:`Features.FromAssemblies()`.
+:code:`typeof(CreateTeam).Assembly` targets the Example.League assembly and 
+:code:`typeof(CreateStudent).Assembly` targets the Example.School assembly. 
+Using Features allows you to only specify your application assemblies once, and it guaranties that your assemblies are only scanned once for Miruken code.
+
+Next, you specify which Miruken installers you want to run. These installers inherit from 
+:code:`FeatureInstaller`, and do all the work of registering objects and configuring the container for that specific feature across all your application assemblies.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
 .. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembly.cs
-
-In this example, we have two assemblies that have features for our application.  
-We use :code:`Features.FromAssemblies()` :code:`typeof(CreateTeam).Assembly` to target the League.dll and code:`typeof(CreateStudent).Assembly` to target the School.dll. Each FeatureAssembly is installed with the Feature installers. 
 
