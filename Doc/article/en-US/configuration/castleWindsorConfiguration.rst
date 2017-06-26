@@ -34,7 +34,7 @@ Next, you specify which Miruken installers you want to run. These installers inh
 FromAssembliesNamed(params string[] assemblyNames)
 --------------------------------------------------
 
-The FromAssembliesNamed() method allows you to specify the assembly name of the feature assemblies you want installed into a container.
+The FromAssembliesNamed() method allows you to specify the assembly name of the feature assemblies you want installed into the container.
 
 .. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembliesNamed.cs
    :emphasize-lines: 19-21
