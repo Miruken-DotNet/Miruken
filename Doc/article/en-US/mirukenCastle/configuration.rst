@@ -10,17 +10,30 @@ In this very basic Castle Windsor Container all the :code:`IWindsorInstaller` cl
 
 .. literalinclude:: /example/mirukenCastleExamples/basicWindsorContainer.cs
 
-Features.FromAssemblies(params Assembly[] assemblies)
-=====================================================
+Features
+========
+
+FromAssemblies(params Assembly[] assemblies)
+--------------------------------------------
 
 Miruken has first class integration with Castle Windsor. 
 The :code:`Features` object has several ways to specify your application assemblies. In this example we pass a comma seperated list of application assemblies into :code:`Features.FromAssemblies()`.
 :code:`typeof(CreateTeam).Assembly` targets the Example.League assembly and 
 :code:`typeof(CreateStudent).Assembly` targets the Example.School assembly. 
-Using Features allows you to only specify your application assemblies once, and it guaranties that your assemblies are only scanned once for Miruken code.
+Using Features allows you to specify your application assemblies in one place, and it guaranties that your assemblies are only scanned once during configuration.
 
 Next, you specify which Miruken installers you want to run. These installers inherit from 
 :code:`FeatureInstaller`, and do all the work of registering objects and configuring the container for that specific feature across all your application assemblies.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
 .. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembly.cs
+
+FromAssembliesNamed(params string[] assemblyNames)
+--------------------------------------------------
+
+InDirectory(AssemblyFilter filter)
+----------------------------------
+
+InDirectory(string directory)
+-----------------------------
+
 
