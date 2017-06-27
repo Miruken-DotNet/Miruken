@@ -29,11 +29,10 @@ In this example we pass a comma seperated list of application assemblies into::
 
    Features.FromAssemblies()
    
-:code:`typeof(CreateTeam).Assembly`
-  targets the Example.League assembly
-  
-:code:`typeof(CreateStudent).Assembly`
-  targets the Example.School assembly. 
+==============================  ====================================
+typeof(CreateTeam).Assembly     Targets the Example.League assembly.
+typeof(CreateStudent).Assembly  Targets the Example.School assembly.
+==============================  ====================================
 
 Next, we specify which FeatureInstallers the application needs.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
