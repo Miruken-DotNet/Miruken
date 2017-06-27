@@ -25,10 +25,15 @@ FeatureInstallers inherit from :code:`FeatureInstaller` and do the container reg
 FromAssemblies(params Assembly[] assemblies)
 --------------------------------------------
 
-| In this example we pass a comma seperated list of application assemblies 
-| into :code:`Features.FromAssemblies()`.
-| :code:`typeof(CreateTeam).Assembly` targets the Example.League assembly
-| :code:`typeof(CreateStudent).Assembly` targets the Example.School assembly. 
+In this example we pass a comma seperated list of application assemblies into::
+
+   Features.FromAssemblies()
+   
+:code:`typeof(CreateTeam).Assembly`
+  targets the Example.League assembly
+  
+:code:`typeof(CreateStudent).Assembly`
+  targets the Example.School assembly. 
 
 Next, we specify which FeatureInstallers the application needs.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
