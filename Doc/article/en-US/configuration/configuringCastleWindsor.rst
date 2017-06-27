@@ -15,18 +15,23 @@ We used to use this simple form of configuration, but found that we had to list 
 Features
 ========
 
-At a high level a feature is an implementation of a Miruken concept. It may be a Protocol, Handler, Validator, or Mediator, etc.  On a very practical level features are application code implemented across multiple assemblies. The :code:`Features` object has several ways to specify your application assemblies so that they can be installed in the container.
+At a high level a feature is an implementation of a Miruken concept. It may be a Protocol, Handler, Validator, or Mediator, etc.  On a very practical level features are concrete application code implemented across multiple assemblies. The :code:`Features` object has several ways to specify your application assemblies so that they can be installed in the container.  Using Features allows you to specify all your assemblies in one place.
+
+FeatureInstaller
+================
+
+FeatureInstallers inherit from :code:`FeatureInstaller` and do the container registration and configuration for a Miruken concept across all your feature assemblies.
 
 FromAssemblies(params Assembly[] assemblies)
 --------------------------------------------
 
-In this example we pass a comma seperated list of application assemblies into :code:`Features.FromAssemblies()`.
-:code:`typeof(CreateTeam).Assembly` targets the Example.League assembly and 
-:code:`typeof(CreateStudent).Assembly` targets the Example.School assembly. 
-Using Features allows you to specify your assemblies in one place, and it guaranties that your assemblies are only scanned once during installation.
+|In this example we pass a comma seperated list of application assemblies into :code:`Features.FromAssemblies()`.
+|
+|:code:`typeof(CreateTeam).Assembly` targets the Example.League assembly and 
+|
+|:code:`typeof(CreateStudent).Assembly` targets the Example.School assembly. 
 
-Next, you specify which Miruken installers you want to run. These installers inherit from 
-:code:`FeatureInstaller`, and do all the work of registering objects and configuring the container for that specific feature across all your feature assemblies.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
+Next, we specify which FeatureInstallers the application needs.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
 .. literalinclude:: /example/mirukenCastleExamples/featuresFromAssemblies.cs
    :emphasize-lines: 21-25
