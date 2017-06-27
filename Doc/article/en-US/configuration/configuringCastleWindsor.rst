@@ -10,7 +10,7 @@ In this very basic Castle Windsor Container all the :code:`IWindsorInstaller` cl
 
 .. literalinclude:: /example/mirukenCastleExamples/basicWindsorContainer.cs
 
-We used to use this simple form of configuration, but found that we had to list assemblies multiple times, and asemblies would sometimes be scanned multiple times which is not optimal.  Features solves this problem. 
+We used to use this simple form of configuration, but found that we had to list assemblies multiple times. Features solves this problem. 
 
 Features
 ========
