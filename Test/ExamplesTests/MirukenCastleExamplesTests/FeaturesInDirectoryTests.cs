@@ -10,7 +10,7 @@
         [TestMethod]
         public void CanConfigureContainer()
         {
-            var container = new FeaturesInDirectoryFoo().Container;
+            var container = new FeaturesInDirectory().Container;
             Assert.IsNotNull(container);
             var featureAssemblies = container.ResolveAll<FeatureAssembly>();
 
