@@ -65,16 +65,16 @@ namespace Miruken.Callback.Policy
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));
 
-            CallbackPolicyDescriptor methods = null;
-            if (_policies?.TryGetValue(policy, out methods) != true)
+            CallbackPolicyDescriptor descriptor = null;
+            if (_policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
             var dispatched = false;
-            var indexes    = methods.Keys;
+            var indexes    = descriptor.Keys;
             var keys       = indexes == null ? null 
                            : policy.SelectKeys(callback, indexes);
 
-            foreach (var method in methods.GetMethods(keys))
+            foreach (var method in descriptor.GetMethods(keys))
             {
                 dispatched = method.Dispatch(target, callback,
                     composer, results) || dispatched;

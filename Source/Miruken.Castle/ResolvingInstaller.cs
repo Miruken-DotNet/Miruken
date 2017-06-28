@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Castle
 {
     using System;
+    using System.Reflection;
     using Callback;
     using global::Castle.MicroKernel.Registration;
 
@@ -14,9 +15,9 @@
             return this;
         }
 
-        protected override void InstallFeature(FeatureAssembly feature)
+        protected override void InstallFeature(Assembly assembly)
         {
-            var resolving = Classes.FromAssembly(feature.Assembly)
+            var resolving = Classes.FromAssembly(assembly)
                 .BasedOn(typeof(IResolving))
                 .WithServiceFromInterface();
             if (_configure != null)

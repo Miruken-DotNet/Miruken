@@ -27,13 +27,13 @@
                 {
                     var feature = container.Kernel.Resolve<FeatureAssembly>(key);
                     if (ShouldInstallFeature(feature))
-                        InstallFeature(feature);
+                        InstallFeature(feature.Assembly);
                 }
             };
 
             var features = container.ResolveAll<FeatureAssembly>();
             foreach (var feature in features.Where(ShouldInstallFeature))
-                InstallFeature(feature);
+                InstallFeature(feature.Assembly);
         }
 
         protected virtual void Install(IConfigurationStore store)
@@ -50,6 +50,6 @@
             return _referenced.Any(p => references.Any(r => r.FullName == p.FullName));
         }
 
-        protected abstract void InstallFeature(FeatureAssembly feature);
+        protected abstract void InstallFeature(Assembly assembly);
     }
 }

@@ -31,8 +31,7 @@
             var assembly    = Assembly.GetExecutingAssembly();
             _container.Install(Features.FromAssembly(assembly), myInstaller);
             Assert.IsTrue(myInstaller.Installed);
-            CollectionAssert.AreEqual(
-                new [] { Features.FromAssembly(assembly) },
+            CollectionAssert.AreEqual(new [] { assembly },
                 myInstaller.InstalledFeatures);
         }
 
@@ -45,8 +44,7 @@
             Assert.IsTrue(myInstaller.Installed);
             Assert.IsTrue(myInstaller.InstalledFeatures.Length == 0);
             _container.Install(Features.FromAssembly(assembly));
-            CollectionAssert.AreEqual(
-                new[] { Features.FromAssembly(assembly) },
+            CollectionAssert.AreEqual(new[] { assembly },
                 myInstaller.InstalledFeatures);
         }
 
@@ -61,8 +59,7 @@
                 myInstaller);
             Assert.IsTrue(myInstaller.Installed);
             _container.Install(Features.FromAssembly(assembly));
-            CollectionAssert.AreEqual(
-                new[] { Features.FromAssembly(assembly) },
+            CollectionAssert.AreEqual( new[] { assembly },
                 myInstaller.InstalledFeatures);
         }
 
@@ -75,20 +72,20 @@
 
         public class MyInstaller : FeatureInstaller
         {
-            private readonly List<FeatureAssembly> _features = new List<FeatureAssembly>();
+            private readonly List<Assembly> _features = new List<Assembly>();
 
             public bool Installed { get; set; }
 
-            public FeatureAssembly[] InstalledFeatures => _features.ToArray();
+            public Assembly[] InstalledFeatures => _features.ToArray();
 
             protected override void Install(IConfigurationStore store)
             {
                 Installed = true;
             }
 
-            protected override void InstallFeature(FeatureAssembly feature)
+            protected override void InstallFeature(Assembly assembly)
             {
-                _features.Add(feature);
+                _features.Add(assembly);
             }
         }
     }
