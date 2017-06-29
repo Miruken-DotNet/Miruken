@@ -153,6 +153,18 @@
             }
         }
 
+        private class ManyProvider : Handler
+        {
+            [Provides]
+            public IEmailFeature[] ProvideEmail()
+            {
+                return new IEmailFeature[]
+                {
+                    new OfflineHandler(), new EmailHandler()
+                };
+            }
+        }
+
         [TestMethod]
         public void Should_Provide_Methods()
         {
@@ -225,6 +237,13 @@
         {
             var provider = new EmailProvider() + new BillingProvider(new Billing());
             P<IEmailFeature>(provider).CancelEmail(1);
+        }
+
+        [TestMethod]
+        public void Should_Visit_All_Providers()
+        {
+            var provider = new ManyProvider();
+            P<IEmailFeature>(provider).CancelEmail(13);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]

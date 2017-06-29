@@ -39,7 +39,7 @@
             var broadcast    = semantics.HasOption(CallbackOptions.Broadcast);
             var handleMethod = new HandleMethod(protocol, message, semantics);
             var callback     = semantics.HasOption(CallbackOptions.Resolve)
-                             ? new ResolveMethod(protocol, broadcast, handleMethod)
+                             ? new Resolve(protocol, broadcast, handleMethod)
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);

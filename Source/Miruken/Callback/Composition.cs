@@ -2,7 +2,9 @@
 
 namespace Miruken.Callback
 {
-    public class Composition : ICallback
+    using Policy;
+
+    public class Composition : ICallback, IDispatchCallback
     {
         public Composition(object callback)
         {
@@ -38,6 +40,16 @@ namespace Miruken.Callback
                 if (cb != null)
                     cb.Result = value;
             }
+        }
+
+        CallbackPolicy IDispatchCallback.Policy =>
+            (Callback as IDispatchCallback)?.Policy;
+
+        bool IDispatchCallback.Dispatch(object handler, ref bool greedy, IHandler composer)
+        {
+            var callback = Callback;
+            return callback != null &&
+                   Handler.Dispatch(handler, callback, ref greedy, composer);
         }
 
         public static bool IsComposed<T>(object callback)

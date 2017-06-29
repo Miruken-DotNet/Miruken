@@ -4,21 +4,9 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using Policy;
 
-    public partial class Handler : MarshalByRefObject, IHandler, ISurrogate
+    public partial class Handler : MarshalByRefObject, IHandler
 	{
-	    public Handler()
-	    {        
-	    }
-
-	    public Handler(object surrogate)
-	    {
-	        Surrogate = surrogate;
-        }
-
-	    public object Surrogate { get; }
-
 	    public virtual bool Handle(
             object callback, ref bool greedy, IHandler composer = null)
 	    {
@@ -31,19 +19,16 @@
         protected virtual bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            if (Surrogate == null && SkippedTypes.Contains(GetType()))
-                return false;
+            return !SkippedTypes.Contains(GetType()) &&
+                Dispatch(this, callback, ref greedy, composer);
+        }
 
-            var compose = callback as Composition;
-            if (compose != null)
-            {
-                callback = compose.Callback;
-                if (callback == null) return false;
-            }
-
+	    public static bool Dispatch(object handler, object callback, 
+            ref bool greedy, IHandler composer, Func<object, bool> results = null)
+	    {
             var dispatch = callback as IDispatchCallback;
-            return dispatch?.Dispatch(this, ref greedy, composer)
-                ?? HandlesPolicy.Dispatch(this, callback, greedy, composer);
+            return dispatch?.Dispatch(handler, ref greedy, composer)
+                ?? HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
         }
 
         public static CascadeHandler operator +(Handler h1, object h2)
@@ -60,13 +45,17 @@
             return new CompositeHandler(h);
         }
 
+        protected static IHandler ToHandler(object instance)
+        {
+            if (instance == null) return null;
+            return instance as IHandler ?? new HandlerAdapter(instance);
+        }
+
         private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>
         {
             typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)
         };
-
-	    private static readonly CallbackPolicy HandlesPolicy = HandlesAttribute.Policy;
 	}
 
     public class CompositionScope : HandlerDecorator

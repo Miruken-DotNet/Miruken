@@ -115,10 +115,7 @@
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var surrogate = (handler as ISurrogate)?.Surrogate;
-            var handled   = surrogate != null && Implied(surrogate, false, composer);
-            if (!handled || greedy)
-                handled = Implied(handler, false, composer) || handled;
+            var handled = Implied(handler, false, composer);
             if (handled && !greedy) return true;
 
             var count = _resolutions.Count;

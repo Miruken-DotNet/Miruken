@@ -8,7 +8,6 @@
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Concurrency;
-    using Miruken.Infrastructure;
 
     /// <summary>
     /// Summary description for HandlerTests
@@ -24,9 +23,9 @@
         }
 
         [TestMethod]
-        public void Should_Indicate_Not_Handled_Surrogate()
+        public void Should_Indicate_Not_Handled__Adapter()
         {
-            var handler = new Handler(new Controller());
+            var handler = new HandlerAdapter(new Controller());
             Assert.IsFalse(handler.Handle(new Bee()));
         }
 
@@ -40,10 +39,10 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Implicitly_Surrogate()
+        public void Should_Handle_Callbacks_Implicitly__Adapter()
         {
             var foo     = new Foo();
-            var handler = new Handler(new Controller());
+            var handler = new HandlerAdapter(new Controller());
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
@@ -117,9 +116,9 @@
         }
 
         [TestMethod]
-        public void Should_Indicate_Not_Provided_Surrogate()
+        public void Should_Indicate_Not_Provided__Adapter()
         {
-            var handler = new Handler(new Controller());
+            var handler = new HandlerAdapter(new Controller());
             var bee     = handler.Resolve<Bee>();
             Assert.IsNull(bee);
         }
@@ -245,9 +244,9 @@
         }
 
         [TestMethod]
-        public void Should_Provide_Callbacks_Implicitly_Surrogate()
+        public void Should_Provide_Callbacks_Implicitly__Adapter()
         {
-            var handler = new Handler(new Controller());
+            var handler = new HandlerAdapter(new Controller());
             var bar     = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -444,19 +443,19 @@
         }
 
         [TestMethod]
-        public void Should_Resolve_Self_Surrogate_Implicitly()
+        public void Should_Resolve_Self__Adapter_Implicitly()
         {
             var controller = new Controller();
-            var handler    = new Handler(controller);
+            var handler    = new HandlerAdapter(controller);
             var result     = handler.Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
         [TestMethod]
-        public void Should_Resolve_Self_Surrogate_Implicitly_Decorated()
+        public void Should_Resolve_Self__Adapter_Implicitly_Decorated()
         {
             var controller = new Controller();
-            var handler    = new Handler(controller);
+            var handler    = new HandlerAdapter(controller);
             var result     = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
         }

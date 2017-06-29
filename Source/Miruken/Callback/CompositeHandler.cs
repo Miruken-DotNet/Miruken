@@ -27,8 +27,8 @@ namespace Miruken.Callback
 	    public ICompositeHandler AddHandlers(params object[] handlers)
         {
             foreach (var handler in handlers
-                .Where(handler => Find(handler) == null))
-                _handlers.Add(handler.ToHandler());
+                .Where(h => h != null && Find(h) == null))
+                _handlers.Add(ToHandler(handler));
             return this;
         }
 
@@ -36,8 +36,8 @@ namespace Miruken.Callback
 	    {
 	        var index = 0;
             foreach (var handler in handlers
-                .Where(handler => Find(handler) == null))
-                _handlers.Insert(atIndex + index++, handler.ToHandler());
+                .Where(h => h != null && Find(h) == null))
+                _handlers.Insert(atIndex + index++, ToHandler(handler));
 	        return this;
 	    }
 
@@ -69,9 +69,9 @@ namespace Miruken.Callback
 	        foreach (var handler in _handlers)
 	        {
 	            if (handler == instance) return handler;
-	            var surrogate = handler as Handler;
-	            if (surrogate != null && surrogate.Surrogate == instance)
-	                return surrogate;
+	            var adapter = handler as HandlerAdapter;
+	            if (adapter != null && adapter.Handler == instance)
+	                return adapter;
 	        }
             return null;
 	    }

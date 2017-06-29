@@ -55,11 +55,7 @@
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var surrogate = (handler as ISurrogate)?.Surrogate;
-            var handled   = surrogate != null && InvokeOn(surrogate, composer);
-            if (!handled || greedy)
-                handled = InvokeOn(handler, composer) || handled;
-            return handled;
+            return InvokeOn(handler, composer);
         }
 
         public static IHandler RequireComposer()

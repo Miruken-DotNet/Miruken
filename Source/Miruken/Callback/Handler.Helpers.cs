@@ -101,10 +101,5 @@
             return handler == null ? null
                  : new HandlerFilter(handler, filter, reentrant);
         }
-
-        public static IHandler ToHandler(this object instance)
-        {
-            return instance as IHandler ?? new Handler(instance);
-        }
     }
 }

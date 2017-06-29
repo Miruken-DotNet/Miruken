@@ -45,25 +45,9 @@
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, Func<object, bool> results = null)
         {
-            var handled   = false;
-            var surrogate = (handler as ISurrogate)?.Surrogate;
-
-            if (surrogate != null)
-            {
-                var descriptor = HandlerDescriptor.GetDescriptor(surrogate.GetType());
-                handled = descriptor.Dispatch(
-                    this, surrogate, callback, greedy, composer, results);
-            }
-
-            if (!handled || greedy)
-            {
-                var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
-                handled = descriptor.Dispatch(
-                    this, handler, callback, greedy, composer, results)
-                       || handled;
-            }
-
-            return handled;
+            var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
+            return descriptor.Dispatch(
+                this, handler, callback, greedy, composer, results);
         }
     }
 }

@@ -212,7 +212,7 @@
         [TestMethod]
         public void Should_Handle_Void_Methods()
         {
-            var handler = new EmailHandler() + new Handler(new Billing());
+            var handler = new EmailHandler() + new Billing();
             P<IEmailFeature>(handler).CancelEmail(1);
         }
 
@@ -292,7 +292,7 @@
         [TestMethod]
         public void Should_Resolve_Methods_Implicitly()
         {
-            var handler = new Handler(new Billing());
+            var handler = new HandlerAdapter(new Billing());
             var total   = P<IBilling>(handler).Bill(7.50M);
             Assert.AreEqual(9.50M, total);
         }
@@ -307,7 +307,7 @@
         [TestMethod]
         public void Should_Handle_Methods_Using_Protocol()
         {
-            var billing = new Handler(new Billing(4M));
+            var billing = new HandlerAdapter(new Billing(4M));
             Assert.AreEqual(7M, P<IBilling>(billing).Bill(3M));
         }
 
