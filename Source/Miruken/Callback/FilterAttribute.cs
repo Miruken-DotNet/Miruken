@@ -29,12 +29,12 @@
         {
             var filters = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
-                .Where(ShouldUseFilterType)
+                .Where(IncludeFilterType)
                 .SelectMany(filterType => Many
                     ? composer.Stop().ResolveAll(filterType)
                     : new[] {composer.Stop().Resolve(filterType)})
                 .OfType<IFilter>()
-                .Where(ShouldUseFilterInstance);
+                .Where(UseFilterInstance);
 
             var relativeOrder = Order;
             foreach (var filter in filters)
@@ -56,12 +56,12 @@
         {          
         }
 
-        protected virtual bool ShouldUseFilterType(Type filterType)
+        protected virtual bool IncludeFilterType(Type filterType)
         {
             return true;
         }
 
-        protected virtual bool ShouldUseFilterInstance(IFilter filter)
+        protected virtual bool UseFilterInstance(IFilter filter)
         {
             return true;
         }
