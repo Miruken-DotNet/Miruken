@@ -29,10 +29,12 @@
         {
             var filters = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
+                .Where(ShouldUseFilterType)
                 .SelectMany(filterType => Many
                     ? composer.Stop().ResolveAll(filterType)
                     : new[] {composer.Stop().Resolve(filterType)})
-                .OfType<IFilter>();
+                .OfType<IFilter>()
+                .Where(ShouldUseFilterInstance);
 
             var relativeOrder = Order;
             foreach (var filter in filters)
@@ -50,8 +52,18 @@
                         typeof(FilterAttribute), inherit)));
         }
 
-        protected virtual void VerifyFilterType(Type filterType)
+        protected virtual void ValidateFilterType(Type filterType)
         {          
+        }
+
+        protected virtual bool ShouldUseFilterType(Type filterType)
+        {
+            return true;
+        }
+
+        protected virtual bool ShouldUseFilterInstance(IFilter filter)
+        {
+            return true;
         }
 
         private static FilterAttribute[] Normalize(FilterAttribute[] filters)
@@ -91,7 +103,7 @@
                     throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
                 if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
                     throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
-                VerifyFilterType(filterType);
+                ValidateFilterType(filterType);
             }
         }
     }
