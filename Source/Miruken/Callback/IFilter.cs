@@ -20,7 +20,7 @@
 
     public interface IFilterProvider
     {
-        IEnumerable<IFilter> GetFilters(
+        IEnumerable<IFilter> GetFilters(MethodBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer);
     }
 
@@ -33,7 +33,7 @@
             _filters = filters;
         }
 
-        public IEnumerable<IFilter> GetFilters(
+        public IEnumerable<IFilter> GetFilters(MethodBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer)
         {
             return _filters;

@@ -84,7 +84,7 @@
             var logicalType    = dispatcher.LogicalReturnType;
 
             var filters = composer
-                .GetOrderedFilters(callbackType, logicalType, Filters,
+                .GetOrderedFilters(this, callbackType, logicalType, Filters,
                     FilterAttribute.GetFilters(target.GetType(), true), 
                     Policy.Filters)
                 .ToArray();

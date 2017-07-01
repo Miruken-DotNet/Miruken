@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Policy;
 
     public static class FilterExtensions
     {
@@ -36,8 +37,9 @@
         }
 
         public static IEnumerable<IFilter> GetFilters(
-            this IHandler composer, Type callbackType, Type logicalResultType,
-            FilterOptions options, params IEnumerable<IFilterProvider>[] providers)
+            this IHandler composer, MethodBinding binding, Type callbackType, 
+            Type logicalResultType, FilterOptions options, params 
+            IEnumerable<IFilterProvider>[] providers)
         {
             if (logicalResultType == typeof(void))
                 logicalResultType = typeof(object);
@@ -49,7 +51,7 @@
                 .Concat(extraProviders))
             {
                 if (provider == null) continue;
-                var filters = provider.GetFilters(
+                var filters = provider.GetFilters(binding,
                     callbackType, logicalResultType, composer)
                     .Where(filter => filter != null);
                 foreach (var filter in filters)
@@ -58,11 +60,11 @@
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
-            this IHandler handler, Type callbackType, Type logicalResultType, 
-            params IEnumerable<IFilterProvider>[] providers)
+            this IHandler handler, MethodBinding binding, Type callbackType, 
+            Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetFilterOptions();
-            return handler.GetFilters(callbackType, logicalResultType,
+            return handler.GetFilters(binding, callbackType, logicalResultType,
                                       options, providers)
                 .OrderBy(f => f.Order ?? int.MaxValue);
         }

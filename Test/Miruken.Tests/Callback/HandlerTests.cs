@@ -654,7 +654,8 @@
         {
             var handler  = new FilterResolver();
             var provider = new FilterAttribute(typeof(RequestFilterCb<>));
-            var filter   = provider.GetFilters(typeof(string), typeof(int), handler)
+            var filter   = provider.GetFilters(
+                null, typeof(string), typeof(int), handler)
                 .ToArray();
             Assert.AreEqual(typeof(RequestFilterCb<string>), handler.RequestedType);
         }
@@ -664,7 +665,8 @@
         {
             var handler  = new FilterResolver();
             var provider = new FilterAttribute(typeof(RequestFilterRes<>));
-            var filter   = provider.GetFilters(typeof(string), typeof(int), handler)
+            var filter   = provider.GetFilters(
+                null, typeof(string), typeof(int), handler)
                 .ToArray();
             Assert.AreEqual(typeof(RequestFilterRes<int>), handler.RequestedType);
         }

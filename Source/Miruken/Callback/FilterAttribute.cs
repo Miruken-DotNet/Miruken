@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Reflection;
     using Infrastructure;
+    using Policy;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
         AllowMultiple = true, Inherited = false)]
@@ -24,17 +25,17 @@
         public bool   Many        { get; set; }
         public int?   Order       { get; set; }
 
-        public IEnumerable<IFilter> GetFilters(
+        public IEnumerable<IFilter> GetFilters(MethodBinding binding, 
             Type callbackType, Type logicalResultType, IHandler composer)
         {
             var filters = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
-                .Where(IncludeFilterType)
+                .Where(f => AllowFilterType(f, binding))
                 .SelectMany(filterType => Many
                     ? composer.Stop().ResolveAll(filterType)
                     : new[] {composer.Stop().Resolve(filterType)})
                 .OfType<IFilter>()
-                .Where(UseFilterInstance);
+                .Where(f => UseFilterInstance(f, binding));
 
             var relativeOrder = Order;
             foreach (var filter in filters)
@@ -56,12 +57,12 @@
         {          
         }
 
-        protected virtual bool IncludeFilterType(Type filterType)
+        protected virtual bool AllowFilterType(Type filterType, MethodBinding binding)
         {
             return true;
         }
 
-        protected virtual bool UseFilterInstance(IFilter filter)
+        protected virtual bool UseFilterInstance(IFilter filter, MethodBinding binding)
         {
             return true;
         }
