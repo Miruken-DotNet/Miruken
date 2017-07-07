@@ -13,7 +13,7 @@
             var batch = new Batch(all);
             prepare(batch);
             handler.Handle(batch);
-            return batch.Completed();
+            return batch.Complete();
         }
 
         public static Promise All(this IHandler handler, Action<Batch> prepare)

@@ -61,7 +61,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(BatchIncompleteException))]
+         ExpectedException(typeof(IncompleteBatchException))]
         public void Should_Fail_If_Batch_Incomplete()
         {
             _bowling.All(b => b

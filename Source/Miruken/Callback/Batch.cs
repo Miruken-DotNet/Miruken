@@ -6,7 +6,7 @@
     using Concurrency;
     using Policy;
 
-    public class BatchIncompleteException : Exception { }
+    public class IncompleteBatchException : Exception { }
 
     public class Batch : IDispatchCallback
     {
@@ -28,41 +28,41 @@
 
         public CallbackPolicy Policy => null;
 
-        public Promise Completed()
+        public Promise Complete()
         {
             var complete = _all
                 ? _operations.All(op => op.Handled)
                 : _operations.Any(op => op.Handled);
             if (!complete)
-                return Promise.Rejected(new BatchIncompleteException());
+                return Promise.Rejected(new IncompleteBatchException());
             return _promises != null
                 ? Promise.All(_promises.ToArray())
                 : Promise.Empty;
 
         }
 
-        public Batch Add(Action<IHandler> action)
+        public Batch Add(Action<IHandler> operation)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            _operations.Add(new Operation {Op = action});
+            if (operation == null)
+                throw new ArgumentNullException(nameof(operation));
+            _operations.Add(new Operation {Op = operation});
             return this;
         }
 
-        public Batch Add(Func<IHandler, object> action)
+        public Batch Add(Func<IHandler, object> operation)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return Add(h => { action(h); });
+            if (operation == null)
+                throw new ArgumentNullException(nameof(operation));
+            return Add(handler => { operation(handler); });
         }
 
-        public Batch Add(Func<IHandler, Promise> action)
+        public Batch Add(Func<IHandler, Promise> operation)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return Add(h =>
+            if (operation == null)
+                throw new ArgumentNullException(nameof(operation));
+            return Add(handler =>
             {
-                var promise = action(h);
+                var promise = operation(handler);
                 if (promise != null)
                 {
                     (_promises ?? (_promises = new List<Promise>()))
@@ -78,7 +78,6 @@
             var proxy    = new ProxyHandler(handler);
             return _all ? _operations.Aggregate(true, (result, op) =>
             {
-                var o = _operations;
                 var handled = op.Handled;
                 if (!handled || isGreedy)
                     handled = op.Handled = proxy.Dispatch(op.Op) || handled;
