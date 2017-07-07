@@ -16,7 +16,7 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                Features.FromAssembliesNamed(
+                WithFeatures.FromAssembliesNamed(
                     "Example.League",
                     "Example.School"),
                 new ConfigurationFactoryInstaller(),

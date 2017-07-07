@@ -47,6 +47,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callback\Batch.cs" />
+    <Compile Include="Callback\Handler.Batch.cs" />
     <Compile Include="Callback\Handler.Command.cs" />
     <Compile Include="Callback\Command.cs" />
     <Compile Include="Callback\FilterExtensions.cs" />

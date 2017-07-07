@@ -54,6 +54,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Callback\HandlerTests.Batch.cs" />
     <Compile Include="Callback\HandlerTests.Command.cs" />
     <Compile Include="Callback\ResolveMethodTests.cs" />
     <Compile Include="Callback\HandleMethodTests.cs" />

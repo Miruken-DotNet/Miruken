@@ -7,7 +7,7 @@
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor.Installer;
 
-    public static class Features
+    public static class WithFeatures
     {
         public static FeatureAssembly FromAssembly(Assembly assembly)
         {

@@ -8,7 +8,6 @@ namespace Miruken.Concurrency
         private int _completed;
         private readonly AsyncCallback _callback;
         private bool _completedSynchronously;
-        private bool _endCalled;
         private object _waitEvent;
         protected Exception _exception;
         protected object _result;
@@ -60,14 +59,8 @@ namespace Miruken.Concurrency
                 throw new ArgumentNullException(nameof(asyncResult));
 
             var result = asyncResult as AbstractAsyncResult;
-
             if (result == null)
                 throw new ArgumentException("Unrecognized IAsyncResult", nameof(asyncResult));
-
-            if (result._endCalled)
-                throw new InvalidOperationException("IAsyncResult has already ended");
-
-            result._endCalled = true;
 
             if (result._completed == 0)
                 result.AsyncWaitHandle.WaitOne();

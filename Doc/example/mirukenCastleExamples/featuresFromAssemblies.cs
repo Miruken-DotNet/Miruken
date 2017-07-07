@@ -18,7 +18,7 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                Features.FromAssemblies(
+                WithFeatures.FromAssemblies(
                     typeof(CreateTeam).Assembly,
                     typeof(CreateStudent).Assembly),
                 new ConfigurationFactoryInstaller(),

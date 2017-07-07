@@ -147,7 +147,7 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(Features.FromAssembly(
+                .Install(WithFeatures.FromAssembly(
                             Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
@@ -161,7 +161,7 @@ namespace Miruken.Castle.Tests
         {
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(Features.FromAssembly(
+                .Install(WithFeatures.FromAssembly(
                             Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
@@ -176,7 +176,7 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Register_All_IResolving_Services()
         {
-            _container.Install(Features.FromAssembly(
+            _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new ResolvingInstaller());
             var auction = P<IContainer>(_handler).Resolve<IAuction>();
@@ -187,7 +187,7 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Skip_IResolving_Service()
         {
-            _container.Install(Features.FromAssembly(
+            _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new ResolvingInstaller());
             var resolving = P<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
@@ -202,7 +202,7 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(Features.FromAssembly(Assembly.GetExecutingAssembly()),
+                .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
             var auction = P<IContainer>(context.Provide(new Junkyard()))
@@ -225,7 +225,7 @@ namespace Miruken.Castle.Tests
 
             _container.Register(
                 Component.For<ICar>().Instance(ferrari))
-                .Install(Features.FromAssembly(Assembly.GetExecutingAssembly()),
+                .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
             P<IAuction>(context.Publish()).Dispose(ferrari);

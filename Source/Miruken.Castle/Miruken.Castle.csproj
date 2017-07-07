@@ -63,7 +63,7 @@
     <Compile Include="DependencyResolution.cs" />
     <Compile Include="FeatureAssembly.cs" />
     <Compile Include="FeatureInstaller.cs" />
-    <Compile Include="Features.cs" />
+    <Compile Include="WithFeatures.cs" />
     <Compile Include="HandlerInstaller.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

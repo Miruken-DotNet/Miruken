@@ -29,7 +29,7 @@
         {
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
-            _container.Install(Features.FromAssembly(assembly), myInstaller);
+            _container.Install(WithFeatures.FromAssembly(assembly), myInstaller);
             Assert.IsTrue(myInstaller.Installed);
             CollectionAssert.AreEqual(new [] { assembly },
                 myInstaller.InstalledFeatures);
@@ -43,7 +43,7 @@
             _container.Install(myInstaller);
             Assert.IsTrue(myInstaller.Installed);
             Assert.IsTrue(myInstaller.InstalledFeatures.Length == 0);
-            _container.Install(Features.FromAssembly(assembly));
+            _container.Install(WithFeatures.FromAssembly(assembly));
             CollectionAssert.AreEqual(new[] { assembly },
                 myInstaller.InstalledFeatures);
         }
@@ -54,11 +54,11 @@
             var myInstaller = new MyInstaller();
             var assembly    = Assembly.GetExecutingAssembly();
             _container.Install(
-                Features.FromAssembly(assembly), 
-                Features.FromAssembly(assembly),
+                WithFeatures.FromAssembly(assembly), 
+                WithFeatures.FromAssembly(assembly),
                 myInstaller);
             Assert.IsTrue(myInstaller.Installed);
-            _container.Install(Features.FromAssembly(assembly));
+            _container.Install(WithFeatures.FromAssembly(assembly));
             CollectionAssert.AreEqual( new[] { assembly },
                 myInstaller.InstalledFeatures);
         }
@@ -67,7 +67,7 @@
          ExpectedException(typeof(FileNotFoundException))]
         public void Should_Reject_Invalid_Feature()
         {
-            Features.FromAssemblyNamed("foo");
+            WithFeatures.FromAssemblyNamed("foo");
         }
 
         public class MyInstaller : FeatureInstaller

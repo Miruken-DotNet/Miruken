@@ -17,7 +17,7 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                Features.InDirectory(new AssemblyFilter("")
+                WithFeatures.InDirectory(new AssemblyFilter("")
                     .FilterByName(x => x.Name.StartsWith("Example."))),
                 new ConfigurationFactoryInstaller(),
                 new ValidationInstaller()

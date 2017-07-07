@@ -20,7 +20,7 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(Features.FromAssembly(Assembly.GetExecutingAssembly()),
+                .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new ConfigurationFactoryInstaller());
         }
 

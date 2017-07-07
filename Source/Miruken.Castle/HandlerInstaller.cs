@@ -36,8 +36,7 @@
         private static BasedOnDescriptor DefaultSelection(FromAssemblyDescriptor descriptor)
         {
             return descriptor.Where(type => 
-                typeof(IHandler).IsAssignableFrom(type)
-                || type.Name.EndsWith("Handler"))
+                typeof(IHandler).IsAssignableFrom(type) || type.Name.EndsWith("Handler"))
                 .WithServiceSelf();
         }
     }
