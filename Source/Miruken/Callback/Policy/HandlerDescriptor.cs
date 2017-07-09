@@ -11,18 +11,19 @@ namespace Miruken.Callback.Policy
     {
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
 
+        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
+            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
+
         public HandlerDescriptor(Type type)
         {
             HandlerType = type;
-            foreach (var method in type.GetMethods(Binding))
+            var members = type.FindMembers(Members, Binding, IsDefinition, null);
+            foreach (var member in members)
             {
                 MethodDispatch dispatch = null;
-
-                if (method.IsSpecialName || method.IsFamily ||
-                    method.DeclaringType == typeof(object))
-                    continue;
-
-                var attributes = Attribute.GetCustomAttributes(method, false);
+                var method = member as MethodInfo
+                          ?? ((PropertyInfo)member).GetMethod;
+                var attributes = Attribute.GetCustomAttributes(member, false);
 
                 foreach (var definition in attributes.OfType<DefinitionAttribute>())
                 {
@@ -89,8 +90,23 @@ namespace Miruken.Callback.Policy
             return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
         }
 
-        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
-            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
+        private static bool IsDefinition(MemberInfo member, object criteria)
+        {
+            if (member.DeclaringType == typeof(object))
+                return false;
+            var method = member as MethodInfo;
+            if (method != null)
+            {
+                if (method.IsSpecialName || method.IsFamily)
+                    return false;
+            }
+            else if (!((PropertyInfo)member).CanRead)
+                return false; 
+            return member.IsDefined(typeof(DefinitionAttribute));
+        }
+
+        private const MemberTypes Members  = MemberTypes.Method 
+                                           | MemberTypes.Property;
 
         private const BindingFlags Binding = BindingFlags.Instance 
                                            | BindingFlags.Public 

@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Tests.Callback
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -102,22 +101,17 @@
 
         private class Lane
         {
-            private readonly Pin[] _pins =
-                Enumerable.Range(0, 10)
-                .Select(i => new Pin(i) {Up = true})
-                .ToArray();
-
             [Provides]
-            public Pin[] GetPins()
-            {
-                return _pins;
-            }
+            public Pin[] Pins { get; } =
+                 Enumerable.Range(0, 10)
+                .Select(i => new Pin(i) { Up = true })
+                .ToArray();
 
             [Handles]
             public void Reset(ResetPins reset, IHandler composer)
             {
                 Assert.IsNotNull(composer);
-                foreach (var t in _pins) t.Up = true;
+                foreach (var t in Pins) t.Up = true;
             }
         }
 

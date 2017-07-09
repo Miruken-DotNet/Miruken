@@ -1,7 +1,10 @@
 ﻿namespace Miruken.Callback
 {
+    using System;
     using Policy;
 
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property,
+        AllowMultiple = true, Inherited = false)]
     public class ProvidesAttribute : DefinitionAttribute
     {
         public ProvidesAttribute()

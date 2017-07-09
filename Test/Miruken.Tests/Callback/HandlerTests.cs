@@ -162,11 +162,13 @@
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
             var bars    = handler.ResolveAll<Bar>();
-            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(3, bars.Length);
             Assert.AreEqual(1, bars[0].Handled);
             Assert.IsFalse(bars[0].HasComposer);
             Assert.AreEqual(2, bars[1].Handled);
             Assert.IsFalse(bars[1].HasComposer);
+            Assert.AreEqual(3, bars[2].Handled);
+            Assert.IsFalse(bars[2].HasComposer);
         }
 
         [TestMethod]
@@ -178,11 +180,13 @@
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
             var bars = handler.ResolveAll<Bar>();
-            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(3, bars.Length);
             Assert.AreEqual(1, bars[0].Handled);
             Assert.IsFalse(bars[0].HasComposer);
             Assert.AreEqual(2, bars[1].Handled);
             Assert.IsFalse(bars[1].HasComposer);
+            Assert.AreEqual(3, bars[2].Handled);
+            Assert.IsFalse(bars[2].HasComposer);
         }
 
         [TestMethod]
@@ -479,7 +483,7 @@
             var objects = handler.ResolveAll<object>();
             CollectionAssert.Contains(objects, custom);
             CollectionAssert.Contains(objects, special);
-            Assert.AreEqual(11, objects.Length);
+            Assert.AreEqual(12, objects.Length);
         }
 
         [TestMethod]
@@ -993,6 +997,9 @@
                 };
             }
 
+            [Provides]
+            public Bar ProvideBar { get; } = new Bar { Handled = 3 };
+
             [Provides(typeof(Bee))]
             public object ProvideManyBeeWithKey()
             {
@@ -1042,6 +1049,10 @@
                     new Bar {Handled = 2}
                 });
             }
+
+            [Provides]
+            public Promise<Bar> ProvideBar { get; } 
+                = Promise.Resolved(new Bar { Handled = 3 });
 
             [Provides(typeof(Bee))]
             public Promise ProvideManyBeeWithKey()
