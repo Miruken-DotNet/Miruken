@@ -3,10 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Concurrency;
     using Policy;
-
-    public class IncompleteBatchException : Exception { }
 
     public class Batch : IDispatchCallback
     {
@@ -16,7 +15,7 @@
 
         private class Operation
         {
-            public Action<IHandler> Op;
+            public Action<IHandler> Action;
             public bool             Handled;
         }
 
@@ -30,43 +29,53 @@
 
         public Promise Complete()
         {
-            var complete = _all
-                ? _operations.All(op => op.Handled)
-                : _operations.Any(op => op.Handled);
-            if (!complete)
-                return Promise.Rejected(new IncompleteBatchException());
             return _promises != null
                 ? Promise.All(_promises.ToArray())
                 : Promise.Empty;
-
         }
 
-        public Batch Add(Action<IHandler> operation)
+        public Batch Add(Action<IHandler> action)
         {
-            if (operation == null)
-                throw new ArgumentNullException(nameof(operation));
-            _operations.Add(new Operation {Op = operation});
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            _operations.Add(new Operation {Action = action});
             return this;
         }
 
-        public Batch Add(Func<IHandler, object> operation)
+        public Batch Add(Func<IHandler, object> action)
         {
-            if (operation == null)
-                throw new ArgumentNullException(nameof(operation));
-            return Add(handler => { operation(handler); });
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return Add(handler => { action(handler); });
         }
 
-        public Batch Add(Func<IHandler, Promise> operation)
+        public Batch Add(Func<IHandler, Promise> action)
         {
-            if (operation == null)
-                throw new ArgumentNullException(nameof(operation));
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
             return Add(handler =>
             {
-                var promise = operation(handler);
+                var promise = action(handler);
                 if (promise != null)
                 {
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(promise);
+                }
+            });
+        }
+
+        public Batch Add(Func<IHandler, Task> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return Add(handler =>
+            {
+                var task = action(handler);
+                if (task != null && (task.Status != TaskStatus.Faulted ||
+                    !(task.Exception?.InnerException is InterruptBatchException)))
+                {
+                    (_promises ?? (_promises = new List<Promise>()))
+                        .Add(task);
                 }
             });
         }
@@ -80,12 +89,11 @@
             {
                 var handled = op.Handled;
                 if (!handled || isGreedy)
-                    handled = op.Handled = proxy.Dispatch(op.Op) 
-                           || handled;
+                    handled = op.Handled = proxy.Dispatch(op) || handled;
                 return handled && result;
             }) : _operations.Any(op =>
             {
-                var handled = proxy.Dispatch(op.Op);
+                var handled = proxy.Dispatch(op);
                 op.Handled |= handled;
                 return handled;
             });
@@ -94,6 +102,7 @@
         private class ProxyHandler : HandlerAdapter
         {
             private readonly IHandler _composer;
+            private bool _handled;
 
             public ProxyHandler(object handler, IHandler composer)
                 : base(handler)
@@ -101,12 +110,13 @@
                 _composer = composer;
             }
 
-            public bool Dispatch(Action<IHandler> action)
+            public bool Dispatch(Operation operation)
             {
                 try
                 {
-                    action(this);
-                    return true;
+                    _handled = true;
+                    operation.Action(this);
+                    return _handled;
                 }
                 catch (InterruptBatchException)
                 {
@@ -120,11 +130,14 @@
                 if (callback is Composition) return false;
                 composer = new CascadeHandler(composer, _composer);
                 if (!base.HandleCallback(callback, ref greedy, composer))
+                {
+                    _handled = false;  // async delegates
                     throw new InterruptBatchException();
+                }
                 return true;
             }
         }
 
-        private class InterruptBatchException : Exception { }
+        private class InterruptBatchException : CancelledException { }
     }
 }

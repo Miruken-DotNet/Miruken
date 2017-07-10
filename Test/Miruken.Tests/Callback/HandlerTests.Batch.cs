@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Concurrency;
+    using static Protocol;
 
     [TestClass]
     public class HandlerBatchTests
@@ -25,7 +26,7 @@
         {
             var handled = false;
             _bowling.All(b => b
-                .Add(h => handled = h.BestEffort().Handle(new ResetPins())))
+                .Add(h => handled = h.Handle(new ResetPins())))
                 .Wait();
             Assert.IsTrue(handled);
         }
@@ -87,6 +88,35 @@
                 .Add(h => bowling = h.Resolve<Bowling>()))
                 .Wait();
             Assert.AreSame(_bowling, bowling);
+        }
+
+        [TestMethod]
+        public async Task Should_Support_Single_Protocol()
+        {
+            Frame frame = null;
+            var bowler  = new Bowler();
+            await _bowling.Any(b => b
+                .Add(async h => frame = await P<IBowling>(h).Bowl(1, bowler)));
+            Assert.AreEqual(1, frame.FirstTurn);
+            Assert.AreEqual(1, frame.FirstTurn);
+            Assert.AreSame(frame, bowler.Frames[0]);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(IncompleteBatchException))]
+        public async Task Should_Reject_Unhandled_Protocol()
+        {
+            var bowler = new Bowler();
+            await _bowling.Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
+        }
+
+        [TestMethod]
+        public async Task Should_Support_Call_Semantics()
+        {
+            var bowler = new Bowler();
+            await _bowling.BestEffort().Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
         }
 
         private class Pin
@@ -154,11 +184,13 @@
 
         private class ResetPins { }
 
-        private class Bowling : CompositeHandler
+        private interface IBowling
         {
-            private readonly bool[] _pins
-                = Enumerable.Repeat(true, 10).ToArray();
+            Promise<Frame> Bowl(int frame, Bowler bowler);
+        }
 
+        private class Bowling : CompositeHandler, IBowling
+        {
             [Handles]
             public BowlingBall FindBall(FindBowlingBall findBall)
             {
@@ -178,6 +210,20 @@
                     SecondTurn = frame
                 };
                 return Promise.Resolved(bowler);
+            }
+
+            Promise<Frame> IBowling.Bowl(int frame, Bowler bowler)
+            {
+                if (frame > 11)
+                    return Unhandled<Promise<Frame>>();
+
+                var newFrame = new Frame
+                {
+                    FirstTurn  = frame,
+                    SecondTurn = frame
+                };
+                bowler.Frames[frame - 1] = newFrame;
+                return Promise.Resolved(newFrame);
             }
         }
     }

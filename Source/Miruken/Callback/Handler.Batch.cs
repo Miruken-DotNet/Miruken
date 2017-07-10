@@ -12,7 +12,15 @@
                 throw new ArgumentNullException(nameof(prepare));
             var batch = new Batch(all);
             prepare(batch);
-            handler.Handle(batch);
+            var semantics = new CallbackSemantics();
+            handler.Handle(semantics, true);
+            var greedy = semantics.HasOption(CallbackOptions.Broadcast);
+            if (!handler.Handle(batch, ref greedy))
+            {
+                if (!semantics.HasOption(CallbackOptions.BestEffort))
+                    return Promise.Rejected(new IncompleteBatchException());
+
+            }
             return batch.Complete();
         }
 
@@ -26,4 +34,6 @@
             return Batch(handler, prepare, false);
         }
     }
+
+    public class IncompleteBatchException : Exception { }
 }

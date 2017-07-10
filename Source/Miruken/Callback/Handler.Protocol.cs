@@ -43,7 +43,7 @@
                              : (object)handleMethod;
 
             var handled = handler.Handle(callback, broadcast);
-            if (!(handled || semantics.HasOption(CallbackOptions.BestEffot)))
+            if (!(handled || semantics.HasOption(CallbackOptions.BestEffort)))
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 

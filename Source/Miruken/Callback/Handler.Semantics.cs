@@ -10,8 +10,8 @@ namespace Miruken.Callback
         Strict    = 1 << 1,
         Resolve   = 1 << 2,
         Broadcast = 1 << 3,
-        BestEffot = 1 << 4,
-        Notify    = Broadcast | BestEffot
+        BestEffort = 1 << 4,
+        Notify    = Broadcast | BestEffort
     }
 
     public class CallbackSemantics : Composition
@@ -52,7 +52,7 @@ namespace Miruken.Callback
             MergeInto(semantics, CallbackOptions.Duck);
             MergeInto(semantics, CallbackOptions.Strict);
             MergeInto(semantics, CallbackOptions.Resolve);
-            MergeInto(semantics, CallbackOptions.BestEffot);
+            MergeInto(semantics, CallbackOptions.BestEffort);
             MergeInto(semantics, CallbackOptions.Broadcast);
         }
 
@@ -108,6 +108,12 @@ namespace Miruken.Callback
 
     public static class CallbackSemanticExtensions
     {
+        public static CallbackSemantics GetSemantics(this IHandler handler)
+        {
+            var semantics = new CallbackSemantics();
+            return handler.Handle(semantics, true) ? semantics : null;           
+        }
+
         public static IHandler Semantics(
             this IHandler handler, CallbackOptions options)
         {
@@ -139,7 +145,7 @@ namespace Miruken.Callback
 
         public static IHandler BestEffort(this IHandler handler)
         {
-            return Semantics(handler, CallbackOptions.BestEffot);
+            return Semantics(handler, CallbackOptions.BestEffort);
         }
 
         public static IHandler Notify(this IHandler handler)
