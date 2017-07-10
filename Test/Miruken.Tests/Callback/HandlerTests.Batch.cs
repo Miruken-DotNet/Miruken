@@ -25,7 +25,7 @@
         {
             var handled = false;
             _bowling.All(b => b
-                .Add(h => handled = h.Handle(new ResetPins())))
+                .Add(h => handled = h.BestEffort().Handle(new ResetPins())))
                 .Wait();
             Assert.IsTrue(handled);
         }
@@ -112,6 +112,7 @@
             {
                 Assert.IsNotNull(composer);
                 foreach (var t in Pins) t.Up = true;
+                composer.Command<BowlingBall>(new FindBowlingBall(5));
             }
         }
 

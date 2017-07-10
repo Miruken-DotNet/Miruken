@@ -75,12 +75,13 @@
             object handler, ref bool greedy, IHandler composer)
         {
             var isGreedy = greedy;
-            var proxy    = new ProxyHandler(handler);
+            var proxy    = new ProxyHandler(handler, composer);
             return _all ? _operations.Aggregate(true, (result, op) =>
             {
                 var handled = op.Handled;
                 if (!handled || isGreedy)
-                    handled = op.Handled = proxy.Dispatch(op.Op) || handled;
+                    handled = op.Handled = proxy.Dispatch(op.Op) 
+                           || handled;
                 return handled && result;
             }) : _operations.Any(op =>
             {
@@ -92,9 +93,12 @@
 
         private class ProxyHandler : HandlerAdapter
         {
-            public ProxyHandler(object handler)
+            private readonly IHandler _composer;
+
+            public ProxyHandler(object handler, IHandler composer)
                 : base(handler)
             {
+                _composer = composer;
             }
 
             public bool Dispatch(Action<IHandler> action)
@@ -104,7 +108,7 @@
                     action(this);
                     return true;
                 }
-                catch
+                catch (InterruptBatchException)
                 {
                     return false;
                 }
@@ -113,10 +117,11 @@
             protected override bool HandleCallback(
                 object callback, ref bool greedy, IHandler composer)
             {
-                var handled = base.HandleCallback(callback, ref greedy, composer);
-                if (!(handled || callback is Composition))
+                if (callback is Composition) return false;
+                composer = new CascadeHandler(composer, _composer);
+                if (!base.HandleCallback(callback, ref greedy, composer))
                     throw new InterruptBatchException();
-                return handled;
+                return true;
             }
         }
 
