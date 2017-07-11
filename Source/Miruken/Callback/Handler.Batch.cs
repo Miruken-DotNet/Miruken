@@ -14,14 +14,13 @@
             prepare(batch);
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
-            var greedy = semantics.HasOption(CallbackOptions.Broadcast);
-            if (!handler.Handle(batch, ref greedy))
-            {
-                if (!semantics.HasOption(CallbackOptions.BestEffort))
-                    return Promise.Rejected(new IncompleteBatchException());
-
-            }
-            return batch.Complete();
+            var greedy    = semantics.HasOption(CallbackOptions.Broadcast);
+            var handled   = handler.Handle(batch, ref greedy);
+            var complete  =  batch.Complete();
+            return handled || semantics.HasOption(CallbackOptions.BestEffort)
+                 ? complete
+                 : complete.Then((r,s) => Promise.Rejected(
+                       new IncompleteBatchException()));
         }
 
         public static Promise All(this IHandler handler, Action<Batch> prepare)

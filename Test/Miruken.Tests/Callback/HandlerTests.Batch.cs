@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Tests.Callback
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -22,7 +23,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Single_Batch()
+        public void Should_Handle_All_Single_Batch()
         {
             var handled = false;
             _bowling.All(b => b
@@ -32,7 +33,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Multiple_Batch()
+        public void Should_Handle_All_Multiple_Batch()
         {
             var         handled = false;
             var         pins    = new List<Pin>();
@@ -48,7 +49,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_Async_Batch()
+        public async Task Should_Handle_Async_All_Batch()
         {
             var bowler  = new Bowler();
             await _bowling.All(b => b
@@ -103,20 +104,55 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(IncompleteBatchException))]
-        public async Task Should_Reject_Unhandled_Protocol()
+         ExpectedException(typeof(IndexOutOfRangeException))]
+        public async Task Should_Propogate_Exceptions()
         {
             var bowler = new Bowler();
             await _bowling.Any(b => b
                 .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
         }
 
+        [TestMethod,
+         ExpectedException(typeof(IncompleteBatchException))]
+        public async Task Should_Reject_Unhandled_Protocol()
+        {
+            var bowler = new Bowler();
+            await new Handler().Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
+        }
+
         [TestMethod]
         public async Task Should_Support_Call_Semantics()
         {
             var bowler = new Bowler();
-            await _bowling.BestEffort().Any(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
+            await new Handler().BestEffort().Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(8, bowler)));
+        }
+
+        [TestMethod]
+        public void Should_Handle_All_Multiple_Batch_Greedily()
+        {
+            var handled = 0;
+            var pins    = new List<Pin>();
+            _bowling.Broadcast().All(b => b
+                .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())))
+                .Wait();
+            Assert.AreEqual(5, handled);
+            Assert.AreEqual(50, pins.Count);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Any_Multiple_Batch_Greedily()
+        {
+            var handled = 0;
+            var pins    = new List<Pin>();
+            _bowling.Broadcast().Any(b => b
+                .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())))
+                .Wait();
+            Assert.AreEqual(5, handled);
+            Assert.AreEqual(0, pins.Count);
         }
 
         private class Pin
@@ -187,6 +223,8 @@
         private interface IBowling
         {
             Promise<Frame> Bowl(int frame, Bowler bowler);
+
+            int GetScore(Bowler bowler);
         }
 
         private class Bowling : CompositeHandler, IBowling
@@ -200,7 +238,7 @@
             }
 
             [Handles]
-            public Promise<Bowler> TakeTurn(TakeTurn turn)
+            public Promise<Bowler> TakeTurn(TakeTurn turn, IHandler composer)
             {
                 var frame  = turn.Frame;
                 var bowler = turn.Bowler;
@@ -209,13 +247,14 @@
                     FirstTurn  = frame,
                     SecondTurn = frame
                 };
+                var scope = P<IBowling>(composer).GetScore(turn.Bowler);
                 return Promise.Resolved(bowler);
             }
 
             Promise<Frame> IBowling.Bowl(int frame, Bowler bowler)
             {
                 if (frame > 11)
-                    return Unhandled<Promise<Frame>>();
+                    throw new IndexOutOfRangeException();
 
                 var newFrame = new Frame
                 {
@@ -224,6 +263,14 @@
                 };
                 bowler.Frames[frame - 1] = newFrame;
                 return Promise.Resolved(newFrame);
+            }
+
+            public int GetScore(Bowler bowler)
+            {
+                return bowler.Frames
+                    .Where(f => f != null)
+                    .Aggregate(0, (total, f) =>
+                    total + f.FirstTurn + f.SecondTurn);
             }
         }
     }

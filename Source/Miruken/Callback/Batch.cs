@@ -31,6 +31,7 @@
         {
             return _promises != null
                 ? Promise.All(_promises.ToArray())
+                    .Then((r,s) => Promise.Empty)
                 : Promise.Empty;
         }
 
