@@ -7,7 +7,7 @@
     using Concurrency;
     using Policy;
 
-    public class Batch : IDispatchCallback
+    public class Batch : IAsyncCallback, IDispatchCallback
     {
         private readonly bool _all;
         private readonly List<Operation> _operations;
@@ -25,11 +25,13 @@
             _operations = new List<Operation>();
         }
 
+        public bool           WantsAsync { get; set; }
+        public bool           IsAsync => _promises != null;
         public CallbackPolicy Policy => null;
 
         public Promise Complete()
         {
-            return _promises != null
+            return IsAsync
                 ? Promise.All(_promises.ToArray())
                     .Then((r,s) => Promise.Empty)
                 : Promise.Empty;
@@ -72,8 +74,9 @@
             return Add(handler =>
             {
                 var task = action(handler);
-                if (task != null && (task.Status != TaskStatus.Faulted ||
-                    !(task.Exception?.InnerException is InterruptBatchException)))
+                if (task != null && 
+                    (task.Status != TaskStatus.Faulted ||
+                        !(task.Exception?.InnerException is InterruptBatchException)))
                 {
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(task);

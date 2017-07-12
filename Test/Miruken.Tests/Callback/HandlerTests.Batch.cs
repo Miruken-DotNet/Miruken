@@ -27,8 +27,16 @@
         {
             var handled = false;
             _bowling.All(b => b
-                .Add(h => handled = h.Handle(new ResetPins())))
-                .Wait();
+                .Add(h => handled = h.Handle(new ResetPins())));
+            Assert.IsTrue(handled);
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_All_Single_Batch_Async()
+        {
+            var handled = false;
+            await _bowling.AllAsync(b => b
+                .Add(h => handled = h.Handle(new ResetPins())));
             Assert.IsTrue(handled);
         }
 
@@ -41,18 +49,45 @@
             _bowling.All(b => b
                 .Add(h => handled = h.Handle(new ResetPins()))
                 .Add(h => pins.AddRange(h.ResolveAll<Pin>()))
-                .Add(h => ball = h.Command<BowlingBall>(new FindBowlingBall(10))))
-                .Wait();
+                .Add(h => ball = h.Command<BowlingBall>(new FindBowlingBall(10))));
             Assert.IsTrue(handled);
             Assert.AreEqual(10, pins.Count);
             Assert.AreEqual(10, ball.Weight);
         }
 
         [TestMethod]
-        public async Task Should_Handle_Async_All_Batch()
+        public async Task Should_Handle_All_Multiple_Batch_Async()
+        {
+            var handled = false;
+            var pins = new List<Pin>();
+            BowlingBall ball = null;
+            await _bowling.AllAsync(b => b
+                .Add(h => handled = h.Handle(new ResetPins()))
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>()))
+                .Add(h => ball = h.Command<BowlingBall>(new FindBowlingBall(10))));
+            Assert.IsTrue(handled);
+            Assert.AreEqual(10, pins.Count);
+            Assert.AreEqual(10, ball.Weight);
+        }
+
+        [TestMethod]
+        public void Should_Handle_All_Batch()
+        {
+            var bowler = new Bowler();
+            _bowling.All(b => b
+                .Add(h => h.Handle(new ResetPins()))
+                .Add(h => h.ResolveAll<Pin>())
+                .Add(h => h.Command<BowlingBall>(new FindBowlingBall(10)))
+                .Add(h => h.Command<Bowler>(new TakeTurn(1, bowler))));
+            Assert.AreEqual(1, bowler.Frames[0].FirstTurn);
+            Assert.AreEqual(1, bowler.Frames[0].SecondTurn);
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_All_Batch_Async()
         {
             var bowler  = new Bowler();
-            await _bowling.All(b => b
+            await _bowling.AllAsync(b => b
                 .Add(h => h.Handle(new ResetPins()))
                 .Add(h => h.ResolveAll<Pin>())
                 .Add(h => h.Command<BowlingBall>(new FindBowlingBall(10)))
@@ -68,8 +103,17 @@
             _bowling.All(b => b
                 .Add(h => h.Handle(new ResetPins()))
                 .Add(h => h.ResolveAll<Pin>())
-                .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30))))
-                .Wait();
+                .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30))));
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(IncompleteBatchException))]
+        public async Task Should_Fail_If_Batch_Incomplete_Async()
+        {
+            await _bowling.AllAsync(b => b
+                .Add(h => h.Handle(new ResetPins()))
+                .Add(h => h.ResolveAll<Pin>())
+                .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30))));
         }
 
         [TestMethod]
@@ -77,8 +121,15 @@
         {
             _bowling.Any(b => b
                 .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30)))
-                .Add(h => h.ResolveAll<Pin>()))
-                .Wait();
+                .Add(h => h.ResolveAll<Pin>()));
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_Any_Batch_Async()
+        {
+            await _bowling.AnyAsync(b => b
+                .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30)))
+                .Add(h => h.ResolveAll<Pin>()));
         }
 
         [TestMethod]
@@ -86,17 +137,37 @@
         {
             Bowling bowling = null;
             _bowling.All(b => b
-                .Add(h => bowling = h.Resolve<Bowling>()))
-                .Wait();
+                .Add(h => bowling = h.Resolve<Bowling>()));
             Assert.AreSame(_bowling, bowling);
         }
 
         [TestMethod]
-        public async Task Should_Support_Single_Protocol()
+        public async Task Should_Support_Service_Provider_Async()
+        {
+            Bowling bowling = null;
+            await _bowling.AllAsync(b => b
+                .Add(h => bowling = h.Resolve<Bowling>()));
+            Assert.AreSame(_bowling, bowling);
+        }
+
+        [TestMethod]
+        public void Should_Support_Single_Protocol()
         {
             Frame frame = null;
             var bowler  = new Bowler();
-            await _bowling.Any(b => b
+            _bowling.Any(b => b
+                .Add(async h => frame = await P<IBowling>(h).Bowl(1, bowler)));
+            Assert.AreEqual(1, frame.FirstTurn);
+            Assert.AreEqual(1, frame.FirstTurn);
+            Assert.AreSame(frame, bowler.Frames[0]);
+        }
+
+        [TestMethod]
+        public async Task Should_Support_Single_Protocol_Async()
+        {
+            Frame frame = null;
+            var bowler  = new Bowler();
+            await _bowling.AnyAsync(b => b
                 .Add(async h => frame = await P<IBowling>(h).Bowl(1, bowler)));
             Assert.AreEqual(1, frame.FirstTurn);
             Assert.AreEqual(1, frame.FirstTurn);
@@ -105,27 +176,53 @@
 
         [TestMethod,
          ExpectedException(typeof(IndexOutOfRangeException))]
-        public async Task Should_Propogate_Exceptions()
+        public void Should_Propogate_Exceptions()
         {
             var bowler = new Bowler();
-            await _bowling.Any(b => b
+            _bowling.Any(b => b
                 .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
         }
 
         [TestMethod,
-         ExpectedException(typeof(IncompleteBatchException))]
-        public async Task Should_Reject_Unhandled_Protocol()
+         ExpectedException(typeof(IndexOutOfRangeException))]
+        public async Task Should_Propogate_Exceptions_Async()
         {
             var bowler = new Bowler();
-            await new Handler().Any(b => b
+            await _bowling.AnyAsync(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
+        }
+
+        [TestMethod,
+          ExpectedException(typeof(IncompleteBatchException))]
+        public void Should_Reject_Unhandled_Protocol()
+        {
+            var bowler = new Bowler();
+            new Handler().Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(IncompleteBatchException))]
+        public async Task Should_Reject_Unhandled_Protocol_Async()
+        {
+            var bowler = new Bowler();
+            await new Handler().AnyAsync(b => b
                 .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
         }
 
         [TestMethod]
-        public async Task Should_Support_Call_Semantics()
+        public void Should_Support_Call_Semantics()
         {
             var bowler = new Bowler();
-            await new Handler().BestEffort().Any(b => b
+            new Handler().BestEffort().Any(b => b
+                .Add(async h => await P<IBowling>(h).Bowl(8, bowler)));
+        }
+
+        [TestMethod]
+        public async Task Should_Support_Call_Semantics_Async()
+        {
+            var bowler = new Bowler();
+            await new Handler().BestEffort().AnyAsync(b => b
                 .Add(async h => await P<IBowling>(h).Bowl(8, bowler)));
         }
 
@@ -136,8 +233,19 @@
             var pins    = new List<Pin>();
             _bowling.Broadcast().All(b => b
                 .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
-                .Add(h => pins.AddRange(h.ResolveAll<Pin>())))
-                .Wait();
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
+            Assert.AreEqual(5, handled);
+            Assert.AreEqual(50, pins.Count);
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_All_Multiple_Batch_Greedily_Async()
+        {
+            var handled = 0;
+            var pins    = new List<Pin>();
+            await _bowling.Broadcast().AllAsync(b => b
+                .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
             Assert.AreEqual(5, handled);
             Assert.AreEqual(50, pins.Count);
         }
@@ -149,8 +257,19 @@
             var pins    = new List<Pin>();
             _bowling.Broadcast().Any(b => b
                 .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
-                .Add(h => pins.AddRange(h.ResolveAll<Pin>())))
-                .Wait();
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
+            Assert.AreEqual(5, handled);
+            Assert.AreEqual(0, pins.Count);
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_Any_Multiple_Batch_Greedily_Async()
+        {
+            var handled = 0;
+            var pins    = new List<Pin>();
+            await _bowling.Broadcast().AnyAsync(b => b
+                .Add(h => handled += h.Handle(new ResetPins()) ? 1 : 0)
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
             Assert.AreEqual(5, handled);
             Assert.AreEqual(0, pins.Count);
         }

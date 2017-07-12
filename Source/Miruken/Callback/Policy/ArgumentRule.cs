@@ -7,9 +7,6 @@
 
     public abstract class ArgumentRule
     {
-        public OptionalArgument Optional =>
-            this as OptionalArgument ?? new OptionalArgument(this);
-
         public TypedArgument OfType<TArg>(params string[] aliases)
         {
             return OfType(typeof(TArg), aliases);
@@ -103,16 +100,6 @@
                     aliases.Add(_aliases[i], genericArgs[i]);
             }
             return base.Matches(parameter, attribute, aliases);
-        }
-    }
-
-    public interface IOptional { }
-
-    public class OptionalArgument : ArgumentRuleDecorator, IOptional
-    {
-        public OptionalArgument(ArgumentRule argument)
-            : base(argument)
-        {
         }
     }
 }

@@ -13,9 +13,6 @@ namespace Miruken.Callback.Policy
 
         protected TPolicy Policy { get; }
 
-        public ComposerArgument Composer => ComposerArgument.Instance;
-        public BindingArgument  Binding  => BindingArgument.Instance;
-
         public TBuilder AcceptResult(AcceptResultDelegate value)
         {
             Policy.AcceptResult = value;

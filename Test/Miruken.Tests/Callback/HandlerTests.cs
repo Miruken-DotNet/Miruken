@@ -1089,18 +1089,17 @@
         private class BadHandler : Handler
         {
             [Handles]
-            public int Add(int num1, int num2, int num3)
+            public int Add()
             {
-                return num1 + num2 + num3;
+                return 22;
             }
         }
 
         private class BadProvider : Handler
         {
             [Provides]
-            public int Add(int num1, int num2, int num3)
+            public void Add(int num1, int num2)
             {
-                return num1 + num2 + num3;
             }
         }
 

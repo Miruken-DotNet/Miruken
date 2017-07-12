@@ -14,20 +14,11 @@ namespace Miruken.Callback.Policy
         private readonly ArgumentRule[] _args;
         private readonly ReturnRule _returnValue;
         private readonly MethodBinder _binder;
-        private readonly int _minArgs;
 
         public MethodRule(MethodBinder binder, params ArgumentRule[] args)
         {
             if (binder == null)
                 throw new ArgumentNullException(nameof(binder));
-            _minArgs = args.Length - args.Aggregate(0, (opt, arg) =>
-            {
-                if (arg is IOptional) return opt + 1;        
-                if (opt > 0)
-                    throw new ArgumentException(
-                        "Optional arguments must appear after all required arguments");
-                return opt;
-            });
             _binder = binder;
             _args   = args;
         }
@@ -44,7 +35,7 @@ namespace Miruken.Callback.Policy
             var parameters = method.GetParameters();
             var paramCount = parameters.Length;
             var aliases    = new Dictionary<string, Type>();
-            if (paramCount < _minArgs || paramCount > _args.Length ||
+            if (paramCount < _args.Length ||
                 !parameters.Zip(_args, (param, arg) => arg.Matches(param, attribute, aliases))
                 .All(m => m)) return false;
             if (_returnValue?.Matches(method.ReturnType, parameters, attribute, aliases) == false)
@@ -58,7 +49,7 @@ namespace Miruken.Callback.Policy
             var binding = _binder(this, dispatch, attribute);
             _returnValue?.Configure(binding);
             var parameters = dispatch.Method.GetParameters();
-            for (var i = 0; i < parameters.Length; ++i)
+            for (var i = 0; i < _args.Length; ++i)
                 _args[i].Configure(parameters[i], binding);
             return binding;
         }
@@ -66,9 +57,21 @@ namespace Miruken.Callback.Policy
         public object[] ResolveArgs(
             PolicyMethodBinding binding, object callback, IHandler handler)
         {
-            return _args.Take(binding.Dispatcher.Parameters.Length)
-                        .Select(arg => arg.Resolve(callback, binding, handler))
-                        .ToArray();
+            return binding.Dispatcher.Parameters
+                .Select((arg, i) => i < _args.Length
+                    ? _args[i].Resolve(callback, binding, handler)
+                    : ResolveDependency(binding, arg, handler)).ToArray();
+        }
+
+        private static object ResolveDependency(
+            PolicyMethodBinding binding, ParameterInfo parameter, IHandler handler)
+        {
+            var paramType = parameter.ParameterType;
+            if (paramType == typeof(IHandler))
+                return handler;
+            if (paramType.IsInstanceOfType(binding))
+                return binding;
+            return null;
         }
     }
 }

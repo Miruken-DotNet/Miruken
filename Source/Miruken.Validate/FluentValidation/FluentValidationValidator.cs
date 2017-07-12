@@ -9,7 +9,7 @@
     public class FluentValidationValidator : Handler
     {
         [Validates(Scope = Scopes.Any)]
-        public async Task Validate<T>(Validation validation, T target, IHandler composer)
+        public async Task Validate<T>(T target, Validation validation, IHandler composer)
         {
             var validators = composer.ResolveAll<IValidator<T>>();
             if (validators.Length == 0) return;

@@ -67,10 +67,8 @@
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
-    <Compile Include="Callback\Policy\BindingArgument.cs" />
     <Compile Include="Callback\Policy\CallbackArgument.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyBuilder.cs" />
-    <Compile Include="Callback\Policy\ComposerArgument.cs" />
     <Compile Include="Callback\Policy\ContravariantPolicy.cs" />
     <Compile Include="Callback\Policy\CovariantPolicy.cs" />
     <Compile Include="Callback\Policy\ExtractArgument.cs" />

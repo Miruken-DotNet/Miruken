@@ -31,9 +31,9 @@
 
         public static readonly CallbackPolicy Policy =
              ContravariantPolicy.Create<Validation>(v => v.Target,
-                    x => x.MatchMethod(x.Callback, x.Composer.Optional)
-                          .MatchMethod(x.Target, x.Extract(v => v.Outcome), x.Composer.Optional)
-                          .MatchMethod(x.Callback, x.Target, x.Composer.Optional)
+                    x => x.MatchMethod(x.Target, x.Extract(v => v.Outcome))
+                          .MatchMethod(x.Target, x.Callback)
+                          .MatchMethod(x.Callback)
              );
     }
 }

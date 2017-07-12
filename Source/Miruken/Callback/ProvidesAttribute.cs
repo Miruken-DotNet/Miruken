@@ -20,9 +20,8 @@
 
         public static readonly CallbackPolicy Policy =
              CovariantPolicy.Create<Inquiry>(r => r.Key,
-                x => x.MatchMethod(x.ReturnKey.OrVoid,  x.Callback,
-                                   x.Composer.Optional, x.Binding.Optional)
-                      .MatchMethod(x.ReturnKey, x.Composer.Optional, x.Binding.Optional)
+                x => x.MatchMethod(x.ReturnKey.OrVoid,  x.Callback)
+                      .MatchMethod(x.ReturnKey)
                 );
     }
 }
