@@ -25,6 +25,7 @@
             _operations = new List<Operation>();
         }
 
+        public bool           IsEmpty => _operations.Count == 0;
         public bool           WantsAsync { get; set; }
         public bool           IsAsync => _promises != null;
         public CallbackPolicy Policy => null;
@@ -41,6 +42,22 @@
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
+            if (WantsAsync)
+            {
+                var act = action;
+                action = handler =>
+                {
+                    try
+                    {
+                        act(handler);
+                    }
+                    catch (Exception ex) when(!(ex is InterruptBatchException))
+                    {
+                        (_promises ?? (_promises = new List<Promise>()))
+                            .Add(Promise.Rejected(ex));
+                    }
+                };
+            }
             _operations.Add(new Operation {Action = action});
             return this;
         }

@@ -12,6 +12,7 @@
                 throw new ArgumentNullException(nameof(prepare));
             var batch = new Batch(all);
             prepare(batch);
+            if (batch.IsEmpty) return;
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
             var greedy = semantics.HasOption(CallbackOptions.Broadcast);
@@ -39,6 +40,8 @@
                 throw new ArgumentNullException(nameof(prepare));
             var batch = new Batch(all) { WantsAsync = true };
             prepare(batch);
+            if (batch.IsEmpty)
+                return Promise.Empty;
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
             var greedy    = semantics.HasOption(CallbackOptions.Broadcast);

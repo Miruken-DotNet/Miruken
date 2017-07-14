@@ -6,6 +6,7 @@
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using Callback;
+    using Infrastructure;
 
     [AttributeUsage(AttributeTargets.Property | 
                     AttributeTargets.Field | AttributeTargets.Parameter)]
@@ -37,7 +38,7 @@
             var memberName = validationContext.MemberName;
             var composer   = validationContext.GetComposer();
 
-            if (_validators?.Length > 0 || IsSimpleType(value.GetType()))
+            if (_validators?.Length > 0 || value.GetType().IsSimpleType())
                 return ValidateValue(value, memberName, composer);
 
             var scopes = GetScopes(validationContext);
@@ -76,22 +77,6 @@
             var scope = Scope ?? validationContext.GetValidation()?.ScopeMatcher;
             return scope != null ? new[] { scope } : Array.Empty<object>();
         }
-
-        protected static bool IsSimpleType(Type type)
-        {
-            return type.IsPrimitive || 
-                Array.IndexOf(SimpleTypes, type) >= 0 ||
-                Convert.GetTypeCode(type) != TypeCode.Object ||
-                (type.IsGenericType && type.GetGenericTypeDefinition() == 
-                typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
-        }
-
-        private static readonly Type[] SimpleTypes = {
-            typeof(Enum),           typeof(string),
-            typeof(decimal),        typeof(DateTime),
-            typeof(DateTimeOffset), typeof(TimeSpan),
-            typeof(Guid)
-        };
     }
 
     public class ValidCollectionAttribute : ValidAttribute
@@ -120,7 +105,7 @@
             var scopes     = GetScopes(validationContext);
 
             var results = enumerable.Cast<object>()
-                .Select((v, i) => v == null || IsSimpleType(v.GetType())
+                .Select((v, i) => v == null || v.GetType().IsSimpleType()
                     ? ValidateValue(v, i.ToString(), composer)
                     : ValidateCompose(v, i.ToString(), composer, scopes))
                     .Where(result => result != ValidationResult.Success);

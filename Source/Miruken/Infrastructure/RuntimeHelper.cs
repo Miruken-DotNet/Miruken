@@ -9,6 +9,8 @@
     using System.Reflection;
     using System.Text;
 
+    #region Delegates
+
     public delegate void   NoArgsDelegate(object instance);
     public delegate void   OneArgDelegate(object instance, object arg);
     public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
@@ -23,6 +25,8 @@
     public delegate object FiveArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
     public delegate object PropertyGetDelegate(object instance);
 
+    #endregion
+
     public static class RuntimeHelper
     {
         private static readonly ConcurrentDictionary<Type, object> 
@@ -33,6 +37,16 @@
             return type != null && type.IsValueType && type != typeof(void)
                  ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
                  : null;
+        }
+
+        public static bool IsSimpleType(this Type type)
+        {
+            if (type == null) return false;
+            return type.IsPrimitive ||
+                Array.IndexOf(SimpleTypes, type) >= 0 ||
+                Convert.GetTypeCode(type) != TypeCode.Object ||
+                (type.IsGenericType && type.GetGenericTypeDefinition() ==
+                typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
         }
 
         public static bool IsCollection(object instance)
@@ -93,6 +107,28 @@
                 }
             }
             return null;
+        }
+
+        public static object ChangeType<T>(object value)
+        {
+            return ChangeType(value, typeof(T));
+        }
+
+        public static object ChangeType(object value, Type conversionType)
+        {
+            if (conversionType == null)
+                throw new ArgumentNullException(nameof(conversionType));
+
+            if (conversionType.IsGenericType &&
+                conversionType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                if (value == null) return null;
+                conversionType = Nullable.GetUnderlyingType(conversionType);
+            }
+
+            return conversionType == typeof(Guid)
+                 ? new Guid(value.ToString()) 
+                 : Convert.ChangeType(value, conversionType);
         }
 
         public static string GetDescription(this MethodInfo method)
@@ -539,5 +575,12 @@
 
             return builder.ToString();
         }
+
+        private static readonly Type[] SimpleTypes = {
+            typeof(Enum),           typeof(string),
+            typeof(decimal),        typeof(DateTime),
+            typeof(DateTimeOffset), typeof(TimeSpan),
+            typeof(Guid)
+        };
     }
 }

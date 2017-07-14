@@ -23,6 +23,18 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Empty_Batch()
+        {
+            _bowling.All(b => { });
+        }
+
+        [TestMethod]
+        public async Task Should_Handle_Empty_Batch_Async()
+        {
+            await _bowling.AllAsync(b => { });
+        }
+
+        [TestMethod]
         public void Should_Handle_All_Single_Batch()
         {
             var handled = false;
@@ -208,6 +220,18 @@
             var bowler = new Bowler();
             await new Handler().AnyAsync(b => b
                 .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(ArgumentException))]
+        public async Task Should_Wrap_Exceptions_In_Promise()
+        {
+            var promise = _bowling.AnyAsync(b => b
+                .Add(new Action<IHandler>(h =>
+                {
+                    throw new ArgumentException("Bad value");
+                })));
+            await promise;
         }
 
         [TestMethod]

@@ -68,7 +68,7 @@
             IHandler composer, Type resultType, Func<object, bool> results,
             out object result)
         {
-            var args = Rule.ResolveArgs(this, callback, composer);
+            var args = ResolveArgs(callback, composer);
 
             if (callback is IInvokeOnlyCallback)
             {
@@ -93,7 +93,7 @@
                 result = dispatcher.Invoke(target, args, resultType);
             else if (!MethodPipeline.GetPipeline(callbackType, logicalType)
                 .Invoke(this, target, actualCallback, comp => dispatcher.Invoke(
-                    target, GetArgs(callback, args, composer, comp),
+                    target, UpdateArgs(args, composer, comp),
                         resultType), composer, filters, out result))
                 return false;
 
@@ -109,6 +109,21 @@
             return accepted;
         }
 
+        private object[] ResolveArgs(object callback, IHandler composer)
+        {
+            var parameters = Dispatcher.Parameters;
+            var args       = new object[parameters.Length];
+            var policyArgs = Rule.ResolveArgs(this, callback, composer);
+            Array.Copy(policyArgs, args, policyArgs.Length);
+            composer.All(batch =>
+            {
+                for (var i = Rule.Args.Length; i < parameters.Length; ++i)
+                    args[i] = DefaultResolver.ResolveParameter(this,
+                        parameters[i], composer);
+            });
+            return args;
+        }
+
         private object GetCallbackInfo(object callback, object[] args,
             MethodDispatch dispatcher, out Type callbackType)
         {
@@ -122,11 +137,15 @@
             return callback;
         }
 
-        private object[] GetArgs(object callback, object[] args,
+        private static object[] UpdateArgs(object[] args,
             IHandler oldComposer, IHandler newComposer)
         {
-            return ReferenceEquals(oldComposer, newComposer) 
-                 ? args : Rule.ResolveArgs(this, callback, newComposer);
+            return ReferenceEquals(oldComposer, newComposer) ? args
+                 : args.Select(arg => ReferenceEquals(arg, oldComposer)
+                 ? newComposer : arg).ToArray();
         }
+
+        private static readonly ResolvingAttribute
+            DefaultResolver = new ResolvingAttribute();
     }
 }

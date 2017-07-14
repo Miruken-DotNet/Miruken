@@ -19,16 +19,16 @@
         [Flags]
         private enum DispatchType
         {
-            FastNoArgs     = (1 << 0),
-            FastOneArg     = (1 << 1),
-            FastTwoArgs    = (1 << 2),
-            FastThreeArgs  = (1 << 3),
-            FastFourArgs   = (1 << 4),
-            FastFiveArgs   = (1 << 5),
-            Promise        = (1 << 6),
-            Task           = (1 << 7),
-            Void           = (1 << 8),
-            LateBound      = (1 << 9),
+            FastNoArgs     = 1 << 0,
+            FastOneArg     = 1 << 1,
+            FastTwoArgs    = 1 << 2,
+            FastThreeArgs  = 1 << 3,
+            FastFourArgs   = 1 << 4,
+            FastFiveArgs   = 1 << 5,
+            Promise        = 1 << 6,
+            Task           = 1 << 7,
+            Void           = 1 << 8,
+            LateBound      = 1 << 9,
             Fast           = FastNoArgs   | FastOneArg
                            | FastTwoArgs  | FastThreeArgs
                            | FastFourArgs | FastFiveArgs
