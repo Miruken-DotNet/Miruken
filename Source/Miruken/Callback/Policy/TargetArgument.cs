@@ -78,8 +78,7 @@ namespace Miruken.Callback.Policy
                 binding.VarianceType  = paramType;
         }
 
-        public override object Resolve(
-            object callback, PolicyMethodBinding binding, IHandler composer)
+        public override object Resolve(object callback)
         {
             return callback is Cb ? _target((Cb)callback) : callback;
         }

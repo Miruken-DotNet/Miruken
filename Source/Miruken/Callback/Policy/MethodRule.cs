@@ -58,12 +58,9 @@ namespace Miruken.Callback.Policy
             return binding;
         }
 
-        public object[] ResolveArgs(
-            PolicyMethodBinding binding, object callback, IHandler composer)
+        public object[] ResolveArgs(object callback)
         {
-            return Args
-                .Select(arg => arg.Resolve(callback, binding, composer))
-                .ToArray();
+            return Args.Select(arg => arg.Resolve(callback)).ToArray();
         }
     }
 }

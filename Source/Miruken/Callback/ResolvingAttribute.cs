@@ -23,49 +23,46 @@
 
         public object ResolveParameter(
             PolicyMethodBinding binding, ParameterInfo parameter,
-            IHandler composer)
+            IHandler handler)
         {
             var paramType = parameter.ParameterType;
-            if (paramType == typeof(IHandler))
-                return composer;
-            if (paramType.IsInstanceOfType(binding))
-                return binding;
             var type      = paramType;
             var modifiers = GetModifiers(ref type);
-            return ResolveDependency(parameter, type, modifiers, composer);
+            return ResolveDependency(parameter, type, modifiers, handler);
         }
 
         protected virtual object ResolveDependency(
             ParameterInfo parameter, Type type, ModifierFlags modifiers,
-            IHandler composer)
+            IHandler handler)
         {
             object dependency;
             var paramType = parameter.ParameterType;
+            var isArray   = (modifiers & ModifierFlags.All) > 0;
             var isPromise = (modifiers & ModifierFlags.Promise) > 0;
             var isTask    = (modifiers & ModifierFlags.Task) > 0;
             var isSimple  = (modifiers & ModifierFlags.Simple) > 0;
             var key       = isSimple ? parameter.Name : (object)type;
 
-            if ((modifiers & ModifierFlags.All) > 0)
+            if (isArray)
             {
                 if (isPromise)
-                    dependency = composer.ResolveAllAsync(key)
+                    dependency = handler.ResolveAllAsync(key)
                         .Coerce(paramType);
                 else if (isTask)
-                    dependency = composer.ResolveAllAsync(key).ToTask()
+                    dependency = handler.ResolveAllAsync(key).ToTask()
                         .Coerce(paramType);
                 else
-                    dependency = composer.ResolveAll(key);
+                    dependency = handler.ResolveAll(key);
             }
             else if (isPromise)
-                dependency = composer.ResolveAsync(key)
+                dependency = handler.ResolveAsync(key)
                     .Coerce(paramType);
             else if (isTask)
-                dependency = composer.ResolveAsync(key).ToTask()
+                dependency = handler.ResolveAsync(key).ToTask()
                     .Coerce(paramType);
             else
             {
-                dependency = composer.Resolve(key);
+                dependency = handler.Resolve(key);
                 if (isSimple && !paramType.IsInstanceOfType(dependency))
                     dependency = RuntimeHelper.ChangeType(dependency, paramType);
             }

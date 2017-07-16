@@ -5,64 +5,57 @@
 
     public static class HandlerBatchExtensions
     {
-        public static void Batch(this IHandler handler,
+        public static bool Batch(this IHandler handler,
                  Action<Batch> prepare, bool all = true)
         {
             if (prepare == null)
                 throw new ArgumentNullException(nameof(prepare));
             var batch = new Batch(all);
             prepare(batch);
-            if (batch.IsEmpty) return;
+            if (batch.IsEmpty) return true;
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
-            var greedy = semantics.HasOption(CallbackOptions.Broadcast);
+            var greedy  = semantics.HasOption(CallbackOptions.Broadcast);
             var handled = handler.Handle(batch, ref greedy);
             if (batch.IsAsync)
                 batch.Complete().Wait();
-            if (!(handled || semantics.HasOption(CallbackOptions.BestEffort)))
-                throw new IncompleteBatchException();
+            return handled || semantics.HasOption(CallbackOptions.BestEffort);
         }
 
-        public static void All(this IHandler handler, Action<Batch> prepare)
+        public static bool All(this IHandler handler, Action<Batch> prepare)
         {
-            Batch(handler, prepare);
+            return Batch(handler, prepare);
         }
 
-        public static void Any(this IHandler handler, Action<Batch> prepare)
+        public static bool Any(this IHandler handler, Action<Batch> prepare)
         {
-            Batch(handler, prepare, false);
+            return Batch(handler, prepare, false);
         }
 
-        public static Promise BatchAsync(this IHandler handler,
+        public static Promise<bool> BatchAsync(this IHandler handler,
             Action<Batch> prepare, bool all = true)
         {
             if (prepare == null)
                 throw new ArgumentNullException(nameof(prepare));
             var batch = new Batch(all) { WantsAsync = true };
             prepare(batch);
-            if (batch.IsEmpty)
-                return Promise.Empty;
+            if (batch.IsEmpty) return Promise.True;
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
             var greedy    = semantics.HasOption(CallbackOptions.Broadcast);
             var handled   = handler.Handle(batch, ref greedy);
-            var complete  = batch.Complete();
-            if (!(handled || semantics.HasOption(CallbackOptions.BestEffort)))
-                complete = complete.Then((r,s) => Promise.Rejected(
-                    new IncompleteBatchException()));
-            return complete;
+            return batch.Complete().Then((r,s) => handled ||
+                semantics.HasOption(CallbackOptions.BestEffort));
         }
 
-        public static Promise AllAsync(this IHandler handler, Action<Batch> prepare)
+        public static Promise<bool> AllAsync(this IHandler handler, Action<Batch> prepare)
         {
             return BatchAsync(handler, prepare);
         }
 
-        public static Promise AnyAsync(this IHandler handler, Action<Batch> prepare)
+        public static Promise<bool> AnyAsync(this IHandler handler, Action<Batch> prepare)
         {
             return BatchAsync(handler, prepare, false);
         }
     }
-
-    public class IncompleteBatchException : Exception { }
 }

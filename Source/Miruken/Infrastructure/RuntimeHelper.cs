@@ -42,7 +42,7 @@
         public static bool IsSimpleType(this Type type)
         {
             if (type == null) return false;
-            return type.IsPrimitive ||
+            return type.IsPrimitive || type.IsEnum ||
                 Array.IndexOf(SimpleTypes, type) >= 0 ||
                 Convert.GetTypeCode(type) != TypeCode.Object ||
                 (type.IsGenericType && type.GetGenericTypeDefinition() ==
@@ -52,6 +52,19 @@
         public static bool IsCollection(object instance)
         {
             return instance is IEnumerable && !(instance is string);
+        }
+
+        public static bool IsEnumDefined(object e)
+        {
+            try
+            {
+                decimal.Parse(e.ToString());
+                return false;
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         public static string GetSimpleTypeName(this Type type)
@@ -118,6 +131,18 @@
         {
             if (conversionType == null)
                 throw new ArgumentNullException(nameof(conversionType));
+
+            if (conversionType.IsEnum)
+            {
+                var enumString = value as string;
+                if (enumString != null)
+                    return Enum.Parse(conversionType, enumString);
+                var val = Convert.ChangeType(value, Enum.GetUnderlyingType(conversionType));
+                var obj = Enum.ToObject(conversionType, val);
+                if (!IsEnumDefined(obj))
+                    throw new InvalidCastException($"{value} is not a valid {conversionType.GetSimpleTypeName()}");
+                return obj;
+            }
 
             if (conversionType.IsGenericType &&
                 conversionType.GetGenericTypeDefinition() == typeof(Nullable<>))

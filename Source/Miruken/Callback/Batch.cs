@@ -10,35 +10,43 @@
     public class Batch : IAsyncCallback, IDispatchCallback
     {
         private readonly bool _all;
-        private readonly List<Operation> _operations;
+        private List<Operation> _operations;
         private List<Promise> _promises;
 
         private class Operation
         {
             public Action<IHandler> Action;
+            public Action           Unhandled;
             public bool             Handled;
         }
 
         public Batch(bool all = true)
         {
-            _all        = all;
-            _operations = new List<Operation>();
+            _all = all;
         }
 
-        public bool           IsEmpty => _operations.Count == 0;
+        public bool           IsEmpty => _operations == null;
         public bool           WantsAsync { get; set; }
         public bool           IsAsync => _promises != null;
         public CallbackPolicy Policy => null;
 
         public Promise Complete()
         {
+            if (_operations == null)
+                return Promise.Empty;
+            if  (_all || !_operations.Any(op => op.Handled))
+                _operations.ForEach(op =>
+                {
+                    if (!op.Handled)
+                        op.Unhandled?.Invoke();
+                });
             return IsAsync
                 ? Promise.All(_promises.ToArray())
                     .Then((r,s) => Promise.Empty)
                 : Promise.Empty;
         }
 
-        public Batch Add(Action<IHandler> action)
+        public Batch Add(Action<IHandler> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -58,18 +66,23 @@
                     }
                 };
             }
-            _operations.Add(new Operation {Action = action});
+            (_operations ?? (_operations = new List<Operation>()))
+                .Add(new Operation
+                {
+                    Action    = action,
+                    Unhandled = unhandled
+                });
             return this;
         }
 
-        public Batch Add(Func<IHandler, object> action)
+        public Batch Add(Func<IHandler, object> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
-            return Add(handler => { action(handler); });
+            return Add(handler => { action(handler); }, unhandled);
         }
 
-        public Batch Add(Func<IHandler, Promise> action)
+        public Batch Add(Func<IHandler, Promise> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -81,10 +94,10 @@
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(promise);
                 }
-            });
+            }, unhandled);
         }
 
-        public Batch Add(Func<IHandler, Task> action)
+        public Batch Add(Func<IHandler, Task> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -98,12 +111,13 @@
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(task);
                 }
-            });
+            }, unhandled);
         }
 
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
+            if (_operations == null) return true;
             var isGreedy = greedy;
             var proxy    = new ProxyHandler(handler, composer);
             return _all ? _operations.Aggregate(true, (result, op) =>

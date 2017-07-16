@@ -5,13 +5,13 @@ namespace Miruken.Callback
     [Flags]
     public enum CallbackOptions
     {
-        None      = 0,
-        Duck      = 1 << 0,
-        Strict    = 1 << 1,
-        Resolve   = 1 << 2,
-        Broadcast = 1 << 3,
+        None       = 0,
+        Duck       = 1 << 0,
+        Strict     = 1 << 1,
+        Resolve    = 1 << 2,
+        Broadcast  = 1 << 3,
         BestEffort = 1 << 4,
-        Notify    = Broadcast | BestEffort
+        Notify     = Broadcast | BestEffort
     }
 
     public class CallbackSemantics : Composition

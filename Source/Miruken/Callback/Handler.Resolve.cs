@@ -60,33 +60,37 @@
 
         public static object[] ResolveAll(this IHandler handler, object key)
         {
-            if (handler == null)
-                return Array.Empty<object>();
-            var inquiry = key as Inquiry ?? new Inquiry(key, true);
-            if (handler.Handle(inquiry, true))
+            if (handler != null)
             {
-                var result = inquiry.Result;
-                return inquiry.IsAsync
-                     ? ((Promise<object[]>)result).Wait()
-                     : (object[])result;
+                var inquiry = key as Inquiry ?? new Inquiry(key, true);
+                if (handler.Handle(inquiry, true))
+                {
+                    var result = inquiry.Result;
+                    return CoerceArray(inquiry.IsAsync
+                         ? ((Promise<object[]>)result).Wait()
+                         : (object[]) result, key);
+                }
             }
-            return Array.Empty<object>();
+            return CoerceArray(Array.Empty<object>(), key);
         }
 
         public static Promise<object[]> ResolveAllAsync(this IHandler handler, object key)
         {
-            if (handler == null)
-                return Promise.Resolved(Array.Empty<object>());
-            var inquiry = key as Inquiry ?? new Inquiry(key, true);
-            inquiry.WantsAsync = true;
-            if (handler.Handle(inquiry, true))
+            if (handler != null)
             {
-                var result = inquiry.Result;
-                return inquiry.IsAsync
-                     ? (Promise<object[]>)result
-                     : Promise.Resolved((object[])result);
+                var inquiry = key as Inquiry ?? new Inquiry(key, true);
+                inquiry.WantsAsync = true;
+                if (handler.Handle(inquiry, true))
+                {
+                    var result = inquiry.Result;
+                    return inquiry.IsAsync
+                         ? ((Promise<object[]>)result)
+                                .Then((arr,s) => CoerceArray(arr, key))
+                         : Promise.Resolved(CoerceArray((object[])result, key));
+                }
             }
-            return Promise.Resolved(Array.Empty<object>());
+            var empty = CoerceArray(Array.Empty<object>(), key);
+            return Promise.Resolved(empty);
         }
 
         public static T[] ResolveAll<T>(this IHandler handler)
@@ -103,6 +107,15 @@
                  : ResolveAllAsync(handler, typeof(T))
                       .Then((r, s) => r?.Cast<T>().ToArray() 
                                    ?? Array.Empty<T>());
+        }
+
+        private static object[] CoerceArray(object[] array, object key)
+        {
+            var type = key as Type;
+            if (type == null) return array;
+            var typed = Array.CreateInstance(type, array.Length);
+            array.CopyTo(typed, 0);
+            return (object[])typed;
         }
     }
 }

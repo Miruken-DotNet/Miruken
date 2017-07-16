@@ -69,6 +69,11 @@
             out object result)
         {
             var args = ResolveArgs(callback, composer);
+            if (args == null)
+            {
+                result = null;
+                return false;
+            }
 
             if (callback is IInvokeOnlyCallback)
             {
@@ -111,16 +116,31 @@
 
         private object[] ResolveArgs(object callback, IHandler composer)
         {
-            var parameters = Dispatcher.Parameters;
-            var args       = new object[parameters.Length];
-            var policyArgs = Rule.ResolveArgs(this, callback, composer);
-            Array.Copy(policyArgs, args, policyArgs.Length);
-            composer.All(batch =>
+            var numRuleArgs = Rule.Args.Length;
+            var parameters  = Dispatcher.Parameters;
+            if (parameters.Length == numRuleArgs)
+                return Rule.ResolveArgs(callback);
+
+            var args = new object[parameters.Length];
+
+            if (!composer.All(batch =>
             {
-                for (var i = Rule.Args.Length; i < parameters.Length; ++i)
-                    args[i] = DefaultResolver.ResolveParameter(this,
-                        parameters[i], composer);
-            });
+                for (var i = numRuleArgs; i < parameters.Length; ++i)
+                {
+                    var parameter = parameters[i];
+                    var paramType = parameter.ParameterType;
+                    if (paramType == typeof(IHandler))
+                        args[i] = composer;
+                    else if (paramType.IsInstanceOfType(this))
+                        args[i] = this;
+                    else
+                        batch.Add(h => args[parameter.Position] 
+                            = DefaultResolver.ResolveParameter(this, parameter, h));
+                }
+            })) return null;
+
+            var ruleArgs = Rule.ResolveArgs(callback);
+            Array.Copy(ruleArgs, args, ruleArgs.Length);
             return args;
         }
 

@@ -78,8 +78,7 @@ namespace Miruken.Callback.Policy
                 binding.VarianceType  = paramType;
         }
 
-        public override object Resolve(
-            object callback, PolicyMethodBinding binding, IHandler composer)
+        public override object Resolve(object callback)
         {
             return callback;
         }
@@ -108,8 +107,7 @@ namespace Miruken.Callback.Policy
             binding.CallbackIndex = parameter.Position;
         }
 
-        public override object Resolve(
-            object callback, PolicyMethodBinding binding, IHandler composer)
+        public override object Resolve(object callback)
         {
             return callback;
         }

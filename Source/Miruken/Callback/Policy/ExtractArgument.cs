@@ -41,8 +41,7 @@ namespace Miruken.Callback.Policy
             return false;
         }
 
-        public override object Resolve(
-            object callback, PolicyMethodBinding binding, IHandler composer)
+        public override object Resolve(object callback)
         {
             return _extract((Cb)callback);
         }
