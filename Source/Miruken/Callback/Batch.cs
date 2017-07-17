@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.ExceptionServices;
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
@@ -59,7 +60,7 @@
                     {
                         act(handler);
                     }
-                    catch (Exception ex) when(!(ex is InterruptBatchException))
+                    catch (Exception ex) when(!(ex is RejectedException))
                     {
                         (_promises ?? (_promises = new List<Promise>()))
                             .Add(Promise.Rejected(ex));
@@ -104,10 +105,14 @@
             return Add(handler =>
             {
                 var task = action(handler);
-                if (task != null && 
-                    (task.Status != TaskStatus.Faulted ||
-                        !(task.Exception?.InnerException is InterruptBatchException)))
+                if (task != null)
                 {
+                    if (task.Status == TaskStatus.Faulted)
+                    {
+                        var rejected = task.Exception?.InnerException as RejectedException;
+                        if (rejected != null)
+                            ExceptionDispatchInfo.Capture(rejected).Throw();
+                    }
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(task);
                 }
@@ -137,7 +142,6 @@
         private class ProxyHandler : HandlerAdapter
         {
             private readonly IHandler _composer;
-            private bool _handled;
 
             public ProxyHandler(object handler, IHandler composer)
                 : base(handler)
@@ -149,11 +153,10 @@
             {
                 try
                 {
-                    _handled = true;
                     operation.Action(this);
-                    return _handled;
+                    return true;
                 }
-                catch (InterruptBatchException)
+                catch (RejectedException)
                 {
                     return false;
                 }
@@ -165,14 +168,9 @@
                 if (callback is Composition) return false;
                 composer = new CascadeHandler(composer, _composer);
                 if (!base.HandleCallback(callback, ref greedy, composer))
-                {
-                    _handled = false;  // async delegates
-                    throw new InterruptBatchException();
-                }
+                    throw new RejectedException(callback);
                 return true;
             }
         }
-
-        private class InterruptBatchException : CancelledException { }
     }
 }

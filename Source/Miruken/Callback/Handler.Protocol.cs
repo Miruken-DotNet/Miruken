@@ -42,15 +42,12 @@
                              ? new Resolve(protocol, broadcast, handleMethod)
                              : (object)handleMethod;
 
-            var handled = handler.Handle(callback, broadcast);
-            if (!(handled || semantics.HasOption(CallbackOptions.BestEffort)))
+            if (!handler.Handle(callback))
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 
-            var result = handleMethod.Result;
-
-            return handled || result != null ? result 
-                 : RuntimeHelper.GetDefault(handleMethod.ResultType);
+            return handleMethod.Result 
+                ?? RuntimeHelper.GetDefault(handleMethod.ResultType);
         }
 
         public static IHandler Composer => HandleMethodBinding.Composer;

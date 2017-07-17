@@ -13,13 +13,10 @@
             var batch = new Batch(all);
             prepare(batch);
             if (batch.IsEmpty) return true;
-            var semantics = new CallbackSemantics();
-            handler.Handle(semantics, true);
-            var greedy  = semantics.HasOption(CallbackOptions.Broadcast);
-            var handled = handler.Handle(batch, ref greedy);
+            var handled = handler.Handle(batch);
             if (batch.IsAsync)
                 batch.Complete().Wait();
-            return handled || semantics.HasOption(CallbackOptions.BestEffort);
+            return handled;
         }
 
         public static bool All(this IHandler handler, Action<Batch> prepare)
@@ -40,12 +37,8 @@
             var batch = new Batch(all) { WantsAsync = true };
             prepare(batch);
             if (batch.IsEmpty) return Promise.True;
-            var semantics = new CallbackSemantics();
-            handler.Handle(semantics, true);
-            var greedy    = semantics.HasOption(CallbackOptions.Broadcast);
-            var handled   = handler.Handle(batch, ref greedy);
-            return batch.Complete().Then((r,s) => handled ||
-                semantics.HasOption(CallbackOptions.BestEffort));
+            var handled = handler.Handle(batch);
+            return batch.Complete().Then((r,s) => handled);
         }
 
         public static Promise<bool> AllAsync(this IHandler handler, Action<Batch> prepare)

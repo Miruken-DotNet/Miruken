@@ -19,16 +19,18 @@
         protected virtual bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            return !SkippedTypes.Contains(GetType()) &&
-                Dispatch(this, callback, ref greedy, composer);
+            return Dispatch(this, callback, ref greedy, composer);
         }
 
 	    public static bool Dispatch(object handler, object callback, 
             ref bool greedy, IHandler composer, Func<object, bool> results = null)
 	    {
+	        if (handler == null) return false;
             var dispatch = callback as IDispatchCallback;
-            return dispatch?.Dispatch(handler, ref greedy, composer)
-                ?? HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
+            if (dispatch != null)
+                return dispatch.Dispatch(handler, ref greedy, composer);
+            return SkipTypes.Contains(handler.GetType()) ||
+                HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
         }
 
         public static CascadeHandler operator +(Handler h1, object h2)
@@ -51,7 +53,7 @@
             return instance as IHandler ?? new HandlerAdapter(instance);
         }
 
-        private static readonly HashSet<Type> SkippedTypes = new HashSet<Type>
+        private static readonly HashSet<Type> SkipTypes = new HashSet<Type>
         {
             typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)

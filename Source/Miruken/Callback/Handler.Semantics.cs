@@ -63,21 +63,23 @@ namespace Miruken.Callback
         }
     }
 
-    public class SemanticsHandler : HandlerDecorator
+    public class CallbackSemanticsHandler : Handler, IDecorator
     {
+        private readonly IHandler _handler;
         private readonly CallbackSemantics _semantics;
 
-        public SemanticsHandler(
+        public CallbackSemanticsHandler(
             IHandler handler, CallbackOptions options)
-            : base(handler)
         {
+            _handler   = handler;
             _semantics = new CallbackSemantics(options);
         }
+
+        object IDecorator.Decoratee => _handler;
 
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var handled = false;
             if (Composition.IsComposed<CallbackSemantics>(callback))
                 return false;
 
@@ -85,24 +87,30 @@ namespace Miruken.Callback
             if (semantics != null)
             {
                 _semantics.MergeInto(semantics);
-                handled = true;
+                if (greedy)
+                    _handler.Handle(callback, ref greedy, composer);
+                return true;
             }
-            else if (!greedy)
+
+            if (callback is Composition)
+                return _handler.Handle(callback, ref greedy, composer);
+            if (_semantics.HasOption(CallbackOptions.Broadcast))
+                greedy = true;
+
+            if (_semantics.HasOption(CallbackOptions.BestEffort))
             {
-                if (_semantics.IsSpecified(CallbackOptions.Broadcast))
-                    greedy = _semantics.HasOption(CallbackOptions.Broadcast);
-                else
+                try
                 {
-                    var cs = new CallbackSemantics();
-                    if (this.Handle(cs, true) && cs.IsSpecified(CallbackOptions.Broadcast))
-                        greedy = cs.HasOption(CallbackOptions.Broadcast);
+                    _handler.Handle(callback, ref greedy, composer);
+                    return true;
+                }
+                catch (RejectedException)
+                {
+                    return true;
                 }
             }
 
-            if (greedy || !handled)
-                handled = base.HandleCallback(callback, ref greedy, composer) || handled;
-
-            return handled;
+            return _handler.Handle(callback, ref greedy, composer);
         }
     }
 
@@ -118,7 +126,7 @@ namespace Miruken.Callback
             this IHandler handler, CallbackOptions options)
         {
             return handler == null ? null 
-                 : new SemanticsHandler(handler, options);
+                 : new CallbackSemanticsHandler(handler, options);
         }
 
         #region Semantics

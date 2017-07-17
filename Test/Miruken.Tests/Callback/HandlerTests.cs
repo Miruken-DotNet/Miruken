@@ -483,7 +483,7 @@
             var objects = handler.ResolveAll<object>();
             CollectionAssert.Contains(objects, custom);
             CollectionAssert.Contains(objects, special);
-            Assert.AreEqual(12, objects.Length);
+            Assert.AreEqual(13, objects.Length);
         }
 
         [TestMethod]
