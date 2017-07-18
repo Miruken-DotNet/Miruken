@@ -82,6 +82,31 @@
             Assert.AreEqual(2, order.Id);
         }
 
+        [TestMethod]
+        public async Task Should_Resolve_Task_Array_Dependency()
+        {
+            var handler = new InventoryHandler()
+                        + new CustomerSupport()
+                        + new Repository<Order>();
+            handler.Command(new NewOrder(new Order()));
+            handler.Command(new NewOrder(new Order()));
+            handler.Command(new NewOrder(new Order()));
+            var orders = await handler.CommandAsync<Order[]>(new ClockIn());
+            Assert.AreEqual(3, orders.Length);
+        }
+
+        [TestMethod]
+        public async Task Should_Resolve_Promise_Array_Dependency()
+        {
+            var handler = new InventoryHandler()
+                        + new CustomerSupport()
+                        + new Repository<Order>();
+            handler.Command(new NewOrder(new Order()));
+            handler.Command(new NewOrder(new Order()));
+            var orders = await handler.CommandAsync<Order[]>(new ClockOut());
+            Assert.AreEqual(2, orders.Length);
+        }
+
         private class LineItem
         {
             public string PLU      { get; set; }
@@ -139,6 +164,10 @@
             public Order Order { get; }
         }
 
+        private class ClockIn { }
+
+        private class ClockOut { }
+
         private class InventoryHandler : Handler
         {
             private readonly List<Order> _orders = new List<Order>();
@@ -147,28 +176,38 @@
             public Order[] Orders => _orders.ToArray();
 
             [Handles]
-            public Guid PlaceOrder(NewOrder place, IRepository<Order> repository)
+            public Guid PlaceOrder(NewOrder place, IRepository<Order> repository,
+                                   Func<Order[]> getOrders)
             {
                 var order = place.Order;
                 order.Status = OrderStatus.Pending;
                 repository.Save(order);
                 _orders.Add(order);
+                var orders = getOrders();
+                CollectionAssert.Contains(orders, order);
                 return Guid.NewGuid();
             }
 
             [Handles]
             public async Task<Guid> ChangeOrder(
-                ChangeOrder change, Task<IRepository<Order>> repository)
+                ChangeOrder change, Task<IRepository<Order>> repository,
+                Func<Promise<Order[]>> getOrders)
             {
                 change.Order.Status = OrderStatus.Pending;
                 await (await repository).Save(change.Order);
+                var orders = await getOrders();
+                Assert.AreEqual(0, orders.Length);
                 return Guid.NewGuid();
             }
 
             [Handles]
-            public Promise CancelOrder(CancelOrder cancel, Promise<IRepository<Order>> repository)
+            public Promise CancelOrder(
+                CancelOrder cancel, Promise<IRepository<Order>> repository,
+                Func<Task<Order[]>> getOrders)
             {
                 cancel.Order.Status = OrderStatus.Cancelled;
+                var orders = getOrders();
+                Assert.AreEqual(0, orders.Result.Length);
                 return repository.Then((r, s) =>
                 {
                     r.Save(cancel.Order);
@@ -180,15 +219,29 @@
         {
             [Handles]
             public Order RefundOrder(RefundOrder refund, Order[] orders,
-                IRepository<Order> repository)
+                Func<IRepository<Order>> getRepository)
             {
                 var order = orders.FirstOrDefault(o => o.Id == refund.OrderId);
                 if (order != null)
                 {
                     order.Status = OrderStatus.Refunded;
-                    repository.Save(order);
+                    getRepository().Save(order);
                 }
                 return order;
+            }
+
+            [Handles]
+            public Promise<Order[]> ClockIn(ClockIn clockIn, Task<Order[]> orders,
+                IRepository<Order> repository)
+            {
+                return orders;
+            }
+
+            [Handles]
+            public Task<Order[]> ClockOut(ClockOut clockOut, Promise<Order[]> orders,
+                IRepository<Order> repository)
+            {
+                return orders;
             }
         }
 

@@ -1,7 +1,8 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Collections.Concurrent;
+    using System.Reflection;
     using Concurrency;
     using Infrastructure;
     using Policy;
@@ -9,7 +10,35 @@
     [AttributeUsage(AttributeTargets.Parameter)]
     public class ResolvingAttribute : Attribute, IArgumentResolver
     {
-        public virtual object ResolveArgument(Argument argument, IHandler handler)
+        private static readonly MethodInfo CreateLazy =
+            typeof(ResolvingAttribute).GetMethod("ResolveLazy",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate> _lazy
+            = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
+
+        public virtual object ResolveArgument(
+            Argument argument, IHandler handler, IHandler composer)
+        {
+            if (argument.IsLazy)
+            {
+                var lazy = _lazy.GetOrAdd(argument.ParameterType, l =>
+                {
+                    var func   = l.GenericTypeArguments[0];
+                    var method = CreateLazy.MakeGenericMethod(func);
+                    return RuntimeHelper.CreateFuncTwoArgs(method);
+                });
+                return lazy(this, argument, composer);
+            }
+            return Resolve(argument, handler);
+        }
+
+        private Func<T> ResolveLazy<T>(Argument argument, IHandler handler)
+        {
+            return () => (T)Resolve(argument, handler);
+        }
+
+        private static object Resolve(Argument argument, IHandler handler)
         {
             object dependency;
             var key          = argument.Key;

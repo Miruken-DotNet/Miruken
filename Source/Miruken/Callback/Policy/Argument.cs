@@ -9,7 +9,8 @@
 
     public interface IArgumentResolver
     {
-        object ResolveArgument(Argument argument, IHandler handler);
+        object ResolveArgument(
+            Argument argument, IHandler handler, IHandler composer);
     } 
 
     public class Argument
@@ -17,8 +18,8 @@
         public Argument(ParameterInfo parameter)
         {
             Parameter     = parameter;
-            ArgumentType  = parameter.ParameterType;
-            LogicalType   = ExtractFlags(ArgumentType);
+            ParameterType = parameter.ParameterType;
+            ExtractFlags(ParameterType);
             Attributes    = Attribute.GetCustomAttributes(parameter, false);
             if (Attributes.Length == 0)
                 Attributes = Array.Empty<Attribute>();
@@ -28,8 +29,9 @@
 
         public object            Key           { get; }
         public ParameterInfo     Parameter     { get; }
-        public Type              ArgumentType  { get; }
-        public Type              LogicalType   { get; }
+        public Type              ParameterType { get; }
+        public Type              ArgumentType  { get; set; }
+        public Type              LogicalType   { get; set; }
         public Attribute[]       Attributes    { get; }
         public IArgumentResolver Resolver      { get; }
 
@@ -39,15 +41,16 @@
         public bool          IsPromise     { get; private set; }
         public bool          IsTask        { get; private set; }
 
-        private Type ExtractFlags(Type parameterType)
+        private void ExtractFlags(Type parameterType)
         {
-            var type  = parameterType;
-            IsLazy    = ExtractLazy(ref type);
-            IsPromise = ExtractPromise(ref type);
-            IsTask    = ExtractTask(ref type);
-            IsArray   = ExtractArray(ref type);
-            IsSimple  = type.IsSimpleType();
-            return type;
+            var type     = parameterType;
+            IsLazy       = ExtractLazy(ref type);
+            ArgumentType = type;
+            IsPromise    = ExtractPromise(ref type);
+            IsTask       = ExtractTask(ref type);
+            IsArray      = ExtractArray(ref type);
+            IsSimple     = type.IsSimpleType();
+            LogicalType  = type;
         }
 
         private static bool ExtractPromise(ref Type type)
