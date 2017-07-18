@@ -91,10 +91,8 @@
             {
                 var promise = action(handler);
                 if (promise != null)
-                {
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(promise);
-                }
             }, unhandled);
         }
 

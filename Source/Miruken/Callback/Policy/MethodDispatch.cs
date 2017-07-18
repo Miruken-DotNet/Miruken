@@ -41,16 +41,16 @@
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            Parameters = method.GetParameters();
-            ConfigureMethod(method, Parameters);
+            Arguments  = method.GetParameters().Select(p => new Argument(p)).ToArray();
+            ConfigureMethod(method, Arguments);
             Method     = method;
             Attributes = attributes;
         }
 
-        public MethodInfo      Method            { get; }
-        public ParameterInfo[] Parameters        { get; }
-        public Attribute[]     Attributes        { get; }
-        public Type            LogicalReturnType { get; private set; }
+        public MethodInfo  Method            { get; }
+        public Argument[]  Arguments         { get; }
+        public Attribute[] Attributes        { get; }
+        public Type        LogicalReturnType { get; private set; }
 
         public Type ReturnType => Method.ReturnType;
         public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;
@@ -137,8 +137,8 @@
         protected object DispatchLate(object target, object[] args, Type returnType = null)
         {
             var method = Method;
-            if (Parameters.Length > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {Method.GetDescription()} expects {Parameters.Length} arguments");
+            if (Arguments.Length > (args?.Length ?? 0))
+                throw new ArgumentException($"Method {Method.GetDescription()} expects {Arguments.Length} arguments");
             if (_mapping != null)
                 method = ClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
@@ -167,7 +167,7 @@
            return Method.MakeGenericMethod(argTypes);
         }
 
-        private void ConfigureMethod(MethodInfo method, ParameterInfo[] parameters)
+        private void ConfigureMethod(MethodInfo method, Argument[] arguments)
         {
             var returnType = method.ReturnType;
             var isVoid     = returnType == typeof(void);
@@ -198,7 +198,7 @@
 
             if (!method.IsGenericMethodDefinition)
             {
-                switch (parameters.Length)
+                switch (arguments.Length)
                 {
                     #region Early Bound
                     case 0:
@@ -244,7 +244,8 @@
                 }
             }
 
-            var argSources = parameters
+            var argSources = arguments
+                .Select(arg => arg.Parameter)
                 .Where(p => p.ParameterType.ContainsGenericParameters)
                 .Select(p => Tuple.Create(p.Position, p.ParameterType))
                 .ToList();

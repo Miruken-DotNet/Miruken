@@ -63,6 +63,7 @@
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="Callback\Policy\Argument.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />

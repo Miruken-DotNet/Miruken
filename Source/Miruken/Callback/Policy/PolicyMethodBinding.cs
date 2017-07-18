@@ -117,25 +117,27 @@
         private object[] ResolveArgs(object callback, IHandler composer)
         {
             var numRuleArgs = Rule.Args.Length;
-            var parameters  = Dispatcher.Parameters;
-            if (parameters.Length == numRuleArgs)
+            var arguments   = Dispatcher.Arguments;
+            if (arguments.Length == numRuleArgs)
                 return Rule.ResolveArgs(callback);
 
-            var args = new object[parameters.Length];
+            var args = new object[arguments.Length];
 
             if (!composer.All(batch =>
             {
-                for (var i = numRuleArgs; i < parameters.Length; ++i)
+                for (var i = numRuleArgs; i < arguments.Length; ++i)
                 {
-                    var parameter = parameters[i];
-                    var paramType = parameter.ParameterType;
-                    if (paramType == typeof(IHandler))
+                    var index        = i;
+                    var argument     = arguments[i];
+                    var argumentType = argument.ArgumentType;
+                    var resolver     = argument.Resolver ?? DefaultResolver;
+                    if (argumentType == typeof(IHandler))
                         args[i] = composer;
-                    else if (paramType.IsInstanceOfType(this))
+                    else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
-                        batch.Add(h => args[parameter.Position] 
-                            = DefaultResolver.ResolveParameter(this, parameter, h));
+                        batch.Add(h => args[index] =
+                            resolver.ResolveArgument(argument, h));
                 }
             })) return null;
 
@@ -150,7 +152,7 @@
             if (CallbackIndex.HasValue)
             {
                 var index = CallbackIndex.Value;
-                callbackType = dispatcher.Parameters[index].ParameterType;
+                callbackType = dispatcher.Arguments[index].ArgumentType;
                 return args[index];
             }
             callbackType = callback.GetType();

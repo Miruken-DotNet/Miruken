@@ -159,6 +159,19 @@
                  : Convert.ChangeType(value, conversionType);
         }
 
+        public static T[] ChangeArrayType<T>(Array array, Type conversionType)
+        {
+            return (T[])ChangeArrayType(array, typeof(T));
+        }
+
+        public static Array ChangeArrayType(Array array, Type conversionType)
+        {
+            var typed = Array.CreateInstance(conversionType, array.Length);
+            for (var i = 0; i < array.Length; ++i)
+                typed.SetValue(ChangeType(array.GetValue(i), conversionType), i);
+            return typed;
+        }
+
         public static string GetDescription(this MethodInfo method)
         {
             return $"{method.ReflectedType?.FullName}:{method.Name}";
