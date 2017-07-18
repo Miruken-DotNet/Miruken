@@ -28,10 +28,10 @@
             var paramType = parameter.ParameterType;
             var type      = paramType;
             var modifiers = GetModifiers(ref type);
-            return ResolveDependency(parameter, type, modifiers, handler);
+            return Resolve(parameter, type, modifiers, handler);
         }
 
-        protected virtual object ResolveDependency(
+        protected virtual object Resolve(
             ParameterInfo parameter, Type type, ModifierFlags modifiers,
             IHandler handler)
         {
@@ -46,24 +46,40 @@
             if (isArray)
             {
                 if (isPromise)
-                    dependency = handler.ResolveAllAsync(key)
-                        .Coerce(paramType);
+                {
+                    var array = handler.ResolveAllAsync(key);
+                    if (isSimple)
+                        array = array.Then((arr, s) => ConvertArray(arr, type));
+                    dependency = array.Coerce(paramType);
+                }
                 else if (isTask)
-                    dependency = handler.ResolveAllAsync(key).ToTask()
-                        .Coerce(paramType);
+                {
+                    var array = handler.ResolveAllAsync(key).ToTask();
+                    if (isSimple)
+                        array = array.ContinueWith(t => ConvertArray(t.Result, type));
+                    return array.Coerce(paramType);
+                }
                 else
-                    dependency = handler.ResolveAll(key);
+                    dependency = ConvertArray(handler.ResolveAll(key), type);
             }
             else if (isPromise)
-                dependency = handler.ResolveAsync(key)
-                    .Coerce(paramType);
+            {
+                var promise = handler.ResolveAsync(key);
+                if (isSimple)
+                    promise = promise.Then((r,s) => RuntimeHelper.ChangeType(r, type));
+               dependency = promise.Coerce(paramType);
+            }
             else if (isTask)
-                dependency = handler.ResolveAsync(key).ToTask()
-                    .Coerce(paramType);
+            {
+                var task = handler.ResolveAsync(key).ToTask();
+                if (isSimple)
+                    task = task.ContinueWith(t => RuntimeHelper.ChangeType(t.Result, type));
+                dependency = task.Coerce(paramType);
+            }
             else
             {
                 dependency = handler.Resolve(key);
-                if (isSimple && !paramType.IsInstanceOfType(dependency))
+                if (isSimple)
                     dependency = RuntimeHelper.ChangeType(dependency, paramType);
             }
 
@@ -116,6 +132,14 @@
                 return false;
             type = type.GetGenericArguments()[0];
             return true;
+        }
+
+        private static object[] ConvertArray(object[] array, Type type)
+        {
+            var typed = (object[])Array.CreateInstance(type, array.Length);
+            for (var i = 0; i < array.Length; ++i)
+                typed[i] = RuntimeHelper.ChangeType(array[i], type);
+            return typed;
         }
     }
 }

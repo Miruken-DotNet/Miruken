@@ -179,10 +179,15 @@
         private class CustomerSupport : Handler
         {
             [Handles]
-            public Order RefundOrder(RefundOrder refund, Order[] orders)
+            public Order RefundOrder(RefundOrder refund, Order[] orders,
+                IRepository<Order> repository)
             {
                 var order = orders.FirstOrDefault(o => o.Id == refund.OrderId);
-                if (order != null) order.Status = OrderStatus.Refunded;
+                if (order != null)
+                {
+                    order.Status = OrderStatus.Refunded;
+                    repository.Save(order);
+                }
                 return order;
             }
         }

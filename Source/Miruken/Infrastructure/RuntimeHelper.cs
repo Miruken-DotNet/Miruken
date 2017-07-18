@@ -132,6 +132,9 @@
             if (conversionType == null)
                 throw new ArgumentNullException(nameof(conversionType));
 
+            if (value != null && conversionType.IsInstanceOfType(value))
+                return value;
+
             if (conversionType.IsEnum)
             {
                 var enumString = value as string;
