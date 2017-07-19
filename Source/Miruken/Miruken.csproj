@@ -64,9 +64,12 @@
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
+    <Compile Include="Callback\Policy\Keys.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
+    <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />

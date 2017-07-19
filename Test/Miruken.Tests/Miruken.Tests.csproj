@@ -60,6 +60,7 @@
     <Compile Include="Callback\ResolveMethodTests.cs" />
     <Compile Include="Callback\HandleMethodTests.cs" />
     <Compile Include="Callback\HandlerTests.cs" />
+    <Compile Include="Callback\StringKeyTests.cs" />
     <Compile Include="Concurrency\CancellingPromiseTests.cs" />
     <Compile Include="Concurrency\Promise.Task.Tests.cs" />
     <Compile Include="Concurrency\PromiseTests.cs" />

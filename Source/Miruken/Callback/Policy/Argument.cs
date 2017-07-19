@@ -21,10 +21,16 @@
             ParameterType = parameter.ParameterType;
             ExtractFlags(ParameterType);
             Attributes    = Attribute.GetCustomAttributes(parameter, false);
-            if (Attributes.Length == 0)
+            if (Attributes.Length > 0)
+            {
+                var key = Attributes.OfType<KeyAttribute>().SingleOrDefault();
+                if (key != null) Key = key.Key;
+                Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
+            }
+            else
                 Attributes = Array.Empty<Attribute>();
-            Key      = IsSimple ? Parameter.Name : (object)LogicalType;
-            Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
+            if (Key == null)
+                Key = IsSimple ? Parameter.Name : (object)LogicalType;
         }
 
         public object            Key           { get; }

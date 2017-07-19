@@ -353,6 +353,14 @@
             Assert.IsNotNull(bar);
         }
 
+        [TestMethod]
+        public void Should_Provide_Callbacks_By_String_Case_Insensitive_Key()
+        {
+            var handler = new CustomHandler();
+            var boo     = handler.Resolve("boo") as Boo;
+            Assert.IsNotNull(boo);
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Providers()
@@ -901,6 +909,18 @@
                         return new Foo();
                     case "Bar":
                         return new Bar();
+                    default:
+                        return null;
+                }
+            }
+
+            [Provides("Boo", StringComparison.OrdinalIgnoreCase)]
+            public object ProvidesByNameCaseInsensitive(Inquiry inquiry)
+            {
+                switch ((inquiry.Key as string)?.ToUpper())
+                {
+                    case "BOO":
+                        return new Boo();
                     default:
                         return null;
                 }

@@ -22,16 +22,16 @@
             return binding;
         }
 
-        public override IEnumerable SelectKeys(object callback, ICollection keys)
+        public override IEnumerable SelectKeys(object callback, Keys keys)
         {
-            return SelectKeys(callback?.GetType(), keys);
+            return SelectTypeKeys(callback?.GetType(), keys);
         }
 
-        protected IEnumerable SelectKeys(Type type, ICollection keys)
+        protected IEnumerable SelectTypeKeys(Type type, Keys keys)
         {
             if (type == null || type == typeof(object))
                 return Enumerable.Empty<object>();
-            return keys.OfType<Type>().Where(k => AcceptKey(type, k))
+            return keys.Typed.Where(k => AcceptKey(type, k))
                        .OrderBy(t => t, this);
         }
 
@@ -96,12 +96,12 @@
 
         public Func<Cb, object> Target { get; }
 
-        public override IEnumerable SelectKeys(object callback, ICollection keys)
+        public override IEnumerable SelectKeys(object callback, Keys keys)
         {
             if (!(callback is Cb))
-                return SelectKeys(callback.GetType(), keys);
+                return SelectTypeKeys(callback.GetType(), keys);
             var type = Target((Cb)callback)?.GetType();
-            return SelectKeys(type, keys);
+            return SelectTypeKeys(type, keys);
         }
     }
 

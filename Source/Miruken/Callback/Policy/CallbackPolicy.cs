@@ -40,7 +40,7 @@
                 ?? new PolicyMethodBinding(rule, dispatch, attribute, this);
         }
 
-        public abstract IEnumerable SelectKeys(object callback, ICollection keys);
+        public abstract IEnumerable SelectKeys(object callback, Keys keys);
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, Func<object, bool> results = null)

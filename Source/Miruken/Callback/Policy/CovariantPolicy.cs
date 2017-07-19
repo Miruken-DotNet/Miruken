@@ -70,15 +70,16 @@
 
         public Func<Cb, object> Key { get; }
 
-        public override IEnumerable SelectKeys(object callback, ICollection keys)
+        public override IEnumerable SelectKeys(object callback, Keys keys)
         {
             if (!(callback is Cb))
                 return Enumerable.Empty<object>();
             var key  = Key((Cb)callback);
             var type = key as Type;
             if (type == null)
-                return Enumerable.Repeat(key, 1);
-            var typeKeys = keys.OfType<Type>();
+                return keys.Other.Where(k => 
+                    Equals(k, key) || Equals(key, k));
+            var typeKeys = keys.Typed;
             return type == typeof(object) 
                  ? typeKeys.Where(k => !k.IsGenericTypeDefinition)
                  : typeKeys.Where(k => AcceptKey(type, k))

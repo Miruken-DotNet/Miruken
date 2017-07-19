@@ -16,6 +16,11 @@
             Key = key;
         }
 
+        public ProvidesAttribute(string key, StringComparison comparison)
+        {
+            Key = new StringKey(key, comparison);
+        }
+
         public override CallbackPolicy CallbackPolicy => Policy;
 
         public static readonly CallbackPolicy Policy =

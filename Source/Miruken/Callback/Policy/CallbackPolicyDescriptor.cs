@@ -8,7 +8,7 @@ namespace Miruken.Callback.Policy
         private List<PolicyMethodBinding> _unknown;
         private Dictionary<object, List<PolicyMethodBinding>> _indexed;
 
-        public ICollection Keys => _indexed?.Keys;
+        public Keys Keys { get; } = new Keys();
 
         internal void Insert(PolicyMethodBinding method)
         {
@@ -27,6 +27,7 @@ namespace Miruken.Callback.Policy
             List<PolicyMethodBinding> methods;
             if (!indexed.TryGetValue(key, out methods))
             {
+                Keys.AddKey(key);
                 methods = new List<PolicyMethodBinding>();
                 indexed.Add(key, methods);
             }
