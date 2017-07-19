@@ -71,7 +71,7 @@
             throw new NotImplementedException();
         }
 
-        public Promise ResolveAllAsync(object ke)
+        public Promise<object[]> ResolveAllAsync(object ke)
         {
             throw new NotImplementedException();
         }

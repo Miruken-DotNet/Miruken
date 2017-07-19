@@ -33,12 +33,32 @@
             return Resolve(argument, handler);
         }
 
+        protected virtual object Resolve(object key, IHandler handler)
+        {
+            return handler.Resolve(key);
+        }
+
+        protected virtual Promise ResolveAsync(object key, IHandler handler)
+        {
+            return handler.ResolveAsync(key);
+        }
+
+        protected virtual object[] ResolveAll(object key, IHandler handler)
+        {
+            return handler.ResolveAll(key);
+        }
+
+        protected virtual Promise<object[]> ResolveAllAsync(object key, IHandler handler)
+        {
+            return handler.ResolveAllAsync(key);
+        }
+
         private Func<T> ResolveLazy<T>(Argument argument, IHandler handler)
         {
             return () => (T)Resolve(argument, handler);
         }
 
-        private static object Resolve(Argument argument, IHandler handler)
+        private object Resolve(Argument argument, IHandler handler)
         {
             object dependency;
             var key          = argument.Key;
@@ -49,7 +69,7 @@
             {
                 if (argument.IsPromise)
                 {
-                    var array  = handler.ResolveAllAsync(key);
+                    var array  = ResolveAllAsync(key, handler);
                     dependency = argument.IsSimple
                                ? array.Then((arr, s) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
@@ -58,7 +78,7 @@
                 }
                 else if (argument.IsTask)
                 {
-                    var array  = handler.ResolveAllAsync(key).ToTask();
+                    var array  = ResolveAllAsync(key, handler).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
                                     RuntimeHelper.ChangeArrayType(task.Result, logicalType))
@@ -67,25 +87,25 @@
                 }
                 else
                     dependency = RuntimeHelper
-                        .ChangeArrayType(handler.ResolveAll(key), logicalType);
+                        .ChangeArrayType(ResolveAll(key, handler), logicalType);
             }
             else if (argument.IsPromise)
             {
-                var promise = handler.ResolveAsync(key);
+                var promise = ResolveAsync(key, handler);
                 if (argument.IsSimple)
                     promise = promise.Then((r,s) => RuntimeHelper.ChangeType(r, logicalType));
                dependency = promise.Coerce(argumentType);
             }
             else if (argument.IsTask)
             {
-                var task = handler.ResolveAsync(key).ToTask();
+                var task = ResolveAsync(key, handler).ToTask();
                 if (argument.IsSimple)
                     task = task.ContinueWith(t => RuntimeHelper.ChangeType(t.Result, logicalType));
                 dependency = task.Coerce(argumentType);
             }
             else
             {
-                dependency = handler.Resolve(key);
+                dependency = Resolve(key, handler);
                 if (argument.IsSimple)
                     dependency = RuntimeHelper.ChangeType(dependency, argumentType);
             }
