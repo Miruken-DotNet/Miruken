@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Infrastructure;
 
     public class ReturnsKey : ReturnRule
     {
@@ -28,14 +29,31 @@
                 $"Key {restrict.FullName} is not related to {returnType.FullName}");
         }
 
-        public override void Configure(PolicyMethodBinding binding)
+        public override void Configure(
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            base.Configure(binding);
-            var returnType = binding.Dispatcher.LogicalReturnType;
+            var key      = policyMethodBindingInfo.Key;
+            var restrict = key as Type;
+            if (key != null && restrict == null) return;
+            var dispatch   = policyMethodBindingInfo.Dispatch;
+            var returnType = dispatch.LogicalReturnType;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            if (returnType == typeof(object)) return;
-            binding.VarianceType = returnType;
+            if (returnType.IsSimpleType())
+            {
+                var method     = dispatch.Method;
+                var methodName = method.Name;
+                if (method.IsSpecialName)
+                {
+                    var _ = methodName.IndexOf('_');
+                    if (_ >= 0) methodName = methodName.Substring(_ + 1);
+                }
+                policyMethodBindingInfo.Key = new StringKey(
+                    methodName, StringComparison.OrdinalIgnoreCase);
+            }
+            else if (returnType != typeof(object) &&
+                (restrict == null || restrict.IsAssignableFrom(returnType)))
+                policyMethodBindingInfo.Key = returnType;
         }
     }
 }

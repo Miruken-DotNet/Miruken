@@ -107,6 +107,47 @@
             Assert.AreEqual(2, orders.Length);
         }
 
+        [TestMethod]
+        public void Should_Resolve_Simple_Dependency()
+        {
+            var handler = new SimpleDependencyHandler()
+                        + new ConfigurationHandler();
+            var maxRetries = handler.Command<int>(new NewOrder(null));
+            Assert.AreEqual(2, maxRetries);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Simple_Promise_Dependency()
+        {
+            var handler = new SimpleDependencyHandler()
+                        + new ConfigurationHandler();
+            var maxRetries = handler.Command<int>(new ChangeOrder(null));
+            Assert.AreEqual(2, maxRetries);
+        }
+
+        [TestMethod]
+        public async Task Should_Resolve_Simple_Task_Dependency()
+        {
+            var handler = new SimpleDependencyHandler()
+                        + new ConfigurationHandler();
+            var maxRetries = await handler.CommandAsync<int>(new CancelOrder(null));
+            Assert.AreEqual(2, maxRetries);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Simple_Array_Dependency()
+        {
+            var handler = new SimpleDependencyHandler()
+                        + new ConfigurationHandler();
+            var help = handler.Command<string[]>(new RefundOrder());
+            CollectionAssert.AreEquivalent(new []
+            {
+                "www.help.com",
+                "www.help2.com",
+                "www.help3.com"
+            }, help);
+        }
+
         private class LineItem
         {
             public string PLU      { get; set; }
@@ -256,10 +297,58 @@
             Off
         }
 
-        private class Configuration : Handler
+        private class ConfigurationHandler : Handler
         {
             [Provides]
+            public int MaxRetries => 2;
+
+            [Provides("logLevel", StringComparison.OrdinalIgnoreCase)]
             public int LogLevelInt => (int)LogLevel.Info;
+
+            [Provides("logLevelStr", StringComparison.OrdinalIgnoreCase)]
+            public string LogLevelStr => LogLevel.Fatal.ToString();
+
+            [Provides("help")]
+            public string PrimaryHelp => "www.help.com";
+
+            [Provides("help")]
+            public string SecondaryHelp => "www.help2.com";
+
+            [Provides("help")]
+            public string CriticalHelp => "www.help3.com";
+
+        }
+
+        private class SimpleDependencyHandler : Handler
+        {
+            [Handles]
+            public int Place(NewOrder newOrder, int maxRetries, LogLevel logLevel)
+            {
+                Assert.AreEqual(LogLevel.Info, logLevel);
+                return maxRetries;
+            }
+
+            [Handles]
+            public async Task<int> Change(ChangeOrder changeOrder,
+                Promise<int> maxRetries, Promise<LogLevel> logLevel)
+            {
+                Assert.AreEqual(LogLevel.Info, await logLevel);
+                return await maxRetries;
+            }
+
+            [Handles]
+            public async Task<int> Cancel(CancelOrder cancelOrder,
+                Task<int> maxRetries, [Key("logLevelStr")]Task<LogLevel> logLevel)
+            {
+                Assert.AreEqual(LogLevel.Fatal, await logLevel);
+                return await maxRetries;
+            }
+
+            [Handles]
+            public string[] Refund(RefundOrder refundOrder, string[] help)
+            {
+                return help;
+            }
         }
 
         private interface IRepository<in T>

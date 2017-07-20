@@ -13,13 +13,9 @@
             AcceptResult = VerifyResult;
         }
 
-        public override PolicyMethodBinding BindMethod(
-            MethodRule rule, MethodDispatch dispatch,
-            DefinitionAttribute attribute)
+        public override object GetKey(object callback)
         {
-            var binding = base.BindMethod(rule, dispatch, attribute);
-            InferVariance(binding);
-            return binding;
+            return callback?.GetType();
         }
 
         public override IEnumerable SelectKeys(object callback, Keys keys)
@@ -33,16 +29,6 @@
                 return Enumerable.Empty<object>();
             return keys.Typed.Where(k => AcceptKey(type, k))
                        .OrderBy(t => t, this);
-        }
-
-        private static void InferVariance(PolicyMethodBinding method)
-        {
-            var restrict = method.Attribute.Key as Type;
-            if (restrict != null)
-            {
-                if (method.VarianceType == null)
-                    method.VarianceType = restrict;
-            }
         }
 
         private static bool AcceptKey(Type type, Type key)
@@ -96,10 +82,17 @@
 
         public Func<Cb, object> Target { get; }
 
+        public override object GetKey(object callback)
+        {
+            return callback is Cb
+                 ? Target((Cb)callback)?.GetType()
+                 : callback?.GetType();
+        }
+
         public override IEnumerable SelectKeys(object callback, Keys keys)
         {
             if (!(callback is Cb))
-                return SelectTypeKeys(callback.GetType(), keys);
+                return SelectTypeKeys(callback?.GetType(), keys);
             var type = Target((Cb)callback)?.GetType();
             return SelectTypeKeys(type, keys);
         }

@@ -8,27 +8,6 @@
 
     public abstract class CovariantPolicy : CallbackPolicy, IComparer<Type>
     {
-        public override PolicyMethodBinding BindMethod(
-            MethodRule rule, MethodDispatch dispatch,
-            DefinitionAttribute attribute)
-        {
-            var binding = base.BindMethod(rule, dispatch, attribute);
-            InferVariance(binding);
-            return binding;
-        }
-
-        protected static void InferVariance(PolicyMethodBinding method)
-        {
-            var key = method.Attribute.Key;
-            var restrict = key as Type;
-            if (restrict != null)
-            {
-                if (method.VarianceType == null ||
-                    method.VarianceType.IsAssignableFrom(restrict))
-                    method.VarianceType = restrict;
-            }
-        }
-
         protected static bool AcceptKey(Type type, Type key)
         {
             if (type.IsGenericTypeDefinition)
@@ -51,7 +30,7 @@
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy = new CovariantPolicy<Cb>(target);
+            var policy  = new CovariantPolicy<Cb>(target);
             var builder = new CovariantPolicyBuilder<Cb>(policy);
             build(builder);
             return policy;
@@ -69,6 +48,11 @@
         }
 
         public Func<Cb, object> Key { get; }
+
+        public override object GetKey(object callback)
+        {
+            return callback is Cb ? Key((Cb) callback) : null;
+        }
 
         public override IEnumerable SelectKeys(object callback, Keys keys)
         {

@@ -11,9 +11,9 @@
         private readonly List<MethodRule> _rules = new List<MethodRule>();
         private readonly List<IFilterProvider> _filters = new List<IFilterProvider>();
 
-        public AcceptResultDelegate AcceptResult     { get; set; }
-        public Func<object, Type>   ResultType       { get; set; }
-        public BindMethodDelegate   Binder           { get; set; }
+        public AcceptResultDelegate AcceptResult { get; set; }
+        public Func<object, Type>   ResultType   { get; set; }
+        public BindMethodDelegate   Binder       { get; set; }
 
         public IEnumerable<IFilterProvider> Filters => _filters;
 
@@ -33,12 +33,14 @@
             return _rules.FirstOrDefault(r => r.Matches(method, attribute));
         }
 
-        public virtual PolicyMethodBinding BindMethod(MethodRule rule,
-            MethodDispatch dispatch, DefinitionAttribute attribute)
+        public virtual PolicyMethodBinding BindMethod(
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            return Binder?.Invoke(rule, dispatch, attribute, this)
-                ?? new PolicyMethodBinding(rule, dispatch, attribute, this);
+            return Binder?.Invoke(this, ref policyMethodBindingInfo)
+                ?? new PolicyMethodBinding(this, ref policyMethodBindingInfo);
         }
+
+        public abstract object GetKey(object callback);
 
         public abstract IEnumerable SelectKeys(object callback, Keys keys);
 

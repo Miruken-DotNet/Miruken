@@ -14,7 +14,7 @@
             DefinitionAttribute attribute,
             IDictionary<string, Type> aliases);
 
-        public virtual void Configure(PolicyMethodBinding binding) { }
+        public virtual void Configure(ref PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
         public virtual R GetSubRule<R>() where R : ReturnRule
         {
@@ -46,9 +46,10 @@
             return Rule.Matches(returnType, parameters, attribute, aliases);
         }
 
-        public override void Configure(PolicyMethodBinding binding)
+        public override void Configure(
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            Rule.Configure(binding);
+            Rule.Configure(ref policyMethodBindingInfo);
         }
 
         public override R GetSubRule<R>()
@@ -72,9 +73,11 @@
                 base.Matches(returnType, parameters, attribute, aliases);
         }
 
-        public override void Configure(PolicyMethodBinding binding)
+        public override void Configure(
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            if (!binding.Dispatcher.IsVoid) Rule.Configure(binding);
+            if (!policyMethodBindingInfo.Dispatch.IsVoid)
+                Rule.Configure(ref policyMethodBindingInfo);
         }
     }
 }

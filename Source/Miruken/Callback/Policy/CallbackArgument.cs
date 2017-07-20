@@ -61,21 +61,23 @@ namespace Miruken.Callback.Policy
                 $"Key {restrict.FullName} is not related to {paramType.FullName}");
         }
 
-        public override void Configure(
-            ParameterInfo parameter, PolicyMethodBinding binding)
+        public override void Configure(ParameterInfo parameter,
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            base.Configure(parameter, binding);
+            var key       = policyMethodBindingInfo.Key;
+            var restrict  = key as Type;
             var paramType = parameter.ParameterType;
+            policyMethodBindingInfo.CallbackIndex = parameter.Position;
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();
                 paramType = contraints.Length == 1
-                        ? contraints[0]
-                        : typeof(object);
+                          ? contraints[0]
+                          : typeof(object);
             }
-            binding.CallbackIndex = parameter.Position;
-            if (paramType != typeof(object))
-                binding.VarianceType  = paramType;
+            if (paramType != typeof(object) &&
+                (restrict == null || restrict.IsAssignableFrom(paramType)))
+                policyMethodBindingInfo.Key = paramType;
         }
 
         public override object Resolve(object callback)
@@ -101,11 +103,8 @@ namespace Miruken.Callback.Policy
             return typeof(Cb).IsAssignableFrom(paramType);
         }
 
-        public override void Configure(
-            ParameterInfo parameter, PolicyMethodBinding binding)
-        {
-            binding.CallbackIndex = parameter.Position;
-        }
+        public override void Configure(ParameterInfo parameter,
+            ref PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
         public override object Resolve(object callback)
         {

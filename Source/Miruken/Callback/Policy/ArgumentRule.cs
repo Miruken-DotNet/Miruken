@@ -21,8 +21,8 @@
            ParameterInfo parameter, DefinitionAttribute attribute,
            IDictionary<string, Type> aliases);
 
-        public virtual void Configure(
-            ParameterInfo parameter, PolicyMethodBinding binding) { }
+        public virtual void Configure(ParameterInfo parameter,
+            ref PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
         public abstract object Resolve(object callback);
     }
@@ -45,10 +45,10 @@
             return Argument.Matches(parameter, attribute, aliases);
         }
 
-        public override void Configure(
-            ParameterInfo parameter, PolicyMethodBinding binding)
+        public override void Configure(ParameterInfo parameter,
+            ref PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            Argument.Configure(parameter, binding);
+            Argument.Configure(parameter, ref policyMethodBindingInfo);
         }
 
         public override object Resolve(object callback)

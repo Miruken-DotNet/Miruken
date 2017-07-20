@@ -7,51 +7,47 @@
         object result, MethodBinding binding);
 
     public delegate PolicyMethodBinding BindMethodDelegate(
-        MethodRule rule, MethodDispatch dispatch,
-        DefinitionAttribute attribute, CallbackPolicy policy);
+        CallbackPolicy policy,
+        ref PolicyMethodBindingInfo policyMethodBindingInfo);
+
+    public struct PolicyMethodBindingInfo
+    {
+        public PolicyMethodBindingInfo(
+            MethodRule rule, MethodDispatch dispatch,
+            DefinitionAttribute attribute)
+        {
+            Rule          = rule;
+            Dispatch      = dispatch;
+            Attribute     = attribute;
+            Key           = attribute.Key;
+            CallbackIndex = null;
+        }
+
+        public object              Key;
+        public int?                CallbackIndex;
+        public MethodRule          Rule           { get; }
+        public MethodDispatch      Dispatch       { get; }
+        public DefinitionAttribute Attribute      { get; }
+    }
 
     public class PolicyMethodBinding : MethodBinding
     {
-        private Type _varianceType;
-
-        public PolicyMethodBinding(MethodRule rule,
-                                   MethodDispatch dispatch,
-                                   DefinitionAttribute attribute,
-                                   CallbackPolicy policy)
-            : base(dispatch)
+        public PolicyMethodBinding(CallbackPolicy policy,
+                                   ref PolicyMethodBindingInfo bindingInfo)
+            : base(bindingInfo.Dispatch)
         {
-            if (rule == null)
-                throw new ArgumentNullException(nameof(rule));
-            if (dispatch == null)
-                throw new ArgumentNullException(nameof(dispatch));
-            Rule       = rule;
-            Attribute  = attribute;
-            Policy     = policy;
+            Policy        = policy;
+            Rule          = bindingInfo.Rule;
+            Attribute     = bindingInfo.Attribute;
+            CallbackIndex = bindingInfo.CallbackIndex;
+            Key           = NormalizeKey(ref bindingInfo);
         }
 
         public MethodRule          Rule          { get; }
         public DefinitionAttribute Attribute     { get; }
         public CallbackPolicy      Policy        { get; }
-        public int?                CallbackIndex { get; set; }
-
-        public Type VarianceType
-        {
-            get { return _varianceType; }
-            set
-            {
-                if (value?.ContainsGenericParameters == true &&
-                    !value.IsGenericTypeDefinition)
-                    _varianceType = value.GetGenericTypeDefinition();
-                else
-                    _varianceType = value;
-            }
-        }
-
-        public object GetKey()
-        {
-            var key = Attribute.Key;
-            return key == null || key is Type ? VarianceType : key;
-        }
+        public int?                CallbackIndex { get; }
+        public object              Key           { get; }
 
         public override bool Dispatch(object target, object callback, 
             IHandler composer, Func<object, bool> results = null)
@@ -157,6 +153,17 @@
             }
             callbackType = callback.GetType();
             return callback;
+        }
+
+        private static object NormalizeKey(ref PolicyMethodBindingInfo bindingInfo)
+        {
+            var key = bindingInfo.Key;
+            var varianceType = key as Type;
+            if (varianceType == null) return key;
+            if (varianceType.ContainsGenericParameters &&
+                !varianceType.IsGenericTypeDefinition)
+                varianceType = varianceType.GetGenericTypeDefinition();
+            return varianceType;
         }
 
         private static object[] UpdateArgs(object[] args,

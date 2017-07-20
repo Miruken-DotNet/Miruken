@@ -2,6 +2,7 @@ namespace Miruken.Callback.Policy
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class CallbackPolicyDescriptor
     {
@@ -12,7 +13,7 @@ namespace Miruken.Callback.Policy
 
         internal void Insert(PolicyMethodBinding method)
         {
-            var key = method.GetKey();
+            var key = method.Key;
             if (key == null)
             {
                 var unknown = _unknown ??
@@ -34,7 +35,14 @@ namespace Miruken.Callback.Policy
             methods.Add(method);
         }
 
-        internal IEnumerable<PolicyMethodBinding> GetMethods(IEnumerable keys)
+        internal PolicyMethodBinding GetMethod(object key)
+        {
+            List<PolicyMethodBinding> methods = null;
+            return _indexed?.TryGetValue(key, out methods) == true
+                 ? methods.FirstOrDefault() : null;
+        }
+
+        internal IEnumerable<PolicyMethodBinding> SelectMethods(IEnumerable keys)
         {
             if (keys != null && _indexed != null)
             {
