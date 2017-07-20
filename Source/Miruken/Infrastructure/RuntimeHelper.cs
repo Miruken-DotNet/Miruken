@@ -154,9 +154,10 @@
                 conversionType = Nullable.GetUnderlyingType(conversionType);
             }
 
-            return conversionType == typeof(Guid)
-                 ? new Guid(value.ToString()) 
-                 : Convert.ChangeType(value, conversionType);
+            if (conversionType == typeof(Guid))
+                return value != null ? new Guid(value.ToString()) : Guid.Empty;
+
+            return Convert.ChangeType(value, conversionType);
         }
 
         public static T[] ChangeArrayType<T>(Array array, Type conversionType)
