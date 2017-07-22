@@ -36,10 +36,10 @@
                 handler = this.Semantics(options);
             }
 
-            var broadcast    = semantics.HasOption(CallbackOptions.Broadcast);
+            var many         = semantics.HasOption(CallbackOptions.Broadcast);
             var handleMethod = new HandleMethod(protocol, message, semantics);
             var callback     = semantics.HasOption(CallbackOptions.Resolve)
-                             ? new Resolve(protocol, broadcast, handleMethod)
+                             ? new Resolve(protocol, many, handleMethod)
                              : (object)handleMethod;
 
             if (!handler.Handle(callback))

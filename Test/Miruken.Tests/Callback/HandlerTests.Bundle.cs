@@ -10,7 +10,7 @@
     using static Protocol;
 
     [TestClass]
-    public class HandlerBatchTests
+    public class HandlerBundleTests
     {
         private Bowling _bowling;
 
@@ -23,20 +23,20 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Empty_Batch()
+        public void Should_Handle_Empty_Bundle()
         {
             Assert.IsTrue(_bowling.All(b => { }));
         }
 
         [TestMethod]
-        public async Task Should_Handle_Empty_Batch_Async()
+        public async Task Should_Handle_Empty_Bundle_Async()
         {
             var complete = await _bowling.AllAsync(b => { });
             Assert.IsTrue(complete);
         }
 
         [TestMethod]
-        public void Should_Handle_All_Single_Batch()
+        public void Should_Handle_All_Single_Bundle()
         {
             var handled  = false;
             var complete =_bowling.All(b => b
@@ -46,7 +46,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_All_Single_Batch_Async()
+        public async Task Should_Handle_All_Single_Bundle_Async()
         {
             var handled  = false;
             var complete = await _bowling.AllAsync(b => b
@@ -56,7 +56,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_All_Multiple_Batch()
+        public void Should_Handle_All_Multiple_Bundle()
         {
             var         handled = false;
             var         pins    = new List<Pin>();
@@ -72,7 +72,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_All_Multiple_Batch_Async()
+        public async Task Should_Handle_All_Multiple_Bundle_Async()
         {
             var handled = false;
             var pins = new List<Pin>();
@@ -88,7 +88,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_All_Batch()
+        public void Should_Handle_All_Bundle()
         {
             var bowler   = new Bowler();
             var complete = _bowling.All(b => b
@@ -102,7 +102,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_All_Batch_Async()
+        public async Task Should_Handle_All_Bundle_Async()
         {
             var bowler  = new Bowler();
             await _bowling.AllAsync(b => b
@@ -115,7 +115,7 @@
         }
 
         [TestMethod]
-        public void Should_Identify_Incomplete_Batch()
+        public void Should_Identify_Incomplete_Bundle()
         {
             Assert.IsFalse(_bowling.All(b => b
                 .Add(h => h.Handle(new ResetPins()))
@@ -124,7 +124,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Identify_Incomplete_Batch_Async()
+        public async Task Should_Identify_Incomplete_Bundle_Async()
         {
             var complete = await _bowling.AllAsync(b => b
                 .Add(h => h.Handle(new ResetPins()))
@@ -134,7 +134,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Any_Batch()
+        public void Should_Handle_Any_Bundle()
         {
             var complete = _bowling.Any(b => b
                 .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30)))
@@ -143,7 +143,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_Any_Batch_Async()
+        public async Task Should_Handle_Any_Bundle_Async()
         {
             var complete = await _bowling.AnyAsync(b => b
                 .Add(h => h.Command<BowlingBall>(new FindBowlingBall(30)))
@@ -273,7 +273,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_All_Multiple_Batch_Greedily()
+        public void Should_Handle_All_Multiple_Bundle_Greedily()
         {
             var handled  = 0;
             var pins     = new List<Pin>();
@@ -286,7 +286,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_All_Multiple_Batch_Greedily_Async()
+        public async Task Should_Handle_All_Multiple_Bundle_Greedily_Async()
         {
             var handled  = 0;
             var pins     = new List<Pin>();
@@ -299,7 +299,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Any_Multiple_Batch_Greedily()
+        public void Should_Handle_Any_Multiple_Bundle_Greedily()
         {
             var handled  = 0;
             var pins     = new List<Pin>();
@@ -312,7 +312,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_Any_Multiple_Batch_Greedily_Async()
+        public async Task Should_Handle_Any_Multiple_Bundle_Greedily_Async()
         {
             var handled  = 0;
             var pins     = new List<Pin>();

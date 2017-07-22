@@ -119,7 +119,7 @@
 
             var args = new object[arguments.Length];
 
-            if (!composer.All(batch =>
+            if (!composer.All(bundle =>
             {
                 for (var i = numRuleArgs; i < arguments.Length; ++i)
                 {
@@ -132,7 +132,7 @@
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
-                        batch.Add(h => args[index] =
+                        bundle.Add(h => args[index] =
                             resolver.ResolveArgument(argument, h, composer));
                 }
             })) return null;

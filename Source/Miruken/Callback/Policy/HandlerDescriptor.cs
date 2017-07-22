@@ -70,23 +70,24 @@ namespace Miruken.Callback.Policy
             if (_policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
-            PolicyMethodBinding exactMethod = null;
+            var key = policy.GetKey(callback);
+            ICollection<PolicyMethodBinding> keyMethods = null;
+
             if (!greedy)
             {
-                var key = policy.GetKey(callback);
-                exactMethod = descriptor.GetMethod(key);
-                if (exactMethod?.Dispatch(target, callback, composer, results) == true)
+                keyMethods = descriptor.GetMethods(key);
+                if (keyMethods.Any(method => method?.Dispatch(
+                        target, callback, composer, results) == true))
                     return true;
             }
 
             var dispatched = false;
-            var indexes    = descriptor.Keys;
-            var keys       = indexes == null ? null 
-                           : policy.SelectKeys(callback, indexes);
+            var keys = policy.SelectKeys(callback, descriptor.Keys);
 
-            foreach (var method in descriptor.SelectMethods(keys))
+            foreach (var method in descriptor.SelectMethods(key, keys))
             {
-                if (method == exactMethod) continue;
+                if (keyMethods?.Contains(method) == true)
+                    continue;
                 dispatched = method.Dispatch(target, callback,
                     composer, results) || dispatched;
                 if (dispatched && !greedy) return true;

@@ -8,7 +8,7 @@
     using Concurrency;
     using Policy;
 
-    public class Batch : IAsyncCallback, IDispatchCallback
+    public class Bundle : IAsyncCallback, IDispatchCallback
     {
         private readonly bool _all;
         private List<Operation> _operations;
@@ -21,7 +21,7 @@
             public bool             Handled;
         }
 
-        public Batch(bool all = true)
+        public Bundle(bool all = true)
         {
             _all = all;
         }
@@ -47,7 +47,7 @@
                 : Promise.Empty;
         }
 
-        public Batch Add(Action<IHandler> action, Action unhandled = null)
+        public Bundle Add(Action<IHandler> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -76,14 +76,14 @@
             return this;
         }
 
-        public Batch Add(Func<IHandler, object> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, object> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
             return Add(handler => { action(handler); }, unhandled);
         }
 
-        public Batch Add(Func<IHandler, Promise> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, Promise> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -96,7 +96,7 @@
             }, unhandled);
         }
 
-        public Batch Add(Func<IHandler, Task> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, Task> action, Action unhandled = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
