@@ -126,14 +126,15 @@
                     var index        = i;
                     var argument     = arguments[i];
                     var argumentType = argument.ArgumentType;
+                    var optional     = argument.Optional;
                     var resolver     = argument.Resolver ?? DefaultResolver;
                     if (argumentType == typeof(IHandler))
                         args[i] = composer;
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
-                        bundle.Add(h => args[index] =
-                            resolver.ResolveArgument(argument, h, composer));
+                        bundle.Add(h => args[index] = resolver.ResolveArgument(
+                            argument, optional ? h.BestEffort() : h, composer));
                 }
             })) return null;
 

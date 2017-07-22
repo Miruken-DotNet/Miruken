@@ -26,6 +26,7 @@
                 var key = Attributes.OfType<KeyAttribute>().SingleOrDefault();
                 if (key != null) Key = key.Key;
                 Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
+                Optional = Attributes.OfType<OptionalAttribute>().Any();
             }
             else
                 Attributes = Array.Empty<Attribute>();
@@ -40,12 +41,13 @@
         public Type              LogicalType   { get; set; }
         public Attribute[]       Attributes    { get; }
         public IArgumentResolver Resolver      { get; }
+        public  bool             Optional      { get; }
 
-        public bool          IsLazy        { get; private set; }
-        public bool          IsArray       { get; private set; }
-        public bool          IsSimple      { get; private set; }
-        public bool          IsPromise     { get; private set; }
-        public bool          IsTask        { get; private set; }
+        public bool              IsLazy        { get; private set; }
+        public bool              IsArray       { get; private set; }
+        public bool              IsSimple      { get; private set; }
+        public bool              IsPromise     { get; private set; }
+        public bool              IsTask        { get; private set; }
 
         private void ExtractFlags(Type parameterType)
         {

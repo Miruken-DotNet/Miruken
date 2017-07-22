@@ -148,6 +148,13 @@
             }, help);
         }
 
+        [TestMethod]
+        public async Task Should_Ignore_Missing_Optional_Dependency()
+        {
+            var handler = new CustomerSupport();
+            await handler.CommandAsync(new NewOrder(null));
+        }
+
         private class LineItem
         {
             public string PLU      { get; set; }
@@ -283,6 +290,13 @@
                 IRepository<Order> repository)
             {
                 return orders;
+            }
+
+            [Handles]
+            public void ValidateOrder(NewOrder place, [Optional]IRepository<Order> repository)
+            {
+                Assert.IsNotNull(place);
+                Assert.IsNull(repository);
             }
         }
 
