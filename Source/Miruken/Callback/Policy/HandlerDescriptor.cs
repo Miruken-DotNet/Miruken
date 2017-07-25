@@ -42,7 +42,7 @@ namespace Miruken.Callback.Policy
                     CallbackPolicyDescriptor methods;
                     if (!_policies.TryGetValue(policy, out methods))
                     {
-                        methods = new CallbackPolicyDescriptor();
+                        methods = new CallbackPolicyDescriptor(policy);
                         _policies.Add(policy, methods);
                     }
 
@@ -70,26 +70,22 @@ namespace Miruken.Callback.Policy
             if (_policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
-            var key = policy.GetKey(callback);
-            ICollection<PolicyMethodBinding> keyMethods = null;
+            var dispatched = false;
+            var key        = policy.GetKey(callback);
 
-            if (!greedy)
+            foreach (var method in descriptor.GetInvariantMethods(key))
             {
-                keyMethods = descriptor.GetMethods(key);
-                if (keyMethods.Any(method => method?.Dispatch(
-                        target, callback, composer, results) == true))
-                    return true;
+                dispatched = method.Dispatch(
+                    target, callback, composer, results) 
+                    || dispatched;
+                if (dispatched && !greedy) return true;
             }
 
-            var dispatched = false;
-            var keys = policy.SelectKeys(callback, descriptor.Keys);
-
-            foreach (var method in descriptor.SelectMethods(key, keys))
+            foreach (var method in descriptor.GetCompatibleMethods(key))
             {
-                if (keyMethods?.Contains(method) == true)
-                    continue;
-                dispatched = method.Dispatch(target, callback,
-                    composer, results) || dispatched;
+                dispatched = method.Dispatch(
+                    target, callback, composer, results) 
+                    || dispatched;
                 if (dispatched && !greedy) return true;
             }
 

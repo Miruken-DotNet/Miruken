@@ -42,7 +42,7 @@
 
         public abstract object GetKey(object callback);
 
-        public abstract IEnumerable SelectKeys(object callback, Keys keys);
+        public abstract IEnumerable CompatibleKeys(object callback, IEnumerable keys);
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, Func<object, bool> results = null)

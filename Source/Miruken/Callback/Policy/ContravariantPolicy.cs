@@ -18,17 +18,18 @@
             return callback?.GetType();
         }
 
-        public override IEnumerable SelectKeys(object callback, Keys keys)
+        public override IEnumerable CompatibleKeys(object key, IEnumerable keys)
         {
-            return SelectTypeKeys(callback?.GetType(), keys);
+            return CompatibleTypes(key as Type, keys);
         }
 
-        protected IEnumerable SelectTypeKeys(Type type, Keys keys)
+        protected IEnumerable CompatibleTypes(Type type, IEnumerable types)
         {
             if (type == null || type == typeof(object))
                 return Enumerable.Empty<object>();
-            return keys.Typed.Where(k => AcceptKey(type, k))
-                       .OrderBy(t => t, this);
+            return types.OfType<Type>()
+                .Where(t => t != type && AcceptKey(type, t)) 
+                .OrderBy(t => t, this);
         }
 
         private static bool AcceptKey(Type type, Type key)
@@ -89,12 +90,9 @@
                  : callback?.GetType();
         }
 
-        public override IEnumerable SelectKeys(object callback, Keys keys)
+        public override IEnumerable CompatibleKeys(object key, IEnumerable keys)
         {
-            if (!(callback is Cb))
-                return SelectTypeKeys(callback?.GetType(), keys);
-            var type = Target((Cb)callback)?.GetType();
-            return SelectTypeKeys(type, keys);
+            return CompatibleTypes(key as Type, keys);
         }
     }
 
