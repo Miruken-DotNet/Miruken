@@ -28,7 +28,11 @@
 
             if (!semantics.IsSpecified(CallbackOptions.Resolve) &&
                 typeof(IResolving).IsAssignableFrom(protocol))
+            {
                 options |= CallbackOptions.Resolve;
+                if (semantics.IsSpecified(CallbackOptions.Broadcast))
+                    options |= CallbackOptions.Broadcast;
+            }
 
             if (options != CallbackOptions.None)
             {
@@ -36,13 +40,8 @@
                 handler = this.Semantics(options);
             }
 
-            var many         = semantics.HasOption(CallbackOptions.Broadcast);
             var handleMethod = new HandleMethod(protocol, message, semantics);
-            var callback     = semantics.HasOption(CallbackOptions.Resolve)
-                             ? new Resolve(protocol, many, handleMethod)
-                             : (object)handleMethod;
-
-            if (!handler.Handle(callback))
+            if (!handler.Handle(handleMethod))
                 throw new MissingMethodException(
                     $"Method '{message.MethodName}' on {message.TypeName} not handled");
 

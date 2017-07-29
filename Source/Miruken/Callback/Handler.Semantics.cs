@@ -11,7 +11,8 @@ namespace Miruken.Callback
         Resolve    = 1 << 2,
         Broadcast  = 1 << 3,
         BestEffort = 1 << 4,
-        Notify     = Broadcast | BestEffort
+        Notify     = Broadcast | BestEffort,
+        ResolveAll = Resolve | Broadcast
     }
 
     public class CallbackSemantics : Composition
@@ -110,6 +111,14 @@ namespace Miruken.Callback
                 }
             }
 
+            if (_semantics.HasOption(CallbackOptions.Resolve))
+            {
+                var resolving = callback as IResolveCallback;
+                if (resolving != null)
+                    callback = resolving.GetCallback(greedy)
+                            ?? callback;
+            }
+
             return _handler.Handle(callback, ref greedy, composer);
         }
     }
@@ -144,6 +153,11 @@ namespace Miruken.Callback
         public static IHandler Resolve(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Resolve);
+        }
+
+        public static IHandler ResolveAll(this IHandler handler)
+        {
+            return Semantics(handler, CallbackOptions.ResolveAll);
         }
 
         public static IHandler Broadcast(this IHandler handler)

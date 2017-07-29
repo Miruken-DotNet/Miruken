@@ -7,7 +7,8 @@
     using Infrastructure;
     using Policy;
 
-    public class HandleMethod : ICallback, IDispatchCallback
+    public class HandleMethod 
+        : ICallback, IResolveCallback, IDispatchCallback
     {
         private readonly CallbackSemantics _semantics;
 
@@ -39,6 +40,11 @@
         }
 
         public CallbackPolicy Policy => null;
+
+        object IResolveCallback.GetCallback(bool greedy)
+        {
+            return new Resolve(Protocol, greedy, this);
+        }
 
         public bool InvokeOn(object target, IHandler composer)
         {

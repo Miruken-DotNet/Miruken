@@ -7,8 +7,8 @@
     using Concurrency;
     using Policy;
 
-    public class Inquiry 
-        : ICallback, IAsyncCallback, IDispatchCallback
+    public class Inquiry : ICallback, 
+        IAsyncCallback, IResolveCallback, IDispatchCallback
     {
         private readonly List<object> _resolutions;
         private object _result;
@@ -110,6 +110,11 @@
         protected virtual bool IsSatisfied(object resolution, IHandler composer)
         {
             return true;
+        }
+
+        object IResolveCallback.GetCallback(bool greedy)
+        {
+            return this;
         }
 
         bool IDispatchCallback.Dispatch(

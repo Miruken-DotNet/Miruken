@@ -20,6 +20,11 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
+    public interface IResolveCallback
+    {
+        object GetCallback(bool greedy);
+    }
+
     public interface IInvokeOnlyCallback {}
 
     public interface IDispatchCallback

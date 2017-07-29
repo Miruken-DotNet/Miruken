@@ -42,7 +42,7 @@
             Assert.IsNotNull(handler);
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void Should_Resolve_Handler()
         {
             using (var handler = new WindsorHandler(container =>
