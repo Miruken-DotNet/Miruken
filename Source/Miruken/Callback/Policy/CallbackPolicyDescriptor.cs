@@ -21,7 +21,7 @@ namespace Miruken.Callback.Policy
 
         public CallbackPolicy Policy { get; }
 
-        internal void Insert(PolicyMethodBinding method)
+        internal void Add(PolicyMethodBinding method, Type handlerType)
         {
             var key = method.Key;
             if (key == null)
@@ -65,9 +65,8 @@ namespace Miruken.Callback.Policy
                 _typed?.TryGetValue(type, out methods);
             else
                 _indexed?.TryGetValue(key, out methods);
-            return methods != null
-                 ? (ICollection<PolicyMethodBinding>)methods
-                 : Array.Empty<PolicyMethodBinding>();
+            return methods as ICollection<PolicyMethodBinding>
+                ?? Array.Empty<PolicyMethodBinding>();
         }
 
         internal IEnumerable<PolicyMethodBinding> GetCompatibleMethods(object key)
@@ -84,7 +83,7 @@ namespace Miruken.Callback.Policy
             {
                 if (_typed != null)
                 {
-                    var keys = Policy.CompatibleKeys(key, _typed.Keys);
+                    var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
                     foreach (var next in keys.OfType<Type>())
                     {
                         List<PolicyMethodBinding> methods;
@@ -95,7 +94,7 @@ namespace Miruken.Callback.Policy
             }
             else if (_indexed != null)
             {
-                var keys = Policy.CompatibleKeys(key, _indexed.Keys);
+                var keys = Policy.GetCompatibleKeys(key, _indexed.Keys);
                 foreach (var next in keys)
                 {
                     List<PolicyMethodBinding> methods;

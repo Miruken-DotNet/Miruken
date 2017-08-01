@@ -267,7 +267,7 @@
         public void Should_Support_Inner_Call_Semantics()
         {
             var bowler   = new Bowler();
-            var complete = new Handler().Any(b => b
+            var complete = new HandlerAdapter(bowler).Any(b => b
                 .Add(h => { P<IBowling>(h.BestEffort()).Bowl(8, bowler); }));
             Assert.IsTrue(complete);
         }

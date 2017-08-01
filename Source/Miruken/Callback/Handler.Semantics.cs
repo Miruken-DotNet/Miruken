@@ -95,6 +95,7 @@ namespace Miruken.Callback
 
             if (callback is Composition)
                 return _handler.Handle(callback, ref greedy, composer);
+
             if (_semantics.HasOption(CallbackOptions.Broadcast))
                 greedy = true;
 
@@ -112,14 +113,23 @@ namespace Miruken.Callback
             }
 
             if (_semantics.HasOption(CallbackOptions.Resolve))
-            {
-                var resolving = callback as IResolveCallback;
-                if (resolving != null)
-                    callback = resolving.GetCallback(greedy)
-                            ?? callback;
-            }
+                callback = GetResolvingCallback(callback, greedy);
 
             return _handler.Handle(callback, ref greedy, composer);
+        }
+
+        private static object GetResolvingCallback(object callback, bool greedy)
+        {
+            var resolving = callback as IResolveCallback;
+            if (resolving != null)
+                return resolving.GetCallback(greedy) ?? callback;
+            var dispatch = callback as IDispatchCallback;
+            var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
+            var handlers = policy.GetHandlers(callback);
+            var bundle   = new Bundle(greedy);
+            foreach (var handler in handlers)
+                bundle.Add(h => h.Handle(new Resolve(handler, greedy, callback)));
+            return bundle;
         }
     }
 

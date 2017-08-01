@@ -3,14 +3,20 @@
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using static Protocol;
 
     /// <summary>
     /// Summary description for ResolveMethodTests
     /// </summary>
     [TestClass]
-    public class ResolveMethodTests
+    public class ResolveCallbackTests
     {
+        public class SendEmail
+        {
+            public string Message { get; set; }
+        }
+
         private interface IEmailFeature : IResolving
         {
             int Count { get; }
@@ -37,6 +43,12 @@
                              ? Composer.BestEffort()
                              : Composer;
                 P<IBilling>(composer).Bill(4M);
+            }
+
+            [Handles]
+            public int Send(SendEmail send)
+            {
+                return Email(send.Message);
             }
         }
 
@@ -163,6 +175,22 @@
                     new OfflineHandler(), new EmailHandler()
                 };
             }
+        }
+
+        private class HandlerRegistry : Handler
+        {
+            [Provides]
+            public EmailHandler EmailHandler => new EmailHandler();
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            var handler = new HandlerRegistry();
+            var id      = handler.Resolve()
+                .Command<int>(new SendEmail {Message = "Hello"});
+            Assert.AreEqual(1, id);
         }
 
         [TestMethod]

@@ -11,13 +11,13 @@ namespace Miruken.Callback.Policy
     {
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
 
-        private static readonly ConcurrentDictionary<Type, HandlerDescriptor>
-            _descriptors = new ConcurrentDictionary<Type, HandlerDescriptor>();
+        private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
+            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
-        public HandlerDescriptor(Type type)
+         public HandlerDescriptor(Type handlerType)
         {
-            HandlerType = type;
-            var members = type.FindMembers(Members, Binding, IsDefinition, null);
+            HandlerType = handlerType;
+            var members = handlerType.FindMembers(Members, Binding, IsDefinition, null);
             foreach (var member in members)
             {
                 MethodDispatch dispatch = null;
@@ -39,25 +39,20 @@ namespace Miruken.Callback.Policy
                     if (_policies == null)
                         _policies = new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>();
 
-                    CallbackPolicyDescriptor methods;
-                    if (!_policies.TryGetValue(policy, out methods))
+                    CallbackPolicyDescriptor descriptor;
+                    if (!_policies.TryGetValue(policy, out descriptor))
                     {
-                        methods = new CallbackPolicyDescriptor(policy);
-                        _policies.Add(policy, methods);
+                        descriptor = new CallbackPolicyDescriptor(policy);
+                        _policies.Add(policy, descriptor);
                     }
 
-                    methods.Insert(binding);
+                    descriptor.Add(binding, handlerType);
                 }
             }
         }
 
         public Type HandlerType { get; }
 
-        public CallbackPolicyDescriptor GetPolicyDescriptor(CallbackPolicy policy)
-        {
-            CallbackPolicyDescriptor descriptor;
-            return _policies.TryGetValue(policy, out descriptor) ? descriptor : null;
-        }
 
         internal bool Dispatch(
             CallbackPolicy policy, object target, object callback,
@@ -92,9 +87,40 @@ namespace Miruken.Callback.Policy
             return dispatched;
         }
 
+        public static HandlerDescriptor GetDescriptor<T>()
+        {
+            return GetDescriptor(typeof(T));
+        }
+
         public static HandlerDescriptor GetDescriptor(Type type)
         {
-            return _descriptors.GetOrAdd(type, t => new HandlerDescriptor(t));
+            try
+            {
+                return _descriptors.GetOrAdd(type,
+                    t => new Lazy<HandlerDescriptor>(() => new HandlerDescriptor(t)))
+                    .Value;
+            }
+            catch
+            {
+                Lazy<HandlerDescriptor> descriptor;
+                _descriptors.TryRemove(type, out descriptor);
+                throw;
+            }
+        }
+
+        public static IEnumerable<Type> GetPolicyHandlers(CallbackPolicy policy, object key)
+        {
+            foreach (var descriptor in _descriptors.Values)
+            {
+                var handler = descriptor.Value;
+                CallbackPolicyDescriptor policyDescriptor = null;
+                if (handler._policies?.TryGetValue(policy, out policyDescriptor) == true)
+                {
+                    if (policyDescriptor.GetInvariantMethods(key).Any() ||
+                        policyDescriptor.GetCompatibleMethods(key).Any())
+                        yield return handler.HandlerType;
+                }
+            }
         }
 
         private static bool IsDefinition(MemberInfo member, object criteria)

@@ -174,7 +174,7 @@
         [TestMethod]
         public async Task Should_Provide_Many_Callbacks_Implicitly_Async()
         {
-            var handler = new SpecialHandlerAsync();
+            var handler = new SpecialAsyncHandler();
             var bar     = await handler.ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -201,7 +201,7 @@
         [TestMethod]
         public async Task Should_Provide_Callbacks_By_Key_Async()
         {
-            var handler = new SpecialHandlerAsync();
+            var handler = new SpecialAsyncHandler();
             var boo     = await handler.ResolveAsync<Boo>();
             Assert.IsNotNull(boo);
             Assert.IsTrue(boo.HasComposer);
@@ -218,7 +218,7 @@
         [TestMethod]
         public async Task Should_Provide_Many_Callbacks_By_Key_Async()
         {
-            var handler = new SpecialHandlerAsync();
+            var handler = new SpecialAsyncHandler();
             var bees    = await handler.ResolveAllAsync<Bee>();
             Assert.AreEqual(3, bees.Length);
         }
@@ -238,7 +238,7 @@
         [TestMethod]
         public async Task Should_Provide_Callbacks_With_Many_Keys_Async()
         {
-            var handler = new SpecialHandlerAsync();
+            var handler = new SpecialAsyncHandler();
             var baz1    = await handler.ResolveAsync<Baz<int>>();
             Assert.AreEqual(1, baz1.Stuff);
             var baz2 = handler.Resolve<Baz<string>>();
@@ -491,7 +491,7 @@
             var objects = handler.ResolveAll<object>();
             CollectionAssert.Contains(objects, custom);
             CollectionAssert.Contains(objects, special);
-            Assert.AreEqual(13, objects.Length);
+            Assert.AreEqual(12, objects.Length);
         }
 
         [TestMethod]
@@ -1001,6 +1001,13 @@
                 ++foo.Handled;
             }
 
+            /*
+            [Handles]
+            public void HandlesAnything(object cb)
+            {
+            }
+            */
+
             [Provides(typeof(Boo))]
             public object ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
             {
@@ -1052,7 +1059,7 @@
             }
         }
 
-        private class SpecialHandlerAsync : Handler
+        private class SpecialAsyncHandler : Handler
         {
             [Provides(typeof(Boo))]
             public Promise ProvideBooKey(IHandler composer, PolicyMethodBinding binding)

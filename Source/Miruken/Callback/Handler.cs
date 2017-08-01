@@ -25,13 +25,12 @@
 	    public static bool Dispatch(object handler, object callback, 
             ref bool greedy, IHandler composer, Func<object, bool> results = null)
 	    {
-	        if (handler == null) return false;
+	        if (handler == null || SkipTypes.Contains(handler.GetType()))
+                return false;
             var dispatch = callback as IDispatchCallback;
-            if (dispatch != null)
-                return dispatch.Dispatch(handler, ref greedy, composer);
-            return SkipTypes.Contains(handler.GetType()) ||
-                HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
-        }
+            return dispatch?.Dispatch(handler, ref greedy, composer)
+                ?? HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
+	    }
 
         public static CascadeHandler operator +(Handler h1, object h2)
         {

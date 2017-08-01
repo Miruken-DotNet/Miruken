@@ -42,7 +42,7 @@
 
         public abstract object GetKey(object callback);
 
-        public abstract IEnumerable CompatibleKeys(object callback, IEnumerable keys);
+        public abstract IEnumerable GetCompatibleKeys(object callback, IEnumerable keys);
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, Func<object, bool> results = null)
@@ -50,6 +50,12 @@
             var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
             return descriptor.Dispatch(
                 this, handler, callback, greedy, composer, results);
+        }
+
+        public IEnumerable<Type> GetHandlers(object callback)
+        {
+            var key = GetKey(callback);
+            return HandlerDescriptor.GetPolicyHandlers(this, key);
         }
     }
 }

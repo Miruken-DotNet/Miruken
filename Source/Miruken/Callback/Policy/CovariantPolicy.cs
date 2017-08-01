@@ -54,7 +54,7 @@
             return callback is Cb ? Key((Cb) callback) : null;
         }
 
-        public override IEnumerable CompatibleKeys(object key, IEnumerable keys)
+        public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
         {
             var type = key as Type;
             if (type == null)

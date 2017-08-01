@@ -57,7 +57,7 @@
     <Compile Include="Callback\HandlerTests.Args.cs" />
     <Compile Include="Callback\HandlerTests.Bundle.cs" />
     <Compile Include="Callback\HandlerTests.Command.cs" />
-    <Compile Include="Callback\ResolveMethodTests.cs" />
+    <Compile Include="Callback\ResolveCallbackTests.cs" />
     <Compile Include="Callback\HandleMethodTests.cs" />
     <Compile Include="Callback\HandlerTests.cs" />
     <Compile Include="Callback\StringKeyTests.cs" />

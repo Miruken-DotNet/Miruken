@@ -18,7 +18,7 @@
             return callback?.GetType();
         }
 
-        public override IEnumerable CompatibleKeys(object key, IEnumerable keys)
+        public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
         {
             return CompatibleTypes(key as Type, keys);
         }
@@ -90,7 +90,7 @@
                  : callback?.GetType();
         }
 
-        public override IEnumerable CompatibleKeys(object key, IEnumerable keys)
+        public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
         {
             return CompatibleTypes(key as Type, keys);
         }
