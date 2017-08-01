@@ -33,27 +33,16 @@
         }
 
         [TestMethod]
-        public void Should_Register_Handlers_In_Background()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            _container.Install(new HandlerInstaller().InBackground(),
-                WithFeatures.FromAssembly(assembly));
-            var handler = _container.Resolve<MyHandler>();
-            Assert.IsNotNull(handler);
-        }
-
-        [TestMethod, Ignore]
         public void Should_Resolve_Handler()
         {
             using (var handler = new WindsorHandler(container =>
             {
                 var assembly = Assembly.GetExecutingAssembly();
-                _container.Install(new HandlerInstaller(),
+                container.Install(new HandlerInstaller(),
                     WithFeatures.FromAssembly(assembly));
             }))
             {
-                var b = handler.Resolve().Resolve<B>();
-                Assert.IsNotNull(b);
+                Assert.IsTrue(handler.Resolve().Handle(new A()));
             } 
         }
 

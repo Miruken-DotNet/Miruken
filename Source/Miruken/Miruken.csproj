@@ -64,7 +64,6 @@
     <Compile Include="Callback\HandlerDecorator.cs" />
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\HandlerFilter.cs" />
-    <Compile Include="Callback\HandlerLoader.cs" />
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />

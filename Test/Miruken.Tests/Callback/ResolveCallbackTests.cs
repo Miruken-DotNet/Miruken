@@ -101,6 +101,12 @@
             {
                 throw new NotSupportedException("Not supported offline");
             }
+
+            [Handles]
+            public int Send(SendEmail send)
+            {
+                return ((IEmailFeature)this).Email(send.Message);
+            }
         }
 
         private class DemoHandler : Handler
@@ -177,20 +183,34 @@
             }
         }
 
-        private class HandlerRegistry : Handler
-        {
-            [Provides]
-            public EmailHandler EmailHandler => new EmailHandler();
-        }
-
         [TestMethod]
         public void Should_Resolve_Handlers()
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
-            var handler = new HandlerRegistry();
+            var handler = new EmailProvider();
             var id      = handler.Resolve()
                 .Command<int>(new SendEmail {Message = "Hello"});
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            HandlerDescriptor.GetDescriptor<OfflineHandler>();
+            var handler = new EmailProvider()
+                        + new OfflineProvider();
+            var id      = handler.ResolveAll()
+                .Command<int>(new SendEmail { Message = "Hello" });
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(NotSupportedException))]
+        public void Should_Fail_If_No_Resolve_Handlers()
+        {
+            var handler = new HandlerAdapter(new Billing());
+            handler.Resolve().Command<int>(new SendEmail { Message = "Hello" });
         }
 
         [TestMethod]

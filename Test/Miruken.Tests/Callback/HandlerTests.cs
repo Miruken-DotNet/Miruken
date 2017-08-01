@@ -1001,13 +1001,6 @@
                 ++foo.Handled;
             }
 
-            /*
-            [Handles]
-            public void HandlesAnything(object cb)
-            {
-            }
-            */
-
             [Provides(typeof(Boo))]
             public object ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
             {

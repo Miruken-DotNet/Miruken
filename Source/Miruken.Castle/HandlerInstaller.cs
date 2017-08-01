@@ -5,35 +5,17 @@
     using Callback;
     using Callback.Policy;
     using global::Castle.MicroKernel.Registration;
-    using global::Castle.MicroKernel.SubSystems.Configuration;
 
     public class HandlerInstaller : FeatureInstaller
     {
         private Func<FromAssemblyDescriptor, BasedOnDescriptor> _selector;
         private Action<ComponentRegistration> _configure;
-        private HandlerLoader _loader;
-        private bool _background;
 
         public HandlerInstaller SelectHandlers(
             Func<FromAssemblyDescriptor, BasedOnDescriptor> selector)
         {
             _selector += selector;
             return this;
-        }
-
-        public HandlerInstaller InBackground()
-        {
-            _background = true;
-            return this;
-        }
-
-        protected override void Install(IConfigurationStore store)
-        {
-            if (_background)
-            {
-                Container.Register(Component.For<HandlerLoader>());
-                _loader = Container.Resolve<HandlerLoader>();
-            }
         }
 
         public HandlerInstaller ConfigureHandlers(Action<ComponentRegistration> configure)
@@ -49,16 +31,9 @@
             var basedOn  = selector(handlers);
             if (_configure != null)
                 basedOn.Configure(_configure);
-            basedOn.Configure(handler =>
-            {
-                var type = handler.Implementation;
-                if (_loader != null)
-                    _loader.LoadHandler(type);
-                else
-                    HandlerDescriptor.GetDescriptor(type);
-
-            });
-            Container.Register(handlers);
+            basedOn.Configure(handler => HandlerDescriptor
+                .GetDescriptor(handler.Implementation));
+            Container.Register(basedOn);
         }
 
         private static BasedOnDescriptor DefaultSelection(FromAssemblyDescriptor descriptor)

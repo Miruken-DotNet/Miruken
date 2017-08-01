@@ -126,9 +126,9 @@ namespace Miruken.Callback
             var dispatch = callback as IDispatchCallback;
             var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
             var handlers = policy.GetHandlers(callback);
-            var bundle   = new Bundle(greedy);
+            var bundle   = new Bundle(false);
             foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolve(handler, greedy, callback)));
+                bundle.Add(h => h.Handle(new Resolve(handler, true, callback)));
             return bundle;
         }
     }

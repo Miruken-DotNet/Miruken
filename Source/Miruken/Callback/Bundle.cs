@@ -120,7 +120,7 @@
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            if (_operations == null) return true;
+            if (_operations == null) return false;
             var isGreedy = greedy;
             var proxy    = new ProxyHandler(handler, composer);
             return _all ? _operations.Aggregate(true, (result, op) =>

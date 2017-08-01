@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
     using Concurrency;
+    using Infrastructure;
 
     public static class HandlerCommandExtensions
     {
@@ -35,7 +36,9 @@
             var result = command.Result;
             return command.IsAsync 
                  ? (Result)((Promise)result).Wait()
-                 : (Result)result;
+                 : (result == null 
+                    ? (Result)RuntimeHelper.GetDefault(typeof(Result)) 
+                    : (Result)result);
         }
 
         public static Promise<Result> CommandAsync<Result>(
