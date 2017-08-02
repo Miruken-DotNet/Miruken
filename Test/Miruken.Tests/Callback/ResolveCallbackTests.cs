@@ -7,7 +7,7 @@
     using static Protocol;
 
     /// <summary>
-    /// Summary description for ResolveMethodTests
+    /// Summary description for ResolveCallbackTests
     /// </summary>
     [TestClass]
     public class ResolveCallbackTests
@@ -15,6 +15,11 @@
         public class SendEmail
         {
             public string Message { get; set; }
+        }
+
+        public class SendEmail<T>
+        {
+            public T Message { get; set; }
         }
 
         private interface IEmailFeature : IResolving
@@ -49,6 +54,12 @@
             public int Send(SendEmail send)
             {
                 return Email(send.Message);
+            }
+
+            [Handles]
+            public int Send<T>(SendEmail<T> send)
+            {
+                return Email(send.Message.ToString());
             }
         }
 
@@ -190,6 +201,26 @@
             var handler = new EmailProvider();
             var id      = handler.Resolve()
                 .Command<int>(new SendEmail {Message = "Hello"});
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Implied_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            var handler = new EmailHandler();
+            var id      = handler.Resolve()
+                .Command<int>(new SendEmail { Message = "Hello" });
+            Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Generic_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            var handler = new EmailProvider();
+            var id      = handler.Resolve()
+                .Command<int>(new SendEmail<int> { Message = 22 });
             Assert.AreEqual(1, id);
         }
 

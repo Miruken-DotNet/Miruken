@@ -4,17 +4,15 @@
     using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Callback;
-    using global::Castle.MicroKernel;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using static Protocol;
-    using IHandler = global::Castle.MicroKernel.IHandler;
 
     /// <summary>
-    /// Summary description for ResolveMethodTests
+    /// Summary description for ResolveCallbackTests
     /// </summary>
     [TestClass]
-    public class ResolveMethodTests
+    public class ResolveCallbackTests
     {
         protected WindsorHandler _handler;
 
