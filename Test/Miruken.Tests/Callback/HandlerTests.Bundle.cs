@@ -177,7 +177,7 @@
             Frame frame  = null;
             var bowler   = new Bowler();
             var complete = _bowling.Any(b => b
-                .Add(async h => frame = await P<IBowling>(h).Bowl(1, bowler)));
+                .Add(async h => frame = await id<IBowling>(h).Bowl(1, bowler)));
             Assert.IsTrue(complete);
             Assert.AreEqual(1, frame.FirstTurn);
             Assert.AreEqual(1, frame.FirstTurn);
@@ -190,7 +190,7 @@
             Frame frame  = null;
             var bowler   = new Bowler();
             var complete = await _bowling.AnyAsync(b => b
-                .Add(async h => frame = await P<IBowling>(h).Bowl(1, bowler)));
+                .Add(async h => frame = await id<IBowling>(h).Bowl(1, bowler)));
             Assert.IsTrue(complete);
             Assert.AreEqual(1, frame.FirstTurn);
             Assert.AreEqual(1, frame.FirstTurn);
@@ -203,7 +203,7 @@
         {
             var bowler = new Bowler();
             _bowling.Any(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(13, bowler)));
         }
 
         [TestMethod,
@@ -212,7 +212,7 @@
         {
             var bowler = new Bowler();
             await _bowling.AnyAsync(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(13, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(13, bowler)));
         }
 
         [TestMethod]
@@ -220,7 +220,7 @@
         {
             var bowler   = new Bowler();
             var complete = new Handler().Any(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(7, bowler)));
             Assert.IsFalse(complete);
         }
 
@@ -229,7 +229,7 @@
         {
             var bowler   = new Bowler();
             var complete = await new Handler().AnyAsync(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(7, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(7, bowler)));
             Assert.IsFalse(complete);
         }
 
@@ -250,7 +250,7 @@
         {
             var bowler   = new Bowler();
             var complete = new Handler().BestEffort().Any(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(8, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(8, bowler)));
             Assert.IsTrue(complete);
         }
 
@@ -259,7 +259,7 @@
         {
             var bowler   = new Bowler();
             var complete = await new Handler().BestEffort().AnyAsync(b => b
-                .Add(async h => await P<IBowling>(h).Bowl(8, bowler)));
+                .Add(async h => await id<IBowling>(h).Bowl(8, bowler)));
             Assert.IsTrue(complete);
         }
 
@@ -268,7 +268,7 @@
         {
             var bowler   = new Bowler();
             var complete = new HandlerAdapter(bowler).Any(b => b
-                .Add(h => { P<IBowling>(h.BestEffort()).Bowl(8, bowler); }));
+                .Add(h => { id<IBowling>(h.BestEffort()).Bowl(8, bowler); }));
             Assert.IsTrue(complete);
         }
 
@@ -416,7 +416,7 @@
                     FirstTurn  = frame,
                     SecondTurn = frame
                 };
-                var scope = P<IBowling>(composer).GetScore(turn.Bowler);
+                var scope = id<IBowling>(composer).GetScore(turn.Bowler);
                 return Promise.Resolved(bowler);
             }
 

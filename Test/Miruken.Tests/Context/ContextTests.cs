@@ -358,7 +358,7 @@
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            P<IObserving>(root.Publish()).Observe();
+            id<IObserving>(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -375,7 +375,7 @@
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            P<IObserving>(root.Publish()).Observe();
+            id<IObserving>(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -387,7 +387,7 @@
             var child2 = root.CreateChild();
             var child3 = root.CreateChild();
             var grandChild = child3.CreateChild();
-            P<IObserving>(root.SelfOrDescendantReverse().BestEffort()).Observe();
+            id<IObserving>(root.SelfOrDescendantReverse().BestEffort()).Observe();
         }
 
         private class Counter

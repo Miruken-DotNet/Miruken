@@ -32,7 +32,7 @@
             public int Email(string message)
             {
                 if (Count > 0 && Count % 2 == 0)
-                    return P<IOffline>(Composer).Email(message);
+                    return id<IOffline>(Composer).Email(message);
                 return ++Count;
             }
 
@@ -41,7 +41,7 @@
                 var composer = id > 4
                              ? Composer.BestEffort()
                              : Composer;
-                P<IBilling>(composer).Bill(4M);
+                id<IBilling>(composer).Bill(4M);
             }
         }
 
@@ -130,34 +130,34 @@
         [TestMethod]
         public void Should_Provide_Methods()
         {
-            var id = P<IEmailFeature>(_handler).Email("Hello");
+            var id = id<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = _handler.P<IEmailFeature>().Email("Hello");
+            id = _handler.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
         }
 
         [TestMethod]
         public void Should_Provide_Properties()
         {
-            var count = P<IEmailFeature>(_handler).Count;
+            var count = id<IEmailFeature>(_handler).Count;
             Assert.AreEqual(0, count);
         }
 
         [TestMethod]
         public void Should_Provide_Methods_Covariantly()
         {
-            var id = P<IEmailFeature>(_handler).Email("Hello");
+            var id = id<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
         [TestMethod]
         public void Should_Provide_Methods_Polymorphically()
         {
-            var id = P<IEmailFeature>(_handler).Email("Hello");
+            var id = id<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = _handler.P<IEmailFeature>().Email("Hello");
+            id = _handler.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
-            id = _handler.P<IEmailFeature>().Email("Hello");
+            id = _handler.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -170,21 +170,21 @@
                     .ImplementedBy<OfflineHandler>());
             }))
             {
-                P<IEmailFeature>(handler.Strict()).Email("22");
+                id<IEmailFeature>(handler.Strict()).Email("22");
             }
         }
 
         [TestMethod]
         public void Should_Chain_Provide_Methods_Strictly()
         {
-            var id = P<IEmailFeature>(_handler.Strict()).Email("22");
+            var id = id<IEmailFeature>(_handler.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
 
         [TestMethod]
         public void Should_Provide_Void_Methods()
         {
-            P<IEmailFeature>(_handler).CancelEmail(1);
+            id<IEmailFeature>(_handler).CancelEmail(1);
         }
 
         [TestMethod]
@@ -199,7 +199,7 @@
                         .ImplementedBy<EmailHandler>());
             }))
             {
-                P<IEmailFeature>(handler).CancelEmail(13);
+                id<IEmailFeature>(handler).CancelEmail(13);
             }
         }
 
@@ -212,7 +212,7 @@
                     .ImplementedBy<OfflineHandler>());
             }))
             {
-                P<IEmailFeature>(handler).CancelEmail(13);
+                id<IEmailFeature>(handler).CancelEmail(13);
             }
         }
     }

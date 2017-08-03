@@ -38,7 +38,7 @@
             public int Email(string message)
             {
                 if (Count > 0 && Count % 2 == 0)
-                    return P<IOffline>(Composer).Email(message);
+                    return id<IOffline>(Composer).Email(message);
                 return ++Count;
             }
 
@@ -47,7 +47,7 @@
                 var composer = id > 4
                              ? Composer.BestEffort()
                              : Composer;
-                P<IBilling>(composer).Bill(4M);
+                id<IBilling>(composer).Bill(4M);
             }
 
             [Handles]
@@ -248,9 +248,9 @@
         public void Should_Provide_Methods()
         {
             var provider = new EmailProvider();
-            var id       = P<IEmailFeature>(provider).Email("Hello");
+            var id       = id<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
-            id = provider.P<IEmailFeature>().Email("Hello");
+            id = provider.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
         }
 
@@ -258,7 +258,7 @@
         public void Should_Provide_Properties()
         {
             var provider = new EmailProvider();
-            var count    = P<IEmailFeature>(provider).Count;
+            var count    = id<IEmailFeature>(provider).Count;
             Assert.AreEqual(0, count);
         }
 
@@ -266,7 +266,7 @@
         public void Should_Provide_Methods_Covariantly()
         {
             var provider = new OfflineProvider();
-            var id       = P<IEmailFeature>(provider).Email("Hello");
+            var id       = id<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -274,11 +274,11 @@
         public void Should_Provide_Methods_Polymorphically()
         {
             var provider = new EmailProvider() + new OfflineProvider();
-            var id = P<IEmailFeature>(provider).Email("Hello");
+            var id = id<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
-            id = provider.P<IEmailFeature>().Email("Hello");
+            id = provider.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
-            id = provider.P<IEmailFeature>().Email("Hello");
+            id = provider.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -286,14 +286,14 @@
         public void Should_Provide_Methods_Strictly()
         {
             var provider = new OfflineProvider();
-            P<IEmailFeature>(provider.Strict()).Email("22");
+            id<IEmailFeature>(provider.Strict()).Email("22");
         }
 
         [TestMethod]
         public void Should_Chain_Provide_Methods_Strictly()
         {
             var provider = new OfflineProvider() + new EmailProvider();
-            var id = P<IEmailFeature>(provider.Strict()).Email("22");
+            var id = id<IEmailFeature>(provider.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
 
@@ -301,49 +301,49 @@
         public void Should_Require_Protocol_Conformance()
         {
             var provider = new DemoProvider();
-            P<IEmailFeature>(provider.Duck()).Email("22");
+            id<IEmailFeature>(provider.Duck()).Email("22");
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Require_Protocol_Invariance()
         {
             var provider = new DemoProvider();
-            P<IOffline>(provider).Email("22");
+            id<IOffline>(provider).Email("22");
         }
 
         [TestMethod]
         public void Should_Provide_Void_Methods()
         {
             var provider = new EmailProvider() + new BillingProvider(new Billing());
-            P<IEmailFeature>(provider).CancelEmail(1);
+            id<IEmailFeature>(provider).CancelEmail(1);
         }
 
         [TestMethod]
         public void Should_Visit_All_Providers()
         {
             var provider = new ManyProvider();
-            P<IEmailFeature>(provider).CancelEmail(13);
+            id<IEmailFeature>(provider).CancelEmail(13);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Ignore_Unhandled_Methods()
         {
             var provider = new OfflineHandler();
-            P<IEmailFeature>(provider).CancelEmail(13);
+            id<IEmailFeature>(provider).CancelEmail(13);
         }
 
         [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Find_Matching_Method()
         {
             var provider = new OfflineHandler() + new EmailProvider();
-            P<IEmailFeature>(provider).CancelEmail(13);
+            id<IEmailFeature>(provider).CancelEmail(13);
         }
 
         [TestMethod]
         public void Should_Provide_Methods_Best_Effort()
         {
             var provider = new EmailProvider();
-            var id       = P<IEmailFeature>(provider.BestEffort()).Email("Hello");
+            var id       = id<IEmailFeature>(provider.BestEffort()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -351,14 +351,14 @@
         public void Should_Not_Propogate_Best_Effort()
         {
             var provider = new EmailProvider();
-            P<IEmailFeature>(provider.BestEffort()).CancelEmail(1);
+            id<IEmailFeature>(provider.BestEffort()).CancelEmail(1);
         }
 
         [TestMethod]
         public void Should_Apply_Nested_Best_Effort()
         {
             var provider = new EmailProvider();
-            P<IEmailFeature>(provider.BestEffort()).CancelEmail(6);
+            id<IEmailFeature>(provider.BestEffort()).CancelEmail(6);
         }
 
         [TestMethod]
@@ -368,7 +368,7 @@
             var mirror = new EmailProvider();
             var backup = new EmailProvider();
             var email  = master + mirror + backup;
-            var id     = P<IEmailFeature>(email.Broadcast()).Email("Hello");
+            var id     = id<IEmailFeature>(email.Broadcast()).Email("Hello");
             Assert.AreEqual(1, id);
             Assert.AreEqual(1, master.Resolve<EmailHandler>().Count);
             Assert.AreEqual(1, mirror.Resolve<EmailHandler>().Count);
@@ -379,7 +379,7 @@
         public void Should_Resolve_Methods_Inferred()
         {
             var provider = new EmailProvider();
-            var id       = P<IEmailFeature>(provider.Resolve()).Email("Hello");
+            var id       = id<IEmailFeature>(provider.Resolve()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -387,7 +387,7 @@
         public void Should_Resolve_Methods_Explicitly()
         {
             var provider = new EmailProvider();
-            var id       = P<IEmailFeature>(provider.Resolve()).Email("Hello");
+            var id       = id<IEmailFeature>(provider.Resolve()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -395,7 +395,7 @@
         public void Should_Resolve_Methods_Implicitly()
         {
             var provider = new BillingProvider(new Billing());
-            var total    = P<IBilling>(provider).Bill(7.50M);
+            var total    = id<IBilling>(provider).Bill(7.50M);
             Assert.AreEqual(9.50M, total);
         }
 
@@ -403,20 +403,20 @@
         public void Should_Not_Resolve_Methods_Implicitly()
         {
             var provider = new DemoProvider();
-            P<IBilling>(provider).Bill(15M);
+            id<IBilling>(provider).Bill(15M);
         }
 
         [TestMethod]
         public void Should_Handle_Methods_Using_Protocol()
         {
             var billing = new BillingProvider(new Billing(4M));
-            Assert.AreEqual(7M, P<IBilling>(billing).Bill(3M));
+            Assert.AreEqual(7M, id<IBilling>(billing).Bill(3M));
         }
 
         [TestMethod]
         public void Should_Allow_Protocol_Cast()
         {
-            var offline = P<IOffline>(new BillingProvider());
+            var offline = id<IOffline>(new BillingProvider());
             var email   = (IEmailFeature)offline;
             Assert.IsNotNull(email);
             var bill    = (IBilling)offline;
@@ -426,7 +426,7 @@
         [TestMethod, ExpectedException(typeof(InvalidCastException))]
         public void Should_Reject_Invalid_Protocol_Cast()
         {
-            var offline = P<IOffline>(new BillingProvider());
+            var offline = id<IOffline>(new BillingProvider());
             var handler = (IHandler) offline;
         }
     }

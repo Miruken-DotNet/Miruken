@@ -29,7 +29,7 @@
             public int Email(string message)
             {
                 if (Count > 0 && Count % 2 == 0)
-                    return P<IOffline>(Composer).Email(message);
+                    return id<IOffline>(Composer).Email(message);
                 return ++Count;
             }
 
@@ -39,7 +39,7 @@
                 var composer = id > 4
                              ? Composer.BestEffort()
                              : Composer;
-                P<IBilling>(composer).Bill(4M);
+                id<IBilling>(composer).Bill(4M);
             }
 
             [Provides(typeof(IFilter<,>))]
@@ -137,9 +137,9 @@
         public void Should_Handle_Methods()
         {
             var handler = new EmailHandler();
-            var id      = P<IEmailFeature>(handler).Email("Hello");
+            var id      = id<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = handler.P<IEmailFeature>().Email("Hello");
+            id = handler.id<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
         }
 
@@ -147,7 +147,7 @@
         public void Should_Handle_Properties()
         {
             var handler = new EmailHandler();
-            var count   = P<IEmailFeature>(handler).Count;
+            var count   = id<IEmailFeature>(handler).Count;
             Assert.AreEqual(0, count);
         }
 
@@ -155,7 +155,7 @@
         public void Should_Handle_Methods_Covariantly()
         {
             var handler = new OfflineHandler();
-            var id      = P<IEmailFeature>(handler
+            var id      = id<IEmailFeature>(handler
                 .WithFilters(new LogFilter())).Email("Hello");
             Assert.AreEqual(1, id);
         }
@@ -164,11 +164,11 @@
         public void Should_Handle_Methods_Polymorphically()
         {
             var handler = new EmailHandler() + new OfflineHandler();
-            var id = P<IEmailFeature>(handler).Email("Hello");
+            var id = id<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = P<IEmailFeature>(handler).Email("Hello");
+            id = id<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(2, id);
-            id = P<IEmailFeature>(handler).Email("Hello");
+            id = id<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -176,14 +176,14 @@
         public void Should_Handle_Methods_Strictly()
         {
             var handler = new OfflineHandler();
-            P<IEmailFeature>(handler.Strict()).Email("22");
+            id<IEmailFeature>(handler.Strict()).Email("22");
         }
 
         [TestMethod]
         public void Should_Chain_Handle_Methods_Strictly()
         {
             var handler = new OfflineHandler() + new EmailHandler();
-            var id = P<IEmailFeature>(handler.Strict()).Email("22");
+            var id = id<IEmailFeature>(handler.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
 
@@ -191,7 +191,7 @@
         public void Should_Handle_Methods_Loosely()
         {
             var handler = new DemoHandler();
-            var id = P<IEmailFeature>(handler.Duck()).Email("22");
+            var id = id<IEmailFeature>(handler.Duck()).Email("22");
             Assert.AreEqual(22, id);
         }
 
@@ -199,28 +199,28 @@
         public void Should_Require_Protocol_Conformance()
         {
             var handler = new DemoHandler();
-            P<IEmailFeature>(handler).Email("22");
+            id<IEmailFeature>(handler).Email("22");
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Require_Protocol_Invariance()
         {
             var handler = new DemoHandler();
-            P<IOffline>(handler).Email("22");
+            id<IOffline>(handler).Email("22");
         }
 
         [TestMethod]
         public void Should_Handle_Void_Methods()
         {
             var handler = new EmailHandler() + new Billing();
-            P<IEmailFeature>(handler).CancelEmail(1);
+            id<IEmailFeature>(handler).CancelEmail(1);
         }
 
         [TestMethod]
         public void Should_Handle_Methods_Best_Effort()
         {
             var handler = new EmailHandler();
-            var id      = P<IEmailFeature>(handler.BestEffort()).Email("Hello");
+            var id      = id<IEmailFeature>(handler.BestEffort()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -228,14 +228,14 @@
         public void Should_Not_Propogate_Best_Effort()
         {
             var handler = new EmailHandler();
-            P<IEmailFeature>(handler.BestEffort()).CancelEmail(1);
+            id<IEmailFeature>(handler.BestEffort()).CancelEmail(1);
         }
 
         [TestMethod]
         public void Should_Apply_Nested_Best_Effort()
         {
             var handler = new EmailHandler();
-            P<IEmailFeature>(handler.BestEffort()).CancelEmail(6);
+            id<IEmailFeature>(handler.BestEffort()).CancelEmail(6);
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@
             var mirror = new EmailHandler();
             var backup = new EmailHandler();
             var email  = master + mirror + backup;
-            var id     = P<IEmailFeature>(email.Broadcast()).Email("Hello");
+            var id     = id<IEmailFeature>(email.Broadcast()).Email("Hello");
             Assert.AreEqual(1, id);
             Assert.AreEqual(1, master.Count);
             Assert.AreEqual(1, mirror.Count);
@@ -256,28 +256,28 @@
         public void Should_Reject_Unhandled_Methods()
         {
             var handler = new Handler();
-            P<IEmailFeature>(handler).Email("Hello");
+            id<IEmailFeature>(handler).Email("Hello");
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Reject_Unhandled_Method_Broadcast()
         {
             var handler = new Handler() + new Handler();
-            P<IEmailFeature>(handler).Email("Hello");
+            id<IEmailFeature>(handler).Email("Hello");
         }
 
         [TestMethod]
         public void Should_Ignore_Unhandled_Methods_If_Best_Effort()
         {
             var handler = new Handler();
-            P<IEmailFeature>(handler.BestEffort()).Email("Hello");
+            id<IEmailFeature>(handler.BestEffort()).Email("Hello");
         }
 
         [TestMethod]
         public void Should_Resolve_Methods_Inferred()
         {
             var handler = new EmailHandler();
-            var id      = P<IEmailFeature>(handler.Resolve()).Email("Hello");
+            var id      = id<IEmailFeature>(handler.Resolve()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -285,7 +285,7 @@
         public void Should_Resolve_Methods_Explicitly()
         {
             var handler = new EmailHandler();
-            var id      = P<IEmailFeature>(handler.Resolve()).Email("Hello");
+            var id      = id<IEmailFeature>(handler.Resolve()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -293,7 +293,7 @@
         public void Should_Resolve_Methods_Implicitly()
         {
             var handler = new HandlerAdapter(new Billing());
-            var total   = P<IBilling>(handler).Bill(7.50M);
+            var total   = id<IBilling>(handler).Bill(7.50M);
             Assert.AreEqual(9.50M, total);
         }
 
@@ -301,20 +301,20 @@
         public void Should_Not_Resolve_Methods_Implicitly()
         {
             var handler = new DemoHandler();
-            P<IBilling>(handler).Bill(15M);
+            id<IBilling>(handler).Bill(15M);
         }
 
         [TestMethod]
         public void Should_Handle_Methods_Using_Protocol()
         {
             var billing = new HandlerAdapter(new Billing(4M));
-            Assert.AreEqual(7M, P<IBilling>(billing).Bill(3M));
+            Assert.AreEqual(7M, id<IBilling>(billing).Bill(3M));
         }
 
         [TestMethod]
         public void Should_Allow_Protocol_Cast()
         {
-            var offline = P<IOffline>(new Handler());
+            var offline = id<IOffline>(new Handler());
             var email   = (IEmailFeature)offline;
             Assert.IsNotNull(email);
             var bill    = (IBilling)offline;
@@ -324,7 +324,7 @@
         [TestMethod]
         public void Should_Allow_Duck_Typing()
         {
-            var offline = P(new Handler());
+            var offline = id(new Handler());
             var email = (IEmailFeature)offline;
             Assert.IsNotNull(email);
             var bill = (IBilling)offline;
@@ -334,14 +334,14 @@
         [TestMethod, ExpectedException(typeof(InvalidCastException))]
         public void Should_Reject_Invalid_Protocol_Cast()
         {
-            var offline = P<IOffline>(new Handler());
+            var offline = id<IOffline>(new Handler());
             var handler = (IHandler) offline;
         }
 
         [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Reject_Non_Interface_Cast()
         {
-            P<OfflineHandler>(new Handler());
+            id<OfflineHandler>(new Handler());
         }
     }
 }

@@ -21,7 +21,7 @@
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = P<IValidator>(handler).Validate(player);
+            var outcome = id<IValidator>(handler).Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("First name is required", outcome["FirstName"]);
@@ -37,7 +37,7 @@
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = P<IValidator>(handler).Validate(player, null, "Recreational");
+            var outcome = id<IValidator>(handler).Validate(player, null, "Recreational");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("Age must be 10 or younger", outcome["DOB"]);
@@ -49,7 +49,7 @@
             var handler = new ValidationHandler()
                         + new ValidateTeam();
             var team    = new Team();
-            var outcome = await P<IValidator>(handler).ValidateAsync(team);
+            var outcome = await id<IValidator>(handler).ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             Assert.AreEqual("Name is required", outcome["Name"]);
@@ -64,7 +64,7 @@
             {
                 Coach = new Coach()
             };
-            var outcome = await P<IValidator>(handler)
+            var outcome = await id<IValidator>(handler)
                 .ValidateAsync(team, null, "ECNL");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
@@ -86,7 +86,7 @@
                 LastName  = "Rooney",
                 DOB       = new DateTime(1985, 10,24)
             };
-            await handler.Valid(player).P<IManageTeam>().AddPlayer(player, team);
+            await handler.Valid(player).id<IManageTeam>().AddPlayer(player, team);
             CollectionAssert.Contains(team.Players, player);
         }
 
@@ -100,7 +100,7 @@
                         + new ValidatePlayer();
             var team    = new Team();
             var player  = new Player();
-            await handler.Valid(player).P<IManageTeam>().AddPlayer(player, team);
+            await handler.Valid(player).id<IManageTeam>().AddPlayer(player, team);
         }
 
         [TestMethod,
@@ -113,7 +113,7 @@
                         + new ValidateTeam();
             var team    = new Team();
             var player  = new Player();
-            await handler.ValidAsync(team).P<IManageTeam>().AddPlayer(player, team);
+            await handler.ValidAsync(team).id<IManageTeam>().AddPlayer(player, team);
         }
 
         public interface IManageTeam

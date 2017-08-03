@@ -110,7 +110,7 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Resolve_Nothing()
         {
-            var car = P<IContainer>(_handler.BestEffort()).Resolve<ICar>();
+            var car = id<IContainer>(_handler.BestEffort()).Resolve<ICar>();
             Assert.IsNull(car);
         }
 
@@ -125,7 +125,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_Type_Explicity()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var car = P<IContainer>(_handler).Resolve<ICar>();
+            var car = id<IContainer>(_handler).Resolve<ICar>();
             Assert.IsNotNull(car);
         }
 
@@ -133,7 +133,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_All_Types()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var cars = P<IContainer>(_handler).ResolveAll<ICar>();
+            var cars = id<IContainer>(_handler).ResolveAll<ICar>();
             Assert.AreEqual(1, cars.Length);
             Assert.IsInstanceOfType(cars, typeof(ICar[]));
         }
@@ -165,11 +165,11 @@ namespace Miruken.Castle.Tests
                             Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
-            var cars = P<IAuction>(_handler).Cars;
+            var cars = id<IAuction>(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
 
-            Assert.IsTrue(P<IAuction>(_handler).Dispose(cars[0]));
-            cars = P<IAuction>(_handler).Cars;
+            Assert.IsTrue(id<IAuction>(_handler).Dispose(cars[0]));
+            cars = id<IAuction>(_handler).Cars;
             Assert.AreEqual(0, cars.Length);
         }
 
@@ -179,8 +179,8 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new ResolvingInstaller());
-            var auction = P<IContainer>(_handler).Resolve<IAuction>();
-            var closing = P<IContainer>(_handler).Resolve<IClosing>();
+            var auction = id<IContainer>(_handler).Resolve<IAuction>();
+            var closing = id<IContainer>(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
         }
 
@@ -190,7 +190,7 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new ResolvingInstaller());
-            var resolving = P<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
+            var resolving = id<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
 
@@ -205,7 +205,7 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
-            var auction = P<IContainer>(context.Provide(new Junkyard()))
+            var auction = id<IContainer>(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
             Assert.AreSame(context, auction.Context);
             Assert.AreEqual(1, auction.Cars.Length);
@@ -228,9 +228,9 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new ResolvingInstaller());
 
-            P<IAuction>(context.Publish()).Dispose(ferrari);
+            id<IAuction>(context.Publish()).Dispose(ferrari);
 
-            var auction = P<IContainer>(context).Resolve<IAuction>();
+            var auction = id<IContainer>(context).Resolve<IAuction>();
             CollectionAssert.AreEqual(new [] { ferrari }, auction.Junk);
         }
     }
