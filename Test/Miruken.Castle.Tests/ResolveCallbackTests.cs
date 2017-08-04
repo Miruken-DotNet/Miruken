@@ -6,6 +6,7 @@
     using Callback;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
+    using static Protocol;
 
     /// <summary>
     /// Summary description for ResolveCallbackTests
@@ -31,7 +32,7 @@
             public int Email(string message)
             {
                 if (Count > 0 && Count % 2 == 0)
-                    return Protocol<IOffline>.Cast(Composer).Email(message);
+                    return Proxy<IOffline>(Composer).Email(message);
                 return ++Count;
             }
 
@@ -40,7 +41,7 @@
                 var composer = id > 4
                              ? Composer.BestEffort()
                              : Composer;
-                Protocol<IBilling>.Cast(composer).Bill(4M);
+                Proxy<IBilling>(composer).Bill(4M);
             }
         }
 
@@ -129,34 +130,34 @@
         [TestMethod]
         public void Should_Provide_Methods()
         {
-            var id = Protocol<IEmailFeature>.Cast(_handler).Email("Hello");
+            var id = Proxy<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = _handler.Cast<IEmailFeature>().Email("Hello");
+            id = _handler.Proxy<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
         }
 
         [TestMethod]
         public void Should_Provide_Properties()
         {
-            var count = Protocol<IEmailFeature>.Cast(_handler).Count;
+            var count = Proxy<IEmailFeature>(_handler).Count;
             Assert.AreEqual(0, count);
         }
 
         [TestMethod]
         public void Should_Provide_Methods_Covariantly()
         {
-            var id = Protocol<IEmailFeature>.Cast(_handler).Email("Hello");
+            var id = Proxy<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
         [TestMethod]
         public void Should_Provide_Methods_Polymorphically()
         {
-            var id = Protocol<IEmailFeature>.Cast(_handler).Email("Hello");
+            var id = Proxy<IEmailFeature>(_handler).Email("Hello");
             Assert.AreEqual(1, id);
-            id = _handler.Cast<IEmailFeature>().Email("Hello");
+            id = _handler.Proxy<IEmailFeature>().Email("Hello");
             Assert.AreEqual(2, id);
-            id = _handler.Cast<IEmailFeature>().Email("Hello");
+            id = _handler.Proxy<IEmailFeature>().Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -169,21 +170,21 @@
                     .ImplementedBy<OfflineHandler>());
             }))
             {
-                Protocol<IEmailFeature>.Cast(handler.Strict()).Email("22");
+                Proxy<IEmailFeature>(handler.Strict()).Email("22");
             }
         }
 
         [TestMethod]
         public void Should_Chain_Provide_Methods_Strictly()
         {
-            var id = Protocol<IEmailFeature>.Cast(_handler.Strict()).Email("22");
+            var id = Proxy<IEmailFeature>(_handler.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
 
         [TestMethod]
         public void Should_Provide_Void_Methods()
         {
-            Protocol<IEmailFeature>.Cast(_handler).CancelEmail(1);
+            Proxy<IEmailFeature>(_handler).CancelEmail(1);
         }
 
         [TestMethod]
@@ -198,7 +199,7 @@
                         .ImplementedBy<EmailHandler>());
             }))
             {
-                Protocol<IEmailFeature>.Cast(handler).CancelEmail(13);
+                Proxy<IEmailFeature>(handler).CancelEmail(13);
             }
         }
 
@@ -211,7 +212,7 @@
                     .ImplementedBy<OfflineHandler>());
             }))
             {
-                Protocol<IEmailFeature>.Cast(handler).CancelEmail(13);
+                Proxy<IEmailFeature>(handler).CancelEmail(13);
             }
         }
     }

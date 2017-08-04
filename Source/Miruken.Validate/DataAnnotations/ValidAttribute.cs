@@ -61,7 +61,7 @@
             object value, string memberName, IHandler composer, 
             params object[] scopes)
         {
-            var outcome = composer.Cast<IValidator>().Validate(value, scopes);
+            var outcome = composer.Proxy<IValidator>().Validate(value, scopes);
             var validationAware = value as IValidationAware;
             if (validationAware != null)
                 validationAware.ValidationOutcome = outcome;

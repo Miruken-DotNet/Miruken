@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Castle.MicroKernel.Registration;
-using Castle.MicroKernel.Resolvers.SpecializedResolvers;
-using Castle.Windsor;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Callback;
-using Miruken.Container;
-
-namespace Miruken.Castle.Tests
+﻿namespace Miruken.Castle.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
+    using Callback;
+    using Container;
     using Context;
+    using global::Castle.MicroKernel.Registration;
+    using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
+    using global::Castle.Windsor;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using static Protocol;
 
     [TestClass]
     public class WindsorHandlerTests
@@ -109,7 +109,7 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Resolve_Nothing()
         {
-            var car = Protocol<IContainer>.Cast(_handler.BestEffort()).Resolve<ICar>();
+            var car = Proxy<IContainer>(_handler.BestEffort()).Resolve<ICar>();
             Assert.IsNull(car);
         }
 
@@ -124,7 +124,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_Type_Explicity()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var car = Protocol<IContainer>.Cast(_handler).Resolve<ICar>();
+            var car = Proxy<IContainer>(_handler).Resolve<ICar>();
             Assert.IsNotNull(car);
         }
 
@@ -132,7 +132,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_All_Types()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var cars = Protocol<IContainer>.Cast(_handler).ResolveAll<ICar>();
+            var cars = Proxy<IContainer>(_handler).ResolveAll<ICar>();
             Assert.AreEqual(1, cars.Length);
             Assert.IsInstanceOfType(cars, typeof(ICar[]));
         }
@@ -164,11 +164,11 @@ namespace Miruken.Castle.Tests
                             Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            var cars = Protocol<IAuction>.Cast(_handler).Cars;
+            var cars = Proxy<IAuction>(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
 
-            Assert.IsTrue(Protocol<IAuction>.Cast(_handler).Dispose(cars[0]));
-            cars = Protocol<IAuction>.Cast(_handler).Cars;
+            Assert.IsTrue(Proxy<IAuction>(_handler).Dispose(cars[0]));
+            cars = Proxy<IAuction>(_handler).Cars;
             Assert.AreEqual(0, cars.Length);
         }
 
@@ -178,8 +178,8 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new HandlerInstaller());
-            var auction = Protocol<IContainer>.Cast(_handler).Resolve<IAuction>();
-            var closing = Protocol<IContainer>.Cast(_handler).Resolve<IClosing>();
+            var auction = Proxy<IContainer>(_handler).Resolve<IAuction>();
+            var closing = Proxy<IContainer>(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
         }
 
@@ -189,7 +189,7 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new HandlerInstaller());
-            var resolving = Protocol<IContainer>.Cast(_handler.BestEffort()).ResolveAll<IResolving>();
+            var resolving = Proxy<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
 
@@ -204,7 +204,7 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            var auction = Protocol<IContainer>.Cast(context.Provide(new Junkyard()))
+            var auction = Proxy<IContainer>(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
             Assert.AreSame(context, auction.Context);
             Assert.AreEqual(1, auction.Cars.Length);
@@ -227,9 +227,9 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            Protocol<IAuction>.Cast(context.Publish()).Dispose(ferrari);
+            Proxy<IAuction>(context.Publish()).Dispose(ferrari);
 
-            var auction = Protocol<IContainer>.Cast(context).Resolve<IAuction>();
+            var auction = Proxy<IContainer>(context).Resolve<IAuction>();
             CollectionAssert.AreEqual(new [] { ferrari }, auction.Junk);
         }
     }

@@ -9,6 +9,7 @@
     using Miruken.Castle;
     using Validate.Tests;
     using Validate.Tests.Model;
+    using static Protocol;
 
     [TestClass]
     public class ValidationInstallerTests
@@ -49,7 +50,7 @@
                         + new FluentValidationValidator()
                         + _handler;
             var player  = new Player();
-            var outcome = await Protocol<IValidating>.Cast(handler).ValidateAsync(player);
+            var outcome = await Proxy<IValidating>(handler).ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
@@ -84,7 +85,7 @@
                 }
             };
 
-            var outcome = await Protocol<IValidating>.Cast(handler).ValidateAsync(team);
+            var outcome = await Proxy<IValidating>(handler).ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new[] { "Coach", "Players" }, outcome.Culprits);
