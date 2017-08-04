@@ -149,7 +149,7 @@ namespace Miruken.Castle.Tests
                 Component.For<ICar>().ImplementedBy<Car>())
                 .Install(WithFeatures.FromAssembly(
                             Assembly.GetExecutingAssembly()),
-                         new ResolvingInstaller());
+                         new HandlerInstaller().Resolving());
 
             var auctions = context.ResolveAll<IAuction>();
             Assert.AreEqual(2, auctions.Length);
@@ -163,7 +163,7 @@ namespace Miruken.Castle.Tests
                 Component.For<ICar>().ImplementedBy<Car>())
                 .Install(WithFeatures.FromAssembly(
                             Assembly.GetExecutingAssembly()),
-                         new ResolvingInstaller());
+                         new HandlerInstaller().Resolving());
 
             var cars = id<IAuction>(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
@@ -178,7 +178,7 @@ namespace Miruken.Castle.Tests
         {
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
-                               new ResolvingInstaller());
+                               new HandlerInstaller().Resolving());
             var auction = id<IContainer>(_handler).Resolve<IAuction>();
             var closing = id<IContainer>(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
@@ -189,7 +189,7 @@ namespace Miruken.Castle.Tests
         {
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
-                               new ResolvingInstaller());
+                               new HandlerInstaller().Resolving());
             var resolving = id<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
@@ -203,7 +203,7 @@ namespace Miruken.Castle.Tests
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
-                         new ResolvingInstaller());
+                         new HandlerInstaller().Resolving());
 
             var auction = id<IContainer>(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
@@ -226,7 +226,7 @@ namespace Miruken.Castle.Tests
             _container.Register(
                 Component.For<ICar>().Instance(ferrari))
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
-                         new ResolvingInstaller());
+                         new HandlerInstaller().Resolving());
 
             id<IAuction>(context.Publish()).Dispose(ferrari);
 

@@ -11,6 +11,12 @@
         private Func<FromAssemblyDescriptor, BasedOnDescriptor> _selector;
         private Action<ComponentRegistration> _configure;
 
+        public HandlerInstaller Resolving()
+        {
+            SelectHandlers(SelectResolving);
+            return this;
+        }
+
         public HandlerInstaller SelectHandlers(
             Func<FromAssemblyDescriptor, BasedOnDescriptor> selector)
         {
@@ -27,7 +33,7 @@
         protected override void InstallFeature(Assembly assembly)
         {
             var handlers = Classes.FromAssembly(assembly);
-            var selector = _selector ?? DefaultSelection;
+            var selector = _selector ?? SelectDefault;
             var basedOn  = selector(handlers);
             if (_configure != null)
                 basedOn.Configure(_configure);
@@ -36,10 +42,17 @@
             Container.Register(basedOn);
         }
 
-        private static BasedOnDescriptor DefaultSelection(FromAssemblyDescriptor descriptor)
+        private static BasedOnDescriptor SelectDefault(FromAssemblyDescriptor descriptor)
         {
             return descriptor.Where(type => 
                 typeof(IHandler).IsAssignableFrom(type) || type.Name.EndsWith("Handler"))
+                .WithServiceSelf();
+        }
+
+        private static BasedOnDescriptor SelectResolving(FromDescriptor descriptor)
+        {
+            return descriptor.BasedOn<IResolving>()
+                .WithServiceFromInterface()
                 .WithServiceSelf();
         }
     }

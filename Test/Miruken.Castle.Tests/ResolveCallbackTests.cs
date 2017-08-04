@@ -117,7 +117,7 @@
                 container.Kernel.Resolver.AddSubResolver(new ArrayResolver(container.Kernel));
                 container.Install(WithFeatures.FromAssembly(
                     Assembly.GetExecutingAssembly()),
-                    new ResolvingInstaller());
+                    new HandlerInstaller().Resolving());
             });
         }
 

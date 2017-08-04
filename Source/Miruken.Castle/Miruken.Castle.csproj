@@ -67,7 +67,6 @@
     <Compile Include="HandlerInstaller.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResolvingInstaller.cs" />
     <Compile Include="WindsorHandler.cs" />
   </ItemGroup>
   <ItemGroup>
