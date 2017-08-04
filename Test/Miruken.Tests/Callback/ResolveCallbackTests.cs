@@ -194,6 +194,48 @@
             }
         }
 
+        private interface IEntity
+        {
+            int Id { get; set; }
+        }
+
+        public class Message : IEntity
+        {
+            public int    Id      { get; set; }
+            public string Content { get; set; }
+        }
+
+        private class Create<T> where T : IEntity
+        {
+            public Create(T entity)
+            {
+                Entity = entity;
+            }
+            public T Entity { get; }    
+        }
+
+        private class Repository<T> : Handler
+            where T : IEntity
+        {
+            private int _nextId = 1;
+
+            [Handles]
+            public void Create(Create<T> create)
+            {
+                create.Entity.Id = _nextId++;
+            }
+        }
+
+        private class RepositoryProvider : Handler
+        {
+            [Provides]
+            public Repository<T> CreateRepository<T>()
+                where T : IEntity
+            {
+                return new Repository<T>();
+            }
+        }
+
         [TestMethod]
         public void Should_Resolve_Handlers()
         {
@@ -234,6 +276,28 @@
             var id      = handler.ResolveAll()
                 .Command<int>(new SendEmail { Message = "Hello" });
             Assert.AreEqual(1, id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Implied_Open_Generic_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor(typeof(Repository<>));
+            var handler = new Repository<Message>();
+            var message = new Message();
+            var handled = handler.Resolve().Handle(new Create<Message>(message));
+            Assert.IsTrue(handled);
+            Assert.AreEqual(1, message.Id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Open_Generic_Handlers()
+        {
+            HandlerDescriptor.GetDescriptor(typeof(Repository<>));
+            var handler = new RepositoryProvider();
+            var message = new Message();
+            var handled = handler.Resolve().Handle(new Create<Message>(message));
+            Assert.IsTrue(handled);
+            Assert.AreEqual(1, message.Id);
         }
 
         [TestMethod,

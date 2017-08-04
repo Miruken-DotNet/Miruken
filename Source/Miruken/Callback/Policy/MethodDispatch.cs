@@ -13,8 +13,10 @@
     {
         private Delegate _delegate;
         private DispatchType _dispatchType;
-        private Tuple<int, int>[] _mapping;
+        private GenericMapping _mapping;
         private ConcurrentDictionary<MethodInfo, MethodDispatch> _closed;
+
+        #region DispatchType
 
         [Flags]
         private enum DispatchType
@@ -34,15 +36,14 @@
                            | FastFourArgs | FastFiveArgs
         }
 
-        private const int UseReturn   = -1;
-        private const int UseArgument = -2;
+        #endregion
 
         public MethodDispatch(MethodInfo method, Attribute[] attributes = null)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
             Arguments  = method.GetParameters().Select(p => new Argument(p)).ToArray();
-            ConfigureMethod(method, Arguments);
+            ConfigureMethod(method);
             Method     = method;
             Attributes = attributes;
         }
@@ -146,28 +147,11 @@
 
         private MethodInfo ClosedMethod(object[] args, Type returnType)
         {
-            var argTypes = _mapping.Select(mapping =>
-            {
-                if (mapping.Item1 == UseReturn)
-                {
-                    if (returnType == null)
-                        throw new ArgumentException(
-                            "Return type is unknown and cannot infer types");
-                    return returnType.GetGenericArguments()[mapping.Item2];
-                }
-                if (mapping.Item2 == UseArgument)
-                {
-                    return args[mapping.Item1].GetType();
-                }
-                var arg = args?[mapping.Item1];
-                if (arg == null)
-                    throw new ArgumentException($"Argument {mapping.Item1} is null and cannot infer types");
-                return arg.GetType().GetGenericArguments()[mapping.Item2];
-            }).ToArray();
-           return Method.MakeGenericMethod(argTypes);
+            var argTypes = _mapping.MapArgs(args, returnType);
+            return Method.MakeGenericMethod(argTypes);
         }
 
-        private void ConfigureMethod(MethodInfo method, Argument[] arguments)
+        private void ConfigureMethod(MethodInfo method)
         {
             var returnType = method.ReturnType;
             var isVoid     = returnType == typeof(void);
@@ -196,7 +180,8 @@
             else
                 LogicalReturnType = returnType;
 
-            if (!method.IsGenericMethodDefinition)
+            var arguments = Arguments;
+            if (!method.ContainsGenericParameters)
             {
                 switch (arguments.Length)
                 {
@@ -244,43 +229,15 @@
                 }
             }
 
-            var argSources = arguments
-                .Select(arg => arg.Parameter)
-                .Where(p => p.ParameterType.ContainsGenericParameters)
-                .Select(p => Tuple.Create(p.Position, p.ParameterType))
-                .ToList();
-            if (returnType.ContainsGenericParameters)
-            {
-                if (IsAsync)
-                    returnType = returnType.GenericTypeArguments[0];
-                argSources.Add(Tuple.Create(UseReturn, returnType));
-            }
-            var methodArgs  = method.GetGenericArguments();
-            var typeMapping = new Tuple<int, int>[methodArgs.Length];
-            foreach (var source in argSources)
-            {
-                var sourceArg = source.Item2;
-                if (sourceArg.IsGenericParameter)
-                {
-                    if (methodArgs.Length == 1 && methodArgs[0] == sourceArg)
-                        typeMapping[0] = Tuple.Create(source.Item1, UseArgument);
-                    continue;
-                }
-                var sourceGenericArgs = sourceArg.GetGenericArguments();
-                for (var i = 0; i < methodArgs.Length; ++i)
-                {
-                    if (typeMapping[i] != null) continue;
-                    var index = Array.IndexOf(sourceGenericArgs, methodArgs[i]);
-                    if (index >= 0)
-                        typeMapping[i] = Tuple.Create(source.Item1, index);
-                }
-                if (!typeMapping.Contains(null)) break;
-            }
-            if (typeMapping.Contains(null))
+            var methodArgs = method.GetGenericArguments();
+            if (returnType.ContainsGenericParameters && IsAsync)
+                returnType = returnType.GenericTypeArguments[0];
+
+            _mapping = new GenericMapping(methodArgs, arguments, returnType);
+            if (!_mapping.Complete)
                 throw new InvalidOperationException(
                     $"Type mapping for {method.GetDescription()} could not be inferred");
 
-            _mapping = typeMapping;
             _dispatchType |= DispatchType.LateBound;
             _closed  = new ConcurrentDictionary<MethodInfo, MethodDispatch>();
         }

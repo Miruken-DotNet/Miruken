@@ -10,11 +10,9 @@ namespace Miruken.Callback.Policy
     public class HandlerDescriptor
     {
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
+        private readonly ConcurrentDictionary<object, Type> _closed;
 
-        private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
-
-         public HandlerDescriptor(Type handlerType)
+        public HandlerDescriptor(Type handlerType)
         {
             HandlerType = handlerType;
             var members = handlerType.FindMembers(Members, Binding, IsDefinition, null);
@@ -49,10 +47,14 @@ namespace Miruken.Callback.Policy
                     descriptor.Add(binding, handlerType);
                 }
             }
+
+            if (handlerType.IsGenericTypeDefinition)
+                _closed = new ConcurrentDictionary<object, Type>();
         }
 
         public Type HandlerType { get; }
 
+        public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 
         internal bool Dispatch(
             CallbackPolicy policy, object target, object callback,
@@ -108,17 +110,32 @@ namespace Miruken.Callback.Policy
             }
         }
 
-        public static IEnumerable<Type> GetPolicyHandlers(CallbackPolicy policy, object key)
+        public static IEnumerable<Type> GetPolicyHandlers(
+            CallbackPolicy policy, object key)
         {
             foreach (var descriptor in _descriptors.Values)
             {
                 var handler = descriptor.Value;
-                CallbackPolicyDescriptor policyDescriptor = null;
-                if (handler._policies?.TryGetValue(policy, out policyDescriptor) == true)
+                CallbackPolicyDescriptor cpd = null;
+                if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {
-                    if (policyDescriptor.GetInvariantMethods(key).Any() ||
-                        policyDescriptor.GetCompatibleMethods(key).Any())
-                        yield return handler.HandlerType;
+                    var binding =
+                        cpd.GetInvariantMethods(key).FirstOrDefault() ??
+                        cpd.GetCompatibleMethods(key).FirstOrDefault();
+                    if (binding != null)
+                    {
+                        if (handler.IsOpenGeneric)
+                        {
+                            bool added;
+                            var handlerType = handler._closed.GetOrAdd(key,
+                                k => binding.CloseHandlerType(handler.HandlerType, k),
+                                out added);
+                            if (added && handlerType != null)
+                                yield return handlerType;
+                        }
+                        else
+                            yield return handler.HandlerType;
+                    }
                 }
             }
         }
@@ -137,6 +154,9 @@ namespace Miruken.Callback.Policy
                 return false; 
             return member.IsDefined(typeof(DefinitionAttribute));
         }
+
+        private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
+            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         private const MemberTypes Members  = MemberTypes.Method 
                                            | MemberTypes.Property;

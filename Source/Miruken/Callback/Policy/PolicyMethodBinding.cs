@@ -60,6 +60,25 @@
                 results, out result);
         }
 
+        public Type CloseHandlerType(Type handlerType, object key)
+        {
+            var type = key as Type;
+            if (type == null || !handlerType.IsGenericTypeDefinition)
+                return handlerType;
+            var index = CallbackIndex;
+            if (!index.HasValue) return null;
+            var callback = Dispatcher.Arguments[index.Value];
+            var mapping  = new GenericMapping(
+                handlerType.GetGenericArguments(),
+                new [] { callback });
+            if (mapping.Complete)
+            {
+                var closed = mapping.MapTypes(new[] { type });
+                return handlerType.MakeGenericType(closed);
+            }
+            return null;
+        }
+
         private bool Invoke(object target, object callback,
             IHandler composer, Type resultType, Func<object, bool> results,
             out object result)
