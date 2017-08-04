@@ -1,5 +1,4 @@
 ﻿using Miruken.Callback;
-using static Miruken.Protocol;
 
 namespace Miruken.Container
 {
@@ -10,14 +9,14 @@ namespace Miruken.Container
         public static ICompositeHandler AddHandler<T>(
             this ICompositeHandler handler)
         {
-            var container = protocol<IContainer>(handler);
+            var container = Protocol<IContainer>.Cast(handler);
             return handler.AddHandlers(container.Resolve<T>());
         }
 
         public static ICompositeHandler AddHandlers<T1, T2>(
             this ICompositeHandler handler)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.AddHandlers(container.Resolve<T1>(),
                                        container.Resolve<T2>());
         }
@@ -25,7 +24,7 @@ namespace Miruken.Container
         public static ICompositeHandler AddHandlers<T1, T2, T3>(
              this ICompositeHandler handler)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.AddHandlers(container.Resolve<T1>(),
                                        container.Resolve<T2>(),
                                        container.Resolve<T3>());
@@ -34,7 +33,7 @@ namespace Miruken.Container
         public static ICompositeHandler AddHandlers<T1, T2, T3, T4>(
                this ICompositeHandler handler)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.AddHandlers(container.Resolve<T1>(),
                                        container.Resolve<T2>(),
                                        container.Resolve<T3>(),
@@ -48,7 +47,7 @@ namespace Miruken.Container
         public static ICompositeHandler InsertHandler<T>(
             this ICompositeHandler handler, int atIndex)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.InsertHandlers(atIndex, container.Resolve<T>());
         }
 
@@ -56,7 +55,7 @@ namespace Miruken.Container
         public static ICompositeHandler InsertHandlers<T1, T2>(
             this ICompositeHandler handler, int atIndex)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),
                                                    container.Resolve<T2>());
         }
@@ -64,7 +63,7 @@ namespace Miruken.Container
         public static ICompositeHandler InsertHandlers<T1, T2, T3>(
              this ICompositeHandler handler, int atIndex)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),
                                                    container.Resolve<T2>(),
                                                    container.Resolve<T3>());
@@ -73,7 +72,7 @@ namespace Miruken.Container
         public static ICompositeHandler InsertHandlers<T1, T2, T3, T4>(
                this ICompositeHandler handler, int atIndex)
         {
-            var container = protocol<IContainer>(handler); ;
+            var container = Protocol<IContainer>.Cast(handler); ;
             return handler.InsertHandlers(atIndex, container.Resolve<T1>(),
                                                    container.Resolve<T2>(),
                                                    container.Resolve<T3>(),

@@ -14,15 +14,17 @@
         object Dispatch(Type protocol, IMethodCallMessage message);
     }
 
-    public static class Protocol
+    public class Protocol
     {
-        public static object protocol(IProtocolAdapter adapter)
+        public static object Cast(IProtocolAdapter adapter)
         {
             return new Interceptor(adapter).GetTransparentProxy();
         }
+    }
 
-        public static TProto protocol<TProto>(IProtocolAdapter adapter)
-            where TProto : class
+    public class Protocol<TProto> where TProto : class
+    {
+        public static TProto Cast(IProtocolAdapter adapter)
         {
             if (!typeof(TProto).IsInterface)
                 throw new NotSupportedException("Only protocol interfaces are supported");
@@ -33,15 +35,15 @@
 
     public static class ProtocolExtensions
     {
-        public static object protocol(this IProtocolAdapter adapter)
+        public static object Cast(this IProtocolAdapter adapter)
         {
-            return Protocol.protocol(adapter);
+            return Protocol.Cast(adapter);
         }
 
-        public static TProto protocol<TProto>(this IProtocolAdapter adapter)
+        public static TProto Cast<TProto>(this IProtocolAdapter adapter)
             where TProto : class
         {
-            return Protocol.protocol<TProto>(adapter);
+            return Protocol<TProto>.Cast(adapter);
         }
     }
 }

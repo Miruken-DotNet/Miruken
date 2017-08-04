@@ -7,7 +7,6 @@ using Castle.Windsor;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Miruken.Callback;
 using Miruken.Container;
-using static Miruken.Protocol;
 
 namespace Miruken.Castle.Tests
 {
@@ -110,7 +109,7 @@ namespace Miruken.Castle.Tests
         [TestMethod]
         public void Should_Resolve_Nothing()
         {
-            var car = protocol<IContainer>(_handler.BestEffort()).Resolve<ICar>();
+            var car = Protocol<IContainer>.Cast(_handler.BestEffort()).Resolve<ICar>();
             Assert.IsNull(car);
         }
 
@@ -125,7 +124,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_Type_Explicity()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var car = protocol<IContainer>(_handler).Resolve<ICar>();
+            var car = Protocol<IContainer>.Cast(_handler).Resolve<ICar>();
             Assert.IsNotNull(car);
         }
 
@@ -133,7 +132,7 @@ namespace Miruken.Castle.Tests
         public void Should_Resolve_All_Types()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var cars = protocol<IContainer>(_handler).ResolveAll<ICar>();
+            var cars = Protocol<IContainer>.Cast(_handler).ResolveAll<ICar>();
             Assert.AreEqual(1, cars.Length);
             Assert.IsInstanceOfType(cars, typeof(ICar[]));
         }
@@ -165,11 +164,11 @@ namespace Miruken.Castle.Tests
                             Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            var cars = protocol<IAuction>(_handler).Cars;
+            var cars = Protocol<IAuction>.Cast(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
 
-            Assert.IsTrue(protocol<IAuction>(_handler).Dispose(cars[0]));
-            cars = protocol<IAuction>(_handler).Cars;
+            Assert.IsTrue(Protocol<IAuction>.Cast(_handler).Dispose(cars[0]));
+            cars = Protocol<IAuction>.Cast(_handler).Cars;
             Assert.AreEqual(0, cars.Length);
         }
 
@@ -179,8 +178,8 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new HandlerInstaller());
-            var auction = protocol<IContainer>(_handler).Resolve<IAuction>();
-            var closing = protocol<IContainer>(_handler).Resolve<IClosing>();
+            var auction = Protocol<IContainer>.Cast(_handler).Resolve<IAuction>();
+            var closing = Protocol<IContainer>.Cast(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
         }
 
@@ -190,7 +189,7 @@ namespace Miruken.Castle.Tests
             _container.Install(WithFeatures.FromAssembly(
                                    Assembly.GetExecutingAssembly()),
                                new HandlerInstaller());
-            var resolving = protocol<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
+            var resolving = Protocol<IContainer>.Cast(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
 
@@ -205,7 +204,7 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            var auction = protocol<IContainer>(context.Provide(new Junkyard()))
+            var auction = Protocol<IContainer>.Cast(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
             Assert.AreSame(context, auction.Context);
             Assert.AreEqual(1, auction.Cars.Length);
@@ -228,9 +227,9 @@ namespace Miruken.Castle.Tests
                 .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
                          new HandlerInstaller());
 
-            protocol<IAuction>(context.Publish()).Dispose(ferrari);
+            Protocol<IAuction>.Cast(context.Publish()).Dispose(ferrari);
 
-            var auction = protocol<IContainer>(context).Resolve<IAuction>();
+            var auction = Protocol<IContainer>.Cast(context).Resolve<IAuction>();
             CollectionAssert.AreEqual(new [] { ferrari }, auction.Junk);
         }
     }

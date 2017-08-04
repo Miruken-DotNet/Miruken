@@ -8,7 +8,6 @@
     using global::FluentValidation;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
-    using static Protocol;
 
     [TestClass]
     public class FluentValidationValidatorTests
@@ -20,7 +19,7 @@
                         + new FluentValidationValidator()
                         + new ValidatorProvider();
             var player  = new Player();
-            var outcome = await protocol<IValidating>(handler).ValidateAsync(player);
+            var outcome = await Protocol<IValidating>.Cast(handler).ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
@@ -55,7 +54,7 @@
                 }
             };
 
-            var outcome = await protocol<IValidating>(handler).ValidateAsync(team);
+            var outcome = await Protocol<IValidating>.Cast(handler).ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new [] { "Coach", "Players"}, outcome.Culprits);
@@ -114,7 +113,7 @@
                 }
             };
 
-            var outcome = await protocol<IValidating>(handler)
+            var outcome = await Protocol<IValidating>.Cast(handler)
                 .ValidateAsync(team, Scopes.Default, "Quickfoot");
             Assert.IsFalse(outcome.IsValid);
             var errors = outcome.GetErrors("Players").Cast<object>().ToArray();

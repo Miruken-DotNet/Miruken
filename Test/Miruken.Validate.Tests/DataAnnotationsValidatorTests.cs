@@ -5,7 +5,6 @@
     using DataAnnotations;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
-    using static Protocol;
 
     [TestClass]
     public class DataAnnotationsValidatorTests
@@ -19,7 +18,7 @@
             {
                 DOB = new DateTime(2007, 6, 14)
             };
-            var outcome = protocol<IValidator>(handler).Validate(player);
+            var outcome = Protocol<IValidator>.Cast(handler).Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);
@@ -46,7 +45,7 @@
                     new Player { FirstName = "Lionel"}
                 }
             };
-            var outcome = protocol<IValidator>(handler).Validate(team);
+            var outcome = Protocol<IValidator>.Cast(handler).Validate(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(
@@ -88,7 +87,7 @@
                         + new RegistrationHandler();
 
             var team = new Team();
-            protocol<IRegistration>(handler.Valid(team)).RegisterTeam(team);
+            Protocol<IRegistration>.Cast(handler.Valid(team)).RegisterTeam(team);
         }
 
         public interface IRegistration

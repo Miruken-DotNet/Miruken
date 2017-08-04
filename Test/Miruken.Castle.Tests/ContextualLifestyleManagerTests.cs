@@ -7,7 +7,6 @@
     using global::Castle.MicroKernel;
     using global::Castle.MicroKernel.Registration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using static Protocol;
 
     [TestClass]
     public class ContextualLifestyleManagerTests
@@ -45,8 +44,8 @@
         [TestMethod]
         public void Should_Resolve_Same_Instance_Per_Context()
         {
-            var controller1 = protocol<IContainer>(_rootContext).Resolve<Controller>();
-            var controller2 = protocol<IContainer>(_rootContext).Resolve<Controller>();
+            var controller1 = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
+            var controller2 = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
             Assert.IsInstanceOfType(controller1, typeof(Controller));
             Assert.AreSame(_rootContext, controller1.Context);
             Assert.AreSame(controller1, controller2);
@@ -55,7 +54,7 @@
         [TestMethod]
         public void Should_Resolve_All_Per_Context()
         {
-            var controllers1 = protocol<IContainer>(_rootContext).ResolveAll<Controller>();
+            var controllers1 = Protocol<IContainer>.Cast(_rootContext).ResolveAll<Controller>();
             var controllers2 = _rootContext.ResolveAll<Controller>();
             Assert.AreEqual(1, controllers1.Length);
             CollectionAssert.AreEqual(controllers1, controllers2);
@@ -66,8 +65,8 @@
         {
             using (var child = _rootContext.CreateChild())
             {
-                var controller1 = protocol<IContainer>(_rootContext).Resolve<Controller>();
-                var controller2 = protocol<IContainer>(child).Resolve<Controller>();
+                var controller1 = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
+                var controller2 = Protocol<IContainer>.Cast(child).Resolve<Controller>();
                 Assert.IsInstanceOfType(controller1, typeof(Controller));
                 Assert.IsInstanceOfType(controller2, typeof(Controller));
                 Assert.AreSame(_rootContext, controller1.Context);
@@ -91,7 +90,7 @@
         [TestMethod]
         public void Should_Ignore_Releasing_Components()
         {
-            var container  = protocol<IContainer>(_rootContext);
+            var container  = Protocol<IContainer>.Cast(_rootContext);
             var controller = container.Resolve<Controller>();
             container.Release(controller);
             Assert.IsFalse(controller.Disposed);
@@ -101,7 +100,7 @@
         public void Should_Release_Components_When_Context_Ends()
         {
             var child      = _rootContext.CreateChild();
-            var controller = protocol<IContainer>(child).Resolve<Controller>();
+            var controller = Protocol<IContainer>.Cast(child).Resolve<Controller>();
             Assert.AreSame(child, controller.Context);
             Assert.IsFalse(controller.Disposed);
             child.End();
@@ -113,7 +112,7 @@
         public void Should_Release_Component_When_Context_Cleared()
         {
             var child      = _rootContext.CreateChild();
-            var controller = protocol<IContainer>(child).Resolve<Controller>();
+            var controller = Protocol<IContainer>.Cast(child).Resolve<Controller>();
             Assert.AreSame(child, controller.Context);
             Assert.IsFalse(controller.Disposed);
             controller.Context = null;
@@ -124,9 +123,9 @@
         [TestMethod]
         public void Should_Resolve_Different_Instance_Same_Context_When_Cleared()
         {
-            var controller1 = protocol<IContainer>(_rootContext).Resolve<Controller>();
+            var controller1 = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
             controller1.Context = null;
-            var controller2 = protocol<IContainer>(_rootContext).Resolve<Controller>();
+            var controller2 = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
             Assert.IsInstanceOfType(controller1, typeof(Controller));
             Assert.AreSame(_rootContext, controller2.Context);
             Assert.AreNotSame(controller1, controller2);
@@ -142,7 +141,7 @@
             "Container managed instances cannot change context")]
         public void Should_Reject_Changing_Context()
         {
-            var controller = protocol<IContainer>(_rootContext).Resolve<Controller>();
+            var controller = Protocol<IContainer>.Cast(_rootContext).Resolve<Controller>();
             controller.Context = _rootContext.CreateChild();
         }
     }

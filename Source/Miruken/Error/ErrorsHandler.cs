@@ -1,7 +1,6 @@
 ﻿using System;
 using Miruken.Callback;
 using Miruken.Concurrency;
-using static Miruken.Protocol;
 
 namespace Miruken.Error
 {
@@ -39,7 +38,7 @@ namespace Miruken.Error
                             {
                                 if (ex is CancelledException)
                                     return Promise.Rejected(ex);
-                                return  protocol<IErrors>(composer).HandleException(ex, context)
+                                return  Protocol<IErrors>.Cast(composer).HandleException(ex, context)
                                      ? Promise.Rejected(new RejectedException(cb))
                                      : Promise.Rejected(ex);
                             }).Coerce(cb.ResultType);
@@ -50,7 +49,7 @@ namespace Miruken.Error
                 catch (Exception exception)
                 {
                     if (exception is CancelledException) return true;
-                    var handled = protocol<IErrors>(composer).HandleException(exception, context);
+                    var handled = Protocol<IErrors>.Cast(composer).HandleException(exception, context);
                     if (!handled) throw;
                     return true;
                 }

@@ -5,7 +5,6 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Context;
-    using static Protocol;
 
     /// <summary>
     /// Summary description for ContextTests
@@ -358,7 +357,7 @@
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            protocol<IObserving>(root.Publish()).Observe();
+            Protocol<IObserving>.Cast(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -375,7 +374,7 @@
             child1.AddHandlers(new Observer(count), new Observer(count));
             child2.AddHandlers(new Observer(count));
             child3.AddHandlers(new Observer(count), new Observer(count));
-            protocol<IObserving>(root.Publish()).Observe();
+            Protocol<IObserving>.Cast(root.Publish()).Observe();
             Assert.AreEqual(6, count.Count);
         }
 
@@ -387,7 +386,7 @@
             var child2 = root.CreateChild();
             var child3 = root.CreateChild();
             var grandChild = child3.CreateChild();
-            protocol<IObserving>(root.SelfOrDescendantReverse().BestEffort()).Observe();
+            Protocol<IObserving>.Cast(root.SelfOrDescendantReverse().BestEffort()).Observe();
         }
 
         private class Counter

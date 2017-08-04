@@ -1,10 +1,13 @@
 ﻿namespace Miruken.Castle
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::Castle.Windsor;
+
+    public delegate IEnumerable<BasedOnDescriptor> FeatureFilter(FromDescriptor from);
 
     public abstract class FeatureInstaller : IWindsorInstaller
     {

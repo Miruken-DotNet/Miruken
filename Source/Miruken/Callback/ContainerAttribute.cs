@@ -7,22 +7,22 @@
     {
         protected override object Resolve(object key, IHandler handler)
         {
-            return handler.protocol<IContainer>().Resolve(key);
+            return handler.Cast<IContainer>().Resolve(key);
         }
 
         protected override Promise ResolveAsync(object key, IHandler handler)
         {
-            return handler.protocol<IContainer>().ResolveAsync(key);
+            return handler.Cast<IContainer>().ResolveAsync(key);
         }
 
         protected override object[] ResolveAll(object key, IHandler handler)
         {
-            return handler.protocol<IContainer>().ResolveAll(key);
+            return handler.Cast<IContainer>().ResolveAll(key);
         }
 
         protected override Promise<object[]> ResolveAllAsync(object key, IHandler handler)
         {
-            return handler.protocol<IContainer>().ResolveAllAsync(key);
+            return handler.Cast<IContainer>().ResolveAllAsync(key);
         }
     }
 }

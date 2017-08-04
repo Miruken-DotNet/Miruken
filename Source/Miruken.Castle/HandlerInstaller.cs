@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Castle
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
     using Callback;
     using Callback.Policy;
@@ -8,13 +9,12 @@
 
     public class HandlerInstaller : FeatureInstaller
     {
-        private Func<FromAssemblyDescriptor, BasedOnDescriptor> _selector;
+        private FeatureFilter _filter;
         private Action<ComponentRegistration> _configure;
 
-        public HandlerInstaller SelectHandlers(
-            Func<FromAssemblyDescriptor, BasedOnDescriptor> selector)
+        public HandlerInstaller SelectHandlers(FeatureFilter filter)
         {
-            _selector = selector;
+            _filter += filter;
             return this;
         }
 
@@ -26,22 +26,32 @@
 
         protected override void InstallFeature(Assembly assembly)
         {
-            var handlers = Classes.FromAssembly(assembly);
-            var selector = _selector ?? SelectDefault;
-            var basedOn  = selector(handlers);
-            if (_configure != null)
-                basedOn.Configure(_configure);
-            basedOn.Configure(handler => HandlerDescriptor
-                .GetDescriptor(handler.Implementation));
-            Container.Register(basedOn);
+            var selection = _filter ?? SelectDefault;
+            var handlers  = Classes.FromAssembly(assembly);
+
+            foreach (FeatureFilter filter in selection.GetInvocationList())
+            {
+                var selector = filter(handlers);
+                foreach (var basedOn in selector)
+                {
+                    basedOn.Configure(handler =>
+                    {
+                        _configure?.Invoke(handler);
+                        HandlerDescriptor.GetDescriptor(handler.Implementation);
+                    });
+                }
+            }
+
+            Container.Register(handlers);
         }
 
-        private static BasedOnDescriptor SelectDefault(FromAssemblyDescriptor descriptor)
+        private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)
         {
-            return descriptor.Where(type => 
-                typeof(IHandler).IsAssignableFrom(type) 
-                || type.Name.EndsWith("Handler")
-                || typeof(IResolving).IsAssignableFrom(type))
+            yield return descriptor.Where(
+                type => !typeof(IResolving).IsAssignableFrom(type) 
+                     && (typeof(IHandler).IsAssignableFrom(type) 
+                     || type.Name.EndsWith("Handler")));
+            yield return descriptor.BasedOn<IResolving>()
                 .WithServiceFromInterface()
                 .WithServiceSelf();
         }

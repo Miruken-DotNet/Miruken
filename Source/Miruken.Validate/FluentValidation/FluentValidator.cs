@@ -19,7 +19,7 @@
             if (composer == null) return new ValidationResult();
             var target  = context.InstanceToValidate;
             var scope   = context.GetValidation()?.ScopeMatcher;   
-            var outcome = composer.protocol<IValidating>().Validate(target, scope);
+            var outcome = composer.Cast<IValidating>().Validate(target, scope);
             return CreateResult(outcome, context);
         }
 
@@ -30,7 +30,7 @@
             if (composer == null) return new ValidationResult();
             var target  = context.InstanceToValidate;
             var scope   = context.GetValidation()?.ScopeMatcher;
-            var outcome = await composer.protocol<IValidating>().ValidateAsync(target, scope);
+            var outcome = await composer.Cast<IValidating>().ValidateAsync(target, scope);
             return CreateResult(outcome, context);
         }
 
