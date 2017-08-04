@@ -16,12 +16,12 @@
 
     public static class Protocol
     {
-        public static object id(IProtocolAdapter adapter)
+        public static object protocol(IProtocolAdapter adapter)
         {
             return new Interceptor(adapter).GetTransparentProxy();
         }
 
-        public static TProto id<TProto>(IProtocolAdapter adapter)
+        public static TProto protocol<TProto>(IProtocolAdapter adapter)
             where TProto : class
         {
             if (!typeof(TProto).IsInterface)
@@ -33,15 +33,15 @@
 
     public static class ProtocolExtensions
     {
-        public static object id(this IProtocolAdapter adapter)
+        public static object protocol(this IProtocolAdapter adapter)
         {
-            return Protocol.id(adapter);
+            return Protocol.protocol(adapter);
         }
 
-        public static TProto id<TProto>(this IProtocolAdapter adapter)
+        public static TProto protocol<TProto>(this IProtocolAdapter adapter)
             where TProto : class
         {
-            return Protocol.id<TProto>(adapter);
+            return Protocol.protocol<TProto>(adapter);
         }
     }
 }

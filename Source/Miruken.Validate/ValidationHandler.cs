@@ -58,7 +58,7 @@
             this IHandler handler, object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.id<IValidator>().Validate(target, scopes)
+                composer.protocol<IValidator>().Validate(target, scopes)
                         .IsValid);
         }
 
@@ -66,7 +66,7 @@
              this IHandler handler, object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.id<IValidator>().ValidateAsync(target, scopes)
+                composer.protocol<IValidator>().ValidateAsync(target, scopes)
                     .Then((outcome, s) => outcome.IsValid));
         }
     }

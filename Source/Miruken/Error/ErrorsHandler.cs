@@ -39,7 +39,7 @@ namespace Miruken.Error
                             {
                                 if (ex is CancelledException)
                                     return Promise.Rejected(ex);
-                                return  id<IErrors>(composer).HandleException(ex, context)
+                                return  protocol<IErrors>(composer).HandleException(ex, context)
                                      ? Promise.Rejected(new RejectedException(cb))
                                      : Promise.Rejected(ex);
                             }).Coerce(cb.ResultType);
@@ -50,7 +50,7 @@ namespace Miruken.Error
                 catch (Exception exception)
                 {
                     if (exception is CancelledException) return true;
-                    var handled = id<IErrors>(composer).HandleException(exception, context);
+                    var handled = protocol<IErrors>(composer).HandleException(exception, context);
                     if (!handled) throw;
                     return true;
                 }

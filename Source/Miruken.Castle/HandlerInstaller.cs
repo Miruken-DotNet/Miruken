@@ -11,16 +11,10 @@
         private Func<FromAssemblyDescriptor, BasedOnDescriptor> _selector;
         private Action<ComponentRegistration> _configure;
 
-        public HandlerInstaller Resolving()
-        {
-            SelectHandlers(SelectResolving);
-            return this;
-        }
-
         public HandlerInstaller SelectHandlers(
             Func<FromAssemblyDescriptor, BasedOnDescriptor> selector)
         {
-            _selector += selector;
+            _selector = selector;
             return this;
         }
 
@@ -45,13 +39,9 @@
         private static BasedOnDescriptor SelectDefault(FromAssemblyDescriptor descriptor)
         {
             return descriptor.Where(type => 
-                typeof(IHandler).IsAssignableFrom(type) || type.Name.EndsWith("Handler"))
-                .WithServiceSelf();
-        }
-
-        private static BasedOnDescriptor SelectResolving(FromDescriptor descriptor)
-        {
-            return descriptor.BasedOn<IResolving>()
+                typeof(IHandler).IsAssignableFrom(type) 
+                || type.Name.EndsWith("Handler")
+                || typeof(IResolving).IsAssignableFrom(type))
                 .WithServiceFromInterface()
                 .WithServiceSelf();
         }

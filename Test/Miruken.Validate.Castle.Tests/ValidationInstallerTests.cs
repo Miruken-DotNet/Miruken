@@ -50,7 +50,7 @@
                         + new FluentValidationValidator()
                         + _handler;
             var player  = new Player();
-            var outcome = await id<IValidating>(handler).ValidateAsync(player);
+            var outcome = await protocol<IValidating>(handler).ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
@@ -85,7 +85,7 @@
                 }
             };
 
-            var outcome = await id<IValidating>(handler).ValidateAsync(team);
+            var outcome = await protocol<IValidating>(handler).ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new[] { "Coach", "Players" }, outcome.Culprits);
