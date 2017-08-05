@@ -14,6 +14,9 @@ namespace Miruken.Callback.Policy
 
         public HandlerDescriptor(Type handlerType)
         {
+            if (!handlerType.IsClass || handlerType.IsAbstract)
+                throw new ArgumentException("Only concrete classes can be handlers");
+
             HandlerType = handlerType;
             var members = handlerType.FindMembers(Members, Binding, IsDefinition, null);
             foreach (var member in members)

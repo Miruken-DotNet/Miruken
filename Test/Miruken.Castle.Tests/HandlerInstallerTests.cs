@@ -62,5 +62,13 @@
                 return new B();
             }
         }
+
+        public abstract class MyAbstractHansler : Handler
+        {
+            [Handles]
+            public void HandlesA(A a)
+            {
+            }
+        }
     }
 }
