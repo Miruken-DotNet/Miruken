@@ -8,7 +8,8 @@
     using Concurrency;
     using Policy;
 
-    public class Bundle : IAsyncCallback, IDispatchCallback
+    public class Bundle :
+        IAsyncCallback, IResolveCallback, IDispatchCallback
     {
         private readonly bool _all;
         private List<Operation> _operations;
@@ -115,6 +116,11 @@
                         .Add(task);
                 }
             }, unhandled);
+        }
+
+        object IResolveCallback.GetCallback(bool greedy)
+        {
+            return this;
         }
 
         bool IDispatchCallback.Dispatch(

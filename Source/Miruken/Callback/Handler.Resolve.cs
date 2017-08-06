@@ -13,8 +13,55 @@
         }
     }
 
+    public class ResolveDecorator : Handler, IDecorator
+    {
+        private readonly IHandler _handler;
+
+        public ResolveDecorator(IHandler handler)
+        {
+            _handler = handler;
+        }
+
+        object IDecorator.Decoratee => _handler;
+
+        protected override bool HandleCallback(
+            object callback, ref bool greedy, IHandler composer)
+        {
+            if (!(callback is Composition))
+                callback = GetResolvingCallback(callback, greedy);
+            return _handler.Handle(callback, ref greedy, composer);
+        }
+
+        private static object GetResolvingCallback(object callback, bool greedy)
+        {
+            var resolving = callback as IResolveCallback;
+            if (resolving != null)
+                return resolving.GetCallback(greedy) ?? callback;
+            var dispatch = callback as IDispatchCallback;
+            var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
+            var handlers = policy.GetHandlers(callback);
+            var bundle   = new Bundle(false);
+            foreach (var handler in handlers)
+                bundle.Add(h => h.Handle(new Resolve(handler, true, callback)));
+            return bundle;
+        }
+    }
+
     public static class HandlerResolveExtensions
     {
+        public static IHandler Resolve(this IHandler handler)
+        {
+            return handler == null ? null : new ResolveDecorator(handler);
+        }
+
+        public static IHandler ResolveAll(this IHandler handler)
+        {
+            return handler == null ? null
+                 : new CallbackSemanticsDecorator(
+                       new ResolveDecorator(handler),
+                       CallbackOptions.Broadcast);
+        }
+
         public static object Resolve(this IHandler handler, object key)
         {
             if (handler == null) return null;

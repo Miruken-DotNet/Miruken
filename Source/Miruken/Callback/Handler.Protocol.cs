@@ -26,18 +26,17 @@
                 typeof(IStrict).IsAssignableFrom(protocol))
                 options |= CallbackOptions.Strict;
 
-            if (!semantics.IsSpecified(CallbackOptions.Resolve) &&
-                typeof(IResolving).IsAssignableFrom(protocol))
+            if (typeof(IResolving).IsAssignableFrom(protocol))
             {
-                options |= CallbackOptions.Resolve;
                 if (semantics.IsSpecified(CallbackOptions.Broadcast))
                     options |= CallbackOptions.Broadcast;
+                handler = handler.Resolve();
             }
 
             if (options != CallbackOptions.None)
             {
                 semantics.SetOption(options, true);
-                handler = this.Semantics(options);
+                handler = handler.Semantics(options);
             }
 
             var handleMethod = new HandleMethod(protocol, message, semantics);

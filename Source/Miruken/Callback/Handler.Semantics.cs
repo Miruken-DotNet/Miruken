@@ -8,11 +8,9 @@ namespace Miruken.Callback
         None       = 0,
         Duck       = 1 << 0,
         Strict     = 1 << 1,
-        Resolve    = 1 << 2,
-        Broadcast  = 1 << 3,
-        BestEffort = 1 << 4,
-        Notify     = Broadcast | BestEffort,
-        ResolveAll = Resolve | Broadcast
+        Broadcast  = 1 << 2,
+        BestEffort = 1 << 3,
+        Notify     = Broadcast | BestEffort
     }
 
     public class CallbackSemantics : Composition
@@ -52,7 +50,6 @@ namespace Miruken.Callback
         {
             MergeInto(semantics, CallbackOptions.Duck);
             MergeInto(semantics, CallbackOptions.Strict);
-            MergeInto(semantics, CallbackOptions.Resolve);
             MergeInto(semantics, CallbackOptions.BestEffort);
             MergeInto(semantics, CallbackOptions.Broadcast);
         }
@@ -64,12 +61,12 @@ namespace Miruken.Callback
         }
     }
 
-    public class CallbackSemanticsHandler : Handler, IDecorator
+    public class CallbackSemanticsDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
         private readonly CallbackSemantics _semantics;
 
-        public CallbackSemanticsHandler(
+        public CallbackSemanticsDecorator(
             IHandler handler, CallbackOptions options)
         {
             _handler   = handler;
@@ -112,24 +109,7 @@ namespace Miruken.Callback
                 }
             }
 
-            if (_semantics.HasOption(CallbackOptions.Resolve))
-                callback = GetResolvingCallback(callback, greedy);
-
             return _handler.Handle(callback, ref greedy, composer);
-        }
-
-        private static object GetResolvingCallback(object callback, bool greedy)
-        {
-            var resolving = callback as IResolveCallback;
-            if (resolving != null)
-                return resolving.GetCallback(greedy) ?? callback;
-            var dispatch = callback as IDispatchCallback;
-            var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
-            var handlers = policy.GetHandlers(callback);
-            var bundle   = new Bundle(false);
-            foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolve(handler, true, callback)));
-            return bundle;
         }
     }
 
@@ -145,7 +125,7 @@ namespace Miruken.Callback
             this IHandler handler, CallbackOptions options)
         {
             return handler == null ? null 
-                 : new CallbackSemanticsHandler(handler, options);
+                 : new CallbackSemanticsDecorator(handler, options);
         }
 
         #region Semantics
@@ -158,16 +138,6 @@ namespace Miruken.Callback
         public static IHandler Strict(this IHandler handler)
         {
             return Semantics(handler, CallbackOptions.Strict);
-        }
-
-        public static IHandler Resolve(this IHandler handler)
-        {
-            return Semantics(handler, CallbackOptions.Resolve);
-        }
-
-        public static IHandler ResolveAll(this IHandler handler)
-        {
-            return Semantics(handler, CallbackOptions.ResolveAll);
         }
 
         public static IHandler Broadcast(this IHandler handler)
