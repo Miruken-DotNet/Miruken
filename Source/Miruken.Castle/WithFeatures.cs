@@ -10,21 +10,21 @@
     public static class WithFeatures
     {
         public static FeatureAssembly FromAssembly(
-            Assembly assembly, Action<FeatureAssembly> configrue = null)
+            Assembly assembly, Action<FeatureAssembly> configure = null)
         {
             if (assembly == null)
                 throw new ArgumentNullException(nameof(assembly));
             var feature = new FeatureAssembly(assembly);
-            configrue?.Invoke(feature);
+            configure?.Invoke(feature);
             return feature;
         }
 
         public static FeatureAssembly FromAssemblyNamed(
-            string assemblyName, Action<FeatureAssembly> configrue = null)
+            string assemblyName, Action<FeatureAssembly> configure = null)
         {
             var assembly = ReflectionUtil.GetAssemblyNamed(assemblyName);
             var feature  = new FeatureAssembly(assembly);
-            configrue?.Invoke(feature);
+            configure?.Invoke(feature);
             return feature;
         }
 
