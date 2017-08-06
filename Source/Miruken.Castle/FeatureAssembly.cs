@@ -8,19 +8,26 @@
 
     public class FeatureAssembly : IWindsorInstaller
     {
+        private bool _skipInstallers;
+
         public FeatureAssembly(Assembly assembly)
         {
             Assembly = assembly;
         }
 
-        public Assembly Assembly       { get; }
-        public bool     SkipInstallers { get; set; }
+        public Assembly Assembly { get; }
+
+        public FeatureAssembly SkipInstallers()
+        {
+            _skipInstallers = true;
+            return this;
+        }
 
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
             var name = Assembly.FullName;
             if (container.Kernel.HasComponent(name)) return;
-            if (!SkipInstallers)
+            if (!_skipInstallers)
                 container.Install(FromAssembly.Instance(Assembly));
             container.Register(Component.For<FeatureAssembly>().Instance(this).Named(name));
         }
