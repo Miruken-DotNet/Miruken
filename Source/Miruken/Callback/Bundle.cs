@@ -14,6 +14,7 @@
         private readonly bool _all;
         private List<Operation> _operations;
         private List<Promise> _promises;
+        private Func<IHandler, IHandler> _control;
 
         private class Operation
         {
@@ -120,7 +121,12 @@
 
         object IResolveCallback.GetCallback(bool greedy)
         {
-            return this;
+            return new Bundle(_all)
+            {
+                _operations = _operations == null ? null
+                            : new List<Operation>(_operations),
+                _control    = h => h.Resolve()
+            };
         }
 
         bool IDispatchCallback.Dispatch(
@@ -133,14 +139,29 @@
             {
                 var handled = op.Handled;
                 if (!handled || isGreedy)
-                    handled = op.Handled = proxy.Dispatch(op) || handled;
+                    handled = op.Handled = Dispatch(proxy, op) || handled;
                 return handled && result;
             }) : _operations.Any(op =>
             {
-                var handled = proxy.Dispatch(op);
+                var handled = Dispatch(proxy, op);
                 op.Handled |= handled;
                 return handled;
             });
+        }
+
+        private bool Dispatch(IHandler proxy, Operation operation)
+        {
+            try
+            {
+                if (_control != null)
+                    proxy = _control(proxy) ?? proxy;
+                operation.Action(proxy);
+                return true;
+            }
+            catch (RejectedException)
+            {
+                return false;
+            }
         }
 
         private class ProxyHandler : HandlerAdapter
@@ -151,19 +172,6 @@
                 : base(handler)
             {
                 _composer = composer;
-            }
-
-            public bool Dispatch(Operation operation)
-            {
-                try
-                {
-                    operation.Action(this);
-                    return true;
-                }
-                catch (RejectedException)
-                {
-                    return false;
-                }
             }
 
             protected override bool HandleCallback(
