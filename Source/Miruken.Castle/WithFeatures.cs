@@ -9,17 +9,23 @@
 
     public static class WithFeatures
     {
-        public static FeatureAssembly FromAssembly(Assembly assembly)
+        public static FeatureAssembly FromAssembly(
+            Assembly assembly, Action<FeatureAssembly> configrue = null)
         {
             if (assembly == null)
                 throw new ArgumentNullException(nameof(assembly));
-            return new FeatureAssembly(assembly);
+            var feature = new FeatureAssembly(assembly);
+            configrue?.Invoke(feature);
+            return feature;
         }
 
-        public static FeatureAssembly FromAssemblyNamed(string assemblyName)
+        public static FeatureAssembly FromAssemblyNamed(
+            string assemblyName, Action<FeatureAssembly> configrue = null)
         {
             var assembly = ReflectionUtil.GetAssemblyNamed(assemblyName);
-            return new FeatureAssembly(assembly);
+            var feature  = new FeatureAssembly(assembly);
+            configrue?.Invoke(feature);
+            return feature;
         }
 
         public static IWindsorInstaller FromAssemblies(params Assembly[] assemblies)
