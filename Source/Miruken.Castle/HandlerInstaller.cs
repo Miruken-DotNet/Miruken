@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using Callback;
     using Callback.Policy;
     using global::Castle.MicroKernel.Registration;
@@ -24,10 +23,10 @@
             return this;
         }
 
-        protected override void InstallFeature(Assembly assembly)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
             var selection = _filter ?? SelectDefault;
-            var handlers  = Classes.FromAssembly(assembly);
+            var handlers  = Classes.FromAssembly(feature.Assembly);
 
             foreach (FeatureFilter filter in selection.GetInvocationList())
             {

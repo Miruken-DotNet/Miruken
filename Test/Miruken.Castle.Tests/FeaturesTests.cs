@@ -83,9 +83,9 @@
                 Installed = true;
             }
 
-            protected override void InstallFeature(Assembly assembly)
+            protected override void InstallFeature(FeatureAssembly feature)
             {
-                _features.Add(assembly);
+                _features.Add(feature.Assembly);
             }
         }
     }

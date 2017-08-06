@@ -3,7 +3,6 @@
     using System;
     using System.Configuration;
     using System.Linq;
-    using System.Reflection;
     using global::Castle.Components.DictionaryAdapter;
     using global::Castle.MicroKernel.Registration;
 
@@ -16,11 +15,11 @@
             _configFactory  = new DictionaryAdapterFactory();
         }
 
-        protected override void InstallFeature(Assembly assembly)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
             var appSettings = ConfigurationManager.AppSettings;
 
-            Container.Register(Types.FromAssembly(assembly)
+            Container.Register(Types.FromAssembly(feature.Assembly)
                 .Where(IsConfiguration)
                 .Configure(reg => reg.UsingFactoryMethod(
                     (k,m,c) => _configFactory.GetAdapter(m.Services.First(), appSettings))

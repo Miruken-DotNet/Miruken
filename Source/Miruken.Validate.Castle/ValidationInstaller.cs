@@ -29,9 +29,9 @@
                 .OnlyNewServices());
         }
 
-        protected override void InstallFeature(Assembly assembly)
+        protected override void InstallFeature(FeatureAssembly feature)
         {
-            var validators = Classes.FromAssembly(assembly)
+            var validators = Classes.FromAssembly(feature.Assembly)
                 .BasedOn(typeof(IValidator<>))
                 .WithServiceBase();
             if (_configure != null)
