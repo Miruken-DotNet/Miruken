@@ -7,8 +7,7 @@
     using Concurrency;
     using Policy;
 
-    public class Inquiry : ICallback, 
-        IAsyncCallback, IResolveCallback, IDispatchCallback
+    public class Inquiry : ICallback, IAsyncCallback, IDispatchCallback
     {
         private readonly List<object> _resolutions;
         private object _result;
@@ -74,16 +73,21 @@
 
         public bool Resolve(object resolution, IHandler composer)
         {
+            return Resolve(resolution, false, composer);
+        }
+
+        public bool Resolve(object resolution, bool greedy, IHandler composer)
+        {
             if (resolution == null) return false;
             var array    = resolution as object[];
             var resolved = array?.Aggregate(false, 
-                (s, res) => Include(res, composer) || s) 
-                         ?? Include(resolution, composer);
+                (s, res) => Include(res, greedy, composer) || s) 
+                         ?? Include(resolution, greedy, composer);
             if (resolved) _result = null;
             return resolved;
         }
 
-        private bool Include(object resolution, IHandler composer)
+        private bool Include(object resolution, bool greedy, IHandler composer)
         {
             if (resolution == null || (!Many && _resolutions.Count > 0))
                 return false;
@@ -96,40 +100,37 @@
                 IsAsync = true;
                 if (Many) promise = promise.Catch((ex,s) => (object)null);
                 promise = promise.Then((result, s) => 
-                    result != null && IsSatisfied(result, composer)
+                    result != null && IsSatisfied(result, greedy, composer)
                     ? result : null);
                 resolution = promise;
             }
-            else if (!IsSatisfied(resolution, composer))
+            else if (!IsSatisfied(resolution, greedy, composer))
                 return false;
 
             _resolutions.Add(resolution);
             return true;
         }
 
-        protected virtual bool IsSatisfied(object resolution, IHandler composer)
+        protected virtual bool IsSatisfied(
+            object resolution, bool greedy, IHandler composer)
         {
             return true;
-        }
-
-        object IResolveCallback.GetCallback(bool greedy)
-        {
-            return this;
         }
 
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var handled = Implied(handler, false, composer);
+            var isGreedy = greedy;
+            var handled  = Implied(handler, false, isGreedy, composer);
             if (handled && !greedy) return true;
 
             var count = _resolutions.Count;
             handled = Policy.Dispatch(handler, this, greedy, composer, 
-                r => Resolve(r, composer)) || handled;
+                r => Resolve(r, isGreedy, composer)) || handled;
             return handled || (_resolutions.Count > count);
         }
 
-        private bool Implied(object item, bool invariant, IHandler composer)
+        private bool Implied(object item, bool invariant, bool greedy, IHandler composer)
         {
             var type = Key as Type;
             if (type == null) return false;
@@ -138,7 +139,7 @@
                            ? type == item.GetType()
                            : type.IsInstanceOfType(item);
 
-            return compatible && Resolve(item, composer);
+            return compatible && Resolve(item, greedy, composer);
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)

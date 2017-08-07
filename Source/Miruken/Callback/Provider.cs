@@ -2,7 +2,8 @@
 {
     using System;
 
-    public delegate bool ProvidesDelegate(Inquiry inquiry, IHandler composer);
+    public delegate bool ProvidesDelegate(
+        Inquiry inquiry, bool greedy, IHandler composer);
 
     public class Provider : Handler
     {
@@ -23,7 +24,7 @@
                 callback = compose.Callback;
 
             var inquiry = callback as Inquiry;
-            return inquiry != null && _provider(inquiry, composer);
+            return inquiry != null && _provider(inquiry, greedy, composer);
         }
     }
 }

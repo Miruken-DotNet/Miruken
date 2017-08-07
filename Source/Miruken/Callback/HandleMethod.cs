@@ -41,9 +41,9 @@
 
         public CallbackPolicy Policy => null;
 
-        object IResolveCallback.GetCallback(bool greedy)
+        object IResolveCallback.GetResolveCallback()
         {
-            return new Resolve(Protocol, greedy, this);
+            return new Resolve(Protocol, this);
         }
 
         public bool InvokeOn(object target, IHandler composer)

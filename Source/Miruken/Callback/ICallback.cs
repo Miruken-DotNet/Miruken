@@ -22,7 +22,7 @@ namespace Miruken.Callback
 
     public interface IResolveCallback
     {
-        object GetCallback(bool greedy);
+        object GetResolveCallback();
     }
 
     public interface IInvokeOnlyCallback {}

@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Concurrency;
     using static Protocol;
 
@@ -324,6 +325,37 @@
             Assert.AreEqual(0, pins.Count);
         }
 
+        [TestMethod]
+        public void Should_Support_Resolving_Bundles()
+        {
+            var handled      = false;
+            var pins         = new List<Pin>();
+            BowlingBall ball = null;
+            HandlerDescriptor.GetDescriptor<Bowling>();
+            HandlerDescriptor.GetDescriptor<Lane>();
+            var complete = new BowlingProvider().Resolve().All(b => b
+                .Add(h => handled = h.Handle(new ResetPins()))
+                .Add(h => pins.AddRange(h.ResolveAll<Pin>()))
+                .Add(h => ball = h.Command<BowlingBall>(new FindBowlingBall(10))));
+            Assert.IsTrue(complete);
+            Assert.IsTrue(handled);
+            Assert.AreEqual(10, pins.Count);
+            Assert.AreEqual(10, ball.Weight);
+        }
+
+        private class BowlingProvider : Handler
+        {
+            private readonly Bowling _bowling = new Bowling();
+            private readonly Lane[] _lanes = Enumerable.Range(0, 5)
+                .Select(i => new Lane(true)).ToArray();
+
+            [Provides]
+            public Bowling Bowling => _bowling;
+
+            [Provides]
+            public Lane[] Lanes => _lanes;
+        }
+
         private class Pin
         {
             public Pin(int number)
@@ -336,6 +368,13 @@
 
         private class Lane
         {
+            private readonly bool _resolve;
+
+            public Lane(bool resolve = false)
+            {
+                _resolve = resolve;
+            }
+
             [Provides]
             public Pin[] Pins { get; } =
                  Enumerable.Range(0, 10)
@@ -347,7 +386,8 @@
             {
                 Assert.IsNotNull(composer);
                 foreach (var t in Pins) t.Up = true;
-                composer.Command<BowlingBall>(new FindBowlingBall(5));
+                var h = _resolve ? composer.Resolve() : composer;
+                h.Command<BowlingBall>(new FindBowlingBall(5));
             }
         }
 

@@ -54,12 +54,12 @@
 
         public static IHandler Provide<R>(this IHandler handler, R result)
         {
-            return Provide(handler, (inquiry, composer) =>
+            return Provide(handler, (inquiry, greedy, composer) =>
             {
                 var type = inquiry.Key as Type;
                 if (type?.IsAssignableFrom(typeof(R)) == true)
                 {
-                    inquiry.Resolve(result, composer);
+                    inquiry.Resolve(result, greedy, composer);
                     return true;
                 }
                 return false;
@@ -68,7 +68,7 @@
 
         public static IHandler ProvideMany<R>(this IHandler handler, IEnumerable<R> result)
         {
-            return Provide(handler, (inquiry, composer) =>
+            return Provide(handler, (inquiry, greedy, composer) =>
             {
                 var resolved = false;
                 var type     = inquiry.Key as Type;
@@ -76,7 +76,7 @@
                 {
                     foreach (var r in result)
                     {
-                        resolved = inquiry.Resolve(r, composer) || resolved;
+                        resolved = inquiry.Resolve(r, greedy, composer) || resolved;
                         if (resolved && !inquiry.Many) return true;
                     }
                 }

@@ -28,21 +28,21 @@
             object callback, ref bool greedy, IHandler composer)
         {
             if (!(callback is Composition))
-                callback = GetResolvingCallback(callback, greedy);
+                callback = GetResolvingCallback(callback);
             return _handler.Handle(callback, ref greedy, composer);
         }
 
-        private static object GetResolvingCallback(object callback, bool greedy)
+        private static object GetResolvingCallback(object callback)
         {
             var resolving = callback as IResolveCallback;
             if (resolving != null)
-                return resolving.GetCallback(greedy) ?? callback;
+                return resolving.GetResolveCallback() ?? callback;
             var dispatch = callback as IDispatchCallback;
             var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
             var handlers = policy.GetHandlers(callback);
             var bundle   = new Bundle(false);
             foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolve(handler, true, callback)));
+                bundle.Add(h => h.Handle(new Resolve(handler, callback)));
             return bundle;
         }
     }

@@ -14,7 +14,7 @@
         private readonly bool _all;
         private List<Operation> _operations;
         private List<Promise> _promises;
-        private Func<IHandler, IHandler> _control;
+        private Func<IHandler, IHandler> _controlFlow;
 
         private class Operation
         {
@@ -119,13 +119,13 @@
             }, unhandled);
         }
 
-        object IResolveCallback.GetCallback(bool greedy)
+        object IResolveCallback.GetResolveCallback()
         {
             return new Bundle(_all)
             {
-                _operations = _operations == null ? null
-                            : new List<Operation>(_operations),
-                _control    = h => h.Resolve()
+                _operations  = _operations == null ? null
+                             : new List<Operation>(_operations),
+                _controlFlow = h => h.Resolve()
             };
         }
 
@@ -134,7 +134,11 @@
         {
             if (_operations == null) return false;
             var isGreedy = greedy;
-            var proxy    = new ProxyHandler(handler, composer);
+
+            IHandler proxy = new ProxyHandler(handler, composer);
+            if (_controlFlow != null)
+                proxy = _controlFlow(proxy) ?? proxy;
+
             return _all ? _operations.Aggregate(true, (result, op) =>
             {
                 var handled = op.Handled;
@@ -149,12 +153,10 @@
             });
         }
 
-        private bool Dispatch(IHandler proxy, Operation operation)
+        private static bool Dispatch(IHandler proxy, Operation operation)
         {
             try
             {
-                if (_control != null)
-                    proxy = _control(proxy) ?? proxy;
                 operation.Action(proxy);
                 return true;
             }

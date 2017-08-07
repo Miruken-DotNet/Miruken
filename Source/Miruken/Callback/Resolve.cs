@@ -2,22 +2,31 @@
 {
     using System;
 
-    public class Resolve : Inquiry
+    public class Resolve : Inquiry, IResolveCallback
     {
         private readonly object _callback;
+        private bool _handled;
 
-        public Resolve(object key, bool many, object callback)
-            : base(key, many)
+        public Resolve(object key, object callback)
+            : base(key, true)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
             _callback = callback;
         }
 
-        protected override bool IsSatisfied(object resolution, IHandler composer)
+        protected override bool IsSatisfied(
+            object resolution, bool greedy, IHandler composer)
         {
-            var greedy = Many;
-            return Handler.Dispatch(resolution, _callback, ref greedy, composer);
+            if (_handled && !greedy) return true;
+            return _handled = 
+                Handler.Dispatch(resolution, _callback, ref greedy, composer)
+                || _handled;
+        }
+
+        object IResolveCallback.GetResolveCallback()
+        {
+            return this;
         }
     }
 }
