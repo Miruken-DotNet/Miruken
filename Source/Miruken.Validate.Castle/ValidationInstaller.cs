@@ -30,7 +30,6 @@
                 .WithServiceBase();
             if (_configure != null)
                 validators.Configure(_configure);
-            Container.Register(validators);
         }
     }
 }
