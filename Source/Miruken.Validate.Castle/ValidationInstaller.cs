@@ -31,5 +31,8 @@
             if (_configure != null)
                 validators.Configure(_configure);
         }
+
+        public static FromDescriptor StandardFeatures =>
+            Classes.FromAssemblyContaining<ValidationHandler>();
     }
 }
