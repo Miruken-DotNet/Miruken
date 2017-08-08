@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Castle.Tests
 {
-    using System.Reflection;
     using Callback;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
