@@ -18,15 +18,13 @@
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
 
-            if (!semantics.IsSpecified(CallbackOptions.Duck) &&
-                typeof(IDuck).IsAssignableFrom(protocol))
+            if (!semantics.IsSpecified(CallbackOptions.Duck) && protocol.Is<IDuck>())
                 options |= CallbackOptions.Duck;
 
-            if (!semantics.IsSpecified(CallbackOptions.Strict) &&
-                typeof(IStrict).IsAssignableFrom(protocol))
+            if (!semantics.IsSpecified(CallbackOptions.Strict) && protocol.Is<IStrict>())
                 options |= CallbackOptions.Strict;
 
-            if (typeof(IResolving).IsAssignableFrom(protocol))
+            if (protocol.Is<IResolving>())
             {
                 if (semantics.IsSpecified(CallbackOptions.Broadcast))
                     options |= CallbackOptions.Broadcast;

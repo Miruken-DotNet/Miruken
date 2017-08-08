@@ -43,7 +43,7 @@
 
         object IResolveCallback.GetResolveCallback()
         {
-            return new Resolve(Protocol, this);
+            return new Resolving(Protocol, this);
         }
 
         public bool InvokeOn(object target, IHandler composer)

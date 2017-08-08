@@ -42,7 +42,7 @@
             var handlers = policy.GetHandlers(callback);
             var bundle   = new Bundle(false);
             foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolve(handler, callback)));
+                bundle.Add(h => h.Handle(new Resolving(handler, callback)));
             return bundle;
         }
     }

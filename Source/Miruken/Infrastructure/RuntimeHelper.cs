@@ -39,6 +39,11 @@
                  : null;
         }
 
+        public static bool Is<T>(this Type type)
+        {
+            return type != null && typeof(T).IsAssignableFrom(type);
+        }
+
         public static bool IsSimpleType(this Type type)
         {
             if (type == null) return false;

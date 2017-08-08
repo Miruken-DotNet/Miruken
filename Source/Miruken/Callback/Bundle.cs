@@ -14,7 +14,7 @@
         private readonly bool _all;
         private List<Operation> _operations;
         private List<Promise> _promises;
-        private Func<IHandler, IHandler> _controlFlow;
+        private bool _resolving;
 
         private class Operation
         {
@@ -121,11 +121,11 @@
 
         object IResolveCallback.GetResolveCallback()
         {
-            return new Bundle(_all)
+            return _resolving ? this : new Bundle(_all)
             {
                 _operations  = _operations == null ? null
                              : new List<Operation>(_operations),
-                _controlFlow = h => h.Resolve()
+                _resolving   = true
             };
         }
 
@@ -136,8 +136,7 @@
             var isGreedy = greedy;
 
             IHandler proxy = new ProxyHandler(handler, composer);
-            if (_controlFlow != null)
-                proxy = _controlFlow(proxy) ?? proxy;
+            if (_resolving) proxy = proxy.Resolve();
 
             return _all ? _operations.Aggregate(true, (result, op) =>
             {

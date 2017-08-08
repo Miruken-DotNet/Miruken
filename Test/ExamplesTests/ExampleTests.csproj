@@ -56,8 +56,8 @@
   <ItemGroup>
     <Compile Include="AContextWithHandlerInstancesTests.cs" />
     <Compile Include="CreatingAChildContextTests.cs" />
-    <Compile Include="MirukenCastleExamplesTests\FeaturesInDirectoryTests.cs" />
     <Compile Include="MirukenCastleExamplesTests\FeaturesFromAssembliesNamedTests.cs" />
+    <Compile Include="MirukenCastleExamplesTests\FeaturesInDirectoryTests.cs" />
     <Compile Include="MirukenCastleExamplesTests\FeaturesFromAssembliesTests.cs" />
     <Compile Include="MirukenCastleExamplesTests\BasicWindosorContainerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

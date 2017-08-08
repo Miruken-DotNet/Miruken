@@ -161,7 +161,7 @@
                 _dispatchType |= DispatchType.Void;
                 LogicalReturnType = returnType;
             }
-            else if (typeof(Promise).IsAssignableFrom(returnType))
+            else if (returnType.Is<Promise>())
             {
                 _dispatchType |= DispatchType.Promise;
                 var promise = returnType.GetOpenTypeConformance(typeof(Promise<>));
@@ -169,7 +169,7 @@
                     ? promise.GetGenericArguments()[0]
                     : typeof(object);
             }
-            else if (typeof(Task).IsAssignableFrom(returnType))
+            else if (returnType.Is<Task>())
             {
                 _dispatchType |= DispatchType.Task;
                 var task = returnType.GetOpenTypeConformance(typeof(Task<>));

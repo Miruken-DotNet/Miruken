@@ -3,6 +3,7 @@ namespace Miruken.Callback.Policy
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Infrastructure;
 
     public class ExtractArgument<Cb, Res> : ArgumentRule
     {
@@ -32,7 +33,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (typeof(Res).IsAssignableFrom(paramType))
+            if (paramType.Is<Res>())
             {
                 if (_alias != null)
                     aliases.Add(_alias, paramType);

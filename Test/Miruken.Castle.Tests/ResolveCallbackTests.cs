@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Castle.Tests
 {
     using System;
-    using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Callback;
     using global::Castle.MicroKernel.Registration;
@@ -115,9 +114,8 @@
             _handler = new WindsorHandler(container =>
             {
                 container.Kernel.Resolver.AddSubResolver(new ArrayResolver(container.Kernel));
-                container.Install(WithFeatures.FromAssembly(
-                    Assembly.GetExecutingAssembly()),
-                    new HandlerInstaller());
+                container.Install(new HandlerInstaller(),
+                    WithFeatures.From(Classes.FromThisAssembly()));
             });
         }
 

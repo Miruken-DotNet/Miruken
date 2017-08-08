@@ -1,7 +1,7 @@
 ﻿namespace Miruken.Castle.Tests
 {
     using System.Configuration;
-    using System.Reflection;
+    using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,8 +20,8 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(WithFeatures.FromAssembly(Assembly.GetExecutingAssembly()),
-                         new ConfigurationFactoryInstaller());
+                .Install(new ConfigurationFactoryInstaller(),
+                    WithFeatures.From(Types.FromThisAssembly()));
         }
 
         [TestCleanup]

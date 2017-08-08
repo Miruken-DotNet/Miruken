@@ -3,6 +3,7 @@ namespace Miruken.Callback.Policy
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Infrastructure;
 
     public class TargetArgument<Cb> : ArgumentRule
     {
@@ -32,7 +33,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (typeof(Cb).IsAssignableFrom(paramType))
+            if (paramType.Is<Cb>())
                 return false;
             if (paramType.IsGenericParameter)
             {

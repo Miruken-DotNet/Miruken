@@ -61,7 +61,6 @@
     <Compile Include="ContextualScopeAccessor.cs" />
     <Compile Include="ContravariantFilter.cs" />
     <Compile Include="DependencyResolution.cs" />
-    <Compile Include="FeatureAssembly.cs" />
     <Compile Include="FeatureInstaller.cs" />
     <Compile Include="WithFeatures.cs" />
     <Compile Include="HandlerInstaller.cs" />

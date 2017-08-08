@@ -2,6 +2,7 @@
 {
     using System.Reflection;
     using Callback;
+    using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,9 +26,8 @@
         [TestMethod]
         public void Should_Register_Handlers()
         {
-            var assembly = Assembly.GetExecutingAssembly();
             _container.Install(new HandlerInstaller(),
-                WithFeatures.FromAssembly(assembly));
+                WithFeatures.From(Classes.FromThisAssembly()));
             var handler = _container.Resolve<MyHandler>();
             Assert.IsNotNull(handler);
         }
@@ -37,9 +37,8 @@
         {
             using (var handler = new WindsorHandler(container =>
             {
-                var assembly = Assembly.GetExecutingAssembly();
                 container.Install(new HandlerInstaller(),
-                    WithFeatures.FromAssembly(assembly));
+                    WithFeatures.From(Classes.FromThisAssembly()));
             }))
             {
                 Assert.IsTrue(handler.Resolve().Handle(new A()));

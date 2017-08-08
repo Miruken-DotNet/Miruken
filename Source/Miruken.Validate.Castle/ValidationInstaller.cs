@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Validate.Castle
 {
     using System;
-    using System.Reflection;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::FluentValidation;
@@ -10,11 +9,6 @@
     public class ValidationInstaller : FeatureInstaller
     {
         private Action<ComponentRegistration> _configure;
-
-        public ValidationInstaller()
-            : base(typeof(IValidator<>).Assembly)
-        {           
-        }
 
         public ValidationInstaller ConfigureValidators(Action<ComponentRegistration> configure)
         {
@@ -29,9 +23,9 @@
                 .OnlyNewServices());
         }
 
-        protected override void InstallFeature(FeatureAssembly feature)
+        public override void InstallFeatures(FromDescriptor from)
         {
-            var validators = Classes.FromAssembly(feature.Assembly)
+            var validators = from
                 .BasedOn(typeof(IValidator<>))
                 .WithServiceBase();
             if (_configure != null)

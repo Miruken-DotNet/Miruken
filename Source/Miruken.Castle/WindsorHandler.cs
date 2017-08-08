@@ -109,7 +109,7 @@
             try
             {
                 var args = CreateArgs(composer, dependency);
-                return inquiry.Many || inquiry is Resolve
+                return inquiry.Many || inquiry is Resolving
                      ? Container.ResolveAll(type, args)
                      : Container.Resolve(type, args);
             }

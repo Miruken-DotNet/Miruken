@@ -21,7 +21,7 @@
 
         public ILifetimeScope GetScope(CreationContext creationContext)
         {
-            if (!typeof(IContextual).IsAssignableFrom(creationContext.RequestedType))
+            if (!creationContext.RequestedType.Is<IContextual>())
                 return null;
             var extra = creationContext.AdditionalArguments;
             var composer = extra[WindsorHandler.ComposerKey] as IHandler;

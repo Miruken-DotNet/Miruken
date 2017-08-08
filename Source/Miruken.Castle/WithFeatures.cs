@@ -1,61 +1,36 @@
 ﻿namespace Miruken.Castle
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
-    using global::Castle.Core.Internal;
     using global::Castle.MicroKernel.Registration;
+    using global::Castle.MicroKernel.SubSystems.Configuration;
+    using global::Castle.Windsor;
     using global::Castle.Windsor.Installer;
 
-    public static class WithFeatures
+    public class WithFeatures : IWindsorInstaller
     {
-        public static FeatureAssembly FromAssembly(
-            Assembly assembly, Action<FeatureAssembly> configure = null)
+        private readonly FromDescriptor[] _from;
+
+        public WithFeatures(params FromDescriptor[] from)
         {
-            if (assembly == null)
-                throw new ArgumentNullException(nameof(assembly));
-            var feature = new FeatureAssembly(assembly);
-            configure?.Invoke(feature);
-            return feature;
+            _from = from;
         }
 
-        public static FeatureAssembly FromAssemblyNamed(
-            string assemblyName, Action<FeatureAssembly> configure = null)
+        void IWindsorInstaller.Install(
+            IWindsorContainer container, IConfigurationStore store)
         {
-            var assembly = ReflectionUtil.GetAssemblyNamed(assemblyName);
-            var feature  = new FeatureAssembly(assembly);
-            configure?.Invoke(feature);
-            return feature;
+            var featureInstallers = container.ResolveAll<FeatureInstaller>();
+            if (featureInstallers.Length == 0) return;
+
+            foreach (var from in _from)
+            {
+                foreach (var featureInstaller in featureInstallers)
+                    featureInstaller.InstallFeatures(from);
+                container.Register(from);
+            }
         }
 
-        public static IWindsorInstaller FromAssemblies(params Assembly[] assemblies)
+        public static WithFeatures From(params FromDescriptor[] from)
         {
-            var installer = new CompositeInstaller();
-            foreach (var assembly in assemblies)
-                installer.Add(FromAssembly(assembly));
-            return installer;
-        }
-
-        public static IWindsorInstaller FromAssembliesNamed(params string[] assemblyNames)
-        {
-            var installer = new CompositeInstaller();
-            foreach (var assemblyName in assemblyNames)
-                installer.Add(FromAssemblyNamed(assemblyName));
-            return installer;
-        }
-
-        public static IWindsorInstaller InDirectory(AssemblyFilter filter)
-        {
-            var installer = new CompositeInstaller();
-            var features  = ReflectionUtil.GetAssemblies(filter);
-            foreach (var feature in features.Distinct())
-                installer.Add(FromAssembly(feature));
-            return installer;
-        }
-
-        public static IWindsorInstaller InDirectory(string directory)
-        {
-            return InDirectory(new AssemblyFilter(directory));
+            return new WithFeatures(from);
         }
     }
 }

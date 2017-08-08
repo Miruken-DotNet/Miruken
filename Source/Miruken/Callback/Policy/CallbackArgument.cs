@@ -3,6 +3,7 @@ namespace Miruken.Callback.Policy
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Infrastructure;
 
     public class CallbackArgument : ArgumentRule
     {
@@ -100,7 +101,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            return typeof(Cb).IsAssignableFrom(paramType);
+            return paramType.Is<Cb>();
         }
 
         public override void Configure(ParameterInfo parameter,

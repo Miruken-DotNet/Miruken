@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Infrastructure;
 
     public static class HandlerHelpers
     {
@@ -57,7 +58,7 @@
             return Provide(handler, (inquiry, greedy, composer) =>
             {
                 var type = inquiry.Key as Type;
-                if (type?.IsAssignableFrom(typeof(R)) == true)
+                if (type.Is<R>())
                 {
                     inquiry.Resolve(result, greedy, composer);
                     return true;
@@ -72,7 +73,7 @@
             {
                 var resolved = false;
                 var type     = inquiry.Key as Type;
-                if (type?.IsAssignableFrom(typeof(R)) == true)
+                if (type.Is<R>())
                 {
                     foreach (var r in result)
                     {

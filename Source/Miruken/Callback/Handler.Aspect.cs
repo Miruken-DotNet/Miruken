@@ -2,6 +2,7 @@
 {
     using System;
     using Concurrency;
+    using Infrastructure;
 
     public delegate object BeforeCallback(object callback, IHandler composer);
     public delegate void AfterCallback(object callback, IHandler composer, object state);
@@ -71,7 +72,7 @@
                     if (Equals(state, false))
                     {
                         var resultType = cb?.ResultType;
-                        if (resultType != null && typeof(Promise).IsAssignableFrom(resultType))
+                        if (resultType.Is<Promise>())
                         {
                             cb.Result = Promise.Rejected(new RejectedException(callback))
                                 .Coerce(resultType);

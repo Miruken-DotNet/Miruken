@@ -15,11 +15,11 @@
             _configFactory  = new DictionaryAdapterFactory();
         }
 
-        protected override void InstallFeature(FeatureAssembly feature)
+        public override void InstallFeatures(FromDescriptor from)
         {
             var appSettings = ConfigurationManager.AppSettings;
 
-            Container.Register(Types.FromAssembly(feature.Assembly)
+            Container.Register(from
                 .Where(IsConfiguration)
                 .Configure(reg => reg.UsingFactoryMethod(
                     (k,m,c) => _configFactory.GetAdapter(m.Services.First(), appSettings))

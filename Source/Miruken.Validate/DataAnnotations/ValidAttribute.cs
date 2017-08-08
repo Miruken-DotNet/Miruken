@@ -20,8 +20,7 @@
 
         public ValidAttribute(params Type[] validators)
         {
-            if (validators.Length > 0 && validators.Any(
-                v => !typeof(ValidationAttribute).IsAssignableFrom(v)))
+            if (validators.Length > 0 && validators.Any(v => !v.Is<ValidationAttribute>()))
                 throw new ArgumentException(
                     "All validators must extend ValidationAttribute", nameof(validators));
             _validators = validators;

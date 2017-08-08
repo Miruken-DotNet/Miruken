@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
+    using Infrastructure;
 
     public abstract class MethodBinding
     {
@@ -44,9 +45,9 @@
             }
             if (result == null || !resultType.IsInstanceOfType(result))
             {
-                if (typeof(Task).IsAssignableFrom(resultType))
+                if (resultType.Is<Task>())
                     return Promise.Resolved(result).ToTask().Coerce(resultType);
-                if (typeof(Promise).IsAssignableFrom(resultType))
+                if (resultType.Is<Promise>())
                     return Promise.Resolved(result).Coerce(resultType);
                 var promise = result as Promise;
                 if (promise == null)

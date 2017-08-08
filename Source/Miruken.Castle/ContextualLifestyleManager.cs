@@ -2,10 +2,11 @@
 using Castle.Core;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Lifestyle;
-using Miruken.Context;
-
 namespace Miruken.Castle
 {
+    using Context;
+    using Infrastructure;
+
     public class ContextualLifestyleManager : ScopedLifestyleManager
     {
         public ContextualLifestyleManager()
@@ -17,7 +18,7 @@ namespace Miruken.Castle
             IComponentActivator componentActivator, IKernel kernel, ComponentModel model)
         {
             var implementation = model.Implementation;
-            if (!typeof(IContextual).IsAssignableFrom(implementation))
+            if (!implementation.Is<IContextual>())
             {
                 throw new InvalidOperationException(
                     $"Component {implementation.FullName} must implement IContextual to use this lifestyle");

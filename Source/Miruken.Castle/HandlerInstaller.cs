@@ -5,6 +5,7 @@
     using Callback;
     using Callback.Policy;
     using global::Castle.MicroKernel.Registration;
+    using Infrastructure;
 
     public class HandlerInstaller : FeatureInstaller
     {
@@ -23,14 +24,13 @@
             return this;
         }
 
-        protected override void InstallFeature(FeatureAssembly feature)
+        public override void InstallFeatures(FromDescriptor from)
         {
             var selection = _filter ?? SelectDefault;
-            var handlers  = Classes.FromAssembly(feature.Assembly);
 
             foreach (FeatureFilter filter in selection.GetInvocationList())
             {
-                var selector = filter(handlers);
+                var selector = filter(from);
                 foreach (var basedOn in selector)
                 {
                     basedOn.Configure(handler =>
@@ -40,15 +40,12 @@
                     });
                 }
             }
-
-            Container.Register(handlers);
         }
 
         private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)
         {
             yield return descriptor.Where(
-                type => !typeof(IResolving).IsAssignableFrom(type) 
-                     && (typeof(IHandler).IsAssignableFrom(type) 
+                type => !type.Is<IResolving>() && (type.Is<IHandler>()
                      || type.Name.EndsWith("Handler")));
             yield return descriptor.BasedOn<IResolving>()
                 .WithServiceFromInterface()

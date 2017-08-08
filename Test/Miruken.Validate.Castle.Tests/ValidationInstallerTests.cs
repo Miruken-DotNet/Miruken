@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using FluentValidation;
+    using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
     using global::FluentValidation;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,9 +22,8 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(WithFeatures.FromAssembly(
-                             typeof(FluentValidationValidatorTests).Assembly),
-                         new ValidationInstaller());
+                .Install(new ValidationInstaller(), WithFeatures.From(
+                 Classes.FromAssemblyContaining<FluentValidationValidatorTests>()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
             _handler = new WindsorHandler(_container);
         }

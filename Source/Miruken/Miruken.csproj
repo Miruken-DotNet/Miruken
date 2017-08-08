@@ -106,7 +106,7 @@
     <Compile Include="Callback\Policy\TargetArgument.cs" />
     <Compile Include="Callback\Provider.cs" />
     <Compile Include="Callback\ProvidesAttribute.cs" />
-    <Compile Include="Callback\Resolve.cs" />
+    <Compile Include="Callback\Resolving.cs" />
     <Compile Include="Callback\Handler.Bounds.cs" />
     <Compile Include="Callback\VarianceOptions.cs" />
     <Compile Include="Concurrency\Promise.Task.cs" />

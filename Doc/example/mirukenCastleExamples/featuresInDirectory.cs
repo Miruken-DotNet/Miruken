@@ -17,10 +17,11 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                WithFeatures.InDirectory(new AssemblyFilter("")
-                    .FilterByName(x => x.Name.StartsWith("Example."))),
                 new ConfigurationFactoryInstaller(),
-                new ValidationInstaller()
+                new ValidationInstaller(),
+                WithFeatures.From(
+                    Classes.FromAssemblyInDirectory(new AssemblyFilter("")
+                        .FilterByName(x => x.Name.StartsWith("Example."))))
             );
         }
     }

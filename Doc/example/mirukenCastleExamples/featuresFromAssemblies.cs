@@ -1,5 +1,6 @@
 ﻿namespace Example.MirukenCastleExamples
 {
+    using Castle.MicroKernel.Registration;
     using Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using Castle.Windsor;
     using League;
@@ -18,11 +19,11 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                WithFeatures.FromAssemblies(
-                    typeof(CreateTeam).Assembly,
-                    typeof(CreateStudent).Assembly),
                 new ConfigurationFactoryInstaller(),
-                new ValidationInstaller()
+                new ValidationInstaller(),
+                WithFeatures.From(
+                    Classes.FromAssemblyContaining<CreateTeam>(),
+                    Classes.FromAssemblyContaining<CreateStudent>())
             );
         }
     }
