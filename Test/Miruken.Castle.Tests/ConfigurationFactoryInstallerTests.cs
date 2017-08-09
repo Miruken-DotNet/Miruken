@@ -20,9 +20,8 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(new FeaturesInstaller(
-                    new ConfigurationFactoryInstaller()).Use(
-                        Types.FromThisAssembly()));
+                .Install(new FeaturesInstaller(new ConfigurationFeature())
+                    .Use(Types.FromThisAssembly()));
         }
 
         [TestCleanup]

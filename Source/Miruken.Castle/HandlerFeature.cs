@@ -7,18 +7,18 @@
     using global::Castle.MicroKernel.Registration;
     using Infrastructure;
 
-    public class HandlerInstaller : FeatureInstaller
+    public class HandlerFeature : FeatureInstaller
     {
         private FeatureFilter _filter;
         private Action<ComponentRegistration> _configure;
 
-        public HandlerInstaller SelectHandlers(FeatureFilter filter)
+        public HandlerFeature SelectHandlers(FeatureFilter filter)
         {
             _filter += filter;
             return this;
         }
 
-        public HandlerInstaller ConfigureHandlers(Action<ComponentRegistration> configure)
+        public HandlerFeature ConfigureHandlers(Action<ComponentRegistration> configure)
         {
             _configure += configure;
             return this;

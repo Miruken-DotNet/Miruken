@@ -18,11 +18,9 @@
 
             Container.Install(
                 new FeaturesInstaller(
-                    new ConfigurationFactoryInstaller(),
-                    new ValidationInstaller()).Use(
-                    Classes.FromAssemblyInDirectory(new AssemblyFilter("")
-                        .FilterByName(x => x.Name.StartsWith("Example.")))
-                    )
+                    new ConfigurationFeature(), new ValidationFeature())
+                    .Use(Classes.FromAssemblyInDirectory(new AssemblyFilter("")
+                        .FilterByName(x => x.Name.StartsWith("Example."))))
             );
         }
     }

@@ -18,11 +18,9 @@
 
             Container.Install(
                 new FeaturesInstaller(
-                    new ConfigurationFactoryInstaller(),
-                    new ValidationInstaller()).Use(
-                    Classes.FromAssemblyNamed("Example.League"),
-                    Classes.FromAssemblyNamed("Example.School")
-                    )
+                    new ConfigurationFeature(), new ValidationFeature())
+                        .Use(Classes.FromAssemblyNamed("Example.League"),
+                             Classes.FromAssemblyNamed("Example.School"))
             );
         }
     }

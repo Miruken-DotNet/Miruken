@@ -6,11 +6,11 @@
     using global::Castle.Components.DictionaryAdapter;
     using global::Castle.MicroKernel.Registration;
 
-    public class ConfigurationFactoryInstaller : FeatureInstaller
+    public class ConfigurationFeature : FeatureInstaller
     {
         private readonly DictionaryAdapterFactory _configFactory;
 
-        public ConfigurationFactoryInstaller()
+        public ConfigurationFeature()
         {
             _configFactory  = new DictionaryAdapterFactory();
         }

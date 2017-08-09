@@ -25,14 +25,14 @@
         [TestMethod]
         public void Should_Process_Existing_Features()
         {
-            var myInstaller = new MyInstaller();
+            var myInstaller = new MyFeature();
             _container.Install(new FeaturesInstaller(
                 myInstaller).Use(Classes.FromThisAssembly()));
             Assert.IsTrue(myInstaller.Installed);
             Assert.AreEqual(1, myInstaller.Count);
         }
 
-        public class MyInstaller : FeatureInstaller
+        public class MyFeature : FeatureInstaller
         {
             public bool Installed { get; set; }
             public int  Count { get; set; }

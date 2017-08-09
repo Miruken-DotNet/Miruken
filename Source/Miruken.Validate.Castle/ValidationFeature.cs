@@ -7,11 +7,11 @@
     using global::FluentValidation;
     using Miruken.Castle;
 
-    public class ValidationInstaller : FeatureInstaller
+    public class ValidationFeature : FeatureInstaller
     {
         private Action<ComponentRegistration> _configure;
 
-        public ValidationInstaller ConfigureValidators(Action<ComponentRegistration> configure)
+        public ValidationFeature ConfigureValidators(Action<ComponentRegistration> configure)
         {
             _configure += configure;
             return this;
