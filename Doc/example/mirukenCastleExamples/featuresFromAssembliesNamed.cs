@@ -17,11 +17,12 @@
                 new CollectionResolver(Container.Kernel, true));
 
             Container.Install(
-                new ConfigurationFactoryInstaller(),
-                new ValidationInstaller(),
-                WithFeatures.From(
+                new FeaturesInstaller(
+                    new ConfigurationFactoryInstaller(),
+                    new ValidationInstaller()).Use(
                     Classes.FromAssemblyNamed("Example.League"),
-                    Classes.FromAssemblyNamed("Example.School"))
+                    Classes.FromAssemblyNamed("Example.School")
+                    )
             );
         }
     }

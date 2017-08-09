@@ -145,8 +145,9 @@
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new HandlerInstaller(),
-                    WithFeatures.From(Classes.FromThisAssembly()));
+                .Install(new FeaturesInstaller(
+                        new HandlerInstaller()).Use(
+                            Classes.FromThisAssembly()));
 
             var auctions = context.ResolveAll<IAuction>();
             Assert.AreEqual(2, auctions.Length);
@@ -158,8 +159,9 @@
         {
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new HandlerInstaller(),
-                    WithFeatures.From(Classes.FromThisAssembly()));
+                .Install(new FeaturesInstaller(
+                        new HandlerInstaller()).Use(
+                            Classes.FromThisAssembly()));
 
             var cars = Proxy<IAuction>(_handler).Cars;
             Assert.AreEqual(1, cars.Length);
@@ -172,8 +174,10 @@
         [TestMethod]
         public void Should_Register_All_IResolving_Services()
         {
-            _container.Install(new HandlerInstaller(),
-                WithFeatures.From(Classes.FromThisAssembly()));
+            _container.Install(
+                new FeaturesInstaller(
+                    new HandlerInstaller()).Use(
+                        Classes.FromThisAssembly()));
             var auction = Proxy<IContainer>(_handler).Resolve<IAuction>();
             var closing = Proxy<IContainer>(_handler).Resolve<IClosing>();
             Assert.AreSame(auction, closing);
@@ -182,8 +186,10 @@
         [TestMethod]
         public void Should_Skip_IResolving_Service()
         {
-            _container.Install(new HandlerInstaller(),
-                WithFeatures.From(Classes.FromThisAssembly()));
+            _container.Install(
+                new FeaturesInstaller(
+                    new HandlerInstaller()).Use(
+                        Classes.FromThisAssembly()));
             var resolving = Proxy<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
@@ -196,8 +202,9 @@
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new HandlerInstaller(),
-                    WithFeatures.From(Classes.FromThisAssembly()));
+                .Install(new FeaturesInstaller(
+                        new HandlerInstaller()).Use(
+                            Classes.FromThisAssembly()));
 
             var auction = Proxy<IContainer>(context.Provide(new Junkyard()))
                 .Resolve<IAuction>();
@@ -219,8 +226,9 @@
 
             _container.Register(
                 Component.For<ICar>().Instance(ferrari))
-                .Install(new HandlerInstaller(),
-                    WithFeatures.From(Classes.FromThisAssembly()));
+                .Install(new FeaturesInstaller(
+                        new HandlerInstaller()).Use(
+                            Classes.FromThisAssembly()));
 
             Proxy<IAuction>(context.Publish()).Dispose(ferrari);
 

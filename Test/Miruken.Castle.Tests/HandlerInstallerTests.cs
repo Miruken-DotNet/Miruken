@@ -25,8 +25,10 @@
         [TestMethod]
         public void Should_Register_Handlers()
         {
-            _container.Install(new HandlerInstaller(),
-                WithFeatures.From(Classes.FromThisAssembly()));
+            _container.Install(
+                new FeaturesInstaller(
+                    new HandlerInstaller()).Use(
+                        Classes.FromThisAssembly()));
             var handler = _container.Resolve<MyHandler>();
             Assert.IsNotNull(handler);
         }
@@ -36,8 +38,10 @@
         {
             using (var handler = new WindsorHandler(container =>
             {
-                container.Install(new HandlerInstaller(),
-                    WithFeatures.From(Classes.FromThisAssembly()));
+                container.Install(
+                    new FeaturesInstaller(
+                        new HandlerInstaller()).Use(
+                            Classes.FromThisAssembly()));
             }))
             {
                 Assert.IsTrue(handler.Resolve().Handle(new A()));

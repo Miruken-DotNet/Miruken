@@ -22,8 +22,9 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(new ValidationInstaller(), WithFeatures.From(
-                 Classes.FromAssemblyContaining<FluentValidationValidatorTests>()));
+                .Install(new FeaturesInstaller(
+                    new ValidationInstaller()).Use(
+                        Classes.FromAssemblyContaining<FluentValidationValidatorTests>()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
             _handler = new WindsorHandler(_container);
         }

@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Validate.Castle
 {
     using System;
+    using System.Collections.Generic;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::FluentValidation;
@@ -16,11 +17,9 @@
             return this;
         }
 
-        protected override void Install(IConfigurationStore store)
+        protected override IEnumerable<FromDescriptor> GetFeatures()
         {
-            Container.Register(Component.For<IValidatorFactory>()
-                .ImplementedBy<WindsorValidatorFactory>()
-                .OnlyNewServices());
+            yield return Classes.FromAssemblyContaining<ValidationHandler>();
         }
 
         public override void InstallFeatures(FromDescriptor from)
@@ -32,7 +31,11 @@
                 validators.Configure(_configure);
         }
 
-        public static FromDescriptor StandardFeatures =>
-            Classes.FromAssemblyContaining<ValidationHandler>();
+        protected override void Install(IConfigurationStore store)
+        {
+            Container.Register(Component.For<IValidatorFactory>()
+                .ImplementedBy<WindsorValidatorFactory>()
+                .OnlyNewServices());
+        }
     }
 }

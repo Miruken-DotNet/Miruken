@@ -5,7 +5,7 @@
     using global::FluentValidation;
     using global::FluentValidation.Results;
 
-    public class FluentValidator<T> : AbstractValidator<T>
+    internal class FluentValidator<T> : AbstractValidator<T>
     {
         public static readonly FluentValidator<T> Instance = new FluentValidator<T>();
 

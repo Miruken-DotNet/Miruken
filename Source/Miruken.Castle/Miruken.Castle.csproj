@@ -62,7 +62,7 @@
     <Compile Include="ContravariantFilter.cs" />
     <Compile Include="DependencyResolution.cs" />
     <Compile Include="FeatureInstaller.cs" />
-    <Compile Include="WithFeatures.cs" />
+    <Compile Include="FeaturesInstaller.cs" />
     <Compile Include="HandlerInstaller.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

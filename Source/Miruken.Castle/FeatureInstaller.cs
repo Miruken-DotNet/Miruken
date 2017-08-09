@@ -1,7 +1,7 @@
 ﻿namespace Miruken.Castle
 {
-    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using global::Castle.Windsor;
@@ -18,17 +18,13 @@
         {
         }
 
+        protected internal virtual IEnumerable<FromDescriptor> GetFeatures()
+        {
+            return Enumerable.Empty<FromDescriptor>();
+        }
+
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)
         {
-            try
-            {
-                container.Register(Component.For<FeatureInstaller>().Instance(this));
-            }
-            catch
-            {
-                return;  // already installed
-            }
-
             Container = container;
             Install(store);
         }
