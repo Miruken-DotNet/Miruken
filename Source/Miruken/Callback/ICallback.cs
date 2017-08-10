@@ -25,7 +25,15 @@ namespace Miruken.Callback
         object GetResolveCallback();
     }
 
-    public interface IInvokeOnlyCallback {}
+    public interface IBatchCallback
+    {
+        bool AllowBatching { get; }
+    }
+
+    public interface IFilterCallback
+    {
+        bool AllowFiltering { get; }
+    }
 
     public interface IDispatchCallback
     {

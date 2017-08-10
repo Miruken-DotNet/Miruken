@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.ExceptionServices;
     using System.Threading;
@@ -212,20 +213,22 @@
 
         protected abstract Promise TimeoutT(TimeSpan timeout);
 
-        public static Promise<object[]> All(params Promise[] promises)
+        public static Promise<object[]> All(IEnumerable<object> results)
         {
-            return All(promises.Select(Resolved).ToArray());
+            return All(results.ToArray());
         }
 
-        public static Promise<T[]> All<T>(params Promise<T>[] promises)
+        public static Promise<object[]> All(params object[] results)
         {
-            if (promises == null || promises.Length == 0)
-                return Resolved(Array.Empty<T>());
+            if (results.Length == 0)
+                return Resolved(Array.Empty<object>());
 
+            var promises    = results.Select(Resolved).ToArray();
             var pending     = 0;
-            var fulfilled   = new T[promises.Length];
+            var fulfilled   = new object[promises.Length];
             var synchronous = true;
-            return new Promise<T[]>((resolve, reject) => {
+
+            return new Promise<object[]>((resolve, reject) => {
                 for (var index = 0; index < promises.Length; ++index)
                 {
                     var pos = index;

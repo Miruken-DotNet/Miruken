@@ -90,7 +90,7 @@
                 return false;
             }
 
-            if (callback is IInvokeOnlyCallback)
+            if ((callback as IFilterCallback)?.AllowFiltering == false)
             {
                 result = Dispatcher.Invoke(target, args, resultType);
                 return true;

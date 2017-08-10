@@ -77,7 +77,7 @@
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (_type.IsAssignableFrom(paramType))
+            if (paramType.Is(_type))
             {
                 if (_aliases != null && _aliases.Length > 0)
                     throw new InvalidOperationException(

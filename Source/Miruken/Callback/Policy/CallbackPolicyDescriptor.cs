@@ -71,10 +71,10 @@ namespace Miruken.Callback.Policy
 
         internal IEnumerable<PolicyMethodBinding> GetCompatibleMethods(object key)
         {
-            return _compatible.GetOrAdd(key, BuildCompatibleMethods);
+            return _compatible.GetOrAdd(key, InferCompatibleMethods);
         }
 
-        internal List<PolicyMethodBinding> BuildCompatibleMethods(object key)
+        internal List<PolicyMethodBinding> InferCompatibleMethods(object key)
         {
             var compatible = new List<PolicyMethodBinding>();
 

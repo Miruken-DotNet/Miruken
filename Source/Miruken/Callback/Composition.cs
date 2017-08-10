@@ -4,7 +4,9 @@ namespace Miruken.Callback
 {
     using Policy;
 
-    public class Composition : ICallback, IDispatchCallback
+    public class Composition 
+        : ICallback, IDispatchCallback, 
+          IFilterCallback, IBatchCallback
     {
         public Composition(object callback)
         {
@@ -41,6 +43,12 @@ namespace Miruken.Callback
                     cb.Result = value;
             }
         }
+
+        bool IFilterCallback.AllowFiltering =>
+            (Callback as IFilterCallback)?.AllowFiltering != false;
+
+        bool IBatchCallback.AllowBatching =>
+            (Callback as IBatchCallback)?.AllowBatching != false;
 
         CallbackPolicy IDispatchCallback.Policy =>
             (Callback as IDispatchCallback)?.Policy;

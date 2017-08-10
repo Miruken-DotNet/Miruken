@@ -6,8 +6,8 @@
 
     public static class HandlerHelpers
     {
-        public static bool Handle(this IHandler handler, object callback, 
-            bool greedy = false, IHandler composer = null)
+        public static bool Handle(this IHandler handler, object callback,
+          bool greedy = false, IHandler composer = null)
         {
             return handler.Handle(callback, ref greedy, composer);
         }

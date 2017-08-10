@@ -13,7 +13,8 @@ namespace Miruken.Callback
         Notify     = Broadcast | BestEffort
     }
 
-    public class CallbackSemantics : Composition
+    public class CallbackSemantics 
+        : Composition, IFilterCallback, IBatchCallback
     {
         private CallbackOptions _options;
         private CallbackOptions _specified;
@@ -59,6 +60,9 @@ namespace Miruken.Callback
             if (IsSpecified(option) && !semantics.IsSpecified(option))
                 semantics.SetOption(option, HasOption(option));
         }
+
+        bool IFilterCallback.AllowFiltering => false;
+        bool IBatchCallback.AllowBatching => false;
     }
 
     public class CallbackSemanticsDecorator : Handler, IDecorator

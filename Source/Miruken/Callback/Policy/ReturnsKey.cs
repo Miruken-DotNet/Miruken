@@ -22,8 +22,7 @@
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
             var restrict = attribute.Key as Type;
-            if (restrict == null || restrict.IsAssignableFrom(returnType)
-                || returnType.IsAssignableFrom(restrict))
+            if (restrict == null || returnType.Is(restrict) || restrict.Is(returnType))
                 return true;
             throw new InvalidOperationException(
                 $"Key {restrict.FullName} is not related to {returnType.FullName}");
@@ -52,7 +51,7 @@
                     methodName, StringComparison.OrdinalIgnoreCase);
             }
             else if (returnType != typeof(object) &&
-                (restrict == null || restrict.IsAssignableFrom(returnType)))
+                (restrict == null || returnType.Is(restrict)))
                 policyMethodBindingInfo.Key = returnType;
         }
     }

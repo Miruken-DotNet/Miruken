@@ -3,7 +3,7 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, IInvokeOnlyCallback
+        IBoundCallback, IFilterCallback, IBatchCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }
@@ -15,6 +15,9 @@
             return handler == null ? null
                  : new OptionsHandler<T>(handler, (T)this);
         }
+
+        bool IFilterCallback.AllowFiltering => false;
+        bool IBatchCallback.AllowBatching => false;
     }
 
     public class OptionsHandler<T> : HandlerDecorator

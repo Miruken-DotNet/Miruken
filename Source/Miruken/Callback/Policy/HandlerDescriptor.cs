@@ -116,9 +116,9 @@ namespace Miruken.Callback.Policy
         public static IEnumerable<Type> GetPolicyHandlers(
             CallbackPolicy policy, object key)
         {
-            foreach (var descriptor in _descriptors.Values)
+            foreach (var descriptor in _descriptors)
             {
-                var handler = descriptor.Value;
+                var handler = descriptor.Value.Value;
                 CallbackPolicyDescriptor cpd = null;
                 if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {

@@ -33,12 +33,13 @@
         void IWindsorInstaller.Install(
             IWindsorContainer container, IConfigurationStore store)
         {
+            if (_features.Count == 0) return;
             var implied = new List<FromDescriptor>();
 
-            foreach (var installer in _features)
+            foreach (var feature in _features)
             {
-                ((IWindsorInstaller)installer).Install(container, store);
-                implied.AddRange(installer.GetFeatures());
+                ((IWindsorInstaller)feature).Install(container, store);
+                implied.AddRange(feature.GetFeatures());
             }
 
             foreach (var from in _from.Concat(implied))

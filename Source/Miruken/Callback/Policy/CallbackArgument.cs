@@ -51,8 +51,7 @@ namespace Miruken.Callback.Policy
                 }
             }
             var restrict = attribute.Key as Type;
-            if (restrict == null || restrict.IsAssignableFrom(paramType)
-                || paramType.IsAssignableFrom(restrict))
+            if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
             {
                 if (_alias != null)
                     aliases.Add(_alias, paramType);
@@ -77,7 +76,7 @@ namespace Miruken.Callback.Policy
                           : typeof(object);
             }
             if (paramType != typeof(object) &&
-                (restrict == null || restrict.IsAssignableFrom(paramType)))
+                (restrict == null || paramType.Is(restrict)))
                 policyMethodBindingInfo.Key = paramType;
         }
 
