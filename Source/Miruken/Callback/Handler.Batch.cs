@@ -62,6 +62,34 @@
                  : null;
         }
 
+        public static Promise<object[]> Batch(
+            this IHandler handler, Action<IHandler> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+            using (var batch = Batch(handler))
+            {
+                if (batch == null)
+                    return Promise<object[]>.Empty;
+                configure(batch);
+                return batch.Completed;
+            }
+        }
+
+        public static Promise<object[]> Batch(this IHandler handler,
+            object[] tags, Action<IHandler> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+            using (var batch = Batch(handler, tags))
+            {
+                if (batch == null)
+                    return Promise<object[]>.Empty;
+                configure(batch);
+                return batch.Completed;
+            }
+        }
+
         public static Batch GetBatch(this IHandler handler, object tag = null)
         {
             var batch = handler?.Resolve<Batch>();
