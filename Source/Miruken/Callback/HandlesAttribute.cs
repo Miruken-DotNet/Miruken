@@ -17,7 +17,7 @@
 
         public static readonly CallbackPolicy Policy =
             ContravariantPolicy.Create<Command>(r => r.Callback,
-                x => x.MatchMethod(x.Target)
+                x => x.MatchMethodWithCallback(x.Target)
                       .MatchMethod(x.Callback)
             );
     }

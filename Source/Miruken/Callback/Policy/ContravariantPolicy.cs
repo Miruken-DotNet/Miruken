@@ -105,6 +105,23 @@
         }
 
         public CallbackArgument Callback => CallbackArgument.Instance;
+
+        public ContravariantPolicyBuilder MatchMethodWithCallback(params ArgumentRule[] args)
+        {
+            MatchMethod(args);
+            if (!args.Any(arg => arg is CallbackArgument))
+                MatchMethod(args.Concat(new [] { Callback }).ToArray());
+            return this;
+        }
+
+        public ContravariantPolicyBuilder MatchMethodWithCallback(
+            ReturnRule returnRule, params ArgumentRule[] args)
+        {
+            MatchMethod(returnRule, args);
+            if (!args.Any(arg => arg is CallbackArgument))
+                MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
+            return this;
+        }
     }
 
     public class ContravariantPolicyBuilder<Cb>
@@ -123,6 +140,23 @@
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
             return new ExtractArgument<Cb, Res>(extract);
+        }
+
+        public ContravariantPolicyBuilder<Cb> MatchMethodWithCallback(params ArgumentRule[] args)
+        {
+            MatchMethod(args);
+            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+                MatchMethod(args.Concat(new[] { Callback }).ToArray());
+            return this;
+        }
+
+        public ContravariantPolicyBuilder<Cb> MatchMethodWithCallback(
+            ReturnRule returnRule, params ArgumentRule[] args)
+        {
+            MatchMethod(returnRule, args);
+            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+                MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
+            return this;
         }
     }
 }
