@@ -92,18 +92,18 @@
 
         public CovariantPolicyBuilder<Cb> MatchMethodWithCallback(params ArgumentRule[] args)
         {
-            MatchMethod(args);
             if (!args.Any(arg => arg is CallbackArgument<Cb>))
                 MatchMethod(args.Concat(new [] { Callback }).ToArray());
+            MatchMethod(args);
             return this;
         }
 
         public CovariantPolicyBuilder<Cb> MatchMethodWithCallback(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
-            MatchMethod(returnRule, args);
             if (!args.Any(arg => arg is CallbackArgument<Cb>))
                 MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
+            MatchMethod(returnRule, args);
             return this;
         }
     }
