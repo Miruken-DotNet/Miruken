@@ -27,23 +27,17 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            if (!(callback is Composition))
-                callback = GetResolvingCallback(callback);
+            callback = GetResolvingCallback(callback);
             return _handler.Handle(callback, ref greedy, composer);
         }
 
         private static object GetResolvingCallback(object callback)
         {
             var resolving = callback as IResolveCallback;
-            if (resolving != null)
-                return resolving.GetResolveCallback() ?? callback;
-            var dispatch = callback as IDispatchCallback;
-            var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
-            var handlers = policy.GetHandlers(callback);
-            var bundle   = new Bundle(false);
-            foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolving(handler, callback)));
-            return bundle;
+            return resolving != null
+                 ? (resolving.GetResolveCallback() ?? callback)
+                 : Resolving.GetDefaultResolvingCallback(callback);
+
         }
     }
 

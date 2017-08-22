@@ -59,6 +59,9 @@
         public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
         public bool IsAsync    => IsPromise || IsTask;
 
+        public HandlerDescriptor Owner => 
+            HandlerDescriptor.GetDescriptor(Method.ReflectedType);
+
         public object Invoke(object target, object[] args, Type returnType = null)
         {
             if (!IsPromise)

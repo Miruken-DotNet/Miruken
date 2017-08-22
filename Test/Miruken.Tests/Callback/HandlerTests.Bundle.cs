@@ -309,7 +309,7 @@
                 .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
             Assert.IsTrue(complete);
             Assert.AreEqual(5, handled);
-            Assert.AreEqual(0, pins.Count);
+            Assert.AreEqual(50, pins.Count);
         }
 
         [TestMethod]
@@ -322,7 +322,7 @@
                 .Add(h => pins.AddRange(h.ResolveAll<Pin>())));
             Assert.IsTrue(complete);
             Assert.AreEqual(5, handled);
-            Assert.AreEqual(0, pins.Count);
+            Assert.AreEqual(50, pins.Count);
         }
 
         [TestMethod]

@@ -1,11 +1,10 @@
-﻿using System;
-
-namespace Miruken.Callback
+﻿namespace Miruken.Callback
 {
+    using System;
     using Policy;
 
     public class Composition 
-        : ICallback, IDispatchCallback, 
+        : ICallback, IDispatchCallback, IResolveCallback,
           IFilterCallback, IBatchCallback
     {
         public Composition(object callback)
@@ -44,14 +43,23 @@ namespace Miruken.Callback
             }
         }
 
+        CallbackPolicy IDispatchCallback.Policy =>
+           (Callback as IDispatchCallback)?.Policy;
+
         bool IFilterCallback.AllowFiltering =>
             (Callback as IFilterCallback)?.AllowFiltering != false;
 
         bool IBatchCallback.AllowBatching =>
             (Callback as IBatchCallback)?.AllowBatching != false;
 
-        CallbackPolicy IDispatchCallback.Policy =>
-            (Callback as IDispatchCallback)?.Policy;
+        object IResolveCallback.GetResolveCallback()
+        {
+            var resolve = (Callback as IResolveCallback)?.GetResolveCallback();
+            if (ReferenceEquals(resolve, Callback)) return this;
+            if (resolve == null)
+                resolve = Resolving.GetDefaultResolvingCallback(Callback);
+            return new Composition(resolve);
+        }
 
         bool IDispatchCallback.Dispatch(object handler, ref bool greedy, IHandler composer)
         {

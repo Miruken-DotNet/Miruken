@@ -1,7 +1,9 @@
 ﻿namespace Miruken.Validate.Castle.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Callback;
     using FluentValidation;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
@@ -22,7 +24,8 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer()
-                .Install(new FeaturesInstaller(new ValidationFeature())
+                .Install(new FeaturesInstaller(
+                    new HandlerFeature(), new ValidationFeature())
                     .Use(Classes.FromAssemblyContaining<FluentValidationValidatorTests>()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
             _handler = new WindsorHandler(_container);
@@ -56,6 +59,38 @@
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
             Assert.AreEqual("'Last Name' should not be empty.", outcome["LastName"]);
             Assert.AreEqual("'DOB' must not be empty.", outcome["DOB"]);
+        }
+
+        [TestMethod]
+        public async Task Should_Validate_Target_Resolving()
+        {
+            var player  = new Player();
+            var outcome = await Proxy<IValidating>(_handler.Resolve())
+                .ValidateAsync(player);
+            Assert.IsFalse(outcome.IsValid);
+            Assert.AreSame(outcome, player.ValidationOutcome);
+            var firstName = outcome.GetErrors("FirstName").Cast<string>().ToArray();
+            CollectionAssert.AreEquivalent(new []
+            {
+                "First name is required",
+                "'First Name' should not be empty.",
+                "The FirstName field is required."
+            }, firstName);
+            var lastName = outcome.GetErrors("LastName").Cast<string>().ToArray();
+            CollectionAssert.AreEquivalent(new[]
+            {
+                "Last name is required",
+                "'Last Name' should not be empty.",
+                "The LastName field is required."
+            }, lastName);
+            var dob = outcome.GetErrors("DOB").Cast<string>().ToArray();
+            CollectionAssert.AreEquivalent(new[]
+            {
+                "DOB is required",
+                "'DOB' must not be empty.",
+                "'DOB' must not be empty.",
+                "The DOB field is required."
+            }, dob);
         }
 
         [TestMethod]

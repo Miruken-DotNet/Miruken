@@ -142,7 +142,7 @@
             return new ExtractArgument<Cb, Res>(extract);
         }
 
-        public ContravariantPolicyBuilder<Cb> MatchMethodWithCallback(params ArgumentRule[] args)
+        public ContravariantPolicyBuilder<Cb> MatchCallbackMethod(params ArgumentRule[] args)
         {
             if (!args.Any(arg => arg is CallbackArgument<Cb>))
                 MatchMethod(args.Concat(new[] { Callback }).ToArray());
@@ -150,7 +150,7 @@
             return this;
         }
 
-        public ContravariantPolicyBuilder<Cb> MatchMethodWithCallback(
+        public ContravariantPolicyBuilder<Cb> MatchCallbackMethod(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
             if (!args.Any(arg => arg is CallbackArgument<Cb>))

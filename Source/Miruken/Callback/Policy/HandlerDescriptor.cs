@@ -11,6 +11,7 @@ namespace Miruken.Callback.Policy
     {
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
         private readonly ConcurrentDictionary<object, Type> _closed;
+        private readonly Lazy<Attribute[]> _attributes;
 
         public HandlerDescriptor(Type handlerType)
         {
@@ -51,11 +52,16 @@ namespace Miruken.Callback.Policy
                 }
             }
 
+            _attributes = new Lazy<Attribute[]>(() => 
+                Attribute.GetCustomAttributes(handlerType, true));
+
             if (handlerType.IsGenericTypeDefinition)
                 _closed = new ConcurrentDictionary<object, Type>();
         }
 
         public Type HandlerType { get; }
+
+        public Attribute[] Attributes => _attributes.Value;
 
         public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 

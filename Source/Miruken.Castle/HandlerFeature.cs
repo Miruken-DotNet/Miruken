@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Callback;
     using Callback.Policy;
+    using global::Castle.DynamicProxy.Internal;
     using global::Castle.MicroKernel.Registration;
     using Infrastructure;
 
@@ -44,12 +46,21 @@
 
         private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)
         {
-            yield return descriptor.Where(
-                type => !type.Is<IResolving>() && (type.Is<IHandler>()
-                     || type.Name.EndsWith("Handler")));
             yield return descriptor.BasedOn<IResolving>()
                 .WithServiceFromInterface()
                 .WithServiceSelf();
+            yield return descriptor.Where(
+                type => type.Is<IHandler>() || type.Name.EndsWith("Handler"))
+                .WithServiceSelect(HandlerInterfaces)
+                .WithServiceSelf();
         }
+
+        private static IEnumerable<Type> HandlerInterfaces(Type type, Type[] baseTypes)
+        {
+            return type.GetAllInterfaces().Except(IgnoredHandlerServices);
+        }
+
+        private static readonly Type[] IgnoredHandlerServices =
+            { typeof(IHandler), typeof(IProtocolAdapter), typeof(IServiceProvider) };
     }
 }

@@ -123,9 +123,9 @@
         {
             return _resolving ? this : new Bundle(_all)
             {
-                _operations  = _operations == null ? null
-                             : new List<Operation>(_operations),
-                _resolving   = true
+                _operations = _operations == null ? null
+                            : new List<Operation>(_operations),
+                _resolving  = true
             };
         }
 
@@ -138,12 +138,13 @@
             IHandler proxy = new ProxyHandler(handler, composer);
             if (_resolving) proxy = proxy.Resolve();
 
-            return _all ? _operations.Aggregate(true, (result, op) =>
+            return _all || isGreedy
+                 ? _operations.Aggregate(_all, (result, op) =>
             {
                 var handled = op.Handled;
                 if (!handled || isGreedy)
                     handled = op.Handled = Dispatch(proxy, op) || handled;
-                return handled && result;
+                return _all ? handled && result : handled || result;
             }) : _operations.Any(op =>
             {
                 var handled = Dispatch(proxy, op);

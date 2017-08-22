@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example.league", "Doc\leagu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example.school", "Doc\school\School\example.school.csproj", "{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Map", "Source\Miruken.Map\Miruken.Map.csproj", "{280F1B43-2B64-4A30-B332-62DF809425FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -199,6 +201,18 @@ Global
 		{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}.Release|x64.Build.0 = Release|Any CPU
 		{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}.Release|x86.ActiveCfg = Release|Any CPU
 		{689A8A8C-1EE3-4654-8DDC-5390E5D2CC6A}.Release|x86.Build.0 = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|x64.Build.0 = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{280F1B43-2B64-4A30-B332-62DF809425FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,7 +14,8 @@ namespace Miruken.Callback
     }
 
     public class CallbackSemantics 
-        : Composition, IFilterCallback, IBatchCallback
+        : Composition, IResolveCallback, IFilterCallback,
+          IBatchCallback
     {
         private CallbackOptions _options;
         private CallbackOptions _specified;
@@ -63,6 +64,11 @@ namespace Miruken.Callback
 
         bool IFilterCallback.AllowFiltering => false;
         bool IBatchCallback.AllowBatching => false;
+
+        object IResolveCallback.GetResolveCallback()
+        {
+            return this;
+        }
     }
 
     public class CallbackSemanticsDecorator : Handler, IDecorator

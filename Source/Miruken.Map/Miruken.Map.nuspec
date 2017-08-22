@@ -1,22 +1,20 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Miruken.Validate</id>
+    <id>Miruken.Map</id>
     <version>$version$</version>
-    <title>Miruken Validate</title>
+    <title>Miruken Map</title>
     <authors>cneuwirt</authors>
     <owners>cneuwirt</owners>
     <licenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Miruken-DotNet/Miruken</projectUrl>
     <iconUrl>https://avatars0.githubusercontent.com/u/20844317</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Miruken Validate</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <description>Miruken Map</description>
     <copyright>Copyright 2016</copyright>
-    <tags>Miruken Validate</tags>
+    <tags>Miruken Map</tags>
     <dependencies>
       <dependency id="Miruken" version="(1.0,)"/>
-      <dependency id="FluentValidation" version="(6.4,)"/>
     </dependencies>
   </metadata>
 </package>
