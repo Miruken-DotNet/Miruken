@@ -25,8 +25,8 @@
             object resolution, bool greedy, IHandler composer)
         {
             if (_handled && !greedy) return true;
-            return _handled = 
-                Handler.Dispatch(resolution, Callback, ref greedy, composer)
+            return _handled =  Handler.Dispatch(
+                resolution, Callback, ref greedy, composer)
                 || _handled;
         }
 
@@ -38,7 +38,8 @@
             var bundle   = new Bundle(false);
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
-            bundle.Add(h => h.Handle(callback));
+            if (bundle.IsEmpty)
+                bundle.Add(h => h.Handle(callback));
             return bundle;
         }
     }
