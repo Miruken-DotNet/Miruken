@@ -119,6 +119,11 @@ namespace Miruken.Callback.Policy
             }
         }
 
+        public static void ResetDescriptors()
+        {
+            _descriptors.Clear();
+        }
+
         public static IEnumerable<Type> GetPolicyHandlers(
             CallbackPolicy policy, object key)
         {
