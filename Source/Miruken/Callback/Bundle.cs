@@ -28,9 +28,9 @@
             _all = all;
         }
 
-        public bool           IsEmpty => _operations == null;
-        public bool           WantsAsync { get; set; }
-        public bool           IsAsync => _promises != null;
+        public bool IsEmpty => _operations == null;
+        public bool WantsAsync { get; set; }
+        public bool IsAsync => _promises != null;
         public CallbackPolicy Policy => null;
 
         public Promise Complete()
