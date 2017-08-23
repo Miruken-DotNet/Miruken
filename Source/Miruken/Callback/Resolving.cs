@@ -38,9 +38,7 @@
             var bundle   = new Bundle(false);
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
-            if (bundle.IsEmpty)
-                bundle.Add(h => h.Handle(callback));
-            return bundle;
+            return bundle.IsEmpty ? callback : bundle;
         }
     }
 }
