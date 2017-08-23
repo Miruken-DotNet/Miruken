@@ -67,7 +67,7 @@
     <Compile Include="ConfigurationFactoryInstallerTests.cs" />
     <Compile Include="ContextualLifestyleManagerTests.cs" />
     <Compile Include="FeaturesTests.cs" />
-    <Compile Include="HandlerFeatureTests.cs" />
+    <Compile Include="HandleFeatureTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolveCallbackTests.cs" />
     <Compile Include="WindsorHandlerTests.cs" />

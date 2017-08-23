@@ -20,7 +20,7 @@
 
             Container.Install(
                 new FeaturesInstaller(
-                    new ConfigurationFeature(), new ValidationFeature())
+                    new ConfigurationFeature(), new ValidateFeature())
                     .Use(Classes.FromAssemblyContaining<CreateTeam>(),
                          Classes.FromAssemblyContaining<CreateStudent>())
             );

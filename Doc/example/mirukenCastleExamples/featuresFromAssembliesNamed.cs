@@ -18,7 +18,7 @@
 
             Container.Install(
                 new FeaturesInstaller(
-                    new ConfigurationFeature(), new ValidationFeature())
+                    new ConfigurationFeature(), new ValidateFeature())
                         .Use(Classes.FromAssemblyNamed("Example.League"),
                              Classes.FromAssemblyNamed("Example.School"))
             );

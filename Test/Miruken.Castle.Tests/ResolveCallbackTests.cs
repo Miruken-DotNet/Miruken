@@ -114,7 +114,7 @@
             _handler = new WindsorHandler(container =>
             {
                 container.Kernel.Resolver.AddSubResolver(new ArrayResolver(container.Kernel));
-                container.Install(new FeaturesInstaller(new HandlerFeature())
+                container.Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             });
         }

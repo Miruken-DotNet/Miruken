@@ -147,7 +147,7 @@
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new FeaturesInstaller(new HandlerFeature())
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
 
             var auctions = context.ResolveAll<IAuction>();
@@ -160,7 +160,7 @@
         {
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new FeaturesInstaller(new HandlerFeature())
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
 
             var cars = Proxy<IAuction>(_handler).Cars;
@@ -175,7 +175,7 @@
         public void Should_Register_All_IResolving_Services()
         {
             _container.Install(
-                new FeaturesInstaller(new HandlerFeature())
+                new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             var auction = Proxy<IContainer>(_handler).Resolve<IAuction>();
             var closing = Proxy<IContainer>(_handler).Resolve<IClosing>();
@@ -186,7 +186,7 @@
         public void Should_Skip_IResolving_Service()
         {
             _container.Install(
-                new FeaturesInstaller(new HandlerFeature())
+                new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             var resolving = Proxy<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
@@ -200,7 +200,7 @@
 
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
-                .Install(new FeaturesInstaller(new HandlerFeature())
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
 
             var auction = Proxy<IContainer>(context.Provide(new Junkyard()))
@@ -223,7 +223,7 @@
 
             _container.Register(
                 Component.For<ICar>().Instance(ferrari))
-                .Install(new FeaturesInstaller(new HandlerFeature())
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
 
             Proxy<IAuction>(context.Publish()).Dispose(ferrari);
@@ -242,7 +242,7 @@
             var ferrari = new Car { Make = "Ferrari", Model = "LaFerrari" };
 
             _container
-                .Install(new FeaturesInstaller(new HandlerFeature())
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromAssemblyContaining<ErrorsHandler>(),
                         Classes.FromThisAssembly()));
 

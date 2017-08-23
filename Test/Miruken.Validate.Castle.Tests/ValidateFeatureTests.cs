@@ -15,7 +15,7 @@
     using static Protocol;
 
     [TestClass]
-    public class ValidationFeatureTests
+    public class ValidateFeatureTests
     {
         protected IWindsorContainer _container;
         protected WindsorHandler _handler;
@@ -25,7 +25,7 @@
         {
             _container = new WindsorContainer()
                 .Install(new FeaturesInstaller(
-                    new HandlerFeature(), new ValidationFeature())
+                    new HandleFeature(), new ValidateFeature())
                     .Use(Classes.FromAssemblyContaining<FluentValidationValidatorTests>()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
             _handler = new WindsorHandler(_container);

@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ValidationFeature.cs" />
+    <Compile Include="ValidateFeature.cs" />
     <Compile Include="WindsorValidatorFactory.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class HandlerFeatureTests
+    public class HandleFeatureTests
     {
         protected IWindsorContainer _container;
 
@@ -26,7 +26,7 @@
         public void Should_Register_Handlers()
         {
             _container.Install(
-                new FeaturesInstaller(new HandlerFeature())
+                new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             var handler = _container.Resolve<MyHandler>();
             Assert.IsNotNull(handler);
@@ -38,7 +38,7 @@
             using (var handler = new WindsorHandler(container =>
             {
                 container.Install(
-                    new FeaturesInstaller(new HandlerFeature())
+                    new FeaturesInstaller(new HandleFeature())
                         .Use(Classes.FromThisAssembly()));
             }))
             {
