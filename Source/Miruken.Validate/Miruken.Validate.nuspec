@@ -15,8 +15,8 @@
     <copyright>Copyright 2016</copyright>
     <tags>Miruken Validate</tags>
     <dependencies>
-      <dependency id="Miruken" version="(1.0,)"/>
-      <dependency id="FluentValidation" version="(6.4,)"/>
+      <dependency id="Miruken" version="1.0"/>
+      <dependency id="FluentValidation" version="6.4"/>
     </dependencies>
   </metadata>
 </package>
