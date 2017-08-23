@@ -46,6 +46,7 @@
     </Compile>
     <Compile Include="IMapping.cs" />
     <Compile Include="MapCallback.cs" />
+    <Compile Include="MappingHandler.cs" />
     <Compile Include="MapsFromAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

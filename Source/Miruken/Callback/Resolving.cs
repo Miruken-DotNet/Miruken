@@ -1,9 +1,11 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using Policy;
 
     public class Resolving : Inquiry, IResolveCallback
     {
+        private readonly object _callback;
         private bool _handled;
 
         public Resolving(object key, object callback)
@@ -11,10 +13,8 @@
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
-            Callback = callback;
+            _callback = callback;
         }
-
-        public object Callback { get; }
 
         object IResolveCallback.GetResolveCallback()
         {
@@ -26,14 +26,13 @@
         {
             if (_handled && !greedy) return true;
             return _handled =  Handler.Dispatch(
-                resolution, Callback, ref greedy, composer)
+                resolution, _callback, ref greedy, composer)
                 || _handled;
         }
 
         public static object GetDefaultResolvingCallback(object callback)
         {
-            var dispatch = callback as IDispatchCallback;
-            var policy   = dispatch?.Policy ?? HandlesAttribute.Policy;
+            var policy   = CallbackPolicy.GetCallbackPolicy(callback);
             var handlers = policy.GetHandlers(callback);
             var bundle   = new Bundle(false);
             foreach (var handler in handlers)

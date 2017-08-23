@@ -57,5 +57,11 @@
             var key = GetKey(callback);
             return HandlerDescriptor.GetPolicyHandlers(this, key);
         }
+
+        public static CallbackPolicy GetCallbackPolicy(object callback)
+        {
+            var dispatch = callback as IDispatchCallback;
+            return dispatch?.Policy ?? HandlesAttribute.Policy;
+        }
     }
 }
