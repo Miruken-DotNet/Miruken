@@ -2,8 +2,11 @@
 
 namespace Miruken.Error
 {
+    using Concurrency;
+
     public interface IErrors
     {
-        bool HandleException(Exception exception, object context = null);
+        Promise HandleException(Exception exception, 
+            object callback = null, object context = null);
     }
 }

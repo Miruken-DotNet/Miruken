@@ -6,6 +6,7 @@
     using Callback;
     using Container;
     using Context;
+    using Error;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using global::Castle.Windsor;
@@ -80,7 +81,8 @@
             public bool Dispose(object part)
             {
                 var index = Array.IndexOf(Cars, part);
-                if (index < 0) return false;
+                if (index < 0)
+                    throw new ArgumentException("Part not found");
                 _junkyard.Decommision(part);
                 Cars = Cars.Where((c, i) => i != index).ToArray();
                 return true;
@@ -228,6 +230,23 @@
 
             var auction = Proxy<IContainer>(context).Resolve<IAuction>();
             CollectionAssert.AreEqual(new [] { ferrari }, auction.Junk);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Errors()
+        {
+            var context = new Context();
+            context.AddHandlers(_handler);
+            context.Store(new Junkyard());
+
+            var ferrari = new Car { Make = "Ferrari", Model = "LaFerrari" };
+
+            _container
+                .Install(new FeaturesInstaller(new HandlerFeature())
+                    .Use(Classes.FromAssemblyContaining<ErrorsHandler>(),
+                        Classes.FromThisAssembly()));
+
+            Proxy<IAuction>(context.Recover()).Dispose(ferrari);
         }
     }
 }

@@ -1,15 +1,17 @@
-﻿using System;
-using Miruken.Callback;
-using Miruken.Concurrency;
-
-namespace Miruken.Error
+﻿namespace Miruken.Error
 {
+    using System;
+    using Callback;
+    using Concurrency;
+    using Infrastructure;
+
     public class ErrorsHandler : Handler, IErrors
     {
-        public virtual bool HandleException(Exception exception, object context)
+        public virtual Promise HandleException(
+            Exception exception, object callback, object context)
         {
             Console.WriteLine(exception);
-            return true;
+            return Promise.Rejected(new RejectedException(callback));
         }
     }
 
@@ -25,32 +27,38 @@ namespace Miruken.Error
             return handler.Filter((callback, composer, proceed) => {
                 if (callback is Composition)
                     return proceed();
+
+                var cb = callback as ICallback;
+
                 try
                 {
                     var handled = proceed();
                     if (handled)
                     {
-                        var cb = callback as ICallback;
                         var promise = cb?.Result as Promise;
                         if (promise != null)
                         {
                             cb.Result = promise.Catch((ex, s) => 
-                            {
-                                if (ex is CancelledException)
-                                    return Promise.Rejected(ex);
-                                return  composer.Proxy<IErrors>().HandleException(ex, context)
-                                     ? Promise.Rejected(new RejectedException(cb))
-                                     : Promise.Rejected(ex);
-                            }).Coerce(cb.ResultType);
+                                ex is CancelledException
+                                    ? Promise.Rejected(ex)
+                                    : composer.Proxy<IErrors>().HandleException(ex, context))
+                                    .Coerce(cb.ResultType);
                         }
                     }
                     return handled;
                 }
                 catch (Exception exception)
                 {
+                    if (cb?.ResultType?.Is<Promise>() == true)
+                    {
+                        cb.Result = (exception is CancelledException
+                                    ? Promise.Rejected(exception)
+                                    : composer.Proxy<IErrors>().HandleException(exception, context))
+                                    .Coerce(cb.ResultType);
+                        return true;
+                    }
                     if (exception is CancelledException) return true;
-                    var handled = composer.Proxy<IErrors>().HandleException(exception, context);
-                    if (!handled) throw;
+                    composer.Proxy<IErrors>().HandleException(exception, context);
                     return true;
                 }
             });

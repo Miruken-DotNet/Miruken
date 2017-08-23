@@ -70,6 +70,7 @@
     <Compile Include="Container\TestContainer.cs" />
     <Compile Include="Context\ContextTests.cs" />
     <Compile Include="Context\ContextualTests.cs" />
+    <Compile Include="Errors\ErrorsHandlerTests.cs" />
     <Compile Include="Graph\TraversalTests.cs" />
     <Compile Include="Graph\TraversingTests.cs" />
     <Compile Include="Graph\TreeNode.cs" />
