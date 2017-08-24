@@ -130,8 +130,8 @@ namespace Miruken.Callback.Policy
         {
             foreach (var descriptor in _descriptors)
             {
-                var handler = descriptor.Value.Value;
                 CallbackPolicyDescriptor cpd = null;
+                var handler = descriptor.Value.Value;
                 if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {
                     var binding =
@@ -160,8 +160,8 @@ namespace Miruken.Callback.Policy
         {
             foreach (var descriptor in _descriptors)
             {
-                var handler = descriptor.Value.Value;
                 CallbackPolicyDescriptor cpd = null;
+                var handler = descriptor.Value.Value;
                 if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {
                     foreach (var binding in cpd.GetInvariantMethods(key))

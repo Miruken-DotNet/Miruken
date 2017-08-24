@@ -32,9 +32,8 @@
 
         public static object GetDefaultResolvingCallback(object callback)
         {
-            var policy   = CallbackPolicy.GetCallbackPolicy(callback);
-            var handlers = policy.GetHandlers(callback);
             var bundle   = new Bundle(false);
+            var handlers = CallbackPolicy.GetCallbackHandlers(callback);
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
             return bundle.IsEmpty ? callback : bundle;

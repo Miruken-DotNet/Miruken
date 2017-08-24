@@ -52,16 +52,26 @@
                                        composer, results);
         }
 
-        public IEnumerable<Type> GetHandlers(object callback)
+        public IEnumerable<Type> GetHandlers(object key)
         {
-            var key = GetKey(callback);
             return HandlerDescriptor.GetPolicyHandlers(this, key);
         }
 
-        public IEnumerable<PolicyMethodBinding> GetMethods(object callback)
+        public IEnumerable<PolicyMethodBinding> GetMethods(object key)
         {
-            var key = GetKey(callback);
             return HandlerDescriptor.GetPolicyMethods(this, key);
+        }
+
+        public static IEnumerable<Type> GetCallbackHandlers(object callback)
+        {
+            var policy = GetCallbackPolicy(callback);
+            return policy.GetHandlers(policy.GetKey(callback));
+        }
+
+        public static IEnumerable<PolicyMethodBinding> GetCallbackMethods(object callback)
+        {
+            var policy = GetCallbackPolicy(callback);
+            return policy.GetMethods(policy.GetKey(callback));
         }
 
         public static CallbackPolicy GetCallbackPolicy(object callback)
