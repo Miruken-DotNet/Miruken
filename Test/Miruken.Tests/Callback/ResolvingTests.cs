@@ -7,10 +7,10 @@
     using static Protocol;
 
     /// <summary>
-    /// Summary description for ResolveCallbackTests
+    /// Summary description for ResolvingTests
     /// </summary>
     [TestClass]
-    public class ResolveCallbackTests
+    public class ResolvingTests
     {
         public class SendEmail
         {

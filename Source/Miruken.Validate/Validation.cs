@@ -57,7 +57,7 @@
             }
         }
 
-        public bool AddAsyncResult(object result)
+        public bool AddAsyncResult(object result, bool strict)
         {
             if (result == null) return false;
 

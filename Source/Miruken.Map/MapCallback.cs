@@ -1,13 +1,20 @@
 ﻿namespace Miruken.Map
 {
-    public class MapCallback
+    public abstract class MapCallback
     {
-        public object Format { get; set; }
+        protected MapCallback(object format)
+        {
+            Format = format;
+        }
+
+        public object Format  { get; }
+        public object Mapping { get; set; }
     }
 
     public class MapFrom : MapCallback
     {
-        public MapFrom(object source)
+        public MapFrom(object source, object format)
+            : base(format)
         {
             Source = source;
         }
@@ -17,14 +24,15 @@
 
     public class MapTo : MapCallback
     {
-        public MapTo(object formattedValue, object typeOrInstance)
+        public MapTo(object formattedValue, object typeOrInstance,
+                     object format)
+            : base(format)
         {
             FormattedValue = formattedValue;
             TypeOrInstance = typeOrInstance;
         }
 
         public object FormattedValue { get; }
-
         public object TypeOrInstance { get; }
     }
 }

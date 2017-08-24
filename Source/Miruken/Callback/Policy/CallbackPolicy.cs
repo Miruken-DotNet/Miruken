@@ -45,11 +45,11 @@
         public abstract IEnumerable GetCompatibleKeys(object callback, IEnumerable keys);
 
         public bool Dispatch(object handler, object callback, bool greedy,
-            IHandler composer, Func<object, bool> results = null)
+            IHandler composer, ResultsDelegate results = null)
         {
             var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
-            return descriptor.Dispatch(
-                this, handler, callback, greedy, composer, results);
+            return descriptor.Dispatch(this, handler, callback, greedy, 
+                                       composer, results);
         }
 
         public IEnumerable<Type> GetHandlers(object callback)

@@ -14,12 +14,12 @@
     {
         public PolicyMethodBindingInfo(
             MethodRule rule, MethodDispatch dispatch,
-            DefinitionAttribute attribute)
+            DefinitionAttribute definition)
         {
             Rule          = rule;
             Dispatch      = dispatch;
-            Attribute     = attribute;
-            Key           = attribute.Key;
+            Definition    = definition;
+            Key           = definition.Key;
             CallbackIndex = null;
         }
 
@@ -27,7 +27,7 @@
         public int?                CallbackIndex;
         public MethodRule          Rule           { get; }
         public MethodDispatch      Dispatch       { get; }
-        public DefinitionAttribute Attribute      { get; }
+        public DefinitionAttribute Definition     { get; }
     }
 
     public class PolicyMethodBinding : MethodBinding
@@ -38,21 +38,21 @@
         {
             Policy        = policy;
             Rule          = bindingInfo.Rule;
-            Attribute     = bindingInfo.Attribute;
+            Definition    = bindingInfo.Definition;
             CallbackIndex = bindingInfo.CallbackIndex;
             Key           = NormalizeKey(ref bindingInfo);
         }
 
         public MethodRule          Rule          { get; }
-        public DefinitionAttribute Attribute     { get; }
+        public DefinitionAttribute Definition    { get; }
         public CallbackPolicy      Policy        { get; }
         public int?                CallbackIndex { get; }
         public object              Key           { get; }
 
         public override bool Dispatch(object target, object callback, 
-            IHandler composer, Func<object, bool> results = null)
+            IHandler composer, ResultsDelegate results = null)
         {
-            if (Attribute?.Approve(callback, this) == false)
+            if (Definition?.Approve(callback, this) == false)
                 return false;
             object result;
             var resultType = Policy.ResultType?.Invoke(callback);
@@ -80,7 +80,7 @@
         }
 
         private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, Func<object, bool> results,
+            IHandler composer, Type resultType, ResultsDelegate results,
             out object result)
         {
             var args = ResolveArgs(callback, composer);
@@ -123,7 +123,7 @@
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
-                return results?.Invoke(result) != false;
+                return results?.Invoke(result, Definition.Strict) != false;
             }
 
             return accepted;

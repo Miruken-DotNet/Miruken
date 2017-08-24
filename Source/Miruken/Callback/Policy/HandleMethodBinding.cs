@@ -13,7 +13,7 @@
         }
 
         public override bool Dispatch(object target, object callback,
-            IHandler composer, Func<object, bool> results = null)
+            IHandler composer, ResultsDelegate results = null)
         {
             var oldComposer  = Composer;
             var oldUnhandled = Unhandled;

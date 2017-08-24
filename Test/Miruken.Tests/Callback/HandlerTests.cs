@@ -91,6 +91,32 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Arrays()
+        {
+            var handler = new ArrayHandler();
+            var type    = handler.Command<string>(new[] { 1, 2, 3 });
+            Assert.AreEqual("integers", type);
+            type = handler.Command<string>(new[] { "red", "green", "blue" });
+            Assert.AreEqual("string", type);
+            type = handler.Command<string>(new[] { typeof(int), typeof(string)});
+            Assert.AreEqual("types", type);
+            type = handler.Command<string>(new[] { 'a', 'b', 'c' });
+            Assert.AreEqual("array", type);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Arrays()
+        {
+            var handler = new ArrayHandler();
+            Array array = handler.Resolve<int[]>();
+            CollectionAssert.AreEqual(new [] { 2, 4, 6 }, array);
+            array = handler.Resolve<string[]>();
+            CollectionAssert.AreEqual(new[] { "square", "circle"}, array);
+            array = handler.Resolve<Type[]>();
+            CollectionAssert.AreEqual(new[] { typeof(float), typeof(object) }, array);
+        }
+
+        [TestMethod]
         public void Should_Handle_Callbacks_With_Keys()
         {
             var foo     = new Foo();
@@ -1103,6 +1129,56 @@
                     inquiry.Resolve(Promise.Resolved(new SuperBaz()), composer);
                     inquiry.Resolve(Promise.Resolved(new Baz()), composer);
                 }
+            }
+        }
+
+        private class ArrayHandler : Handler
+        {
+            [Handles]
+            public string HandlesIntegers(int[] array)
+            {
+                return "integers";
+            }
+
+            [Handles]
+            public string HandlesStrings(string[] array)
+            {
+                return "string";
+            }
+
+            [Handles]
+            public string HandlesTypes(Type[] array)
+            {
+                return "types";
+            }
+
+            [Handles]
+            public string HandlesArray(Array array)
+            {
+                return "array";
+            }
+
+            public string HandlesError(object instance)
+            {
+                return "error";
+            }
+
+            [Provides(Strict = true)]
+            public int[] ProvidesIntegers()
+            {
+                return new[] {2, 4, 6};
+            }
+
+            [Provides(Strict = true)]
+            public string[] ProvidesStrings()
+            {
+                return new[] { "square", "circle" };
+            }
+
+            [Provides(Strict = true)]
+            public Type[] ProvidesTypes()
+            {
+                return new[] { typeof(float), typeof(object) };
             }
         }
 

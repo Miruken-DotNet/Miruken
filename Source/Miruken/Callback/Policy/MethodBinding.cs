@@ -7,6 +7,8 @@
     using Concurrency;
     using Infrastructure;
 
+    public delegate bool ResultsDelegate(object result, bool strict);
+
     public abstract class MethodBinding
     {
         private List<IFilterProvider> _filters;
@@ -33,7 +35,7 @@
         }
 
         public abstract bool Dispatch(object target, object callback,
-            IHandler composer, Func<object, bool> results = null);
+            IHandler composer, ResultsDelegate results = null);
 
         internal object CoerceResult(
             object result, Type resultType, bool? wantsAsync = null)

@@ -66,8 +66,9 @@ namespace Miruken.Callback.Policy
         public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 
         internal bool Dispatch(
-            CallbackPolicy policy, object target, object callback,
-            bool greedy, IHandler composer, Func<object, bool> results = null)
+            CallbackPolicy policy, object target, 
+            object callback, bool greedy, IHandler composer,
+            ResultsDelegate results = null)
         {
             if (policy == null)
                 throw new ArgumentNullException(nameof(policy));

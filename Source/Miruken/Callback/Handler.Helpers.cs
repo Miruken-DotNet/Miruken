@@ -60,7 +60,7 @@
                 var type = inquiry.Key as Type;
                 if (type.Is<R>())
                 {
-                    inquiry.Resolve(result, greedy, composer);
+                    inquiry.Resolve(result, false, greedy, composer);
                     return true;
                 }
                 return false;
@@ -77,7 +77,7 @@
                 {
                     foreach (var r in result)
                     {
-                        resolved = inquiry.Resolve(r, greedy, composer) || resolved;
+                        resolved = inquiry.Resolve(r, false, greedy, composer) || resolved;
                         if (resolved && !inquiry.Many) return true;
                     }
                 }

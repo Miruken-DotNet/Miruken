@@ -73,13 +73,14 @@
 
         public bool Resolve(object resolution, IHandler composer)
         {
-            return Resolve(resolution, false, composer);
+            return Resolve(resolution, false, false, composer);
         }
 
-        public bool Resolve(object resolution, bool greedy, IHandler composer)
+        public bool Resolve(object resolution, bool strict,
+            bool greedy, IHandler composer)
         {
             if (resolution == null) return false;
-            var array    = resolution as object[];
+            var array    = strict ? null : resolution as object[];
             var resolved = array?.Aggregate(false, 
                 (s, res) => Include(res, greedy, composer) || s) 
                          ?? Include(resolution, greedy, composer);
@@ -126,7 +127,7 @@
 
             var count = _resolutions.Count;
             handled = Policy.Dispatch(handler, this, greedy, composer, 
-                r => Resolve(r, isGreedy, composer)) || handled;
+                (r,strict) => Resolve(r, strict, isGreedy, composer)) || handled;
             return handled || (_resolutions.Count > count);
         }
 
@@ -139,7 +140,7 @@
                            ? type == item.GetType()
                            : type.IsInstanceOfType(item);
 
-            return compatible && Resolve(item, greedy, composer);
+            return compatible && Resolve(item, false, greedy, composer);
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)

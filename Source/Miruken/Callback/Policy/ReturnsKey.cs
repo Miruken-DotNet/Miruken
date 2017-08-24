@@ -36,21 +36,25 @@
             if (key != null && restrict == null) return;
             var dispatch   = policyMethodBindingInfo.Dispatch;
             var returnType = dispatch.LogicalReturnType;
-            if (returnType.IsArray)
-                returnType = returnType.GetElementType();
-            if (returnType.IsSimpleType())
+            if (!policyMethodBindingInfo.Definition.Strict)
             {
-                var method     = dispatch.Method;
-                var methodName = method.Name;
-                if (method.IsSpecialName)
+                if (returnType.IsArray)
+                    returnType = returnType.GetElementType();
+                if (returnType.IsSimpleType())
                 {
-                    var _ = methodName.IndexOf('_');
-                    if (_ >= 0) methodName = methodName.Substring(_ + 1);
+                    var method = dispatch.Method;
+                    var methodName = method.Name;
+                    if (method.IsSpecialName)
+                    {
+                        var _ = methodName.IndexOf('_');
+                        if (_ >= 0) methodName = methodName.Substring(_ + 1);
+                    }
+                    policyMethodBindingInfo.Key = new StringKey(
+                        methodName, StringComparison.OrdinalIgnoreCase);
+                    return;
                 }
-                policyMethodBindingInfo.Key = new StringKey(
-                    methodName, StringComparison.OrdinalIgnoreCase);
             }
-            else if (returnType != typeof(object) &&
+            if (returnType != typeof(object) &&
                 (restrict == null || returnType.Is(restrict)))
                 policyMethodBindingInfo.Key = returnType;
         }

@@ -69,7 +69,7 @@
             }
         }
 
-        public bool Respond(object response)
+        public bool Respond(object response, bool strict)
         {
             if (response == null || (!Many && _results.Count > 0))
                 return false;

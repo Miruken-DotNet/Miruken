@@ -69,7 +69,7 @@
     <Compile Include="FeaturesTests.cs" />
     <Compile Include="HandleFeatureTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResolveCallbackTests.cs" />
+    <Compile Include="ResolvingTests.cs" />
     <Compile Include="WindsorHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
