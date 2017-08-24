@@ -19,7 +19,7 @@
             {
                 DOB = new DateTime(2007, 6, 14)
             };
-            var outcome = Proxy<IValidator>(handler).Validate(player);
+            var outcome = Proxy<IValidating>(handler).Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);
@@ -46,7 +46,7 @@
                     new Player { FirstName = "Lionel"}
                 }
             };
-            var outcome = Proxy<IValidator>(handler).Validate(team);
+            var outcome = Proxy<IValidating>(handler).Validate(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(

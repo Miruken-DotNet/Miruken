@@ -8,8 +8,4 @@
 
         Promise<ValidationOutcome> ValidateAsync(object target, params object[] scopes);
     }
-
-    public interface IValidator : IValidating
-    {
-    }
 }

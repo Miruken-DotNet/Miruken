@@ -3,7 +3,7 @@
     using Callback;
     using Concurrency;
 
-    public class ValidationHandler : Handler, IValidator
+    public class ValidationHandler : Handler, IValidating
     {
         public ValidationOutcome Validate(
             object target, params object[] scopes)
@@ -58,7 +58,7 @@
             this IHandler handler, object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.Proxy<IValidator>().Validate(target, scopes)
+                composer.Proxy<IValidating>().Validate(target, scopes)
                         .IsValid);
         }
 
@@ -66,7 +66,7 @@
              this IHandler handler, object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.Proxy<IValidator>().ValidateAsync(target, scopes)
+                composer.Proxy<IValidating>().ValidateAsync(target, scopes)
                     .Then((outcome, s) => outcome.IsValid));
         }
     }

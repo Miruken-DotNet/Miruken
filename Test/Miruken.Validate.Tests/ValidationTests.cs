@@ -21,7 +21,7 @@
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = Proxy<IValidator>(handler).Validate(player);
+            var outcome = Proxy<IValidating>(handler).Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("First name is required", outcome["FirstName"]);
@@ -37,7 +37,7 @@
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = Proxy<IValidator>(handler).Validate(player, null, "Recreational");
+            var outcome = Proxy<IValidating>(handler).Validate(player, null, "Recreational");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("Age must be 10 or younger", outcome["DOB"]);
@@ -49,7 +49,7 @@
             var handler = new ValidationHandler()
                         + new ValidateTeam();
             var team    = new Team();
-            var outcome = await Proxy<IValidator>(handler).ValidateAsync(team);
+            var outcome = await Proxy<IValidating>(handler).ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             Assert.AreEqual("Name is required", outcome["Name"]);
@@ -64,7 +64,7 @@
             {
                 Coach = new Coach()
             };
-            var outcome = await Proxy<IValidator>(handler)
+            var outcome = await Proxy<IValidating>(handler)
                 .ValidateAsync(team, null, "ECNL");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);

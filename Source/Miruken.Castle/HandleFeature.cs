@@ -57,7 +57,7 @@
 
         private static IEnumerable<Type> HandlerInterfaces(Type type, Type[] baseTypes)
         {
-            return type.GetAllInterfaces().Except(IgnoredHandlerServices);
+            return type.GetToplevelInterfaces().Except(IgnoredHandlerServices);
         }
 
         private static readonly Type[] IgnoredHandlerServices =
