@@ -155,6 +155,23 @@ namespace Miruken.Callback.Policy
             }
         }
 
+        public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(
+            CallbackPolicy policy, object key)
+        {
+            foreach (var descriptor in _descriptors)
+            {
+                var handler = descriptor.Value.Value;
+                CallbackPolicyDescriptor cpd = null;
+                if (handler._policies?.TryGetValue(policy, out cpd) == true)
+                {
+                    foreach (var binding in cpd.GetInvariantMethods(key))
+                        yield return binding;
+                    foreach (var binding in cpd.GetCompatibleMethods(key))
+                        yield return binding;
+                }
+            }
+        }
+
         private static bool IsDefinition(MemberInfo member, object criteria)
         {
             if (member.DeclaringType == typeof(object))

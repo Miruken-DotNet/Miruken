@@ -58,6 +58,12 @@
             return HandlerDescriptor.GetPolicyHandlers(this, key);
         }
 
+        public IEnumerable<PolicyMethodBinding> GetMethods(object callback)
+        {
+            var key = GetKey(callback);
+            return HandlerDescriptor.GetPolicyMethods(this, key);
+        }
+
         public static CallbackPolicy GetCallbackPolicy(object callback)
         {
             var dispatch = callback as IDispatchCallback;
