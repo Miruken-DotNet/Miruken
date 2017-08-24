@@ -62,6 +62,11 @@
             return HandlerDescriptor.GetPolicyMethods(this);
         }
 
+        public IEnumerable<PolicyMethodBinding> GetMethods<T>()
+        {
+            return HandlerDescriptor.GetPolicyMethods<T>(this);
+        }
+
         public IEnumerable<PolicyMethodBinding> GetMethods(object key)
         {
             return HandlerDescriptor.GetPolicyMethods(this, key);

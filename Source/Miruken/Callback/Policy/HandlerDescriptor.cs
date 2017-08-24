@@ -186,6 +186,11 @@ namespace Miruken.Callback.Policy
             }
         }
 
+        public static IEnumerable<PolicyMethodBinding> GetPolicyMethods<T>(CallbackPolicy policy)
+        {
+            return GetPolicyMethods(policy).Where(m => (m.Key as Type)?.Is<T>() == true);
+        }
+
         private static bool IsDefinition(MemberInfo member, object criteria)
         {
             if (member.DeclaringType == typeof(object))
