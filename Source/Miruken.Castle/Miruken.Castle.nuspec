@@ -10,9 +10,9 @@
     <projectUrl>https://github.com/Miruken-DotNet/Miruken</projectUrl>
     <iconUrl>https://avatars0.githubusercontent.com/u/20844317</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Miruken Castle</description>
+    <description>Miruken integration with Castle Windsor</description>
     <copyright>Copyright 2016</copyright>
-    <tags>Miruken miruken Castle castle</tags>
+    <tags>Miruken Castle</tags>
     <dependencies>
       <dependency id="Castle.Core" version="[3.3.3]"/>
       <dependency id="Castle.Windsor" version="[3.3.0]"/>

@@ -46,7 +46,7 @@
             var filters   = composer.GetOrderedFilters(
                 this, typeof(HandleMethod), typeof(object),
                 FilterAttribute.GetFilters(target.GetType(), true),
-                FilterAttribute.GetFilters(Dispatcher.Method))
+                Dispatcher.Attributes.OfType<FilterAttribute>())
                 .ToArray();
 
             bool handled;

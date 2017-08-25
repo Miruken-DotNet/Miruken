@@ -45,7 +45,7 @@
             Arguments  = method.GetParameters().Select(p => new Argument(p)).ToArray();
             ConfigureMethod(method);
             Method     = method;
-            Attributes = attributes;
+            Attributes = attributes ?? Attribute.GetCustomAttributes(method, false);
         }
 
         public MethodInfo  Method            { get; }

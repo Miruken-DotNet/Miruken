@@ -18,7 +18,7 @@
             if (dispatch == null)
                 throw new ArgumentNullException(nameof(dispatch));
             Dispatcher = dispatch;
-            AddFilters(FilterAttribute.GetFilters(Dispatcher.Method));
+            AddFilters(dispatch.Attributes.OfType<IFilterProvider>().ToArray());
         }
 
         public MethodDispatch Dispatcher { get; }
