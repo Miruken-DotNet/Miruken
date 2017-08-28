@@ -43,9 +43,9 @@
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
             Arguments  = method.GetParameters().Select(p => new Argument(p)).ToArray();
+            Attributes = attributes ?? Attribute.GetCustomAttributes(method, false);
             ConfigureMethod(method);
             Method     = method;
-            Attributes = attributes ?? Attribute.GetCustomAttributes(method, false);
         }
 
         public MethodInfo  Method            { get; }

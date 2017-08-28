@@ -5,14 +5,16 @@
     using System.Linq;
     using Callback;
     using Callback.Policy;
-    using global::Castle.DynamicProxy.Internal;
+    using global::Castle.Core.Internal;
     using global::Castle.MicroKernel.Registration;
+    using global::Castle.MicroKernel.SubSystems.Configuration;
     using Infrastructure;
 
     public class HandleFeature : FeatureInstaller
     {
         private FeatureFilter _filter;
-        private Action<ComponentRegistration> _configure;
+        private Action<ComponentRegistration> _configureHandlers;
+        private Action<ComponentRegistration> _configureFilters;
 
         public HandleFeature SelectHandlers(FeatureFilter filter)
         {
@@ -22,8 +24,22 @@
 
         public HandleFeature ConfigureHandlers(Action<ComponentRegistration> configure)
         {
-            _configure += configure;
+            _configureHandlers += configure;
             return this;
+        }
+
+        public HandleFeature ConfigureFiltersFeature(Action<ComponentRegistration> configure)
+        {
+            _configureFilters += configure;
+            return this;
+        }
+
+        protected override void Install(IConfigurationStore store)
+        {
+            base.Install(store);
+            var constrainedFilter = ConstrainedFilterSelector.Instance;
+            Container.Kernel.AddHandlerSelector(constrainedFilter);
+            Container.Kernel.AddHandlersFilter(constrainedFilter);
         }
 
         public override void InstallFeatures(FromDescriptor from)
@@ -37,11 +53,29 @@
                 {
                     basedOn.Configure(handler =>
                     {
-                        _configure?.Invoke(handler);
+                        _configureHandlers?.Invoke(handler);
                         HandlerDescriptor.GetDescriptor(handler.Implementation);
                     });
                 }
             }
+
+            from.BasedOn(typeof(IFilter<,>))
+                .WithServiceBase().WithServiceSelf()
+                .Configure(filter =>
+                {
+                    _configureFilters?.Invoke(filter);
+                    var constraint = ConstrainedFilterSelector
+                        .GetFilterConstraint(filter.Implementation);
+                    if (constraint != null)
+                    {
+                        filter.ExtendedProperties(
+                            Property.ForKey<ConstrainedFilterSelector>()
+                            .Eq(constraint));
+                        filter.ExtendedProperties(Property.ForKey(
+                            Constants.GenericImplementationMatchingStrategy)
+                                .Eq(ConstrainedFilterMatching.Instance));
+                    }
+                });
         }
 
         private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)
@@ -50,7 +84,7 @@
                 .WithServiceFromInterface()
                 .WithServiceSelf();
             yield return descriptor.Where(
-                type => type.Is<IHandler>() || type.Name.EndsWith("Handler"))
+                type => RuntimeHelper.Is<IHandler>(type) || type.Name.EndsWith("Handler"))
                 .WithServiceSelect(HandlerInterfaces)
                 .WithServiceSelf();
         }
@@ -61,6 +95,6 @@
         }
 
         private static readonly Type[] IgnoredHandlerServices =
-            { typeof(IHandler), typeof(IProtocolAdapter), typeof(IServiceProvider) };
+            { typeof(IHandler), typeof(IProtocolAdapter), typeof(IServiceProvider) };        
     }
 }
