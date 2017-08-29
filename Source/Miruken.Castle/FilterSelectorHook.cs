@@ -100,11 +100,21 @@
             ComponentModel model, CreationContext context)
         {
             var filter     = model.Implementation;
+            var filterArgs = filter.GetGenericArguments();
+            if (filterArgs.Length == 0) return null;
             var actualArgs = context.RequestedType.GetGenericArguments();
+            if (filterArgs.Length == 2) return actualArgs;
             var openFilter = filter.GetOpenTypeConformance(typeof(IFilter<,>));
-            return filter.GetGenericArguments().Select(arg =>
-                actualArgs[Array.IndexOf(openFilter.GetGenericArguments(), arg)]
-            ).ToArray();
+            var openArgs   = openFilter.GetGenericArguments();
+            var filterArg  = filterArgs[0];
+            for (var i = 0; i < 2; ++i)
+            {
+                var openArg = openArgs[i];
+                if (openArg == filterArg ||
+                    openArg.GetGenericArguments().Contains(filterArg))
+                    return new[] {actualArgs[i]};
+            }
+            return null;
         }
     }
 }
