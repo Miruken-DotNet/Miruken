@@ -40,9 +40,8 @@
         CastleHandler[] IHandlersFilter.SelectHandlers(
             Type service, CastleHandler[] handlers)
         {
-            var genericOverrides = new HashSet<Type>();
             handlers = handlers.OrderBy(PreferOverride).ToArray();
-            return handlers.Where(h => MatchHandler(service, h, genericOverrides))
+            return handlers.Where(h => MatchHandler(service, h))
                 .ToArray();
         }
 
@@ -66,14 +65,8 @@
             return service.GetOpenTypeConformance(typeof(IFilter<,>)) != null;
         }
 
-        private static bool MatchHandler(Type service, CastleHandler handler,
-                                         ISet<Type> genericOverrides = null)
+        private static bool MatchHandler(Type service, CastleHandler handler)
         {
-            if (genericOverrides != null && service.IsGenericType)
-            {
-                var openService = service.GetOpenTypeConformance(typeof(IFilter<,>));
-                if (!genericOverrides.Add(openService)) return false;
-            }
             var constraint = (Type)handler.ComponentModel
                 .ExtendedProperties[typeof(FilterSelectorHook)];
             return constraint == null || 

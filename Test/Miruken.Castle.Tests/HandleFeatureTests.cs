@@ -80,7 +80,7 @@
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
             handler.Resolve().Command(publish);
-            Assert.AreEqual(20, publish.Running);
+            Assert.AreEqual(8, publish.Running);
         }
 
         public class A { }
@@ -169,18 +169,6 @@
                 IHandler composer, NextDelegate<Res> next)
             {
                 job.Running++;
-                return next();
-            }
-        }
-
-        public class RunningPublishFilter : IFilter<PublishResults, object>
-        {
-            public int? Order { get; set; }
-
-            public object Next(PublishResults publish, MethodBinding method, 
-                IHandler composer, NextDelegate<object> next)
-            {
-                publish.Running += 10;
                 return next();
             }
         }
