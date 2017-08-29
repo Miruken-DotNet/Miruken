@@ -37,7 +37,7 @@
         protected override void Install(IConfigurationStore store)
         {
             base.Install(store);
-            var constrainedFilter = ConstrainedFilterSelector.Instance;
+            var constrainedFilter = FilterSelectorHook.Instance;
             Container.Kernel.AddHandlerSelector(constrainedFilter);
             Container.Kernel.AddHandlersFilter(constrainedFilter);
         }
@@ -64,16 +64,18 @@
                 .Configure(filter =>
                 {
                     _configureFilters?.Invoke(filter);
-                    var constraint = ConstrainedFilterSelector
-                        .GetFilterConstraint(filter.Implementation);
-                    if (constraint != null)
+                    var impl = filter.Implementation;
+                    if (impl.IsGenericType)
                     {
-                        filter.ExtendedProperties(
-                            Property.ForKey<ConstrainedFilterSelector>()
-                            .Eq(constraint));
+                        var constraint = FilterSelectorHook
+                            .GetFilterConstraint(impl);
+                        if (constraint != null)
+                            filter.ExtendedProperties(
+                                Property.ForKey<FilterSelectorHook>()
+                                .Eq(constraint));
                         filter.ExtendedProperties(Property.ForKey(
                             Constants.GenericImplementationMatchingStrategy)
-                                .Eq(ConstrainedFilterMatching.Instance));
+                                .Eq(FilterGenericsHook.Instance));
                     }
                 });
         }

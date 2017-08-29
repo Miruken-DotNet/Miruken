@@ -60,6 +60,18 @@
         }
 
         [TestMethod]
+        public void Should_Use_Most_Specific_Filter()
+        {
+            _container.Install(
+                new FeaturesInstaller(new HandleFeature())
+                   .Use(Classes.FromThisAssembly()));
+            var handler = new WindsorHandler(_container);
+            var clear   = new ClearResults();
+            handler.Resolve().Command(clear);
+            Assert.AreEqual(9, clear.Running);
+        }
+
+        [TestMethod]
         public void Should_Use_Filters_With_Matched_Constraints()
         {
             _container.Install(
@@ -68,7 +80,7 @@
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
             handler.Resolve().Command(publish);
-            Assert.IsTrue(publish.Running);
+            Assert.AreEqual(20, publish.Running);
         }
 
         public class A { }
@@ -98,10 +110,12 @@
 
         public class Job
         {
-            public bool Running { get; set; }
+            public int Running { get; set; }
         }
 
         public class GetResults { }
+
+        public class ClearResults : Job { }
 
         public class PublishResults : Job { }
 
@@ -114,25 +128,59 @@
             }
         }
 
+        [Filter(typeof(IFilter<,>))]
+        public class ClearResultsHandler : Handler
+        {
+            [Handles]
+            public void Clear(ClearResults clear)
+            {
+                clear.Running *= 3;
+            }
+        }
+
         [Filter(typeof(IFilter<,>), Many = true)]
         public class PublishResultsHandler : Handler
         {
             [Handles]
             public void Publish(PublishResults publish)
             {
+                publish.Running *= 2;
             }
         }
 
-        public class SingleRunFilter<T> : IFilter<T, object>
-            where T : Job
+        public class JobFilter<Res> : IFilter<Job, Res>
         {
             public int? Order { get; set; }
 
-            public object Next(T job, MethodBinding method,
+            public Res Next(Job job, MethodBinding method,
+                IHandler composer, NextDelegate<Res> next)
+            {
+                job.Running += 3;
+                return next();
+            }
+        }
+
+        public class RunningFilter<Req, Res> : IFilter<Req, Res>
+            where Req : Job
+        {
+            public int? Order { get; set; }
+
+            public Res Next(Req job, MethodBinding method,
+                IHandler composer, NextDelegate<Res> next)
+            {
+                job.Running++;
+                return next();
+            }
+        }
+
+        public class RunningPublishFilter : IFilter<PublishResults, object>
+        {
+            public int? Order { get; set; }
+
+            public object Next(PublishResults publish, MethodBinding method, 
                 IHandler composer, NextDelegate<object> next)
             {
-                if (job.Running) return null;
-                job.Running = true;
+                publish.Running += 10;
                 return next();
             }
         }

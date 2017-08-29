@@ -3,9 +3,9 @@
     using Callback;
     using Container;
 
-    public static class CompositeHandlerExtensions
+    public static class HandlerExtensions
     {
-        #region Add Handlers
+        #region Composite Add Handlers
 
         public static ICompositeHandler AddHandler<T>(
             this ICompositeHandler handler)
@@ -43,7 +43,7 @@
 
         #endregion
 
-        #region Insert Handlers
+        #region Composite Insert Handlers
 
         public static ICompositeHandler InsertHandler<T>(
             this ICompositeHandler handler, int atIndex)

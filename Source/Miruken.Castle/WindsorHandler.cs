@@ -31,7 +31,7 @@
         {
             Container.Kernel.Resolver.AddSubResolver(
                 new CollectionResolver(Container.Kernel, true));
-            Container.Kernel.Resolver.AddSubResolver(new ComposerSubDependencyResolver());
+            Container.Kernel.Resolver.AddSubResolver(new CompositionResolver());
         }
 
         public IWindsorContainer Container { get; }

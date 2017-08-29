@@ -54,10 +54,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComposerSubDependencyResolver.cs" />
-    <Compile Include="CompositeHandlerExtensions.cs" />
+    <Compile Include="CompositionResolver.cs" />
+    <Compile Include="HandlerExtensions.cs" />
     <Compile Include="ConfigurationFeature.cs" />
-    <Compile Include="ConstrainedFilterSelector.cs" />
+    <Compile Include="FilterSelectorHook.cs" />
     <Compile Include="ContextualLifestyleManager.cs" />
     <Compile Include="ContextualScopeAccessor.cs" />
     <Compile Include="ContravariantFilter.cs" />
