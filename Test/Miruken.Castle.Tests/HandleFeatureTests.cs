@@ -68,7 +68,7 @@
             var handler = new WindsorHandler(_container);
             var clear   = new ClearResults();
             handler.Resolve().Command(clear);
-            Assert.AreEqual(9, clear.Running);
+            Assert.AreEqual(-1, clear.Running);
         }
 
         [TestMethod]
@@ -80,7 +80,7 @@
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
             handler.Resolve().Command(publish);
-            Assert.AreEqual(8, publish.Running);
+            Assert.AreEqual(7, publish.Running);
         }
 
         public class A { }
@@ -145,6 +145,19 @@
             public void Publish(PublishResults publish)
             {
                 publish.Running *= 2;
+            }
+        }
+
+        public class JobFilter : IFilter<Job, object>
+        {
+            public int? Order { get; set; }
+
+            public object Next(Job job, MethodBinding method,
+                IHandler composer, NextDelegate<object> next)
+            {
+                var result = next();
+                job.Running--;
+                return result;
             }
         }
 
