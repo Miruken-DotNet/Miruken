@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Castle
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Callback;
     using global::Castle.Core;
@@ -45,7 +44,7 @@
                 .ToArray();
         }
 
-        public static Type GetFilterConstraint(Type filter)
+        public static Type[] GetFilterConstraints(Type filter)
         {
             if (filter.ContainsGenericParameters)
             {
@@ -54,7 +53,7 @@
                 if (Array.IndexOf(openFilter.GetGenericArguments(), genericArgs[0]) == 0)
                 {
                     var constraints = genericArgs[0].GetGenericParameterConstraints();
-                    if (constraints.Length == 1) return constraints[0];
+                    if (constraints.Length > 0) return constraints;
                 }
             }
             return null;
@@ -67,10 +66,11 @@
 
         private static bool MatchHandler(Type service, CastleHandler handler)
         {
-            var constraint = (Type)handler.ComponentModel
+            var constraints = (Type[])handler.ComponentModel
                 .ExtendedProperties[typeof(FilterSelectorHook)];
-            return constraint == null || 
-                service.GetGenericArguments()[0].Is(constraint);
+            if (constraints == null) return true;
+            var callback = service.GetGenericArguments()[0];
+            return constraints.All(constraint => callback.Is(constraint));
         }
 
         private static int PreferOverride(CastleHandler handler)

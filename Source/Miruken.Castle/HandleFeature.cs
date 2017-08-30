@@ -67,12 +67,12 @@
                     var impl = filter.Implementation;
                     if (impl.IsGenericType)
                     {
-                        var constraint = FilterSelectorHook
-                            .GetFilterConstraint(impl);
-                        if (constraint != null)
+                        var constraints = FilterSelectorHook
+                            .GetFilterConstraints(impl);
+                        if (constraints != null && constraints.Length > 0)
                             filter.ExtendedProperties(
                                 Property.ForKey<FilterSelectorHook>()
-                                .Eq(constraint));
+                                .Eq(constraints));
                         filter.ExtendedProperties(Property.ForKey(
                             Constants.GenericImplementationMatchingStrategy)
                                 .Eq(FilterGenericsHook.Instance));
