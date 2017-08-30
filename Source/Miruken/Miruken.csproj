@@ -74,7 +74,6 @@
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
-    <Compile Include="Infrastructure\Either.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
