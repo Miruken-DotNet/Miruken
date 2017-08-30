@@ -20,6 +20,20 @@
             _isLeft = false;
         }
 
+        public void Match(Action<TL> matchLeft, Action<TR> matchRight)
+        {
+            if (matchLeft == null)
+                throw new ArgumentNullException(nameof(matchLeft));
+
+            if (matchRight == null)
+                throw new ArgumentNullException(nameof(matchRight));
+
+            if (_isLeft)
+                matchLeft(_left);
+            else
+                matchRight(_right);
+        }
+
         public T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight)
         {
             if (matchLeft == null)
