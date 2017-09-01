@@ -4,21 +4,22 @@
 
     public class Either<TL, TR>
     {
-        private readonly TL _left;
-        private readonly TR _right;
         private readonly bool _isLeft;
 
         public Either(TL left)
         {
-            _left = left;
+            Left    = left;
             _isLeft = true;
         }
 
         public Either(TR right)
         {
-            _right = right;
+            Right = right;
             _isLeft = false;
         }
+
+        public TL Left  { get; }
+        public TR Right { get; }
 
         public void Match(Action<TL> matchLeft, Action<TR> matchRight)
         {
@@ -29,9 +30,9 @@
                 throw new ArgumentNullException(nameof(matchRight));
 
             if (_isLeft)
-                matchLeft(_left);
+                matchLeft(Left);
             else
-                matchRight(_right);
+                matchRight(Right);
         }
 
         public T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight)
@@ -42,7 +43,7 @@
             if (matchRight == null)
                 throw new ArgumentNullException(nameof(matchRight));
 
-            return _isLeft ? matchLeft(_left) : matchRight(_right);
+            return _isLeft ? matchLeft(Left) : matchRight(Right);
         }
 
         public TL LeftOrDefault() => Match(l => l, r => default(TL));
