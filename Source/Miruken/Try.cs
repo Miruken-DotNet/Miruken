@@ -16,6 +16,10 @@
         }
 
         public bool IsError { get; }
+
+        public static implicit operator Try<TE, TR>(TE error) => new Try<TE, TR>(error);
+        public static implicit operator Try<TE, TR>(TR result) => new Try<TE, TR>(result);
+
     }
 
     public class Try<TR> : Try<Exception, TR>
