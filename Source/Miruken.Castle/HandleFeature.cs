@@ -42,6 +42,11 @@
             Container.Kernel.AddHandlersFilter(constrainedFilter);
         }
 
+        protected internal override IEnumerable<FromDescriptor> GetFeatures()
+        {
+            yield return Classes.FromAssemblyContaining<Provider>();
+        }
+
         public override void InstallFeatures(FromDescriptor from)
         {
             var selection = _filter ?? SelectDefault;

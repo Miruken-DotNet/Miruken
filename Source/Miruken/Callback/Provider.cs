@@ -1,30 +1,29 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-
-    public delegate bool ProvidesDelegate(
-        Inquiry inquiry, bool greedy, IHandler composer);
+    using Infrastructure;
 
     public class Provider : Handler
     {
-        private readonly ProvidesDelegate _provider;
+        private readonly object _value;
+        private readonly Type _providesType;
 
-        public Provider(ProvidesDelegate provider)
+        public Provider(object value)
         {
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
-            _provider = provider;
+            _value = value;
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            _providesType = value.GetType();
+            if (_providesType.IsArray)
+                _providesType = _providesType.GetElementType();
         }
 
-        protected override bool HandleCallback(
-            object callback, ref bool greedy, IHandler composer)
+        [Provides]
+        public object Provide(Inquiry inquiry)
         {
-            var compose = callback as Composition;
-            if (compose != null)
-                callback = compose.Callback;
-
-            var inquiry = callback as Inquiry;
-            return inquiry != null && _provider(inquiry, greedy, composer);
+            var type = inquiry.Key as Type;
+            if (type == null) return null;
+            return _providesType.Is(type) ? _value : null;
         }
     }
 }

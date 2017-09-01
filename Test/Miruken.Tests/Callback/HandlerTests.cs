@@ -560,7 +560,7 @@
             var foo1    = new Foo();
             var foo2    = new Foo();
             var handler = new Handler();
-            var foos    = handler.ProvideMany(new [] {foo1, foo2}).ResolveAll<Foo>();
+            var foos    = handler.Provide(new [] {foo1, foo2}).ResolveAll<Foo>();
             CollectionAssert.AreEqual(new [] {foo1, foo2}, foos);
         }
 

@@ -237,6 +237,34 @@
         }
 
         [TestMethod]
+        public void Should_Override_Providers()
+        {
+            var demo    = new DemoHandler();
+            var handler = new Handler();
+            var resolve = handler.Resolve().Provide(demo).Resolve<DemoHandler>();
+            Assert.AreSame(demo, resolve);
+        }
+
+        [TestMethod]
+        public void Should_Override_Providers_Polymorphically()
+        {
+            var email   = new EmailHandler();
+            var handler = new Handler();
+            var resolve = handler.Resolve().Provide(email).Resolve<IEmailFeature>();
+            Assert.AreSame(email, resolve);
+        }
+
+        [TestMethod]
+        public void Should_Override_Providers_Resolving()
+        {
+            HandlerDescriptor.GetDescriptor<Provider>();
+            var demo    = new DemoHandler();
+            var handler = new Handler();
+            var resolve = handler.Provide(demo).Resolve().Resolve<DemoHandler>();
+            Assert.AreSame(demo, resolve);
+        }
+
+        [TestMethod]
         public void Should_Resolve_Handlers()
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();

@@ -1,8 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Collections.Generic;
-    using Infrastructure;
 
     public static class HandlerHelpers
     {
@@ -55,39 +53,7 @@
 
         public static IHandler Provide<R>(this IHandler handler, R result)
         {
-            return Provide(handler, (inquiry, greedy, composer) =>
-            {
-                var type = inquiry.Key as Type;
-                if (type.Is<R>())
-                {
-                    inquiry.Resolve(result, false, greedy, composer);
-                    return true;
-                }
-                return false;
-            });
-        }
-
-        public static IHandler ProvideMany<R>(this IHandler handler, IEnumerable<R> result)
-        {
-            return Provide(handler, (inquiry, greedy, composer) =>
-            {
-                var resolved = false;
-                var type     = inquiry.Key as Type;
-                if (type.Is<R>())
-                {
-                    foreach (var r in result)
-                    {
-                        resolved = inquiry.Resolve(r, false, greedy, composer) || resolved;
-                        if (resolved && !inquiry.Many) return true;
-                    }
-                }
-                return resolved;
-            });
-        }
-
-        public static IHandler Provide(this IHandler handler, ProvidesDelegate provider)
-        {
-            return new Provider(provider) + handler;
+            return new Provider(result) + handler;
         }
 
         public static HandlerFilter Filter(
