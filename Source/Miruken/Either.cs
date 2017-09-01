@@ -4,8 +4,9 @@
 
     public interface IEither
     {
-        object Left  { get; set; }
-        object Right { get; set; }
+        bool   IsLeft { get; }
+        object Left   { get; set; }
+        object Right  { get; set; }
     }
 
     public class Either<TL, TR> : IEither
@@ -30,6 +31,8 @@
 
         public TL Left  { get; private set; }
         public TR Right { get; private set; }
+
+        bool IEither.IsLeft => _isLeft;
 
         object IEither.Left
         {
