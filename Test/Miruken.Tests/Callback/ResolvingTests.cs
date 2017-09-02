@@ -257,7 +257,7 @@
         [TestMethod]
         public void Should_Override_Providers_Resolving()
         {
-            HandlerDescriptor.GetDescriptor<Provider>();
+            HandlerDescriptor.GetDescriptor<DemoProvider>();
             var demo    = new DemoHandler();
             var handler = new Handler();
             var resolve = handler.Provide(demo).Resolve().Resolve<DemoHandler>();
