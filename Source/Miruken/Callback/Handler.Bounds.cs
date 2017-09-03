@@ -20,9 +20,9 @@
         }
     }
 
-    public static class HandlerScopeExtensions
+    public static class HandlerBoundsExtensions
     {
-        public static IHandler Stop(this IHandler handler, object bounds = null)
+        public static IHandler Break(this IHandler handler, object bounds = null)
         {
             return handler != null ? new HandlerBounds(handler, bounds) : null;
         }

@@ -32,8 +32,8 @@
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
                 .Where(f => AllowFilterType(f, binding))
                 .SelectMany(filterType => Many
-                    ? composer.Stop().ResolveAll(filterType)
-                    : new[] {composer.Stop().Resolve(filterType)})
+                    ? composer.Break().ResolveAll(filterType)
+                    : new[] {composer.Break().Resolve(filterType)})
                 .OfType<IFilter>()
                 .Where(f => UseFilterInstance(f, binding));
 
