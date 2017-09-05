@@ -67,8 +67,12 @@
                     if (_cache == null) return;
                     token.Upgrade();
                     var localCache = Interlocked.Exchange(ref _cache, null);
-                    localCache?.Values.Reverse().ForEach(b => b.Release());
-                    _cache = null;
+                    var burdens    = localCache?.Values.Reverse();
+                    if (burdens != null)
+                    {
+                        foreach (var burden in burdens)
+                            burden.Release();
+                    }
                 }
             }
 
