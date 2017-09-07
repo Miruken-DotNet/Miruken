@@ -1,5 +1,7 @@
 ﻿namespace Miruken.Map.Tests
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Callback;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -23,7 +25,21 @@
                 Name = "Tim Howard"
             };
             var data = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().MapFrom<PlayerData>(entity);
+                .Proxy<IMapping>().Map<PlayerData>(entity);
+            Assert.AreEqual(entity.Id, data.Id);
+            Assert.AreEqual(entity.Name, data.Name);
+        }
+
+        [TestMethod]
+        public async Task Should_Perform_Implicit_Mapping_Async()
+        {
+            var entity = new PlayerEntity
+            {
+                Id   = 2,
+                Name = "David Silva"
+            };
+            var data = await (new EntityMapping() + _handler)
+                .Proxy<IMapping>().MapAsync<PlayerData>(entity);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
@@ -42,7 +58,7 @@
 
         private class EntityMapping : Handler
         {
-            [MapsFrom]
+            [Maps]
             public PlayerData MapFromEntity(PlayerEntity entity)
             {
                 return new PlayerData
@@ -50,6 +66,25 @@
                     Id   = entity.Id,
                     Name = entity.Name
                 };
+            }
+        }
+
+        private class DictionaryMapping : Handler
+        {
+            [Maps]
+            public IDictionary<string, object> MapToDictionary(PlayerEntity entity)
+            {
+                return new Dictionary<string, object>
+                {
+                    { "Id",   entity.Id },
+                    { "Name", entity.Name }
+                };
+            }
+
+            [Maps]
+            public PlayerEntity MapToEntity(IDictionary<string, object> keyValues)
+            {
+                return null;
             }
         }
     }

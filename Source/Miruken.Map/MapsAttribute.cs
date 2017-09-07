@@ -5,7 +5,7 @@
     using Callback;
     using Callback.Policy;
 
-    public class MapsFromAttribute : DefinitionAttribute
+    public class MapsAttribute : DefinitionAttribute
     {
         public override CallbackPolicy CallbackPolicy => Policy;
 
@@ -16,14 +16,12 @@
             var dispatch = binding.Dispatcher;
             var formats  = dispatch.Attributes
                 .OfType<IFormatMatching>().ToArray();
-            if (formats.Any(f => f.Matches(format)))
-                return true;
+            if (formats.Any(f => f.Matches(format))) return true;
             var sharedFormats = dispatch.Owner.Attributes
                 .OfType<IFormatMatching>() .ToArray();
-            if (sharedFormats.Any(f => f.Matches(format)))
-                return true;
+            if (sharedFormats.Any(f => f.Matches(format))) return true;
             return formats.Length == 0 && sharedFormats.Length == 0
-                && format as Type == dispatch.ReturnType;
+                && format as Type == dispatch.LogicalReturnType;
         }
 
         public static readonly CallbackPolicy Policy =

@@ -44,14 +44,13 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AnyFormatAttribute.cs" />
     <Compile Include="FormatAttribute.cs" />
+    <Compile Include="AnyFormatAttribute.cs" />
     <Compile Include="IFormatMatching.cs" />
     <Compile Include="IMapping.cs" />
-    <Compile Include="MapCallback.cs" />
+    <Compile Include="MapFrom.cs" />
     <Compile Include="MappingHandler.cs" />
-    <Compile Include="MapsToAttribute.cs" />
-    <Compile Include="MapsFromAttribute.cs" />
+    <Compile Include="MapsAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
