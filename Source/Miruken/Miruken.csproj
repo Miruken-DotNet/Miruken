@@ -73,8 +73,8 @@
     <Compile Include="Callback\Policy\GenericMapping.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
-    <Compile Include="Either.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
+    <Compile Include="Monads.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\ArgumentRule.cs" />
@@ -143,7 +143,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs" />
     <Compile Include="Protocol.cs" />
-    <Compile Include="Try.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx" />

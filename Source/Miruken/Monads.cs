@@ -15,13 +15,13 @@
 
         public Either(TL left)
         {
-            Left    = left;
+            Left = left;
             _isLeft = true;
         }
 
         public Either(TR right)
         {
-            Right   = right;
+            Right = right;
             _isLeft = false;
         }
 
@@ -41,7 +41,7 @@
             {
                 if (value is TL)
                 {
-                    Left    = (TL)value;
+                    Left = (TL)value;
                     _isLeft = true;
                 }
                 else
@@ -56,7 +56,7 @@
             {
                 if (value is TR)
                 {
-                    Right   = (TR)value;
+                    Right = (TR)value;
                     _isLeft = false;
                 }
                 else
@@ -94,5 +94,24 @@
 
         public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
         public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);
+    }
+
+    public class Try<TE, TR> : Either<TE, TR>
+    {
+        public Try(TR result)
+             : base(result)
+        {
+        }
+
+        public Try(TE error)
+            : base(error)
+        {
+            IsError = true;
+        }
+
+        public bool IsError { get; }
+
+        public static implicit operator Try<TE, TR>(TE error) => new Try<TE, TR>(error);
+        public static implicit operator Try<TE, TR>(TR result) => new Try<TE, TR>(result);
     }
 }

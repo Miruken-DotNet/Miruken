@@ -86,13 +86,19 @@
         public override object GetKey(object callback)
         {
             return callback is Cb
-                 ? Target((Cb)callback)?.GetType()
+                 ? GetTargetType((Cb)callback)
                  : callback?.GetType();
         }
 
         public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
         {
             return CompatibleTypes(key as Type, keys);
+        }
+
+        private Type GetTargetType(Cb callback)
+        {
+            var target = Target(callback);
+            return target as Type ?? target?.GetType();
         }
     }
 
