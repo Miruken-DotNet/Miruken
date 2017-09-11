@@ -25,12 +25,12 @@
         }
 
         public static CovariantPolicy<Cb> Create<Cb>(
-            Func<Cb, object> target,
+            Func<Cb, object> key,
             Action<CovariantPolicyBuilder<Cb>> build)
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy  = new CovariantPolicy<Cb>(target);
+            var policy  = new CovariantPolicy<Cb>(key);
             var builder = new CovariantPolicyBuilder<Cb>(policy);
             build(builder);
             return policy;
@@ -51,7 +51,7 @@
 
         public override object GetKey(object callback)
         {
-            return callback is Cb ? Key((Cb) callback) : null;
+            return callback is Cb ? Key((Cb)callback) : null;
         }
 
         public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)

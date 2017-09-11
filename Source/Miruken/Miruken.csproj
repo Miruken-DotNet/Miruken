@@ -69,6 +69,7 @@
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />
+    <Compile Include="Callback\Policy\BivariantPolicy.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\Policy\GenericMapping.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />

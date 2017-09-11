@@ -3,7 +3,7 @@
     using System;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
-        AllowMultiple = true, Inherited = false)]
+        Inherited = false)]
     public class FormatAttribute : Attribute, IFormatMatching
     {
         public FormatAttribute(object format)

@@ -42,7 +42,7 @@
                     returnType = returnType.GetElementType();
                 if (returnType.IsSimpleType())
                 {
-                    var method = dispatch.Method;
+                    var method     = dispatch.Method;
                     var methodName = method.Name;
                     if (method.IsSpecialName)
                     {
