@@ -110,6 +110,16 @@
         }
 
         [TestMethod]
+        public void Should_Map_Simple_Results()
+        {
+            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            var exception = new NotSupportedException("Close not found");
+            var value     = (new ExceptionMapping() + _handler).Resolve()
+                .Proxy<IMapping>().Map<object>(exception);
+            Assert.AreEqual(500, value);
+        }
+
+        [TestMethod]
         public void Should_Perform_Open_Mapping()
         {
             var entity = new PlayerEntity
@@ -178,6 +188,12 @@
             public string MapArgumentException(ArgumentException ex)
             {
                 return ex.ToString();
+            }
+
+            [Maps]
+            public int MapArgumentException(NotSupportedException ex)
+            {
+                return 500;
             }
         }
 
