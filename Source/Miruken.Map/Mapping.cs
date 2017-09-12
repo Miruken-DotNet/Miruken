@@ -6,12 +6,12 @@
     using Callback.Policy;
     using Concurrency;
 
-    public class MapFrom : 
+    public class Mapping : 
         ICallback, IAsyncCallback, IDispatchCallback
     {
         private object _result;
 
-        public MapFrom(object source, object format,
+        public Mapping(object source, object format,
                        object typeOrInstance)
         {
             if (source == null)
@@ -53,7 +53,8 @@
             object handler, ref bool greedy, IHandler composer)
         {
             return Policy.Dispatch(
-                handler, this, greedy, composer, SetMapping);
+                handler, this, greedy, composer, SetMapping)
+                || _result != null;
         }
 
         private bool SetMapping(object mapping, bool strict)

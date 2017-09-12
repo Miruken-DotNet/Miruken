@@ -14,12 +14,12 @@
     {
         public class SendEmail
         {
-            public string Message { get; set; }
+            public string Body { get; set; }
         }
 
         public class SendEmail<T>
         {
-            public T Message { get; set; }
+            public T Body { get; set; }
         }
 
         private interface IEmailFeature : IResolving
@@ -53,13 +53,13 @@
             [Handles]
             public int Send(SendEmail send)
             {
-                return Email(send.Message);
+                return Email(send.Body);
             }
 
             [Handles]
             public int Send<T>(SendEmail<T> send)
             {
-                return Email(send.Message.ToString());
+                return Email(send.Body.ToString());
             }
         }
 
@@ -116,7 +116,7 @@
             [Handles]
             public int Send(SendEmail send)
             {
-                return ((IEmailFeature)this).Email(send.Message);
+                return ((IEmailFeature)this).Email(send.Body);
             }
         }
 
@@ -270,7 +270,7 @@
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider();
             var id      = handler.Resolve()
-                .Command<int>(new SendEmail {Message = "Hello"});
+                .Command<int>(new SendEmail {Body = "Hello"});
             Assert.AreEqual(1, id);
         }
 
@@ -280,7 +280,7 @@
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailHandler();
             var id      = handler.Resolve()
-                .Command<int>(new SendEmail { Message = "Hello" });
+                .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(1, id);
         }
 
@@ -290,7 +290,7 @@
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider();
             var id      = handler.Resolve()
-                .Command<int>(new SendEmail<int> { Message = 22 });
+                .Command<int>(new SendEmail<int> { Body = 22 });
             Assert.AreEqual(1, id);
         }
 
@@ -302,7 +302,7 @@
             var handler = new EmailProvider()
                         + new OfflineProvider();
             var id      = handler.ResolveAll()
-                .Command<int>(new SendEmail { Message = "Hello" });
+                .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(1, id);
         }
 
@@ -333,7 +333,7 @@
         public void Should_Fail_If_No_Resolve_Handlers()
         {
             var handler = new HandlerAdapter(new Billing());
-            handler.Resolve().Command<int>(new SendEmail { Message = "Hello" });
+            handler.Resolve().Command<int>(new SendEmail { Body = "Hello" });
         }
 
         [TestMethod]

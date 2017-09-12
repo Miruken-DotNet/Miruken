@@ -6,6 +6,15 @@
 
     public abstract class BivariantPolicy : CallbackPolicy
     {
+        public override object CreateKey(PolicyMethodBindingInfo bindingInfo)
+        {
+            var inKey  = bindingInfo.InKey;
+            var outKey = bindingInfo.OutKey;
+            return inKey != null && outKey != null
+                 ? Tuple.Create(outKey, inKey)
+                 : null;
+        }
+
         public static BivariantPolicy<Cb> Create<Cb>(
             Func<Cb, object> key, Func<Cb, object> target,
             Action<BivariantPolicyBuilder<Cb>> build)
@@ -33,15 +42,22 @@
 
         public override object GetKey(object callback)
         {
-            return Tuple.Create(Output.GetKey(callback), Input.GetKey(callback));
+            return Tuple.Create(
+                Output.GetKey(callback),
+                Input.GetKey(callback));
         }
 
         public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
         {
             var tuple = key as Tuple<object, object>;
             if (tuple == null) return Enumerable.Empty<object>();
-            keys = Output.GetCompatibleKeys(tuple.Item1, keys);
-            return Input.GetCompatibleKeys(tuple.Item2, keys);
+            var inKey  = tuple.Item2;
+            var outKey = tuple.Item1;
+            return keys.OfType<Tuple<object, object>>().Where(testKey =>
+                (Equals(testKey.Item1, outKey) || Output.GetCompatibleKeys(outKey,
+                    new[] { testKey.Item1 }).GetEnumerator().MoveNext()) &&
+                (Equals(testKey.Item2, inKey) ||Input.GetCompatibleKeys(inKey,
+                    new[] { testKey.Item2 }).GetEnumerator().MoveNext()));
         }
     }
 

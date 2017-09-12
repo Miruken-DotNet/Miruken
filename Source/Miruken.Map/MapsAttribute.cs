@@ -1,35 +1,33 @@
 ﻿namespace Miruken.Map
 {
     using System;
-    using System.Linq;
     using Callback;
     using Callback.Policy;
 
     public class MapsAttribute : DefinitionAttribute
     {
-        public override CallbackPolicy CallbackPolicy => Policy;
-
-        public object Format { get; set; }
-
-        public override bool Approve(object callback, PolicyMethodBinding binding)
-        {
-            var mapsFrom = (MapFrom)callback;
-            var format   = mapsFrom.Format;
-            var dispatch = binding.Dispatcher;
-            if (Format != null)
-                return Equals(format, Format);
-           var shared = dispatch.Owner.Attributes
-                .OfType<IFormatMatching>()
-                .SingleOrDefault();
-            if (shared != null)
-                return shared.Matches(format);
-            return format as Type == dispatch.LogicalReturnType;
+        public MapsAttribute()
+        {         
         }
 
+        public MapsAttribute(Type key)
+        {
+            InKey = key;
+        }
+
+        public object Format
+        {
+            get { return OutKey; }
+            set { OutKey = value; }
+        }
+
+        public override CallbackPolicy CallbackPolicy => Policy;
+
         public static readonly CallbackPolicy Policy =
-            ContravariantPolicy.Create<MapFrom>(m => m.Source,
-                x => x.MatchCallbackMethod(x.Target, x.Extract(v => v.Format))
-                      .MatchCallbackMethod(x.Target)
+            BivariantPolicy.Create<Mapping>(m => m.Format, m => m.Source,
+                x => x.MatchCallbackMethod(x.ReturnKey, x.Target, x.Extract(v => v.Format))
+                      .MatchCallbackMethod(x.ReturnKey, x.Target)
+                      .MatchMethod(x.ReturnKey.OrVoid, x.Callback)
             );
     }
 }

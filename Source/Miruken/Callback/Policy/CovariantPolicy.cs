@@ -61,7 +61,7 @@
                 return keys.Cast<object>().Where(k => 
                     !Equals(key, k) && Equals(k, key));
             return type == typeof(object) 
-                 ? keys.OfType<Type>().Where(t => !t.IsGenericTypeDefinition)
+                 ? keys.Cast<object>().Where(t => (t as Type)?.IsGenericTypeDefinition != true)
                  : keys.OfType<Type>().Where(t => t != type && AcceptKey(type, t))
                       .OrderBy(t => t, this);
         }

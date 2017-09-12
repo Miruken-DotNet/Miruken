@@ -39,7 +39,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Implicitly__Adapter()
+        public void Should_Handle_Callbacks_Implicitly_Adapter()
         {
             var foo     = new Foo();
             var handler = new HandlerAdapter(new Controller());

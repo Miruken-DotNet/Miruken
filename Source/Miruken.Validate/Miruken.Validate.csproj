@@ -56,7 +56,7 @@
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IScopeMatching.cs" />
     <Compile Include="IValidationAware.cs" />
-    <Compile Include="IValidator.cs" />
+    <Compile Include="IValidating.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scopes.cs" />
     <Compile Include="ValidatesAttribute.cs" />
