@@ -9,21 +9,20 @@
     {
         public override CallbackPolicy CallbackPolicy => Policy;
 
+        public object Format { get; set; }
+
         public override bool Approve(object callback, PolicyMethodBinding binding)
         {
             var mapsFrom = (MapFrom)callback;
             var format   = mapsFrom.Format;
             var dispatch = binding.Dispatcher;
-            var accepts  = dispatch.Attributes
+            if (Format != null)
+                return Equals(format, Format);
+           var shared = dispatch.Owner.Attributes
                 .OfType<IFormatMatching>()
                 .SingleOrDefault();
-            if (accepts != null)
-                return accepts.Matches(format);
-           accepts = dispatch.Owner.Attributes
-                .OfType<IFormatMatching>()
-                .SingleOrDefault();
-            if (accepts != null)
-                return accepts.Matches(format);
+            if (shared != null)
+                return shared.Matches(format);
             return format as Type == dispatch.LogicalReturnType;
         }
 

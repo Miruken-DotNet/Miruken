@@ -10,7 +10,7 @@
 
         public HandlesAttribute(object key)
         {
-            Key = key;
+            InKey = key;
         }
 
         public override CallbackPolicy CallbackPolicy => Policy;

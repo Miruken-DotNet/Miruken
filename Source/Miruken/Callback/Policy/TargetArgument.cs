@@ -50,7 +50,7 @@ namespace Miruken.Callback.Policy
                         return false;
                 }
             }
-            var restrict = attribute.Key as Type;
+            var restrict = attribute.InKey as Type;
             if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
             {
                 if (_alias != null)
@@ -62,9 +62,9 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(ParameterInfo parameter,
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            var key       = policyMethodBindingInfo.Key;
+            var key       = policyMethodBindingInfo.InKey;
             var restrict  = key as Type;
             var paramType = parameter.ParameterType;
             policyMethodBindingInfo.CallbackIndex = parameter.Position;
@@ -77,7 +77,7 @@ namespace Miruken.Callback.Policy
             }
             if (paramType != typeof(object) &&
                 (restrict == null || paramType.Is(restrict)))
-                policyMethodBindingInfo.Key = paramType;
+                policyMethodBindingInfo.InKey = paramType;
         }
 
         public override object Resolve(object callback)

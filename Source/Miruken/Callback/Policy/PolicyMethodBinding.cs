@@ -8,9 +8,9 @@
 
     public delegate PolicyMethodBinding BindMethodDelegate(
         CallbackPolicy policy,
-        ref PolicyMethodBindingInfo policyMethodBindingInfo);
+        PolicyMethodBindingInfo policyMethodBindingInfo);
 
-    public struct PolicyMethodBindingInfo
+    public class PolicyMethodBindingInfo
     {
         public PolicyMethodBindingInfo(
             MethodRule rule, MethodDispatch dispatch,
@@ -19,11 +19,13 @@
             Rule          = rule;
             Dispatch      = dispatch;
             Definition    = definition;
-            Key           = definition.Key;
+            InKey         = definition.InKey;
+            OutKey        = definition.OutKey;
             CallbackIndex = null;
         }
 
-        public object              Key;
+        public object              InKey;
+        public object              OutKey;
         public int?                CallbackIndex;
         public MethodRule          Rule           { get; }
         public MethodDispatch      Dispatch       { get; }
@@ -33,14 +35,14 @@
     public class PolicyMethodBinding : MethodBinding
     {
         public PolicyMethodBinding(CallbackPolicy policy,
-                                   ref PolicyMethodBindingInfo bindingInfo)
+                                   PolicyMethodBindingInfo bindingInfo)
             : base(bindingInfo.Dispatch)
         {
             Policy        = policy;
             Rule          = bindingInfo.Rule;
             Definition    = bindingInfo.Definition;
             CallbackIndex = bindingInfo.CallbackIndex;
-            Key           = NormalizeKey(ref bindingInfo);
+            Key           = policy.CreateKey(bindingInfo);
         }
 
         public MethodRule          Rule          { get; }
@@ -173,17 +175,6 @@
             }
             callbackType = callback.GetType();
             return callback;
-        }
-
-        private static object NormalizeKey(ref PolicyMethodBindingInfo bindingInfo)
-        {
-            var key = bindingInfo.Key;
-            var varianceType = key as Type;
-            if (varianceType == null) return key;
-            if (varianceType.ContainsGenericParameters &&
-                !varianceType.IsGenericTypeDefinition)
-                varianceType = varianceType.GetGenericTypeDefinition();
-            return varianceType;
         }
 
         private static object[] UpdateArgs(object[] args,

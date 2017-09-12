@@ -14,7 +14,7 @@
             DefinitionAttribute attribute,
             IDictionary<string, Type> aliases);
 
-        public virtual void Configure(ref PolicyMethodBindingInfo policyMethodBindingInfo) { }
+        public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
         public virtual R GetSubRule<R>() where R : ReturnRule
         {
@@ -47,9 +47,9 @@
         }
 
         public override void Configure(
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            Rule.Configure(ref policyMethodBindingInfo);
+            Rule.Configure(policyMethodBindingInfo);
         }
 
         public override R GetSubRule<R>()
@@ -74,10 +74,10 @@
         }
 
         public override void Configure(
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
             if (!policyMethodBindingInfo.Dispatch.IsVoid)
-                Rule.Configure(ref policyMethodBindingInfo);
+                Rule.Configure(policyMethodBindingInfo);
         }
     }
 }

@@ -13,12 +13,12 @@
 
         public ProvidesAttribute(object key)
         {
-            Key = key;
+            OutKey = key;
         }
 
         public ProvidesAttribute(string key, StringComparison comparison)
         {
-            Key = new StringKey(key, comparison);
+            OutKey = new StringKey(key, comparison);
         }
 
         public override CallbackPolicy CallbackPolicy => Policy;

@@ -22,7 +22,7 @@
            IDictionary<string, Type> aliases);
 
         public virtual void Configure(ParameterInfo parameter,
-            ref PolicyMethodBindingInfo policyMethodBindingInfo) { }
+            PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
         public abstract object Resolve(object callback);
     }
@@ -46,9 +46,9 @@
         }
 
         public override void Configure(ParameterInfo parameter,
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            Argument.Configure(parameter, ref policyMethodBindingInfo);
+            Argument.Configure(parameter, policyMethodBindingInfo);
         }
 
         public override object Resolve(object callback)

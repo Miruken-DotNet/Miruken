@@ -12,7 +12,7 @@
 
         public ValidatesAttribute(Type key)
         {
-            Key = key;
+            InKey = key;
         }
 
         public object Scope { get; set; }

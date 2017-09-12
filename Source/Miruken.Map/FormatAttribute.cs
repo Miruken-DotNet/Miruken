@@ -2,8 +2,7 @@
 {
     using System;
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
-        Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class FormatAttribute : Attribute, IFormatMatching
     {
         public FormatAttribute(object format)

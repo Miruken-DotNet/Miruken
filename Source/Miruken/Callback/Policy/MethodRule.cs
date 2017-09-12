@@ -7,7 +7,7 @@ namespace Miruken.Callback.Policy
     using Infrastructure;
 
     public delegate PolicyMethodBinding MethodBinder(
-        ref PolicyMethodBindingInfo policyMethodBindingInfo);
+        PolicyMethodBindingInfo policyMethodBindingInfo);
 
     public class MethodRule
     {
@@ -51,11 +51,11 @@ namespace Miruken.Callback.Policy
             MethodDispatch dispatch, DefinitionAttribute attribute)
         {
             var policyBindingInfo = new PolicyMethodBindingInfo(this, dispatch, attribute);
-            ReturnValue?.Configure(ref policyBindingInfo);
+            ReturnValue?.Configure(policyBindingInfo);
             var parameters = dispatch.Method.GetParameters();
             for (var i = 0; i < Args.Length; ++i)
-                Args[i].Configure(parameters[i], ref policyBindingInfo);
-            return _binder(ref policyBindingInfo);
+                Args[i].Configure(parameters[i], policyBindingInfo);
+            return _binder(policyBindingInfo);
         }
 
         public object[] ResolveArgs(object callback)

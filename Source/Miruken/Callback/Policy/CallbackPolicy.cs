@@ -34,10 +34,27 @@
         }
 
         public virtual PolicyMethodBinding BindMethod(
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            return Binder?.Invoke(this, ref policyMethodBindingInfo)
-                ?? new PolicyMethodBinding(this, ref policyMethodBindingInfo);
+            return Binder?.Invoke(this, policyMethodBindingInfo)
+                ?? new PolicyMethodBinding(this, policyMethodBindingInfo);
+        }
+
+        public virtual object CreateKey(PolicyMethodBindingInfo bindingInfo)
+        {
+            return bindingInfo.InKey != null
+                 ? NormalizeKey(bindingInfo.InKey)
+                 : NormalizeKey(bindingInfo.OutKey);
+        }
+
+        protected object NormalizeKey(object key)
+        {
+            var varianceType = key as Type;
+            if (varianceType == null) return key;
+            if (varianceType.ContainsGenericParameters &&
+                !varianceType.IsGenericTypeDefinition)
+                varianceType = varianceType.GetGenericTypeDefinition();
+            return varianceType;
         }
 
         public abstract object GetKey(object callback);

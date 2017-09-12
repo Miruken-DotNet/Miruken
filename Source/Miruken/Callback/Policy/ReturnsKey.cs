@@ -21,17 +21,17 @@
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            var restrict = attribute.Key as Type;
+            var restrict = attribute.OutKey as Type;
             if (restrict == null || returnType.Is(restrict) || restrict.Is(returnType))
                 return true;
             throw new InvalidOperationException(
-                $"Key {restrict.FullName} is not related to {returnType.FullName}");
+                $"Key {restrict.FullName} is not related to {returnType?.FullName}");
         }
 
         public override void Configure(
-            ref PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            var key      = policyMethodBindingInfo.Key;
+            var key      = policyMethodBindingInfo.OutKey;
             var restrict = key as Type;
             if (key != null && restrict == null) return;
             var dispatch   = policyMethodBindingInfo.Dispatch;
@@ -49,14 +49,14 @@
                         var _ = methodName.IndexOf('_');
                         if (_ >= 0) methodName = methodName.Substring(_ + 1);
                     }
-                    policyMethodBindingInfo.Key = new StringKey(
+                    policyMethodBindingInfo.OutKey = new StringKey(
                         methodName, StringComparison.OrdinalIgnoreCase);
                     return;
                 }
             }
             if (returnType != typeof(object) &&
                 (restrict == null || returnType.Is(restrict)))
-                policyMethodBindingInfo.Key = returnType;
+                policyMethodBindingInfo.OutKey = returnType;
         }
     }
 }
