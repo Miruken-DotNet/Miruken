@@ -6,26 +6,28 @@
 
     public class MappingHandler : Handler, IMapping
     {
-        public object Map(object source, object format, object typeOrInstance)
+        public object Map(object source, object typeOrInstance,
+                          object format = null)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
-            var mapFrom = new Mapping(source, format, typeOrInstance);
+            if (typeOrInstance == null)
+                throw new ArgumentNullException(nameof(typeOrInstance));
+            var mapFrom = new Mapping(source, typeOrInstance, format);
             if (!Composer.Handle(mapFrom))
                 throw new InvalidOperationException(
                     $"Mapping not found from {source} to {format}");
             return mapFrom.Result;
         }
 
-        public Promise MapAsync(object source, object format, object typeOrInstance)
+        public Promise MapAsync(object source, object typeOrInstance,
+                                object format)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
-            var mapFrom = new Mapping(source, format, typeOrInstance)
+            if (typeOrInstance == null)
+                throw new ArgumentNullException(nameof(typeOrInstance));
+            var mapFrom = new Mapping(source, typeOrInstance, format)
             {
                 WantsAsync = true
             };

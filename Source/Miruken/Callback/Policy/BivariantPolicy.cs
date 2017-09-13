@@ -16,12 +16,12 @@
         }
 
         public static BivariantPolicy<Cb> Create<Cb>(
-            Func<Cb, object> key, Func<Cb, object> target,
+            Func<Cb, object> output, Func<Cb, object> input,
             Action<BivariantPolicyBuilder<Cb>> build)
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy  = new BivariantPolicy<Cb>(key, target);
+            var policy  = new BivariantPolicy<Cb>(output, input);
             var builder = new BivariantPolicyBuilder<Cb>(policy);
             build(builder);
             return policy;
@@ -31,10 +31,13 @@
     public class BivariantPolicy<Cb> : BivariantPolicy
     {
         public BivariantPolicy(
-            Func<Cb, object> key, Func<Cb, object> target)
+            Func<Cb, object> input, 
+            Func<Cb, object> ouput)
         {
-            Output = new CovariantPolicy<Cb>(key);
-            Input  = new ContravariantPolicy<Cb>(target);
+            Output       = new CovariantPolicy<Cb>(input);
+            Input        = new ContravariantPolicy<Cb>(ouput);
+            ResultType   = Output.ResultType;
+            AcceptResult = Output.AcceptResult;
         }
 
         public CovariantPolicy<Cb>     Output { get; }
@@ -51,13 +54,20 @@
         {
             var tuple = key as Tuple<object, object>;
             if (tuple == null) return Enumerable.Empty<object>();
-            var inKey  = tuple.Item2;
-            var outKey = tuple.Item1;
+            var input  = tuple.Item2;
+            var output = tuple.Item1;
             return keys.OfType<Tuple<object, object>>().Where(testKey =>
-                (Equals(testKey.Item1, outKey) || Output.GetCompatibleKeys(outKey,
-                    new[] { testKey.Item1 }).GetEnumerator().MoveNext()) &&
-                (Equals(testKey.Item2, inKey) ||Input.GetCompatibleKeys(inKey,
-                    new[] { testKey.Item2 }).GetEnumerator().MoveNext()));
+            {
+                var inKey    = testKey.Item2;
+                var outKey   = testKey.Item1;
+                var inEqual  = Equals(input, inKey);
+                var outEqual = Equals(output, outKey);
+                return (!inEqual || !outEqual) &&
+                    (outEqual || Output.GetCompatibleKeys(output,
+                        new[] {outKey}).GetEnumerator().MoveNext()) &&
+                    (inEqual || Input.GetCompatibleKeys(input,
+                        new[] {inKey}).GetEnumerator().MoveNext());
+            });
         }
     }
 
@@ -78,14 +88,6 @@
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
             return new ExtractArgument<Cb, Res>(extract);
-        }
-
-        public BivariantPolicyBuilder<Cb> MatchCallbackMethod(params ArgumentRule[] args)
-        {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
-                MatchMethod(args.Concat(new[] { Callback }).ToArray());
-            MatchMethod(args);
-            return this;
         }
 
         public BivariantPolicyBuilder<Cb> MatchCallbackMethod(

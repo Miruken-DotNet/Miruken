@@ -54,15 +54,15 @@
             return callback is Cb ? Key((Cb)callback) : null;
         }
 
-        public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
+        public override IEnumerable GetCompatibleKeys(object key, IEnumerable output)
         {
             var type = key as Type;
             if (type == null)
-                return keys.Cast<object>().Where(k => 
+                return output.Cast<object>().Where(k => 
                     !Equals(key, k) && Equals(k, key));
             return type == typeof(object) 
-                 ? keys.Cast<object>().Where(t => (t as Type)?.IsGenericTypeDefinition != true)
-                 : keys.OfType<Type>().Where(t => t != type && AcceptKey(type, t))
+                 ? output.Cast<object>().Where(t => (t as Type)?.IsGenericTypeDefinition != true)
+                 : output.OfType<Type>().Where(t => t != type && AcceptKey(type, t))
                       .OrderBy(t => t, this);
         }
 

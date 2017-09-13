@@ -59,7 +59,7 @@
 
         public abstract object GetKey(object callback);
 
-        public abstract IEnumerable GetCompatibleKeys(object key, IEnumerable keys);
+        public abstract IEnumerable GetCompatibleKeys(object key, IEnumerable output);
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, ResultsDelegate results = null)

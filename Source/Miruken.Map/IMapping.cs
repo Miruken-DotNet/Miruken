@@ -4,36 +4,36 @@
 
     public interface IMapping
     {
-        object Map(object source, object format, object typeOrInstance);
+        object Map(object source, object typeOrInstance, object format = null);
 
-        Promise MapAsync(object source, object format, object typeOrInstance);
+        Promise MapAsync(object source, object typeOrInstance, object format = null);
     }
 
     public static class MappingExtensions
     {
-        public static T Map<T>(
-            this IMapping mapping, object source)
+        public static T Map<T>(this IMapping mapping,
+            object source, object format = null)
         {
-            return (T)mapping.Map(source, typeof(T), null);
+            return (T)mapping.Map(source, typeof(T), format);
         }
 
-        public static Promise<T> MapAsync<T>(
-            this IMapping mapping, object source)
+        public static Promise<T> MapAsync<T>(this IMapping mapping,
+            object source, object format = null)
         {
-            return (Promise<T>)mapping.MapAsync(source, typeof(T), null)
+            return (Promise<T>)mapping.MapAsync(source, typeof(T), format)
                 .Coerce(typeof(Promise<T>));
         }
 
-        public static T Map<T>(
-            this IMapping mapping, object source, T instance)
+        public static T Map<T>(this IMapping mapping, 
+            object source, T instance, object format = null)
         {
-            return (T)mapping.Map(source, typeof(T), instance);
+            return (T)mapping.Map(source, instance, format);
         }
 
-        public static Promise<T> MapAsync<T>(
-            this IMapping mapping, object source, T instance)
+        public static Promise<T> MapAsync<T>(this IMapping mapping,
+            object source, T instance, object format = null)
         {
-            return (Promise<T>)mapping.MapAsync(source, typeof(T), instance)
+            return (Promise<T>)mapping.MapAsync(source, instance, format)
                 .Coerce(typeof(Promise<T>));
         }
     }

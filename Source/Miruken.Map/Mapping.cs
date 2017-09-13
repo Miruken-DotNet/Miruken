@@ -6,28 +6,30 @@
     using Callback.Policy;
     using Concurrency;
 
-    public class Mapping : 
-        ICallback, IAsyncCallback, IDispatchCallback
+    public class Mapping : ICallback,
+        IAsyncCallback, IDispatchCallback
     {
         private object _result;
 
-        public Mapping(object source, object format,
-                       object typeOrInstance)
+        public Mapping(object source, object typeOrInstance,
+                       object format = null)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
+            if (typeOrInstance == null)
+                throw new ArgumentNullException(nameof(typeOrInstance));
             Source         = source;
-            Format         = format;
             TypeOrInstance = typeOrInstance;
+            Format         = format;
         }
 
         public object Source         { get; }
-        public object Format         { get; }
         public object TypeOrInstance { get; }
+        public object Format         { get; }
         public bool   WantsAsync     { get; set; }
         public bool   IsAsync        { get; private set; }
+
+        public Type Type => TypeOrInstance as Type ?? TypeOrInstance.GetType();
 
         public Type ResultType => 
             WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();

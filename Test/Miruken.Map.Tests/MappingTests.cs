@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
+    using Infrastructure;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -44,6 +45,22 @@
                 .Proxy<IMapping>().MapAsync<PlayerData>(entity);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
+        }
+
+        [TestMethod]
+        public void Should_Map_Explicitly()
+        {
+            var handler = (new ExplicitMapping() + _handler);
+            var player = new PlayerData
+            {
+                Id   = 3,
+                Name = "Franz Beckenbauer"
+            };
+            var json = handler.Proxy<IMapping>().Map<string>(player, "application/json");
+            Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json);
+            var data = handler.Proxy<IMapping>().Map<PlayerData>(json, "application/json");
+            Assert.AreEqual(3, data.Id);
+            Assert.AreEqual("Franz Beckenbauer", player.Name);
         }
 
         [TestMethod,
@@ -113,10 +130,13 @@
         public void Should_Map_Simple_Results()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            var handler   = (new ExceptionMapping() + _handler).Resolve();
             var exception = new NotSupportedException("Close not found");
-            var value     = (new ExceptionMapping() + _handler).Resolve()
-                .Proxy<IMapping>().Map<object>(exception);
+            var value     = handler.Proxy<IMapping>().Map<object>(exception);
             Assert.AreEqual(500, value);
+            value = handler.Proxy<IMapping>().Map<object>(
+                new InvalidOperationException("Operation not allowed"));
+            Assert.AreEqual("Operation not allowed", value);
         }
 
         [TestMethod]
@@ -195,6 +215,12 @@
             {
                 return 500;
             }
+
+            [Maps]
+            public string MapException(Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         private class OpenMapping : Handler
@@ -203,8 +229,8 @@
             public object Map(Mapping mapping)
             {
                 var playerEntity = mapping.Source as PlayerEntity;
-                if (playerEntity != null &&
-                    Equals(mapping.Format, typeof(PlayerData)))
+                if (playerEntity != null && 
+                    (mapping.TypeOrInstance as Type).Is<PlayerData>())
                 {
                     return new PlayerData
                     {
@@ -213,6 +239,37 @@
                     };
                 }
                 return null;
+            }
+        }
+
+        private class ExplicitMapping : Handler
+        {
+            [Maps, Format("application/json")]
+            public string ToJsonPlayer(PlayerData player)
+            {
+                return $"{{id:{player.Id},name:'{player.Name}'}}";
+            }
+
+            [Maps, Format("application/json")]
+            public PlayerData FromJsonPlayer(string json)
+            {
+                var player = new PlayerData();
+                var parts  = json.Split(new [] { '{', '}', ',' },
+                    StringSplitOptions.RemoveEmptyEntries);
+                foreach (var part in parts)
+                {
+                    var keyValue = part.Split(':');
+                    switch (keyValue[0].ToLower())
+                    {
+                        case "id":
+                            player.Id = int.Parse(keyValue[1]);
+                            break;
+                        case "name":
+                            player.Name = keyValue[1].TrimEnd('\'');
+                            break;
+                    }
+                }
+                return player;
             }
         }
     }

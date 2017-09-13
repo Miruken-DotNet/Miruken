@@ -44,6 +44,8 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="FormatAttribute.cs" />
+    <Compile Include="IFormatMatching.cs" />
     <Compile Include="IMapping.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="MappingHandler.cs" />

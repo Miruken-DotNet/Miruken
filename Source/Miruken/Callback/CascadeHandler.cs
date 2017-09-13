@@ -5,7 +5,7 @@
 		private readonly IHandler _handlerA;
 		private readonly IHandler _handlerB;
 
-		internal CascadeHandler(object handlerA, object handlerB)
+		public CascadeHandler(object handlerA, object handlerB)
 		{
 		    _handlerA = ToHandler(handlerA);
 		    _handlerB = ToHandler(handlerB);
