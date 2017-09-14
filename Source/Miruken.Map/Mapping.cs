@@ -29,7 +29,11 @@
         public bool   WantsAsync     { get; set; }
         public bool   IsAsync        { get; private set; }
 
-        public Type Type => TypeOrInstance as Type ?? TypeOrInstance.GetType();
+        public Type Type =>
+            TypeOrInstance as Type ?? TypeOrInstance.GetType();
+
+        public object Instance => 
+            TypeOrInstance is Type ? null : TypeOrInstance;
 
         public Type ResultType => 
             WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();

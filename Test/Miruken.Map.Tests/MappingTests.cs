@@ -63,6 +63,38 @@
             Assert.AreEqual("Franz Beckenbauer", player.Name);
         }
 
+        [TestMethod]
+        public async Task Should_Map_Explicitly_Async()
+        {
+            var handler = (new ExplicitMapping() + _handler);
+            var player = new PlayerData
+            {
+                Id   = 3,
+                Name = "Franz Beckenbauer"
+            };
+            var json = await handler.Proxy<IMapping>().MapAsync<string>(player, "application/json");
+            Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json);
+            var data = handler.Proxy<IMapping>().Map<PlayerData>(json, "application/json");
+            Assert.AreEqual(3, data.Id);
+            Assert.AreEqual("Franz Beckenbauer", player.Name);
+        }
+
+        [TestMethod]
+        public void Should_Map_Using_Existing_Instance()
+        {
+            var entity = new PlayerEntity
+            {
+                Id   = 9,
+                Name = "Diego Maradona"
+            };
+            var player = new PlayerData();
+            var data   = (new EntityMapping() + _handler)
+                .Proxy<IMapping>().MapInto(entity, player);
+            Assert.AreSame(player, data);
+            Assert.AreEqual(entity.Id, data.Id);
+            Assert.AreEqual(entity.Name, data.Name);
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Missing_Mapping()
@@ -153,6 +185,35 @@
             Assert.AreEqual(entity.Name, data.Name);
         }
 
+        [TestMethod]
+        public void Should_Bundle_Mapping()
+        {
+            var entity = new PlayerEntity
+            {
+                Id   = 4,
+                Name = "Michel Platini"
+            };
+            var player = new PlayerData
+            {
+                Id   = 12,
+                Name = "Roberto Carlose"
+            };
+            var handler = new EntityMapping() + new ExplicitMapping() + _handler;
+            var handled = handler.All(bundle =>
+                bundle.Add(h =>
+                {
+                    var data = h.Proxy<IMapping>().Map<PlayerData>(entity);
+                    Assert.AreEqual(entity.Id, data.Id);
+                    Assert.AreEqual(entity.Name, data.Name);
+                }).Add(h =>
+                {
+                    var json = handler.Proxy<IMapping>().Map<string>(player, "application/json");
+                    Assert.AreEqual("{id:12,name:'Roberto Carlose'}", json);
+
+                }));
+            Assert.IsTrue(handled);
+        }
+
         private class Entity
         {
             public int Id { get; set; }
@@ -172,13 +233,18 @@
         private class EntityMapping : Handler
         {
             [Maps]
-            public PlayerData MapToPlayerData(PlayerEntity entity)
+            public PlayerData MapToPlayerData(PlayerEntity entity, Mapping mapping)
             {
-                return new PlayerData
-                {
-                    Id   = entity.Id,
-                    Name = entity.Name
-                };
+                var instance = mapping.Instance as PlayerData;
+                if (instance == null)
+                    return new PlayerData
+                    {
+                        Id   = entity.Id,
+                        Name = entity.Name
+                    };
+                instance.Id   = entity.Id;
+                instance.Name = entity.Name;
+                return instance;
             }
 
             [Maps]

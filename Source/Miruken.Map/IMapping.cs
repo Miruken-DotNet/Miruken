@@ -24,13 +24,13 @@
                 .Coerce(typeof(Promise<T>));
         }
 
-        public static T Map<T>(this IMapping mapping, 
+        public static T MapInto<T>(this IMapping mapping, 
             object source, T instance, object format = null)
         {
             return (T)mapping.Map(source, instance, format);
         }
 
-        public static Promise<T> MapAsync<T>(this IMapping mapping,
+        public static Promise<T> MapIntoAsync<T>(this IMapping mapping,
             object source, T instance, object format = null)
         {
             return (Promise<T>)mapping.MapAsync(source, instance, format)
