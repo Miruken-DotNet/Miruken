@@ -172,6 +172,26 @@
         }
 
         [TestMethod]
+        public void Should_Map_Simple_Default_If_Best_Effort()
+        {
+            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            var value = (new ExceptionMapping() + _handler)
+                .Resolve().BestEffort()
+                .Proxy<IMapping>().Map<int>(new AggregateException());
+            Assert.AreEqual(0, value);
+        }
+
+        [TestMethod]
+        public async Task Should_Map_Simple_Default_If_Best_Effort_Async()
+        {
+            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            var value = await (new ExceptionMapping() + _handler)
+                .Resolve().BestEffort()
+                .Proxy<IMapping>().MapAsync<int>(new AggregateException());
+            Assert.AreEqual(0, value);
+        }
+
+        [TestMethod]
         public void Should_Perform_Open_Mapping()
         {
             var entity = new PlayerEntity
