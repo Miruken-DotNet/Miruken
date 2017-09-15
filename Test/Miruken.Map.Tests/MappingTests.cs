@@ -96,7 +96,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+         ExpectedException(typeof(MissingMethodException))]
         public void Should_Reject_Missing_Mapping()
         {
             var entity = new PlayerEntity
@@ -108,7 +108,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+         ExpectedException(typeof(MissingMethodException))]
         public async Task Should_Reject_Missing_Mapping_Async()
         {
             var entity = new PlayerEntity
@@ -235,7 +235,7 @@
             [Maps]
             public PlayerData MapToPlayerData(PlayerEntity entity, Mapping mapping)
             {
-                var instance = mapping.Instance as PlayerData;
+                var instance = mapping.Target as PlayerData;
                 if (instance == null)
                     return new PlayerData
                     {

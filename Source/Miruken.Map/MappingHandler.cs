@@ -14,10 +14,9 @@
             if (typeOrInstance == null)
                 throw new ArgumentNullException(nameof(typeOrInstance));
             var mapFrom = new Mapping(source, typeOrInstance, format);
-            if (!Composer.Handle(mapFrom))
-                throw new InvalidOperationException(
-                    $"Mapping not found from {source} to {format}");
-            return mapFrom.Result;
+            return Composer.Handle(mapFrom) 
+                 ? mapFrom.Result 
+                 : Unhandled<object>();
         }
 
         public Promise MapAsync(object source, object typeOrInstance,
@@ -31,11 +30,9 @@
             {
                 WantsAsync = true
             };
-            if (!Composer.Handle(mapFrom))
-                return Promise.Rejected(
-                    new InvalidOperationException(
-                         $"Mapping not found from {source} to {format}"));
-            return (Promise)mapFrom.Result;
+            return Composer.Handle(mapFrom) 
+                 ? (Promise)mapFrom.Result
+                 : Unhandled<Promise>();
         }
     }
 }

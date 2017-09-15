@@ -32,7 +32,7 @@
         public Type Type =>
             TypeOrInstance as Type ?? TypeOrInstance.GetType();
 
-        public object Instance => 
+        public object Target => 
             TypeOrInstance is Type ? null : TypeOrInstance;
 
         public Type ResultType => 
