@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
@@ -149,6 +150,20 @@
         }
 
         [TestMethod]
+        public void Should_Map_From_Array()
+        {
+            var data = new Dictionary<string, object>
+            {
+                {"Id",   1},
+                {"Name", "Geroge Best"}
+            };
+            var entity = (new EntityMapping() + _handler)
+                .Proxy<IMapping>().Map<PlayerEntity>(data.ToArray());
+            Assert.AreEqual(1, entity.Id);
+            Assert.AreEqual("Geroge Best", entity.Name);
+        }
+
+        [TestMethod]
         public void Should_Map_Resolving()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
@@ -285,6 +300,25 @@
                     Id   = (int)keyValues["Id"],
                     Name = (string)keyValues["Name"]
                 };
+            }
+
+            [Maps]
+            public PlayerEntity MapFromPlayerKeyValues(KeyValuePair<string, object>[] keyValues)
+            {
+                var entity = new PlayerEntity();
+                foreach (var keyValue in keyValues)
+                {
+                    switch (keyValue.Key)
+                    {
+                        case "Id":
+                            entity.Id = (int)keyValue.Value;
+                            break;
+                        case "Name":
+                            entity.Name = keyValue.Value.ToString();
+                            break;
+                    }
+                }
+                return entity;
             }
         }
 
