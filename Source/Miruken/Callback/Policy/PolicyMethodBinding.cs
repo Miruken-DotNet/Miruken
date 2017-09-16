@@ -111,16 +111,19 @@
                     Policy.Filters)
                 .ToArray();
 
+            object baseResult = null;
+
             if (filters.Length == 0)
-                result = dispatcher.Invoke(target, args, resultType);
+                result = baseResult = dispatcher.Invoke(target, args, resultType);
             else if (!MethodPipeline.GetPipeline(callbackType, logicalType)
-                .Invoke(this, target, actualCallback, comp => dispatcher.Invoke(
-                    target, UpdateArgs(args, composer, comp),
+                .Invoke(this, target, actualCallback, comp => 
+                    baseResult = dispatcher.Invoke(
+                        target, UpdateArgs(args, composer, comp),
                         resultType), composer, filters, out result))
                 return false;
 
-            var accepted = Policy.AcceptResult?.Invoke(result, this)
-                        ?? result != null;
+            var accepted = Policy.AcceptResult?.Invoke(baseResult, this)
+                        ?? baseResult != null;
             if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;

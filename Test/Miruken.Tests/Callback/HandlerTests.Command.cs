@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Concurrency;
 
     [TestClass]
@@ -85,6 +86,20 @@
             await handler.CommandAsync(new UpdateOrder());
         }
 
+        [TestMethod,
+         ExpectedException(typeof(NotSupportedException))]
+        public void Should_Not_Handler_Command()
+        {
+            new NullHandler().Command<object>(new PlaceOrder());
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(NotSupportedException))]
+        public async Task Should_Not_Handler_Command_Async()
+        {
+            await new NullHandler().CommandAsync<object>(new CancelOrder());
+        }
+
         private class PlaceOrder
         {
         }
@@ -143,6 +158,52 @@
                 if (callback is FulfillOrder)
                     return new Promise<bool>((resolve, reject) => resolve(true, true));
                 return null;
+            }
+        }
+
+        private class NullHandler : Handler
+        {
+            [Handles,
+             Filter(typeof(IBehavior<,>), Many = true)]
+            public object Place(PlaceOrder order)
+            {
+                return null;
+            }
+
+            [Handles,
+             Filter(typeof(IBehavior<,>), Many = true)]
+            public Promise Cancel(CancelOrder cancel)
+            {
+                return null;
+            }
+
+
+            [Provides(typeof(IBehavior<,>))]
+            public object CreateFilter(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(NullBehavior<,>).
+                        MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                     : Activator.CreateInstance(type);
+            }
+        }
+
+        public interface IBehavior<in TReq, TResp> : IFilter<TReq, Task<TResp>>
+        {
+        }
+
+        private class NullBehavior<Cb, Res> : IBehavior<Cb, Res>
+        {
+            public int? Order { get; set; } = 1;
+
+            public Task<Res> Next(Cb callback, MethodBinding binding,
+                IHandler composer, NextDelegate<Task<Res>> next)
+            {
+                return next();
             }
         }
     }
