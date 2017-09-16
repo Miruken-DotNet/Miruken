@@ -40,12 +40,13 @@
         internal object CoerceResult(
             object result, Type resultType, bool? wantsAsync = null)
         {
+            if (result == null) return null;
             if (wantsAsync == true)
             {
                 var promise = result as Promise;
                 return promise ?? Promise.Resolved(result);
             }
-            if (result == null || !resultType.IsInstanceOfType(result))
+            if (!resultType.IsInstanceOfType(result))
             {
                 if (resultType.Is<Task>())
                     return Promise.Resolved(result).ToTask().Coerce(resultType);
