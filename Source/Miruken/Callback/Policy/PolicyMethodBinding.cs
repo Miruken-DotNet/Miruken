@@ -111,7 +111,7 @@
                     Policy.Filters)
                 .ToArray();
 
-            object baseResult = null;
+            object baseResult = this;
 
             if (filters.Length == 0)
                 result = baseResult = dispatcher.Invoke(target, args, resultType);
@@ -122,8 +122,9 @@
                         resultType), composer, filters, out result))
                 return false;
 
-            var accepted = Policy.AcceptResult?.Invoke(baseResult, this)
-                        ?? baseResult != null;
+            var testResult = ReferenceEquals(baseResult, this) ? result : baseResult;
+            var accepted   = Policy.AcceptResult?.Invoke(testResult, this)
+                          ?? testResult != null;
             if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
