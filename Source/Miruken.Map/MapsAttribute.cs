@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Map
 {
-    using System.Collections.Generic;
     using System.Linq;
     using Callback;
     using Callback.Policy;
@@ -20,16 +19,10 @@
             var format  = mapping.Format;
             if (format == null) return true;
             var dispatch = binding.Dispatcher;
-            return Matches(format, dispatch.Attributes
-                      .OfType<IFormatMatching>())
-                || Matches(format, dispatch.Owner.Attributes
-                      .OfType<IFormatMatching>());
-        }
-
-        private static bool Matches(
-            object format, IEnumerable<IFormatMatching> formats)
-        {
-            return formats.Any(f => f.Matches(format));
+            return dispatch.Attributes.OfType<IFormatMatching>()
+                       .Any(f => f.Matches(format))
+                || dispatch.Owner.Attributes.OfType<IFormatMatching>()
+                       .Any(f => f.Matches(format));
         }
 
         public static readonly CallbackPolicy Policy =
