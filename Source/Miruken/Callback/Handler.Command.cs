@@ -21,10 +21,17 @@
         {
             if (handler == null) return Promise.Empty;
             var command = new Command(callback) { WantsAsync = true };
-            return handler.Handle(command)
-                 ? (Promise)command.Result
-                 : Promise.Rejected(new NotSupportedException(
-                      $"{callback.GetType()} not handled"));
+            try
+            {
+                return handler.Handle(command)
+                    ? (Promise)command.Result
+                    : Promise.Rejected(new NotSupportedException(
+                        $"{callback.GetType()} not handled"));
+            }
+            catch (Exception ex)
+            {
+                return Promise.Rejected(ex);
+            }
         }
 
         public static Result Command<Result>(this IHandler handler, object callback)
@@ -47,10 +54,17 @@
             if (handler == null)
                 return Promise<Result>.Empty;
             var command = new Command(callback) { WantsAsync = true };
-            if (!handler.Handle(command))
-                throw new NotSupportedException($"{callback.GetType()} not handled");
-            var promise  = (Promise)command.Result;
-            return (Promise<Result>)promise.Coerce(typeof(Promise<Result>));
+            try
+            {
+                if (!handler.Handle(command))
+                    throw new NotSupportedException($"{callback.GetType()} not handled");
+                var promise = (Promise)command.Result;
+                return (Promise<Result>)promise.Coerce(typeof(Promise<Result>));
+            }
+            catch (Exception ex)
+            {
+                return Promise<Result>.Rejected(ex);
+            }
         }
 
         public static void CommandAll(this IHandler handler, object callback)
@@ -64,10 +78,17 @@
         {
             if (handler == null) return Promise.Empty;
             var command = new Command(callback, true) { WantsAsync = true };
-            if (!handler.Handle(command, true))
-                return Promise.Rejected(new NotSupportedException(
-                    $"{callback.GetType()} not handled"));
-            return (Promise)command.Result;
+            try
+            {
+                if (!handler.Handle(command, true))
+                    return Promise.Rejected(new NotSupportedException(
+                        $"{callback.GetType()} not handled"));
+                return (Promise)command.Result;
+            }
+            catch (Exception ex)
+            {
+                return Promise.Rejected(ex);
+            }
         }
 
         public static Result[] CommandAll<Result>(
@@ -91,12 +112,19 @@
             if (handler == null)
                 return Promise<Result[]>.Empty;
             var command = new Command(callback, true) { WantsAsync = true };
-            if (!handler.Handle(command, true))
-                return Promise<Result[]>.Rejected(new NotSupportedException(
-                    $"{callback.GetType()} not handled"));
-            var promise = (Promise)command.Result;
-            return promise.Then((results, s) => ((object[])results)
-                .Cast<Result>().ToArray());
+            try
+            {
+                if (!handler.Handle(command, true))
+                    return Promise<Result[]>.Rejected(new NotSupportedException(
+                        $"{callback.GetType()} not handled"));
+                var promise = (Promise)command.Result;
+                return promise.Then((results, s) => ((object[])results)
+                    .Cast<Result>().ToArray());
+            }
+            catch (Exception ex)
+            {
+                return Promise<Result[]>.Rejected(ex);
+            }
         }
     }
 }
