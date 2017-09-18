@@ -30,16 +30,9 @@
             {
                 WantsAsync = true
             };
-            try
-            {
-                return Composer.Handle(mapFrom)
-                     ? (Promise)mapFrom.Result
-                     : Unhandled<Promise>();
-            }
-            catch (Exception ex)
-            {
-                return Promise.Rejected(ex);
-            }
+            return Composer.Handle(mapFrom) 
+                 ? (Promise)mapFrom.Result
+                 : Unhandled<Promise>();
         }
     }
 }
