@@ -20,13 +20,10 @@
             var format  = mapping.Format;
             if (format == null) return true;
             var dispatch = binding.Dispatcher;
-            var formats  = dispatch.Attributes
-                .OfType<IFormatMatching>().ToArray();
-            if (Matches(format, formats)) return true;
-            var sharedFormats = dispatch.Owner.Attributes
-                .OfType<IFormatMatching>().ToArray();
-            if (Matches(format, sharedFormats)) return true;
-            return formats.Length == 0 && sharedFormats.Length == 0;
+            return Matches(format, dispatch.Attributes
+                      .OfType<IFormatMatching>())
+                || Matches(format, dispatch.Owner.Attributes
+                      .OfType<IFormatMatching>());
         }
 
         private static bool Matches(
