@@ -54,10 +54,10 @@ namespace Miruken.Callback.Policy
             }
 
             _attributes = new Lazy<Attribute[]>(() => 
-                Attribute.GetCustomAttributes(handlerType, true));
+                Attribute.GetCustomAttributes(handlerType, true).Normalize());
 
             _filters = new Lazy<IFilterProvider[]>(() =>
-                Attributes.OfType<IFilterProvider>().ToArray());
+                Attributes.OfType<IFilterProvider>().ToArray().Normalize());
 
             if (handlerType.IsGenericTypeDefinition)
                 _closed = new ConcurrentDictionary<object, Type>();

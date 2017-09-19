@@ -11,14 +11,15 @@
 
     public abstract class MethodBinding
     {
-        private List<IFilterProvider> _filters;
+        private IFilterProvider[] _filters;
 
         protected MethodBinding(MethodDispatch dispatch)
         {
             if (dispatch == null)
                 throw new ArgumentNullException(nameof(dispatch));
             Dispatcher = dispatch;
-            AddFilters(dispatch.Attributes.OfType<IFilterProvider>().ToArray());
+            _filters = dispatch.Attributes.OfType<IFilterProvider>()
+                .ToArray().Normalize();
         }
 
         public MethodDispatch Dispatcher { get; }
@@ -29,9 +30,8 @@
         public void AddFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
-            if (_filters == null)
-                _filters = new List<IFilterProvider>();
-            _filters.AddRange(providers.Where(p => p != null));
+            _filters = _filters.Concat(providers.Where(p => p != null))
+                .ToArray().Normalize();
         }
 
         public abstract bool Dispatch(object target, object callback,
