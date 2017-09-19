@@ -30,7 +30,7 @@
         {
             var filters = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
-                .Where(f => AllowFilterType(f, binding))
+                .Where(f => f != null && AllowFilterType(f, binding))
                 .SelectMany(filterType => Many
                     ? composer.Break().ResolveAll(filterType)
                     : new[] {composer.Break().Resolve(filterType)})
@@ -82,18 +82,26 @@
                 return filterType.MakeGenericType(callbackType, logicalResultType);
             var conformance  = filterType.GetOpenTypeConformance(openFilterType);
             var inferredArgs = conformance.GetGenericArguments();
-            return filterType.MakeGenericType(inferredArgs.Select((arg, i) =>
+            var closedArgs = new List<Type>();
+            for (var i = 0; i < inferredArgs.Length; ++i)
             {
-                if (!arg.ContainsGenericParameters) return null;
-                return i == 0 ? callbackType : logicalResultType;
-            }).Where(arg => arg != null).ToArray());
+                var arg = inferredArgs[i];
+                if (!arg.ContainsGenericParameters) continue;
+                var closedArg = i == 0 ? callbackType : logicalResultType;
+                if (arg.IsGenericParameter &&
+                    !arg.GetGenericParameterConstraints().All(
+                        constraint => closedArg.Is(constraint)))
+                    return null;
+                closedArgs.Add(closedArg);
+            }
+            return filterType.MakeGenericType(closedArgs.ToArray());
         }
 
         private void ValidateFilters(Type[] filterTypes)
         {
             if (filterTypes == null)
                 throw new ArgumentNullException(nameof(filterTypes));
-            var anyFilter     = typeof(IFilter<,>);
+            var anyFilter = typeof(IFilter<,>);
             foreach (var filterType in filterTypes)
             {
                 if (filterType == null)

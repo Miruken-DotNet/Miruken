@@ -25,7 +25,7 @@
             object resolution, bool greedy, IHandler composer)
         {
             if (_handled && !greedy) return true;
-            return _handled =  Handler.Dispatch(
+            return _handled = Handler.Dispatch(
                 resolution, _callback, ref greedy, composer)
                 || _handled;
         }

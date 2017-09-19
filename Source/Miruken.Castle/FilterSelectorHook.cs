@@ -52,8 +52,12 @@
                 var openFilter  = filter.GetOpenTypeConformance(typeof(IFilter<,>));
                 if (Array.IndexOf(openFilter.GetGenericArguments(), genericArgs[0]) == 0)
                 {
-                    var constraints = genericArgs[0].GetGenericParameterConstraints();
-                    if (constraints.Length > 0) return constraints;
+                    var arg = genericArgs[0];
+                    if (arg.IsGenericParameter)
+                    {
+                        var constraints = arg.GetGenericParameterConstraints();
+                        if (constraints.Length > 0) return constraints;
+                    }
                 }
             }
             return null;
