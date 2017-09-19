@@ -105,10 +105,9 @@
             var returnType     = dispatcher.ReturnType;
             var logicalType    = dispatcher.LogicalReturnType;
 
-            var filters = composer
-                .GetOrderedFilters(this, callbackType, logicalType, Filters,
-                    FilterAttribute.GetFilters(target.GetType(), true), 
-                    Policy.Filters)
+            var filters = composer.GetOrderedFilters(
+                this, callbackType, logicalType, Filters,
+                dispatcher.Owner.Filters, Policy.Filters)
                 .ToArray();
 
             object baseResult = this;

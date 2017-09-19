@@ -575,7 +575,7 @@
         public static PropertyGetDelegate CreatePropertyGetter(string name, Type owner)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("Name cannot be empty", nameof(name));
+                throw new ArgumentException(@"Name cannot be empty", nameof(name));
             if (owner == null)
                 throw new ArgumentNullException(nameof(owner));
             var instance = Expression.Parameter(typeof(object), "instance");
@@ -586,6 +586,12 @@
                     typeof(object)
                 ), instance
             ).Compile();
+        }
+
+        public static T[] Normalize<T>(this T[] array)
+        {
+            if (array == null) return null;
+            return array.Length == 0 ? Array.Empty<T>() : array;
         }
 
         private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)

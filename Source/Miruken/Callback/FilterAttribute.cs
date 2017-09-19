@@ -1,10 +1,8 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using Infrastructure;
     using Policy;
 
@@ -12,9 +10,6 @@
         AllowMultiple = true, Inherited = false)]
     public class FilterAttribute : Attribute, IFilterProvider
     {
-        private static readonly ConcurrentDictionary<MemberInfo, FilterAttribute[]>
-            _filters = new ConcurrentDictionary<MemberInfo, FilterAttribute[]>();
-
         public FilterAttribute(params Type[] filterTypes)
         {
             ValidateFilters(filterTypes);
@@ -46,13 +41,6 @@
             }
         }
 
-        public static FilterAttribute[] GetFilters(MemberInfo member, bool inherit = false)
-        {
-            return _filters.GetOrAdd(member, t => Normalize(
-                    (FilterAttribute[])member.GetCustomAttributes(
-                        typeof(FilterAttribute), inherit)));
-        }
-
         protected virtual void ValidateFilterType(Type filterType)
         {          
         }
@@ -65,11 +53,6 @@
         protected virtual bool UseFilterInstance(IFilter filter, MethodBinding binding)
         {
             return true;
-        }
-
-        private static FilterAttribute[] Normalize(FilterAttribute[] filters)
-        {
-            return filters.Length > 0 ? filters : Array.Empty<FilterAttribute>();
         }
 
         private static Type CloseFilterType(Type filterType, Type callbackType,
