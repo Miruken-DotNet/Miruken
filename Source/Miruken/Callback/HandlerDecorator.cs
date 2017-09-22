@@ -18,7 +18,8 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            return Decoratee.Handle(callback, ref greedy, composer);
+            return Decoratee.Handle(callback, ref greedy, composer)
+                || base.HandleCallback(callback, ref greedy, composer);
         }
     }
 }
