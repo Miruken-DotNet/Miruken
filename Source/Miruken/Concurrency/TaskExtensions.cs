@@ -66,7 +66,10 @@
 
         public static Exception FlattenException(this Task task)
         {
-            return task?.Exception?.Flatten().InnerException;
+            var exception = task?.Exception?.Flatten();
+            return exception?.InnerExceptions.Count == 1
+                 ? exception.InnerException
+                 : exception;
         }
 
         private static readonly ConcurrentDictionary<Type, Func<Task, Task>>
