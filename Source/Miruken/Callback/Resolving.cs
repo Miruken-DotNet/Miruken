@@ -35,7 +35,11 @@
             var bundle   = new Bundle(false);
             var handlers = CallbackPolicy.GetCallbackHandlers(callback);
             foreach (var handler in handlers)
+            {
+                if (bundle.IsEmpty)
+                    bundle.Add(h => h.Handle(callback));
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
+            }
             return bundle.IsEmpty ? callback : bundle;
         }
     }
