@@ -1,13 +1,14 @@
-﻿namespace Miruken.Map.Tests
+﻿namespace Miruken.Tests.Map
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Callback;
-    using Callback.Policy;
-    using Infrastructure;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Callback;
+    using Miruken.Callback.Policy;
+    using Miruken.Infrastructure;
+    using Miruken.Map;
 
     [TestClass]
     public class MappingTests

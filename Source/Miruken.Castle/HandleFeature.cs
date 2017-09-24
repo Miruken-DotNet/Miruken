@@ -5,10 +5,12 @@
     using System.Linq;
     using Callback;
     using Callback.Policy;
+    using Error;
     using global::Castle.Core.Internal;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using Infrastructure;
+    using Map;
 
     public class HandleFeature : FeatureInstaller
     {
@@ -32,6 +34,11 @@
         {
             _configureFilters += configure;
             return this;
+        }
+
+        protected internal override IEnumerable<FromDescriptor> GetFeatures()
+        {
+            yield return Types.From(typeof(ErrorsHandler), typeof(MappingHandler));
         }
 
         protected override void Install(IConfigurationStore store)

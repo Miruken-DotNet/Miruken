@@ -73,10 +73,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Miruken.Map\Miruken.Map.csproj">
-      <Project>{280f1b43-2b64-4a30-b332-62df809425fd}</Project>
-      <Name>Miruken.Map</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
       <Name>Miruken</Name>

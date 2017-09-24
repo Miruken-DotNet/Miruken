@@ -75,6 +75,12 @@
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
+    <Compile Include="Map\FormatAttribute.cs" />
+    <Compile Include="Map\IFormatMatching.cs" />
+    <Compile Include="Map\IMapping.cs" />
+    <Compile Include="Map\Mapping.cs" />
+    <Compile Include="Map\MappingHandler.cs" />
+    <Compile Include="Map\MapsAttribute.cs" />
     <Compile Include="Monads.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
