@@ -31,11 +31,16 @@
         private static ValidationOutcome CreateOutcome(ValidationErrors[] errors)
         {
             var outcome = new ValidationOutcome();
+            if (errors == null) return outcome;
             foreach (var property in errors)
             {
                 var propertyName = property.PropertyName;
-                foreach (var error in property.Errors)
-                    outcome.AddError(propertyName, error);
+                var failures     = property.Errors;
+                if (failures != null)
+                {
+                    foreach (var error in failures)
+                        outcome.AddError(propertyName, error);
+                }
                 var nested = property.Nested;
                 if (nested != null && nested.Length > 0)
                     outcome.AddError(propertyName, CreateOutcome(nested));
