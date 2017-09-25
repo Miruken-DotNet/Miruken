@@ -121,12 +121,6 @@
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            return Dispatch(handler, ref greedy, composer);
-        }
-
-        protected virtual bool Dispatch(
-            object handler, ref bool greedy, IHandler composer)
-        {
             var isGreedy = greedy;
             var handled  = Implied(handler, false, isGreedy, composer);
             if (handled && !greedy) return true;
@@ -137,17 +131,16 @@
             return handled || (_resolutions.Count > count);
         }
 
-        private bool Implied(
-            object handler, bool invariant, bool greedy, IHandler composer)
+        private bool Implied(object item, bool invariant, bool greedy, IHandler composer)
         {
             var type = Key as Type;
             if (type == null) return false;
 
             var compatible = invariant
-                           ? type == handler.GetType()
-                           : type.IsInstanceOfType(handler);
+                           ? type == item.GetType()
+                           : type.IsInstanceOfType(item);
 
-            return compatible && Resolve(handler, false, greedy, composer);
+            return compatible && Resolve(item, false, greedy, composer);
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)
