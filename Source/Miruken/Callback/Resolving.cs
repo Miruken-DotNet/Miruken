@@ -21,6 +21,14 @@
             return this;
         }
 
+        protected override bool Dispatch(
+            object handler, ref bool greedy, IHandler composer)
+        {
+            return Handler.Dispatch(
+                handler, _callback, ref greedy, composer)
+                || base.Dispatch(handler, ref greedy, composer);
+        }
+
         protected override bool IsSatisfied(
             object resolution, bool greedy, IHandler composer)
         {

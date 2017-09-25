@@ -2,7 +2,6 @@
 {
     using System;
     using Infrastructure;
-    using Policy;
 
     public class Provider : Handler
     {
@@ -25,11 +24,6 @@
             var type = inquiry.Key as Type;
             if (type == null) return null;
             return _providesType.Is(type) ? _value : null;
-        }
-
-        static Provider()
-        {
-            HandlerDescriptor.GetDescriptor<Provider>();
         }
     }
 }
