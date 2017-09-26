@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Validate
 {
-    using System;
     using Callback;
     using Concurrency;
 
@@ -15,7 +14,6 @@
             {
                 StopOnFailure = options?.StopOnFailure == true
             };
-            Console.WriteLine($"Validate {target}");
             composer.Handle(validation, true);
 
             var outcome         = validation.Outcome;
@@ -35,7 +33,6 @@
                 StopOnFailure = options?.StopOnFailure == true,
                 WantsAsync    = true
             };
-            Console.WriteLine($"ValidateAsync {target}");
             composer.Handle(validation, true);
 
             return ((Promise)validation.Result).Then((r, s) =>
