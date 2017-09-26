@@ -151,7 +151,8 @@
                     {
                         var dispatched = Dispatch(proxy, operation);
                         opHandled = operation.Handled = dispatched || opHandled;
-                        stop = operation.Notify?.Invoke(dispatched) ?? false;
+                        if (dispatched)
+                            stop = operation.Notify?.Invoke(true) ?? false;
                     }
                     handled = _all ? opHandled && handled
                             : opHandled || handled;
@@ -161,8 +162,11 @@
                 {
                     var opHandled = Dispatch(proxy, operation);
                     operation.Handled |= opHandled;
-                    operation.Notify?.Invoke(opHandled);
-                    if (opHandled) return true;
+                    if (opHandled)
+                    {
+                        operation.Notify?.Invoke(true);
+                        return true;
+                    }
                 }
             }
             return handled;
