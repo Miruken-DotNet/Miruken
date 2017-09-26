@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using Concurrency;
-    using Policy;
 
     public class HandlerBatch : HandlerDecorator, IDisposable
     {
@@ -50,11 +49,6 @@
             if (Interlocked.CompareExchange(ref _completed, 1, 0) == 0)
                 this.Proxy<IBatchingComplete>().Complete(this)
                     .Then(_resolved, _rejected);
-        }
-
-        static HandlerBatch()
-        {
-            HandlerDescriptor.GetDescriptor<HandlerBatch>();
         }
     }
 

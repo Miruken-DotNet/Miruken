@@ -8,18 +8,21 @@
     using Concurrency;
     using Policy;
 
-    public class Bundle :
-        IAsyncCallback, IResolveCallback, IDispatchCallback
+
+    public class Bundle : IAsyncCallback, 
+        IResolveCallback, IDispatchCallback
     {
         private readonly bool _all;
         private List<Operation> _operations;
         private List<Promise> _promises;
         private bool _resolving;
 
+        public delegate bool NotifyDelegate(bool handled);
+
         private class Operation
         {
             public Action<IHandler> Action;
-            public Action           Unhandled;
+            public NotifyDelegate   Notify;
             public bool             Handled;
         }
 
@@ -41,7 +44,7 @@
                 _operations.ForEach(op =>
                 {
                     if (!op.Handled)
-                        op.Unhandled?.Invoke();
+                        op.Notify?.Invoke(false);
                 });
             return IsAsync
                 ? Promise.All(_promises.ToArray())
@@ -49,7 +52,7 @@
                 : Promise.Empty;
         }
 
-        public Bundle Add(Action<IHandler> action, Action unhandled = null)
+        public Bundle Add(Action<IHandler> action, NotifyDelegate notify = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -72,20 +75,20 @@
             (_operations ?? (_operations = new List<Operation>()))
                 .Add(new Operation
                 {
-                    Action    = action,
-                    Unhandled = unhandled
+                    Action = action,
+                    Notify = notify
                 });
             return this;
         }
 
-        public Bundle Add(Func<IHandler, object> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, object> action, NotifyDelegate notify = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
-            return Add(handler => { action(handler); }, unhandled);
+            return Add(handler => { action(handler); }, notify);
         }
 
-        public Bundle Add(Func<IHandler, Promise> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, Promise> action, NotifyDelegate notify = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -95,10 +98,10 @@
                 if (promise != null)
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(promise);
-            }, unhandled);
+            }, notify);
         }
 
-        public Bundle Add(Func<IHandler, Task> action, Action unhandled = null)
+        public Bundle Add(Func<IHandler, Task> action, NotifyDelegate notify = null)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -116,7 +119,7 @@
                     (_promises ?? (_promises = new List<Promise>()))
                         .Add(task);
                 }
-            }, unhandled);
+            }, notify);
         }
 
         object IResolveCallback.GetResolveCallback()
@@ -133,24 +136,36 @@
             object handler, ref bool greedy, IHandler composer)
         {
             if (_operations == null) return false;
-            var isGreedy = greedy;
 
             IHandler proxy = new ProxyHandler(handler, composer);
             if (_resolving) proxy = proxy.Resolve();
 
-            return _all || isGreedy
-                 ? _operations.Aggregate(_all, (result, op) =>
+            var handled = _all || greedy;
+            foreach (var operation in _operations)
             {
-                var handled = op.Handled;
-                if (!handled || isGreedy)
-                    handled = op.Handled = Dispatch(proxy, op) || handled;
-                return _all ? handled && result : handled || result;
-            }) : _operations.Any(op =>
-            {
-                var handled = Dispatch(proxy, op);
-                op.Handled |= handled;
-                return handled;
-            });
+                var stop = false;
+                if (_all || greedy)
+                {
+                    var opHandled = operation.Handled;
+                    if (!opHandled || greedy)
+                    {
+                        var dispatched = Dispatch(proxy, operation);
+                        opHandled = operation.Handled = dispatched || opHandled;
+                        stop = operation.Notify?.Invoke(dispatched) ?? false;
+                    }
+                    handled = _all ? opHandled && handled
+                            : opHandled || handled;
+                    if (stop) break;
+                }
+                else
+                {
+                    var opHandled = Dispatch(proxy, operation);
+                    operation.Handled |= opHandled;
+                    operation.Notify?.Invoke(opHandled);
+                    if (opHandled) return true;
+                }
+            }
+            return handled;
         }
 
         private static bool Dispatch(IHandler proxy, Operation operation)

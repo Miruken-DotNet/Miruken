@@ -2,6 +2,7 @@
 {
     using System;
     using Callback;
+    using Callback.Policy;
     using DataAnnotations;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
@@ -77,6 +78,24 @@
             Assert.AreEqual("", player3["FirstName"]);
             Assert.AreEqual("The LastName field is required.", player3["LastName"]);
             Assert.AreEqual("The DOB field is required.", player3["DOB"]);
+        }
+
+        [TestMethod]
+        public void Should_Validate_Target_Resolving()
+        {
+            HandlerDescriptor.GetDescriptor<ValidationHandler>();
+            HandlerDescriptor.GetDescriptor<DataAnnotationsValidator>();
+            var handler = new ValidationHandler()
+                        + new DataAnnotationsValidator();
+            var player = new Player
+            {
+                DOB = new DateTime(2007, 6, 14)
+            };
+            var outcome = Proxy<IValidating>(handler.Resolve()).Validate(player);
+            Assert.IsFalse(outcome.IsValid);
+            Assert.AreSame(outcome, player.ValidationOutcome);
+            Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);
+            Assert.AreEqual("The LastName field is required.", outcome["LastName"]);
         }
 
         [TestMethod,

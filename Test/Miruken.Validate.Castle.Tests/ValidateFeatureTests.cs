@@ -88,7 +88,6 @@
             {
                 "DOB is required",
                 "'DOB' must not be empty.",
-                "'DOB' must not be empty.",
                 "The DOB field is required."
             }, dob);
         }
