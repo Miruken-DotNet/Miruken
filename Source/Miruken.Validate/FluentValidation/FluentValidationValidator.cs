@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Validate.FluentValidation
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Callback;
@@ -11,8 +12,10 @@
         [Validates(Scope = Scopes.Any)]
         public async Task Validate<T>(T target, Validation validation, IHandler composer)
         {
+            Console.WriteLine("Fluent");
             var validators = composer.ResolveAll<IValidator<T>>();
             if (validators.Length == 0) return;
+            Console.WriteLine($"Fluent Validators{target} {validators.Length}");
 
             var outcome = validation.Outcome;
             var scope   = validation.ScopeMatcher;
@@ -24,8 +27,10 @@
 
             foreach (var validator in validators)
             {
+                Console.WriteLine($"Fluent Validator {validator}");
                 var result = await validator.ValidateAsync(context)
                     .ConfigureAwait(false);
+                Console.WriteLine($"Fluent valid {result.IsValid}");
                 if (!result.IsValid)
                 {
                     AddErrors(result, outcome);
