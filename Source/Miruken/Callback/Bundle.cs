@@ -140,7 +140,7 @@
             IHandler proxy = new ProxyHandler(handler, composer);
             if (_resolving) proxy = proxy.Resolve();
 
-            var handled = _all || greedy;
+            var handled = _all;
             foreach (var operation in _operations)
             {
                 var stop = false;
