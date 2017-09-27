@@ -137,15 +137,32 @@
         {
             if (_operations == null) return false;
 
+            var isGreedy = greedy;
             IHandler proxy = new ProxyHandler(handler, composer);
             if (_resolving) proxy = proxy.Resolve();
 
+            return _all || isGreedy
+                ? _operations.Aggregate(_all, (result, op) =>
+                {
+                    var handled = op.Handled;
+                    if (!handled || isGreedy)
+                        handled = op.Handled = Dispatch(proxy, op) || handled;
+                    return _all ? handled && result : handled || result;
+                })
+                : _operations.Any(op =>
+                {
+                    var handled = Dispatch(proxy, op);
+                    op.Handled |= handled;
+                    return handled;
+                });
+
+            /*
             var handled = _all;
             foreach (var operation in _operations)
             {
-                var stop = false;
                 if (_all || greedy)
                 {
+                    var stop = false;
                     var opHandled = operation.Handled;
                     if (!opHandled || greedy)
                     {
@@ -170,6 +187,7 @@
                 }
             }
             return handled;
+            */
         }
 
         private static bool Dispatch(IHandler proxy, Operation operation)
