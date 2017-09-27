@@ -36,10 +36,25 @@
             var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
             if (handlers.Length == 0) return callback;
             var bundle = new Bundle(false)
-                .Add(h => h.Handle(callback), handled => false);
+                .Add(h => h.Handle(new NoResolving(callback)), handled => handled);
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
             return bundle;
+        }
+    }
+
+    public class NoResolving : IResolveCallback
+    {
+        private readonly object _callback;
+
+        public NoResolving(object callback)
+        {
+            _callback = callback;
+        }
+
+        object IResolveCallback.GetResolveCallback()
+        {
+            return _callback;
         }
     }
 }
