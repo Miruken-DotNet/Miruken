@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/Miruken-DotNet/Miruken</projectUrl>
     <iconUrl>https://avatars0.githubusercontent.com/u/20844317</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Miruken integration providing extensible validation including DataAnnotations and FluentValidation</description>
+    <description>Miruken validation including DataAnnotations and FluentValidation</description>
     <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>Miruken Validate DataAnnotations FluentValidation</tags>
