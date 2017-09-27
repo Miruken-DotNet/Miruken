@@ -43,18 +43,29 @@
         }
     }
 
-    public class NoResolving : IResolveCallback
+    public class NoResolving : IDispatchCallback, IResolveCallback
     {
         private readonly object _callback;
 
         public NoResolving(object callback)
         {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
             _callback = callback;
         }
+
+        CallbackPolicy IDispatchCallback.Policy =>
+            (_callback as IDispatchCallback)?.Policy;
 
         object IResolveCallback.GetResolveCallback()
         {
             return _callback;
+        }
+
+        bool IDispatchCallback.Dispatch(
+            object handler, ref bool greedy, IHandler composer)
+        {
+            return Handler.Dispatch(handler, _callback, ref greedy, composer);
         }
     }
 }
