@@ -50,6 +50,7 @@
     <Compile Include="Callback\Batch.cs" />
     <Compile Include="Callback\Bundle.cs" />
     <Compile Include="Callback\ContainerAttribute.cs" />
+    <Compile Include="Callback\DynamicFilter.cs" />
     <Compile Include="Callback\Handler.Batch.cs" />
     <Compile Include="Callback\Handler.Bundle.cs" />
     <Compile Include="Callback\Handler.Command.cs" />

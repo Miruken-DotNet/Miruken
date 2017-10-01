@@ -27,13 +27,15 @@
             FastThreeArgs  = 1 << 3,
             FastFourArgs   = 1 << 4,
             FastFiveArgs   = 1 << 5,
-            Promise        = 1 << 6,
-            Task           = 1 << 7,
-            Void           = 1 << 8,
-            LateBound      = 1 << 9,
+            FastSixArgs    = 1 << 6,
+            Promise        = 1 << 7,
+            Task           = 1 << 8,
+            Void           = 1 << 9,
+            LateBound      = 1 << 10,
             Fast           = FastNoArgs   | FastOneArg
                            | FastTwoArgs  | FastThreeArgs
                            | FastFourArgs | FastFiveArgs
+                           | FastSixArgs
         }
 
         #endregion
@@ -107,6 +109,10 @@
                     AssertArgsCount(5, args);
                     ((FiveArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
                     return null;
+                case DispatchType.FastSixArgs | DispatchType.Void:
+                    AssertArgsCount(6, args);
+                    ((SixArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
+                    return null;
                 case DispatchType.FastNoArgs:
                     AssertArgsCount(0, args);
                     return ((NoArgsReturnDelegate)_delegate)(target);
@@ -125,6 +131,9 @@
                 case DispatchType.FastFiveArgs:
                     AssertArgsCount(5, args);
                     return ((FiveArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
+                case DispatchType.FastSixArgs:
+                    AssertArgsCount(6, args);
+                    return ((SixArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
                 #endregion
                 default:
                     return DispatchLate(target, args, returnType);
@@ -224,6 +233,12 @@
                                   ? (Delegate)RuntimeHelper.CreateCallFiveArgs(method)
                                   : RuntimeHelper.CreateFuncFiveArgs(method);
                         _dispatchType |= DispatchType.FastFiveArgs;
+                        return;
+                    case 6:
+                        _delegate = isVoid
+                            ? (Delegate)RuntimeHelper.CreateCallSixArgs(method)
+                            : RuntimeHelper.CreateFuncSixArgs(method);
+                        _dispatchType |= DispatchType.FastSixArgs;
                         return;
                     #endregion
                     default:

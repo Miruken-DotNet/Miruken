@@ -1383,7 +1383,7 @@
             {
                 var cb = ExtractCallback(callback);
                 cb?.Filters.Add(this);
-                Console.WriteLine($"Filter log {callback}");
+                Console.WriteLine($@"Filter log {callback}");
                 return next();
             }
         }
@@ -1397,7 +1397,7 @@
             {
                 var cb = ExtractCallback(request);
                 cb?.Filters.Add(this);
-                Console.WriteLine($"Behavior Promise log {request}");
+                Console.WriteLine($@"Behavior Promise log {request}");
                 return next();
             }
         }
@@ -1411,7 +1411,7 @@
             {
                 var cb = ExtractCallback(request);
                 cb?.Filters.Add(this);
-                Console.WriteLine($"Behavior Task log {request}");
+                Console.WriteLine($@"Behavior Task log {request}");
                 return next();
             }
         }

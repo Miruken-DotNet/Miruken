@@ -10,6 +10,9 @@
     [AttributeUsage(AttributeTargets.Parameter)]
     public class ResolvingAttribute : Attribute, IArgumentResolver
     {
+        public static readonly ResolvingAttribute 
+            Default = new ResolvingAttribute();
+
         private static readonly MethodInfo CreateLazy =
             typeof(ResolvingAttribute).GetMethod("ResolveLazy",
                 BindingFlags.NonPublic | BindingFlags.Instance);

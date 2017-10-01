@@ -151,7 +151,7 @@
                     var argument     = arguments[i];
                     var argumentType = argument.ArgumentType;
                     var optional     = argument.Optional;
-                    var resolver     = argument.Resolver ?? DefaultResolver;
+                    var resolver     = argument.Resolver ?? ResolvingAttribute.Default;
                     if (argumentType == typeof(IHandler))
                         args[i] = composer;
                     else if (argumentType.IsInstanceOfType(this))
@@ -187,8 +187,5 @@
                  : args.Select(arg => ReferenceEquals(arg, oldComposer)
                  ? newComposer : arg).ToArray();
         }
-
-        private static readonly ResolvingAttribute
-            DefaultResolver = new ResolvingAttribute();
     }
 }

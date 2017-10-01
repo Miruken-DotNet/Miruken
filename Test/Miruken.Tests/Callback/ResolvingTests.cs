@@ -31,6 +31,7 @@
             void CancelEmail(int id);
         }
 
+        [Filter(typeof(AuditFilter<,>))]
         private class EmailHandler : Handler, IEmailFeature
         {
             public int Count { get; private set; }
@@ -194,6 +195,49 @@
             }
         }
 
+        private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
+        {
+            public Res Next(Cb callback, NextDelegate<Res> next,
+                MethodBinding method,
+                Repository<Message> repository)
+            {
+                var send = callback as SendEmail;
+                if (send != null)
+                {
+                    var message = new Message {Content = send.Body};
+                    repository.Create(new Create<Message>(message));
+                    send.Body = method.Dispatcher.Method.Name;
+                    if (typeof(Res) == typeof(int))
+                        return (Res) (object) (message.Id * 10);
+                }
+                return next();
+            }
+        }
+
+        private class BalanceFilter<Cb, Res> : DynamicFilter<Cb, Res>
+        {
+            public Res Next(Cb callback, NextDelegate<Res> next,
+                Repository<Message> repository, IBilling billing)
+            {
+                return next();
+            }
+        }
+
+        private class FilterProvider : Handler
+        {
+            [Provides]
+            public AuditFilter<Cb, Res> ProviderAudit<Cb, Res>()
+            {
+                return new AuditFilter<Cb, Res>();
+            }
+
+            [Provides]
+            public BalanceFilter<Cb, Res> ProviderBalance<Cb, Res>()
+            {
+                return new BalanceFilter<Cb, Res>();
+            }
+        }
+
         public interface IEntity
         {
             int Id { get; set; }
@@ -203,6 +247,18 @@
         {
             public int    Id      { get; set; }
             public string Content { get; set; }
+        }
+
+        public class Deposit : IEntity
+        {
+            public int     Id     { get; set; }
+            public decimal Amount { get; set; }
+        }
+
+        public class Withdrawal : IEntity
+        {
+            public int     Id     { get; set; }
+            public decimal Amount { get; set; }
         }
 
         public class Create<T> where T : IEntity
@@ -215,7 +271,7 @@
         }
 
         public class Repository<T> : Handler
-            where T : IEntity
+            where T : class, IEntity
         {
             private int _nextId = 1;
 
@@ -226,11 +282,30 @@
             }
         }
 
+        public class Accountant : Handler
+        {
+            private decimal _balance;
+
+            [Handles,
+             Filter(typeof(BalanceFilter<,>))]
+            public decimal DepositFunds(Create<Deposit> deposit)
+            {
+                return _balance += deposit.Entity.Amount;
+            }
+
+            [Handles,
+             Filter(typeof(BalanceFilter<,>))]
+            public decimal WithdrawFunds(Create<Withdrawal> withdraw)
+            {
+                return _balance -= withdraw.Entity.Amount;
+            }
+        }
+
         public class RepositoryProvider : Handler
         {
             [Provides]
             public Repository<T> CreateRepository<T>()
-                where T : IEntity
+                where T : class, IEntity
             {
                 return new Repository<T>();
             }
@@ -326,6 +401,28 @@
             var handled = handler.Resolve().Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Handlers_With_Filters()
+        {
+            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            var handler = new EmailProvider()
+                        + new RepositoryProvider()
+                        + new FilterProvider();
+            var id = handler.Resolve()
+                .Command<int>(new SendEmail { Body = "Hello" });
+            Assert.AreEqual(10, id);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
+        public void Should_Reject_Filters_With_Missing_Dependencies()
+        {
+            var handler = new Accountant()
+                        + new FilterProvider();
+            handler.Resolve().Command<decimal>(
+                new Create<Deposit>(new Deposit { Amount = 10.0M }));
         }
 
         [TestMethod,

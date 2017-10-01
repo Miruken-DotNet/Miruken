@@ -13,9 +13,10 @@
             var bundle = new Bundle(all);
             prepare(bundle);
             if (bundle.IsEmpty) return true;
-            var handled = handler.Handle(bundle);
-            if (bundle.IsAsync)
-                bundle.Complete().Wait();
+            var handled  = handler.Handle(bundle);
+            var complete = bundle.Complete();
+            if (!bundle.WantsAsync && bundle.IsAsync)
+                complete.Wait();
             return handled;
         }
 
