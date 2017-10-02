@@ -73,6 +73,7 @@
     <Compile Include="Callback\Policy\BivariantPolicy.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\Policy\GenericMapping.cs" />
+    <Compile Include="Callback\ProxyAttribute.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />

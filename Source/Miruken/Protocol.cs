@@ -21,12 +21,16 @@
             return new Interceptor(adapter).GetTransparentProxy();
         }
 
+        public static object Proxy(IProtocolAdapter adapter, Type protocol)
+        {
+            if (!protocol.IsInterface)
+                throw new NotSupportedException("Only protocol interfaces are supported");
+            return new Interceptor(adapter, protocol).GetTransparentProxy();
+        }
+
         public static TProto Proxy<TProto>(IProtocolAdapter adapter)
         {
-            if (!typeof(TProto).IsInterface)
-                throw new NotSupportedException("Only protocol interfaces are supported");
-            return (TProto)new Interceptor(adapter, typeof(TProto))
-                .GetTransparentProxy();
+            return (TProto)Proxy(adapter, typeof(TProto));
         }
     }
 
@@ -35,6 +39,11 @@
         public static object Proxy(this IProtocolAdapter adapter)
         {
             return Protocol.Proxy(adapter);
+        }
+
+        public static object Proxy(this IProtocolAdapter adapter, Type protocolType)
+        {
+            return Protocol.Proxy(adapter, protocolType);
         }
 
         public static TProto Proxy<TProto>(this IProtocolAdapter adapter)

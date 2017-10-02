@@ -199,7 +199,8 @@
         {
             public Res Next(Cb callback, NextDelegate<Res> next,
                 MethodBinding method,
-                Repository<Message> repository)
+                Repository<Message> repository,
+                [Proxy]IBilling billing)
             {
                 var send = callback as SendEmail;
                 if (send != null)

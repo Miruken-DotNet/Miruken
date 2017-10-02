@@ -17,8 +17,8 @@
             typeof(ResolvingAttribute).GetMethod("ResolveLazy",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate> _lazy
-            = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
+        private static readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate>
+            _lazy = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
 
         public virtual object ResolveArgument(
             Argument argument, IHandler handler, IHandler composer)
@@ -34,6 +34,10 @@
                 return lazy(this, argument, composer);
             }
             return Resolve(argument, handler);
+        }
+
+        public virtual void ValidateArgument(Argument argument)
+        {
         }
 
         protected virtual object Resolve(object key, IHandler handler)

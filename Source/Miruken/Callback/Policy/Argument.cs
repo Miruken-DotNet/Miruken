@@ -9,6 +9,8 @@
 
     public interface IArgumentResolver
     {
+        void ValidateArgument(Argument argument);
+
         object ResolveArgument(
             Argument argument, IHandler handler, IHandler composer);
     } 
@@ -32,13 +34,14 @@
                 Attributes = Array.Empty<Attribute>();
             if (Key == null)
                 Key = IsSimple ? Parameter.Name : (object)LogicalType;
+            Resolver?.ValidateArgument(this);
         }
 
         public object            Key           { get; }
         public ParameterInfo     Parameter     { get; }
         public Type              ParameterType { get; }
-        public Type              ArgumentType  { get; set; }
-        public Type              LogicalType   { get; set; }
+        public Type              ArgumentType  { get; private set; }
+        public Type              LogicalType   { get; private set; }
         public Attribute[]       Attributes    { get; }
         public IArgumentResolver Resolver      { get; }
         public  bool             Optional      { get; }
