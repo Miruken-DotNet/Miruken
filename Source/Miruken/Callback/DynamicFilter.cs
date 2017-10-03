@@ -57,7 +57,7 @@
                 }
             }))
             {
-                var errors = new StringBuilder("Unresolved filter dependencies");
+                var errors = new StringBuilder("Missing dependencies");
                 foreach (var culprit in culprits)
                     errors.Append($" {culprit.Parameter.Name}:{culprit.ParameterType}");
                 throw new InvalidOperationException(errors.ToString());
@@ -73,7 +73,7 @@
                 MemberTypes.Method, Binding, IsDynamicNext, null);
             if (members.Length > 1)
                 throw new InvalidOperationException(
-                    $"Found {members.Length} filter Next methods.");
+                    $"Found {members.Length} candidate Next methods");
             return members.Length == 0 ? null : new MethodDispatch(
                 (MethodInfo)members[0], Array.Empty<Attribute>());
         }

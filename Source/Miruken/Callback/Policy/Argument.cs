@@ -44,7 +44,7 @@
         public Type              LogicalType   { get; private set; }
         public Attribute[]       Attributes    { get; }
         public IArgumentResolver Resolver      { get; }
-        public  bool             Optional      { get; }
+        public bool              Optional      { get; }
 
         public bool              IsLazy        { get; private set; }
         public bool              IsArray       { get; private set; }
