@@ -73,7 +73,7 @@
                 MemberTypes.Method, Binding, IsDynamicNext, null);
             if (members.Length > 1)
                 throw new InvalidOperationException(
-                    $"Found {members.Length} candidate Next methods");
+                    $"Found {members.Length} compatible Next methods");
             return members.Length == 0 ? null : new MethodDispatch(
                 (MethodInfo)members[0], Array.Empty<Attribute>());
         }

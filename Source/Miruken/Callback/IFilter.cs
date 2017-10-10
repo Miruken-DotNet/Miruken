@@ -18,6 +18,8 @@
                  IHandler composer, NextDelegate<Res> next);
     }
 
+    public interface IGlobalFilter<in Cb, Res> : IFilter<Cb, Res> { }
+
     public interface IFilterProvider
     {
         IEnumerable<IFilter> GetFilters(MethodBinding binding,

@@ -9,7 +9,6 @@
 
     public static class HandlerAspectExtensions
     {
-
         public static HandlerFilter Aspect(
             this IHandler handler, BeforeCallback before)
         {
