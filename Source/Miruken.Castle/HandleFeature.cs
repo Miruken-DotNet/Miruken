@@ -36,7 +36,7 @@
             return this;
         }
 
-        protected internal override IEnumerable<FromDescriptor> GetFeatures()
+        public override IEnumerable<FromDescriptor> GetFeatures()
         {
             yield return Types.From(typeof(ErrorsHandler), typeof(MappingHandler));
         }

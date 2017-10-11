@@ -14,13 +14,13 @@
 
         public abstract void InstallFeatures(FromDescriptor from);
 
-        protected virtual void Install(IConfigurationStore store)
-        {
-        }
-
-        protected internal virtual IEnumerable<FromDescriptor> GetFeatures()
+        public virtual IEnumerable<FromDescriptor> GetFeatures()
         {
             return Enumerable.Empty<FromDescriptor>();
+        }
+
+        protected virtual void Install(IConfigurationStore store)
+        {
         }
 
         void IWindsorInstaller.Install(IWindsorContainer container, IConfigurationStore store)

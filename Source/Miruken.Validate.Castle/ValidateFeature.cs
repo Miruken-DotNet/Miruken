@@ -17,7 +17,7 @@
             return this;
         }
 
-        protected override IEnumerable<FromDescriptor> GetFeatures()
+        public override IEnumerable<FromDescriptor> GetFeatures()
         {
             yield return Classes.FromAssemblyContaining<ValidationHandler>();
         }
