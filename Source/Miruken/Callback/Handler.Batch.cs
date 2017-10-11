@@ -29,7 +29,6 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var handled = false;
             if (Batch != null && 
                 (callback as IBatchCallback)?.AllowBatching != false)
             {
@@ -37,11 +36,10 @@
                 if (_completed > 0 && !(callback is Composition)) {
                     Batch = null;
                 }
-                if ((handled = batch.Handle(callback, ref greedy, composer)) 
-                    && !greedy) return true;
+                if (batch.Handle(callback, ref greedy, composer))
+                    return true;
             }
-            return base.HandleCallback(callback, ref greedy, composer)
-                || handled;
+            return base.HandleCallback(callback, ref greedy, composer);
         }
 
         public void Dispose()
