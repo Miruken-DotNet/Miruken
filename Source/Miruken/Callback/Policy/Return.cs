@@ -22,7 +22,7 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             return returnType.IsClassOf(_type);
@@ -70,7 +70,7 @@
 
         public override bool Matches(
              Type returnType, ParameterInfo[] parameters,
-             DefinitionAttribute attribute,
+             CategoryAttribute category,
              IDictionary<string, Type> aliases)
         {
             return _test(returnType, parameters, aliases);

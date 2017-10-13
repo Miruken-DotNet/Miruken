@@ -14,22 +14,22 @@
     {
         public PolicyMethodBindingInfo(
             MethodRule rule, MethodDispatch dispatch,
-            DefinitionAttribute definition)
+            CategoryAttribute category)
         {
             Rule          = rule;
             Dispatch      = dispatch;
-            Definition    = definition;
-            InKey         = definition.InKey;
-            OutKey        = definition.OutKey;
+            Category    = category;
+            InKey         = category.InKey;
+            OutKey        = category.OutKey;
             CallbackIndex = null;
         }
 
-        public object              InKey;
-        public object              OutKey;
-        public int?                CallbackIndex;
-        public MethodRule          Rule           { get; }
-        public MethodDispatch      Dispatch       { get; }
-        public DefinitionAttribute Definition     { get; }
+        public object            InKey;
+        public object            OutKey;
+        public int?              CallbackIndex;
+        public MethodRule        Rule           { get; }
+        public MethodDispatch    Dispatch       { get; }
+        public CategoryAttribute Category       { get; }
     }
 
     public class PolicyMethodBinding : MethodBinding
@@ -40,21 +40,21 @@
         {
             Policy        = policy;
             Rule          = bindingInfo.Rule;
-            Definition    = bindingInfo.Definition;
+            Category      = bindingInfo.Category;
             CallbackIndex = bindingInfo.CallbackIndex;
             Key           = policy.CreateKey(bindingInfo);
         }
 
-        public MethodRule          Rule          { get; }
-        public DefinitionAttribute Definition    { get; }
-        public CallbackPolicy      Policy        { get; }
-        public int?                CallbackIndex { get; }
-        public object              Key           { get; }
+        public MethodRule        Rule          { get; }
+        public CategoryAttribute Category      { get; }
+        public CallbackPolicy    Policy        { get; }
+        public int?              CallbackIndex { get; }
+        public object            Key           { get; }
 
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            if (Definition?.Approve(callback, this) == false)
+            if (Category?.Approve(callback, this) == false)
                 return false;
             object result;
             var resultType = Policy.ResultType?.Invoke(callback);
@@ -128,7 +128,7 @@
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
-                return results?.Invoke(result, Definition.Strict) != false;
+                return results?.Invoke(result, Category.Strict) != false;
             }
 
             return accepted;

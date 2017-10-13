@@ -4,7 +4,7 @@
     using Callback;
     using Callback.Policy;
 
-    public class MapsAttribute : DefinitionAttribute
+    public class MapsAttribute : CategoryAttribute
     {
         public MapsAttribute()
         {

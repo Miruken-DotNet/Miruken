@@ -28,9 +28,9 @@
             _filters.AddRange(providers.Where(p => p != null));
         }
 
-        public MethodRule MatchMethod(MethodInfo method, DefinitionAttribute attribute)
+        public MethodRule MatchMethod(MethodInfo method, CategoryAttribute category)
         {
-            return _rules.FirstOrDefault(r => r.Matches(method, attribute));
+            return _rules.FirstOrDefault(r => r.Matches(method, category));
         }
 
         public virtual PolicyMethodBinding BindMethod(

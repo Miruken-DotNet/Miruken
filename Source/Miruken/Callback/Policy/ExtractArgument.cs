@@ -29,7 +29,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;

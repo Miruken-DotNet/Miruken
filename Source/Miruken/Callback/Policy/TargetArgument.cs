@@ -29,7 +29,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
@@ -50,7 +50,7 @@ namespace Miruken.Callback.Policy
                         return false;
                 }
             }
-            var restrict = attribute.InKey as Type;
+            var restrict = category.InKey as Type;
             if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
             {
                 if (_alias != null)

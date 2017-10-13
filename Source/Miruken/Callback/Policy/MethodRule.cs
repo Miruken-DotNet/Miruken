@@ -32,25 +32,25 @@ namespace Miruken.Callback.Policy
         public ArgumentRule[] Args        { get; }
         public ReturnRule     ReturnValue { get; }
 
-        public bool Matches(MethodInfo method, DefinitionAttribute attribute)
+        public bool Matches(MethodInfo method, CategoryAttribute category)
         {
             var parameters = method.GetParameters();
             var paramCount = parameters.Length;
             var aliases    = new Dictionary<string, Type>();
             if (paramCount < Args.Length || !parameters.Zip(Args, 
-                (param, arg) => arg.Matches(param, attribute, aliases))
+                (param, arg) => arg.Matches(param, category, aliases))
                 .All(m => m)) return false;
             if (ReturnValue?.Matches(
-                method.ReturnType, parameters, attribute, aliases) == false)
+                method.ReturnType, parameters, category, aliases) == false)
                 throw new InvalidOperationException(
                      $"Method '{method.GetDescription()}' satisfied the arguments but rejected the return");
             return true;
         }
 
         public PolicyMethodBinding Bind(
-            MethodDispatch dispatch, DefinitionAttribute attribute)
+            MethodDispatch dispatch, CategoryAttribute category)
         {
-            var policyBindingInfo = new PolicyMethodBindingInfo(this, dispatch, attribute);
+            var policyBindingInfo = new PolicyMethodBindingInfo(this, dispatch, category);
             ReturnValue?.Configure(policyBindingInfo);
             var parameters = dispatch.Method.GetParameters();
             for (var i = 0; i < Args.Length; ++i)

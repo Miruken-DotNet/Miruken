@@ -5,7 +5,7 @@ namespace Miruken.Callback
 
     [AttributeUsage(AttributeTargets.Method,
         AllowMultiple = true, Inherited = false)]
-    public abstract class DefinitionAttribute : Attribute
+    public abstract class CategoryAttribute : Attribute
     {
         public object InKey  { get; protected set; }
         public object OutKey { get; protected set; }

@@ -11,7 +11,7 @@
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases);
 
         public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo) { }
@@ -40,10 +40,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
-            return Rule.Matches(returnType, parameters, attribute, aliases);
+            return Rule.Matches(returnType, parameters, category, aliases);
         }
 
         public override void Configure(
@@ -66,11 +66,11 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             return returnType == typeof(void) ||
-                base.Matches(returnType, parameters, attribute, aliases);
+                base.Matches(returnType, parameters, category, aliases);
         }
 
         public override void Configure(

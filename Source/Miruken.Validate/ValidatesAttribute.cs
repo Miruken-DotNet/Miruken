@@ -4,7 +4,7 @@
     using Callback;
     using Callback.Policy;
 
-    public class ValidatesAttribute : DefinitionAttribute
+    public class ValidatesAttribute : CategoryAttribute
     {
         public ValidatesAttribute()
         {          

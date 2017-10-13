@@ -18,7 +18,7 @@
         }
 
         public abstract bool Matches(
-           ParameterInfo parameter, DefinitionAttribute attribute,
+           ParameterInfo parameter, CategoryAttribute category,
            IDictionary<string, Type> aliases);
 
         public virtual void Configure(ParameterInfo parameter,
@@ -39,10 +39,10 @@
         public ArgumentRule Argument { get; }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
-            return Argument.Matches(parameter, attribute, aliases);
+            return Argument.Matches(parameter, category, aliases);
         }
 
         public override void Configure(ParameterInfo parameter,
@@ -73,7 +73,7 @@
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
@@ -82,7 +82,7 @@
                 if (_aliases != null && _aliases.Length > 0)
                     throw new InvalidOperationException(
                         $"{_type.FullName} is not a generic definition and cannot bind aliases");
-                return base.Matches(parameter, attribute, aliases);
+                return base.Matches(parameter, category, aliases);
             }
             var openGeneric = paramType.GetOpenTypeConformance(_type);
             if (openGeneric == null) return false;
@@ -97,7 +97,7 @@
                 if (!string.IsNullOrEmpty(alias))
                     aliases.Add(_aliases[i], genericArgs[i]);
             }
-            return base.Matches(parameter, attribute, aliases);
+            return base.Matches(parameter, category, aliases);
         }
     }
 }

@@ -28,16 +28,16 @@ namespace Miruken.Callback.Policy
                           ?? ((PropertyInfo)member).GetMethod;
                 var attributes = Attribute.GetCustomAttributes(member, false);
 
-                foreach (var definition in attributes.OfType<DefinitionAttribute>())
+                foreach (var category in attributes.OfType<CategoryAttribute>())
                 {
-                    var policy = definition.CallbackPolicy;
-                    var rule   = policy.MatchMethod(method, definition);
+                    var policy = category.CallbackPolicy;
+                    var rule   = policy.MatchMethod(method, category);
                     if (rule == null)
                         throw new InvalidOperationException(
-                            $"The policy for {definition.GetType().FullName} rejected method '{method.GetDescription()}'");
+                            $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
                     dispatch = dispatch ?? new MethodDispatch(method, attributes);
-                    var binding = rule.Bind(dispatch, definition);
+                    var binding = rule.Bind(dispatch, category);
 
                     if (_policies == null)
                         _policies = new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>();
@@ -207,7 +207,7 @@ namespace Miruken.Callback.Policy
             }
             else if (!((PropertyInfo)member).CanRead)
                 return false; 
-            return member.IsDefined(typeof(DefinitionAttribute));
+            return member.IsDefined(typeof(CategoryAttribute));
         }
 
         private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>

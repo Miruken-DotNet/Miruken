@@ -19,7 +19,7 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             if (returnType.Is<Promise>())
@@ -38,7 +38,7 @@
             }
             else if (_required)
                 return false;
-            return base.Matches(returnType, parameters, attribute, aliases);
+            return base.Matches(returnType, parameters, category, aliases);
         }
     }
 }

@@ -5,7 +5,7 @@
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property,
         AllowMultiple = true, Inherited = false)]
-    public class ProvidesAttribute : DefinitionAttribute
+    public class ProvidesAttribute : CategoryAttribute
     {
         public ProvidesAttribute()
         {

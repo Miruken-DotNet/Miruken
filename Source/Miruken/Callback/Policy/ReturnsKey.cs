@@ -15,13 +15,13 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            DefinitionAttribute attribute,
+            CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            var restrict = attribute.OutKey as Type;
+            var restrict = category.OutKey as Type;
             if (restrict == null || returnType.Is(restrict) || restrict.Is(returnType))
                 return true;
             throw new InvalidOperationException(
@@ -36,7 +36,7 @@
             if (key != null && restrict == null) return;
             var dispatch   = policyMethodBindingInfo.Dispatch;
             var returnType = dispatch.LogicalReturnType;
-            if (!policyMethodBindingInfo.Definition.Strict)
+            if (!policyMethodBindingInfo.Category.Strict)
             {
                 if (returnType.IsArray)
                     returnType = returnType.GetElementType();

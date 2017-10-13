@@ -2,7 +2,7 @@
 {
     using Policy;
 
-    public class HandlesAttribute : DefinitionAttribute
+    public class HandlesAttribute : CategoryAttribute
     {
         public HandlesAttribute()
         {

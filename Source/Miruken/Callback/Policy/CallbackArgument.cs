@@ -22,7 +22,7 @@ namespace Miruken.Callback.Policy
             get
             {
                 if (string.IsNullOrEmpty(alias))
-                    throw new ArgumentException("Alias cannot be empty", nameof(alias));
+                    throw new ArgumentException(@"Alias cannot be empty", nameof(alias));
                 if (this == Instance)
                     return new CallbackArgument(alias);
                 _alias = alias;
@@ -31,7 +31,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
@@ -50,7 +50,7 @@ namespace Miruken.Callback.Policy
                         return false;
                 }
             }
-            var restrict = attribute.InKey as Type;
+            var restrict = category.InKey as Type;
             if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
             {
                 if (_alias != null)
@@ -96,7 +96,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, DefinitionAttribute attribute,
+            ParameterInfo parameter, CategoryAttribute category,
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
