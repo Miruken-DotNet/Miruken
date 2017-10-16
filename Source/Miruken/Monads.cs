@@ -25,7 +25,7 @@
             _isLeft = false;
         }
 
-        private Either()
+        protected Either()
         {
         }
 
@@ -107,6 +107,10 @@
             : base(error)
         {
             IsError = true;
+        }
+
+        protected Try()
+        {
         }
 
         public bool IsError { get; }
