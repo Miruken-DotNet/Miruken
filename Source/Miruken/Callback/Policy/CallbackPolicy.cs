@@ -59,7 +59,8 @@
 
         public abstract object GetKey(object callback);
 
-        public abstract IEnumerable GetCompatibleKeys(object key, IEnumerable output);
+        public abstract IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+            object key, IEnumerable output);
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, ResultsDelegate results = null)

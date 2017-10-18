@@ -6,24 +6,8 @@
     using System.Linq;
     using Infrastructure;
 
-    public abstract class CovariantPolicy : CallbackPolicy, IComparer<Type>
+    public abstract class CovariantPolicy : CallbackPolicy
     {
-        protected static bool AcceptKey(Type type, Type key)
-        {
-            if (type.IsGenericTypeDefinition)
-                return key.GetOpenTypeConformance(type) != null;
-            if (key.IsGenericTypeDefinition)
-                return type.IsGenericType && 
-                    type.GetGenericTypeDefinition() == key;
-            return type.IsAssignableFrom(key);
-        }
-
-        int IComparer<Type>.Compare(Type x, Type y)
-        {
-            if (x == y) return 0;
-            return y == null || AcceptKey(x, y) ? -1 : 1;
-        }
-
         public static CovariantPolicy<Cb> Create<Cb>(
             Func<Cb, object> key,
             Action<CovariantPolicyBuilder<Cb>> build)
@@ -34,6 +18,37 @@
             var builder = new CovariantPolicyBuilder<Cb>(policy);
             build(builder);
             return policy;
+        }
+
+        protected static int? Accuracy(Type type, Type key)
+        {
+            if (type == key) return 0;
+            if (type == null || key == null)
+                return null;
+            if (type.IsGenericTypeDefinition)
+                return key.GetOpenTypeConformance(type) != null
+                    ? 1000 : (int?)null;
+            if (key.IsGenericTypeDefinition)
+                return type.IsGenericType && type.GetGenericTypeDefinition() == key
+                    ? 2000 : (int?)null;
+            return type.IsAssignableFrom(key)
+                 ? GetAccuracy(type, key)
+                 : (int?)null;
+        }
+
+        private static int GetAccuracy(Type type, Type key)
+        {
+            if (type.IsClass && key.IsClass)
+            {
+                var accuracy = 0;
+                while (key != null && key != type)
+                {
+                    key = key.BaseType;
+                    ++accuracy;
+                }
+                return accuracy;
+            }
+            return 50;
         }
     }
 
@@ -54,16 +69,26 @@
             return callback is Cb ? Key((Cb)callback) : null;
         }
 
-        public override IEnumerable GetCompatibleKeys(object key, IEnumerable output)
+        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+            object key, IEnumerable output)
         {
             var type = key as Type;
             if (type == null)
-                return output.Cast<object>().Where(k => 
-                    !Equals(key, k) && Equals(k, key));
-            return type == typeof(object) 
-                 ? output.Cast<object>().Where(t => (t as Type)?.IsGenericTypeDefinition != true)
-                 : output.OfType<Type>().Where(t => t != type && AcceptKey(type, t))
-                      .OrderBy(t => t, this);
+                return output.Cast<object>()
+                    .Where(k => !Equals(key, k) && Equals(k, key))
+                    .Select(k => Tuple.Create(k, 1));
+
+            if (type == typeof(object))
+                return output.Cast<object>()
+                    .Where(t => (t as Type)?.IsGenericTypeDefinition != true)
+                    .Select(t => Tuple.Create(t, int.MaxValue));
+
+            return output.OfType<Type>()
+                .Where(t => t != type)
+                .Select(t => new { Key = t, Accuracy = Accuracy(type, t) })
+                .Where(k => k.Accuracy.HasValue)
+                .OrderBy(k => k.Accuracy)
+                .Select(k => Tuple.Create((object)k.Key, k.Accuracy.Value));
         }
 
         private Type GetResultType(object callback)

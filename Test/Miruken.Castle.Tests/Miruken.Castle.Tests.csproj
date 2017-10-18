@@ -66,7 +66,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CompositeHandlerExtensionsTests.cs" />
-    <Compile Include="ConfigurationFactoryInstallerTests.cs" />
+    <Compile Include="ConfigurationFeatureTests.cs" />
     <Compile Include="ContextualLifestyleManagerTests.cs" />
     <Compile Include="FeaturesTests.cs" />
     <Compile Include="HandleFeatureTests.cs" />

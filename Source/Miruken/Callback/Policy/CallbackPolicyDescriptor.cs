@@ -8,7 +8,8 @@ namespace Miruken.Callback.Policy
     public class CallbackPolicyDescriptor
     {
         private readonly Dictionary<Type, List<PolicyMethodBinding>> _typed;
-        private readonly ConcurrentDictionary<object, List<PolicyMethodBinding>> _compatible;
+        private readonly ConcurrentDictionary
+            <object, List<Tuple<PolicyMethodBinding, int>>> _compatible;
         private Dictionary<object, List<PolicyMethodBinding>> _indexed;
         private List<PolicyMethodBinding> _unknown;
 
@@ -16,7 +17,8 @@ namespace Miruken.Callback.Policy
         {
             Policy      = policy;
             _typed      = new Dictionary<Type, List<PolicyMethodBinding>>();
-            _compatible = new ConcurrentDictionary<object, List<PolicyMethodBinding>>();
+            _compatible = new ConcurrentDictionary
+                <object, List<Tuple<PolicyMethodBinding, int>>>();
         }
 
         public CallbackPolicy Policy { get; }
@@ -82,24 +84,25 @@ namespace Miruken.Callback.Policy
                 ?? Array.Empty<PolicyMethodBinding>();
         }
 
-        internal IEnumerable<PolicyMethodBinding> GetCompatibleMethods(object key)
+        internal IEnumerable<Tuple<PolicyMethodBinding, int>> GetCompatibleMethods(object key)
         {
             return _compatible.GetOrAdd(key, InferCompatibleMethods);
         }
 
-        internal List<PolicyMethodBinding> InferCompatibleMethods(object key)
+        internal List<Tuple<PolicyMethodBinding, int>> InferCompatibleMethods(object key)
         {
-            var compatible = new List<PolicyMethodBinding>();
+            var compatible = new List<Tuple<PolicyMethodBinding, int>>();
 
             var type = key as Type;
             if (type != null)
             {
                 var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
-                foreach (var next in keys.OfType<Type>())
+                foreach (var next in keys)
                 {
                     List<PolicyMethodBinding> methods;
-                    if (_typed.TryGetValue(next, out methods))
-                        compatible.AddRange(methods);
+                    var nextType = next.Item1 as Type;
+                    if (nextType != null && _typed.TryGetValue(nextType, out methods))
+                        compatible.AddRange(methods.Select(m => Tuple.Create(m, next.Item2)));
                 }
             }
             else if (_indexed != null)
@@ -108,13 +111,13 @@ namespace Miruken.Callback.Policy
                 foreach (var next in keys)
                 {
                     List<PolicyMethodBinding> methods;
-                    if (_indexed.TryGetValue(next, out methods))
-                        compatible.AddRange(methods);
+                    if (_indexed.TryGetValue(next.Item1, out methods))
+                        compatible.AddRange(methods.Select(m => Tuple.Create(m, next.Item2)));
                 }
             }
 
             if (_unknown != null)
-                compatible.AddRange(_unknown);
+                compatible.AddRange(_unknown.Select(u => Tuple.Create(u, int.MaxValue)));
 
             return compatible;
         }

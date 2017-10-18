@@ -6,7 +6,7 @@
     using System.Linq;
     using Infrastructure;
 
-    public class ContravariantPolicy : CallbackPolicy, IComparer<Type>
+    public class ContravariantPolicy : CallbackPolicy
     {
         public ContravariantPolicy()
         {
@@ -18,23 +18,23 @@
             return callback?.GetType();
         }
 
-        public override IEnumerable GetCompatibleKeys(object key, IEnumerable output)
+        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+            object key, IEnumerable output)
         {
             return CompatibleTypes(key as Type, output);
         }
 
-        protected IEnumerable CompatibleTypes(Type type, IEnumerable types)
+        protected IEnumerable<Tuple<object, int>> CompatibleTypes(
+            Type type, IEnumerable types)
         {
             if (type == null || type == typeof(object))
-                return Enumerable.Empty<object>();
+                return Enumerable.Empty<Tuple<object, int>>();
             return types.OfType<Type>()
-                .Where(t => t != type && AcceptKey(type, t)) 
-                .OrderBy(t => t, this);
-        }
-
-        private static bool AcceptKey(Type type, Type key)
-        {
-            return type.IsClassOf(key);
+                .Where(t => t != type)
+                .Select(t => new { Key = t, Accuracy = Accuracy(type, t) })
+                .Where(k => k.Accuracy.HasValue)
+                .OrderBy(k => k.Accuracy)
+                .Select(k => Tuple.Create((object)k.Key, k.Accuracy.Value));
         }
 
         private static bool VerifyResult(object result, MethodBinding binding)
@@ -42,10 +42,31 @@
             return result != null || binding.Dispatcher.IsVoid;
         }
 
-        int IComparer<Type>.Compare(Type x, Type y)
+        private static int? Accuracy(Type type, Type key)
         {
-            if (x == y) return 0;
-            return x == null || AcceptKey(x, y) ? -1 : 1;
+            if (type == key) return 0;
+            if (type == null || key == null) return null;
+            if (key.IsAssignableFrom(type))
+                return GetClassAccuracy(type, key);
+            var open = type.GetOpenTypeConformance(key);
+            return open != null 
+                 ? 1000 - open.GenericTypeArguments.Length
+                 : (int?)null;
+        }
+
+        private static int GetClassAccuracy(Type type, Type key)
+        {
+            if (type.IsClass && key.IsClass)
+            {
+                var accuracy = 0;
+                while (type != null && type != key)
+                {
+                    type = type.BaseType;
+                    ++accuracy;
+                }
+                return accuracy;
+            }
+            return 50;
         }
 
         public static ContravariantPolicy Create(
@@ -90,7 +111,8 @@
                  : callback?.GetType();
         }
 
-        public override IEnumerable GetCompatibleKeys(object key, IEnumerable output)
+        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+            object key, IEnumerable output)
         {
             return CompatibleTypes(key as Type, output);
         }

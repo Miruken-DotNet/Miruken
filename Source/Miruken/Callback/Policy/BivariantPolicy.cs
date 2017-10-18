@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
 
     public abstract class BivariantPolicy : CallbackPolicy
@@ -50,24 +51,43 @@
                 Input.GetKey(callback));
         }
 
-        public override IEnumerable GetCompatibleKeys(object key, IEnumerable keys)
+        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+            object key, IEnumerable keys)
         {
             var tuple = key as Tuple<object, object>;
-            if (tuple == null) return Enumerable.Empty<object>();
+            if (tuple == null) return Enumerable.Empty<Tuple<object, int>>();
             var input  = tuple.Item2;
             var output = tuple.Item1;
-            return keys.OfType<Tuple<object, object>>().Where(testKey =>
+            return keys.OfType<Tuple<object, object>>().Select(testKey =>
             {
                 var inKey    = testKey.Item2;
                 var outKey   = testKey.Item1;
                 var inEqual  = Equals(input, inKey);
                 var outEqual = Equals(output, outKey);
-                return (!inEqual || !outEqual) &&
-                    (outEqual || Output.GetCompatibleKeys(output,
-                        new[] {outKey}).GetEnumerator().MoveNext()) &&
-                    (inEqual || Input.GetCompatibleKeys(input,
-                        new[] {inKey}).GetEnumerator().MoveNext());
-            });
+                if (inEqual && outEqual) return null;
+                var accuracy = 0;
+                if (!outEqual)
+                {
+                    using (var k = Output.GetCompatibleKeys(output,
+                        new[] { outKey }).GetEnumerator())
+                    {
+                        if (!k.MoveNext() || k.Current == null)
+                            return null;
+                        accuracy += k.Current.Item2;
+                    }
+                }
+                if (!inEqual)
+                {
+                    using (var k = Input.GetCompatibleKeys(input,
+                        new[] { inKey }).GetEnumerator())
+                    {
+                        if (!k.MoveNext() || k.Current == null)
+                            return null;
+                        accuracy += k.Current.Item2;
+                    }
+                }
+                return Tuple.Create((object)testKey, accuracy);
+            }).Where(k => k != null);
         }
     }
 

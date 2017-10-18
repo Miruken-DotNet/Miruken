@@ -6,7 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class ConfigurationFactoryInstallerTests
+    public class ConfigurationFeatureTests
     {
         private IWindsorContainer _container;
 
