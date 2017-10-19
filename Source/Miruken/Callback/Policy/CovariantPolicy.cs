@@ -81,7 +81,7 @@
             if (type == typeof(object))
                 return output.Cast<object>()
                     .Where(t => (t as Type)?.IsGenericTypeDefinition != true)
-                    .Select(t => Tuple.Create(t, int.MaxValue));
+                    .Select(t => Tuple.Create(t, 10000));
 
             return output.OfType<Type>()
                 .Where(t => t != type)
