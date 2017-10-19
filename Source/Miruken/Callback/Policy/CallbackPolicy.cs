@@ -70,11 +70,6 @@
                                        composer, results);
         }
 
-        public IEnumerable<Type> GetHandlers(object key)
-        {
-            return HandlerDescriptor.GetPolicyHandlers(this, key);
-        }
-
         public IEnumerable<PolicyMethodBinding> GetMethods()
         {
             return HandlerDescriptor.GetPolicyMethods(this);
@@ -93,7 +88,7 @@
         public static IEnumerable<Type> GetCallbackHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
-            return policy.GetHandlers(policy.GetKey(callback));
+            return HandlerDescriptor.GetCallbackHandlers(policy, callback);
         }
 
         public static IEnumerable<PolicyMethodBinding> GetCallbackMethods(object callback)

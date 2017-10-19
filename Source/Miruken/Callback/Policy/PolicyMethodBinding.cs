@@ -51,11 +51,15 @@
         public int?              CallbackIndex { get; }
         public object            Key           { get; }
 
+        public bool Approves(object callback)
+        {
+            return Category?.Approve(callback, this) != false;
+        }
+
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            if (Category?.Approve(callback, this) == false)
-                return false;
+            if (!Approves(callback)) return false;
             object result;
             var resultType = Policy.ResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType,

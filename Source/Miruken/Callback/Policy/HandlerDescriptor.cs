@@ -20,7 +20,7 @@ namespace Miruken.Callback.Policy
                 throw new ArgumentException("Only concrete classes can be handlers");
 
             HandlerType = handlerType;
-            var members = handlerType.FindMembers(Members, Binding, IsDefinition, null);
+            var members = handlerType.FindMembers(Members, Binding, IsCategory, null);
             foreach (var member in members)
             {
                 MethodDispatch dispatch = null;
@@ -129,9 +129,10 @@ namespace Miruken.Callback.Policy
             _descriptors.Clear();
         }
 
-        public static IEnumerable<Type> GetPolicyHandlers(
-            CallbackPolicy policy, object key)
+        public static IEnumerable<Type> GetCallbackHandlers(
+            CallbackPolicy policy, object callback)
         {
+            var key   = policy.GetKey(callback);
             var types = new SortedSet<Tuple<Type, int>>(
                 WeightedComparer<Type>.Instance);
 
@@ -141,9 +142,13 @@ namespace Miruken.Callback.Policy
                 var handler = descriptor.Value.Value;
                 if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {
-                    var binding = cpd.GetInvariantMethods(key)
-                        .Select(b => Tuple.Create(b, 0)).FirstOrDefault() ??
-                        cpd.GetCompatibleMethods(key).FirstOrDefault();
+                    var binding = 
+                        cpd.GetInvariantMethods(key)
+                           .Where(b => b.Approves(callback))
+                           .Select(b => Tuple.Create(b, 0))
+                           .FirstOrDefault() ??
+                        cpd.GetCompatibleMethods(key)
+                           .FirstOrDefault(b => b.Item1.Approves(callback));
                     if (binding != null)
                     {
                         if (handler.IsOpenGeneric)
@@ -205,7 +210,7 @@ namespace Miruken.Callback.Policy
             return GetPolicyMethods(policy).Where(m => (m.Key as Type)?.Is<T>() == true);
         }
 
-        private static bool IsDefinition(MemberInfo member, object criteria)
+        private static bool IsCategory(MemberInfo member, object criteria)
         {
             if (member.DeclaringType == typeof(object))
                 return false;
