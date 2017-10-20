@@ -82,9 +82,7 @@ namespace Miruken.Callback.Policy
                 return false;
 
             var dispatched = false;
-            var key        = policy.GetKey(callback);
-
-            foreach (var method in descriptor.GetInvariantMethods(key))
+            foreach (var method in descriptor.GetInvariantMethods(callback))
             {
                 dispatched = method.Dispatch(
                     target, callback, composer, results) 
@@ -92,7 +90,7 @@ namespace Miruken.Callback.Policy
                 if (dispatched && !greedy) return true;
             }
 
-            foreach (var method in descriptor.GetCompatibleMethods(key))
+            foreach (var method in descriptor.GetCompatibleMethods(callback))
             {
                 dispatched = method.Item1.Dispatch(
                     target, callback, composer, results) 
@@ -132,7 +130,6 @@ namespace Miruken.Callback.Policy
         public static IEnumerable<Type> GetCallbackHandlers(
             CallbackPolicy policy, object callback)
         {
-            var key   = policy.GetKey(callback);
             var types = new SortedSet<Tuple<Type, int>>(
                 WeightedComparer<Type>.Instance);
 
@@ -143,17 +140,17 @@ namespace Miruken.Callback.Policy
                 if (handler._policies?.TryGetValue(policy, out cpd) == true)
                 {
                     var binding = 
-                        cpd.GetInvariantMethods(key)
-                           .Where(b => b.Approves(callback))
+                        cpd.GetInvariantMethods(callback)
                            .Select(b => Tuple.Create(b, 0))
                            .FirstOrDefault() ??
-                        cpd.GetCompatibleMethods(key)
-                           .FirstOrDefault(b => b.Item1.Approves(callback));
+                        cpd.GetCompatibleMethods(callback)
+                           .FirstOrDefault();
                     if (binding != null)
                     {
                         if (handler.IsOpenGeneric)
                         {
                             bool added;
+                            var key = policy.GetKey(callback);
                             var handlerType = handler._closed.GetOrAdd(key,
                                 k => binding.Item1.CloseHandlerType(handler.HandlerType, k),
                                 out added);

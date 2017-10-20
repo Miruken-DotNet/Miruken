@@ -72,21 +72,25 @@ namespace Miruken.Callback.Policy
             }
         }
 
-        internal IEnumerable<PolicyMethodBinding> GetInvariantMethods(object key)
+        internal IEnumerable<PolicyMethodBinding> GetInvariantMethods(object callback)
         {
+            var key  = Policy.GetKey(callback);
             var type = key as Type;
             List<PolicyMethodBinding> methods = null;
             if (type != null)
                 _typed.TryGetValue(type, out methods);
             else
                 _indexed?.TryGetValue(key, out methods);
-            return methods as ICollection<PolicyMethodBinding>
+            return methods?.Where(method => method.Approves(callback))
                 ?? Array.Empty<PolicyMethodBinding>();
         }
 
-        internal IEnumerable<Tuple<PolicyMethodBinding, int>> GetCompatibleMethods(object key)
+        internal IEnumerable<Tuple<PolicyMethodBinding, int>>
+             GetCompatibleMethods(object callback)
         {
-            return _compatible.GetOrAdd(key, InferCompatibleMethods);
+            var key = Policy.GetKey(callback);
+            return _compatible.GetOrAdd(key, InferCompatibleMethods)
+                .Where(method => method.Item1.Approves(callback));
         }
 
         internal List<Tuple<PolicyMethodBinding, int>> InferCompatibleMethods(object key)

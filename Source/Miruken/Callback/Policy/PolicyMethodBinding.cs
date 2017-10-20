@@ -18,7 +18,7 @@
         {
             Rule          = rule;
             Dispatch      = dispatch;
-            Category    = category;
+            Category      = category;
             InKey         = category.InKey;
             OutKey        = category.OutKey;
             CallbackIndex = null;
@@ -53,13 +53,12 @@
 
         public bool Approves(object callback)
         {
-            return Category?.Approve(callback, this) != false;
+            return Category.Approve(callback, this);
         }
 
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            if (!Approves(callback)) return false;
             object result;
             var resultType = Policy.ResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType,
