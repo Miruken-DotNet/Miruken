@@ -56,7 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompositionResolver.cs" />
+    <Compile Include="ExternalDependencyResolver.cs" />
     <Compile Include="HandlerExtensions.cs" />
     <Compile Include="ConfigurationFeature.cs" />
     <Compile Include="FilterSelectorHook.cs" />

@@ -11,6 +11,7 @@
     {
         private readonly List<FeatureInstaller> _features;
         private readonly List<FromDescriptor> _from;
+        private bool _useExternalDependencies;
         private IWindsorContainer _container;
 
         public FeaturesInstaller(params FeatureInstaller[] features)
@@ -18,6 +19,12 @@
             _features = new List<FeatureInstaller>();
             _from     = new List<FromDescriptor>();
             Add(features);
+        }
+
+        public FeaturesInstaller WithExternalDependencies()
+        {
+            _useExternalDependencies = true;
+            return this;
         }
 
         public FeaturesInstaller Add(params FeatureInstaller[] features)
@@ -42,6 +49,9 @@
             if (Interlocked.CompareExchange(
                 ref _container, container, null) != null)
                 return;
+
+            if (_useExternalDependencies)
+                _container.Kernel.Resolver.AddSubResolver(new ExternalDependencyResolver());
 
             if (_features.Count == 0) return;
             var implied = new List<FromDescriptor>();

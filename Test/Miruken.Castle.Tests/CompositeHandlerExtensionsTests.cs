@@ -25,7 +25,8 @@
         public void TestInitialize()
         {
             _rootContext = new Context();
-            _container   = new WindsorHandler();
+            _container   = new WindsorHandler(container => 
+                container.Kernel.Resolver.AddSubResolver(new ExternalDependencyResolver()));
             _rootContext.AddHandlers(_container);
             _container.Container.Register(Component.For<MyHandler>());
         }

@@ -7,7 +7,7 @@ namespace Miruken.Castle
 {
     using IHandler = Callback.IHandler;
 
-    public class CompositionResolver : ISubDependencyResolver
+    public class ExternalDependencyResolver : ISubDependencyResolver
     {
         public bool CanResolve(
             CreationContext context, ISubDependencyResolver contextHandlerResolver,

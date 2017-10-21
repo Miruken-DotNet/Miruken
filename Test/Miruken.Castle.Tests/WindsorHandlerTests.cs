@@ -201,6 +201,7 @@
             _container.Register(
                 Component.For<ICar>().ImplementedBy<Car>())
                 .Install(new FeaturesInstaller(new HandleFeature())
+                    .WithExternalDependencies()
                     .Use(Classes.FromThisAssembly()));
 
             var auction = Proxy<IContainer>(context.Provide(new Junkyard()))
