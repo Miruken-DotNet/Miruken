@@ -90,8 +90,7 @@
 
             private static Task<T> Complete<T>(Task task)
             {
-                var source = new TaskCompletionSource<T>(
-                    TaskCreationOptions.AttachedToParent);
+                var source = new TaskCompletionSource<T>();
                 if (task.IsFaulted)
                     source.SetException(task.FlattenException());
                 else if (task.IsCanceled)
