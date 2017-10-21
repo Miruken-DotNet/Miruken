@@ -32,7 +32,8 @@
 
         public Task<object> ToTask()
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(
+                TaskCreationOptions.AttachedToParent);
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());
@@ -148,7 +149,8 @@
 
         public new Task<T> ToTask()
         {
-            var tcs = new TaskCompletionSource<T>();
+            var tcs = new TaskCompletionSource<T>(
+                TaskCreationOptions.AttachedToParent);
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());

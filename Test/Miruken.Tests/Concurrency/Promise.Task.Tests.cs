@@ -354,22 +354,5 @@ namespace Miruken.Tests.Concurrency
                 .Then((r, s) => Task.FromException(new ArgumentException("Bad value")));
             Assert.AreEqual(2, promise.Wait());
         }
-
-
-        [TestMethod]
-        public async Task Should_Call_All_Children_First()
-        {
-            var task = Promise.Delay(.1.Sec())
-                .Then((r, s) =>
-                {
-                    throw new Exception();
-                    return 1;
-                }).ToTask().ToPromise()
-                .Catch((ex, s) =>
-                {
-                    
-                });
-            await Promise.All(task);
-        }
     }
 }
