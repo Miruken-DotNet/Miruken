@@ -1,22 +1,19 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using Policy;
 
     public class Composition 
-        : ICallback, IDispatchCallback, IResolveCallback,
+        : Trampoline, ICallback, IResolveCallback,
           IFilterCallback, IBatchCallback
     {
         public Composition(object callback)
+            : base(callback)
         {
-            Callback = callback;
         }
 
         protected Composition()
         {         
         }
-
-        public object Callback { get; }
 
         public Type ResultType
         {
@@ -43,9 +40,6 @@
             }
         }
 
-        CallbackPolicy IDispatchCallback.Policy =>
-           (Callback as IDispatchCallback)?.Policy;
-
         bool IFilterCallback.AllowFiltering =>
             (Callback as IFilterCallback)?.AllowFiltering != false;
 
@@ -59,13 +53,6 @@
             if (resolve == null)
                 resolve = Resolving.GetDefaultResolvingCallback(Callback);
             return new Composition(resolve);
-        }
-
-        bool IDispatchCallback.Dispatch(object handler, ref bool greedy, IHandler composer)
-        {
-            var callback = Callback;
-            return callback != null &&
-                   Handler.Dispatch(handler, callback, ref greedy, composer);
         }
 
         public static bool IsComposed<T>(object callback)

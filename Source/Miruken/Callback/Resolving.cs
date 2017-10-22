@@ -43,29 +43,16 @@
         }
     }
 
-    public class NoResolving : IDispatchCallback, IResolveCallback
+    public class NoResolving : Trampoline, IResolveCallback
     {
-        private readonly object _callback;
-
         public NoResolving(object callback)
+            : base(callback)
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-            _callback = callback;
         }
-
-        CallbackPolicy IDispatchCallback.Policy =>
-            (_callback as IDispatchCallback)?.Policy;
 
         object IResolveCallback.GetResolveCallback()
         {
-            return _callback;
-        }
-
-        bool IDispatchCallback.Dispatch(
-            object handler, ref bool greedy, IHandler composer)
-        {
-            return Handler.Dispatch(handler, _callback, ref greedy, composer);
+            return Callback;
         }
     }
 }

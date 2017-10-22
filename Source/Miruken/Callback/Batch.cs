@@ -35,4 +35,14 @@
             return Promise.All(results);
         }
     }
+
+    public class NoRBatching : Trampoline, IBatchCallback
+    {
+        public NoRBatching(object callback)
+            : base(callback)
+        {
+        }
+
+        bool IBatchCallback.AllowBatching => false;
+    }
 }

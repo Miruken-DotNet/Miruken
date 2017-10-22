@@ -76,6 +76,7 @@
     <Compile Include="Callback\ProxyAttribute.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
+    <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Infrastructure\WeightedComparer.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
