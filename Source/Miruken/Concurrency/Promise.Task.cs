@@ -41,7 +41,8 @@
 
         public TaskAwaiter<object> GetAwaiter()
         {
-            return ToTask().GetAwaiter();
+            return (ToTaskInternal() as Task<object> ?? ToTask())
+                .GetAwaiter();
         }
 
         Task ITaskConversion.ToTask()
@@ -157,7 +158,8 @@
 
         public new TaskAwaiter<T> GetAwaiter()
         {
-            return ToTask().GetAwaiter();
+            return (ToTaskInternal() as Task<T> ?? ToTask())
+                .GetAwaiter();
         }
 
         protected override Task ToTaskInternal()
