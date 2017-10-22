@@ -1121,7 +1121,7 @@
 
         protected virtual Promise<R> CreateChild<R>(Promise<R>.PromiseOwner owner)
         {
-            var child = new Promise<R>(_mode, (resolve, reject, onCancel) =>
+            var child = CreateChild<R>(_mode, (resolve, reject, onCancel) =>
             {
                 owner(resolve, reject);
                 onCancel(() =>
@@ -1134,6 +1134,12 @@
             if (_mode == ChildCancelMode.All)
                 Interlocked.Increment(ref _childCount);
             return child;
+        }
+
+        protected virtual Promise<R> CreateChild<R>(
+            ChildCancelMode mode, Promise<R>.CancellingPromiseOwner owner)
+        {
+            return new Promise<R>(_mode, owner);
         }
 
         public new T Wait()
