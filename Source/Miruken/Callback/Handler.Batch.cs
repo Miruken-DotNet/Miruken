@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Concurrency;
 
     public class HandlerBatch : HandlerDecorator, IDisposable
@@ -74,6 +75,20 @@
             }
         }
 
+        public static async Task<object[]> Batch(
+            this IHandler handler, Func<IHandler, Task> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+            using (var batch = Batch(handler))
+            {
+                if (batch == null)
+                    return Array.Empty<object>();
+                await configure(batch);
+                return await batch.Completed;
+            }
+        }
+
         public static Promise<object[]> Batch(this IHandler handler,
             object[] tags, Action<IHandler> configure)
         {
@@ -85,6 +100,20 @@
                     return Promise<object[]>.Empty;
                 configure(batch);
                 return batch.Completed;
+            }
+        }
+
+        public static async Task<object[]> Batch(this IHandler handler,
+            object[] tags, Func<IHandler, Task> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+            using (var batch = Batch(handler, tags))
+            {
+                if (batch == null)
+                    return Array.Empty<object[]>();
+                await configure(batch);
+                return await batch.Completed;
             }
         }
 
