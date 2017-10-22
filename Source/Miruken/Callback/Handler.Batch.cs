@@ -5,13 +5,13 @@
     using System.Threading.Tasks;
     using Concurrency;
 
-    public class HandlerBatch : HandlerDecorator, IDisposable
+    public class BatchDecorator : HandlerDecorator, IDisposable
     {
         private Promise<object[]>.ResolveCallbackT _resolved;
         private RejectCallback _rejected;
         private int _completed;
         
-        public HandlerBatch(IHandler handler, params object[] tags)
+        public BatchDecorator(IHandler handler, params object[] tags)
             : base(handler)
         {
             Batch     = new Batch(tags);
@@ -51,13 +51,31 @@
         }
     }
 
+    public class NoBatchingDecorator : Handler, IDecorator
+    {
+        private readonly IHandler _handler;
+
+        public NoBatchingDecorator(IHandler handler)
+        {
+            _handler = handler;
+        }
+
+        object IDecorator.Decoratee => _handler;
+
+        protected override bool HandleCallback(
+            object callback, ref bool greedy, IHandler composer)
+        {
+            return _handler.Handle(new NoBatch(callback), ref greedy, composer);
+        }
+    }
+
     public static class HandlerBatchExtensions
     {
-        public static HandlerBatch Batch(
+        public static BatchDecorator Batch(
             this IHandler handler, params object[] tags)
         {
             return handler != null 
-                 ? new HandlerBatch(handler, tags) 
+                 ? new BatchDecorator(handler, tags) 
                  : null;
         }
 
@@ -115,6 +133,12 @@
                 await configure(batch);
                 return await batch.Completed;
             }
+        }
+
+        public static IHandler NoBatch(this IHandler handler)
+        {
+            return handler == null ? null
+                 : new NoBatchingDecorator(handler);    
         }
 
         public static Batch GetBatch(this IHandler handler, object tag = null)
