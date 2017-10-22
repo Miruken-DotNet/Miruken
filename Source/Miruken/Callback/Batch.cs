@@ -36,9 +36,9 @@
         }
     }
 
-    public class NoRBatching : Trampoline, IBatchCallback
+    public class NoBatching : Trampoline, IBatchCallback
     {
-        public NoRBatching(object callback)
+        public NoBatching(object callback)
             : base(callback)
         {
         }
