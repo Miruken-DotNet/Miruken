@@ -14,7 +14,7 @@
             Default = new ResolvingAttribute();
 
         private static readonly MethodInfo CreateLazy =
-            typeof(ResolvingAttribute).GetMethod("ResolveLazy",
+            typeof(ResolvingAttribute).GetMethod(nameof(ResolveLazy),
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate>

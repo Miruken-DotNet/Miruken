@@ -82,19 +82,19 @@ namespace Miruken.Tests
         [TestMethod]
         public void Should_Determine_If_Toplevel_Interface()
         {
-            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBar), typeof(Bar)));
-            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBaz), typeof(Baz)));
-            Assert.IsTrue(RuntimeHelper.IsTopLevelInterface(typeof(IBoo), typeof(Baz)));
-            Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IBar), typeof(Baz)));
-            Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IFoo), typeof(Bar)));
-            Assert.IsFalse(RuntimeHelper.IsTopLevelInterface(typeof(IFoo), typeof(Baz)));
+            Assert.IsTrue(typeof(IBar).IsTopLevelInterface(typeof(Bar)));
+            Assert.IsTrue(typeof(IBaz).IsTopLevelInterface(typeof(Baz)));
+            Assert.IsTrue(typeof(IBoo).IsTopLevelInterface(typeof(Baz)));
+            Assert.IsFalse(typeof(IBar).IsTopLevelInterface(typeof(Baz)));
+            Assert.IsFalse(typeof(IFoo).IsTopLevelInterface(typeof(Bar)));
+            Assert.IsFalse(typeof(IFoo).IsTopLevelInterface(typeof(Baz)));
         }
 
         [TestMethod]
         public void Should_Create_Single_Arg_Action()
         {
             var call = RuntimeHelper.CreateCallOneArg(
-                typeof(Handler).GetMethod("HandleOne"));
+                typeof(Handler).GetMethod(nameof(Handler.HandleOne)));
             var handler = new Handler();
             call(handler, "Hello");
             Assert.AreEqual("Hello", handler.Arg1);
@@ -104,7 +104,7 @@ namespace Miruken.Tests
         public void Should_Create_Double_Arg_Action()
         {
             var call = RuntimeHelper.CreateCallTwoArgs(
-                typeof(Handler).GetMethod("HandleTwo"));
+                typeof(Handler).GetMethod(nameof(Handler.HandleTwo)));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14));
             Assert.AreEqual(false, handler.Arg1);
@@ -115,7 +115,7 @@ namespace Miruken.Tests
         public void Should_Create_Triple_Arg_Action()
         {
             var call = RuntimeHelper.CreateCallThreeArgs(
-                typeof(Handler).GetMethod("HandleThree"));
+                typeof(Handler).GetMethod(nameof(Handler.HandleThree)));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14), 22);
             Assert.AreEqual(false, handler.Arg1);
@@ -127,21 +127,21 @@ namespace Miruken.Tests
         public void Should_Fail_If_Action_Arg_Mismatch()
         {
             RuntimeHelper.CreateFuncOneArg(
-                typeof(Handler).GetMethod("HandleTwo"));
+                typeof(Handler).GetMethod(nameof(Handler.HandleTwo)));
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_Args()
         {
             RuntimeHelper.CreateCallOneArg(
-                typeof(Handler).GetMethod("Handle"));
+                typeof(Handler).GetMethod(nameof(Handler.Handle)));
         }
 
         [TestMethod]
         public void Should_Create_No_Arg_Function()
         {
             var call = RuntimeHelper.CreateFuncNoArgs(
-                typeof(Provider).GetMethod("Provide"));
+                typeof(Provider).GetMethod(nameof(Provider.Provide)));
             var provider = new Provider();
             Assert.AreEqual("Hello", call(provider));
         }
@@ -150,7 +150,7 @@ namespace Miruken.Tests
         public void Should_Create_One_Arg_Function()
         {
             var call = RuntimeHelper.CreateFuncOneArg(
-                typeof(Provider).GetMethod("ProvideOne"));
+                typeof(Provider).GetMethod(nameof(Provider.ProvideOne)));
             var provider = new Provider();
             Assert.AreEqual("22", call(provider, 22));
         }
@@ -159,7 +159,7 @@ namespace Miruken.Tests
         public void Should_Create_Two_Args_Function()
         {
             var call = RuntimeHelper.CreateFuncTwoArgs(
-                typeof(Provider).GetMethod("ProvideTwo"));
+                typeof(Provider).GetMethod(nameof(Provider.ProvideTwo)));
             var provider = new Provider();
             Assert.AreEqual(new DateTime(2003, 4, 9),
                 call(provider, 2, new DateTime(2003, 4, 7)));
@@ -169,7 +169,7 @@ namespace Miruken.Tests
         public void Should_Create_Three_Args_Function()
         {
             var call = RuntimeHelper.CreateFuncThreeArgs(
-                typeof(Provider).GetMethod("ProvideThree"));
+                typeof(Provider).GetMethod(nameof(Provider.ProvideThree)));
             var provider = new Provider();
             Assert.AreEqual(-5.5, call(provider, 2, 3.5f, true));
         }
@@ -178,14 +178,14 @@ namespace Miruken.Tests
         public void Should_Fail_If_Function_Arg_Mismatch()
         {
             RuntimeHelper.CreateFuncTwoArgs(
-                typeof(Provider).GetMethod("ProvideOne"));
+                typeof(Provider).GetMethod(nameof(Provider.ProvideOne)));
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_ReturnType()
         {
             RuntimeHelper.CreateCallOneArg(
-                typeof(Provider).GetMethod("ProvideVoid"));
+                typeof(Provider).GetMethod(nameof(Provider.ProvideVoid)));
         }
     }
 }

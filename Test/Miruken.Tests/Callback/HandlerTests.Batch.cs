@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Concurrency;
@@ -306,6 +307,36 @@
                     }));
             }
             Assert.AreEqual(1, count);
+        }
+
+        [TestMethod]
+        public async Task Should_Supress_Batching()
+        {
+            var called  = false;
+            var handler = new EmailHandler();
+            var results = await handler.Batch(batch =>
+            {
+                Assert.AreEqual("Hello", batch.NoBatch()
+                    .Proxy<IEmailing>().Send("Hello"));
+                called = true;
+            });
+            Assert.IsTrue(called);
+            Assert.AreEqual(0, results.Length);
+        }
+
+        [TestMethod]
+        public async Task Should_Supress_Batching_When_Resolving()
+        {
+            var called  = false;
+            var handler = new EmailHandler();
+            var results = await handler.Batch(batch =>
+            {
+                Assert.AreEqual("Hello", batch.Resolve().NoBatch()
+                    .Proxy<IEmailing>().Send("Hello"));
+                called = true;
+            });
+            Assert.IsTrue(called);
+            Assert.AreEqual(0, results.Length);
         }
 
         [TestMethod]

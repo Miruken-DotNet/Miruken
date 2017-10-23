@@ -50,11 +50,11 @@
         }
     }
 
-    public class NoBatchingDecorator : Handler, IDecorator
+    public class NoBatchDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
 
-        public NoBatchingDecorator(IHandler handler)
+        public NoBatchDecorator(IHandler handler)
         {
             _handler = handler;
         }
@@ -64,7 +64,10 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            return _handler.Handle(new NoBatch(callback), ref greedy, composer);
+            var inquiry = ((callback as Composition)?.Callback
+                       ?? callback) as Inquiry;
+            return inquiry?.Key as Type != typeof(Batch) &&
+                   _handler.Handle(new NoBatch(callback), ref greedy, composer);
         }
     }
 
@@ -109,7 +112,7 @@
         public static IHandler NoBatch(this IHandler handler)
         {
             return handler == null ? null
-                 : new NoBatchingDecorator(handler);    
+                 : new NoBatchDecorator(handler);    
         }
 
         public static Batch GetBatch(this IHandler handler, object tag = null)
