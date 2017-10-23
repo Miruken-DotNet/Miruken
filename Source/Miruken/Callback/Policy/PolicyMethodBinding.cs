@@ -160,8 +160,13 @@
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
-                        bundle.Add(h => args[index] = resolver.ResolveArgument(
-                            argument, optional ? h.BestEffort() : h, composer));
+                        bundle.Add(h => args[index] = 
+                            resolver.ResolveArgument(argument, h, composer),
+                            (ref bool resolved) =>
+                            {
+                                resolved = resolved || optional;
+                                return false;
+                            });
                 }
             })) return null;
 

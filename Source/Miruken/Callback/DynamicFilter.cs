@@ -47,7 +47,7 @@
                     else
                         bundle.Add(h => args[index] = resolver.ResolveArgument(
                             argument, optional ? h.BestEffort() : h, composer),
-                            resolved =>
+                            (ref bool resolved) =>
                             {
                                 if (!resolved)
                                     (culprits ?? (culprits = new List<Argument>()))

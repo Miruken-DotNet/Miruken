@@ -17,7 +17,7 @@
         private List<Promise> _promises;
         private bool _resolving;
 
-        public delegate bool NotifyDelegate(bool handled);
+        public delegate bool NotifyDelegate(ref bool handled);
 
         private class Operation
         {
@@ -36,6 +36,9 @@
         public bool IsAsync => _promises != null;
         public CallbackPolicy Policy => null;
 
+        public bool Handled => IsEmpty ||
+            _operations.All(op => op.Handled);
+
         public Promise Complete()
         {
             if (_operations == null)
@@ -44,12 +47,12 @@
                 _operations.ForEach(op =>
                 {
                     if (!op.Handled)
-                        op.Notify?.Invoke(false);
+                        op.Notify?.Invoke(ref op.Handled);
                 });
             return IsAsync
-                ? Promise.All(_promises.ToArray())
-                    .Then((r,s) => Promise.Empty)
-                : Promise.Empty;
+                 ? Promise.All(_promises.ToArray())
+                     .Then((r,s) => Promise.Empty)
+                 : Promise.Empty;
         }
 
         public Bundle Add(Action<IHandler> action, NotifyDelegate notify = null)
@@ -145,27 +148,26 @@
             {
                 if (_all || greedy)
                 {
-                    var stop = false;
+                    var stop      = false;
                     var opHandled = operation.Handled;
                     if (!opHandled || greedy)
                     {
                         var dispatched = Dispatch(proxy, operation);
-                        opHandled = operation.Handled = dispatched || opHandled;
                         if (dispatched)
-                            stop = operation.Notify?.Invoke(true) ?? false;
+                            stop = operation.Notify?.Invoke(ref dispatched) ?? false;
+                        opHandled = operation.Handled = dispatched || opHandled;
                     }
-                    handled = _all ? opHandled && handled
-                            : opHandled || handled;
+                    handled = _all ? opHandled && handled : opHandled || handled;
                     if (stop) break;
                 }
                 else
                 {
                     var opHandled = Dispatch(proxy, operation);
-                    operation.Handled |= opHandled;
                     if (opHandled)
                     {
-                        operation.Notify?.Invoke(true);
-                        return true;
+                        operation.Notify?.Invoke(ref opHandled);
+                        operation.Handled |= opHandled;
+                        if (opHandled) return true;
                     }
                 }
             }

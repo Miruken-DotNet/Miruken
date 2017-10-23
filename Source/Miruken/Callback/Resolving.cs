@@ -36,7 +36,8 @@
             var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
             if (handlers.Length == 0) return callback;
             var bundle = new Bundle(false)
-                .Add(h => h.Handle(new NoResolving(callback)), handled => handled);
+                .Add(h => h.Handle(new NoResolving(callback)), 
+                    (ref bool handled) => handled);
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
             return bundle;

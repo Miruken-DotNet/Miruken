@@ -17,7 +17,7 @@
             var complete = bundle.Complete();
             if (!bundle.WantsAsync && bundle.IsAsync)
                 complete.Wait();
-            return handled;
+            return handled || bundle.Handled;
         }
 
         public static bool All(this IHandler handler, Action<Bundle> prepare)
