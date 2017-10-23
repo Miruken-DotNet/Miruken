@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Concurrency;
@@ -205,22 +204,6 @@
                 });
             });
             Assert.AreEqual(2, count);
-        }
-
-        [TestMethod, Ignore]
-        public async Task Should_Batch_Protocols_Async_Using_Action_Async()
-        {
-            var handler = new EmailHandler();
-            var result  = await handler.Proxy<IEmailing>().SendConfirm("Hello");
-            Assert.AreEqual("Hello", result);
-            var results  = await handler.Batch(async batch =>
-            {
-                var r = await batch.Proxy<IEmailing>().SendConfirm("Hello");
-                Assert.AreEqual("Hello batch", r);
-            });
-            CollectionAssert.AreEqual(new[] { "Hello" }, results);
-            result = await handler.Proxy<IEmailing>().SendConfirm("Hello");
-            Assert.AreEqual("Hello", result);
         }
 
         [TestMethod]
