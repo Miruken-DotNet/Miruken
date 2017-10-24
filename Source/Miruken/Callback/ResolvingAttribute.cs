@@ -20,6 +20,8 @@
         private static readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate>
             _lazy = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
 
+        public bool IsOptional => false;
+
         public virtual object ResolveArgument(
             Argument argument, IHandler handler, IHandler composer)
         {

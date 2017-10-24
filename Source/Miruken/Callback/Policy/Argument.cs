@@ -9,6 +9,8 @@
 
     public interface IArgumentResolver
     {
+        bool IsOptional { get;  }
+
         void ValidateArgument(Argument argument);
 
         object ResolveArgument(
@@ -28,7 +30,8 @@
                 var key = Attributes.OfType<KeyAttribute>().SingleOrDefault();
                 if (key != null) Key = key.Key;
                 Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
-                Optional = Attributes.OfType<OptionalAttribute>().Any();
+                Optional = Resolver?.IsOptional == true
+                        || Attributes.OfType<OptionalAttribute>().Any();
             }
             else
                 Attributes = Array.Empty<Attribute>();

@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Callback\Batch.cs" />
+    <Compile Include="Callback\BatchAttribute.cs" />
     <Compile Include="Callback\Bundle.cs" />
     <Compile Include="Callback\ContainerAttribute.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />

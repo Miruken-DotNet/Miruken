@@ -79,6 +79,11 @@
             }
         }
 
+        public static bool HasDefaultConstructor(this Type t)
+        {
+            return t.IsValueType || t.GetConstructor(Type.EmptyTypes) != null;
+        }
+
         public static string GetSimpleTypeName(this Type type)
         {
             if (type == null) return "";
