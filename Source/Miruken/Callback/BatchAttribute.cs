@@ -24,9 +24,9 @@
         {
             var batchType = argument.ParameterType;
 
-            if (batchType.IsInterface)
+            if (!batchType.IsClass)
                 throw new NotSupportedException(
-                    "Batch parameters cannot be interfaces");
+                    "Batch parameters must be classes");
 
             if (batchType != typeof(Batch))
                 throw new NotSupportedException(

@@ -115,11 +115,34 @@
                  : new NoBatchDecorator(handler);    
         }
 
-        public static Batch GetBatch(this IHandler handler, object tag = null)
+        public static Batch GetBatch(
+            this IHandler handler, object tag = null)
         {
             var batch = handler?.Resolve<Batch>();
             if (batch == null) return null;
             return tag == null || batch.ShouldBatch(tag) ? batch : null;
+        }
+
+
+        public static TBatch GetBatch<TBatch>(
+            this IHandler handler, object tag = null)
+            where TBatch : class, IBatching, new()
+        {
+            var batch = handler.GetBatch(tag);
+            if (batch != null)
+            {
+                var batchInstance = new TBatch();
+                batch.AddHandlers(batchInstance);
+                return batchInstance;
+            }
+            return null;
+        }
+
+        public static TTag GetBatch<TTag, TBatch>(
+            this IHandler handler, object tag = null)
+            where TBatch : class, IBatching, TTag, new()
+        {
+            return handler.GetBatch<TBatch>(typeof(TTag));
         }
     }
 }

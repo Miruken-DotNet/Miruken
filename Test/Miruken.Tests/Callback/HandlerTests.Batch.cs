@@ -26,7 +26,7 @@
         {
             object IEmailing.Send(object message)
             {
-                var batch = GetBatch();
+                var batch = Composer.GetBatch<IEmailing, EmailBatch>();
                 return batch != null
                     ? batch.Send(message)
                     : message;
@@ -34,7 +34,7 @@
 
             Promise IEmailing.SendConfirm(object message)
             {
-                var batch = GetBatch();
+                var batch = Composer.GetBatch<IEmailing, EmailBatch>();
                 return batch != null
                     ? batch.SendConfirm(message)
                     : Promise.Resolved(message);
@@ -49,22 +49,10 @@
 
             Promise IEmailing.FailConfirm(object message)
             {
-                var batch = GetBatch();
+                var batch = Composer.GetBatch<IEmailing, EmailBatch>();
                 return batch != null
                     ? batch.FailConfirm(message)
                     : Promise.Rejected(new Exception("Can'ts send message"));
-            }
-
-            private static IEmailing GetBatch()
-            {
-                var batch = Composer.GetBatch(typeof(IEmailing));
-                if (batch != null)
-                {
-                    var emailBatch = new EmailBatch();
-                    batch.AddHandlers(emailBatch);
-                    return emailBatch;
-                }
-                return null;
             }
         }
 
