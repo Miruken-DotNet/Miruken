@@ -93,7 +93,9 @@
                 .WithServiceFromInterface()
                 .WithServiceSelf();
             yield return descriptor.Where(
-                type => RuntimeHelper.Is<IHandler>(type) || type.Name.EndsWith("Handler"))
+                type => !type.IsNested
+                     || RuntimeHelper.Is<IHandler>(type) 
+                     || type.Name.EndsWith("Handler"))
                 .WithServiceSelect(HandlerInterfaces)
                 .WithServiceSelf();
         }

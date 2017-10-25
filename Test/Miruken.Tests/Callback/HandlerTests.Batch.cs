@@ -1,11 +1,13 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Concurrency;
+    using Miruken.Infrastructure;
 
     [TestClass]
     public class HandlerBatchTests
@@ -105,25 +107,6 @@
         public void Should_Batch_Protocols()
         {
             var completed = false;
-            var handler = new EmailHandler();
-            Assert.AreEqual("Hello", handler.Proxy<IEmailing>().Send("Hello"));
-            using (var batch = handler.Batch())
-            {
-                Assert.IsNull(batch.Proxy<IEmailing>().Send("Hello"));
-                batch.Completed.Then((results, s) =>
-                {
-                    completed = true;
-                    CollectionAssert.AreEqual(new[] {"Hello batch"}, results);
-                });
-            }
-            Assert.IsTrue(completed);
-            Assert.AreEqual("Hello", handler.Proxy<IEmailing>().Send("Hello"));
-        }
-
-        [TestMethod]
-        public void Should_Batch_Protocols_Using_Action()
-        {
-            var completed = false;
             var handler   = new EmailHandler();
             Assert.AreEqual("Hello", handler.Proxy<IEmailing>().Send("Hello"));
             handler.Batch(batch =>
@@ -131,44 +114,16 @@
                 Assert.IsNull(batch.Proxy<IEmailing>().Send("Hello"));
             }).Then((results, s) =>
             {
+                Assert.AreEqual(1, results.Length);
+                CollectionAssert.AreEqual(new[] { "Hello batch" }, (ICollection)results[0]);
                 completed = true;
-                CollectionAssert.AreEqual(new[] { "Hello batch" }, results);
             });
             Assert.IsTrue(completed);
             Assert.AreEqual("Hello", handler.Proxy<IEmailing>().Send("Hello"));
         }
 
         [TestMethod]
-        public void Should_Batch_Protocols_Async()
-        {
-            var count = 0;
-            var handler = new EmailHandler();
-            handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
-            {
-                Assert.AreEqual("Hello", r);
-                ++count;
-            });
-            using (var batch = handler.Batch())
-            {
-                batch.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
-                {
-                    Assert.AreEqual("Hello batch", r);
-                    ++count;
-                });
-                batch.Completed.Then((results, s) =>
-                {
-                    CollectionAssert.AreEqual(new[] {"Hello"}, results);
-                    handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, ss) =>
-                    {
-                        Assert.AreEqual("Hello", r);
-                    });
-                });
-            }
-            Assert.AreEqual(2, count);
-        }
-
-        [TestMethod]
-        public void Should_Batch_Protocols_Async_Using_Action()
+        public void Should_Batch_Protocols_Promises()
         {
             var count   = 0;
             var handler = new EmailHandler();
@@ -177,123 +132,169 @@
                 Assert.AreEqual("Hello", r);
                 ++count;
             });
-            handler.Batch(batch =>
-            {
+            var promise = handler.Batch(batch =>
                 batch.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
                 {
                     Assert.AreEqual("Hello batch", r);
                     ++count;
-                });       
-            }).Then((results, s) =>
+                })
+            ).Then((results, s) =>
             {
-                CollectionAssert.AreEqual(new[] { "Hello" }, results);
+                Assert.AreEqual(1, results.Length);
+                CollectionAssert.AreEqual(new[] { "Hello" }, (ICollection)results[0]);
                 handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, ss) =>
                 {
                     Assert.AreEqual("Hello", r);
+                    ++count;
                 });
             });
-            Assert.AreEqual(2, count);
+            if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
+                Assert.AreEqual(3, count);
+            else
+                Assert.Fail("Operation timed out");
         }
 
         [TestMethod]
-        public void Should_Reject_Batch_Protocol_Async()
+        public async Task Should_Batch_Protocols_Async()
         {
-            var count = 0;
             var handler = new EmailHandler();
-            using (var batch = handler.Batch())
+            var result  = await handler.Proxy<IEmailing>().SendConfirm("Hello");
+            Assert.AreEqual("Hello", result);
+            var results = await handler.Batch(async batch =>
             {
+                var confirm = await batch.Proxy<IEmailing>().SendConfirm("Hello");
+                Assert.AreEqual("Hello batch", confirm);
+            });
+            Assert.AreEqual(1, results.Length);
+            CollectionAssert.AreEqual(new[] { "Hello" }, (ICollection)results[0]);
+            result = await handler.Proxy<IEmailing>().SendConfirm("Hello");
+            Assert.AreEqual("Hello", result);
+        }
+
+        [TestMethod]
+        public void Should_Reject_Batch_Protocol_Promises()
+        {
+            var count   = 0;
+            var handler = new EmailHandler();
+            handler.Batch(batch =>
                 batch.Proxy<IEmailing>().FailConfirm("Hello")
                     .Catch((err, s) =>
                     {
                         Assert.AreEqual("Can't send message", err.Message);
                         ++count;
+                    })
+            )
+            .Catch((err, s) =>
+            {
+                Assert.AreEqual("Can't send message", err.Message);
+                handler.Proxy<IEmailing>().FailConfirm("Hello")
+                    .Catch((errx, sx) =>
+                    {
+                        Assert.AreEqual("Can't send message", err.Message);
+                        ++count;
                     });
-                batch.Completed.Catch((err, s) =>
-                {
-                    Assert.AreEqual("Can't send message", err.Message);
-                    handler.Proxy<IEmailing>().FailConfirm("Hello")
-                        .Catch((errx, sx) =>
-                        {
-                            Assert.AreEqual("Can't send message", err.Message);
-                            ++count;
-                        });
-                });
-            }
+            });
+            Assert.AreEqual(2, count);
+        }
+
+        [TestMethod]
+        public async Task Should_Not_Batch_After_Await()
+        {
+            var count   = 0;
+            var handler = new EmailHandler();
+            var result = await handler.Proxy<IEmailing>().SendConfirm("Hello");
+            Assert.AreEqual("Hello", result);
+            var results = await handler.Batch(async batch =>
+            {
+                var confirm = await batch.Proxy<IEmailing>().SendConfirm("Hello");
+                Assert.AreEqual("Hello batch", confirm);
+                ++count;
+                confirm = await batch.Proxy<IEmailing>().SendConfirm("Goodbye");
+                Assert.AreEqual("Goodbye", confirm);
+                ++count;
+            });
+            Assert.AreEqual(1, results.Length);
+            CollectionAssert.AreEqual(new[] { "Hello" }, (ICollection)results[0]);
+            result = await handler.Proxy<IEmailing>().SendConfirm("Hello");
+            Assert.AreEqual("Hello", result);
             Assert.AreEqual(2, count);
         }
 
         [TestMethod]
         public void Should_Batch_Requested_Protocols()
         {
-            var handler = new EmailHandler();
-            using (var batch = handler.Batch(typeof(IEmailing)))
+            var completed = false;
+            var handler   = new EmailHandler();
+            handler.Batch<IEmailing>(batch =>
+                Assert.IsNull(batch.Proxy<IEmailing>().Send("Hello")))
+            .Then((results, s) =>
             {
-                Assert.IsNull(batch.Proxy<IEmailing>().Send("Hello"));
-                batch.Completed.Then((results, s) =>
-                    CollectionAssert.AreEqual(new[] {"Hello batch"}, results)
-                );
-            }
+                Assert.AreEqual(1, results.Length);
+                CollectionAssert.AreEqual(new[] { "Hello batch" }, (ICollection)results[0]);
+                completed = true;
+            });
+            Assert.IsTrue(completed);
         }
 
         [TestMethod]
-        public void Should_Batch_Requested_Protocols_Async()
+        public void Should_Batch_Requested_Protocols_Promises()
         {
-            var count = 0;
+            var count   = 0;
             var handler = new EmailHandler();
             handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
             {
                 Assert.AreEqual("Hello", r);
                 ++count;
             });
-            using (var batch = handler.Batch(typeof(IEmailing)))
+            handler.Batch<IEmailing>(batch =>
             {
                 batch.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
                 {
                     Assert.AreEqual("Hello batch", r);
                     ++count;
                 });
-                batch.Completed.Then((results, s) =>
+            })
+            .Then((results, s) =>
+            {
+                Assert.AreEqual(1, results.Length);
+                CollectionAssert.AreEqual(new[] { "Hello" }, (ICollection)results[0]);
+                handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, ss) =>
                 {
-                    CollectionAssert.AreEqual(new[] {"Hello"}, results);
-                    handler.Proxy<IEmailing>().SendConfirm("Hello").Then((r, ss) =>
-                    {
-                        Assert.AreEqual("Hello", r);
-                    });
+                    Assert.AreEqual("Hello", r);
+                    ++count;
                 });
-            }
-            Assert.AreEqual(2, count);
+            });
+            Assert.AreEqual(3, count);
         }
 
         [TestMethod]
         public void Should_Not_Batch_Unrequested_Protocols()
         {
-            var count = 0;
+            var count   = 0;
             var handler = new EmailHandler();
-            using (var batch = handler.Batch(typeof(IOffline)))
-            {
+            handler.Batch<IOffline>(batch =>
                 batch.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
                 {
                     Assert.AreEqual("Hello", r);
                     ++count;
-                });
-            }
+                })
+            );
             Assert.AreEqual(1, count);
         }
 
         [TestMethod]
         public void Should_Not_Batch_After_Completed_Async()
         {
-            var count = 0;
+            var count   = 0;
             var handler = new EmailHandler();
-            using (var batch = handler.Batch())
-            {
+            handler.Batch(batch =>
                 batch.Proxy<IEmailing>().SendConfirm("Hello").Then((r, s) =>
                     batch.Proxy<IEmailing>().SendConfirm("Hello").Then((rr, ss) =>
                     {
                         Assert.AreEqual("Hello", rr);
                         ++count;
-                    }));
-            }
+                    }))
+            );
             Assert.AreEqual(1, count);
         }
 
@@ -332,13 +333,12 @@
         {
             var count   = 0;
             var handler = new EmailHandler();
-            using (var batch = handler
-                .Aspect((cb,c,s) => ++count).Batch())
+            handler.Aspect((cb,c,s) => ++count).Batch(batch =>
             {
                 Assert.IsNull(batch.Proxy<IEmailing>().Send("Hello"));
-                batch.Completed.Then((results, s) =>
-                  CollectionAssert.AreEqual(new[] { "Hello batch" }, results));
-            }
+            })
+            .Then((results, s) =>
+                CollectionAssert.AreEqual(new[] { "Hello batch" }, results));
             Assert.AreEqual(2, count);
         }
     }

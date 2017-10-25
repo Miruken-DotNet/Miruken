@@ -2,29 +2,22 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Concurrency;
 
-    public class BatchDecorator : HandlerDecorator, IDisposable
+    public class BatchDecorator : HandlerDecorator
     {
-        private Promise<object[]>.ResolveCallbackT _resolved;
-        private RejectCallback _rejected;
         private int _completed;
         
-        public BatchDecorator(IHandler handler, params object[] tags)
+        public BatchDecorator(
+            IHandler handler, params object[] tags)
             : base(handler)
         {
-            Batch     = new Batch(tags);
-            Completed = new Promise<object[]>((resolved, rejected) =>
-            {
-                _resolved = resolved;
-                _rejected = rejected;
-            });
+            Batch = new Batch(tags);
         }
 
         [Provides]
         public Batch Batch { get; private set; }
-
-        public Promise<object[]> Completed { get; }
 
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
@@ -42,11 +35,14 @@
             return base.HandleCallback(callback, ref greedy, composer);
         }
 
-        public void Dispose()
+        public Promise<object[]> Complete(Promise complete = null)
         {
-            if (Interlocked.CompareExchange(ref _completed, 1, 0) == 0)
-                this.Proxy<IBatchingComplete>().Complete(this)
-                    .Then(_resolved, _rejected);
+            if (Interlocked.CompareExchange(ref _completed, 1, 0) == 1)
+                throw new InvalidOperationException("The batch has already completed");
+            var results = this.Proxy<IBatchingComplete>().Complete(this);
+            return complete != null
+                 ? results.Then((r, s) => complete.Then((_, ss) => r))
+                 : results;
         }
     }
 
@@ -84,29 +80,48 @@
         public static Promise<object[]> Batch(
             this IHandler handler, Action<IHandler> configure)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-            using (var batch = Batch(handler))
-            {
-                if (batch == null)
-                    return Promise<object[]>.Empty;
-                configure(batch);
-                return batch.Completed;
-            }
+            return handler.Batch(null, configure);
+        }
+
+        public static Promise<object[]> Batch(
+            this IHandler handler, Func<IHandler, Task> configure)
+        {
+            return handler.Batch(null, configure);
         }
 
         public static Promise<object[]> Batch(this IHandler handler,
             object[] tags, Action<IHandler> configure)
         {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
-            using (var batch = Batch(handler, tags))
-            {
-                if (batch == null)
-                    return Promise<object[]>.Empty;
-                configure(batch);
-                return batch.Completed;
-            }
+            var batch = new BatchDecorator(handler, tags);
+            configure(batch);
+            return batch.Complete();
+        }
+
+        public static Promise<object[]> Batch(this IHandler handler,
+            object[] tags, Func<IHandler, Task> configure)
+        {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+            var batch = new BatchDecorator(handler, tags);
+            return batch.Complete(configure(batch));
+        }
+
+        public static Promise<object[]> Batch<TTag>(this IHandler handler,
+            Action<IHandler> configure)
+        {
+            return handler.Batch(new [] { typeof(TTag) }, configure);
+        }
+
+        public static Promise<object[]> Batch<TTag>(this IHandler handler,
+            Func<IHandler, Task> configure)
+        {
+            return handler.Batch(new[] { typeof(TTag) }, configure);
         }
 
         public static IHandler NoBatch(this IHandler handler)

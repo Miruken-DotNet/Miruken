@@ -20,12 +20,14 @@
 
         public Batch(params object[] tags)
         {
-            _tags = new HashSet<object>(tags);
+            if (tags != null)
+                _tags = new HashSet<object>(tags);
         }
 
         public bool ShouldBatch(object tag)
         {
-            return _tags.Count == 0 || _tags.Contains(tag);
+            return _tags == null || _tags.Count == 0 
+                || _tags.Contains(tag);
         }
 
         Promise<object[]> IBatchingComplete.Complete(IHandler composer)
