@@ -33,8 +33,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (paramType.Is<Cb>())
-                return false;
+            if (paramType.Is<Cb>()) return false;
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();

@@ -19,6 +19,19 @@
         [Provides]
         public Batch Batch { get; private set; }
 
+        [Provides]
+        public TBatch GetBatch<TBatch>(Inquiry inquiry)
+            where TBatch : class, IBatching, new()
+        {
+            if (Batch != null)
+            {
+                var batchInstance = new TBatch();
+                Batch.AddHandlers(batchInstance);
+                return batchInstance;
+            }
+            return null;
+        }
+
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
@@ -137,7 +150,6 @@
             if (batch == null) return null;
             return tag == null || batch.ShouldBatch(tag) ? batch : null;
         }
-
 
         public static TBatch GetBatch<TBatch>(
             this IHandler handler, object tag = null)

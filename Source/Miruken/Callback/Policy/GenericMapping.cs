@@ -64,7 +64,9 @@
                     if (returnType == null)
                         throw new ArgumentException(
                             "Return type is unknown and cannot infer types");
-                    return returnType.GetGenericArguments()[mapping.Item2];
+                    return mapping.Item2 != UseArgument
+                         ? returnType.GetGenericArguments()[mapping.Item2]
+                         : returnType;
                 }
                 if (mapping.Item2 == UseArgument)
                     return types[mapping.Item1];

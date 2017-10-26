@@ -52,7 +52,8 @@
             var varianceType = key as Type;
             if (varianceType == null) return key;
             if (varianceType.ContainsGenericParameters &&
-                !varianceType.IsGenericTypeDefinition)
+                !varianceType.IsGenericTypeDefinition &&
+                !varianceType.IsGenericParameter)
                 varianceType = varianceType.GetGenericTypeDefinition();
             return varianceType;
         }
