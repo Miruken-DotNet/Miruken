@@ -95,7 +95,7 @@
             yield return descriptor.Where(
                 type => (RuntimeHelper.Is<IHandler>(type) ||
                          type.Name.EndsWith("Handler")) &&
-                         !type.IsDefined(typeof(UnmanagedAttribute), false))
+                         !type.IsDefined(typeof(UnmanagedAttribute), true))
                 .WithServiceSelect(HandlerInterfaces)
                 .WithServiceSelf();
         }

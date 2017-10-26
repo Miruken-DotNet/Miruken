@@ -2,7 +2,7 @@
 {
     using System;
 
-    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class)]
     public class UnmanagedAttribute : Attribute
     {
     }
