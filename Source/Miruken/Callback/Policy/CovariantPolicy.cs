@@ -33,7 +33,7 @@
                      ? 2000 : (int?)null;
             if (key.IsGenericParameter)
                 return key.GetGenericParameterConstraints()
-                    .Min(constraint => Accuracy(type, constraint));
+                    .Min(constraint => Accuracy(constraint, type));
             return type.IsAssignableFrom(key)
                  ? GetAccuracy(type, key)
                  : (int?)null;
