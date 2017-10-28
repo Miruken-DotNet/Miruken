@@ -27,13 +27,13 @@
                 return null;
             if (type.IsGenericTypeDefinition)
                 return key.GetOpenTypeConformance(type) != null
-                    ? 1000 : (int?)null;
+                     ? 1000 : (int?)null;
             if (key.IsGenericTypeDefinition)
                 return type.IsGenericType && type.GetGenericTypeDefinition() == key
-                    ? 2000 : (int?)null;
+                     ? 2000 : (int?)null;
             if (key.IsGenericParameter)
-                return key.GetGenericParameterConstraints().Any(type.Is)
-                    ? 1 : (int?)null;
+                return key.GetGenericParameterConstraints()
+                    .Min(constraint => Accuracy(type, constraint));
             return type.IsAssignableFrom(key)
                  ? GetAccuracy(type, key)
                  : (int?)null;
