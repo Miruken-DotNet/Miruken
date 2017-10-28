@@ -5,23 +5,22 @@
     public interface IEither
     {
         bool   IsLeft { get; }
-        object Left   { get; set; }
-        object Right  { get; set; }
+        object Value  { get; }
     }
 
     public class Either<TL, TR> : IEither
     {
-        private bool _isLeft;
+        private readonly bool _isLeft;
 
         public Either(TL left)
         {
-            Left = left;
+            Left    = left;
             _isLeft = true;
         }
 
         public Either(TR right)
         {
-            Right = right;
+            Right   = right;
             _isLeft = false;
         }
 
@@ -29,40 +28,12 @@
         {
         }
 
-        public TL Left  { get; private set; }
-        public TR Right { get; private set; }
+        public TL Left  { get; }
+        public TR Right { get; }
 
         bool IEither.IsLeft => _isLeft;
 
-        object IEither.Left
-        {
-            get { return Left; }
-            set
-            {
-                if (value is TL)
-                {
-                    Left = (TL)value;
-                    _isLeft = true;
-                }
-                else
-                    throw new ArgumentException("Could not infer left");
-            }
-        }
-
-        object IEither.Right
-        {
-            get { return Right; }
-            set
-            {
-                if (value is TR)
-                {
-                    Right = (TR)value;
-                    _isLeft = false;
-                }
-                else
-                    throw new ArgumentException("Could not infer right");
-            }
-        }
+        object IEither.Value => _isLeft ? Left : (object)Right;
 
         public void Match(Action<TL> matchLeft, Action<TR> matchRight)
         {
