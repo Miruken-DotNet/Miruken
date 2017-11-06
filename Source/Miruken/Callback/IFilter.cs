@@ -41,4 +41,17 @@
             return _filters;
         }
     }
+
+    public class FilterComparer : IComparer<IFilter>
+    {
+        public static readonly FilterComparer Instance = new FilterComparer();
+
+        public int Compare(IFilter x, IFilter y)
+        {
+            if (x == y) return 0;
+            if (y?.Order == null) return -1;
+            if (x?.Order == null) return 1;
+            return x.Order.Value - y.Order.Value;
+        }
+    }
 }

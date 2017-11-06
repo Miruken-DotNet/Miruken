@@ -36,27 +36,24 @@
                 .Decorate(handler);
         }
 
-        public static IEnumerable<IFilter> GetFilters(
+        public static IEnumerable<IFilter> GetOrderedFilters(
             this IHandler composer, MethodBinding binding, Type callbackType, 
             Type logicalResultType, FilterOptions options, params 
             IEnumerable<IFilterProvider>[] providers)
         {
             if (logicalResultType == typeof(void))
                 logicalResultType = typeof(object);
-            var extraProviders = options?.ExtraFilters
-                ?? Enumerable.Empty<IFilterProvider>();
 
-            foreach (var provider in providers
-                .Where(p => p != null).SelectMany(p => p)
-                .Concat(extraProviders))
-            {
-                if (provider == null) continue;
-                var filters = provider.GetFilters(binding,
-                    callbackType, logicalResultType, composer)
-                    .Where(filter => filter != null);
-                foreach (var filter in filters)
-                    yield return filter;
-            }
+            return new SortedSet<IFilter>(providers
+                .Where(p => p != null)
+                .SelectMany(p => p)
+                .Concat(options?.ExtraFilters ??
+                        Enumerable.Empty<IFilterProvider>())
+                .Where(provider => provider != null)
+                .SelectMany(provider => provider
+                    .GetFilters(binding, callbackType, logicalResultType, composer)
+                    .Where(filter => filter != null)),
+                    FilterComparer.Instance);
         }
 
         public static IEnumerable<IFilter> GetOrderedFilters(
@@ -64,8 +61,8 @@
             Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetFilterOptions();
-            return handler.GetFilters(binding, callbackType, logicalResultType,
-                                      options, providers)
+            return handler.GetOrderedFilters(binding, callbackType, 
+                logicalResultType, options, providers)
                 .OrderBy(f => f.Order ?? int.MaxValue);
         }
     }

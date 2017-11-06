@@ -108,9 +108,14 @@
             var returnType     = dispatcher.ReturnType;
             var logicalType    = dispatcher.LogicalReturnType;
 
+            var targetFilter   = target as IFilter;
+            var targetFilters  = targetFilter != null
+                ? new [] {new FilterInstancesProvider(targetFilter)}
+                : null;
+
             var filters = composer.GetOrderedFilters(
                 this, callbackType, logicalType, Filters,
-                dispatcher.Owner.Filters, Policy.Filters)
+                dispatcher.Owner.Filters, Policy.Filters, targetFilters)
                 .ToArray();
 
             object baseResult = this;
