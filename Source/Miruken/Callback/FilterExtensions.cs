@@ -61,9 +61,8 @@
             Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetFilterOptions();
-            return handler.GetOrderedFilters(binding, callbackType, 
-                logicalResultType, options, providers)
-                .OrderBy(f => f.Order ?? int.MaxValue);
+            return handler.GetOrderedFilters(binding, callbackType,
+                logicalResultType, options, providers);
         }
     }
 }
