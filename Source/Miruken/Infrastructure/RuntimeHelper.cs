@@ -139,6 +139,30 @@
             return null;
         }
 
+        public static bool SatisfiesGenericParameterConstraints(
+            this Type genericArgType, Type proposedType)
+        {
+            var gpa         = genericArgType.GenericParameterAttributes;
+            var constraints = gpa & GenericParameterAttributes.SpecialConstraintMask;
+
+            if (constraints != GenericParameterAttributes.None)
+            {
+                if ((constraints & GenericParameterAttributes.ReferenceTypeConstraint) != 0 &&
+                    proposedType.IsValueType)
+                    return false;
+
+                if ((constraints & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0 &&
+                    !proposedType.IsValueType)
+                    return false;
+
+                if ((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0 &&
+                    proposedType.GetConstructor(Type.EmptyTypes) == null)
+                    return false;
+            }
+
+            return genericArgType.GetGenericParameterConstraints().Any(proposedType.Is);
+        }
+
         public static object ChangeType<T>(object value)
         {
             return ChangeType(value, typeof(T));

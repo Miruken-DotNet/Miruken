@@ -32,7 +32,7 @@
                 return type.IsGenericType && type.GetGenericTypeDefinition() == key
                      ? 2000 : (int?)null;
             if (key.IsGenericParameter)
-                return key.GetGenericParameterConstraints().Any(type.Is)
+                return key.SatisfiesGenericParameterConstraints(type)
                      ? 0 : (int?)null;
             return type.IsAssignableFrom(key)
                  ? GetAccuracy(type, key)
@@ -83,7 +83,7 @@
 
             if (type == typeof(object))
                 return output.Cast<object>()
-                    .Where(t => (t as Type)?.IsGenericTypeDefinition != true)
+                    .Where(t => (t as Type)?.ContainsGenericParameters != true)
                     .Select(t => Tuple.Create(t, 10000));
 
             return output.OfType<Type>()

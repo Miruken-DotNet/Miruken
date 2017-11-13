@@ -387,6 +387,21 @@
             Assert.IsNotNull(boo);
         }
 
+        [TestMethod]
+        public void Should_Provide_Callback_Using_Constraints()
+        {
+            var handler = new SpecialHandler();
+            Assert.IsNotNull(handler.Resolve<Foo>());
+            Assert.IsNotNull(handler.Resolve<SuperFoo>());
+        }
+
+        [TestMethod]
+        public void Should_Skip_Methods_With_Unmatched_Constraints()
+        {
+            var handler = new SpecialHandler();
+            Assert.IsNull(handler.Resolve<FooDecorator>());
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Providers()
@@ -787,6 +802,13 @@
         {
         }
 
+        private class FooDecorator : Foo
+        {
+            private FooDecorator(Foo foo)
+            {           
+            }
+        }
+
         private class Bar : Callback
         {
             public int  Handled     { get; set; }
@@ -1075,6 +1097,13 @@
                     inquiry.Resolve(new SuperBaz(), composer);
                     inquiry.Resolve(new Baz(), composer);
                 }
+            }
+
+            [Provides]
+            public TFoo ProvidesNewFoo<TFoo>()
+                where TFoo : Foo, new()
+            {
+                return new TFoo();
             }
         }
 
