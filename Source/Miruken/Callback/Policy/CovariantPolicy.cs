@@ -82,9 +82,9 @@
                     .Select(k => Tuple.Create(k, 1));
 
             if (type == typeof(object))
-                return output.Cast<object>()
-                    .Where(t => (t as Type)?.ContainsGenericParameters != true)
-                    .Select(t => Tuple.Create(t, 10000));
+                return output.OfType<Type>()
+                    .Where(t => !t.ContainsGenericParameters)
+                    .Select(t => Tuple.Create((object)t, 10000));
 
             return output.OfType<Type>()
                 .Where(t => t != type)
