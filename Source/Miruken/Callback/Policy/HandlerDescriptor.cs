@@ -92,7 +92,7 @@ namespace Miruken.Callback.Policy
 
             foreach (var method in descriptor.GetCompatibleMethods(callback))
             {
-                dispatched = method.Item1.Dispatch(
+                dispatched = method.Dispatch(
                     target, callback, composer, results) 
                     || dispatched;
                 if (dispatched && !greedy) return true;
@@ -130,76 +130,56 @@ namespace Miruken.Callback.Policy
         public static IEnumerable<Type> GetCallbackHandlers(
             CallbackPolicy policy, object callback)
         {
-            var types = new SortedSet<Tuple<Type, int>>(
-                WeightedComparer<Type>.Instance);
-
-            foreach (var descriptor in _descriptors)
+            return _descriptors.Select(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                if (handler._policies?.TryGetValue(policy, out cpd) == true)
+                return handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
+                       cpd.GetCompatibleMethods(callback).FirstOrDefault()
+                     : null;
+            })
+            .Where(binding => binding != null)
+            .OrderBy(binding => binding.Key, policy)
+            .Select(binding =>
+            {
+                var handler = binding.Dispatcher.Owner;
+                if (handler.IsOpenGeneric)
                 {
-                    var binding = 
-                        cpd.GetInvariantMethods(callback)
-                           .Select(b => Tuple.Create(b, 0))
-                           .FirstOrDefault() ??
-                        cpd.GetCompatibleMethods(callback)
-                           .FirstOrDefault();
-                    if (binding != null)
-                    {
-                        if (handler.IsOpenGeneric)
-                        {
-                            bool added;
-                            var key = policy.GetKey(callback);
-                            var handlerType = handler._closed.GetOrAdd(key,
-                                k => binding.Item1.CloseHandlerType(handler.HandlerType, k),
-                                out added);
-                            if (added && handlerType != null)
-                                types.Add(Tuple.Create(handlerType, binding.Item2));
-                        }
-                        else
-                            types.Add(Tuple.Create(handler.HandlerType, binding.Item2));
-                    }
+                    var key = policy.GetKey(callback);
+                    return handler._closed.GetOrAdd(key,
+                        k => binding.CloseHandlerType(handler.HandlerType, k));
                 }
-            }
-
-            return types.Select(type => type.Item1);
+                return handler.HandlerType;
+            })
+            .Where(type => type != null)
+            .Distinct();
         }
 
         public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(
             CallbackPolicy policy, object key)
         {
-            var bindings = new SortedSet<Tuple<PolicyMethodBinding, int>>(
-                WeightedComparer<PolicyMethodBinding>.Instance);
-
-            foreach (var descriptor in _descriptors)
+            return _descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                if (handler._policies?.TryGetValue(policy, out cpd) == true)
-                {
-                    foreach (var binding in cpd.GetInvariantMethods(key))
-                        bindings.Add(Tuple.Create(binding, 0));
-                    foreach (var binding in cpd.GetCompatibleMethods(key))
-                        bindings.Add(binding);
-                }
-            }
-
-            return bindings.Select(binding => binding.Item1);
+                return handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMethods(key).Concat(cpd.GetCompatibleMethods(key))
+                     : Enumerable.Empty<PolicyMethodBinding>();
+            })
+            .OrderBy(binding => binding.Key, policy);
         }
 
         public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(CallbackPolicy policy)
         {
-            foreach (var descriptor in _descriptors)
+            return _descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                if (handler._policies?.TryGetValue(policy, out cpd) == true)
-                {
-                    foreach (var binding in cpd.GetInvariantMethods())
-                        yield return binding;
-                }
-            }
+                return handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMethods()
+                     : Enumerable.Empty<PolicyMethodBinding>();
+            });
         }
 
         public static IEnumerable<PolicyMethodBinding> GetPolicyMethods<T>(CallbackPolicy policy)

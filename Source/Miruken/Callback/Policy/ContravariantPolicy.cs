@@ -18,23 +18,36 @@
             return callback?.GetType();
         }
 
-        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+        public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable output)
         {
             return CompatibleTypes(key as Type, output);
         }
 
-        protected IEnumerable<Tuple<object, int>> CompatibleTypes(
+        protected IEnumerable<object> CompatibleTypes(
             Type type, IEnumerable types)
         {
             if (type == null || type == typeof(object))
                 return Enumerable.Empty<Tuple<object, int>>();
             return types.OfType<Type>()
-                .Where(t => t != type)
-                .Select(t => new { Key = t, Accuracy = Accuracy(type, t) })
-                .Where(k => k.Accuracy.HasValue)
-                .OrderBy(k => k.Accuracy)
-                .Select(k => Tuple.Create((object)k.Key, k.Accuracy.Value));
+                .Where(t => t != type && IsCompatible(type, t));
+        }
+
+        public override int Compare(object key1, object key2)
+        {
+            if (key1 == key2) return 0;
+            var type1 = key1 as Type;
+            if (type1 == null) return 1;
+            var type2 = key2 as Type;
+            if (type2 == null) return -1;
+            if (type2.ContainsGenericParameters)
+                return type1.ContainsGenericParameters
+                     ? type2.GetGenericArguments().Length -
+                       type1.GetGenericArguments().Length
+                     : -1;
+            if (type1.ContainsGenericParameters)
+                return 1;
+            return type2.IsAssignableFrom(type1) ? -1 : 1;
         }
 
         private static bool VerifyResult(object result, MethodBinding binding)
@@ -42,31 +55,12 @@
             return result != null || binding.Dispatcher.IsVoid;
         }
 
-        private static int? Accuracy(Type type, Type key)
+        private static bool IsCompatible(Type type, Type key)
         {
-            if (type == key) return 0;
-            if (type == null || key == null) return null;
-            if (key.IsAssignableFrom(type))
-                return GetClassAccuracy(type, key);
-            var open = type.GetOpenTypeConformance(key);
-            return open != null 
-                 ? 1000 - open.GenericTypeArguments.Length
-                 : (int?)null;
-        }
-
-        private static int GetClassAccuracy(Type type, Type key)
-        {
-            if (type.IsClass && key.IsClass)
-            {
-                var accuracy = 0;
-                while (type != null && type != key)
-                {
-                    type = type.BaseType;
-                    ++accuracy;
-                }
-                return accuracy;
-            }
-            return 50;
+            if (type == key) return true;
+            if (type == null || key == null) return false;
+            if (key.IsAssignableFrom(type)) return true;
+            return type.GetOpenTypeConformance(key) != null;
         }
 
         public static ContravariantPolicy Create(
@@ -111,7 +105,7 @@
                  : callback?.GetType();
         }
 
-        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+        public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable output)
         {
             return CompatibleTypes(key as Type, output);

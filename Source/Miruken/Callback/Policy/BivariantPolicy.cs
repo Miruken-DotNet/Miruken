@@ -51,11 +51,11 @@
                 Input.GetKey(callback));
         }
 
-        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+        public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable keys)
         {
             var tuple = key as Tuple<object, object>;
-            if (tuple == null) return Enumerable.Empty<Tuple<object, int>>();
+            if (tuple == null) return Enumerable.Empty<object>();
             var input  = tuple.Item2;
             var output = tuple.Item1;
             return keys.OfType<Tuple<object, object>>().Select(testKey =>
@@ -65,7 +65,6 @@
                 var inEqual  = Equals(input, inKey);
                 var outEqual = Equals(output, outKey);
                 if (inEqual && outEqual) return null;
-                var accuracy = 0;
                 if (!outEqual)
                 {
                     using (var k = Output.GetCompatibleKeys(output,
@@ -73,7 +72,6 @@
                     {
                         if (!k.MoveNext() || k.Current == null)
                             return null;
-                        accuracy += k.Current.Item2;
                     }
                 }
                 if (!inEqual)
@@ -83,11 +81,20 @@
                     {
                         if (!k.MoveNext() || k.Current == null)
                             return null;
-                        accuracy += k.Current.Item2;
                     }
                 }
-                return Tuple.Create((object)testKey, accuracy);
+                return testKey;
             }).Where(k => k != null);
+        }
+
+        public override int Compare(object key1, object key2)
+        {
+            var tuple1 = key1 as Tuple<object, object>;
+            var tuple2 = key2 as Tuple<object, object>;
+            var order  = Input.Compare(tuple1?.Item2, tuple2?.Item2);
+            return order == 0
+                 ? Output.Compare(tuple1?.Item1, tuple2?.Item1)
+                 : order;
         }
     }
 

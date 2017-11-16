@@ -6,7 +6,8 @@
     using System.Linq;
     using System.Reflection;
 
-    public abstract class CallbackPolicy
+    public abstract class CallbackPolicy 
+        : IComparer<PolicyMethodBinding>, IComparer<object>
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
         private readonly List<IFilterProvider> _filters = new List<IFilterProvider>();
@@ -60,8 +61,15 @@
 
         public abstract object GetKey(object callback);
 
-        public abstract IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+        public abstract IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable output);
+
+        public abstract int Compare(object key1, object key2);
+
+        public int Compare(PolicyMethodBinding x, PolicyMethodBinding y)
+        {
+            return Compare(x?.Key, y?.Key);
+        }
 
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, ResultsDelegate results = null)

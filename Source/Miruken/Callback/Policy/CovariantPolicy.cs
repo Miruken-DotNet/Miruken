@@ -20,38 +20,31 @@
             return policy;
         }
 
-        protected static int? Accuracy(Type type, Type key)
+        public override int Compare(object key1, object key2)
         {
-            if (type == key) return 0;
-            if (type == null || key == null)
-                return null;
-            if (type.IsGenericTypeDefinition)
-                return key.GetOpenTypeConformance(type) != null
-                     ? 1000 : (int?)null;
-            if (key.IsGenericTypeDefinition)
-                return type.IsGenericType && type.GetGenericTypeDefinition() == key
-                     ? 2000 : (int?)null;
-            if (key.IsGenericParameter)
-                return key.SatisfiesGenericParameterConstraints(type)
-                     ? 0 : (int?)null;
-            return type.IsAssignableFrom(key)
-                 ? GetAccuracy(type, key)
-                 : (int?)null;
+            if (key1 == key2) return 0;
+            var type1 = key1 as Type;
+            if (type1 == null) return 1;
+            var type2 = key2 as Type;
+            if (type2 == null) return -1;
+            if (type2.ContainsGenericParameters)
+                return -1;
+            if (type1.ContainsGenericParameters)
+                return 1;
+            return type1.IsAssignableFrom(type2) ? -1 : 1;
         }
 
-        private static int GetAccuracy(Type type, Type key)
+        protected static bool IsCompatible(Type type, Type key)
         {
-            if (type.IsClass && key.IsClass)
-            {
-                var accuracy = 0;
-                while (key != null && key != type)
-                {
-                    key = key.BaseType;
-                    ++accuracy;
-                }
-                return accuracy;
-            }
-            return 50;
+            if (type == key) return true;
+            if (type == null || key == null) return false;
+            if (type.IsGenericTypeDefinition)
+                return key.GetOpenTypeConformance(type) != null;
+            if (key.IsGenericTypeDefinition)
+                return type.IsGenericType && type.GetGenericTypeDefinition() == key;
+            return key.IsGenericParameter 
+                 ? key.SatisfiesGenericParameterConstraints(type)
+                 : type.IsAssignableFrom(key);
         }
     }
 
@@ -72,26 +65,20 @@
             return callback is Cb ? Key((Cb)callback) : null;
         }
 
-        public override IEnumerable<Tuple<object, int>> GetCompatibleKeys(
+        public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable output)
         {
             var type = key as Type;
             if (type == null)
                 return output.Cast<object>()
-                    .Where(k => !Equals(key, k) && Equals(k, key))
-                    .Select(k => Tuple.Create(k, 1));
+                    .Where(k => !Equals(key, k) && Equals(k, key));
 
             if (type == typeof(object))
                 return output.OfType<Type>()
-                    .Where(t => !t.ContainsGenericParameters)
-                    .Select(t => Tuple.Create((object)t, 10000));
+                    .Where(t => !t.ContainsGenericParameters);
 
             return output.OfType<Type>()
-                .Where(t => t != type)
-                .Select(t => new { Key = t, Accuracy = Accuracy(type, t) })
-                .Where(k => k.Accuracy.HasValue)
-                .OrderBy(k => k.Accuracy)
-                .Select(k => Tuple.Create((object)k.Key, k.Accuracy.Value));
+                .Where(t => t != type && IsCompatible(type, t));
         }
 
         private Type GetResultType(object callback)
