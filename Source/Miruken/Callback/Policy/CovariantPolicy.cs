@@ -27,10 +27,8 @@
             if (type1 == null) return 1;
             var type2 = key2 as Type;
             if (type2 == null) return -1;
-            if (type2.ContainsGenericParameters)
-                return -1;
-            if (type1.ContainsGenericParameters)
-                return 1;
+            if (type2.ContainsGenericParameters) return -1;
+            if (type1.ContainsGenericParameters) return 1;
             return type1.IsAssignableFrom(type2) ? -1 : 1;
         }
 

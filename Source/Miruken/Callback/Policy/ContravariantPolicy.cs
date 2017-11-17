@@ -45,8 +45,7 @@
                      ? type2.GetGenericArguments().Length -
                        type1.GetGenericArguments().Length
                      : -1;
-            if (type1.ContainsGenericParameters)
-                return 1;
+            if (type1.ContainsGenericParameters) return 1;
             return type2.IsAssignableFrom(type1) ? -1 : 1;
         }
 

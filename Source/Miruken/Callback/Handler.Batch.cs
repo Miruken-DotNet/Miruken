@@ -20,7 +20,7 @@
         public Batch Batch { get; private set; }
 
         [Provides]
-        public TBatch GetBatch<TBatch>(Inquiry inquiry)
+        public TBatch GetBatch<TBatch>()
             where TBatch : class, IBatching, new()
         {
             if (Batch != null)
