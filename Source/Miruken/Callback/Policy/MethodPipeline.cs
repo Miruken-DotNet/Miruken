@@ -6,10 +6,13 @@
     using System.Threading.Tasks;
     using Concurrency;
 
+    public delegate object CompletePipelineDelegate(
+        IHandler handler, out bool completed);
+
     internal abstract class MethodPipeline
     {
         public abstract bool Invoke(MethodBinding binding, object target,
-            object callback, Func<IHandler, object> complete, IHandler composer,
+            object callback, CompletePipelineDelegate complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result);
 
         public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
@@ -30,7 +33,7 @@
     internal class MethodPipeline<Cb, Res> : MethodPipeline
     {
         public override bool Invoke(MethodBinding binding, object target, 
-            object callback, Func<IHandler, object> complete, IHandler composer,
+            object callback, CompletePipelineDelegate complete, IHandler composer,
             IEnumerable<IFilter> filters, out object result)
         {
             var completed = true;
@@ -63,7 +66,7 @@
                                 (p, c) => (Promise<Res>)binding.CoerceResult(next(p, c),
                                            typeof(Promise<Res>)));
                     }
-                    return complete(composer);
+                    return complete(composer, out completed);
                 };
                 result = next(true, composer);
                 return completed;

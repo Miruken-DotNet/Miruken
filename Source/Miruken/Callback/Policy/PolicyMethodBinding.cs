@@ -88,17 +88,17 @@
             IHandler composer, Type resultType, ResultsDelegate results,
             out object result)
         {
-            var args = ResolveArgs(callback, composer);
-            if (args == null)
-            {
-                result = null;
-                return false;
-            }
+            result = null;
+            var args = Rule.ResolveArgs(callback);
 
             if ((callback as IFilterCallback)?.AllowFiltering == false)
             {
-                result = Dispatcher.Invoke(target, args, resultType);
-                return true;
+                bool completed;
+                args   = ResolveArgs(args, composer, out completed);
+                result = completed 
+                       ? Dispatcher.Invoke(target, args, resultType)
+                       : null;
+                return completed;
             }
 
             Type callbackType;
@@ -121,12 +121,18 @@
             object baseResult = this;
 
             if (filters.Length == 0)
+            {
+                bool completed;
+                args = ResolveArgs(args, composer, out completed);
+                if (!completed) return false;
                 result = baseResult = dispatcher.Invoke(target, args, resultType);
+            }
             else if (!MethodPipeline.GetPipeline(callbackType, logicalType)
-                .Invoke(this, target, actualCallback, comp => 
-                    baseResult = dispatcher.Invoke(
-                        target, UpdateArgs(args, composer, comp),
-                        resultType), composer, filters, out result))
+                .Invoke(this, target, actualCallback,
+                    (IHandler comp, out bool completed) =>
+                        baseResult = dispatcher.Invoke(target,
+                        ResolveArgs(args, comp, out completed),
+                            resultType), composer, filters, out result))
                 return false;
 
             var testResult = ReferenceEquals(baseResult, this) ? result : baseResult;
@@ -142,18 +148,19 @@
             return accepted;
         }
 
-        private object[] ResolveArgs(object callback, IHandler composer)
+        private object[] ResolveArgs(
+            object[] ruleArgs, IHandler composer, out bool completed)
         {
-            var numRuleArgs = Rule.Args.Length;
-            var arguments   = Dispatcher.Arguments;
-            if (arguments.Length == numRuleArgs)
-                return Rule.ResolveArgs(callback);
+            completed = true;
+            var arguments = Dispatcher.Arguments;
+            if (arguments.Length == ruleArgs.Length)
+                return ruleArgs;
 
             var args = new object[arguments.Length];
 
             if (!composer.All(bundle =>
             {
-                for (var i = numRuleArgs; i < arguments.Length; ++i)
+                for (var i = ruleArgs.Length; i < arguments.Length; ++i)
                 {
                     var index        = i;
                     var argument     = arguments[i];
@@ -165,7 +172,7 @@
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
-                        bundle.Add(h => args[index] = 
+                        bundle.Add(h => args[index] =
                             resolver.ResolveArgument(argument, h, composer),
                             (ref bool resolved) =>
                             {
@@ -173,9 +180,12 @@
                                 return false;
                             });
                 }
-            })) return null;
+            }))
+            {
+                completed = false;
+                return null;
+            }
 
-            var ruleArgs = Rule.ResolveArgs(callback);
             Array.Copy(ruleArgs, args, ruleArgs.Length);
             return args;
         }
@@ -191,14 +201,6 @@
             }
             callbackType = callback.GetType();
             return callback;
-        }
-
-        private static object[] UpdateArgs(object[] args,
-            IHandler oldComposer, IHandler newComposer)
-        {
-            return ReferenceEquals(oldComposer, newComposer) ? args
-                 : args.Select(arg => ReferenceEquals(arg, oldComposer)
-                 ? newComposer : arg).ToArray();
         }
     }
 }

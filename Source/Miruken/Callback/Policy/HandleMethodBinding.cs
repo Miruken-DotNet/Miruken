@@ -57,9 +57,10 @@
             }
             else
             {
-                handled = Pipeline.Invoke(
-                    this, target, handleMethod, comp =>
+                handled = Pipeline.Invoke(this, target, handleMethod, 
+                    (IHandler comp, out bool completed) =>
                     {
+                        completed = true;
                         if (comp != null && !ReferenceEquals(composer, comp))
                             Composer = comp;
                         return Dispatcher.Invoke(target, arguments);

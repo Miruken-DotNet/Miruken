@@ -79,7 +79,6 @@
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
-    <Compile Include="Infrastructure\WeightedComparer.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
     <Compile Include="Map\IFormatMatching.cs" />
     <Compile Include="Map\IMapping.cs" />
