@@ -160,7 +160,8 @@
                     return false;
             }
 
-            return genericArgType.GetGenericParameterConstraints().Any(proposedType.Is);
+            var typeConstraints = genericArgType.GetGenericParameterConstraints();
+            return typeConstraints.Length == 0 || typeConstraints.Any(proposedType.Is);
         }
 
         public static object ChangeType<T>(object value)
