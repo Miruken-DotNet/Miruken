@@ -1,6 +1,8 @@
 ﻿namespace Miruken.Validate.FluentValidation
 {
+    using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Callback;
     using global::FluentValidation;
@@ -48,7 +50,7 @@
 
     public static class FluentValidatorExtensions
     {
-        private const string ComposerKey   = "Miruken.Composer";
+        private const string ComposerKey = "Miruken.Composer";
         private const string ValidationKey = "Miruken.Validation";
 
         public static void SetValidation(
@@ -61,7 +63,7 @@
         {
             object validation;
             return context.RootContextData.TryGetValue(ValidationKey, out validation)
-                ? (Validation)validation
+                ? (Validation) validation
                 : null;
         }
 
@@ -86,9 +88,63 @@
 
         public static CollectionValidatorExtensions
             .ICollectionValidatorRuleBuilder<T, TElem> ValidCollection<T, TElem>(
-            this IRuleBuilder<T, IEnumerable<TElem>> builder)
+                this IRuleBuilder<T, IEnumerable<TElem>> builder)
         {
             return builder.SetCollectionValidator(FluentValidator<TElem>.Instance);
+        }
+
+        public static IRuleBuilderOptions<T, TProperty> WithComposer<T, TProperty>(
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            Func<T, TProperty, IHandler, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+            return ruleBuilder.Must((target, prop, ctx) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer == null || predicate(target, prop, composer);
+            });
+        }
+
+        public static IRuleBuilderOptions<T, TProperty> WithComposerAsync<T, TProperty>(
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            Func<T, TProperty, IHandler, CancellationToken, Task<bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+            return ruleBuilder.MustAsync((target, prop, ctx, token) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer == null ? Task.FromResult(true)
+                     : predicate(target, prop, composer, token);
+            });
+        }
+
+        public static IRuleBuilderOptions<T, TProperty> WithoutComposer<T, TProperty>(
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            Func<T, TProperty, bool> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+            return ruleBuilder.Must((target, prop, ctx) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer != null || predicate(target, prop);
+            });
+        }
+
+        public static IRuleBuilderOptions<T, TProperty> WithoutComposerAsync<T, TProperty>(
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            Func<T, TProperty, CancellationToken, Task<bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+            return ruleBuilder.MustAsync((target, prop, ctx, token) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer != null ? Task.FromResult(true)
+                    : predicate(target, prop, token);
+            });
         }
     }
 }
