@@ -20,9 +20,10 @@
                     "Proxy parameters cannot be tasks or promises");
         }
 
-        protected override object Resolve(object key, IHandler handler)
+        protected override object Resolve(
+            object key, IHandler handler, IHandler composer)
         {
-            return handler.Proxy((Type)key);
+            return composer.Proxy((Type)key);
         }
     }
 }

@@ -35,39 +35,44 @@
                 });
                 return lazy(this, argument, composer);
             }
-            return Resolve(argument, handler);
+            return Resolve(argument, handler, composer);
         }
 
         public virtual void ValidateArgument(Argument argument)
         {
         }
 
-        protected virtual object Resolve(object key, IHandler handler)
+        protected virtual object Resolve
+            (object key, IHandler handler, IHandler composer)
         {
             return handler.Resolve(key);
         }
 
-        protected virtual Promise ResolveAsync(object key, IHandler handler)
+        protected virtual Promise ResolveAsync(
+            object key, IHandler handler, IHandler composer)
         {
             return handler.ResolveAsync(key);
         }
 
-        protected virtual object[] ResolveAll(object key, IHandler handler)
+        protected virtual object[] ResolveAll(
+            object key, IHandler handler, IHandler composer)
         {
             return handler.ResolveAll(key);
         }
 
-        protected virtual Promise<object[]> ResolveAllAsync(object key, IHandler handler)
+        protected virtual Promise<object[]> ResolveAllAsync(
+            object key, IHandler handler, IHandler composer)
         {
             return handler.ResolveAllAsync(key);
         }
 
-        private Func<T> ResolveLazy<T>(Argument argument, IHandler handler)
+        private Func<T> ResolveLazy<T>(Argument argument, IHandler composer)
         {
-            return () => (T)Resolve(argument, handler);
+            return () => (T)Resolve(argument, composer, composer);
         }
 
-        private object Resolve(Argument argument, IHandler handler)
+        private object Resolve(
+            Argument argument, IHandler handler, IHandler composer)
         {
             object dependency;
             var key          = argument.Key;
@@ -78,7 +83,7 @@
             {
                 if (argument.IsPromise)
                 {
-                    var array  = ResolveAllAsync(key, handler);
+                    var array  = ResolveAllAsync(key, handler, composer);
                     dependency = argument.IsSimple
                                ? array.Then((arr, s) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
@@ -87,7 +92,7 @@
                 }
                 else if (argument.IsTask)
                 {
-                    var array  = ResolveAllAsync(key, handler).ToTask();
+                    var array  = ResolveAllAsync(key, handler, composer).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
                                     RuntimeHelper.ChangeArrayType(task.Result, logicalType))
@@ -96,25 +101,25 @@
                 }
                 else
                     dependency = RuntimeHelper
-                        .ChangeArrayType(ResolveAll(key, handler), logicalType);
+                        .ChangeArrayType(ResolveAll(key, handler, composer), logicalType);
             }
             else if (argument.IsPromise)
             {
-                var promise = ResolveAsync(key, handler);
+                var promise = ResolveAsync(key, handler, composer);
                 if (argument.IsSimple)
                     promise = promise.Then((r,s) => RuntimeHelper.ChangeType(r, logicalType));
                dependency = promise.Coerce(argumentType);
             }
             else if (argument.IsTask)
             {
-                var task = ResolveAsync(key, handler).ToTask();
+                var task = ResolveAsync(key, handler, composer).ToTask();
                 if (argument.IsSimple)
                     task = task.ContinueWith(t => RuntimeHelper.ChangeType(t.Result, logicalType));
                 dependency = task.Coerce(argumentType);
             }
             else
             {
-                dependency = Resolve(key, handler);
+                dependency = Resolve(key, handler, composer);
                 if (argument.IsSimple)
                     dependency = RuntimeHelper.ChangeType(dependency, argumentType);
             }

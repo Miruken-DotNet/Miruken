@@ -50,7 +50,7 @@
 
     public static class FluentValidatorExtensions
     {
-        private const string ComposerKey = "Miruken.Composer";
+        private const string ComposerKey   = "Miruken.Composer";
         private const string ValidationKey = "Miruken.Validation";
 
         public static void SetValidation(
@@ -143,7 +143,7 @@
             {
                 var composer = ctx.ParentContext?.GetComposer();
                 return composer != null ? Task.FromResult(true)
-                    : predicate(target, prop, token);
+                     : predicate(target, prop, token);
             });
         }
     }
