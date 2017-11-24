@@ -28,14 +28,15 @@
             FastFourArgs   = 1 << 4,
             FastFiveArgs   = 1 << 5,
             FastSixArgs    = 1 << 6,
-            Promise        = 1 << 7,
-            Task           = 1 << 8,
-            Void           = 1 << 9,
-            LateBound      = 1 << 10,
+            FastSevenArgs  = 1 << 7,
+            Promise        = 1 << 8,
+            Task           = 1 << 9,
+            Void           = 1 << 10,
+            LateBound      = 1 << 11,
             Fast           = FastNoArgs   | FastOneArg
                            | FastTwoArgs  | FastThreeArgs
                            | FastFourArgs | FastFiveArgs
-                           | FastSixArgs
+                           | FastSixArgs  | FastSevenArgs
         }
 
         #endregion
@@ -113,6 +114,10 @@
                     AssertArgsCount(6, args);
                     ((SixArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
                     return null;
+                case DispatchType.FastSevenArgs | DispatchType.Void:
+                    AssertArgsCount(7, args);
+                    ((SevenArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+                    return null;
                 case DispatchType.FastNoArgs:
                     AssertArgsCount(0, args);
                     return ((NoArgsReturnDelegate)_delegate)(target);
@@ -134,6 +139,9 @@
                 case DispatchType.FastSixArgs:
                     AssertArgsCount(6, args);
                     return ((SixArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
+                case DispatchType.FastSevenArgs:
+                    AssertArgsCount(7, args);
+                    return ((SevenArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
                 #endregion
                 default:
                     return DispatchLate(target, args, returnType);

@@ -18,6 +18,7 @@
     public delegate void   FourArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
     public delegate void   FiveArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
     public delegate void   SixArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
+    public delegate void   SevenArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
     public delegate object NoArgsReturnDelegate(object instance);
     public delegate object OneArgReturnDelegate(object instance, object arg);
     public delegate object TwoArgsReturnDelegate(object instance, object arg1, object arg2);
@@ -25,6 +26,7 @@
     public delegate object FourArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
     public delegate object FiveArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
     public delegate object SixArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
+    public delegate object SevenArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
     public delegate object PropertyGetDelegate(object instance);
 
     #endregion
@@ -342,10 +344,10 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 3)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -368,11 +370,11 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 4)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
-            var argument4 = Expression.Parameter(typeof(object), "argument4");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -396,12 +398,12 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 5)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
-            var argument4 = Expression.Parameter(typeof(object), "argument4");
-            var argument5 = Expression.Parameter(typeof(object), "argument5");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -426,13 +428,13 @@
             var parameters = method.GetParameters();
             if (parameters.Length != 6)
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
-            var argument4 = Expression.Parameter(typeof(object), "argument4");
-            var argument5 = Expression.Parameter(typeof(object), "argument5");
-            var argument6 = Expression.Parameter(typeof(object), "argument6");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
+            var argument6  = Expression.Parameter(typeof(object), "argument6");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -446,6 +448,41 @@
             return Expression.Lambda<SixArgsDelegate>(
                 methodCall, instance, argument1, argument2, argument3, argument4,
                 argument5, argument6
+            ).Compile();
+        }
+
+        public static SevenArgsDelegate CreateCallSevenArgs(MethodInfo method)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            var target = method.ReflectedType;
+            if (target == null || method.IsStatic)
+                throw new NotSupportedException("Only instance methods supported");
+            var parameters = method.GetParameters();
+            if (parameters.Length != 7)
+                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
+            var argument6  = Expression.Parameter(typeof(object), "argument6");
+            var argument7  = Expression.Parameter(typeof(object), "argument7");
+            var methodCall = Expression.Call(
+                Expression.Convert(instance, target),
+                method,
+                Expression.Convert(argument1, parameters[0].ParameterType),
+                Expression.Convert(argument2, parameters[1].ParameterType),
+                Expression.Convert(argument3, parameters[2].ParameterType),
+                Expression.Convert(argument4, parameters[3].ParameterType),
+                Expression.Convert(argument5, parameters[4].ParameterType),
+                Expression.Convert(argument6, parameters[5].ParameterType),
+                Expression.Convert(argument7, parameters[6].ParameterType)
+            );
+            return Expression.Lambda<SevenArgsDelegate>(
+                methodCall, instance, argument1, argument2, argument3, argument4,
+                argument5, argument6, argument7
             ).Compile();
         }
 
@@ -596,12 +633,12 @@
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
             if (method.ReturnType == typeof(void))
                 throw new ArgumentException($"Method {method.Name} is void");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
-            var argument4 = Expression.Parameter(typeof(object), "argument4");
-            var argument5 = Expression.Parameter(typeof(object), "argument5");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -629,13 +666,13 @@
                 throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
             if (method.ReturnType == typeof(void))
                 throw new ArgumentException($"Method {method.Name} is void");
-            var instance  = Expression.Parameter(typeof(object), "instance");
-            var argument1 = Expression.Parameter(typeof(object), "argument1");
-            var argument2 = Expression.Parameter(typeof(object), "argument2");
-            var argument3 = Expression.Parameter(typeof(object), "argument3");
-            var argument4 = Expression.Parameter(typeof(object), "argument4");
-            var argument5 = Expression.Parameter(typeof(object), "argument5");
-            var argument6 = Expression.Parameter(typeof(object), "argument6");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
+            var argument6  = Expression.Parameter(typeof(object), "argument6");
             var methodCall = Expression.Call(
                 Expression.Convert(instance, target),
                 method,
@@ -650,6 +687,44 @@
                 Expression.Convert(methodCall, typeof(object)),
                 instance, argument1, argument2, argument3, argument4,
                 argument5, argument6
+            ).Compile();
+        }
+
+        public static SevenArgsReturnDelegate CreateFuncSevenArgs(MethodInfo method)
+        {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            var target = method.ReflectedType;
+            if (target == null || method.IsStatic)
+                throw new NotSupportedException("Only instance methods supported");
+            var parameters = method.GetParameters();
+            if (parameters.Length != 7)
+                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
+            if (method.ReturnType == typeof(void))
+                throw new ArgumentException($"Method {method.Name} is void");
+            var instance   = Expression.Parameter(typeof(object), "instance");
+            var argument1  = Expression.Parameter(typeof(object), "argument1");
+            var argument2  = Expression.Parameter(typeof(object), "argument2");
+            var argument3  = Expression.Parameter(typeof(object), "argument3");
+            var argument4  = Expression.Parameter(typeof(object), "argument4");
+            var argument5  = Expression.Parameter(typeof(object), "argument5");
+            var argument6  = Expression.Parameter(typeof(object), "argument6");
+            var argument7  = Expression.Parameter(typeof(object), "argument7");
+            var methodCall = Expression.Call(
+                Expression.Convert(instance, target),
+                method,
+                Expression.Convert(argument1, parameters[0].ParameterType),
+                Expression.Convert(argument2, parameters[1].ParameterType),
+                Expression.Convert(argument3, parameters[2].ParameterType),
+                Expression.Convert(argument4, parameters[3].ParameterType),
+                Expression.Convert(argument5, parameters[4].ParameterType),
+                Expression.Convert(argument6, parameters[5].ParameterType),
+                Expression.Convert(argument7, parameters[6].ParameterType)
+            );
+            return Expression.Lambda<SevenArgsReturnDelegate>(
+                Expression.Convert(methodCall, typeof(object)),
+                instance, argument1, argument2, argument3, argument4,
+                argument5, argument6, argument7
             ).Compile();
         }
 
