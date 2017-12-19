@@ -5,24 +5,23 @@ namespace Miruken.Callback.Policy
     using System.Reflection;
     using Infrastructure;
 
-    public class TargetArgument<Cb> : ArgumentRule
+    public class TargetArgument<TCb> : ArgumentRule
     {
-        private readonly Func<Cb, object> _target;
+        private readonly Func<TCb, object> _target;
         private string _alias;
 
-        public TargetArgument(Func<Cb, object> target)
+        public TargetArgument(Func<TCb, object> target)
         {
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
-            _target = target;
+            _target = target 
+                   ?? throw new ArgumentNullException(nameof(target));
         }
 
-        public TargetArgument<Cb> this[string alias]
+        public TargetArgument<TCb> this[string alias]
         {
             get
             {
                 if (string.IsNullOrEmpty(alias))
-                    throw new ArgumentException("Alias cannot be empty", nameof(alias));
+                    throw new ArgumentException(@"Alias cannot be empty", nameof(alias));
                 _alias = alias;
                 return this;
             }
@@ -33,7 +32,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (paramType.Is<Cb>()) return false;
+            if (paramType.Is<TCb>()) return false;
             if (paramType.IsGenericParameter)
             {
                 var contraints = paramType.GetGenericParameterConstraints();
@@ -81,7 +80,7 @@ namespace Miruken.Callback.Policy
 
         public override object Resolve(object callback)
         {
-            return callback is Cb ? _target((Cb)callback) : callback;
+            return callback is TCb cb ? _target(cb) : callback;
         }
     }
 }

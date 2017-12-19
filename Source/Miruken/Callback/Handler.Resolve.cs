@@ -33,8 +33,7 @@
 
         private static object GetResolvingCallback(object callback)
         {
-            var resolving = callback as IResolveCallback;
-            return resolving != null
+            return callback is IResolveCallback resolving
                  ? (resolving.GetResolveCallback() ?? callback)
                  : Resolving.GetDefaultResolvingCallback(callback);
 

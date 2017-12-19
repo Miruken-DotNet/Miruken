@@ -67,12 +67,12 @@
 
         public Promise Then(ResolveCallback<Promise> then)
         {
-            return Then(then, (RejectCallback<Promise>)null).Unwrap();
+            return Then(then, null).Unwrap();
         }
 
         public Promise<R> Then<R>(ResolveCallback<Promise<R>> then)
         {
-            return Then(then, (RejectCallback<Promise<R>>)null).Unwrap();
+            return Then(then, null).Unwrap();
         }
 
         #endregion
@@ -925,7 +925,7 @@
 
         protected override Promise TapT(ResolveCallback<Promise> tap)
         {
-            return Tap((T r, bool s) => tap(r, s));
+            return Tap((r, s) => tap(r, s));
         }
 
         public new Promise<T> TapCatch(RejectCallback tap)

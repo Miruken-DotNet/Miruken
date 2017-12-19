@@ -6,9 +6,8 @@
     {
         protected HandlerDecorator(IHandler decoratee)
         {
-            if (decoratee == null)
-                throw new ArgumentNullException(nameof(decoratee));
-            Decoratee = decoratee;
+            Decoratee = decoratee
+                     ?? throw new ArgumentNullException(nameof(decoratee));
         }
 
         public IHandler Decoratee { get; }

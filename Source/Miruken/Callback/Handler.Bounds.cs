@@ -14,8 +14,8 @@
             object callback, ref bool greedy, IHandler composer)
         {
             var composition = callback as Composition;
-            var bounded     = (composition?.Callback ?? callback) as IBoundCallback;
-            return (bounded == null || bounded.Bounds != _bounds) &&
+            return (!((composition?.Callback ?? callback) is IBoundCallback bounded) 
+                || bounded.Bounds != _bounds) &&
                 base.HandleCallback(callback, ref greedy, composer);
         }
     }

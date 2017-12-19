@@ -34,8 +34,7 @@
 
             set
             {
-                var cb = Callback as ICallback;
-                if (cb != null)
+                if (Callback is ICallback cb)
                     cb.Result = value;
             }
         }

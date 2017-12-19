@@ -16,17 +16,15 @@ namespace Miruken.Callback
 
         public HandlerAxis(IHandlerAxis handler, TraversingAxis axis)
         {
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-            _handler = handler;
+            _handler = handler 
+                    ?? throw new ArgumentNullException(nameof(handler));
             _axis    = axis;
         }
 
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var composition = callback as Composition;
-            var handled = composition == null
+            var handled = !(callback is Composition)
                  ? _handler.Handle(_axis, callback, ref greedy, composer)
                  : _handler.Handle(callback, greedy, composer);
             return handled || base.HandleCallback(callback, ref greedy, composer);

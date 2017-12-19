@@ -59,10 +59,9 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            object result;
             var resultType = Policy.ResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType,
-                results, out result);
+                results, out _);
         }
 
         public Type CloseHandlerType(Type handlerType, object key)
@@ -93,23 +92,20 @@
 
             if ((callback as IFilterCallback)?.AllowFiltering == false)
             {
-                bool completed;
-                args   = ResolveArgs(args, composer, out completed);
+                args   = ResolveArgs(args, composer, out var completed);
                 result = completed 
                        ? Dispatcher.Invoke(target, args, resultType)
                        : null;
                 return completed;
             }
 
-            Type callbackType;
             var dispatcher     = Dispatcher.CloseDispatch(args, resultType);
             var actualCallback = GetCallbackInfo(
-                callback, args, dispatcher, out callbackType);
+                callback, args, dispatcher, out var callbackType);
             var returnType     = dispatcher.ReturnType;
             var logicalType    = dispatcher.LogicalReturnType;
 
-            var targetFilter   = target as IFilter;
-            var targetFilters  = targetFilter != null
+            var targetFilters  = target is IFilter targetFilter
                 ? new [] {new FilterInstancesProvider(targetFilter)}
                 : null;
 
@@ -122,8 +118,7 @@
 
             if (filters.Length == 0)
             {
-                bool completed;
-                args = ResolveArgs(args, composer, out completed);
+                args = ResolveArgs(args, composer, out var completed);
                 if (!completed) return false;
                 result = baseResult = dispatcher.Invoke(target, args, resultType);
             }

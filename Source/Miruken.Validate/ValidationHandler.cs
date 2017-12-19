@@ -16,9 +16,8 @@
             };
             composer.Handle(validation, true);
 
-            var outcome         = validation.Outcome;
-            var validationAware = target as IValidationAware;
-            if (validationAware != null)
+            var outcome = validation.Outcome;
+            if (target is IValidationAware validationAware)
                 validationAware.ValidationOutcome = outcome;
             return outcome;
         }
@@ -37,9 +36,8 @@
 
             return ((Promise)validation.Result).Then((r, s) =>
             {
-                var outcome         = validation.Outcome;
-                var validationAware = target as IValidationAware;
-                if (validationAware != null)
+                var outcome = validation.Outcome;
+                if (target is IValidationAware validationAware)
                     validationAware.ValidationOutcome = outcome;
                 return outcome;
             });

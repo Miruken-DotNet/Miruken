@@ -177,10 +177,7 @@ namespace Miruken.Context
                 else if (State == ContextState.Ending)
                     value(this as TContext);
             }
-            remove
-            {
-                _events.RemoveHandler(ContextEvents.ContextEnding, value);
-            }
+            remove => _events.RemoveHandler(ContextEvents.ContextEnding, value);
         } 
 
         public event Action<TContext> ContextEnded
@@ -192,34 +189,19 @@ namespace Miruken.Context
                 else if (State == ContextState.Ended)
                     value(this as TContext);
             }
-            remove
-            {
-                _events.RemoveHandler(ContextEvents.ContextEnded, value);
-            }            
+            remove => _events.RemoveHandler(ContextEvents.ContextEnded, value);
         }
 
         public event Action<TContext> ChildContextEnding
         {
-            add
-            {
-                _events?.AddHandler(ContextEvents.ChildContextEnding, value);
-            }
-            remove
-            {
-                _events.RemoveHandler(ContextEvents.ChildContextEnding, value);
-            }
+            add => _events?.AddHandler(ContextEvents.ChildContextEnding, value);
+            remove => _events.RemoveHandler(ContextEvents.ChildContextEnding, value);
         }
 
         public event Action<TContext> ChildContextEnded
         {
-            add
-            {
-                _events?.AddHandler(ContextEvents.ChildContextEnded, value);
-            }
-            remove
-            {
-                _events.RemoveHandler(ContextEvents.ChildContextEnded, value);
-            }
+            add => _events?.AddHandler(ContextEvents.ChildContextEnded, value);
+            remove => _events.RemoveHandler(ContextEvents.ChildContextEnded, value);
         }
 
         #endregion

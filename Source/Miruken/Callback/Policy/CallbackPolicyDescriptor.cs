@@ -102,9 +102,8 @@ namespace Miruken.Callback.Policy
                 var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
                 foreach (var next in keys)
                 {
-                    List<PolicyMethodBinding> methods;
                     var nextType = next as Type;
-                    if (nextType != null && _typed.TryGetValue(nextType, out methods))
+                    if (nextType != null && _typed.TryGetValue(nextType, out var methods))
                         compatible.AddRange(methods);
                 }
             }
@@ -113,8 +112,7 @@ namespace Miruken.Callback.Policy
                 var keys = Policy.GetCompatibleKeys(key, _indexed.Keys);
                 foreach (var next in keys)
                 {
-                    List<PolicyMethodBinding> methods;
-                    if (_indexed.TryGetValue(next, out methods))
+                    if (_indexed.TryGetValue(next, out var methods))
                         compatible.AddRange(methods);
                 }
             }

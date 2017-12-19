@@ -7,22 +7,31 @@
     using System.Text;
     using Policy;
 
-    public class DynamicFilter<Cb, Res> : IFilter<Cb, Res>
+    public abstract class DynamicFilter : IFilter
     {
         public int? Order { get; set; }
 
-        Res IFilter<Cb, Res>.Next(Cb callback, MethodBinding method, 
-            IHandler composer, NextDelegate<Res> next)
+        protected static readonly ConcurrentDictionary<Type, MethodDispatch>
+            DynamicNext = new ConcurrentDictionary<Type, MethodDispatch>();
+
+        protected const BindingFlags Binding = BindingFlags.Instance
+                                             | BindingFlags.Public;
+    }
+
+    public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
+    {
+        TRes IFilter<TCb, TRes>.Next(TCb callback, MethodBinding method, 
+            IHandler composer, NextDelegate<TRes> next)
         {
-            var dispatch = _next.GetOrAdd(GetType(), GetDynamicNext);
+            var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
             var args = ResolveArgs(dispatch, callback, method, composer, next);
-            return (Res)dispatch.Invoke(this, args);
+            return (TRes)dispatch.Invoke(this, args);
         }
 
         private static object[] ResolveArgs(MethodDispatch dispatch,
-            Cb callback, MethodBinding method, IHandler composer,
-            NextDelegate<Res> next)
+            TCb callback, MethodBinding method, IHandler composer,
+            NextDelegate<TRes> next)
         {
             var arguments = dispatch.Arguments;
             if (arguments.Length == 2)
@@ -86,14 +95,8 @@
             if (method.Name != "Next") return false;
             var parameters = method.GetParameters();
             if (parameters.Length < 2) return false;
-            return parameters[0].ParameterType == typeof(Cb) &&
-                   parameters[1].ParameterType == typeof(NextDelegate<Res>);                
+            return parameters[0].ParameterType == typeof(TCb) &&
+                   parameters[1].ParameterType == typeof(NextDelegate<TRes>);                
         }
-
-        private static readonly ConcurrentDictionary<Type, MethodDispatch> 
-            _next = new ConcurrentDictionary<Type, MethodDispatch>();
-
-        private const BindingFlags Binding = BindingFlags.Instance
-                                           | BindingFlags.Public;
     }
 }

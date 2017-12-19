@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate Res NextDelegate<out Res>(
+    public delegate TRes NextDelegate<out TRes>(
         bool proceed = true, IHandler composer = null);
 
     public interface IFilter
@@ -12,13 +12,13 @@
         int? Order { get; set; }
     }
 
-    public interface IFilter<in Cb, Res> : IFilter
+    public interface IFilter<in TCb, TRes> : IFilter
     {
-        Res Next(Cb callback, MethodBinding method,
-                 IHandler composer, NextDelegate<Res> next);
+        TRes Next(TCb callback, MethodBinding method,
+                 IHandler composer, NextDelegate<TRes> next);
     }
 
-    public interface IGlobalFilter<in Cb, Res> : IFilter<Cb, Res> { }
+    public interface IGlobalFilter<in TCb, TRes> : IFilter<TCb, TRes> { }
 
     public interface IFilterProvider
     {

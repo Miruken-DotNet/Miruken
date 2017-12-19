@@ -60,8 +60,7 @@
                 var children = new List<ValidationErrors>();
                 foreach (var error in outcome.GetErrors(culprit))
                 {
-                    var child = error as ValidationOutcome;
-                    if (child != null)
+                    if (error is ValidationOutcome child)
                         children.AddRange(CreateErrors(child));
                     else
                         messages.Add(error.ToString());

@@ -7,7 +7,6 @@ namespace Miruken.Concurrency
     {
         private int _completed;
         private readonly AsyncCallback _callback;
-        private bool _completedSynchronously;
         private object _waitEvent;
         protected Exception _exception;
         protected object _result;
@@ -26,11 +25,7 @@ namespace Miruken.Concurrency
 
         public bool IsCompleted => _completed != 0;
 
-        public bool CompletedSynchronously
-        {
-            get { return _completedSynchronously; }
-            protected set { _completedSynchronously = value; }
-        }
+        public bool CompletedSynchronously { get; protected set; }
 
         public WaitHandle AsyncWaitHandle
         {
@@ -58,9 +53,8 @@ namespace Miruken.Concurrency
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            var result = asyncResult as AbstractAsyncResult;
-            if (result == null)
-                throw new ArgumentException("Unrecognized IAsyncResult", nameof(asyncResult));
+            if (!(asyncResult is AbstractAsyncResult result))
+                throw new ArgumentException(@"Unrecognized IAsyncResult", nameof(asyncResult));
 
             if (result._completed == 0)
                 result.AsyncWaitHandle.WaitOne();
@@ -91,7 +85,7 @@ namespace Miruken.Concurrency
 
         private void Complete(bool synchronously, Action action = null)
         {
-            _completedSynchronously = synchronously;
+            CompletedSynchronously = synchronously;
             action?.Invoke();
             ((ManualResetEvent) _waitEvent)?.Set();
             _callback?.Invoke(this);

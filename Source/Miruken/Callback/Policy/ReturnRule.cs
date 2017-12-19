@@ -16,9 +16,9 @@
 
         public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
-        public virtual R GetSubRule<R>() where R : ReturnRule
+        public virtual T GetSubRule<T>() where T : ReturnRule
         {
-            return this as R;
+            return this as T;
         }
 
         protected static bool IsLogicalVoid(Type returnType)
@@ -31,9 +31,7 @@
     {
         protected ReturnRuleDecorator(ReturnRule rule)
         {
-            if (rule == null)
-                throw new ArgumentNullException(nameof(rule));
-            Rule = rule;
+            Rule = rule ?? throw new ArgumentNullException(nameof(rule));
         }
 
         public ReturnRule Rule { get; }
@@ -52,9 +50,9 @@
             Rule.Configure(policyMethodBindingInfo);
         }
 
-        public override R GetSubRule<R>()
+        public override T GetSubRule<T>()
         {
-            return base.GetSubRule<R>() ?? Rule.GetSubRule<R>();
+            return base.GetSubRule<T>() ?? Rule.GetSubRule<T>();
         }
     }
 

@@ -33,19 +33,16 @@
                 try
                 {
                     var handled = proceed();
-                    if (handled)
+                    if (!handled) return false;
+                    if (cb?.Result is Promise promise)
                     {
-                        var promise = cb?.Result as Promise;
-                        if (promise != null)
-                        {
-                            cb.Result = promise.Catch((ex, s) => 
+                        cb.Result = promise.Catch((ex, s) => 
                                 ex is CancelledException
                                     ? Promise.Rejected(ex)
                                     : composer.Proxy<IErrors>().HandleException(ex, context))
-                                    .Coerce(cb.ResultType);
-                        }
+                            .Coerce(cb.ResultType);
                     }
-                    return handled;
+                    return true;
                 }
                 catch (Exception exception)
                 {

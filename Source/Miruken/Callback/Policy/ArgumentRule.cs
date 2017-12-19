@@ -31,9 +31,7 @@
     {
         protected ArgumentRuleDecorator(ArgumentRule argument)
         {
-            if (argument == null)
-                throw new ArgumentNullException(nameof(argument));
-            Argument = argument;
+            Argument = argument ?? throw new ArgumentNullException(nameof(argument));
         }
 
         public ArgumentRule Argument { get; }

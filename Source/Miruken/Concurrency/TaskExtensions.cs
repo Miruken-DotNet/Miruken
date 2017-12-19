@@ -81,8 +81,7 @@
         {
             internal static Task<T> Coerce<T>(Task task)
             {
-                var ttask = task as Task<T>;
-                if (ttask != null) return ttask;
+                if (task is Task<T> ttask) return ttask;
                 return task.IsCompleted 
                      ? Complete<T>(task) 
                      : task.ContinueWith(Complete<T>).Unwrap();

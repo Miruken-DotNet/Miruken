@@ -111,17 +111,14 @@
             return Add(handler =>
             {
                 var task = action(handler);
-                if (task != null)
+                if (task == null) return;
+                if (task.Status == TaskStatus.Faulted)
                 {
-                    if (task.Status == TaskStatus.Faulted)
-                    {
-                        var rejected = task.Exception?.InnerException as RejectedException;
-                        if (rejected != null)
-                            ExceptionDispatchInfo.Capture(rejected).Throw();
-                    }
-                    (_promises ?? (_promises = new List<Promise>()))
-                        .Add(task);
+                    if (task.Exception?.InnerException is RejectedException rejected)
+                        ExceptionDispatchInfo.Capture(rejected).Throw();
                 }
+                (_promises ?? (_promises = new List<Promise>()))
+                    .Add(task);
             }, notify);
         }
 

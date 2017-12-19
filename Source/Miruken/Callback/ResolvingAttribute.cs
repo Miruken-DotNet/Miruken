@@ -18,24 +18,22 @@
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate>
-            _lazy = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
+            Lazy = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
 
         public bool IsOptional => false;
 
         public virtual object ResolveArgument(
             Argument argument, IHandler handler, IHandler composer)
         {
-            if (argument.IsLazy)
+            if (!argument.IsLazy)
+                return Resolve(argument, handler, composer);
+            var lazy = Lazy.GetOrAdd(argument.ParameterType, l =>
             {
-                var lazy = _lazy.GetOrAdd(argument.ParameterType, l =>
-                {
-                    var func   = l.GenericTypeArguments[0];
-                    var method = CreateLazy.MakeGenericMethod(func);
-                    return RuntimeHelper.CreateFuncTwoArgs(method);
-                });
-                return lazy(this, argument, composer);
-            }
-            return Resolve(argument, handler, composer);
+                var func   = l.GenericTypeArguments[0];
+                var method = CreateLazy.MakeGenericMethod(func);
+                return RuntimeHelper.CreateFuncTwoArgs(method);
+            });
+            return lazy(this, argument, composer);
         }
 
         public virtual void ValidateArgument(Argument argument)

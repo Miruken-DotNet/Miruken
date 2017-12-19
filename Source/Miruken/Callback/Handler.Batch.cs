@@ -134,7 +134,7 @@
         public static Promise<object[]> Batch<TTag>(this IHandler handler,
             Func<IHandler, Task> configure)
         {
-            return handler.Batch(new[] { typeof(TTag) }, configure);
+            return handler.Batch(new [] { typeof(TTag) }, configure);
         }
 
         public static IHandler NoBatch(this IHandler handler)

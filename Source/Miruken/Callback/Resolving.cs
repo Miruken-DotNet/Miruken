@@ -12,9 +12,8 @@
         public Resolving(object key, object callback)
             : base(key, true)
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-            _callback = callback;
+            _callback = callback 
+                     ?? throw new ArgumentNullException(nameof(callback));
         }
 
         object IResolveCallback.GetResolveCallback()

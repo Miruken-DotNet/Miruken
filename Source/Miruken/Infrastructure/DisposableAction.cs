@@ -4,14 +4,13 @@
 
     public class DisposableAction<T> : IDisposable
     {
-        readonly Action<T> _action;
-        readonly T _val;
+        private readonly Action<T> _action;
+        private readonly T _val;
 
         public DisposableAction(Action<T> action, T val)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            _action = action;
+            _action = action
+                   ?? throw new ArgumentNullException(nameof(action));
             _val    = val;
         }
 

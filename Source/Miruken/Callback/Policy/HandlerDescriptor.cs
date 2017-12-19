@@ -42,8 +42,7 @@ namespace Miruken.Callback.Policy
                     if (_policies == null)
                         _policies = new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>();
 
-                    CallbackPolicyDescriptor descriptor;
-                    if (!_policies.TryGetValue(policy, out descriptor))
+                    if (!_policies.TryGetValue(policy, out var descriptor))
                     {
                         descriptor = new CallbackPolicyDescriptor(policy);
                         _policies.Add(policy, descriptor);
@@ -110,27 +109,26 @@ namespace Miruken.Callback.Policy
         {
             try
             {
-                return _descriptors.GetOrAdd(type,
+                return Descriptors.GetOrAdd(type,
                     t => new Lazy<HandlerDescriptor>(() => new HandlerDescriptor(t)))
                     .Value;
             }
             catch
             {
-                Lazy<HandlerDescriptor> descriptor;
-                _descriptors.TryRemove(type, out descriptor);
+                Descriptors.TryRemove(type, out _);
                 throw;
             }
         }
 
         public static void ResetDescriptors()
         {
-            _descriptors.Clear();
+            Descriptors.Clear();
         }
 
         public static IEnumerable<Type> GetCallbackHandlers(
             CallbackPolicy policy, object callback)
         {
-            return _descriptors.Select(descriptor =>
+            return Descriptors.Select(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
@@ -159,7 +157,7 @@ namespace Miruken.Callback.Policy
         public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(
             CallbackPolicy policy, object key)
         {
-            return _descriptors.SelectMany(descriptor =>
+            return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
@@ -172,7 +170,7 @@ namespace Miruken.Callback.Policy
 
         public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(CallbackPolicy policy)
         {
-            return _descriptors.SelectMany(descriptor =>
+            return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
@@ -203,7 +201,7 @@ namespace Miruken.Callback.Policy
         }
 
         private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
+            Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         private const MemberTypes Members  = MemberTypes.Method 
                                            | MemberTypes.Property;

@@ -61,8 +61,7 @@
 
         public static Validation GetValidation(this ValidationContext context)
         {
-            object validation;
-            return context.RootContextData.TryGetValue(ValidationKey, out validation)
+            return context.RootContextData.TryGetValue(ValidationKey, out var validation)
                 ? (Validation) validation
                 : null;
         }
@@ -74,8 +73,7 @@
 
         public static IHandler GetComposer(this ValidationContext context)
         {
-            object composer;
-            return context.RootContextData.TryGetValue(ComposerKey, out composer)
+            return context.RootContextData.TryGetValue(ComposerKey, out var composer)
                 ? (IHandler) composer
                 : null;
         }

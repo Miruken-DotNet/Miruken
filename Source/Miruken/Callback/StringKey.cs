@@ -20,12 +20,11 @@
                 return true;
 
             var rawString = obj as string;
-            if (rawString == null && obj != null)
-            {
-                var stringKey = obj as StringKey;
-                if (stringKey == null) return false;
-                rawString = stringKey.Key;
-            }
+            if (rawString != null || obj == null)
+                return ReferenceEquals(rawString, Key) ||
+                       string.Compare(Key, rawString, Comparison) == 0;
+            if (!(obj is StringKey stringKey)) return false;
+            rawString = stringKey.Key;
 
             return ReferenceEquals(rawString, Key) ||
                 string.Compare(Key, rawString, Comparison) == 0;

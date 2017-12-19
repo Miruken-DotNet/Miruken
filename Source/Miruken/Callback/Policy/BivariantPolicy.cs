@@ -16,33 +16,33 @@
                  : null;
         }
 
-        public static BivariantPolicy<Cb> Create<Cb>(
-            Func<Cb, object> output, Func<Cb, object> input,
-            Action<BivariantPolicyBuilder<Cb>> build)
+        public static BivariantPolicy<TCb> Create<TCb>(
+            Func<TCb, object> output, Func<TCb, object> input,
+            Action<BivariantPolicyBuilder<TCb>> build)
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy  = new BivariantPolicy<Cb>(output, input);
-            var builder = new BivariantPolicyBuilder<Cb>(policy);
+            var policy  = new BivariantPolicy<TCb>(output, input);
+            var builder = new BivariantPolicyBuilder<TCb>(policy);
             build(builder);
             return policy;
         }
     }
 
-    public class BivariantPolicy<Cb> : BivariantPolicy
+    public class BivariantPolicy<TCb> : BivariantPolicy
     {
         public BivariantPolicy(
-            Func<Cb, object> input, 
-            Func<Cb, object> ouput)
+            Func<TCb, object> input, 
+            Func<TCb, object> ouput)
         {
-            Output       = new CovariantPolicy<Cb>(input);
-            Input        = new ContravariantPolicy<Cb>(ouput);
+            Output       = new CovariantPolicy<TCb>(input);
+            Input        = new ContravariantPolicy<TCb>(ouput);
             ResultType   = Output.ResultType;
             AcceptResult = Output.AcceptResult;
         }
 
-        public CovariantPolicy<Cb>     Output { get; }
-        public ContravariantPolicy<Cb> Input  { get; }
+        public CovariantPolicy<TCb>     Output { get; }
+        public ContravariantPolicy<TCb> Input  { get; }
 
         public override object GetKey(object callback)
         {
@@ -54,8 +54,8 @@
         public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable keys)
         {
-            var tuple = key as Tuple<object, object>;
-            if (tuple == null) return Enumerable.Empty<object>();
+            if (!(key is Tuple<object, object> tuple))
+                return Enumerable.Empty<object>();
             var input  = tuple.Item2;
             var output = tuple.Item1;
             return keys.OfType<Tuple<object, object>>().Select(testKey =>
@@ -98,29 +98,29 @@
         }
     }
 
-    public class BivariantPolicyBuilder<Cb>
-       : CallbackPolicyBuilder<BivariantPolicy<Cb>, BivariantPolicyBuilder<Cb>>
+    public class BivariantPolicyBuilder<TCb>
+       : CallbackPolicyBuilder<BivariantPolicy<TCb>, BivariantPolicyBuilder<TCb>>
     {
-        public BivariantPolicyBuilder(BivariantPolicy<Cb> policy)
+        public BivariantPolicyBuilder(BivariantPolicy<TCb> policy)
             : base(policy)
         {
         }
 
-        public CallbackArgument<Cb> Callback  => CallbackArgument<Cb>.Instance;
-        public TargetArgument<Cb>   Target    => new TargetArgument<Cb>(Policy.Input.Target);
-        public ReturnsKey           ReturnKey => ReturnsKey.Instance;
+        public CallbackArgument<TCb> Callback  => CallbackArgument<TCb>.Instance;
+        public TargetArgument<TCb>   Target    => new TargetArgument<TCb>(Policy.Input.Target);
+        public ReturnsKey            ReturnKey => ReturnsKey.Instance;
 
-        public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
+        public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
         {
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<Cb, Res>(extract);
+            return new ExtractArgument<TCb, TRes>(extract);
         }
 
-        public BivariantPolicyBuilder<Cb> MatchCallbackMethod(
+        public BivariantPolicyBuilder<TCb> MatchCallbackMethod(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+            if (!args.Any(arg => arg is CallbackArgument<TCb>))
                 MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
             MatchMethod(returnRule, args);
             return this;

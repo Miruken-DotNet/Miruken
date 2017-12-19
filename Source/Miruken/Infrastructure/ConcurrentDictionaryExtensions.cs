@@ -12,19 +12,16 @@
         {
             while (true)
             {
-                TValue value;
-                if (dict.TryGetValue(key, out value))
+                if (dict.TryGetValue(key, out var value))
                 {
                     added = false;
                     return value;
                 }
 
                 value = generator(key);
-                if (dict.TryAdd(key, value))
-                {
-                    added = true;
-                    return value;
-                }
+                if (!dict.TryAdd(key, value)) continue;
+                added = true;
+                return value;
             }
         }
     }

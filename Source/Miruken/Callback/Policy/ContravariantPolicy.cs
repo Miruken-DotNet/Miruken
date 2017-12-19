@@ -73,34 +73,33 @@
             return policy;
         }
 
-        public static ContravariantPolicy<Cb> Create<Cb>(
-            Func<Cb, object> target,
-            Action<ContravariantPolicyBuilder<Cb>> build)
+        public static ContravariantPolicy<TCb> Create<TCb>(
+            Func<TCb, object> target,
+            Action<ContravariantPolicyBuilder<TCb>> build)
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy  = new ContravariantPolicy<Cb>(target);
-            var builder = new ContravariantPolicyBuilder<Cb>(policy);
+            var policy  = new ContravariantPolicy<TCb>(target);
+            var builder = new ContravariantPolicyBuilder<TCb>(policy);
             build(builder);
             return policy;
         }
     }
 
-    public class ContravariantPolicy<Cb> : ContravariantPolicy
+    public class ContravariantPolicy<TCb> : ContravariantPolicy
     {
-        public ContravariantPolicy(Func<Cb, object> target)
+        public ContravariantPolicy(Func<TCb, object> target)
         {
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
-            Target = target;
+            Target = target 
+                  ?? throw new ArgumentNullException(nameof(target));
         }
 
-        public Func<Cb, object> Target { get; }
+        public Func<TCb, object> Target { get; }
 
         public override object GetKey(object callback)
         {
-            return callback is Cb
-                 ? GetTargetType((Cb)callback)
+            return callback is TCb cb
+                 ? GetTargetType(cb)
                  : callback?.GetType();
         }
 
@@ -110,7 +109,7 @@
             return CompatibleTypes(key as Type, output);
         }
 
-        private Type GetTargetType(Cb callback)
+        private Type GetTargetType(TCb callback)
         {
             var target = Target(callback);
             return target as Type ?? target?.GetType();
@@ -145,36 +144,36 @@
         }
     }
 
-    public class ContravariantPolicyBuilder<Cb>
-         : CallbackPolicyBuilder<ContravariantPolicy<Cb>, ContravariantPolicyBuilder<Cb>>
+    public class ContravariantPolicyBuilder<TCb>
+         : CallbackPolicyBuilder<ContravariantPolicy<TCb>, ContravariantPolicyBuilder<TCb>>
     {
-        public ContravariantPolicyBuilder(ContravariantPolicy<Cb> policy)
+        public ContravariantPolicyBuilder(ContravariantPolicy<TCb> policy)
             : base(policy)
         {
         }
 
-        public CallbackArgument<Cb> Callback => CallbackArgument<Cb>.Instance;
-        public TargetArgument<Cb>   Target   => new TargetArgument<Cb>(Policy.Target);
+        public CallbackArgument<TCb> Callback => CallbackArgument<TCb>.Instance;
+        public TargetArgument<TCb>   Target   => new TargetArgument<TCb>(Policy.Target);
 
-        public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
+        public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
         {
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<Cb, Res>(extract);
+            return new ExtractArgument<TCb, TRes>(extract);
         }
 
-        public ContravariantPolicyBuilder<Cb> MatchCallbackMethod(params ArgumentRule[] args)
+        public ContravariantPolicyBuilder<TCb> MatchCallbackMethod(params ArgumentRule[] args)
         {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+            if (!args.Any(arg => arg is CallbackArgument<TCb>))
                 MatchMethod(args.Concat(new[] { Callback }).ToArray());
             MatchMethod(args);
             return this;
         }
 
-        public ContravariantPolicyBuilder<Cb> MatchCallbackMethod(
+        public ContravariantPolicyBuilder<TCb> MatchCallbackMethod(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+            if (!args.Any(arg => arg is CallbackArgument<TCb>))
                 MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
             MatchMethod(returnRule, args);
             return this;

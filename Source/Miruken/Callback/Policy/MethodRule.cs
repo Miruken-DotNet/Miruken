@@ -15,10 +15,9 @@ namespace Miruken.Callback.Policy
 
         public MethodRule(MethodBinder binder, params ArgumentRule[] args)
         {
-            if (binder == null)
-                throw new ArgumentNullException(nameof(binder));
-            _binder = binder;
-            Args    = args;
+            _binder = binder 
+                   ?? throw new ArgumentNullException(nameof(binder));
+            Args = args;
 
         }
 

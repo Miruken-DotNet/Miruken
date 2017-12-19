@@ -10,6 +10,6 @@ namespace Miruken.Callback
             Callback = callback;
         }
 
-        public object Callback { get; private set; }
+        public object Callback { get; }
     }
 }

@@ -7,9 +7,8 @@
     {
         public Trampoline(object callback)
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-            Callback = callback;
+            Callback = callback 
+                    ?? throw new ArgumentNullException(nameof(callback));
         }
 
         protected Trampoline()

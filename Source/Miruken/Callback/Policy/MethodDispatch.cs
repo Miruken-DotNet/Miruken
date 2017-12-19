@@ -75,8 +75,8 @@
             }
             catch (Exception exception)
             {
-                var tie = exception as TargetException;
-                if (tie != null) exception = tie.InnerException;
+                if (exception is TargetException tie)
+                    exception = tie.InnerException;
                 return Promise.Rejected(exception).Coerce(ReturnType);
             }
         }

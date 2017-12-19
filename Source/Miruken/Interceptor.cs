@@ -14,9 +14,8 @@
         public Interceptor(IProtocolAdapter adapter, Type protocol = null)
             : base(typeof(MarshalByRefObject))
         {
-            if (adapter == null)
-                throw new ArgumentNullException(nameof(adapter));
-            _adapter  = adapter;
+            _adapter = adapter 
+                    ?? throw new ArgumentNullException(nameof(adapter));
             _protocol = protocol;
         }
 

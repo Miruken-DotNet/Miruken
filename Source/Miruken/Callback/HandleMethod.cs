@@ -13,7 +13,7 @@
         private readonly CallbackSemantics _semantics;
 
         private static readonly ConcurrentDictionary<MethodInfo, HandleMethodBinding>
-            _bindings = new ConcurrentDictionary<MethodInfo, HandleMethodBinding>();
+            Bindings = new ConcurrentDictionary<MethodInfo, HandleMethodBinding>();
 
         public HandleMethod(Type protocol, IMethodMessage methodCall, 
             CallbackSemantics semantics = null)
@@ -35,8 +35,8 @@
 
         public object Result
         {
-            get { return ReturnValue; }
-            set { ReturnValue = value; }
+            get => ReturnValue;
+            set => ReturnValue = value;
         }
 
         public CallbackPolicy Policy => null;
@@ -53,7 +53,7 @@
             var method = RuntimeHelper.SelectMethod(Method, target.GetType(), Binding);
             if (method == null) return false;
 
-            var binding = _bindings.GetOrAdd(method, 
+            var binding = Bindings.GetOrAdd(method, 
                 m => new HandleMethodBinding(new MethodDispatch(m)));
             return binding.Dispatch(target, this, composer);
         }

@@ -14,9 +14,7 @@
 
         public Inquiry(object key, bool many = false)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            Key          = key;
+            Key          = key ?? throw new ArgumentNullException(nameof(key));
             Many         = many;
             _resolutions = new List<object>();
         }
@@ -42,11 +40,9 @@
                     if (_resolutions.Count > 0)
                     {
                         var result = _resolutions[0];
-                        _result = (result as Promise)?.Then((r, s) =>
-                        {
-                            var array = r as object[];
-                            return array != null ? array.FirstOrDefault() : r;
-                        }) ?? result;
+                        _result = (result as Promise)?.Then(
+                            (r, s) => r is object[] array ? array.FirstOrDefault() : r) 
+                            ?? result;
                     }
                 }
                 else if (IsAsync)

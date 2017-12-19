@@ -25,8 +25,7 @@
             if (Equals(scope, Scopes.Any) ||
                 Equals(_scope, Scopes.Any))
                 return true;
-            var collection = scope as object[];
-            return collection != null
+            return scope is object[] collection
                  ? Array.IndexOf(collection, scope) >= 0 
                  : Equals(scope, _scope);
         }

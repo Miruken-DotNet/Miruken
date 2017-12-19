@@ -8,14 +8,14 @@
 
     public abstract class CovariantPolicy : CallbackPolicy
     {
-        public static CovariantPolicy<Cb> Create<Cb>(
-            Func<Cb, object> key,
-            Action<CovariantPolicyBuilder<Cb>> build)
+        public static CovariantPolicy<TCb> Create<TCb>(
+            Func<TCb, object> key,
+            Action<CovariantPolicyBuilder<TCb>> build)
         {
             if (build == null)
                 throw new ArgumentNullException(nameof(build));
-            var policy  = new CovariantPolicy<Cb>(key);
-            var builder = new CovariantPolicyBuilder<Cb>(policy);
+            var policy  = new CovariantPolicy<TCb>(key);
+            var builder = new CovariantPolicyBuilder<TCb>(policy);
             build(builder);
             return policy;
         }
@@ -46,21 +46,19 @@
         }
     }
 
-    public class CovariantPolicy<Cb> : CovariantPolicy
+    public class CovariantPolicy<TCb> : CovariantPolicy
     {
-        public CovariantPolicy(Func<Cb, object> key)
+        public CovariantPolicy(Func<TCb, object> key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-            Key        = key;
+            Key = key ?? throw new ArgumentNullException(nameof(key));
             ResultType = GetResultType;
         }
 
-        public Func<Cb, object> Key { get; }
+        public Func<TCb, object> Key { get; }
 
         public override object GetKey(object callback)
         {
-            return callback is Cb ? Key((Cb)callback) : null;
+            return callback is TCb cb ? Key(cb) : null;
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
@@ -81,40 +79,40 @@
 
         private Type GetResultType(object callback)
         {
-            return Key((Cb)callback) as Type;
+            return Key((TCb)callback) as Type;
         }
     }
 
-    public class CovariantPolicyBuilder<Cb>
-        : CallbackPolicyBuilder<CovariantPolicy<Cb>, CovariantPolicyBuilder<Cb>>
+    public class CovariantPolicyBuilder<TCb>
+        : CallbackPolicyBuilder<CovariantPolicy<TCb>, CovariantPolicyBuilder<TCb>>
     {
-        public CovariantPolicyBuilder(CovariantPolicy<Cb> policy)
+        public CovariantPolicyBuilder(CovariantPolicy<TCb> policy)
             : base(policy)
         {
         }
 
-        public CallbackArgument<Cb> Callback  => CallbackArgument<Cb>.Instance;
+        public CallbackArgument<TCb> Callback  => CallbackArgument<TCb>.Instance;
         public ReturnsKey           ReturnKey => ReturnsKey.Instance;
 
-        public ExtractArgument<Cb, Res> Extract<Res>(Func<Cb, Res> extract)
+        public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
         {
             if (extract == null)
                 throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<Cb, Res>(extract);
+            return new ExtractArgument<TCb, TRes>(extract);
         }
 
-        public CovariantPolicyBuilder<Cb> MatchMethodWithCallback(params ArgumentRule[] args)
+        public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(params ArgumentRule[] args)
         {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+            if (!args.Any(arg => arg is CallbackArgument<TCb>))
                 MatchMethod(args.Concat(new [] { Callback }).ToArray());
             MatchMethod(args);
             return this;
         }
 
-        public CovariantPolicyBuilder<Cb> MatchMethodWithCallback(
+        public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(
             ReturnRule returnRule, params ArgumentRule[] args)
         {
-            if (!args.Any(arg => arg is CallbackArgument<Cb>))
+            if (!args.Any(arg => arg is CallbackArgument<TCb>))
                 MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
             MatchMethod(returnRule, args);
             return this;

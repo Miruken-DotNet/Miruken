@@ -30,28 +30,27 @@
             }
         }
 
-        public static IHandler Resolve<R>(
-            this IHandler handler, Func<R> provider, out R result)
+        public static IHandler Resolve<T>(
+            this IHandler handler, Func<T> provider, out T result)
         {
-            var inquiry = new Inquiry(typeof(R));
+            var inquiry = new Inquiry(typeof(T));
             if (handler.Handle(inquiry))
             {
-                result = (R)inquiry.Result;
+                result = (T)inquiry.Result;
                 return handler;
             }
             result = provider();
             return handler.Provide(result);
         }
 
-        public static R Rssolve<R>(
-            this IHandler handler, Func<R> provider, out IHandler composer)
+        public static T Rssolve<T>(
+            this IHandler handler, Func<T> provider, out IHandler composer)
         {
-            R result;
-            composer = Resolve(handler, provider, out result);
+            composer = Resolve(handler, provider, out var result);
             return result;
         }
 
-        public static IHandler Provide<R>(this IHandler handler, R result)
+        public static IHandler Provide<T>(this IHandler handler, T result)
         {
             return new Provider(result) + handler;
         }

@@ -86,10 +86,10 @@ namespace Miruken.Callback.Policy
         }
     }
 
-    public class CallbackArgument<Cb> : ArgumentRule
+    public class CallbackArgument<TCb> : ArgumentRule
     {
-        public static readonly CallbackArgument<Cb>
-             Instance = new CallbackArgument<Cb>();
+        public static readonly CallbackArgument<TCb>
+             Instance = new CallbackArgument<TCb>();
 
         private CallbackArgument()
         {         
@@ -100,7 +100,7 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            return paramType.Is<Cb>();
+            return paramType.Is<TCb>();
         }
 
         public override void Configure(ParameterInfo parameter,

@@ -14,13 +14,11 @@
         public Mapping(object source, object typeOrInstance,
                        object format = null)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (typeOrInstance == null)
-                throw new ArgumentNullException(nameof(typeOrInstance));
-            Source         = source;
-            TypeOrInstance = typeOrInstance;
-            Format         = format;
+            Source = source 
+                  ?? throw new ArgumentNullException(nameof(source));
+            TypeOrInstance = typeOrInstance 
+                  ?? throw new ArgumentNullException(nameof(typeOrInstance));
+            Format = format;
         }
 
         public object Source         { get; }

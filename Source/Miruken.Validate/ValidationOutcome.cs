@@ -31,16 +31,12 @@
                 var outcome = ParsePath(ref propertyName);
                 if (outcome == null) return string.Empty;
                 if (outcome != this) return outcome[propertyName];
-                List<object> propertyErrors;
-                if (!_errors.TryGetValue(propertyName, out propertyErrors))
+                if (!_errors.TryGetValue(propertyName, out var propertyErrors))
                     return string.Empty;
-                return string.Join(Environment.NewLine, propertyErrors.Select(err =>
-                {
-                    var nested = err as ValidationOutcome;
-                    return nested != null
-                         ? $"[{Environment.NewLine}{err}{Environment.NewLine}]" 
-                         : err;
-                }).ToArray());
+                return string.Join(Environment.NewLine, propertyErrors
+                    .Select(err => err is ValidationOutcome
+                        ? $"[{Environment.NewLine}{err}{Environment.NewLine}]" 
+                        : err).ToArray());
             }
         }
 
@@ -49,8 +45,7 @@
             var outcome = ParsePath(ref propertyName);
             if (outcome == null) return string.Empty;
             if (outcome != this) return outcome.GetErrors(propertyName);
-            List<object> errors;
-            return _errors.TryGetValue(propertyName, out errors)
+            return _errors.TryGetValue(propertyName, out var errors)
                  ? errors.AsReadOnly() : Enumerable.Empty<object>();
         }
 
@@ -159,13 +154,9 @@
                 () => string.Join(Environment.NewLine, _errors.SelectMany(e =>
                 {
                     var property = e.Key;
-                    return e.Value.Select(err =>
-                    {
-                        var outcome = err as ValidationOutcome;
-                        return outcome != null
-                             ? $"{property}[{Environment.NewLine}{err}{Environment.NewLine}]"
-                             : err;
-                    });
+                    return e.Value.Select(err => err is ValidationOutcome
+                         ? $"{property}[{Environment.NewLine}{err}{Environment.NewLine}]"
+                         : err);
                 }).ToArray()));
         }
 

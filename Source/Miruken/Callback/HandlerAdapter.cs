@@ -6,9 +6,8 @@
     {
         public HandlerAdapter(object handler)
         {
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-            Handler = handler;
+            Handler = handler 
+                   ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public object Handler { get; }

@@ -69,8 +69,8 @@ namespace Miruken.Callback
 	        foreach (var handler in _handlers)
 	        {
 	            if (handler == instance) return handler;
-	            var adapter = handler as HandlerAdapter;
-	            if (adapter != null && adapter.Handler == instance)
+	            if (handler is HandlerAdapter adapter &&
+                    adapter.Handler == instance)
 	                return adapter;
 	        }
             return null;

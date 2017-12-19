@@ -34,9 +34,8 @@
         public OptionsHandler(IHandler handler, T options)
             : base(handler)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-            _options = options;
+            _options = options 
+                    ?? throw new ArgumentNullException(nameof(options));
         }
 
         protected override bool HandleCallback(

@@ -20,17 +20,17 @@
             if (resultType == typeof(void))
                 resultType  = typeof(object);
             var key = Tuple.Create(callbackType, resultType);
-            return _pipelines.GetOrAdd(key, k =>
+            return Pipelines.GetOrAdd(key, k =>
                 (MethodPipeline)Activator.CreateInstance(
                     typeof(MethodPipeline<,>).MakeGenericType(k.Item1, k.Item2)
             ));
         }
 
         private static readonly ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>
-            _pipelines = new ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>();
+            Pipelines = new ConcurrentDictionary<Tuple<Type, Type>, MethodPipeline>();
     }
 
-    internal class MethodPipeline<Cb, Res> : MethodPipeline
+    internal class MethodPipeline<TCb, TRes> : MethodPipeline
     {
         public override bool Invoke(MethodBinding binding, object target, 
             object callback, CompletePipelineDelegate complete, IHandler composer,
@@ -39,36 +39,34 @@
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
-                NextDelegate<object> next = null;
-                next = (proceed, comp) =>
+                object Next(bool proceed, IHandler comp)
                 {
                     if (!proceed)
                     {
                         completed = false;
-                        return default(Res);
+                        return default(TRes);
                     }
                     while (pipeline.MoveNext())
                     {
                         composer = comp ?? composer;
-                        var filter      = pipeline.Current;
-                        var typeFilter = filter as IFilter<Cb, Res>;
-                        if (typeFilter != null)
-                            return typeFilter.Next((Cb)callback, binding, composer, 
-                                (p,c) => (Res)binding.CoerceResult(next(p, c), typeof(Res)));
-                        var taskFilter = filter as IFilter<Cb, Task<Res>>;
-                        if (taskFilter != null)
-                            return taskFilter.Next((Cb)callback, binding, composer,
-                                (p, c) => (Task<Res>)binding.CoerceResult(next(p, c),
-                                           typeof(Task<Res>)));
-                        var promiseFilter = filter as IFilter<Cb, Promise<Res>>;
-                        if (promiseFilter != null)
-                            return promiseFilter.Next((Cb)callback, binding, composer,
-                                (p, c) => (Promise<Res>)binding.CoerceResult(next(p, c),
-                                           typeof(Promise<Res>)));
+                        var filter = pipeline.Current;
+                        switch (filter)
+                        {
+                            case IFilter<TCb, TRes> typeFilter:
+                                return typeFilter.Next((TCb) callback, binding, composer,
+                                    (p, c) => (TRes) binding.CoerceResult(Next(p, c), typeof(TRes)));
+                            case IFilter<TCb, Task<TRes>> taskFilter:
+                                return taskFilter.Next((TCb) callback, binding, composer,
+                                    (p, c) => (Task<TRes>) binding.CoerceResult(Next(p, c), typeof(Task<TRes>)));
+                            case IFilter<TCb, Promise<TRes>> promiseFilter:
+                                return promiseFilter.Next((TCb) callback, binding, composer,
+                                    (p, c) => (Promise<TRes>) binding.CoerceResult(Next(p, c), typeof(Promise<TRes>)));
+                        }
                     }
                     return complete(composer, out completed);
-                };
-                result = next(true, composer);
+                }
+
+                result = Next(true, composer);
                 return completed;
             }
         }

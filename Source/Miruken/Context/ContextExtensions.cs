@@ -1,5 +1,4 @@
-﻿using System;
-using Miruken.Callback;
+﻿using Miruken.Callback;
 using Miruken.Concurrency;
 
 namespace Miruken.Context
@@ -13,23 +12,18 @@ namespace Miruken.Context
             return handler.Filter((callback, composer, proceed) =>
             {
                 var handled = proceed();
-                if (handled)
+                if (!handled) return false;
+                var cb = callback as ICallback;
+                if (!(cb?.Result is Promise promise)) return true;
+                if (context.State == ContextState.Active)
                 {
-                    var cb = callback as ICallback;
-                    var promise = cb?.Result as Promise;
-                    if (promise != null)
-                    {
-                        if (context.State == ContextState.Active)
-                        {
-                            Action<IContext> ended = ctx => promise.Cancel();
-                            context.ContextEnded += ended;
-                            promise.Finally(() => context.ContextEnded -= ended);
-                        }
-                        else
-                            promise.Cancel();
-                    }
+                    void Ended(IContext ctx) => promise.Cancel();
+                    context.ContextEnded += Ended;
+                    promise.Finally(() => context.ContextEnded -= Ended);
                 }
-                return handled;
+                else
+                    promise.Cancel();
+                return true;
             });
         }
     }

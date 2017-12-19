@@ -15,9 +15,8 @@
 
         protected MethodBinding(MethodDispatch dispatch)
         {
-            if (dispatch == null)
-                throw new ArgumentNullException(nameof(dispatch));
-            Dispatcher = dispatch;
+            Dispatcher = dispatch 
+                      ?? throw new ArgumentNullException(nameof(dispatch));
             _filters = dispatch.Attributes.OfType<IFilterProvider>()
                 .ToArray().Normalize();
         }
@@ -53,10 +52,7 @@
                     return Promise.Resolved(result).Coerce(resultType);
                 var promise = result as Promise;
                 if (promise == null)
-                {
-                    var task = result as Task;
-                    if (task != null) promise = Promise.Resolved(task);
-                }
+                    if (result is Task task) promise = Promise.Resolved(task);
                 if (promise != null)
                     return promise.Wait();
             }

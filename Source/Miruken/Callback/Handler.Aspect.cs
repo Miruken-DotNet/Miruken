@@ -45,40 +45,32 @@
         {
             return handler?.Filter((callback, composer, proceed) =>
             {
-                object state = null;
                 var cb = callback as ICallback;
 
-                if (before != null)
+                if (before == null)
+                    return AspectProceed(callback, composer, proceed, after, null);
+                var state = before(callback, composer);
+                switch (state)
                 {
-                    state = before(callback, composer);
-                    var promise = state as Promise;
-                    if (promise != null)
-                    {
+                    case Promise promise:
                         // TODO: Use Promise.End if cb.ResultType is not a Promise
                         // TODO: or you will get an InvalidCastException
                         var accept = promise.Then((accepted, s) => {
-                            if (!Equals(accepted, false))
-                            {
-                                AspectProceed(callback, composer, proceed, after, state);
-                                return Promise.Resolved(cb?.Result);
-                            }
-                            return Promise.Rejected(new RejectedException(callback), s);
+                            if (Equals(accepted, false))
+                                return Promise.Rejected(new RejectedException(callback), s);
+                            AspectProceed(callback, composer, proceed, after, state);
+                            return Promise.Resolved(cb?.Result);
                         });
-                        if (cb != null)
-                            cb.Result = accept;
+                        if (cb != null) cb.Result = accept;
                         return true;
-                    }
-                    if (Equals(state, false))
-                    {
+                    case false:
                         var resultType = cb?.ResultType;
-                        if (resultType.Is<Promise>())
-                        {
+                        if (!resultType.Is<Promise>())
+                            throw new RejectedException(callback);
+                        if (cb != null)
                             cb.Result = Promise.Rejected(new RejectedException(callback))
                                 .Coerce(resultType);
-                            return true;
-                        }
-                        throw new RejectedException(callback);
-                    }
+                        return true;
                 }
                 return AspectProceed(callback, composer, proceed, after, state);
             }, reentrant);

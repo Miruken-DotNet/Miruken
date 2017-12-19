@@ -21,10 +21,7 @@ namespace Miruken.Callback
             IHandler handler, HandlerFilterDelegate filter, 
             bool reentrant) : base(handler)
         {
-            if (filter == null)
-                throw new ArgumentNullException(nameof(filter));
-
-            _filter    = filter;
+            _filter    = filter ?? throw new ArgumentNullException(nameof(filter));
             _reentrant = reentrant;
         }
 

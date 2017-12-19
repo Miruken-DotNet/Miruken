@@ -34,36 +34,36 @@
             }
         }
 
-        public static Result Command<Result>(this IHandler handler, object callback)
+        public static TRes Command<TRes>(this IHandler handler, object callback)
         {
-            if (handler == null) return default(Result);
+            if (handler == null) return default(TRes);
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
             var result = command.Result;
             return command.IsAsync 
-                 ? (Result)((Promise)result).Wait()
+                 ? (TRes)((Promise)result).Wait()
                  : (result == null 
-                    ? (Result)RuntimeHelper.GetDefault(typeof(Result)) 
-                    : (Result)result);
+                    ? (TRes)RuntimeHelper.GetDefault(typeof(TRes)) 
+                    : (TRes)result);
         }
 
-        public static Promise<Result> CommandAsync<Result>(
+        public static Promise<TRes> CommandAsync<TRes>(
             this IHandler handler, object callback)
         {
             if (handler == null)
-                return Promise<Result>.Empty;
+                return Promise<TRes>.Empty;
             var command = new Command(callback) { WantsAsync = true };
             try
             {
                 if (!handler.Handle(command))
                     throw new NotSupportedException($"{callback.GetType()} not handled");
                 var promise = (Promise)command.Result;
-                return (Promise<Result>)promise.Coerce(typeof(Promise<Result>));
+                return (Promise<TRes>)promise.Coerce(typeof(Promise<TRes>));
             }
             catch (Exception ex)
             {
-                return Promise<Result>.Rejected(ex);
+                return Promise<TRes>.Rejected(ex);
             }
         }
 
@@ -91,39 +91,39 @@
             }
         }
 
-        public static Result[] CommandAll<Result>(
+        public static TRes[] CommandAll<TRes>(
              this IHandler handler, object callback)
         {
             if (handler == null)
-                return Array.Empty<Result>();
+                return Array.Empty<TRes>();
             var command = new Command(callback, true) { WantsAsync = true };
             if (!handler.Handle(command, true))
                 throw new NotSupportedException(
                     $"{callback.GetType()} not handled");
             var result = command.Result;
             return command.IsAsync
-                 ? ((object[])((Promise)result).Wait()).Cast<Result>().ToArray()
-                 : ((object[])result).Cast<Result>().ToArray();
+                 ? ((object[])((Promise)result).Wait()).Cast<TRes>().ToArray()
+                 : ((object[])result).Cast<TRes>().ToArray();
         }
 
-        public static Promise<Result[]> CommandAllAsync<Result>(
+        public static Promise<TRes[]> CommandAllAsync<TRes>(
             this IHandler handler, object callback)
         {
             if (handler == null)
-                return Promise<Result[]>.Empty;
+                return Promise<TRes[]>.Empty;
             var command = new Command(callback, true) { WantsAsync = true };
             try
             {
                 if (!handler.Handle(command, true))
-                    return Promise<Result[]>.Rejected(new NotSupportedException(
+                    return Promise<TRes[]>.Rejected(new NotSupportedException(
                         $"{callback.GetType()} not handled"));
                 var promise = (Promise)command.Result;
                 return promise.Then((results, s) => ((object[])results)
-                    .Cast<Result>().ToArray());
+                    .Cast<TRes>().ToArray());
             }
             catch (Exception ex)
             {
-                return Promise<Result[]>.Rejected(ex);
+                return Promise<TRes[]>.Rejected(ex);
             }
         }
     }

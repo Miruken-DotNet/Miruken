@@ -17,8 +17,7 @@ namespace Miruken.Castle
                 return false;
             var extra = context.AdditionalArguments;
             if (extra.Contains(dependency)) return true;
-            var composer = extra[WindsorHandler.ComposerKey] as IHandler;
-            if (composer == null) return false;
+            if (!(extra[WindsorHandler.ComposerKey] is IHandler composer)) return false;
             var parent     = extra[WindsorHandler.ResolutionKey] as DependencyResolution;
             var resolution = new DependencyResolution(dependency.TargetItemType, parent);
             if (composer.Handle(resolution))

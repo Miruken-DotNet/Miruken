@@ -181,8 +181,7 @@
 
             if (conversionType.IsEnum)
             {
-                var enumString = value as string;
-                if (enumString != null)
+                if (value is string enumString)
                     return Enum.Parse(conversionType, enumString);
                 var val = Convert.ChangeType(value, Enum.GetUnderlyingType(conversionType));
                 var obj = Enum.ToObject(conversionType, val);
@@ -728,22 +727,22 @@
             ).Compile();
         }
 
-        public static Func<T, Ret> CreateGenericFuncNoArgs<T, Ret>(
+        public static Func<T, TRet> CreateGenericFuncNoArgs<T, TRet>(
             string methodName, params Type[] genericParams)
         {
             var instance   = Expression.Parameter(typeof(T), "instance");
             var methodCall = Expression.Call(instance, methodName, genericParams);
-            return Expression.Lambda<Func<T, Ret>>(
+            return Expression.Lambda<Func<T, TRet>>(
                methodCall, instance
                ).Compile();
         }
 
-        public static Func<TArg, Ret> CreateStaticFuncOneArg<T, TArg, Ret>(
+        public static Func<TArg, TRet> CreateStaticFuncOneArg<T, TArg, TRet>(
              string methodName, params Type[] genericParams)
         {
             var arg        = Expression.Parameter(typeof(TArg), "arg");
             var methodCall = Expression.Call(typeof(T), methodName, genericParams, arg);
-            return Expression.Lambda<Func<TArg, Ret>>(
+            return Expression.Lambda<Func<TArg, TRet>>(
                methodCall, arg
                ).Compile();
         }

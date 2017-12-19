@@ -15,7 +15,7 @@
 
         public ValidationOutcome ValidationOutcome
         {
-            get { return _outcome; }
+            get => _outcome;
             set
             {
                 if (ReferenceEquals(_outcome, value)) return;

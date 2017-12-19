@@ -16,9 +16,8 @@
 
         public Command(object callback, bool many = false)
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-            Callback = callback;
+            Callback = callback 
+                    ?? throw new ArgumentNullException(nameof(callback));
             Many     = many;
             _results = new List<object>();
         }
@@ -30,8 +29,8 @@
 
         public CallbackPolicy Policy
         {
-            get { return _policy ?? HandlesAttribute.Policy; }
-            set { _policy = value; }
+            get => _policy ?? HandlesAttribute.Policy;
+            set => _policy = value;
         }
 
         public ICollection<object> Results => _results.AsReadOnly();

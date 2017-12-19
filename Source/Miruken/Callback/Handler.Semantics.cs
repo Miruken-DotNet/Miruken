@@ -91,17 +91,16 @@ namespace Miruken.Callback
             if (Composition.IsComposed<CallbackSemantics>(callback))
                 return false;
 
-            var semantics = callback as CallbackSemantics;
-            if (semantics != null)
+            switch (callback)
             {
-                _semantics.MergeInto(semantics);
-                if (greedy)
-                    _handler.Handle(callback, ref greedy, composer);
-                return true;
+                case CallbackSemantics semantics:
+                    _semantics.MergeInto(semantics);
+                    if (greedy)
+                        _handler.Handle(callback, ref greedy, composer);
+                    return true;
+                case Composition _:
+                    return _handler.Handle(callback, ref greedy, composer);
             }
-
-            if (callback is Composition)
-                return _handler.Handle(callback, ref greedy, composer);
 
             if (_semantics.HasOption(CallbackOptions.Broadcast))
                 greedy = true;

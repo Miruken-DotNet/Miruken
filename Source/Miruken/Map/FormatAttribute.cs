@@ -8,9 +8,8 @@
     {
         public FormatAttribute(object format)
         {
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
-            Format = format;
+            Format = format 
+                  ?? throw new ArgumentNullException(nameof(format));
         }
 
         public object Format { get; }

@@ -15,9 +15,7 @@
 
         public Return(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-            _type = type;
+            _type = type ?? throw new ArgumentNullException(nameof(type));
         }
 
         public override bool Matches(
@@ -63,9 +61,7 @@
 
         public TestReturn(ReturnTestDelegate test)
         {
-            if (test == null)
-                throw new ArgumentNullException(nameof(test));
-            _test = test;
+            _test = test ?? throw new ArgumentNullException(nameof(test));
         }
 
         public override bool Matches(

@@ -22,7 +22,7 @@
         {
             if (validators.Length > 0 && validators.Any(v => !v.Is<ValidationAttribute>()))
                 throw new ArgumentException(
-                    "All validators must extend ValidationAttribute", nameof(validators));
+                    @"All validators must extend ValidationAttribute", nameof(validators));
             _validators = validators;
         }
 
@@ -61,8 +61,7 @@
             params object[] scopes)
         {
             var outcome = composer.Proxy<IValidating>().Validate(value, scopes);
-            var validationAware = value as IValidationAware;
-            if (validationAware != null)
+            if (value is IValidationAware validationAware)
                 validationAware.ValidationOutcome = outcome;
             return outcome.IsValid
                  ? ValidationResult.Success
@@ -71,8 +70,7 @@
 
         protected object[] GetScopes(ValidationContext validationContext)
         {
-            var scopes = Scope as object[];
-            if (scopes != null) return scopes;
+            if (Scope is object[] scopes) return scopes;
             var scope = Scope ?? validationContext.GetValidation()?.ScopeMatcher;
             return scope != null ? new[] { scope } : Array.Empty<object>();
         }
@@ -95,8 +93,7 @@
             if (value == null)
                 return ValidationResult.Success;
 
-            var enumerable = value as IEnumerable;
-            if (enumerable == null)
+            if (!(value is IEnumerable enumerable))
                 throw new ArgumentException("Target is not a collection");
 
             var memberName = validationContext.MemberName;

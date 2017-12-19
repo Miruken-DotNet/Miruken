@@ -5,24 +5,23 @@ namespace Miruken.Callback.Policy
     using System.Reflection;
     using Infrastructure;
 
-    public class ExtractArgument<Cb, Res> : ArgumentRule
+    public class ExtractArgument<TCb, TRes> : ArgumentRule
     {
-        private readonly Func<Cb, Res> _extract;
+        private readonly Func<TCb, TRes> _extract;
         private string _alias;
 
-        public ExtractArgument(Func<Cb, Res> extract)
+        public ExtractArgument(Func<TCb, TRes> extract)
         {
-            if (extract == null)
-                throw new ArgumentNullException(nameof(extract));
-            _extract = extract;
+            _extract = extract 
+                    ?? throw new ArgumentNullException(nameof(extract));
         }
 
-        public ExtractArgument<Cb, Res> this[string alias]
+        public ExtractArgument<TCb, TRes> this[string alias]
         {
             get
             {
                 if (string.IsNullOrEmpty(alias))
-                    throw new ArgumentException("Alias cannot be empty", nameof(alias));
+                    throw new ArgumentException(@"Alias cannot be empty", nameof(alias));
                 _alias = alias;
                 return this;
             }
@@ -33,18 +32,15 @@ namespace Miruken.Callback.Policy
             IDictionary<string, Type> aliases)
         {
             var paramType = parameter.ParameterType;
-            if (paramType.Is<Res>())
-            {
-                if (_alias != null)
-                    aliases.Add(_alias, paramType);
-                return true;
-            }
-            return false;
+            if (!paramType.Is<TRes>()) return false;
+            if (_alias != null)
+                aliases.Add(_alias, paramType);
+            return true;
         }
 
         public override object Resolve(object callback)
         {
-            return _extract((Cb)callback);
+            return _extract((TCb)callback);
         }
     }
 }

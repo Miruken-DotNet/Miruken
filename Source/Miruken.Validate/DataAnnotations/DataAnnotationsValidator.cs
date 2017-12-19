@@ -21,8 +21,7 @@
 
             foreach (var result in results)
             {
-                var compositeResult = result as CompositeResult;
-                if (compositeResult == null)
+                if (!(result is CompositeResult compositeResult))
                 {
                     var error = result.ErrorMessage;
                     foreach (var memberName in result.MemberNames)
@@ -50,8 +49,7 @@
 
         public static Validation GetValidation(this ValidationContext context)
         {
-            object validation;
-            return context.Items.TryGetValue(ValidationKey, out validation)
+            return context.Items.TryGetValue(ValidationKey, out var validation)
                  ? (Validation)validation
                  : null;
         }
@@ -63,8 +61,7 @@
 
         public static IHandler GetComposer(this ValidationContext context)
         {
-            object composer;
-            return context.Items.TryGetValue(ComposerKey, out composer)
+            return context.Items.TryGetValue(ComposerKey, out var composer)
                  ? (IHandler)composer
                  : null;
         }
