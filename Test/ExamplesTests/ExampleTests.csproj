@@ -75,9 +75,9 @@
     <Compile Include="CreatingAContextTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Doc\example\example.csproj">
+    <ProjectReference Include="..\..\Doc\examples\examples.csproj">
       <Project>{f73c6936-e41e-49c6-9e2b-c7a87daf81d4}</Project>
-      <Name>example</Name>
+      <Name>examples</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Doc\league\League\example.league.csproj">
       <Project>{AC218DED-C524-45F1-8720-94A80B0E72CC}</Project>
