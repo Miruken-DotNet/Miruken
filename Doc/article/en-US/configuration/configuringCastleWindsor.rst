@@ -8,7 +8,7 @@ One of the main ways of configuring a Castle Windsor container is the :code:`Con
 
 In this very basic Castle Windsor Container all the :code:`IWindsorInstaller` classes in the current assembly will be run. :code:`FromAssembly.This()` returns an :code:`IWindsorInstaller`.
 
-.. literalinclude:: /example/mirukenCastleExamples/basicWindsorContainer.cs
+.. literalinclude:: ../../example/mirukenCastleExamples/basicWindsorContainer.cs
 
 We used to use this simple form of configuration, but found that we had to list assemblies multiple times. Features and FeatureInstaller solve this problem. 
 
@@ -36,7 +36,7 @@ typeof(CreateStudent).Assembly  Targets the Example.School assembly.
 
 Next, we specify which FeatureInstallers the application needs.  This example configures the ConfigurationFactory using the ConfigurationFactoryInstaller, and Validation using the ValidationInstaller.
 
-.. literalinclude:: /example/mirukenCastleExamples/featuresFromAssemblies.cs
+.. literalinclude:: ../../example/mirukenCastleExamples/featuresFromAssemblies.cs
    :emphasize-lines: 21-25
 
 FromAssembliesNamed(params string[] assemblyNames)
@@ -44,7 +44,7 @@ FromAssembliesNamed(params string[] assemblyNames)
 
 The FromAssembliesNamed() method allows you to specify the assembly name of the feature assemblies you want installed into the container.
 
-.. literalinclude:: /example/mirukenCastleExamples/featuresFromAssembliesNamed.cs
+.. literalinclude:: ../../example/mirukenCastleExamples/featuresFromAssembliesNamed.cs
    :emphasize-lines: 19-21
 
 InDirectory(AssemblyFilter filter)
@@ -52,7 +52,7 @@ InDirectory(AssemblyFilter filter)
 
 The InDirectory() method allows you to specify an AssemblyFilter. An AssemblyFilter takes the string name of a directory and a filter predicate to allow only the assemblies you intend.
 
-.. literalinclude:: /example/mirukenCastleExamples/featuresInDirectory.cs
+.. literalinclude:: ../../example/mirukenCastleExamples/featuresInDirectory.cs
    :emphasize-lines: 20-21
 
 
