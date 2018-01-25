@@ -12,16 +12,16 @@
         public int? Order { get; set; }
 
         protected static readonly ConcurrentDictionary<Type, MethodDispatch>
-            DynamicNext = new ConcurrentDictionary<Type, MethodDispatch>();
+            _next = new ConcurrentDictionary<Type, MethodDispatch>();
 
         protected const BindingFlags Binding = BindingFlags.Instance
                                              | BindingFlags.Public;
     }
 
-    public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
+    public class DynamicFilter<Cb, Res> : DynamicFilter, IFilter<Cb, Res>
     {
-        TRes IFilter<TCb, TRes>.Next(TCb callback, MethodBinding method, 
-            IHandler composer, NextDelegate<TRes> next)
+        Res IFilter<Cb, Res>.Next(Cb callback, MethodBinding method, 
+            IHandler composer, NextDelegate<Res> next)
         {
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
