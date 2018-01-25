@@ -7,10 +7,19 @@
     using System.Text;
     using Policy;
 
-    public class DynamicFilter<Cb, Res> : IFilter<Cb, Res>
+    public abstract class DynamicFilter : IFilter
     {
         public int? Order { get; set; }
 
+        protected static readonly ConcurrentDictionary<Type, MethodDispatch>
+            _next = new ConcurrentDictionary<Type, MethodDispatch>();
+
+        protected const BindingFlags Binding = BindingFlags.Instance
+                                             | BindingFlags.Public;
+    }
+
+    public class DynamicFilter<Cb, Res> : DynamicFilter, IFilter<Cb, Res>
+    {
         Res IFilter<Cb, Res>.Next(Cb callback, MethodBinding method, 
             IHandler composer, NextDelegate<Res> next)
         {
@@ -89,11 +98,5 @@
             return parameters[0].ParameterType == typeof(Cb) &&
                    parameters[1].ParameterType == typeof(NextDelegate<Res>);                
         }
-
-        private static readonly ConcurrentDictionary<Type, MethodDispatch> 
-            _next = new ConcurrentDictionary<Type, MethodDispatch>();
-
-        private const BindingFlags Binding = BindingFlags.Instance
-                                           | BindingFlags.Public;
     }
 }
