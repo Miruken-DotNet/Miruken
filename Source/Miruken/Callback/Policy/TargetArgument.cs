@@ -22,7 +22,7 @@ namespace Miruken.Callback.Policy
             get
             {
                 if (string.IsNullOrEmpty(alias))
-                    throw new ArgumentException("Alias cannot be empty", nameof(alias));
+                    throw new ArgumentException(@"Alias cannot be empty", nameof(alias));
                 _alias = alias;
                 return this;
             }

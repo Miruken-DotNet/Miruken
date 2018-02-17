@@ -64,9 +64,9 @@
     <Compile Include="Callback\Handler.Resolve.cs" />
     <Compile Include="Callback\Handler.Semantics.cs" />
     <Compile Include="Callback\Handler.Traverse.cs" />
-    <Compile Include="Callback\HandlerDecorator.cs" />
+    <Compile Include="Callback\DecoratedHandler.cs" />
     <Compile Include="Callback\HandlerAdapter.cs" />
-    <Compile Include="Callback\HandlerFilter.cs" />
+    <Compile Include="Callback\FilteredHandler.cs" />
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />

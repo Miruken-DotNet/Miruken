@@ -8,7 +8,6 @@
     using Concurrency;
     using Policy;
 
-
     public class Bundle : IAsyncCallback, 
         IResolveCallback, IDispatchCallback
     {
@@ -42,7 +41,7 @@
         public Promise Complete()
         {
             if (_operations == null)
-                return Promise.Empty;
+                return WantsAsync ? Promise.Empty : null;
             if  (_all || !_operations.Any(op => op.Handled))
                 _operations.ForEach(op =>
                 {
@@ -52,7 +51,7 @@
             return IsAsync
                  ? Promise.All(_promises.ToArray())
                      .Then((r,s) => Promise.Empty)
-                 : Promise.Empty;
+                 : WantsAsync ? Promise.Empty : null;
         }
 
         public Bundle Add(Action<IHandler> action, NotifyDelegate notify = null)

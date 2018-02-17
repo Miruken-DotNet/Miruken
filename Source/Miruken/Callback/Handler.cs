@@ -22,8 +22,8 @@
             return Dispatch(this, callback, ref greedy, composer);
         }
 
-	    public static bool Dispatch(object handler, object callback, 
-            ref bool greedy, IHandler composer, Func<object, bool> results = null)
+	    public static bool Dispatch(
+            object handler, object callback, ref bool greedy, IHandler composer)
 	    {
 	        if (handler == null || SkipTypes.Contains(handler.GetType()))
                 return false;
@@ -54,12 +54,12 @@
 
         private static readonly HashSet<Type> SkipTypes = new HashSet<Type>
         {
-            typeof(Handler), typeof(HandlerFilter), typeof(CascadeHandler),
+            typeof(Handler), typeof(FilteredHandler), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)
         };
 	}
 
-    public class CompositionScope : HandlerDecorator
+    public class CompositionScope : DecoratedHandler
     {
         public CompositionScope(IHandler handler)
             : base(handler)

@@ -26,7 +26,7 @@
         }
     }
 
-    public class OptionsHandler<T> : HandlerDecorator
+    public class OptionsHandler<T> : DecoratedHandler
         where T : Options<T>
     {
         private readonly T _options;
@@ -47,7 +47,7 @@
             var handled     = options != null;
             if (handled) _options.MergeInto(options);
             return handled && !greedy ||
-                (Decoratee.Handle(callback, ref greedy, composer) || handled);
+                Decoratee.Handle(callback, ref greedy, composer) || handled;
         }
     }
 }

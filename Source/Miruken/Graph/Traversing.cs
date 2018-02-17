@@ -115,9 +115,9 @@ namespace Miruken.Graph
         public static void TraverseAncestors(
             this ITraversing node, Visitor visitor, bool withSelf)
         {
-            var parent  = node;
-            var visited = new[] { node }.ToList();
             if (withSelf && visitor(node)) return;
+            var parent = node;
+            var visited = new[] { node }.ToList();
             while ((parent = parent.Parent) != null && !visitor(parent))
                 CheckCircularity(visited, parent);
         }
@@ -128,10 +128,7 @@ namespace Miruken.Graph
             if (withSelf)
                 Traversal.LevelOrder(node, visitor);
             else
-            {
-                var self = node;
-                Traversal.LevelOrder(node, n => self != n && visitor(n));
-            }
+                Traversal.LevelOrder(node, n => node != n && visitor(n));
         }
 
         public static void TraverseDescendantsReverse(
@@ -140,10 +137,7 @@ namespace Miruken.Graph
             if (withSelf)
                 Traversal.ReverseLevelOrder(node, visitor);
             else
-            {
-                var self = node;
-                Traversal.ReverseLevelOrder(node, n => self != n && visitor(n));
-            }
+                Traversal.ReverseLevelOrder(node, n => node != n && visitor(n));
         }
 
         public static void TraverseSelfSiblingOrAncestor(
@@ -151,11 +145,10 @@ namespace Miruken.Graph
         {
             if (withSelf && visitor(node))
                 return;
-            var self   = node;
             var parent = node.Parent;
             if (parent == null) return;
             var children = parent.Children;
-            if (children?.Any(sibling => self != sibling && visitor(sibling)) == true)
+            if (children?.Any(sibling => node != sibling && visitor(sibling)) == true)
                 return;
             if (withAncestor)
                 TraverseAncestors(parent, visitor, true);

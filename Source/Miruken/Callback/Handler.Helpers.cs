@@ -56,17 +56,12 @@
             return new Provider(result) + handler;
         }
 
-        public static HandlerFilter Filter(
-            this IHandler handler, HandlerFilterDelegate filter)
-        {
-            return Filter(handler, filter, false);
-        }
-
-        public static HandlerFilter Filter(
-            this IHandler handler, HandlerFilterDelegate filter, bool reentrant)
+        public static FilteredHandler Filter(
+            this IHandler handler, HandlerFilterDelegate filter,
+            bool reentrant = false)
         {
             return handler == null ? null
-                 : new HandlerFilter(handler, filter, reentrant);
+                 : new FilteredHandler(handler, filter, reentrant);
         }
     }
 }
