@@ -3,9 +3,6 @@
     using System;
     using System.Linq;
 
-    public delegate bool AcceptResultDelegate(
-        object result, MethodBinding binding);
-
     public delegate PolicyMethodBinding BindMethodDelegate(
         CallbackPolicy policy,
         PolicyMethodBindingInfo policyMethodBindingInfo);
@@ -59,10 +56,8 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            object result;
             var resultType = Policy.ResultType?.Invoke(callback);
-            return Invoke(target, callback, composer, resultType,
-                results, out result);
+            return Invoke(target, callback, composer, resultType, results);
         }
 
         public Type CloseHandlerType(Type handlerType, object key)
@@ -85,19 +80,17 @@
         }
 
         private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, ResultsDelegate results,
-            out object result)
+            IHandler composer, Type resultType, ResultsDelegate results)
         {
-            result = null;
+            object result;
             var args = Rule.ResolveArgs(callback);
 
             if ((callback as IFilterCallback)?.AllowFiltering == false)
             {
                 bool completed;
-                args   = ResolveArgs(args, composer, out completed);
-                result = completed 
-                       ? Dispatcher.Invoke(target, args, resultType)
-                       : null;
+                args = ResolveArgs(args, composer, out completed);
+                if (completed)
+                    Dispatcher.Invoke(target, args, resultType);
                 return completed;
             }
 
@@ -166,19 +159,21 @@
                     var argument     = arguments[i];
                     var argumentType = argument.ArgumentType;
                     var optional     = argument.Optional;
-                    var resolver     = argument.Resolver ?? ResolvingAttribute.Default;
                     if (argumentType == typeof(IHandler))
                         args[i] = composer;
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
+                    {
+                        var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                         bundle.Add(h => args[index] =
-                            resolver.ResolveArgument(argument, h, composer),
+                                resolver.ResolveArgument(argument, h, composer),
                             (ref bool resolved) =>
                             {
                                 resolved = resolved || optional;
                                 return false;
                             });
+                    }
                 }
             }))
             {

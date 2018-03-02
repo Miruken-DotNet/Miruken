@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Reflection;
 
+    public delegate bool AcceptResultDelegate(object result, MethodBinding binding);
+
     public abstract class CallbackPolicy 
         : IComparer<PolicyMethodBinding>, IComparer<object>
     {

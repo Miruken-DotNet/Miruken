@@ -532,9 +532,9 @@
         [TestMethod]
         public void Should_Provide_Methods_Best_Effort()
         {
-            var provider = new EmailProvider();
+            var provider = new Handler();
             var id       = Proxy<IEmailFeature>(provider.BestEffort()).Email("Hello");
-            Assert.AreEqual(1, id);
+            Assert.AreEqual(0, id);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
@@ -567,14 +567,6 @@
 
         [TestMethod]
         public void Should_Resolve_Methods_Inferred()
-        {
-            var provider = new EmailProvider();
-            var id       = Proxy<IEmailFeature>(provider.Resolve()).Email("Hello");
-            Assert.AreEqual(1, id);
-        }
-
-        [TestMethod]
-        public void Should_Resolve_Methods_Explicitly()
         {
             var provider = new EmailProvider();
             var id       = Proxy<IEmailFeature>(provider.Resolve()).Email("Hello");

@@ -130,6 +130,7 @@
             {
                 _operations = _operations == null ? null
                             : new List<Operation>(_operations),
+                WantsAsync  = WantsAsync,
                 _resolving  = true
             };
         }

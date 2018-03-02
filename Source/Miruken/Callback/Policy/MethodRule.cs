@@ -19,7 +19,6 @@ namespace Miruken.Callback.Policy
                 throw new ArgumentNullException(nameof(binder));
             _binder = binder;
             Args    = args;
-
         }
 
         public MethodRule(MethodBinder binder, ReturnRule returnValue,

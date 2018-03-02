@@ -36,14 +36,14 @@ namespace Miruken.Callback.Policy
             if (paramType.Is<Cb>()) return false;
             if (paramType.IsGenericParameter)
             {
-                var contraints = paramType.GetGenericParameterConstraints();
-                switch (contraints.Length)
+                var constraints = paramType.GetGenericParameterConstraints();
+                switch (constraints.Length)
                 {
                     case 0:
                         paramType = typeof(object);
                         break;
                     case 1:
-                        paramType = contraints[0];
+                        paramType = constraints[0];
                         break;
                     default:
                         return false;
@@ -69,9 +69,9 @@ namespace Miruken.Callback.Policy
             policyMethodBindingInfo.CallbackIndex = parameter.Position;
             if (paramType.IsGenericParameter)
             {
-                var contraints = paramType.GetGenericParameterConstraints();
-                paramType = contraints.Length == 1
-                          ? contraints[0]
+                var constraints = paramType.GetGenericParameterConstraints();
+                paramType = constraints.Length == 1
+                          ? constraints[0]
                           : typeof(object);
             }
             if (paramType != typeof(object) &&

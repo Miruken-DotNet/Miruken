@@ -220,8 +220,8 @@
         public void Should_Handle_Methods_Best_Effort()
         {
             var handler = new EmailHandler();
-            var id      = Proxy<IEmailFeature>(handler.BestEffort()).Email("Hello");
-            Assert.AreEqual(1, id);
+            var id      = Proxy<IOffline>(handler.BestEffort()).Email("Hello");
+            Assert.AreEqual(0, id);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]

@@ -28,7 +28,7 @@
             Type type, IEnumerable types)
         {
             if (type == null || type == typeof(object))
-                return Enumerable.Empty<Tuple<object, int>>();
+                return Enumerable.Empty<object>();
             return types.OfType<Type>()
                 .Where(t => t != type && IsCompatible(type, t));
         }

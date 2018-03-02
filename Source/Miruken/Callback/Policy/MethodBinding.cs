@@ -24,8 +24,7 @@
 
         public MethodDispatch Dispatcher { get; }
 
-        public IEnumerable<IFilterProvider> Filters =>
-            _filters ?? Enumerable.Empty<IFilterProvider>();
+        public IEnumerable<IFilterProvider> Filters => _filters;
 
         public void AddFilters(params IFilterProvider[] providers)
         {

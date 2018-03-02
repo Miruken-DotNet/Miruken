@@ -134,8 +134,8 @@
         {
             var data       = new DataTable(); 
             var context    = new Context();
-            var child1     = context.CreateChild();
-            var grandChild = child1.CreateChild();
+            var child      = context.CreateChild();
+            var grandChild = child.CreateChild();
             context.Store(data);
             Assert.AreEqual(data, grandChild.Resolve<DataTable>());
         }

@@ -23,7 +23,7 @@
         }
 
         [TestMethod]
-        public void Should_Indicate_Not_Handled__Adapter()
+        public void Should_Indicate_Not_Handled_Adapter()
         {
             var handler = new HandlerAdapter(new Controller());
             Assert.IsFalse(handler.Handle(new Bee()));
@@ -274,7 +274,7 @@
         }
 
         [TestMethod]
-        public void Should_Provide_Callbacks_Implicitly__Adapter()
+        public void Should_Provide_Callbacks_Implicitly_Adapter()
         {
             var handler = new HandlerAdapter(new Controller());
             var bar     = handler.Resolve<Bar>();
@@ -496,7 +496,7 @@
         }
 
         [TestMethod]
-        public void Should_Resolve_Self__Adapter_Implicitly()
+        public void Should_Resolve_Self_Adapter_Implicitly()
         {
             var controller = new Controller();
             var handler    = new HandlerAdapter(controller);
@@ -505,7 +505,7 @@
         }
 
         [TestMethod]
-        public void Should_Resolve_Self__Adapter_Implicitly_Decorated()
+        public void Should_Resolve_Self_Adapter_Implicitly_Decorated()
         {
             var controller = new Controller();
             var handler    = new HandlerAdapter(controller);

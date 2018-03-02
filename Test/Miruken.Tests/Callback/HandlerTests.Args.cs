@@ -43,7 +43,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Resolve_Promie_Dependency()
+        public async Task Should_Resolve_Promise_Dependency()
         {
             var handler = new InventoryHandler()
                         + new Repository<Order>();

@@ -20,6 +20,9 @@ namespace Miruken.Callback
         private CallbackOptions _options;
         private CallbackOptions _specified;
 
+        public static readonly CallbackSemantics None =
+            new CallbackSemantics(CallbackOptions.None);
+
         public CallbackSemantics()
             : this(CallbackOptions.None)
         {    

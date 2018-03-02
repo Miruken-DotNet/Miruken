@@ -18,7 +18,7 @@
         public HandleMethod(Type protocol, IMethodMessage methodCall, 
             CallbackSemantics semantics = null)
         {
-            _semantics = semantics;
+            _semantics = semantics ?? CallbackSemantics.None;
             Method     = (MethodInfo)methodCall.MethodBase;
             Arguments  = methodCall.Args;
             Protocol   = protocol ?? Method.ReflectedType;

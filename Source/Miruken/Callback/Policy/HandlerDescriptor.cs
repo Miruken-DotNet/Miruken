@@ -49,7 +49,7 @@ namespace Miruken.Callback.Policy
                         _policies.Add(policy, descriptor);
                     }
 
-                    descriptor.Add(binding, handlerType);
+                    descriptor.Add(binding);
                 }
             }
 

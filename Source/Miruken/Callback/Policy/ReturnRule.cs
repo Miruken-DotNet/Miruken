@@ -16,7 +16,7 @@
 
         public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo) { }
 
-        public virtual R GetSubRule<R>() where R : ReturnRule
+        public virtual R GetInnerRule<R>() where R : ReturnRule
         {
             return this as R;
         }
@@ -52,9 +52,9 @@
             Rule.Configure(policyMethodBindingInfo);
         }
 
-        public override R GetSubRule<R>()
+        public override R GetInnerRule<R>()
         {
-            return base.GetSubRule<R>() ?? Rule.GetSubRule<R>();
+            return base.GetInnerRule<R>() ?? Rule.GetInnerRule<R>();
         }
     }
 

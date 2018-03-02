@@ -90,8 +90,11 @@ namespace Miruken.Context
 	    public virtual bool Handle(
             TraversingAxis axis, object callback, ref bool greedy, IHandler composer)
 	    {
-            if (axis == TraversingAxis.Self)                                                                                                              
-                return base.HandleCallback(callback, ref greedy, composer);
+	        if (composer == null)
+	            composer = new CompositionScope(this);
+
+            if (axis == TraversingAxis.Self)
+	            return base.HandleCallback(callback, ref greedy, composer);
 
 	        var g = greedy;
 	        var handled = false;                                                                                    
