@@ -243,7 +243,7 @@
                     Assert.AreEqual(entity.Name, data.Name);
                 }).Add(h =>
                 {
-                    var json = handler.Proxy<IMapping>().Map<string>(player, "application/json");
+                    var json = h.Proxy<IMapping>().Map<string>(player, "application/json");
                     Assert.AreEqual("{id:12,name:'Roberto Carlose'}", json);
 
                 }));
@@ -351,7 +351,7 @@
             {
                 var playerEntity = mapping.Source as PlayerEntity;
                 if (playerEntity != null && 
-                    (mapping.TypeOrInstance as Type).Is<PlayerData>())
+                    (mapping.TypeOrTarget as Type).Is<PlayerData>())
                 {
                     return new PlayerData
                     {

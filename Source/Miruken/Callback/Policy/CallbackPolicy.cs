@@ -64,7 +64,7 @@
         public abstract object GetKey(object callback);
 
         public abstract IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output);
+            object key, IEnumerable available);
 
         public abstract int Compare(object key1, object key2);
 

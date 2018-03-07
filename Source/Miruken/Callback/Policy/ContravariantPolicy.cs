@@ -19,9 +19,9 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output)
+            object key, IEnumerable available)
         {
-            return CompatibleTypes(key as Type, output);
+            return CompatibleTypes(key as Type, available);
         }
 
         protected IEnumerable<object> CompatibleTypes(
@@ -105,9 +105,9 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output)
+            object key, IEnumerable available)
         {
-            return CompatibleTypes(key as Type, output);
+            return CompatibleTypes(key as Type, available);
         }
 
         private Type GetTargetType(Cb callback)

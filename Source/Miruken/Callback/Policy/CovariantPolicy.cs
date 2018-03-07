@@ -64,18 +64,18 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output)
+            object key, IEnumerable available)
         {
             var type = key as Type;
             if (type == null)
-                return output.Cast<object>()
+                return available.Cast<object>()
                     .Where(k => !Equals(key, k) && Equals(k, key));
 
             if (type == typeof(object))
-                return output.OfType<Type>()
+                return available.OfType<Type>()
                     .Where(t => !t.ContainsGenericParameters);
 
-            return output.OfType<Type>()
+            return available.OfType<Type>()
                 .Where(t => t != type && IsCompatible(type, t));
         }
 
