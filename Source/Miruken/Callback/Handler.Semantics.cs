@@ -65,8 +65,8 @@ namespace Miruken.Callback
                 semantics.SetOption(option, HasOption(option));
         }
 
-        bool IFilterCallback.AllowFiltering => false;
-        bool IBatchCallback.AllowBatching => false;
+        bool IFilterCallback.CanFilter => false;
+        bool IBatchCallback.CanBatch => false;
 
         object IResolveCallback.GetResolveCallback()
         {

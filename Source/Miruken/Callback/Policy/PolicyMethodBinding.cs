@@ -85,7 +85,7 @@
             object result;
             var args = Rule.ResolveArgs(callback);
 
-            if ((callback as IFilterCallback)?.AllowFiltering == false)
+            if ((callback as IFilterCallback)?.CanFilter == false)
             {
                 bool completed;
                 args = ResolveArgs(args, composer, out completed);

@@ -40,7 +40,7 @@
             using (var pipeline = filters.GetEnumerator())
             {
                 NextDelegate<object> next = null;
-                next = (proceed, comp) =>
+                next = proceed =>
                 {
                     if (!proceed)
                     {
@@ -49,26 +49,25 @@
                     }
                     while (pipeline.MoveNext())
                     {
-                        composer = comp ?? composer;
-                        var filter      = pipeline.Current;
+                        var filter     = pipeline.Current;
                         var typeFilter = filter as IFilter<Cb, Res>;
                         if (typeFilter != null)
                             return typeFilter.Next((Cb)callback, binding, composer, 
-                                (p,c) => (Res)binding.CoerceResult(next(p, c), typeof(Res)));
+                                p => (Res)binding.CoerceResult(next(p), typeof(Res)));
                         var taskFilter = filter as IFilter<Cb, Task<Res>>;
                         if (taskFilter != null)
                             return taskFilter.Next((Cb)callback, binding, composer,
-                                (p, c) => (Task<Res>)binding.CoerceResult(next(p, c),
+                                p => (Task<Res>)binding.CoerceResult(next(p),
                                            typeof(Task<Res>)));
                         var promiseFilter = filter as IFilter<Cb, Promise<Res>>;
                         if (promiseFilter != null)
                             return promiseFilter.Next((Cb)callback, binding, composer,
-                                (p, c) => (Promise<Res>)binding.CoerceResult(next(p, c),
+                                p => (Promise<Res>)binding.CoerceResult(next(p),
                                            typeof(Promise<Res>)));
                     }
                     return complete(composer, out completed);
                 };
-                result = next(true, composer);
+                result = next();
                 return completed;
             }
         }

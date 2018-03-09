@@ -40,11 +40,11 @@
             }
         }
 
-        bool IFilterCallback.AllowFiltering =>
-            (Callback as IFilterCallback)?.AllowFiltering != false;
+        bool IFilterCallback.CanFilter =>
+            (Callback as IFilterCallback)?.CanFilter != false;
 
-        bool IBatchCallback.AllowBatching =>
-            (Callback as IBatchCallback)?.AllowBatching != false;
+        bool IBatchCallback.CanBatch =>
+            (Callback as IBatchCallback)?.CanBatch != false;
 
         object IResolveCallback.GetResolveCallback()
         {

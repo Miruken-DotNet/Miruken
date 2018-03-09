@@ -36,7 +36,7 @@
             object callback, ref bool greedy, IHandler composer)
         {
             if (Batch != null && 
-                (callback as IBatchCallback)?.AllowBatching != false)
+                (callback as IBatchCallback)?.CanBatch != false)
             {
                 var batch = Batch;
                 if (_completed > 0 && !(callback is Composition)) {

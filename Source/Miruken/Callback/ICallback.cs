@@ -27,12 +27,12 @@ namespace Miruken.Callback
 
     public interface IBatchCallback
     {
-        bool AllowBatching { get; }
+        bool CanBatch { get; }
     }
 
     public interface IFilterCallback
     {
-        bool AllowFiltering { get; }
+        bool CanFilter { get; }
     }
 
     public interface IDispatchCallback

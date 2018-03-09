@@ -3,8 +3,8 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, IResolveCallback, IFilterCallback,
-        IBatchCallback
+        IBoundCallback, IResolveCallback,
+        IFilterCallback, IBatchCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }
@@ -17,8 +17,8 @@
                  : new OptionsHandler<T>(handler, (T)this);
         }
 
-        bool IFilterCallback.AllowFiltering => false;
-        bool IBatchCallback.AllowBatching => false;
+        bool IFilterCallback.CanFilter => false;
+        bool IBatchCallback.CanBatch => false;
 
         object IResolveCallback.GetResolveCallback()
         {
