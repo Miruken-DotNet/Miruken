@@ -1348,8 +1348,7 @@
                 Bar callback, MethodBinding binding, IHandler composer,
                 NextDelegate<object> next)
             {
-                var cb = ExtractCallback(callback);
-                cb?.Filters.Add(this);
+                callback.Filters.Add(this);
                 callback.Handled++;
                 return next();
             }

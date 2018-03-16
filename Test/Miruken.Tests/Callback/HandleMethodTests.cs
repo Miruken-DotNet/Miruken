@@ -23,6 +23,7 @@
 
         private class EmailHandler : Handler, IEmailFeature
         {
+            [Log]
             public int Count { get; private set; }
 
             [Log]
@@ -128,8 +129,10 @@
             public object Next(HandleMethod method, MethodBinding binding,
                 IHandler composer, NextDelegate<object> next)
             {
-                Console.WriteLine($"Handle method {method.Method.Name}");
-                return next();
+                Console.Write($@"Handle method '{method.Method.Name}' with result ");
+                var result = next();
+                Console.WriteLine(result);
+                return result;
             }
         }
 
