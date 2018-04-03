@@ -57,7 +57,7 @@
             }
         }
 
-        public bool AddAsyncResult(object result, bool strict)
+        public bool AddResult(object result, bool strict)
         {
             if (result == null) return false;
 
@@ -78,7 +78,7 @@
             object handler, ref bool greedy, IHandler composer)
         {
             var handled = Policy.Dispatch(
-                handler, this, greedy, composer, AddAsyncResult);
+                handler, this, greedy, composer, AddResult);
             if (greedy && StopOnFailure && !Outcome.IsValid)
                 greedy = false;
             return handled;
@@ -91,7 +91,7 @@
             if (scopes.Length == 1)
                 return scopes[0] as IScopeMatching
                     ?? new EqualsScopeMatcher(scopes[0]);
-            return new CompoundScopeMatcher(scopes.Select(scope => 
+            return new CompositeScopeMatcher(scopes.Select(scope => 
                 CreateScopeMatcher(new [] {scope})).ToArray());
         }
     }

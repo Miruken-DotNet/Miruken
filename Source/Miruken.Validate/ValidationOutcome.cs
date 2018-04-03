@@ -47,7 +47,7 @@
         public IEnumerable GetErrors(string propertyName)
         {
             var outcome = ParsePath(ref propertyName);
-            if (outcome == null) return string.Empty;
+            if (outcome == null) return Array.Empty<object>();
             if (outcome != this) return outcome.GetErrors(propertyName);
             List<object> errors;
             return _errors.TryGetValue(propertyName, out errors)

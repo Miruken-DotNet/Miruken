@@ -9,7 +9,7 @@
             object target, params object[] scopes)
         {
             var composer   = Composer;
-            var options    = GetOptions(composer);
+            var options    = composer.GetOptions<ValidationOptions>();
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true
@@ -27,7 +27,7 @@
             object target, params object[] scopes)
         {
             var composer   = Composer;
-            var options    = GetOptions(composer);
+            var options    = composer.GetOptions<ValidationOptions>();
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true,
@@ -43,12 +43,6 @@
                     validationAware.ValidationOutcome = outcome;
                 return outcome;
             });
-        }
-
-        private static ValidationOptions GetOptions(IHandler composer)
-        {
-            var options = new ValidationOptions();
-            return composer.Handle(options) ? options : null;
         }
     }
 
