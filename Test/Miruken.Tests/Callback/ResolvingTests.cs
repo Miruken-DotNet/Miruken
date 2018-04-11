@@ -197,7 +197,7 @@
 
         private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
         {
-            public Res Next(Cb callback, NextDelegate<Res> next,
+            public Res Next(Cb callback, Next<Res> next,
                 MethodBinding method,
                 Repository<Message> repository,
                 [Proxy]IBilling billing)
@@ -221,7 +221,7 @@
         private class BalanceFilter<T, Res> : DynamicFilter<Create<T>, Res>
             where T : IEntity
         {
-            public Res Next(Create<T> callback, NextDelegate<Res> next,
+            public Res Next(Create<T> callback, Next<Res> next,
                 Repository<Message> repository, IBilling billing)
             {
                 return next();

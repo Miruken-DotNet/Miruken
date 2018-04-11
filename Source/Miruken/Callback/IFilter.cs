@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate Res NextDelegate<out Res>(bool proceed = true);
+    public delegate Res Next<out Res>(bool proceed = true);
 
     public interface IFilter
     {
@@ -14,7 +14,7 @@
     public interface IFilter<in Cb, Res> : IFilter
     {
         Res Next(Cb callback, MethodBinding method,
-                 IHandler composer, NextDelegate<Res> next);
+                 IHandler composer, Next<Res> next);
     }
 
     public interface IGlobalFilter<in Cb, Res> : IFilter<Cb, Res> { }

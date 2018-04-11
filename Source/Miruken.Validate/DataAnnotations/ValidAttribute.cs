@@ -22,7 +22,7 @@
         {
             if (validators.Length > 0 && validators.Any(v => !v.Is<ValidationAttribute>()))
                 throw new ArgumentException(
-                    "All validators must extend ValidationAttribute", nameof(validators));
+                    @"All validators must extend ValidationAttribute", nameof(validators));
             _validators = validators;
         }
 

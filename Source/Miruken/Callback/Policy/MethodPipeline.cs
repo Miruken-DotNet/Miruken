@@ -39,7 +39,7 @@
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
-                NextDelegate<object> next = null;
+                Next<object> next = null;
                 next = proceed =>
                 {
                     if (!proceed)

@@ -21,7 +21,7 @@
     public class DynamicFilter<Cb, Res> : DynamicFilter, IFilter<Cb, Res>
     {
         Res IFilter<Cb, Res>.Next(Cb callback, MethodBinding method, 
-            IHandler composer, NextDelegate<Res> next)
+            IHandler composer, Next<Res> next)
         {
             var dispatch = _next.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
@@ -31,7 +31,7 @@
 
         private static object[] ResolveArgs(MethodDispatch dispatch,
             Cb callback, MethodBinding method, IHandler composer,
-            NextDelegate<Res> next)
+            Next<Res> next)
         {
             var arguments = dispatch.Arguments;
             if (arguments.Length == 2)
@@ -96,7 +96,7 @@
             var parameters = method.GetParameters();
             if (parameters.Length < 2) return false;
             return parameters[0].ParameterType == typeof(Cb) &&
-                   parameters[1].ParameterType == typeof(NextDelegate<Res>);                
+                   parameters[1].ParameterType == typeof(Next<Res>);                
         }
     }
 }
