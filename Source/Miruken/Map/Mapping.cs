@@ -18,9 +18,9 @@
                 throw new ArgumentNullException(nameof(source));
             if (typeOrTarget == null)
                 throw new ArgumentNullException(nameof(typeOrTarget));
-            Source         = source;
+            Source       = source;
             TypeOrTarget = typeOrTarget;
-            Format         = format;
+            Format       = format;
         }
 
         public object Source       { get; }

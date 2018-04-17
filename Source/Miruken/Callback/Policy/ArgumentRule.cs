@@ -7,6 +7,14 @@
 
     public abstract class ArgumentRule
     {
+        public AliasedArgument Alias(string alias)
+        {
+            if (string.IsNullOrEmpty(alias))
+                throw new ArgumentException(
+                    @"Argument alias cannot be empty", nameof(alias));
+            return new AliasedArgument(alias, this);
+        }
+
         public TypedArgument OfType<TArg>(params string[] aliases)
         {
             return OfType(typeof(TArg), aliases);
@@ -54,6 +62,26 @@
         public override object Resolve(object callback)
         {
             return Argument.Resolve(callback);
+        }
+    }
+
+    public class AliasedArgument : ArgumentRuleDecorator
+    {
+        private readonly string _alias;
+
+        public AliasedArgument(string alias, ArgumentRule argument)
+            : base(argument)
+        {
+            _alias = alias;
+        }
+
+        public override bool Matches(
+            ParameterInfo parameter, CategoryAttribute category,
+            IDictionary<string, Type> aliases)
+        {
+            Type alias;
+            return aliases.TryGetValue(_alias, out alias) &&
+                parameter.ParameterType.Is(alias);
         }
     }
 

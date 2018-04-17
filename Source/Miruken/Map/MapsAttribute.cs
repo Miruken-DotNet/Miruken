@@ -27,7 +27,9 @@
 
         public static readonly CallbackPolicy Policy =
             BivariantPolicy.Create<Mapping>(m => m.Type, m => m.Source,
-                x => x.MatchCallbackMethod(x.ReturnKey, x.Target)
+                x => x.MatchMethod(x.ReturnKey.Alias("to"),
+                          x.Target, x.Extract(m => m.Target).Alias("to"))
+                      .MatchCallbackMethod(x.ReturnKey, x.Target)
                       .MatchMethod(x.ReturnKey.OrVoid, x.Callback)
             );
     }

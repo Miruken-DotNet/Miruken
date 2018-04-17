@@ -33,13 +33,15 @@ namespace Miruken.Callback.Policy
 
         public bool Matches(MethodInfo method, CategoryAttribute category)
         {
-            var parameters = method.GetParameters();
-            var paramCount = parameters.Length;
-            var aliases    = new Dictionary<string, Type>();
+            var parameters  = method.GetParameters();
+            var paramCount  = parameters.Length;
+            var aliases     = new Dictionary<string, Type>();
+            var returnMatch = ReturnValue?.Matches( // binds alias ???
+                method.ReturnType, parameters, category, aliases) != false;
             if (paramCount < Args.Length || !parameters.Zip(Args, 
                 (param, arg) => arg.Matches(param, category, aliases))
                 .All(m => m)) return false;
-            if (ReturnValue?.Matches(
+            if (!returnMatch && ReturnValue.Matches(  // Uses alias ???
                 method.ReturnType, parameters, category, aliases) == false)
                 throw new InvalidOperationException(
                      $"Method '{method.GetDescription()}' satisfied the arguments but rejected the return");

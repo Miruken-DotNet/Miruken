@@ -37,7 +37,12 @@
 
         public static TestReturn Is(string alias)
         {
-            return Is((returnType, p, aliases) => aliases[alias] == returnType);
+            return Is((returnType, p, aliases) =>
+            {
+                Type typeAlias;
+                return aliases.TryGetValue(alias, out typeAlias)
+                       && typeAlias == returnType;
+            });
         }
 
         public static TestReturn Is(ReturnTestDelegate test)
