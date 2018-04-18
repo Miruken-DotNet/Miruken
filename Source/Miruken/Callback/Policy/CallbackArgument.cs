@@ -10,8 +10,7 @@ namespace Miruken.Callback.Policy
             Instance = new CallbackArgument();
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
             var paramType = parameter.ParameterType;
             if (paramType.IsGenericParameter)
@@ -29,7 +28,7 @@ namespace Miruken.Callback.Policy
                         return false;
                 }
             }
-            var restrict = category.InKey as Type;
+            var restrict = context.Category.InKey as Type;
             if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
                 return true;
 
@@ -73,8 +72,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
             var paramType = parameter.ParameterType;
             return paramType.Is<Cb>();

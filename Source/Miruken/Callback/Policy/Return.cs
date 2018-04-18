@@ -21,7 +21,6 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
             RuleContext context)
         {
             return returnType.IsClassOf(_type);
@@ -72,7 +71,6 @@
 
         public override bool Matches(
              Type returnType, ParameterInfo[] parameters,
-             CategoryAttribute category,
              RuleContext context)
         {
             return _test(returnType, parameters, context);

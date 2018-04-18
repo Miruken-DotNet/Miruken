@@ -10,7 +10,6 @@
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
             RuleContext context);
 
         public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo)
@@ -49,9 +48,9 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category, RuleContext context)
+            RuleContext context)
         {
-            return Rule.Matches(returnType, parameters, category, context);
+            return Rule.Matches(returnType, parameters, context);
         }
 
         public override void Configure(
@@ -74,10 +73,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category, RuleContext context)
+            RuleContext context)
         {
             return returnType == typeof(void) ||
-                   base.Matches(returnType, parameters, category, context);
+                   base.Matches(returnType, parameters, context);
         }
 
         public override void Configure(
@@ -100,11 +99,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
             RuleContext context)
         {
-            return context.AddAlias(_alias, returnType) &&
-                base.Matches(returnType, parameters, category, context);
+            return base.Matches(returnType, parameters, context) &&
+                context.AddAlias(_alias, returnType);
         }
     }
 }

@@ -32,13 +32,12 @@ namespace Miruken.Callback.Policy
         public bool Matches(MethodInfo method, CategoryAttribute category)
         {
             var parameters = method.GetParameters();
-            var context    = new RuleContext();
-            return ReturnValue?.Matches(method.ReturnType,
-                parameters, category, context) != false &&
+            var context    = new RuleContext(category);
+            return ReturnValue?.Matches(
+                method.ReturnType, parameters, context) != false &&
                 parameters.Length >= Args.Length &&
-                parameters.Zip(Args, (param, arg) =>
-                    arg.Matches(param, category, context))
-                .All(m => m);
+                parameters.Zip(Args, (param, arg) => arg.Matches(param, context))
+                    .All(m => m);
         }
 
         public PolicyMethodBinding Bind(

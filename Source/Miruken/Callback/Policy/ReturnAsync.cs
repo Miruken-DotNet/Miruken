@@ -18,7 +18,7 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category, RuleContext context)
+            RuleContext context)
         {
             if (returnType.Is<Promise>())
             {
@@ -34,9 +34,9 @@
                            ? taskType.GetGenericArguments()[0]
                            : typeof(object);
             }
-            else if (_required)
-                return false;
-            return base.Matches(returnType, parameters, category, context);
+            else if (_required) return false;
+
+            return base.Matches(returnType, parameters, context);
         }
     }
 }

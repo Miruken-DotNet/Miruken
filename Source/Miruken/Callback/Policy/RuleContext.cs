@@ -8,6 +8,15 @@
         private Dictionary<string, Type> _aliases;
         private List<string> _errors;
 
+        public RuleContext(CategoryAttribute category)
+        {
+            Category = category;
+        }
+
+        public CategoryAttribute Category { get; }
+
+        public bool HasErrors => _errors?.Count > 0;
+
         public string[] Errors => _errors.ToArray();
 
         public bool AddAlias(string alias, Type type)
@@ -18,23 +27,19 @@
                 {
                     { alias, type }
                 };
+                return true;
             }
-            else
+            Type aliasType;
+            if (_aliases.TryGetValue(alias, out aliasType))
             {
-                Type aliasType;
-                if (_aliases.TryGetValue(alias, out aliasType))
+                if (aliasType != type)
                 {
-                    if (aliasType != type)
-                    {
-                        AddError("Mismatched alias '{alias}': {type} != {aliasType}");
-                        return false;
-                    }
+                    AddError("Mismatched alias '{alias}', {type} != {aliasType}");
+                    return false;
                 }
-                else
-                {
-                    _aliases.Add(alias, type);
-                }
+                return true;
             }
+           _aliases.Add(alias, type);
             return true;
         }
 

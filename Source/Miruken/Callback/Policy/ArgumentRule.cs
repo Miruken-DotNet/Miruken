@@ -26,8 +26,7 @@
         }
 
         public abstract bool Matches(
-           ParameterInfo parameter, CategoryAttribute category,
-           RuleContext context);
+            ParameterInfo parameter, RuleContext context);
 
         public virtual void Configure(ParameterInfo parameter,
             PolicyMethodBindingInfo policyMethodBindingInfo) { }
@@ -47,10 +46,9 @@
         public ArgumentRule Argument { get; }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
-            return Argument.Matches(parameter, category, context);
+            return Argument.Matches(parameter, context);
         }
 
         public override void Configure(ParameterInfo parameter,
@@ -76,10 +74,10 @@
         }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
-            return context.AddAlias(_alias, parameter.ParameterType);
+            return base.Matches(parameter, context) &&
+                context.AddAlias(_alias, parameter.ParameterType);
         }
     }
 
@@ -99,19 +97,19 @@
         }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
             var paramType = parameter.ParameterType;
             if (paramType.Is(_type))
             {
+                if (!base.Matches(parameter, context)) return false;
                 if (_aliases != null && _aliases.Length > 0)
                 {
                     context.AddError(
                         $"{_type.FullName} is not a generic definition and cannot bind aliases");
                     return false;
                 }
-                return base.Matches(parameter, category, context);
+                return true;
             }
             var openGeneric = paramType.GetOpenTypeConformance(_type);
             if (openGeneric == null) return false;
@@ -123,10 +121,9 @@
                     $"{_type.FullName} has {genericArgs.Length} generic args, but {_aliases.Length} aliases provided");
                 return false;
             }
-            return !_aliases.Where((alias, i) =>
-                !string.IsNullOrEmpty(alias) &&
-                !context.AddAlias(alias, genericArgs[i])).Any() && 
-                base.Matches(parameter, category, context);
+            return base.Matches(parameter, context) && 
+                !_aliases.Where((alias, i) => !string.IsNullOrEmpty(alias) &&
+                !context.AddAlias(alias, genericArgs[i])).Any();
         }
     }
 }

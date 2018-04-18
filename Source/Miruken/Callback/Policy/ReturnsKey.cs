@@ -14,13 +14,12 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
             RuleContext context)
         {
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            var restrict = category.OutKey as Type;
+            var restrict = context.Category.OutKey as Type;
             if (restrict == null || returnType.Is(restrict) || restrict.Is(returnType))
                 return true;
             throw new InvalidOperationException(

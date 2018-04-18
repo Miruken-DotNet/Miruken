@@ -16,8 +16,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            RuleContext context)
+            ParameterInfo parameter, RuleContext context)
         {
             var paramType = parameter.ParameterType;
             return paramType.Is<Res>();
