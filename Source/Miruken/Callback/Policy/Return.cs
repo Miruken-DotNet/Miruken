@@ -34,6 +34,11 @@
             return new Return(type);
         }
 
+        public new static ReturnRule Alias(string alias)
+        {
+            return TestReturn.True.Alias(alias);
+        }
+
         public static TestReturn Is(ReturnTestDelegate test)
         {
             return new TestReturn(test);
@@ -54,6 +59,9 @@
     public class TestReturn : ReturnRule
     {
         private readonly ReturnTestDelegate _test;
+
+        public static readonly TestReturn True = 
+            Return.Is((returnType, p, ctx) => true);
 
         public TestReturn(ReturnTestDelegate test)
         {

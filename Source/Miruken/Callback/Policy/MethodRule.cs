@@ -31,13 +31,13 @@ namespace Miruken.Callback.Policy
 
         public bool Matches(MethodInfo method, CategoryAttribute category)
         {
-            var parameters  = method.GetParameters();
-            var paramCount  = parameters.Length;
-            var context     = new RuleContext();
-            if (ReturnValue?.Matches( method.ReturnType,
-                parameters, category, context) == false) return false;
-            return paramCount >= Args.Length && parameters.Zip(
-                Args, (param, arg) => arg.Matches(param, category, context))
+            var parameters = method.GetParameters();
+            var context    = new RuleContext();
+            return ReturnValue?.Matches(method.ReturnType,
+                parameters, category, context) != false &&
+                parameters.Length >= Args.Length &&
+                parameters.Zip(Args, (param, arg) =>
+                    arg.Matches(param, category, context))
                 .All(m => m);
         }
 
