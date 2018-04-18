@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
 
     public delegate PolicyMethodBinding BindMethodDelegate(
@@ -29,6 +30,7 @@
         public CategoryAttribute Category       { get; }
     }
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class PolicyMethodBinding : MethodBinding
     {
         public PolicyMethodBinding(CallbackPolicy policy,
@@ -196,6 +198,15 @@
             }
             callbackType = callback.GetType();
             return callback;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var category = Category.GetType().Name.Replace("Attribute", "");
+                return $"{category} | {Dispatcher.Method}";
+            }
         }
     }
 }
