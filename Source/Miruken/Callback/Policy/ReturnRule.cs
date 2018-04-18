@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
 
     public abstract class ReturnRule
@@ -12,7 +11,7 @@
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
             CategoryAttribute category,
-            IDictionary<string, Type> aliases);
+            RuleContext context);
 
         public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo)
         {
@@ -50,10 +49,9 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            CategoryAttribute category, RuleContext context)
         {
-            return Rule.Matches(returnType, parameters, category, aliases);
+            return Rule.Matches(returnType, parameters, category, context);
         }
 
         public override void Configure(
@@ -76,11 +74,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            CategoryAttribute category, RuleContext context)
         {
             return returnType == typeof(void) ||
-                   base.Matches(returnType, parameters, category, aliases);
+                   base.Matches(returnType, parameters, category, context);
         }
 
         public override void Configure(
@@ -104,11 +101,10 @@
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
             CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
-            var matches = base.Matches(returnType, parameters, category, aliases);
-            if (matches) aliases.Add(_alias, returnType);
-            return matches;
+            return context.AddAlias(_alias, returnType) &&
+                base.Matches(returnType, parameters, category, context);
         }
     }
 }

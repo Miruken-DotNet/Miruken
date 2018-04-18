@@ -1,38 +1,17 @@
 namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using Infrastructure;
 
     public class CallbackArgument : ArgumentRule
     {
-        private string _alias;
-
         public static readonly CallbackArgument
             Instance = new CallbackArgument();
 
-        private CallbackArgument(string alias = null)
-        {
-            _alias = alias;
-        }
-
-        public CallbackArgument this[string alias]
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(alias))
-                    throw new ArgumentException(@"Alias cannot be empty", nameof(alias));
-                if (this == Instance)
-                    return new CallbackArgument(alias);
-                _alias = alias;
-                return this;
-            }   
-        }
-
         public override bool Matches(
             ParameterInfo parameter, CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
             var paramType = parameter.ParameterType;
             if (paramType.IsGenericParameter)
@@ -52,13 +31,11 @@ namespace Miruken.Callback.Policy
             }
             var restrict = category.InKey as Type;
             if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
-            {
-                if (_alias != null)
-                    aliases.Add(_alias, paramType);
                 return true;
-            }
-            throw new InvalidOperationException(
+
+            context.AddError(
                 $"Key {restrict.FullName} is not related to {paramType.FullName}");
+            return false;
         }
 
         public override void Configure(ParameterInfo parameter,
@@ -97,7 +74,7 @@ namespace Miruken.Callback.Policy
 
         public override bool Matches(
             ParameterInfo parameter, CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
             var paramType = parameter.ParameterType;
             return paramType.Is<Cb>();

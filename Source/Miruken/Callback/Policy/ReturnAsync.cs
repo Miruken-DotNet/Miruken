@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using System.Threading.Tasks;
     using Concurrency;
@@ -19,8 +18,7 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            CategoryAttribute category, RuleContext context)
         {
             if (returnType.Is<Promise>())
             {
@@ -38,7 +36,7 @@
             }
             else if (_required)
                 return false;
-            return base.Matches(returnType, parameters, category, aliases);
+            return base.Matches(returnType, parameters, category, context);
         }
     }
 }

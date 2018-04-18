@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using Infrastructure;
 
@@ -16,7 +15,7 @@
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
             CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
