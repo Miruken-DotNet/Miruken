@@ -44,7 +44,7 @@
                                 if (!Equals(accepted, false))
                                 {
                                     AspectProceed(callback, composer, proceed, after, state);
-                                    return Promise.Resolved(cb?.Result);
+                                    return Promise.Resolved(cb.Result);
                                 }
                                 return Promise.Rejected(new RejectedException(callback), s);
                             });

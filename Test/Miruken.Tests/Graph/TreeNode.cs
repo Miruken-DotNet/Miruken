@@ -10,7 +10,7 @@ namespace Miruken.Tests.Graph
             Data = data;
         }
 
-        public object Data { get; private set; }
+        public object Data { get; }
 
         public ITraversing Parent { get; private set; }
 

@@ -40,8 +40,9 @@
             using (var pipeline = filters.GetEnumerator())
             {
                 Next<object> next = null;
-                next = proceed =>
+                next = (proceed, comp) =>
                 {
+                    comp = comp ?? composer;
                     if (!proceed)
                     {
                         completed = false;
@@ -52,20 +53,20 @@
                         var filter     = pipeline.Current;
                         var typeFilter = filter as IFilter<Cb, Res>;
                         if (typeFilter != null)
-                            return typeFilter.Next((Cb)callback, binding, composer, 
-                                p => (Res)binding.CoerceResult(next(p), typeof(Res)));
+                            return typeFilter.Next((Cb)callback, binding, comp, 
+                                (p,c) => (Res)binding.CoerceResult(next(p,c), typeof(Res)));
                         var taskFilter = filter as IFilter<Cb, Task<Res>>;
                         if (taskFilter != null)
-                            return taskFilter.Next((Cb)callback, binding, composer,
-                                p => (Task<Res>)binding.CoerceResult(next(p),
+                            return taskFilter.Next((Cb)callback, binding, comp,
+                                (p,c) => (Task<Res>)binding.CoerceResult(next(p,c),
                                            typeof(Task<Res>)));
                         var promiseFilter = filter as IFilter<Cb, Promise<Res>>;
                         if (promiseFilter != null)
-                            return promiseFilter.Next((Cb)callback, binding, composer,
-                                p => (Promise<Res>)binding.CoerceResult(next(p),
+                            return promiseFilter.Next((Cb)callback, binding, comp,
+                                (p,c) => (Promise<Res>)binding.CoerceResult(next(p,c),
                                            typeof(Promise<Res>)));
                     }
-                    return complete(composer, out completed);
+                    return complete(comp, out completed);
                 };
                 result = next();
                 return completed;

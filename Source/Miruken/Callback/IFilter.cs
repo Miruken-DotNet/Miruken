@@ -4,7 +4,8 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate Res Next<out Res>(bool proceed = true);
+    public delegate Res Next<out Res>(
+        bool proceed = true, IHandler composer = null);
 
     public interface IFilter
     {
