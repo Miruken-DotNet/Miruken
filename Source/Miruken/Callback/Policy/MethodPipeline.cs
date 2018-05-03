@@ -42,7 +42,7 @@
                 Next<object> next = null;
                 next = (proceed, comp) =>
                 {
-                    comp = comp ?? composer;
+                    composer = comp ?? composer;
                     if (!proceed)
                     {
                         completed = false;
@@ -53,20 +53,20 @@
                         var filter     = pipeline.Current;
                         var typeFilter = filter as IFilter<Cb, Res>;
                         if (typeFilter != null)
-                            return typeFilter.Next((Cb)callback, binding, comp, 
+                            return typeFilter.Next((Cb)callback, binding, composer, 
                                 (p,c) => (Res)binding.CoerceResult(next(p,c), typeof(Res)));
                         var taskFilter = filter as IFilter<Cb, Task<Res>>;
                         if (taskFilter != null)
-                            return taskFilter.Next((Cb)callback, binding, comp,
+                            return taskFilter.Next((Cb)callback, binding, composer,
                                 (p,c) => (Task<Res>)binding.CoerceResult(next(p,c),
                                            typeof(Task<Res>)));
                         var promiseFilter = filter as IFilter<Cb, Promise<Res>>;
                         if (promiseFilter != null)
-                            return promiseFilter.Next((Cb)callback, binding, comp,
+                            return promiseFilter.Next((Cb)callback, binding, composer,
                                 (p,c) => (Promise<Res>)binding.CoerceResult(next(p,c),
                                            typeof(Promise<Res>)));
                     }
-                    return complete(comp, out completed);
+                    return complete(composer, out completed);
                 };
                 result = next();
                 return completed;
