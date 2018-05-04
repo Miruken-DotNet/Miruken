@@ -40,14 +40,14 @@
             using (var pipeline = filters.GetEnumerator())
             {
                 Next<object> next = null;
-                next = (proceed, comp) =>
+                next = (comp, proceed) =>
                 {
-                    composer = comp ?? composer;
                     if (!proceed)
                     {
                         completed = false;
                         return default(Res);
                     }
+                    composer = comp ?? composer;
                     while (pipeline.MoveNext())
                     {
                         var filter     = pipeline.Current;

@@ -5,7 +5,7 @@
     using Policy;
 
     public delegate Res Next<out Res>(
-        bool proceed = true, IHandler composer = null);
+        IHandler composer = null, bool proceed = true);
 
     public interface IFilter
     {
