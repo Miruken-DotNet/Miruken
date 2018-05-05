@@ -11,27 +11,27 @@
     {
         private object _result;
 
-        public Mapping(object source, object typeOrInstance,
+        public Mapping(object source, object typeOrTarget,
                        object format = null)
         {
             Source = source 
                   ?? throw new ArgumentNullException(nameof(source));
-            TypeOrInstance = typeOrInstance 
-                  ?? throw new ArgumentNullException(nameof(typeOrInstance));
+            TypeOrTarget = typeOrTarget
+                  ?? throw new ArgumentNullException(nameof(typeOrTarget));
             Format = format;
         }
 
-        public object Source         { get; }
-        public object TypeOrInstance { get; }
-        public object Format         { get; }
-        public bool   WantsAsync     { get; set; }
-        public bool   IsAsync        { get; private set; }
+        public object Source       { get; }
+        public object TypeOrTarget { get; }
+        public object Format       { get; }
+        public bool   WantsAsync   { get; set; }
+        public bool   IsAsync      { get; private set; }
 
         public Type Type =>
-            TypeOrInstance as Type ?? TypeOrInstance.GetType();
+            TypeOrTarget as Type ?? TypeOrTarget.GetType();
 
         public object Target => 
-            TypeOrInstance is Type ? null : TypeOrInstance;
+            TypeOrTarget is Type ? null : TypeOrTarget;
 
         public Type ResultType => 
             WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();

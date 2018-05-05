@@ -26,16 +26,16 @@
                 Equals(_scope, Scopes.Any))
                 return true;
             return scope is object[] collection
-                 ? Array.IndexOf(collection, scope) >= 0 
+                 ? Array.IndexOf(collection, _scope) >= 0 
                  : Equals(scope, _scope);
         }
     }
 
-    public class CompoundScopeMatcher : IScopeMatching
+    public class CompositeScopeMatcher : IScopeMatching
     {
         private readonly IScopeMatching[] _matchers;
 
-        public CompoundScopeMatcher(IScopeMatching[] matchers)
+        public CompositeScopeMatcher(IScopeMatching[] matchers)
         {
             _matchers = matchers;
         }

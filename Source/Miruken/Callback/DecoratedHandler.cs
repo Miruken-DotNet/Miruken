@@ -2,9 +2,9 @@
 {
     using System;
 
-    public abstract class HandlerDecorator  : Handler, IDecorator
+    public abstract class DecoratedHandler  : Handler, IDecorator
     {
-        protected HandlerDecorator(IHandler decoratee)
+        protected DecoratedHandler(IHandler decoratee)
         {
             Decoratee = decoratee
                      ?? throw new ArgumentNullException(nameof(decoratee));

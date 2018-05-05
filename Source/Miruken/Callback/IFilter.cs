@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using Policy;
 
-    public delegate TRes NextDelegate<out TRes>(
-        bool proceed = true, IHandler composer = null);
+    public delegate Res Next<out Res>(
+        IHandler composer = null, bool proceed = true);
 
     public interface IFilter
     {
@@ -15,7 +15,7 @@
     public interface IFilter<in TCb, TRes> : IFilter
     {
         TRes Next(TCb callback, MethodBinding method,
-                 IHandler composer, NextDelegate<TRes> next);
+                 IHandler composer, Next<TRes> next);
     }
 
     public interface IGlobalFilter<in TCb, TRes> : IFilter<TCb, TRes> { }

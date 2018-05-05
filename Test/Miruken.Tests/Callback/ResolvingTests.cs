@@ -197,7 +197,7 @@
 
         private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
         {
-            public Res Next(Cb callback, NextDelegate<Res> next,
+            public Res Next(Cb callback, Next<Res> next,
                 MethodBinding method,
                 Repository<Message> repository,
                 [Proxy]IBilling billing)
@@ -209,15 +209,19 @@
                     repository.Create(new Create<Message>(message));
                     send.Body = method.Dispatcher.Method.Name;
                     if (typeof(Res) == typeof(int))
+                    {
+                        billing.Bill(message.Id);
                         return (Res) (object) (message.Id * 10);
+                    }
                 }
                 return next();
             }
         }
 
-        private class BalanceFilter<Cb, Res> : DynamicFilter<Cb, Res>
+        private class BalanceFilter<T, Res> : DynamicFilter<Create<T>, Res>
+            where T : IEntity
         {
-            public Res Next(Cb callback, NextDelegate<Res> next,
+            public Res Next(Create<T> callback, Next<Res> next,
                 Repository<Message> repository, IBilling billing)
             {
                 return next();
@@ -233,9 +237,10 @@
             }
 
             [Provides]
-            public BalanceFilter<Cb, Res> ProviderBalance<Cb, Res>()
+            public BalanceFilter<T, Res> ProviderBalance<T, Res>()
+                where T: IEntity
             {
-                return new BalanceFilter<Cb, Res>();
+                return new BalanceFilter<T, Res>();
             }
         }
 
@@ -353,7 +358,6 @@
         [TestMethod]
         public void Should_Resolve_Implied_Handlers()
         {
-            HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailHandler();
             var id      = handler.Resolve()
                 .Command<int>(new SendEmail { Body = "Hello" });
@@ -385,7 +389,6 @@
         [TestMethod]
         public void Should_Resolve_Implied_Open_Generic_Handlers()
         {
-            HandlerDescriptor.GetDescriptor(typeof(Repository<>));
             var handler = new Repository<Message>();
             var message = new Message();
             var handled = handler.Resolve().Handle(new Create<Message>(message));
@@ -409,6 +412,7 @@
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider()
+                        + new Billing()
                         + new RepositoryProvider()
                         + new FilterProvider();
             var id = handler.Resolve()
@@ -416,7 +420,8 @@
             Assert.AreEqual(10, id);
         }
 
-        [TestMethod,
+        [Ignore,
+        TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Filters_With_Missing_Dependencies()
         {
@@ -532,9 +537,9 @@
         [TestMethod]
         public void Should_Provide_Methods_Best_Effort()
         {
-            var provider = new EmailProvider();
+            var provider = new Handler();
             var id       = Proxy<IEmailFeature>(provider.BestEffort()).Email("Hello");
-            Assert.AreEqual(1, id);
+            Assert.AreEqual(0, id);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
@@ -567,14 +572,6 @@
 
         [TestMethod]
         public void Should_Resolve_Methods_Inferred()
-        {
-            var provider = new EmailProvider();
-            var id       = Proxy<IEmailFeature>(provider.Resolve()).Email("Hello");
-            Assert.AreEqual(1, id);
-        }
-
-        [TestMethod]
-        public void Should_Resolve_Methods_Explicitly()
         {
             var provider = new EmailProvider();
             var id       = Proxy<IEmailFeature>(provider.Resolve()).Email("Hello");

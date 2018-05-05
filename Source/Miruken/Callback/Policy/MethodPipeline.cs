@@ -39,34 +39,36 @@
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
-                object Next(bool proceed, IHandler comp)
+                Next<object> next = null;
+                next = (comp, proceed) =>
                 {
                     if (!proceed)
                     {
                         completed = false;
                         return default(TRes);
                     }
+                    composer = comp ?? composer;
                     while (pipeline.MoveNext())
                     {
-                        composer = comp ?? composer;
-                        var filter = pipeline.Current;
+                        var filter     = pipeline.Current;
                         switch (filter)
                         {
                             case IFilter<TCb, TRes> typeFilter:
-                                return typeFilter.Next((TCb) callback, binding, composer,
-                                    (p, c) => (TRes) binding.CoerceResult(Next(p, c), typeof(TRes)));
+                                return typeFilter.Next((TCb)callback, binding, composer, 
+                                    (p,c) => (TRes)binding.CoerceResult(next(p,c), typeof(TRes)));
                             case IFilter<TCb, Task<TRes>> taskFilter:
-                                return taskFilter.Next((TCb) callback, binding, composer,
-                                    (p, c) => (Task<TRes>) binding.CoerceResult(Next(p, c), typeof(Task<TRes>)));
+                                return taskFilter.Next((TCb)callback, binding, composer,
+                                    (p,c) => (Task<TRes>)binding.CoerceResult(next(p,c),
+                                        typeof(Task<TRes>)));
                             case IFilter<TCb, Promise<TRes>> promiseFilter:
-                                return promiseFilter.Next((TCb) callback, binding, composer,
-                                    (p, c) => (Promise<TRes>) binding.CoerceResult(Next(p, c), typeof(Promise<TRes>)));
+                                return promiseFilter.Next((TCb)callback, binding, composer,
+                                    (p,c) => (Promise<TRes>)binding.CoerceResult(next(p,c),
+                                        typeof(Promise<TRes>)));
                         }
                     }
                     return complete(composer, out completed);
-                }
-
-                result = Next(true, composer);
+                };
+                result = next();
                 return completed;
             }
         }

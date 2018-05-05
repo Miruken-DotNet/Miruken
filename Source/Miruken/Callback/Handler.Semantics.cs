@@ -20,6 +20,9 @@ namespace Miruken.Callback
         private CallbackOptions _options;
         private CallbackOptions _specified;
 
+        public static readonly CallbackSemantics None =
+            new CallbackSemantics(CallbackOptions.None);
+
         public CallbackSemantics()
             : this(CallbackOptions.None)
         {    
@@ -62,8 +65,8 @@ namespace Miruken.Callback
                 semantics.SetOption(option, HasOption(option));
         }
 
-        bool IFilterCallback.AllowFiltering => false;
-        bool IBatchCallback.AllowBatching => false;
+        bool IFilterCallback.CanFilter => false;
+        bool IBatchCallback.CanBatch => false;
 
         object IResolveCallback.GetResolveCallback()
         {

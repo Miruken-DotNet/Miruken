@@ -96,10 +96,9 @@
             {
                 IsAsync = true;
                 if (Many) promise = promise.Catch((ex,s) => (object)null);
-                promise = promise.Then((result, s) => 
+                resolution = promise.Then((result, s) => 
                     result != null && IsSatisfied(result, greedy, composer)
                     ? result : null);
-                resolution = promise;
             }
             else if (!IsSatisfied(resolution, greedy, composer))
                 return false;
@@ -118,7 +117,7 @@
             object handler, ref bool greedy, IHandler composer)
         {
             var isGreedy = greedy;
-            var handled  = Implied(handler, false, isGreedy, composer);
+            var handled  = Implied(handler, isGreedy, composer);
             if (handled && !greedy) return true;
 
             var count = _resolutions.Count;
@@ -127,15 +126,11 @@
             return handled || (_resolutions.Count > count);
         }
 
-        private bool Implied(object item, bool invariant, bool greedy, IHandler composer)
+        private bool Implied(object item, bool greedy, IHandler composer)
         {
             var type = Key as Type;
             if (type == null) return false;
-
-            var compatible = invariant
-                           ? type == item.GetType()
-                           : type.IsInstanceOfType(item);
-
+            var compatible =  type.IsInstanceOfType(item);
             return compatible && Resolve(item, false, greedy, composer);
         }
 

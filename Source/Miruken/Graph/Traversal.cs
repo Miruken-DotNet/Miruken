@@ -86,11 +86,7 @@ namespace Miruken.Graph
                 foreach (var l in level)
                     queue.Enqueue(l);
             }
-            while (stack.Count > 0)
-            {
-                if (visitor(stack.Pop()))
-                    return;
-            }
+            while (stack.Count > 0 && !visitor(stack.Pop())) { }
         }
     }
 }

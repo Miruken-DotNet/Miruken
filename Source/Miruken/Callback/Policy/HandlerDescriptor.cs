@@ -48,7 +48,7 @@ namespace Miruken.Callback.Policy
                         _policies.Add(policy, descriptor);
                     }
 
-                    descriptor.Add(binding, handlerType);
+                    descriptor.Add(binding);
                 }
             }
 
@@ -187,7 +187,8 @@ namespace Miruken.Callback.Policy
 
         private static bool IsCategory(MemberInfo member, object criteria)
         {
-            if (member.DeclaringType == typeof(object))
+            if (member.DeclaringType == typeof(object) ||
+                member.DeclaringType == typeof(MarshalByRefObject))
                 return false;
             var method = member as MethodInfo;
             if (method != null)

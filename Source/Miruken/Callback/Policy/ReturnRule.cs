@@ -1,24 +1,32 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
 
     public abstract class ReturnRule
     {
-        public ReturnVoid  OrVoid => new ReturnVoid(this);
-        public ReturnAsync Async  => new ReturnAsync(this);
+        public ReturnVoid OrVoid => new ReturnVoid(this);
+        public ReturnAsync Async => new ReturnAsync(this);
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases);
+            RuleContext context);
 
-        public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo) { }
-
-        public virtual T GetSubRule<T>() where T : ReturnRule
+        public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo)
         {
-            return this as T;
+        }
+
+        public virtual R GetInnerRule<R>() where R : ReturnRule
+        {
+            return this as R;
+        }
+
+        public ReturnAlias Alias(string alias)
+        {
+            if (string.IsNullOrEmpty(alias))
+                throw new ArgumentException(
+                    @"Return alias cannot be empty", nameof(alias));
+            return new ReturnAlias(alias, this);
         }
 
         protected static bool IsLogicalVoid(Type returnType)
@@ -38,10 +46,9 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
-            return Rule.Matches(returnType, parameters, category, aliases);
+            return Rule.Matches(returnType, parameters, context);
         }
 
         public override void Configure(
@@ -50,9 +57,9 @@
             Rule.Configure(policyMethodBindingInfo);
         }
 
-        public override T GetSubRule<T>()
+        public override R GetInnerRule<R>()
         {
-            return base.GetSubRule<T>() ?? Rule.GetSubRule<T>();
+            return base.GetInnerRule<R>() ?? Rule.GetInnerRule<R>();
         }
     }
 
@@ -64,11 +71,10 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
             return returnType == typeof(void) ||
-                base.Matches(returnType, parameters, category, aliases);
+                   base.Matches(returnType, parameters, context);
         }
 
         public override void Configure(
@@ -76,6 +82,25 @@
         {
             if (!policyMethodBindingInfo.Dispatch.IsVoid)
                 Rule.Configure(policyMethodBindingInfo);
+        }
+    }
+
+    public class ReturnAlias : ReturnRuleDecorator
+    {
+        private readonly string _alias;
+
+        public ReturnAlias(string alias, ReturnRule rule)
+            : base(rule)
+        {
+            _alias = alias;
+        }
+
+        public override bool Matches(
+            Type returnType, ParameterInfo[] parameters,
+            RuleContext context)
+        {
+            return base.Matches(returnType, parameters, context) &&
+                context.AddAlias(_alias, returnType);
         }
     }
 }

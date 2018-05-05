@@ -54,7 +54,7 @@ namespace Miruken.Callback.Policy
         {
             if (returnRule == null)
                 throw new ArgumentNullException(nameof(returnRule));
-            if (returnRule.GetSubRule<ReturnAsync>() == null)
+            if (returnRule.GetInnerRule<ReturnAsync>() == null)
                 returnRule = new ReturnAsync(returnRule, false);
             Policy.AddMethodRule(new MethodRule(Policy.BindMethod, returnRule, args));
             return (TBuilder)this;

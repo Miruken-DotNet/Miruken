@@ -16,10 +16,10 @@
         public bool CanExecute(IValidationRule rule,
             string propertyPath, ValidationContext context)
         {
-            var ruleSet = rule.RuleSet;
-            if (string.IsNullOrEmpty(ruleSet))
+            var ruleSets = rule.RuleSets;
+            if (ruleSets.Length == 0)
                 return _scope.Matches(Scopes.Default);
-            var scopes = ruleSet.Split(',').Select(
+            var scopes = ruleSets.Select(
                 scope => scope != "default" ? scope : Scopes.Default);
             return scopes.Any(scope => _scope.Matches(scope));
         }

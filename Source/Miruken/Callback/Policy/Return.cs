@@ -1,13 +1,12 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
     using Infrastructure;
 
     public delegate bool ReturnTestDelegate(
         Type returnType, ParameterInfo[] parameters,
-        IDictionary<string, Type> aliases);
+        RuleContext context);
 
     public class Return : ReturnRule
     {
@@ -20,8 +19,7 @@
 
         public override bool Matches(
             Type returnType, ParameterInfo[] parameters,
-            CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            RuleContext context)
         {
             return returnType.IsClassOf(_type);
         }
@@ -33,9 +31,9 @@
             return new Return(type);
         }
 
-        public static TestReturn Is(string alias)
+        public new static ReturnRule Alias(string alias)
         {
-            return Is((returnType, p, aliases) => aliases[alias] == returnType);
+            return TestReturn.True.Alias(alias);
         }
 
         public static TestReturn Is(ReturnTestDelegate test)
@@ -59,6 +57,9 @@
     {
         private readonly ReturnTestDelegate _test;
 
+        public static readonly TestReturn True = 
+            Return.Is((returnType, p, ctx) => true);
+
         public TestReturn(ReturnTestDelegate test)
         {
             _test = test ?? throw new ArgumentNullException(nameof(test));
@@ -66,10 +67,9 @@
 
         public override bool Matches(
              Type returnType, ParameterInfo[] parameters,
-             CategoryAttribute category,
-             IDictionary<string, Type> aliases)
+             RuleContext context)
         {
-            return _test(returnType, parameters, aliases);
+            return _test(returnType, parameters, context);
         }
     }
 }

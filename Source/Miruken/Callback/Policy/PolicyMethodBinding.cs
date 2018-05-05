@@ -1,10 +1,8 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
-
-    public delegate bool AcceptResultDelegate(
-        object result, MethodBinding binding);
 
     public delegate PolicyMethodBinding BindMethodDelegate(
         CallbackPolicy policy,
@@ -32,6 +30,7 @@
         public CategoryAttribute Category       { get; }
     }
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class PolicyMethodBinding : MethodBinding
     {
         public PolicyMethodBinding(CallbackPolicy policy,
@@ -60,8 +59,7 @@
             IHandler composer, ResultsDelegate results = null)
         {
             var resultType = Policy.ResultType?.Invoke(callback);
-            return Invoke(target, callback, composer, resultType,
-                results, out _);
+            return Invoke(target, callback, composer, resultType, results);
         }
 
         public Type CloseHandlerType(Type handlerType, object key)
@@ -84,18 +82,16 @@
         }
 
         private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, ResultsDelegate results,
-            out object result)
+            IHandler composer, Type resultType, ResultsDelegate results)
         {
-            result = null;
+            object result;
             var args = Rule.ResolveArgs(callback);
 
-            if ((callback as IFilterCallback)?.AllowFiltering == false)
+            if ((callback as IFilterCallback)?.CanFilter == false)
             {
-                args   = ResolveArgs(args, composer, out var completed);
-                result = completed 
-                       ? Dispatcher.Invoke(target, args, resultType)
-                       : null;
+                args = ResolveArgs(args, composer, out var completed);
+                if (completed)
+                    Dispatcher.Invoke(target, args, resultType);
                 return completed;
             }
 
@@ -161,19 +157,21 @@
                     var argument     = arguments[i];
                     var argumentType = argument.ArgumentType;
                     var optional     = argument.Optional;
-                    var resolver     = argument.Resolver ?? ResolvingAttribute.Default;
                     if (argumentType == typeof(IHandler))
                         args[i] = composer;
                     else if (argumentType.IsInstanceOfType(this))
                         args[i] = this;
                     else
+                    {
+                        var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                         bundle.Add(h => args[index] =
-                            resolver.ResolveArgument(argument, h, composer),
+                                resolver.ResolveArgument(argument, h, composer),
                             (ref bool resolved) =>
                             {
                                 resolved = resolved || optional;
                                 return false;
                             });
+                    }
                 }
             }))
             {
@@ -196,6 +194,15 @@
             }
             callbackType = callback.GetType();
             return callback;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var category = Category.GetType().Name.Replace("Attribute", "");
+                return $"{category} | {Dispatcher.Method}";
+            }
         }
     }
 }

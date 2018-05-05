@@ -6,7 +6,8 @@
     using Infrastructure;
     using Policy;
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
+    [AttributeUsage(AttributeTargets.Class |
+        AttributeTargets.Method | AttributeTargets.Property,
         AllowMultiple = true, Inherited = false)]
     public class FilterAttribute : Attribute, IFilterProvider
     {

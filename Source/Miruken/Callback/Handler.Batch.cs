@@ -5,11 +5,11 @@
     using System.Threading.Tasks;
     using Concurrency;
 
-    public class BatchDecorator : HandlerDecorator
+    public class BatchHandler : DecoratedHandler
     {
         private int _completed;
         
-        public BatchDecorator(
+        public BatchHandler(
             IHandler handler, params object[] tags)
             : base(handler)
         {
@@ -36,7 +36,7 @@
             object callback, ref bool greedy, IHandler composer)
         {
             if (Batch != null && 
-                (callback as IBatchCallback)?.AllowBatching != false)
+                (callback as IBatchCallback)?.CanBatch != false)
             {
                 var batch = Batch;
                 if (_completed > 0 && !(callback is Composition)) {
@@ -82,11 +82,11 @@
 
     public static class HandlerBatchExtensions
     {
-        public static BatchDecorator Batch(
+        public static BatchHandler Batch(
             this IHandler handler, params object[] tags)
         {
             return handler != null 
-                 ? new BatchDecorator(handler, tags) 
+                 ? new BatchHandler(handler, tags) 
                  : null;
         }
 
@@ -109,7 +109,7 @@
                 throw new ArgumentNullException(nameof(handler));
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
-            var batch = new BatchDecorator(handler, tags);
+            var batch = new BatchHandler(handler, tags);
             configure(batch);
             return batch.Complete();
         }
@@ -121,7 +121,7 @@
                 throw new ArgumentNullException(nameof(handler));
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
-            var batch = new BatchDecorator(handler, tags);
+            var batch = new BatchHandler(handler, tags);
             return batch.Complete(configure(batch));
         }
 

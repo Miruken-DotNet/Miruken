@@ -45,6 +45,6 @@
         {
         }
 
-        bool IBatchCallback.AllowBatching => false;
+        bool IBatchCallback.CanBatch => false;
     }
 }

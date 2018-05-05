@@ -23,6 +23,7 @@
 
         private class EmailHandler : Handler, IEmailFeature
         {
+            [Log]
             public int Count { get; private set; }
 
             [Log]
@@ -126,10 +127,12 @@
             public int? Order { get; set; }
 
             public object Next(HandleMethod method, MethodBinding binding,
-                IHandler composer, NextDelegate<object> next)
+                IHandler composer, Next<object> next)
             {
-                Console.WriteLine($"Handle method {method.Method.Name}");
-                return next();
+                Console.Write($@"Handle method '{method.Method.Name}' with result ");
+                var result = next();
+                Console.WriteLine(result);
+                return result;
             }
         }
 
@@ -220,8 +223,8 @@
         public void Should_Handle_Methods_Best_Effort()
         {
             var handler = new EmailHandler();
-            var id      = Proxy<IEmailFeature>(handler.BestEffort()).Email("Hello");
-            Assert.AreEqual(1, id);
+            var id      = Proxy<IOffline>(handler.BestEffort()).Email("Hello");
+            Assert.AreEqual(0, id);
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]

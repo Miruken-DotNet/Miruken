@@ -1,10 +1,8 @@
 namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Infrastructure;
 
     public delegate PolicyMethodBinding MethodBinder(
         PolicyMethodBindingInfo policyMethodBindingInfo);
@@ -18,7 +16,6 @@ namespace Miruken.Callback.Policy
             _binder = binder 
                    ?? throw new ArgumentNullException(nameof(binder));
             Args = args;
-
         }
 
         public MethodRule(MethodBinder binder, ReturnRule returnValue,
@@ -34,16 +31,12 @@ namespace Miruken.Callback.Policy
         public bool Matches(MethodInfo method, CategoryAttribute category)
         {
             var parameters = method.GetParameters();
-            var paramCount = parameters.Length;
-            var aliases    = new Dictionary<string, Type>();
-            if (paramCount < Args.Length || !parameters.Zip(Args, 
-                (param, arg) => arg.Matches(param, category, aliases))
-                .All(m => m)) return false;
-            if (ReturnValue?.Matches(
-                method.ReturnType, parameters, category, aliases) == false)
-                throw new InvalidOperationException(
-                     $"Method '{method.GetDescription()}' satisfied the arguments but rejected the return");
-            return true;
+            var context    = new RuleContext(category);
+            return ReturnValue?.Matches(
+                method.ReturnType, parameters, context) != false &&
+                parameters.Length >= Args.Length &&
+                parameters.Zip(Args, (param, arg) => arg.Matches(param, context))
+                    .All(m => m);
         }
 
         public PolicyMethodBinding Bind(

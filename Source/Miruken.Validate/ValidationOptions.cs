@@ -16,7 +16,7 @@
     public static class ValidationOptionExtensions
     {
         public static IHandler StopOnFailure(
-            this IHandler handler, bool? stopOnFailure = null)
+            this IHandler handler, bool stopOnFailure = true)
         {
             return new ValidationOptions
             {

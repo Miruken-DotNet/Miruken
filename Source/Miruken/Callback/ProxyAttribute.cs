@@ -7,7 +7,7 @@
     {
         public override void ValidateArgument(Argument argument)
         {
-            if (!argument.LogicalType.IsInterface)
+            if (!argument.ParameterType.IsInterface)
                 throw new NotSupportedException(
                     "Proxy parameters must be interfaces");
 

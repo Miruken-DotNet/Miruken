@@ -52,13 +52,13 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable keys)
+            object key, IEnumerable available)
         {
             if (!(key is Tuple<object, object> tuple))
                 return Enumerable.Empty<object>();
             var input  = tuple.Item2;
             var output = tuple.Item1;
-            return keys.OfType<Tuple<object, object>>().Select(testKey =>
+            return available.OfType<Tuple<object, object>>().Select(testKey =>
             {
                 var inKey    = testKey.Item2;
                 var outKey   = testKey.Item1;

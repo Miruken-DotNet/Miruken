@@ -9,40 +9,23 @@
 
     public static class HandlerAspectExtensions
     {
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before)
-        {
-            return Aspect(handler, before, false);
-        }
-
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before, bool reentrant)
+        public static IHandler Aspect(
+            this IHandler handler, BeforeCallback before, bool reentrant = false)
         {
             return Aspect(handler, before, null, reentrant);
         }
 
-        public static HandlerFilter Aspect(
-            this IHandler handler, AfterCallback after)
-        {
-            return Aspect(handler, after, false);
-        }
-
-        public static HandlerFilter Aspect(
-                 this IHandler handler, AfterCallback after, bool reentrant)
+        public static IHandler Aspect(
+            this IHandler handler, AfterCallback after, bool reentrant = false)
         {
             return Aspect(handler, null, after, reentrant);
         }
 
-        public static HandlerFilter Aspect(
-            this IHandler handler, BeforeCallback before, AfterCallback after)
-        {
-            return Aspect(handler, before, after, false);
-        }
-
-        public static HandlerFilter Aspect(
+        public static IHandler Aspect(
             this IHandler handler, BeforeCallback before, AfterCallback after,
-            bool reentrant)
+            bool reentrant = false)
         {
+            if (before == null && after == null) return handler;
             return handler?.Filter((callback, composer, proceed) =>
             {
                 var cb = callback as ICallback;
@@ -53,8 +36,6 @@
                 switch (state)
                 {
                     case Promise promise:
-                        // TODO: Use Promise.End if cb.ResultType is not a Promise
-                        // TODO: or you will get an InvalidCastException
                         var accept = promise.Then((accepted, s) => {
                             if (Equals(accepted, false))
                                 return Promise.Rejected(new RejectedException(callback), s);
@@ -80,6 +61,7 @@
             object callback, IHandler composer,
             Func<bool> proceed, AfterCallback after, object state)
         {
+            if (after == null) return proceed();
             Promise promise = null;
             try
             {
@@ -87,14 +69,12 @@
                 var cb = callback as ICallback;
                 if (cb == null) return handled;
                 promise = cb.Result as Promise;
-                if (promise == null) return handled;
-                if (after != null)
-                    promise.Finally(() => after(callback, composer, state));
+                promise?.Finally(() => after(callback, composer, state));
                 return handled;
             }
             finally
             {
-                if (after != null && promise == null)
+                if (promise == null)
                     after(callback, composer, state);
             }
         }

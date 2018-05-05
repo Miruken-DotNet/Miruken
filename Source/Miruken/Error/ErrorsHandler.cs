@@ -39,8 +39,9 @@
                         cb.Result = promise.Catch((ex, s) => 
                                 ex is CancelledException
                                     ? Promise.Rejected(ex)
-                                    : composer.Proxy<IErrors>().HandleException(ex, context))
-                            .Coerce(cb.ResultType);
+                                    : composer.Proxy<IErrors>().HandleException(
+                                        ex, callback, context))
+                                    .Coerce(cb.ResultType);
                     }
                     return true;
                 }
@@ -50,12 +51,13 @@
                     {
                         cb.Result = (exception is CancelledException
                                     ? Promise.Rejected(exception)
-                                    : composer.Proxy<IErrors>().HandleException(exception, context))
+                                    : composer.Proxy<IErrors>().HandleException(
+                                        exception, callback, context))
                                     .Coerce(cb.ResultType);
                         return true;
                     }
                     if (exception is CancelledException) return true;
-                    composer.Proxy<IErrors>().HandleException(exception, context);
+                    composer.Proxy<IErrors>().HandleException(exception, callback, context);
                     return true;
                 }
             });

@@ -1,12 +1,20 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Infrastructure;
 
     public abstract class ArgumentRule
     {
+        public ArgumentAlias Alias(string alias)
+        {
+            if (string.IsNullOrEmpty(alias))
+                throw new ArgumentException(
+                    @"Argument alias cannot be empty", nameof(alias));
+            return new ArgumentAlias(alias, this);
+        }
+
         public TypedArgument OfType<TArg>(params string[] aliases)
         {
             return OfType(typeof(TArg), aliases);
@@ -18,8 +26,7 @@
         }
 
         public abstract bool Matches(
-           ParameterInfo parameter, CategoryAttribute category,
-           IDictionary<string, Type> aliases);
+            ParameterInfo parameter, RuleContext context);
 
         public virtual void Configure(ParameterInfo parameter,
             PolicyMethodBindingInfo policyMethodBindingInfo) { }
@@ -37,10 +44,9 @@
         public ArgumentRule Argument { get; }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            ParameterInfo parameter, RuleContext context)
         {
-            return Argument.Matches(parameter, category, aliases);
+            return Argument.Matches(parameter, context);
         }
 
         public override void Configure(ParameterInfo parameter,
@@ -52,6 +58,24 @@
         public override object Resolve(object callback)
         {
             return Argument.Resolve(callback);
+        }
+    }
+
+    public class ArgumentAlias : ArgumentRuleDecorator
+    {
+        private readonly string _alias;
+
+        public ArgumentAlias(string alias, ArgumentRule argument)
+            : base(argument)
+        {
+            _alias = alias;
+        }
+
+        public override bool Matches(
+            ParameterInfo parameter, RuleContext context)
+        {
+            return base.Matches(parameter, context) &&
+                context.AddAlias(_alias, parameter.ParameterType);
         }
     }
 
@@ -71,31 +95,33 @@
         }
 
         public override bool Matches(
-            ParameterInfo parameter, CategoryAttribute category,
-            IDictionary<string, Type> aliases)
+            ParameterInfo parameter, RuleContext context)
         {
             var paramType = parameter.ParameterType;
             if (paramType.Is(_type))
             {
+                if (!base.Matches(parameter, context)) return false;
                 if (_aliases != null && _aliases.Length > 0)
-                    throw new InvalidOperationException(
+                {
+                    context.AddError(
                         $"{_type.FullName} is not a generic definition and cannot bind aliases");
-                return base.Matches(parameter, category, aliases);
+                    return false;
+                }
+                return true;
             }
             var openGeneric = paramType.GetOpenTypeConformance(_type);
             if (openGeneric == null) return false;
             if (_aliases == null || _aliases.Length == 0) return true;
             var genericArgs = openGeneric.GetGenericArguments();
             if (_aliases.Length > genericArgs.Length)
-                throw new InvalidOperationException(
-                    $"{_type.FullName} has {genericArgs.Length} generic args, but {_aliases.Length} requested");
-            for (var i = 0; i < _aliases.Length; ++i)
             {
-                var alias = _aliases[i];
-                if (!string.IsNullOrEmpty(alias))
-                    aliases.Add(_aliases[i], genericArgs[i]);
+                context.AddError(
+                    $"{_type.FullName} has {genericArgs.Length} generic args, but {_aliases.Length} aliases provided");
+                return false;
             }
-            return base.Matches(parameter, category, aliases);
+            return base.Matches(parameter, context) && 
+                !_aliases.Where((alias, i) => !string.IsNullOrEmpty(alias) &&
+                !context.AddAlias(alias, genericArgs[i])).Any();
         }
     }
 }

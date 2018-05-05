@@ -134,8 +134,8 @@
         {
             var data       = new DataTable(); 
             var context    = new Context();
-            var child1     = context.CreateChild();
-            var grandChild = child1.CreateChild();
+            var child      = context.CreateChild();
+            var grandChild = child.CreateChild();
             context.Store(data);
             Assert.AreEqual(data, grandChild.Resolve<DataTable>());
         }
@@ -276,10 +276,10 @@
             var child3     = root.CreateChild();
             var grandChild = child3.CreateChild();
             grandChild.Store(data);
-            Assert.IsNull(child2.SelfDescendant().Resolve<DataTable>());
-            Assert.AreSame(data, grandChild.SelfDescendant().Resolve<DataTable>());
-            Assert.AreSame(data, child3.SelfDescendant().Resolve<DataTable>());
-            Assert.AreSame(data, root.SelfDescendant().Resolve<DataTable>());
+            Assert.IsNull(child2.SelfOrDescendant().Resolve<DataTable>());
+            Assert.AreSame(data, grandChild.SelfOrDescendant().Resolve<DataTable>());
+            Assert.AreSame(data, child3.SelfOrDescendant().Resolve<DataTable>());
+            Assert.AreSame(data, root.SelfOrDescendant().Resolve<DataTable>());
         }
 
         [TestMethod]
@@ -292,8 +292,8 @@
             var child3 = root.CreateChild();
             var grandChild = child3.CreateChild();
             root.Store(data);
-            Assert.IsNull(child2.SelfDescendant().Resolve<DataTable>());
-            Assert.AreSame(data, root.SelfDescendant().Resolve<DataTable>());
+            Assert.IsNull(child2.SelfOrDescendant().Resolve<DataTable>());
+            Assert.AreSame(data, root.SelfOrDescendant().Resolve<DataTable>());
         }
 
         [TestMethod]
@@ -338,10 +338,10 @@
             Func<IHandler, IHandler> Foo =
                 h => h.Aspect((_, __, ___) => ++count);
 
-            Assert.IsNull(Foo(child2.SelfDescendant()).Resolve<DataTable>());
-            Assert.AreSame(data, Foo(grandChild.SelfDescendant()).Resolve<DataTable>());
-            Assert.AreSame(data, Foo(child3.SelfDescendant()).Resolve<DataTable>());
-            Assert.AreSame(data, Foo(root.SelfDescendant()).Resolve<DataTable>());
+            Assert.IsNull(Foo(child2.SelfOrDescendant()).Resolve<DataTable>());
+            Assert.AreSame(data, Foo(grandChild.SelfOrDescendant()).Resolve<DataTable>());
+            Assert.AreSame(data, Foo(child3.SelfOrDescendant()).Resolve<DataTable>());
+            Assert.AreSame(data, Foo(root.SelfOrDescendant()).Resolve<DataTable>());
             Assert.AreEqual(4, count);
         }
 

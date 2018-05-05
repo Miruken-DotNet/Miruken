@@ -19,16 +19,16 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output)
+            object key, IEnumerable available)
         {
-            return CompatibleTypes(key as Type, output);
+            return CompatibleTypes(key as Type, available);
         }
 
         protected IEnumerable<object> CompatibleTypes(
             Type type, IEnumerable types)
         {
             if (type == null || type == typeof(object))
-                return Enumerable.Empty<Tuple<object, int>>();
+                return Enumerable.Empty<object>();
             return types.OfType<Type>()
                 .Where(t => t != type && IsCompatible(type, t));
         }
@@ -104,9 +104,9 @@
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable output)
+            object key, IEnumerable available)
         {
-            return CompatibleTypes(key as Type, output);
+            return CompatibleTypes(key as Type, available);
         }
 
         private Type GetTargetType(TCb callback)

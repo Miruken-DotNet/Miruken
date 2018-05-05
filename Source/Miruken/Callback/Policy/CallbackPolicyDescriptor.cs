@@ -23,7 +23,7 @@ namespace Miruken.Callback.Policy
 
         public CallbackPolicy Policy { get; }
 
-        internal void Add(PolicyMethodBinding method, Type handlerType)
+        internal void Add(PolicyMethodBinding method)
         {
             var key = method.Key;
             if (key == null)
@@ -100,10 +100,9 @@ namespace Miruken.Callback.Policy
             if (type != null)
             {
                 var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
-                foreach (var next in keys)
+                foreach (Type next in keys)
                 {
-                    var nextType = next as Type;
-                    if (nextType != null && _typed.TryGetValue(nextType, out var methods))
+                    if (next != null && _typed.TryGetValue(next, out var methods))
                         compatible.AddRange(methods);
                 }
             }

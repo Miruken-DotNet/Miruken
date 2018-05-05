@@ -45,7 +45,7 @@
             var arguments = handleMethod.Arguments;
             var filters   = composer.GetOrderedFilters(
                 this, typeof(HandleMethod), typeof(object),
-                Dispatcher.Owner.Filters).ToArray();
+                Filters, Dispatcher.Owner.Filters).ToArray();
 
             bool handled;
             object returnValue;

@@ -134,10 +134,10 @@
         public class ValidateTeam: Handler
         {
             [Validates]
-            public async Task ShouldHaveName(Team player, ValidationOutcome outcome)
+            public async Task ShouldHaveName(Team team, ValidationOutcome outcome)
             {
                 await Task.Delay(10);
-                if (string.IsNullOrEmpty(player.Name))
+                if (string.IsNullOrEmpty(team.Name))
                     outcome.AddError("Name", "Name is required");
             }
 
@@ -174,7 +174,7 @@
             public void MustBeTenOrUnder(Validation validation, IHandler composer)
             {
                 var outcome = validation.Outcome;
-                var player = (Player) validation.Target;
+                var player = (Player)validation.Target;
 
                 var age = (int) (DateTime.Today.Subtract(player.DOB.Value.Date)
                                      .TotalDays / 365.242199);

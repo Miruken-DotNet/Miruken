@@ -48,7 +48,7 @@ namespace Miruken.Callback
 
         public static IHandler Publish(this IHandlerAxis handler)
         {
-            return handler.SelfDescendant().Notify();
+            return handler.SelfOrDescendant().Notify();
         }
 
         #region Axis
@@ -113,7 +113,7 @@ namespace Miruken.Callback
                  : new HandlerAxis(handler, TraversingAxis.SelfOrAncestor);
         }
 
-        public static IHandlerAxis SelfDescendant(this IHandlerAxis handler)
+        public static IHandlerAxis SelfOrDescendant(this IHandlerAxis handler)
         {
             return handler == null ? null 
                  : new HandlerAxis(handler, TraversingAxis.SelfOrDescendant);

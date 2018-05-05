@@ -6,18 +6,18 @@ namespace Miruken.Callback
         object callback, IHandler composer, Func<bool> proceed
     );
 
-    public class HandlerFilter : HandlerDecorator
+    public class FilteredHandler : DecoratedHandler
     {
         private readonly HandlerFilterDelegate _filter;
         private readonly bool _reentrant;
 
-        public HandlerFilter(
+        public FilteredHandler(
             IHandler handler, HandlerFilterDelegate filter
             ) : this(handler, filter, false)
         {           
         }
 
-        public HandlerFilter(
+        public FilteredHandler(
             IHandler handler, HandlerFilterDelegate filter, 
             bool reentrant) : base(handler)
         {
@@ -33,14 +33,9 @@ namespace Miruken.Callback
             }
             var g = greedy;
             var handled = _filter(callback, composer,
-                () => BaseHandle(callback, ref g, composer));
+                () => base.HandleCallback(callback, ref g, composer));
             greedy = g;
             return handled;
-        }
-
-        private bool BaseHandle(object callback, ref bool greedy, IHandler composer)
-        {
-            return base.HandleCallback(callback, ref greedy, composer);
         }
     }
 }

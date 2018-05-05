@@ -36,6 +36,21 @@
         }
 
         [TestMethod]
+        public void Should_Map_Existing_Target()
+        {
+            var entity = new PlayerEntity
+            {
+                Id   = 1,
+                Name = "Tim Howard"
+            };
+            var target = new PlayerData();
+            var data   = (new EntityMapping() + _handler)
+                .Proxy<IMapping>().MapInto(entity, target, "ExistingTarget");
+            Assert.AreEqual(entity.Id, data.Id);
+            Assert.AreEqual(entity.Name, data.Name);
+        }
+
+        [TestMethod]
         public async Task Should_Map_Implicitly_Async()
         {
             var entity = new PlayerEntity
@@ -243,7 +258,7 @@
                     Assert.AreEqual(entity.Name, data.Name);
                 }).Add(h =>
                 {
-                    var json = handler.Proxy<IMapping>().Map<string>(player, "application/json");
+                    var json = h.Proxy<IMapping>().Map<string>(player, "application/json");
                     Assert.AreEqual("{id:12,name:'Roberto Carlose'}", json);
 
                 }));
@@ -281,6 +296,20 @@
                 instance.Id   = entity.Id;
                 instance.Name = entity.Name;
                 return instance;
+            }
+
+            [Maps, Format("ExistingTarget")]
+            public PlayerData MapToExistingPlayerData(PlayerEntity entity, PlayerData data)
+            {
+                if (data == null)
+                    return new PlayerData
+                    {
+                        Id   = entity.Id,
+                        Name = entity.Name
+                    };
+                data.Id   = entity.Id;
+                data.Name = entity.Name;
+                return data;
             }
 
             [Maps]
@@ -351,7 +380,7 @@
             {
                 var playerEntity = mapping.Source as PlayerEntity;
                 if (playerEntity != null && 
-                    (mapping.TypeOrInstance as Type).Is<PlayerData>())
+                    (mapping.TypeOrTarget as Type).Is<PlayerData>())
                 {
                     return new PlayerData
                     {

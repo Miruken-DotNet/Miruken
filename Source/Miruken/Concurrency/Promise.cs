@@ -372,12 +372,7 @@
             return task.ToPromise();
         }
 
-        public static Promise<T> Resolved<T>(T value)
-        {
-            return Resolved(value, true);
-        }
-
-        public static Promise<T> Resolved<T>(T value, bool synchronous)
+        public static Promise<T> Resolved<T>(T value, bool synchronous = true)
         {
             return new Promise<T>((resolve, reject) => resolve(value, synchronous));
         }
@@ -782,8 +777,11 @@
                         {
                             var result  = final();
                             var promise = result as Promise;
-                            promise?.Then((_, ss) => resolve((T)r, s & ss),
-                                (ex, ss) => reject(ex, s & ss));
+                            if (promise != null)
+                                promise.Then((_, ss) => resolve((T) r, s & ss),
+                                    (ex, ss) => reject(ex, s & ss));
+                            else
+                                resolve((T)r, s);
                         }
                         catch (Exception ex)
                         {
@@ -1139,7 +1137,7 @@
         protected virtual Promise<R> CreateChild<R>(
             ChildCancelMode mode, Promise<R>.CancellingPromiseOwner owner)
         {
-            return new Promise<R>(_mode, owner);
+            return new Promise<R>(mode, owner);
         }
 
         public new T Wait()

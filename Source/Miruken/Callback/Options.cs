@@ -3,8 +3,8 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, IResolveCallback, IFilterCallback,
-        IBatchCallback
+        IBoundCallback, IResolveCallback,
+        IFilterCallback, IBatchCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }
@@ -17,8 +17,8 @@
                  : new OptionsHandler<T>(handler, (T)this);
         }
 
-        bool IFilterCallback.AllowFiltering => false;
-        bool IBatchCallback.AllowBatching => false;
+        bool IFilterCallback.CanFilter => false;
+        bool IBatchCallback.CanBatch => false;
 
         object IResolveCallback.GetResolveCallback()
         {
@@ -26,7 +26,7 @@
         }
     }
 
-    public class OptionsHandler<T> : HandlerDecorator
+    public class OptionsHandler<T> : DecoratedHandler
         where T : Options<T>
     {
         private readonly T _options;
@@ -46,7 +46,25 @@
             var handled     = options != null;
             if (handled) _options.MergeInto(options);
             return handled && !greedy ||
-                (Decoratee.Handle(callback, ref greedy, composer) || handled);
+                Decoratee.Handle(callback, ref greedy, composer) || handled;
+        }
+    }
+
+    public static class OptionExtensions
+    {
+        public static T GetOptions<T>(this IHandler handler, T options)
+            where T : Options<T>
+        {
+            return handler == null || options == null ? null 
+                 : handler.Handle(options, true) ? options : null;
+        }
+
+        public static T GetOptions<T>(this IHandler handler) 
+            where T : Options<T>, new()
+        {
+            if (handler == null) return null;
+            var options = new T();
+            return handler.Handle(options, true) ? options : null;
         }
     }
 }

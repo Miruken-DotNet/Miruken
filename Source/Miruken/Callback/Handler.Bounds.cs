@@ -1,10 +1,10 @@
 ﻿namespace Miruken.Callback
 {
-    public class HandlerBounds : HandlerDecorator
+    public class BoundedHandler : DecoratedHandler
     {
         private readonly object _bounds;
 
-        public HandlerBounds(IHandler handler, object bounds = null)
+        public BoundedHandler(IHandler handler, object bounds = null)
             : base(handler)
         {
             _bounds = bounds;
@@ -24,7 +24,7 @@
     {
         public static IHandler Break(this IHandler handler, object bounds = null)
         {
-            return handler != null ? new HandlerBounds(handler, bounds) : null;
+            return handler != null ? new BoundedHandler(handler, bounds) : null;
         }
     }
 }
