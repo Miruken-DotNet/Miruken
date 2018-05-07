@@ -5,6 +5,9 @@
 
     public class ProxyAttribute : ResolvingAttribute
     {
+        public static readonly ProxyAttribute
+            Instance = new ProxyAttribute();
+
         public override void ValidateArgument(Argument argument)
         {
             if (!argument.ParameterType.IsInterface)

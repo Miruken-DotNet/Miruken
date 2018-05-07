@@ -2,7 +2,7 @@
 {
     using Concurrency;
 
-    public interface IMapping
+    public interface IMapping : IProtocol
     {
         object Map(object source, object typeOrInstance, object format = null);
 

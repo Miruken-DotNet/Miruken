@@ -2,7 +2,7 @@
 {
     using Concurrency;
 
-    public interface IContainer
+    public interface IContainer : IProtocol
     {
         T                 Resolve<T>();
         object            Resolve(object key);
