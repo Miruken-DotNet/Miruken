@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Linq;
-    using Infrastructure;
 
     public delegate PolicyMethodBinding BindMethodDelegate(
         CallbackPolicy policy,
@@ -168,7 +167,7 @@
                         args[i] = this;
                     else
                     {
-                        var resolver = GetResolver(argument);
+                        var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                         bundle.Add(h => args[index] =
                                 resolver.ResolveArgument(argument, h, composer),
                             (ref bool resolved) =>
@@ -186,26 +185,6 @@
 
             Array.Copy(ruleArgs, args, ruleArgs.Length);
             return args;
-        }
-
-        private static IArgumentResolver GetResolver(Argument argument)
-        {
-            var resolver = argument.Resolver;
-            if (resolver != null) return resolver;
-            if (argument.ParameterType.Is<IProtocol>())
-            {
-                try
-                {
-                    var proxyResolver = ProxyAttribute.Instance;
-                    proxyResolver.ValidateArgument(argument);
-                    return proxyResolver;
-                }
-                catch
-                {
-                    // Use default resolver
-                }
-            }
-            return ResolvingAttribute.Default;
         }
 
         private object GetCallbackInfo(object callback, object[] args,

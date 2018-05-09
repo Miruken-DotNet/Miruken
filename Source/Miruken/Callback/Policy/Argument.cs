@@ -32,6 +32,11 @@
                 Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
                 Optional = Resolver?.IsOptional == true
                         || Attributes.OfType<OptionalAttribute>().Any();
+                if (Resolver == null && ParameterType.IsInterface &&
+                    (ParameterType.Is<IProtocol>() || ParameterType.Is<IResolving>()))
+                {
+                    Resolver = ProxyAttribute.Instance;
+                }
             }
             else
                 Attributes = Array.Empty<Attribute>();
