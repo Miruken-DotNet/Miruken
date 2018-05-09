@@ -200,7 +200,7 @@
             public Res Next(Cb callback, Next<Res> next,
                 MethodBinding method,
                 Repository<Message> repository,
-                [Proxy]IBilling billing)
+                IBilling billing)
             {
                 var send = callback as SendEmail;
                 if (send != null)

@@ -2,7 +2,7 @@
 {
     using Concurrency;
 
-    public interface IValidating
+    public interface IValidating : IProtocol
     {
         ValidationOutcome Validate(object target, params object[] scopes);
 
