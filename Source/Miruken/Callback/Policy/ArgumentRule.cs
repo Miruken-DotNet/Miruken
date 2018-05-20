@@ -111,7 +111,8 @@
             }
             var openGeneric = paramType.GetOpenTypeConformance(_type);
             if (openGeneric == null) return false;
-            if (_aliases == null || _aliases.Length == 0) return true;
+            if (_aliases == null || _aliases.Length == 0)
+                return base.Matches(parameter, context);
             var genericArgs = openGeneric.GetGenericArguments();
             if (_aliases.Length > genericArgs.Length)
             {

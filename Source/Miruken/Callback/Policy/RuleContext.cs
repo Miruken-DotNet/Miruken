@@ -17,7 +17,7 @@
 
         public bool HasErrors => _errors?.Count > 0;
 
-        public string[] Errors => _errors.ToArray();
+        public string[] Errors => _errors?.ToArray() ?? Array.Empty<string>();
 
         public bool AddAlias(string alias, Type type)
         {
@@ -29,10 +29,10 @@
                 };
                 return true;
             }
-            Type aliasType;
-            if (_aliases.TryGetValue(alias, out aliasType))
+            Type aliasedType;
+            if (_aliases.TryGetValue(alias, out aliasedType))
             {
-                if (aliasType != type)
+                if (aliasedType != type)
                 {
                     AddError("Mismatched alias '{alias}', {type} != {aliasType}");
                     return false;

@@ -23,16 +23,15 @@
         }
 
 	    public static bool Dispatch(
-            object handler, object callback, ref bool greedy, IHandler composer)
+	        object handler, object callback, ref bool greedy, IHandler composer)
 	    {
 	        if (handler == null || SkipTypes.Contains(handler.GetType()))
-                return false;
-            var dispatch = callback as IDispatchCallback;
-            return dispatch?.Dispatch(handler, ref greedy, composer)
-                ?? HandlesAttribute.Policy.Dispatch(handler, callback, greedy, composer);
+	            return false;
+	        var dispatch = callback as IDispatchCallback?? new Command(callback);
+	        return dispatch.Dispatch(handler, ref greedy, composer);
 	    }
 
-        public static CascadeHandler operator +(Handler h1, object h2)
+	    public static CascadeHandler operator +(Handler h1, object h2)
         {
             return new CascadeHandler(h1, h2);
         }
