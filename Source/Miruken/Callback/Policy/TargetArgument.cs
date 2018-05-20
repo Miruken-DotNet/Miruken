@@ -65,7 +65,7 @@ namespace Miruken.Callback.Policy
 
         public override object Resolve(object callback)
         {
-            return callback is Cb ? _target((Cb)callback) : callback;
+            return _target((Cb) callback);
         }
     }
 }
