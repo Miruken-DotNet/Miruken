@@ -13,7 +13,7 @@
     {
         public abstract bool Invoke(MethodBinding binding, object target,
             object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<IFilter> filters, out object result);
+            IEnumerable<(IFilter, IFilterProvider)> filters, out object result);
 
         public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
         {
@@ -34,7 +34,7 @@
     {
         public override bool Invoke(MethodBinding binding, object target, 
             object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<IFilter> filters, out object result)
+            IEnumerable<(IFilter, IFilterProvider)> filters, out object result)
         {
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
@@ -50,20 +50,21 @@
                     composer = comp ?? composer;
                     while (pipeline.MoveNext())
                     {
-                        var filter     = pipeline.Current;
+                        var (filter, provider) = pipeline.Current;
                         switch (filter)
                         {
                             case IFilter<TCb, TRes> typeFilter:
                                 return typeFilter.Next((TCb)callback, binding, composer, 
-                                    (p,c) => (TRes)binding.CoerceResult(next(p,c), typeof(TRes)));
+                                    (p,c) => (TRes)binding.CoerceResult(next(p,c), typeof(TRes)),
+                                    provider);
                             case IFilter<TCb, Task<TRes>> taskFilter:
                                 return taskFilter.Next((TCb)callback, binding, composer,
                                     (p,c) => (Task<TRes>)binding.CoerceResult(next(p,c),
-                                        typeof(Task<TRes>)));
+                                        typeof(Task<TRes>)), provider);
                             case IFilter<TCb, Promise<TRes>> promiseFilter:
                                 return promiseFilter.Next((TCb)callback, binding, composer,
                                     (p,c) => (Promise<TRes>)binding.CoerceResult(next(p,c),
-                                        typeof(Promise<TRes>)));
+                                        typeof(Promise<TRes>)), provider);
                         }
                     }
                     return complete(composer, out completed);

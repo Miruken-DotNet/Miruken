@@ -20,18 +20,20 @@
 
     public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
     {
-        TRes IFilter<TCb, TRes>.Next(TCb callback, MethodBinding method, 
-            IHandler composer, Next<TRes> next)
+        TRes IFilter<TCb, TRes>.Next(
+            TCb callback, MethodBinding method, 
+            IHandler composer, Next<TRes> next,
+            IFilterProvider provider)
         {
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
-            var args = ResolveArgs(dispatch, callback, method, composer, next);
+            var args = ResolveArgs(dispatch, callback, method, composer, next, provider);
             return (TRes)dispatch.Invoke(this, args);
         }
 
         private static object[] ResolveArgs(MethodDispatch dispatch,
             TCb callback, MethodBinding method, IHandler composer,
-            Next<TRes> next)
+            Next<TRes> next, IFilterProvider provider)
         {
             var arguments = dispatch.Arguments;
             if (arguments.Length == 2)
@@ -53,6 +55,8 @@
                         args[i] = composer;
                     else if (argumentType.IsInstanceOfType(method))
                         args[i] = method;
+                    else if (argumentType.IsInstanceOfType(provider))
+                        args[i] = provider;
                     else
                         bundle.Add(h => args[index] = resolver.ResolveArgument(
                             argument, optional ? h.BestEffort() : h, composer),

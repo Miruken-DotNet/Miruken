@@ -153,7 +153,8 @@
             public int? Order { get; set; }
 
             public object Next(Job job, MethodBinding method,
-                IHandler composer, Next<object> next)
+                IHandler composer, Next<object> next,
+                IFilterProvider provider)
             {
                 var result = next();
                 job.Running--;
@@ -166,7 +167,8 @@
             public int? Order { get; set; }
 
             public Res Next(Job job, MethodBinding method,
-                IHandler composer, Next<Res> next)
+                IHandler composer, Next<Res> next,
+                IFilterProvider provider)
             {
                 job.Running += 3;
                 return next();
@@ -179,7 +181,8 @@
             public int? Order { get; set; }
 
             public Res Next(Req job, MethodBinding method,
-                IHandler composer, Next<Res> next)
+                IHandler composer, Next<Res> next,
+                IFilterProvider provider)
             {
                 job.Running++;
                 return next();

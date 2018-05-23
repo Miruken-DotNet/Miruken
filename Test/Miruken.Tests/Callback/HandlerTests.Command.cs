@@ -201,7 +201,8 @@
             public int? Order { get; set; } = 1;
 
             public Task<Res> Next(Cb callback, MethodBinding binding,
-                IHandler composer, Next<Task<Res>> next)
+                IHandler composer, Next<Task<Res>> next,
+                IFilterProvider provider)
             {
                 return next();
             }

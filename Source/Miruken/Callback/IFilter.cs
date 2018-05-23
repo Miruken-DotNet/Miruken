@@ -15,7 +15,8 @@
     public interface IFilter<in TCb, TRes> : IFilter
     {
         TRes Next(TCb callback, MethodBinding method,
-                 IHandler composer, Next<TRes> next);
+                  IHandler composer, Next<TRes> next,
+                  IFilterProvider provider = null);
     }
 
     public interface IGlobalFilter<in TCb, TRes> : IFilter<TCb, TRes> { }
@@ -39,19 +40,6 @@
             Type callbackType, Type logicalResultType, IHandler composer)
         {
             return _filters;
-        }
-    }
-
-    public class FilterComparer : IComparer<IFilter>
-    {
-        public static readonly FilterComparer Instance = new FilterComparer();
-
-        public int Compare(IFilter x, IFilter y)
-        {
-            if (x == y) return 0;
-            if (y?.Order == null) return -1;
-            if (x?.Order == null) return 1;
-            return x.Order.Value - y.Order.Value;
         }
     }
 }

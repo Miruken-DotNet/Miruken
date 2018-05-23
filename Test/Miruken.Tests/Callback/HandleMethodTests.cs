@@ -127,7 +127,8 @@
             public int? Order { get; set; }
 
             public object Next(HandleMethod method, MethodBinding binding,
-                IHandler composer, Next<object> next)
+                IHandler composer, Next<object> next,
+                IFilterProvider provider)
             {
                 Console.Write($@"Handle method '{method.Method.Name}' with result ");
                 var result = next();

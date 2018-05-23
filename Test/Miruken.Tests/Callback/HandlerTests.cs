@@ -759,8 +759,9 @@
         {
             public int? Order { get; set; }
 
-            public object Next(
-                T callback, MethodBinding method, IHandler composer, Next<object> next)
+            public object Next(T callback, MethodBinding method,
+                IHandler composer, Next<object> next,
+                IFilterProvider provider)
             {
                 return null;
             }
@@ -770,7 +771,9 @@
         {
             public int? Order { get; set; }
 
-            public T Next(object callback, MethodBinding method, IHandler composer, Next<T> next)
+            public T Next(object callback, MethodBinding method,
+                IHandler composer, Next<T> next,
+                IFilterProvider provider)
             {
                 return default(T);
             }
@@ -781,7 +784,9 @@
             public int? Order { get; set; }
 
             public object Next(
-                object callback, MethodBinding method, IHandler composer, Next<object> next)
+                object callback, MethodBinding method,
+                IHandler composer, Next<object> next,
+                IFilterProvider provider)
             {
                 return null;
             }
@@ -1346,7 +1351,7 @@
 
             object IFilter<Bar, object>.Next(
                 Bar callback, MethodBinding binding, IHandler composer,
-                Next<object> next)
+                Next<object> next, IFilterProvider provider)
             {
                 callback.Filters.Add(this);
                 callback.Handled++;
@@ -1407,7 +1412,8 @@
             public int? Order { get; set; } = 1;
 
             public Res Next(Cb callback, MethodBinding binding,
-                IHandler composer, Next<Res> next)
+                IHandler composer, Next<Res> next,
+                IFilterProvider provider)
             {
                 var cb = ExtractCallback(callback);
                 cb?.Filters.Add(this);
@@ -1421,7 +1427,8 @@
             public int? Order { get; set; } = 2;
 
             public Promise<Res> Next(Req request, MethodBinding binding,
-                IHandler composer, Next<Promise<Res>> next)
+                IHandler composer, Next<Promise<Res>> next,
+                IFilterProvider provider)
             {
                 var cb = ExtractCallback(request);
                 cb?.Filters.Add(this);
@@ -1435,7 +1442,8 @@
             public int? Order { get; set; } = 3;
 
             public Task<Res> Next(Req request, MethodBinding binding,
-                IHandler composer, Next<Task<Res>> next)
+                IHandler composer, Next<Task<Res>> next,
+                IFilterProvider provider)
             {
                 var cb = ExtractCallback(request);
                 cb?.Filters.Add(this);
@@ -1449,7 +1457,8 @@
             public int? Order { get; set; } = 2;
 
             public Task<Res> Next(Req request, MethodBinding binding,
-                IHandler composer, Next<Task<Res>> next)
+                IHandler composer, Next<Task<Res>> next,
+                IFilterProvider provider)
             {
                 return Promise<Res>.Rejected(
                     new InvalidOperationException("System shutdown"));

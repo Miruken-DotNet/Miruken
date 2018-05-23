@@ -20,6 +20,7 @@
         public Type[] FilterTypes { get; }
         public bool   Many        { get; set; }
         public int?   Order       { get; set; }
+        public bool   Required    { get; set; }
 
         public IEnumerable<IFilter> GetFilters(MethodBinding binding, 
             Type callbackType, Type logicalResultType, IHandler composer)
@@ -31,15 +32,17 @@
                     ? composer.Break().ResolveAll(filterType)
                     : new[] {composer.Break().Resolve(filterType)})
                 .OfType<IFilter>()
-                .Where(f => UseFilterInstance(f, binding));
+                .ToArray();
 
             var relativeOrder = Order;
             foreach (var filter in filters)
             {
                 if (!filter.Order.HasValue && relativeOrder.HasValue)
                     filter.Order = relativeOrder++;
-                yield return filter;
             }
+
+            ResolvedFilters(filters, binding);
+            return filters;
         }
 
         protected virtual void ValidateFilterType(Type filterType)
@@ -51,9 +54,11 @@
             return true;
         }
 
-        protected virtual bool UseFilterInstance(IFilter filter, MethodBinding binding)
+        protected virtual void ResolvedFilters(IFilter[] filters, MethodBinding binding)
         {
-            return true;
+            if (Required && filters.Length == 0)
+                throw new InvalidOperationException(
+                    $"At least one filter instance from '{GetType().FullName}' is required");
         }
 
         private static Type CloseFilterType(Type filterType, Type callbackType,
