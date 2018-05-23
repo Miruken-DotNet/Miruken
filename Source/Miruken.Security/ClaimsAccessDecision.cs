@@ -14,12 +14,14 @@
         {
         }
 
-        bool IAccessDecision.Allow(IPrincipal principal)
+        bool IAccessDecision.Allow(
+            IPrincipal principal, IHandler composer)
         {
-            return Allow(principal);
+            return Allow(principal, composer);
         }
 
-        protected abstract bool Allow(IPrincipal principal);
+        protected abstract bool Allow(
+            IPrincipal principal, IHandler composer);
 
         protected static IEnumerable<Claim> ObtainClaims(
             IPrincipal principal, string claimType)

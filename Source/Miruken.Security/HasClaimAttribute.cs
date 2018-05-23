@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Security.Claims;
     using System.Security.Principal;
+    using Callback;
 
     public class HasClaimAttribute : ClaimsAccessDecision
     {
@@ -17,7 +18,7 @@
         public string   Type   { get; }
         public string[] Values { get; }
 
-        protected override bool Allow(IPrincipal principal)
+        protected override bool Allow(IPrincipal principal, IHandler composer)
         {
             var claims = ObtainClaims(principal, Type);
             if (claims.Any(claim => Values.Length == 0 ||

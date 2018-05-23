@@ -8,9 +8,9 @@
     {
         public TRes Next(TCb callback, Next<TRes> next,
             MethodBinding method, IAccessDecision access,
-            IPrincipal principal)
+            IPrincipal principal, IHandler composer)
         {
-            return next(proceed: access.Allow(principal));
+            return next(proceed: access.Allow(principal, composer));
         }
     }
 }
