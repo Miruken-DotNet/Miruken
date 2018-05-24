@@ -1,10 +1,13 @@
 ﻿namespace Miruken.Security
 {
     using System.Security.Principal;
+    using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
 
-    public interface IAccessDecision
+    public interface IAccessDecision : IProtocol
     {
-        bool Allow(IPrincipal principal, IHandler composer);
+        Task<bool> Allow(MethodBinding method,
+            IPrincipal principal, IHandler composer);
     }
 }

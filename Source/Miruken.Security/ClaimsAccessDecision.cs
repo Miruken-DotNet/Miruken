@@ -4,7 +4,9 @@
     using System.Security.Authentication;
     using System.Security.Claims;
     using System.Security.Principal;
+    using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
 
     public abstract class ClaimsAccessDecision
         : FilterAttribute, IAccessDecision
@@ -14,13 +16,13 @@
         {
         }
 
-        bool IAccessDecision.Allow(
+        Task<bool> IAccessDecision.Allow(MethodBinding method,
             IPrincipal principal, IHandler composer)
         {
-            return Allow(principal, composer);
+            return Allow(method, principal, composer);
         }
 
-        protected abstract bool Allow(
+        protected abstract Task<bool> Allow(MethodBinding method,
             IPrincipal principal, IHandler composer);
 
         protected static IEnumerable<Claim> ObtainClaims(
@@ -33,7 +35,7 @@
                 return claimsIdentity.FindAll(claimType);
             }
             throw new AuthenticationException(
-                "The current principal does not have an authenticated ClaimsIdentity");
+                "The principal does not represent an authenticated claims identity.");
         }
     }
 }
