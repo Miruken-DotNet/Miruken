@@ -3,6 +3,7 @@
     using System;
     using System.Security.Claims;
     using System.Threading;
+    using System.Threading.Tasks;
     using Callback;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -54,7 +55,7 @@
         }
 
         [TestMethod]
-        public void Handles_Callback_If_Role_Satisfied()
+        public async Task Handles_Callback_If_Role_Satisfied()
         {
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim("scope", "launch"));
@@ -66,7 +67,7 @@
             var confirmtion = handler
                 .Command<LaunchConfirmation>(launch);
             var abortLaunch = new AbortLaunch(confirmtion);
-            var aborted     = handler.Command<LaunchAborted>(abortLaunch);
+            var aborted     = await handler.CommandAsync<LaunchAborted>(abortLaunch);
             Assert.AreEqual("Scud", aborted.Launch.Missle);
         }
 
@@ -121,9 +122,9 @@
 
             [Handles,
              HasRole("president")]
-            public LaunchAborted Abort(AbortLaunch abort)
+            public Task<LaunchAborted> Abort(AbortLaunch abort)
             {
-                return new LaunchAborted(abort.Launch);
+                return Task.FromResult(new LaunchAborted(abort.Launch));
             }
         }
 

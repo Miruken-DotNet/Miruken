@@ -96,7 +96,8 @@
             if (member.DeclaringType == typeof(object))
                 return false;
             var method = (MethodInfo)member;
-            if (method.Name != "Next") return false;
+            if (method.Name != "Next" || method.ReturnType != typeof(TRes))
+                return false;
             var parameters = method.GetParameters();
             if (parameters.Length < 2) return false;
             return parameters[0].ParameterType == typeof(TCb) &&
