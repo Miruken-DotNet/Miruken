@@ -16,7 +16,7 @@
             MethodBinding method, IAccessDecision access,
             IPrincipal principal, IHandler composer)
         {
-            var allowed = await access.Allow(method, principal, composer);
+            var allowed = await access.CanAccess(method, principal, composer);
             return await next(proceed: allowed);
         }
     }

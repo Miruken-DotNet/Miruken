@@ -20,7 +20,7 @@
         public string   Type   { get; }
         public string[] Values { get; }
 
-        protected override Task<bool> Allow(MethodBinding method,
+        protected override Task<bool> CanAccess(MethodBinding method,
             IPrincipal principal, IHandler composer)
         {
             var claims = ObtainClaims(principal, Type);

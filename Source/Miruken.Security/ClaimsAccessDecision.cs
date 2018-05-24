@@ -16,13 +16,13 @@
         {
         }
 
-        Task<bool> IAccessDecision.Allow(MethodBinding method,
+        Task<bool> IAccessDecision.CanAccess(MethodBinding method,
             IPrincipal principal, IHandler composer)
         {
-            return Allow(method, principal, composer);
+            return CanAccess(method, principal, composer);
         }
 
-        protected abstract Task<bool> Allow(MethodBinding method,
+        protected abstract Task<bool> CanAccess(MethodBinding method,
             IPrincipal principal, IHandler composer);
 
         protected static IEnumerable<Claim> ObtainClaims(
