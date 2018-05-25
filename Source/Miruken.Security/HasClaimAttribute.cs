@@ -24,11 +24,9 @@
             IPrincipal principal, IHandler composer)
         {
             var claims = ObtainClaims(principal, Type);
-            if (claims.Any(claim => Values.Length == 0 ||
-                Values.Contains(claim.Value)))
-                return Task.FromResult(true);
-            throw new UnauthorizedAccessException(
-                $"The principal does not satisfy the required '{Type}' claim.");
+            var allow = claims.Any(claim =>
+                Values.Length == 0 || Values.Contains(claim.Value));
+            return Task.FromResult(allow);
         }
     }
 
@@ -36,6 +34,14 @@
     {
         public HasRoleAttribute(params string[] roles)
             : base(ClaimTypes.Role, roles)
+        {
+        }
+    }
+
+    public class HasScopeAttribute : HasClaimAttribute
+    {
+        public HasScopeAttribute(params string[] scopes)
+            : base("scope", scopes)
         {
         }
     }

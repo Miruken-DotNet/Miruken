@@ -8,7 +8,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class HasClaimFilterTests
+    public class HasClaimAtreibuteTests
     {
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]

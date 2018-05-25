@@ -16,8 +16,9 @@
         {
         }
 
-        Task<bool> IAccessDecision.CanAccess(MethodBinding method,
-            IPrincipal principal, IHandler composer)
+        Task<bool> IAccessDecision.CanAccess(
+            MethodBinding method, IPrincipal principal,
+            object scope, IHandler composer)
         {
             return CanAccess(method, principal, composer);
         }
@@ -35,7 +36,7 @@
                 return claimsIdentity.FindAll(claimType);
             }
             throw new AuthenticationException(
-                "The principal does not represent an authenticated claims identity.");
+                "The principal is not authenticated");
         }
     }
 }

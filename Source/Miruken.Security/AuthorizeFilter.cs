@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Security
 {
+    using System;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Callback;
@@ -12,12 +13,18 @@
             Order = Stage.Authorization;
         }
 
-        public async Task<TRes> Next(TCb callback, Next<Task<TRes>> next,
+        public async Task<TRes> Next(
+            TCb callback, Next<Task<TRes>> next,
             MethodBinding method, IAccessDecision access,
-            IPrincipal principal, IHandler composer)
+            IPrincipal principal, IHandler composer,
+            IFilterProvider provider)
         {
-            var allowed = await access.CanAccess(method, principal, composer);
-            return await next(proceed: allowed);
+            if (await access.CanAccess(
+                method, principal, provider, composer))
+                return await next();
+
+            throw new UnauthorizedAccessException(
+                "Authorization has been denied");
         }
     }
 }

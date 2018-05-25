@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthorizedAttribute.cs" />
     <Compile Include="ClaimsAccessDecision.cs" />
     <Compile Include="HasClaimAttribute.cs" />
     <Compile Include="AuthorizeFilter.cs" />

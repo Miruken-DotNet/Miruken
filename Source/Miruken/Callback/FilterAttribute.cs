@@ -58,7 +58,7 @@
         {
             if (Required && filters.Length == 0)
                 throw new InvalidOperationException(
-                    $"At least one filter instance from '{GetType().FullName}' is required");
+                    $"At least one filter must be provided by '{GetType().FullName}'");
         }
 
         private static Type CloseFilterType(Type filterType, Type callbackType,

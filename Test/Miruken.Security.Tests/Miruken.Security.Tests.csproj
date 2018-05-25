@@ -48,8 +48,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizeFilterTests.cs" />
-    <Compile Include="HasClaimFilterTests.cs" />
+    <Compile Include="AuthorizedAttributeTests.cs" />
+    <Compile Include="HasClaimAtreibuteTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

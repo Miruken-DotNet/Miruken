@@ -7,7 +7,8 @@
 
     public interface IAccessDecision : IProtocol
     {
-        Task<bool> CanAccess(MethodBinding method,
-            IPrincipal principal, IHandler composer);
+        Task<bool> CanAccess(
+            MethodBinding method, IPrincipal principal,
+            object scope, IHandler composer);
     }
 }
