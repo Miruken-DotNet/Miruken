@@ -66,8 +66,7 @@
             try
             {
                 var handled = proceed();
-                var cb = callback as ICallback;
-                if (cb == null) return handled;
+                if (!(callback is ICallback cb)) return handled;
                 promise = cb.Result as Promise;
                 promise?.Finally(() => after(callback, composer, state));
                 return handled;

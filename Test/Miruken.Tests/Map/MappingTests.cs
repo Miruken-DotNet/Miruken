@@ -286,11 +286,10 @@
             [Maps]
             public PlayerData MapToPlayerData(PlayerEntity entity, Mapping mapping)
             {
-                var instance = mapping.Target as PlayerData;
-                if (instance == null)
+                if (!(mapping.Target is PlayerData instance))
                     return new PlayerData
                     {
-                        Id   = entity.Id,
+                        Id = entity.Id,
                         Name = entity.Name
                     };
                 instance.Id   = entity.Id;
@@ -378,8 +377,7 @@
             [Maps]
             public object Map(Mapping mapping)
             {
-                var playerEntity = mapping.Source as PlayerEntity;
-                if (playerEntity != null && 
+                if (mapping.Source is PlayerEntity playerEntity && 
                     (mapping.TypeOrTarget as Type).Is<PlayerData>())
                 {
                     return new PlayerData

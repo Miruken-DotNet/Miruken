@@ -6,7 +6,7 @@
     using Callback;
     using Callback.Policy;
 
-    public class AuthorizeFilter<TCb, TRes> : DynamicFilter<TCb, Task<TRes>>
+    public class AuthorizeFilter<TCb, TRes> : DynamicFilter<TCb, TRes>
     {
         public AuthorizeFilter()
         {
@@ -14,7 +14,7 @@
         }
 
         public async Task<TRes> Next(
-            TCb callback, Next<Task<TRes>> next,
+            TCb callback, Next<TRes> next,
             MethodBinding method, IAccessDecision access,
             IPrincipal principal, IHandler composer,
             IFilterProvider provider)

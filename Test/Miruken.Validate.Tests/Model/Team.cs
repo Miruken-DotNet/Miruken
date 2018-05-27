@@ -5,6 +5,10 @@
 
     public class Team : Model
     {
+        public int      Id         { get; set; }
+
+        public bool     Active     { get; set; }
+
         [Required]
         public string   Name       { get; set; }
 

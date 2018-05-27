@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
@@ -126,12 +127,13 @@
         {
             public int? Order { get; set; }
 
-            public object Next(HandleMethod method, MethodBinding binding,
+            public async Task<object> Next(
+                HandleMethod method, MethodBinding binding,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
                 Console.Write($@"Handle method '{method.Method.Name}' with result ");
-                var result = next();
+                var result = await next();
                 Console.WriteLine(result);
                 return result;
             }

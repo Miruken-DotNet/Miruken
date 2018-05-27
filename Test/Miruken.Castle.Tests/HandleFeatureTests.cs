@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Castle.Tests
 {
+    using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
     using global::Castle.MicroKernel.Registration;
@@ -152,11 +153,11 @@
         {
             public int? Order { get; set; }
 
-            public object Next(Job job, MethodBinding method,
+            public async Task<object> Next(Job job, MethodBinding method,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
-                var result = next();
+                var result = await next();
                 job.Running--;
                 return result;
             }
@@ -166,7 +167,7 @@
         {
             public int? Order { get; set; }
 
-            public Res Next(Job job, MethodBinding method,
+            public Task<Res> Next(Job job, MethodBinding method,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -180,7 +181,7 @@
         {
             public int? Order { get; set; }
 
-            public Res Next(Req job, MethodBinding method,
+            public Task<Res> Next(Req job, MethodBinding method,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Reflection;
     using System.Text;
+    using System.Threading.Tasks;
     using Policy;
 
     public abstract class DynamicFilter : IFilter
@@ -20,7 +21,7 @@
 
     public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
     {
-        TRes IFilter<TCb, TRes>.Next(
+        Task<TRes> IFilter<TCb, TRes>.Next(
             TCb callback, MethodBinding method, 
             IHandler composer, Next<TRes> next,
             IFilterProvider provider)
@@ -28,7 +29,7 @@
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
             var args = ResolveArgs(dispatch, callback, method, composer, next, provider);
-            return (TRes)dispatch.Invoke(this, args);
+            return (Task<TRes>)dispatch.Invoke(this, args);
         }
 
         private static object[] ResolveArgs(MethodDispatch dispatch,
@@ -96,7 +97,7 @@
             if (member.DeclaringType == typeof(object))
                 return false;
             var method = (MethodInfo)member;
-            if (method.Name != "Next" || method.ReturnType != typeof(TRes))
+            if (method.Name != "Next" || method.ReturnType != typeof(Task<TRes>))
                 return false;
             var parameters = method.GetParameters();
             if (parameters.Length < 2) return false;

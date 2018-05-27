@@ -2,9 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Policy;
 
-    public delegate Res Next<out Res>(
+    public delegate Task<Res> Next<Res>(
         IHandler composer = null, bool proceed = true);
 
     public interface IFilter
@@ -14,7 +15,7 @@
 
     public interface IFilter<in TCb, TRes> : IFilter
     {
-        TRes Next(TCb callback, MethodBinding method,
+        Task<TRes> Next(TCb callback, MethodBinding method,
                   IHandler composer, Next<TRes> next,
                   IFilterProvider provider = null);
     }

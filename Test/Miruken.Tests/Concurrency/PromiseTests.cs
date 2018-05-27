@@ -327,7 +327,7 @@ namespace Miruken.Tests.Concurrency
                 Assert.AreEqual("Hello", r);
                 ++called; 
             });
-            promise.Then(new ResolveCallback((r,s) => { throw new Exception("Bad"); }))
+            promise.Then(new ResolveCallback((r,s) => throw new Exception("Bad")))
                 .Then((r, s) => { Assert.Fail("Should skip"); return 12;})
                 .Catch((ex, s) =>
                 {
@@ -347,7 +347,7 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
-                .Then(new ResolveCallback((r,s) => { throw new Exception("Bad"); }))
+                .Then(new ResolveCallback((r,s) => throw new Exception("Bad")))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -373,9 +373,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 reject(new Exception("Foo"), true))
                 .Then(null, new RejectCallback((ex, s) =>
-                {
-                    throw new Exception("Bar");
-                }))
+                    throw new Exception("Bar")))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -396,10 +394,8 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ =>
                     reject(new Exception("Rejected"), false)))
-                .Then(null, new RejectCallback((ex, s) =>
-                {
-                    throw new Exception("Bar");
-                }))
+                .Then(null, new RejectCallback((ex, s) => 
+                    throw new Exception("Bar")))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex, s) =>
                 {
@@ -431,7 +427,7 @@ namespace Miruken.Tests.Concurrency
         {
             var promise = new Promise<object>((resolve, reject) =>
                 reject(new Exception("Rejected"), true))
-                .Then((r,s) => 12, (ex,s) => { throw new Exception("Yeah"); });
+                .Then((r,s) => 12, (ex,s) => throw new Exception("Yeah"));
             try
             {
                 promise.Wait();
@@ -451,7 +447,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ =>
                     reject(new Exception("Rejected"), false)))
-                .Then((r,s) => 12, (exx,s) => { throw new Exception("Meltdown"); })
+                .Then((r,s) => 12, (exx,s) => throw new Exception("Meltdown"))
                 .Catch((ex, s) =>
                 {
                     Thread.Sleep(100);
@@ -495,7 +491,7 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
-                .Then(new ResolveCallback((r,s) => { throw new Exception("Bar"); }))
+                .Then(new ResolveCallback((r,s) => throw new Exception("Bar")))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex,s) =>
                 {
@@ -520,7 +516,7 @@ namespace Miruken.Tests.Concurrency
             var verify = false;
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => reject(new Exception("Foo"), false)))
-                .Then((r,s) => 12, (ex,s) => { throw new Exception("Bar"); })
+                .Then((r,s) => 12, (ex,s) => throw new Exception("Bar"))
                 .Then((r,s) => Assert.Fail("Should skip"))
                 .Catch((ex,s) =>
                 {
@@ -1006,7 +1002,7 @@ namespace Miruken.Tests.Concurrency
             var called  = false;
             var cancel  = false;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true))
-                .Then(new ResolveCallback((result, s) => { throw new CancelledException(); }))
+                .Then(new ResolveCallback((result, s) => throw new CancelledException()))
                 .Then((result, s) => { called = true; }, (ex, ss) => { called = true; });
             promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
@@ -1044,7 +1040,7 @@ namespace Miruken.Tests.Concurrency
             var called = false;
             var cancel = false;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true))
-            .Then(new ResolveCallback((result, s) => { throw new CancelledException(); }))
+            .Then(new ResolveCallback((result, s) => throw new CancelledException()))
             .Finally(() => { called = true; });
             promise.Cancelled(ex => cancel = true);
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
@@ -1261,9 +1257,8 @@ namespace Miruken.Tests.Concurrency
         public void Should_Translate_Failed_Actions_Into_Rejected_Promises()
         {
             var called = false;
-            var promise = Promise.Try(() => {
-                throw new InvalidOperationException("No connection");
-            })
+            var promise = Promise.Try(() => 
+                    throw new InvalidOperationException("No connection"))
             .Catch((InvalidOperationException ex, bool s) =>
             {
                 Assert.AreEqual("No connection", ex.Message);
@@ -1301,10 +1296,8 @@ namespace Miruken.Tests.Concurrency
         public void Should_Translate_Failed_Functions_Into_Rejected_Promises()
         {
             var called = false;
-            var promise = Promise.Try(() =>
-            {
-                throw new InvalidOperationException("Out of paper");
-            })
+            var promise = Promise.Try(() => 
+                    throw new InvalidOperationException("Out of paper"))
             .Catch((InvalidOperationException ex, bool s) =>
             {
                 Assert.AreEqual("Out of paper", ex.Message);
@@ -1345,9 +1338,8 @@ namespace Miruken.Tests.Concurrency
             var called = false;
             var promise = Promise.Try(() =>
                 Promise.Delay(100.Millis()).Then(
-                    (ResolveCallback)((r, s) => {
-                        throw new ArgumentException("Bad param", "foo");
-                })))
+                    (ResolveCallback)((r, s) =>
+                        throw new ArgumentException("Bad param", "foo"))))
             .Catch((ArgumentException ex, bool s) =>
             {
                 Assert.AreEqual("foo", ex.ParamName);

@@ -185,8 +185,8 @@
                 else
                 {
                     _rejected += (ex, s) => {
-                        var cancel = ex as CancelledException;
-                        if (cancel != null) cancelled(cancel);
+                        if (ex is CancelledException cancel)
+                            cancelled(cancel);
                     };
                 }
             }
@@ -258,18 +258,20 @@
         public static Promise Delay(TimeSpan delay)
         {
             Timer timer = null;
-            Action disposeTimer = () =>
+
+            void DisposeTimer()
             {
                 var t = Interlocked.CompareExchange(ref timer, null, timer);
                 t?.Dispose();
-            };
+            }
+
             return new Promise<object>((resolve, reject) => 
                 timer = new Timer(_ => {
-                    disposeTimer();
+                    DisposeTimer();
                     resolve(null, false);
                 },
                 null, (int)delay.TotalMilliseconds, System.Threading.Timeout.Infinite)
-            ).Finally(() => disposeTimer());  // cancel;
+            ).Finally(() => DisposeTimer());  // cancel;
         }
 
         public static Promise Try(Action action)
@@ -351,10 +353,9 @@
 
         public static Promise<object> Resolved(object value)
         {
-            var promise = value as Promise;
-            if (promise != null) return Resolved(promise);
-            var task = value as Task;
-            return task == null  
+            if (value is Promise promise)
+                return Resolved(promise);
+            return !(value is Task task)  
                  ? Resolved<object>(value) 
                  : task.ToPromise(); // 2.3.2
         }
@@ -541,12 +542,13 @@
         public Promise<T> Then(ResolveCallbackT then, RejectCallback fail)
         {
             return CreateChild<T>((resolve, reject) => {
-                ResolveCallback res = (r,s) => {
+                void Res(object r, bool s)
+                {
                     if (then != null)
                     {
                         try
                         {
-                            then((T)r, s);
+                            then((T) r, s);
                         }
                         catch (Exception ex)
                         {
@@ -555,9 +557,12 @@
                             return;
                         }
                     }
-                    resolve((T)r, s);
-                };
-                RejectCallback rej = (ex,s) => {
+
+                    resolve((T) r, s);
+                }
+
+                void Rej(Exception ex, bool s)
+                {
                     if (fail != null && !(ex is CancelledException))
                     {
                         try
@@ -570,23 +575,24 @@
                             // 2.2.7.2
                             reject(exo, s);
                         }
-                    }   
+                    }
                     else
                         reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
-                        _rejected += rej;
+                        _fulfilled += Res;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -615,14 +621,14 @@
         {
             return CreateChild<R>((resolve, reject) =>
             {
-                ResolveCallback res = (r,s) =>
+                void Res(object r, bool s)
                 {
                     var f = default(R);
                     if (then != null)
                     {
                         try
                         {
-                            f = then((T)r, s);
+                            f = then((T) r, s);
                         }
                         catch (Exception ex)
                         {
@@ -631,13 +637,15 @@
                             return;
                         }
                     }
-                    else if (r is R)
-                        f = (R)r;
+                    else if (r is R r1)
+                        f = r1;
                     else if (typeof(R) == typeof(Promise))
-                        f = (R)(object)Resolved(r);
+                        f = (R) (object) Resolved(r);
+
                     resolve(f, s);
-                };
-                RejectCallback rej = (ex,s) =>
+                }
+
+                void Rej(Exception ex, bool s)
                 {
                     if (fail != null && !(ex is CancelledException))
                     {
@@ -654,20 +662,21 @@
                     }
                     else
                         reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
-                        _rejected += rej;
+                        _fulfilled += Res;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -714,7 +723,7 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                ResolveCallback res = (r, s) =>
+                void Res(object r, bool s)
                 {
                     if (final != null)
                     {
@@ -728,9 +737,11 @@
                             return;
                         }
                     }
-                    resolve((T)r, s);
-                };
-                RejectCallback rej = (ex, s) =>
+
+                    resolve((T) r, s);
+                }
+
+                void Rej(Exception ex, bool s)
                 {
                     if (final != null)
                     {
@@ -746,20 +757,21 @@
                     }
                     else
                         reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
-                        _rejected += rej;
+                        _fulfilled += Res;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -769,19 +781,19 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                ResolveCallback res = (r, s) =>
+                void Res(object r, bool s)
                 {
                     if (final != null)
                     {
                         try
                         {
-                            var result  = final();
-                            var promise = result as Promise;
-                            if (promise != null)
-                                promise.Then((_, ss) => resolve((T) r, s & ss),
+                            var result = final();
+                            if (result is Promise promise)
+                                promise.Then((_, ss) => 
+                                    resolve((T) r, s & ss),
                                     (ex, ss) => reject(ex, s & ss));
                             else
-                                resolve((T)r, s);
+                                resolve((T) r, s);
                         }
                         catch (Exception ex)
                         {
@@ -789,9 +801,10 @@
                         }
                     }
                     else
-                        resolve((T)r, s);
-                };
-                RejectCallback rej = (ex, s) =>
+                        resolve((T) r, s);
+                }
+
+                void Rej(Exception ex, bool s)
                 {
                     if (final != null)
                     {
@@ -807,20 +820,21 @@
                     }
                     else
                         reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
-                        _rejected += rej;
+                        _fulfilled += Res;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -844,7 +858,7 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                ResolveCallback res = (r, s) =>
+                void Res(object r, bool s)
                 {
                     if (tap != null)
                     {
@@ -857,20 +871,22 @@
                             // ignore
                         }
                     }
-                    resolve((T)r, s);
-                };
+
+                    resolve((T) r, s);
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
                             reject(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
+                        _fulfilled += Res;
                         _rejected += reject;
                     }
                 }
@@ -881,35 +897,37 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                ResolveCallback res = (r, s) =>
+                void Res(object r, bool s)
                 {
                     if (tap != null)
                     {
                         try
                         {
                             var promise = tap((T) r, s);
-                            if (promise?.Finally(() => resolve((T) r, s)) != null)
-                                return;
+                            if (promise?.Finally(() =>
+                                    resolve((T) r, s)) != null) return;
                         }
                         catch
                         {
                             // ignore
                         }
                     }
-                    resolve((T)r, s);
-                };
+
+                    resolve((T) r, s);
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
                     {
                         if (State == PromiseState.Fulfilled)
-                            res(_result, CompletedSynchronously);
+                            Res(_result, CompletedSynchronously);
                         else
                             reject(_exception, CompletedSynchronously);
                     }
                     else
                     {
-                        _fulfilled += res;
+                        _fulfilled += Res;
                         _rejected += reject;
                     }
                 }
@@ -930,7 +948,7 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                RejectCallback rej = (ex, s) =>
+                void Rej(Exception ex, bool s)
                 {
                     if (tap != null)
                     {
@@ -943,8 +961,10 @@
                             // ignore
                         }
                     }
+
                     reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
@@ -952,12 +972,12 @@
                         if (State == PromiseState.Fulfilled)
                             resolve((T)_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
                         _fulfilled += (r,s) => resolve((T)r,s);
-                        _rejected += rej;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -967,7 +987,7 @@
         {
             return CreateChild<T>((resolve, reject) =>
             {
-                RejectCallback rej = (ex, s) =>
+                void Rej(Exception ex, bool s)
                 {
                     if (tap != null)
                     {
@@ -982,8 +1002,10 @@
                             // ignore
                         }
                     }
+
                     reject(ex, s);
-                };
+                }
+
                 lock (_guard)
                 {
                     if (IsCompleted)
@@ -991,12 +1013,12 @@
                         if (State == PromiseState.Fulfilled)
                             resolve((T)_result, CompletedSynchronously);
                         else
-                            rej(_exception, CompletedSynchronously);
+                            Rej(_exception, CompletedSynchronously);
                     }
                     else
                     {
                         _fulfilled += (r, s) => resolve((T)r, s);
-                        _rejected += rej;
+                        _rejected += Rej;
                     }
                 }
             });
@@ -1029,8 +1051,8 @@
         {
             return CreateChild<T>((res, rej) =>
             {
-                ResolveCallback rc = (r, s) => res((T)r, s);
-                Then(resolve != null ? resolve(rc) : rc,
+                void Res(object r, bool s) => res((T) r, s);
+                Then(resolve != null ? resolve(Res) : Res,
                     reject != null ? reject(rej) : rej);
             });
         }
@@ -1050,21 +1072,24 @@
         public new Promise<T> Timeout(TimeSpan timeout)
         {
             Timer timer = null;
-            Action disposeTimer = () => {
+
+            void DisposeTimer()
+            {
                 var t = Interlocked.CompareExchange(ref timer, null, timer);
                 t?.Dispose();
-            };
+            }
+
             return CreateChild<T>((resolve, reject) => {
                 Then((r, s) => {
-                    disposeTimer();
+                    DisposeTimer();
                     resolve(r, s);
                 }, (ex, s) => {
-                    disposeTimer();
+                    DisposeTimer();
                     reject(ex, s);                           
-                }).Finally(() => disposeTimer());  // cancel
+                }).Finally(() => DisposeTimer());  // cancel
                 if (State != PromiseState.Pending) return;
                 timer = new Timer(_ => {
-                    disposeTimer();
+                    DisposeTimer();
                     reject(new TimeoutException(), false);
                     Cancel();
                 },

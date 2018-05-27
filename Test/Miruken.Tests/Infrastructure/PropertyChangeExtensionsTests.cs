@@ -14,8 +14,8 @@ namespace Miruken.Tests.Infrastructure
 
             public string FirstName
             {
-                get { return _firstName; }
-                set { PropertyChanged.ChangeProperty(ref _firstName, value, this); }
+                get => _firstName;
+                set => PropertyChanged.ChangeProperty(ref _firstName, value, this);
             }
             private string _firstName;
         }

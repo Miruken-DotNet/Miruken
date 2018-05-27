@@ -335,8 +335,7 @@
             var grandChild = child3.CreateChild();
             grandChild.Store(data);
 
-            Func<IHandler, IHandler> Foo =
-                h => h.Aspect((_, __, ___) => ++count);
+            IHandler Foo(IHandler h) => h.Aspect((_, __, ___) => ++count);
 
             Assert.IsNull(Foo(child2.SelfOrDescendant()).Resolve<DataTable>());
             Assert.AreSame(data, Foo(grandChild.SelfOrDescendant()).Resolve<DataTable>());

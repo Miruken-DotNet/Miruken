@@ -240,9 +240,7 @@
         {
             var promise = _bowling.AnyAsync(b => b
                 .Add(new Action<IHandler>(h =>
-                {
-                    throw new ArgumentException("Bad value");
-                })));
+                    throw new ArgumentException("Bad value"))));
             await promise;
         }
 
@@ -345,15 +343,12 @@
 
         private class BowlingProvider : Handler
         {
-            private readonly Bowling _bowling = new Bowling();
-            private readonly Lane[] _lanes = Enumerable.Range(0, 5)
+            [Provides]
+            public Bowling Bowling { get; } = new Bowling();
+
+            [Provides]
+            public Lane[] Lanes { get; } = Enumerable.Range(0, 5)
                 .Select(i => new Lane(true)).ToArray();
-
-            [Provides]
-            public Bowling Bowling => _bowling;
-
-            [Provides]
-            public Lane[] Lanes => _lanes;
         }
 
         private class Pin

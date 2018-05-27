@@ -209,7 +209,7 @@ namespace Miruken.Tests.Concurrency
             TestRunner.MTA(() =>
             {
                 var called  = 0;
-                var task    = Task.Run(() => { throw new Exception("Rejected"); });
+                var task    = Task.Run(() => throw new Exception("Rejected"));
                 var promise = task.ToPromise();
                 var catch1  = promise.Catch((ex, s) =>
                 {
@@ -315,7 +315,7 @@ namespace Miruken.Tests.Concurrency
             TestRunner.MTA(() =>
             {
                 var called  = 0;
-                var task    = Task.Run(() => { throw new Exception("Rejected"); });
+                var task    = Task.Run(() => throw new Exception("Rejected"));
                 var promise = Promise.Resolved(task);
                 var catch1  = promise.Catch((ex, s) =>
                 {

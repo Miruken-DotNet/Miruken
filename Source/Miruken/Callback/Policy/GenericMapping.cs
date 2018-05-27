@@ -59,14 +59,15 @@
         {
             return _mapping.Select(mapping =>
             {
-                if (mapping.Item1 == UseReturn)
+                switch (mapping.Item1)
                 {
-                    if (returnType == null)
+                    case UseReturn when returnType == null:
                         throw new ArgumentException(
                             "Return type is unknown and cannot infer types");
-                    return mapping.Item2 != UseArgument
-                         ? returnType.GetGenericArguments()[mapping.Item2]
-                         : returnType;
+                    case UseReturn:
+                        return mapping.Item2 != UseArgument
+                            ? returnType.GetGenericArguments()[mapping.Item2]
+                            : returnType;
                 }
                 if (mapping.Item2 == UseArgument)
                     return types[mapping.Item1];

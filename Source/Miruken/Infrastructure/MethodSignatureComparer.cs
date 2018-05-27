@@ -24,7 +24,7 @@ namespace Miruken.Infrastructure
                     if (xArgs[i].GetTypeInfo().IsGenericParameter != yArgs[i].GetTypeInfo().IsGenericParameter)
                         return false;
 
-                    if (!xArgs[i].GetTypeInfo().IsGenericParameter && !xArgs[i].Equals(yArgs[i]))
+                    if (!xArgs[i].GetTypeInfo().IsGenericParameter && xArgs[i] != yArgs[i])
                         return false;
                 }
             }
@@ -61,7 +61,7 @@ namespace Miruken.Infrastructure
                 if (x.GenericParameterPosition != y.GenericParameterPosition)
                     return false;
             }
-            else if (!x.Equals(y))
+            else if (x != y)
                 return false;
 
             return true;

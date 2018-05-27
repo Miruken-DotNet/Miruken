@@ -171,7 +171,7 @@ namespace Miruken.Tests.Concurrency
                 onCancel(() => called = true))
                 .Then((r, s) => { })
                 .Catch((TimeoutException tex, bool s) => { })
-                .Catch((ex, s) => { }); ;
+                .Catch((ex, s) => { });
             promise.Cancel();
             if (promise.AsyncWaitHandle.WaitOne(5.Sec()))
             {

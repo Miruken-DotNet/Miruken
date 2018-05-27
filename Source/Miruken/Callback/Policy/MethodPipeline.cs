@@ -4,7 +4,6 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Concurrency;
 
     public delegate object CompletePipelineDelegate(
         IHandler handler, out bool completed);
@@ -39,36 +38,26 @@
             var completed = true;
             using (var pipeline = filters.GetEnumerator())
             {
-                object Next(IHandler comp, bool proceed)
+                Task<TRes> Next(IHandler comp, bool proceed)
                 {
                     if (!proceed)
                     {
                         completed = false;
-                        return default(TRes);
+                        return Task.FromResult(default(TRes));
                     }
 
                     composer = comp ?? composer;
                     while (pipeline.MoveNext())
                     {
                         var (filter, provider) = pipeline.Current;
-                        switch (filter)
-                        {
-                            case IFilter<TCb, TRes> typeFilter:
-                                return typeFilter.Next((TCb)callback, binding, composer,
-                                    (p, c) => (TRes)binding.CoerceResult(Next(p, c),
-                                        typeof(TRes)), provider);
-                            case IFilter<TCb, Task<TRes>> taskFilter:
-                                return taskFilter.Next((TCb)callback, binding, composer,
-                                    (p, c) => (Task<TRes>)binding.CoerceResult(Next(p, c),
-                                        typeof(Task<TRes>)), provider);
-                            case IFilter<TCb, Promise<TRes>> promiseFilter:
-                                return promiseFilter.Next((TCb)callback, binding, composer,
-                                    (p, c) => (Promise<TRes>)binding.CoerceResult(Next(p, c),
-                                        typeof(Promise<TRes>)), provider);
-                        }
+                        if (filter is IFilter<TCb, TRes> typedFilter)
+                            return typedFilter.Next((TCb) callback, binding,
+                                composer, Next, provider);
                     }
 
-                    return complete(composer, out completed);
+                    return (Task<TRes>) binding.CoerceResult(
+                        complete(composer, out completed),
+                        typeof(Task<TRes>));
                 }
 
                 result = Next(composer, true);

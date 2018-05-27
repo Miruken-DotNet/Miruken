@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
@@ -197,7 +198,7 @@
 
         private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
         {
-            public Res Next(Cb callback, Next<Res> next,
+            public Task<Res> Next(Cb callback, Next<Res> next,
                 MethodBinding method,
                 Repository<Message> repository,
                 IBilling billing)
@@ -205,13 +206,14 @@
                 var send = callback as SendEmail;
                 if (send != null)
                 {
-                    var message = new Message {Content = send.Body};
+                    var message = new Message { Content = send.Body };
                     repository.Create(new Create<Message>(message));
                     send.Body = method.Dispatcher.Method.Name;
                     if (typeof(Res) == typeof(int))
                     {
                         billing.Bill(message.Id);
-                        return (Res) (object) (message.Id * 10);
+                        return Task.FromResult(
+                            (Res)(object)(message.Id * 10));
                     }
                 }
                 return next();
@@ -221,7 +223,7 @@
         private class BalanceFilter<T, Res> : DynamicFilter<Create<T>, Res>
             where T : IEntity
         {
-            public Res Next(Create<T> callback, Next<Res> next,
+            public Task<Res> Next(Create<T> callback, Next<Res> next,
                 Repository<Message> repository, IBilling billing)
             {
                 return next();

@@ -164,21 +164,21 @@
         private class NullHandler : Handler
         {
             [Handles,
-             Filter(typeof(IBehavior<,>), Many = true)]
+             Filter(typeof(IFilter<,>), Many = true)]
             public object Place(PlaceOrder order)
             {
                 return null;
             }
 
             [Handles,
-             Filter(typeof(IBehavior<,>), Many = true)]
+             Filter(typeof(IFilter<,>), Many = true)]
             public Promise Cancel(CancelOrder cancel)
             {
                 return null;
             }
 
 
-            [Provides(typeof(IBehavior<,>))]
+            [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
                 var type = (Type)inquiry.Key;
@@ -192,16 +192,12 @@
             }
         }
 
-        public interface IBehavior<in TReq, TResp> : IFilter<TReq, Task<TResp>>
-        {
-        }
-
-        private class NullBehavior<Cb, Res> : IBehavior<Cb, Res>
+        private class NullBehavior<Cb, Res> : IFilter<Cb, Res>
         {
             public int? Order { get; set; } = 1;
 
             public Task<Res> Next(Cb callback, MethodBinding binding,
-                IHandler composer, Next<Task<Res>> next,
+                IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
                 return next();

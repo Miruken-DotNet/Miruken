@@ -129,7 +129,7 @@
             var testResult = ReferenceEquals(baseResult, this) ? result : baseResult;
             var accepted   = Policy.AcceptResult?.Invoke(testResult, this)
                           ?? testResult != null;
-            if (accepted && (result != null))
+            if (accepted && (testResult != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);

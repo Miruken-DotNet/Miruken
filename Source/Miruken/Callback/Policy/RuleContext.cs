@@ -29,8 +29,8 @@
                 };
                 return true;
             }
-            Type aliasedType;
-            if (_aliases.TryGetValue(alias, out aliasedType))
+
+            if (_aliases.TryGetValue(alias, out var aliasedType))
             {
                 if (aliasedType != type)
                 {

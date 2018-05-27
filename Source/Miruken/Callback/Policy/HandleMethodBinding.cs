@@ -69,7 +69,7 @@
             }
 
             handleMethod.ReturnValue = handled 
-                   ? returnValue
+                   ? CoerceResult(returnValue, handleMethod.Method.ReturnType)
                    : RuntimeHelper.GetDefault(handleMethod.ResultType);
             return handled;
         }
