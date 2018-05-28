@@ -4,7 +4,8 @@
     {
         public GlobalFiltersAttribute()
             : base(typeof(IGlobalFilter<,>))
-        {         
+        {
+            Many = true;
         }
     }
 }
