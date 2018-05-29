@@ -85,20 +85,23 @@
             IHandler composer, Type resultType, ResultsDelegate results)
         {
             object result;
-            var args = Rule.ResolveArgs(callback);
+            var args       = Rule.ResolveArgs(callback);
+            var dispatcher = Dispatcher.CloseDispatch(args, resultType);
+            var returnType = dispatcher.ReturnType;
 
             if ((callback as IFilterCallback)?.CanFilter == false)
             {
                 args = ResolveArgs(args, composer, out var completed);
                 if (completed)
-                    Dispatcher.Invoke(target, args, resultType);
-                return completed;
+                {
+                    result = dispatcher.Invoke(target, args, resultType);
+                    return Accept(callback, result, result, returnType, results);
+                }
+                return false;
             }
 
-            var dispatcher     = Dispatcher.CloseDispatch(args, resultType);
             var actualCallback = GetCallbackInfo(
                 callback, args, dispatcher, out var callbackType);
-            var returnType     = dispatcher.ReturnType;
             var logicalType    = dispatcher.LogicalReturnType;
 
             var targetFilters  = target is IFilter targetFilter
@@ -126,16 +129,22 @@
                             resultType), composer, filters, out result))
                 return false;
 
-            var testResult = ReferenceEquals(baseResult, this) ? result : baseResult;
-            var accepted   = Policy.AcceptResult?.Invoke(testResult, this)
-                          ?? testResult != null;
+            var testResult = ReferenceEquals(baseResult, this) 
+                           ? result : baseResult;
+            return Accept(callback, testResult, result, returnType, results);
+        }
+
+        private bool Accept(object callback, object testResult, object result,
+            Type returnType, ResultsDelegate results)
+        {
+            var accepted = Policy.AcceptResult?.Invoke(testResult, this)
+                        ?? testResult != null;
             if (accepted && (testResult != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
                 return results?.Invoke(result, Category.Strict) != false;
             }
-
             return accepted;
         }
 

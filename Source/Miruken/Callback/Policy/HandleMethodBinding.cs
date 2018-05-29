@@ -1,10 +1,12 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using Infrastructure;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandleMethodBinding : MethodBinding
     {
         public HandleMethodBinding(MethodDispatch dispatch)
@@ -72,6 +74,16 @@
                    ? CoerceResult(returnValue, handleMethod.Method.ReturnType)
                    : RuntimeHelper.GetDefault(handleMethod.ResultType);
             return handled;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var method = Dispatcher.Method;
+                return $"{method.ReflectedType?.FullName} | {method}";
+
+            }
         }
 
         private static readonly MethodPipeline Pipeline = MethodPipeline

@@ -17,6 +17,7 @@
         private FeatureFilter _filter;
         private Action<ComponentRegistration> _configureHandlers;
         private Action<ComponentRegistration> _configureFilters;
+        private bool _withoutLogFilter;
 
         public HandleFeature SelectHandlers(FeatureFilter filter)
         {
@@ -36,9 +37,20 @@
             return this;
         }
 
+        public HandleFeature WithoutLogFilter()
+        {
+            _withoutLogFilter = true;
+            return this;
+        }
+
         public override IEnumerable<FromDescriptor> GetFeatures()
         {
-            yield return Types.From(typeof(ErrorsHandler), typeof(MappingHandler));
+            var types = new List<Type>
+            {
+                typeof(ErrorsHandler), typeof(MappingHandler)
+            };
+            if (!_withoutLogFilter) types.Add(typeof(LogFilter<,>));
+            yield return Types.From(types);
         }
 
         protected override void Install(IConfigurationStore store)

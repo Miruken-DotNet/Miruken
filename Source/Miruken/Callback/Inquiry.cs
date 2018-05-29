@@ -78,13 +78,14 @@
             if (resolution == null) return false;
             var array    = strict ? null : resolution as object[];
             var resolved = array?.Aggregate(false, 
-                (s, res) => Include(res, greedy, composer) || s) 
-                         ?? Include(resolution, greedy, composer);
+                (s, res) => Include(res, false, greedy, composer) || s) 
+                         ?? Include(resolution, strict, greedy, composer);
             if (resolved) _result = null;
             return resolved;
         }
 
-        private bool Include(object resolution, bool greedy, IHandler composer)
+        private bool Include(object resolution, bool strict,
+            bool greedy, IHandler composer)
         {
             if (resolution == null || (!Many && _resolutions.Count > 0))
                 return false;
@@ -95,10 +96,14 @@
             if (promise != null)
             {
                 IsAsync = true;
-                if (Many) promise = promise.Catch((ex,s) => (object)null);
-                resolution = promise.Then((result, s) => 
-                    result != null && IsSatisfied(result, greedy, composer)
-                    ? result : null);
+                if (Many)
+                    promise = promise.Catch((ex,s) => (object)null);
+                resolution = promise.Then((result, s) =>
+                {
+                    var array = strict ? null : result as object[];
+                    return array?.Where(res => IsSatisfied(res, greedy, composer))
+                               .ToArray() ?? result;
+                });
             }
             else if (!IsSatisfied(resolution, greedy, composer))
                 return false;

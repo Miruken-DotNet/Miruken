@@ -4,7 +4,8 @@
     using System.Linq;
     using Policy;
 
-    public class Resolving : Inquiry, IResolveCallback
+    public class Resolving : Inquiry,
+        IResolveCallback, IFilterCallback
     {
         private readonly object _callback;
         private bool _handled;
@@ -15,6 +16,8 @@
             _callback = callback 
                      ?? throw new ArgumentNullException(nameof(callback));
         }
+
+        bool IFilterCallback.CanFilter => false;
 
         object IResolveCallback.GetResolveCallback()
         {
