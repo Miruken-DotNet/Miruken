@@ -32,6 +32,12 @@
                 .ToArray().Normalize();
         }
 
+        public void AddFilters(params Type[] filterTypes)
+        {
+            if (filterTypes == null || filterTypes.Length == 0) return;
+            AddFilters(new FilterAttribute(filterTypes));
+        }
+
         public abstract bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null);
 

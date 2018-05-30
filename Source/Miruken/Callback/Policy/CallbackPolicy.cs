@@ -31,6 +31,12 @@
             _filters.AddRange(providers.Where(p => p != null));
         }
 
+        public void AddFilters(params Type[] filterTypes)
+        {
+            if (filterTypes == null || filterTypes.Length == 0) return;
+            AddFilters(new FilterAttribute(filterTypes));
+        }
+
         public MethodRule MatchMethod(MethodInfo method, CategoryAttribute category)
         {
             return _rules.FirstOrDefault(r => r.Matches(method, category));

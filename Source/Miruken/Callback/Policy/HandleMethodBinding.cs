@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
@@ -9,9 +10,26 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandleMethodBinding : MethodBinding
     {
+        private static readonly List<IFilterProvider> 
+            _globalFilters = new List<IFilterProvider>();
+
         public HandleMethodBinding(MethodDispatch dispatch)
              : base(dispatch)
         {       
+        }
+
+        public IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
+
+        public static void AdGlobaldFilters(params IFilterProvider[] providers)
+        {
+            if (providers == null || providers.Length == 0) return;
+            _globalFilters.AddRange(providers.Where(p => p != null));
+        }
+
+        public static void AdGlobaldFilters(params Type[] filterTypes)
+        {
+            if (filterTypes == null || filterTypes.Length == 0) return;
+            AdGlobaldFilters(new FilterAttribute(filterTypes));
         }
 
         public override bool Dispatch(object target, object callback,
@@ -47,7 +65,8 @@
             var arguments = handleMethod.Arguments;
             var filters   = composer.GetOrderedFilters(
                 this, typeof(HandleMethod), typeof(object),
-                Filters, Dispatcher.Owner.Filters).ToArray();
+                Filters, Dispatcher.Owner.Filters, GlobalFilters)
+                .ToArray();
 
             bool handled;
             object returnValue;

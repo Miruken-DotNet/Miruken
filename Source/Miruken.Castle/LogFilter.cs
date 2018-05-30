@@ -13,7 +13,7 @@
     using Newtonsoft.Json.Converters;
 
     public class LogFilter<TRequest, TResponse>
-        : LogFilter, IGlobalFilter<TRequest, TResponse>
+        : LogFilter, IFilter<TRequest, TResponse>
     {
         public int? Order { get; set; } = Stage.Logging;
 

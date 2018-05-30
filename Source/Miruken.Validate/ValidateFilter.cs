@@ -5,7 +5,7 @@
     using Callback.Policy;
     using Concurrency;
 
-    public class ValidateFilter<TCb, TRes> : IGlobalFilter<TCb, TRes>
+    public class ValidateFilter<TCb, TRes> : IFilter<TCb, TRes>
     {
         public int? Order { get; set; } = Stage.Validation;
 

@@ -36,9 +36,10 @@
             LogManager.Configuration = config;
             _container = new WindsorContainer()
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
-                .Install(new FeaturesInstaller(new HandleFeature()).Use(
-                    Classes.FromThisAssembly()));
+                .Install(new FeaturesInstaller(new HandleFeature())
+                    .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
+            HandleMethodBinding.AdGlobaldFilters(typeof(LogFilter<,>));
 
             _handler = new WindsorHandler(_container);
         }
@@ -53,7 +54,6 @@
         public void Should_Log_Methods()
         {
             var id = _handler
-                .WithFilters(new GlobalFiltersAttribute())
                 .Proxy<ResolvingTests.IEmailFeature>()
                 .Email("Hello");
             Assert.AreEqual(1, id);

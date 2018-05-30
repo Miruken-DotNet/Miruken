@@ -21,6 +21,7 @@
         {
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<TeamHandler>();
+            HandlesAttribute.Policy.AddFilters(typeof(ValidateFilter<,>));
 
             _handler = new TeamHandler()
                      + new FilterProvider()
@@ -162,7 +163,7 @@
                 RuleFor(ta => ta.Team.Id).GreaterThan(0);
             }
         }
-        [GlobalFilters]
+
         public class TeamHandler : Handler
         {
             public int _teamId;
@@ -189,7 +190,7 @@
         private class FilterProvider : Handler
         {
             [Provides]
-            public IGlobalFilter<TCb, TRes> Create<TCb, TRes>()
+            public ValidateFilter<TCb, TRes> Create<TCb, TRes>()
             {
                 return new ValidateFilter<TCb, TRes>();
             }
