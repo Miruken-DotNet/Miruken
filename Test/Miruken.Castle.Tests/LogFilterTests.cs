@@ -37,7 +37,7 @@
             _container = new WindsorContainer()
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
                 .Install(new FeaturesInstaller(
-                        new HandleFeature().AddFilters(typeof(LogFilter<,>)))
+                        new HandleFeature().AddMethodFilters(typeof(LogFilter<,>)))
                     .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
 

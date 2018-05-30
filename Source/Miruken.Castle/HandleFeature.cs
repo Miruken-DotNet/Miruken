@@ -50,9 +50,21 @@
             return this;
         }
 
+        public HandleFeature AddMethodFilters(params IFilterProvider[] providers)
+        {
+            HandleMethodBinding.AddGlobalFilters(providers);
+            return this;
+        }
+
         public HandleFeature AddFilters(params Type[] filterTypes)
         {
             HandlesAttribute.Policy.AddFilters(filterTypes);
+            return this;
+        }
+
+        public HandleFeature AddMethodFilters(params Type[] filterTypes)
+        {
+            HandleMethodBinding.AddGlobalFilters(filterTypes);
             return this;
         }
 
