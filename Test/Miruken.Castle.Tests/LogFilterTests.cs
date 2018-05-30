@@ -36,10 +36,10 @@
             LogManager.Configuration = config;
             _container = new WindsorContainer()
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
-                .Install(new FeaturesInstaller(new HandleFeature())
+                .Install(new FeaturesInstaller(
+                        new HandleFeature().AddFilters(typeof(LogFilter<,>)))
                     .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
-            HandleMethodBinding.AdGlobaldFilters(typeof(LogFilter<,>));
 
             _handler = new WindsorHandler(_container);
         }

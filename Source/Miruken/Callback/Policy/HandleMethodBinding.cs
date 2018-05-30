@@ -20,16 +20,16 @@
 
         public IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
 
-        public static void AdGlobaldFilters(params IFilterProvider[] providers)
+        public static void AddGlobalFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
             _globalFilters.AddRange(providers.Where(p => p != null));
         }
 
-        public static void AdGlobaldFilters(params Type[] filterTypes)
+        public static void AddGlobalFilters(params Type[] filterTypes)
         {
             if (filterTypes == null || filterTypes.Length == 0) return;
-            AdGlobaldFilters(new FilterAttribute(filterTypes));
+            AddGlobalFilters(new FilterAttribute(filterTypes));
         }
 
         public override bool Dispatch(object target, object callback,
