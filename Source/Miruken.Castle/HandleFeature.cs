@@ -47,14 +47,12 @@
         public HandleFeature AddFilters(params IFilterProvider[] providers)
         {
             HandlesAttribute.Policy.AddFilters(providers);
-            HandleMethodBinding.AddGlobalFilters(providers);
             return this;
         }
 
         public HandleFeature AddFilters(params Type[] filterTypes)
         {
             HandlesAttribute.Policy.AddFilters(filterTypes);
-            HandleMethodBinding.AddGlobalFilters(filterTypes);
             return this;
         }
 
