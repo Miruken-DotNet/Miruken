@@ -1,7 +1,9 @@
 ﻿namespace Miruken.Castle.Tests
 {
+    using System;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
     using Castle;
@@ -37,7 +39,9 @@
             _container = new WindsorContainer()
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
                 .Install(new FeaturesInstaller(
-                        new HandleFeature().AddMethodFilters(typeof(LogFilter<,>)))
+                        new HandleFeature().AddFilters(
+                                typeof(LogFilter<,>), typeof(ConsoleFilter<,>))
+                            .AddMethodFilters(typeof(LogFilter<,>)))
                     .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
@@ -48,6 +52,24 @@
         public void TestCleanup()
         {
             _container.Dispose();
+        }
+
+        [TestMethod]
+        public void Should_Log_Callbacks()
+        {
+            var handled = _handler.Resolve().Handle(new Foo());
+            Assert.IsTrue(handled);
+
+            var events = _memoryTarget.Logs;
+            Assert.AreEqual(4, events.Count);
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Handling Foo").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Handling Bar").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Completed Bar").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Completed Foo").Success));
         }
 
         [TestMethod]
@@ -64,6 +86,38 @@
                 @"DEBUG.*Miruken\.Castle\.Tests\.ResolvingTests\+EmailHandler.*Handling HandleMethod").Success));
             Assert.IsTrue(events.Any(x => Regex.Match(x,
                 @"DEBUG.*Miruken\.Castle\.Tests\.ResolvingTests\+EmailHandler.*Completed HandleMethod.*with int").Success));
+        }
+
+        public class Foo { }
+        public class Bar { }
+
+        public class CallbackHandler : Handler
+        {
+            [Handles]
+            public void Handle(Foo foo)
+            {
+            }
+
+            [Handles]
+            public void Handle(Bar bar)
+            {
+            }
+        }
+
+        public class ConsoleFilter<TCb, TRes> : IFilter<TCb, TRes>
+        {
+            public int? Order { get; set; }
+
+            public Task<TRes> Next(
+                TCb callback, MethodBinding method, 
+                IHandler composer, Next<TRes> next,
+                IFilterProvider provider = null)
+            {
+                Console.WriteLine(callback);
+                if (!(callback is Bar))
+                    composer.SkipFilters(false).Handle(new Bar());
+                return next();
+            }
         }
     }
 }
