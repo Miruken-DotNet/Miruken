@@ -43,7 +43,9 @@
             Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetOptions<FilterOptions>();
-            return handler.SkipFilters().GetOrderedFilters(
+            if (options?.SkipFilters == null)
+                handler = handler.SkipFilters();
+            return handler.GetOrderedFilters(
                 binding, callbackType, logicalResultType, options, providers);
         }
 
