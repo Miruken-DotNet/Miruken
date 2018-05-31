@@ -52,7 +52,7 @@
                         var (filter, provider) = pipeline.Current;
                         if (filter is IFilter<TCb, TRes> typedFilter)
                             return typedFilter.Next((TCb) callback, binding,
-                                composer, Next, provider);
+                                composer.SkipFilters(), Next, provider);
                     }
 
                     return (Task<TRes>) binding.CoerceResult(
