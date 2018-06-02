@@ -98,9 +98,9 @@
 
         public override object GetKey(object callback)
         {
-            return callback is TCb cb
-                 ? GetTargetType(cb)
-                 : callback?.GetType();
+            return (callback as ICallbackKey)?.Key
+                ?? (callback is TCb cb ? GetTargetType(cb)
+                   : callback?.GetType());
         }
 
         public override IEnumerable<object> GetCompatibleKeys(

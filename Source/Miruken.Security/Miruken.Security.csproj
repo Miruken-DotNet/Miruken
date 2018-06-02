@@ -40,13 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizedAttribute.cs" />
-    <Compile Include="ClaimsAccessDecision.cs" />
-    <Compile Include="HasClaimAttribute.cs" />
-    <Compile Include="AuthorizeFilter.cs" />
-    <Compile Include="IAccessDecision.cs" />
+    <Compile Include="AllowAttribute.cs" />
+    <Compile Include="AccessPolicyAttribute.cs" />
+    <Compile Include="Authorization.cs" />
+    <Compile Include="AuthorizationOptions.cs" />
+    <Compile Include="AuthorizeAttribute.cs" />
+    <Compile Include="AuthorizeExtensions.cs" />
+    <Compile Include="PrincipalExtensions.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AuthorizesAttribute.cs" />
+    <Compile Include="AuthorizeFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Miruken.Security.nuspec" />

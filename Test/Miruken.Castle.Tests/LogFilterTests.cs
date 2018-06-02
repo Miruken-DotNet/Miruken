@@ -40,7 +40,7 @@
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
                 .Install(new FeaturesInstaller(
                         new HandleFeature().AddFilters(
-                                typeof(LogFilter<,>), typeof(ConsoleFilter<,>))
+                                typeof(LogFilter<,>), typeof(ConsoleFilter))
                             .AddMethodFilters(typeof(LogFilter<,>)))
                     .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
@@ -104,18 +104,17 @@
             }
         }
 
-        public class ConsoleFilter<TCb, TRes> : IFilter<TCb, TRes>
+        public class ConsoleFilter : IFilter<Foo, object>
         {
             public int? Order { get; set; }
 
-            public Task<TRes> Next(
-                TCb callback, MethodBinding method, 
-                IHandler composer, Next<TRes> next,
+            public Task<object> Next(
+                Foo callback, MethodBinding method, 
+                IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {
                 Console.WriteLine(callback);
-                if (!(callback is Bar))
-                    composer.SkipFilters(false).Handle(new Bar());
+                composer.SkipFilters(false).Handle(new Bar());
                 return next();
             }
         }

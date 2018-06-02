@@ -60,7 +60,8 @@
 
         public override object GetKey(object callback)
         {
-            return callback is TCb cb ? Key(cb) : null;
+            return (callback as ICallbackKey)?.Key
+                ?? (callback is TCb cb ? Key(cb) : null);
         }
 
         public override IEnumerable<object> GetCompatibleKeys(

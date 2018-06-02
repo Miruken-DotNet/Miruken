@@ -25,10 +25,15 @@
         public IEnumerable<IFilter> GetFilters(MethodBinding binding, 
             Type callbackType, Type logicalResultType, IHandler composer)
         {
-            var filters = FilterTypes
+            var filterTypes = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
                 .Where(f => f != null && AllowFilterType(f, binding))
-                .SelectMany(filterType => Many
+                .ToArray();
+
+            if (filterTypes.Length == 0)
+                return Enumerable.Empty<IFilter>();
+
+            var filters = filterTypes.SelectMany(filterType => Many
                     ? composer.Break().ResolveAll(filterType)
                     : new[] {composer.Break().Resolve(filterType)})
                 .OfType<IFilter>()

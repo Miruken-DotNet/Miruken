@@ -62,6 +62,9 @@
         public bool              IsPromise     { get; private set; }
         public bool              IsTask        { get; private set; }
 
+        public bool IsInstanceOf(object argument) =>
+            ParameterType.IsInstanceOfType(argument);
+
         private void ExtractFlags(Type parameterType)
         {
             var type     = parameterType;

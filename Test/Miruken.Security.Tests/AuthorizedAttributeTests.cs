@@ -8,6 +8,7 @@
     using Callback.Policy;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    /*
     [TestClass]
     public class AuthorizedAttributeTests
     {
@@ -92,4 +93,5 @@
             }
         }
     }
+    */
 }

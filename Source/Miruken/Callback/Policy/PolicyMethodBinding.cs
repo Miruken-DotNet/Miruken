@@ -87,6 +87,13 @@
             object result;
             var args       = Rule.ResolveArgs(callback);
             var dispatcher = Dispatcher.CloseDispatch(args, resultType);
+            if (CallbackIndex.HasValue)
+            {
+                var index = CallbackIndex.Value;
+                if (!dispatcher.Arguments[index].IsInstanceOf(args[index]))
+                    return false;
+            }
+
             var returnType = dispatcher.ReturnType;
 
             if ((callback as IFilterCallback)?.CanFilter == false)

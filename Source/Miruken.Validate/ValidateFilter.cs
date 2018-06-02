@@ -19,14 +19,14 @@
                 .Then((resp, s) => Validate(resp, validator));
         }
 
-        private static Promise<T> Validate<T>(T message, IValidating validator)
+        private static Promise<T> Validate<T>(T target, IValidating validator)
         {
-            return message == null ? Promise<T>.Empty
-                : validator.ValidateAsync(message).Then((outcome, s) =>
+            return target == null ? Promise<T>.Empty
+                : validator.ValidateAsync(target).Then((outcome, s) =>
                 {
                     if (!outcome.IsValid)
                         throw new ValidationException(outcome);
-                    return message;
+                    return target;
                 });
         }
     }

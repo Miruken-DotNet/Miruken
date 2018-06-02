@@ -32,7 +32,8 @@
 
         public CallbackPolicy Policy => ValidatesAttribute.Policy;
 
-        public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
+        public Type ResultType => WantsAsync
+                               || IsAsync ? typeof(Promise) : null;
 
         public object Result
         {

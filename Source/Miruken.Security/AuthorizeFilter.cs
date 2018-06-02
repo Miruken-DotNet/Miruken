@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Security
 {
     using System;
+    using System.Linq;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Callback;
@@ -13,16 +14,43 @@
             Order = Stage.Authorization;
         }
 
-        public async Task<TRes> Next(
+        public Task<TRes> Next(
             TCb callback, Next<TRes> next,
-            MethodBinding method, IAccessDecision access,
             IPrincipal principal, IHandler composer,
-            IFilterProvider provider)
+            MethodBinding method, AuthorizeAttribute attribute)
         {
-            if (await access.CanAccess(
-                method, principal, provider, composer))
-                return await next();
+            if (attribute.RequireAuthenticatedUser != false)
+                principal.RequireAuthenticatedClaims();
+            var policy = GetPolicy(callback, method);
+            var authorization = new Authorization(callback, principal, policy);
+            if (!composer.Handle(authorization))
+            {
+                if (attribute.RequirePolicy != false) AccessDenied();
+                return next();
+            }
+            return authorization.Result.Then((canAccess, s) =>
+            {
+                if (!canAccess) AccessDenied();
+                return next();
+            });
+        }
 
+        private static object GetPolicy(TCb callback, MethodBinding method)
+        {
+            var policy = method.Dispatcher.Attributes
+                .OfType<AccessPolicyAttribute>().FirstOrDefault();
+            if (policy == null && callback is HandleMethod)
+            {
+                var m     = method.Dispatcher.Method;
+                var owner = m.ReflectedType ?? m.DeclaringType;
+                var delim = owner != null ? ":" : "";
+                return $"{owner?.FullName ?? ""}{delim}{m.Name}";
+            };
+            return policy?.Policy;
+        }
+
+        private static void AccessDenied()
+        {
             throw new UnauthorizedAccessException(
                 "Authorization has been denied");
         }

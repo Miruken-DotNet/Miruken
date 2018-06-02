@@ -1,0 +1,27 @@
+﻿namespace Miruken.Security
+{
+    using System.Security.Principal;
+    using Callback;
+    using Concurrency;
+
+    public static class AuthorizeExtensions
+    {
+        public static bool CanAccess(
+            this IHandler handler, object target,
+            IPrincipal principal, object policy = null)
+        {
+            return handler.CanAccessAsync(target, principal, policy)
+                .GetAwaiter().GetResult();
+        }
+
+        public static Promise<bool> CanAccessAsync(
+            this IHandler handler, object target,
+            IPrincipal principal, object policy = null)
+        {
+            if (handler == null) return Promise.False;
+            var authorization = new Authorization(target, principal, policy);
+            handler.Handle(authorization);
+            return authorization.Result;
+        }
+    }
+}

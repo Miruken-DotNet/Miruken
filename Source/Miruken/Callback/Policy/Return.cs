@@ -26,9 +26,14 @@
 
         public static readonly Return Void = new Return(typeof(void));
 
-        public static Return Type(Type type)
+        public static Return Of(Type type)
         {
             return new Return(type);
+        }
+
+        public static Return Of<T>()
+        {
+            return Of(typeof(T));
         }
 
         public new static ReturnRule Alias(string alias)

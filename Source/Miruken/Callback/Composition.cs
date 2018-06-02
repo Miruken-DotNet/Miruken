@@ -4,7 +4,8 @@
 
     public class Composition 
         : Trampoline, ICallback, IResolveCallback,
-          IFilterCallback, IBatchCallback
+          IFilterCallback, IBatchCallback,
+          ICallbackKey
     {
         public Composition(object callback)
             : base(callback)
@@ -38,6 +39,9 @@
                     cb.Result = value;
             }
         }
+
+        object ICallbackKey.Key =>
+            (Callback as ICallbackKey)?.Key;
 
         bool IFilterCallback.CanFilter =>
             (Callback as IFilterCallback)?.CanFilter != false;

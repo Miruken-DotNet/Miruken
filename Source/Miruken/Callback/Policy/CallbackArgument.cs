@@ -42,8 +42,9 @@ namespace Miruken.Callback.Policy
         {
             var key       = policyMethodBindingInfo.InKey;
             var restrict  = key as Type;
-            var paramType = parameter.ParameterType;
             policyMethodBindingInfo.CallbackIndex = parameter.Position;
+            if (key != null && restrict == null) return;
+            var paramType = parameter.ParameterType;
             if (paramType.IsGenericParameter)
             {
                 var constraints = paramType.GetGenericParameterConstraints();

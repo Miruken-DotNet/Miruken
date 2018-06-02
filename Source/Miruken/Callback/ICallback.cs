@@ -9,6 +9,11 @@ namespace Miruken.Callback
         object Result     { get; set; }
     }
 
+    public interface ICallbackKey
+    {
+        object Key { get; }
+    }
+
     public interface IAsyncCallback
     {
         bool IsAsync    { get; }
