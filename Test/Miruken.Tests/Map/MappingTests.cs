@@ -13,14 +13,6 @@
     [TestClass]
     public class MappingTests
     {
-        private IHandler _handler;
-
-        [TestInitialize]
-        public void Setup()
-        {
-            _handler = new MappingHandler();
-        }
-
         [TestMethod]
         public void Should_Map_Implicitly()
         {
@@ -29,8 +21,7 @@
                 Id   = 1,
                 Name = "Tim Howard"
             };
-            var data = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().Map<PlayerData>(entity);
+            var data = new EntityMapping().Map<PlayerData>(entity);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
@@ -44,8 +35,8 @@
                 Name = "Tim Howard"
             };
             var target = new PlayerData();
-            var data   = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().MapInto(entity, target, "ExistingTarget");
+            var data   = new EntityMapping()
+                .MapInto(entity, target, "ExistingTarget");
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
@@ -58,8 +49,8 @@
                 Id   = 2,
                 Name = "David Silva"
             };
-            var data = await (new EntityMapping() + _handler)
-                .Proxy<IMapping>().MapAsync<PlayerData>(entity);
+            var data = await new EntityMapping()
+                .MapAsync<PlayerData>(entity);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
@@ -67,15 +58,15 @@
         [TestMethod]
         public void Should_Map_Explicitly()
         {
-            var handler = (new ExplicitMapping() + _handler);
+            var handler = new ExplicitMapping();
             var player = new PlayerData
             {
                 Id   = 3,
                 Name = "Franz Beckenbauer"
             };
-            var json = handler.Proxy<IMapping>().Map<string>(player, "application/json");
+            var json = handler.Map<string>(player, "application/json");
             Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json);
-            var data = handler.Proxy<IMapping>().Map<PlayerData>(json, "application/json");
+            var data = handler.Map<PlayerData>(json, "application/json");
             Assert.AreEqual(3, data.Id);
             Assert.AreEqual("Franz Beckenbauer", player.Name);
         }
@@ -83,15 +74,15 @@
         [TestMethod]
         public async Task Should_Map_Explicitly_Async()
         {
-            var handler = (new ExplicitMapping() + _handler);
+            var handler = new ExplicitMapping();
             var player = new PlayerData
             {
                 Id   = 3,
                 Name = "Franz Beckenbauer"
             };
-            var json = await handler.Proxy<IMapping>().MapAsync<string>(player, "application/json");
+            var json = await handler.MapAsync<string>(player, "application/json");
             Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json);
-            var data = handler.Proxy<IMapping>().Map<PlayerData>(json, "application/json");
+            var data = handler.Map<PlayerData>(json, "application/json");
             Assert.AreEqual(3, data.Id);
             Assert.AreEqual("Franz Beckenbauer", player.Name);
         }
@@ -105,15 +96,14 @@
                 Name = "Diego Maradona"
             };
             var player = new PlayerData();
-            var data   = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().MapInto(entity, player);
+            var data   = new EntityMapping().MapInto(entity, player);
             Assert.AreSame(player, data);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
 
         [TestMethod,
-         ExpectedException(typeof(MissingMethodException))]
+         ExpectedException(typeof(NotSupportedException))]
         public void Should_Reject_Missing_Mapping()
         {
             var entity = new PlayerEntity
@@ -121,11 +111,11 @@
                 Id   = 1,
                 Name = "Tim Howard"
             };
-            _handler.Proxy<IMapping>().Map<PlayerData>(entity);
+            new Handler().Map<PlayerData>(entity);
         }
 
         [TestMethod,
-         ExpectedException(typeof(MissingMethodException))]
+         ExpectedException(typeof(NotSupportedException))]
         public async Task Should_Reject_Missing_Mapping_Async()
         {
             var entity = new PlayerEntity
@@ -133,7 +123,7 @@
                 Id   = 1,
                 Name = "Tim Howard"
             };
-            await _handler.Proxy<IMapping>().MapAsync<PlayerData>(entity);
+            await new Handler().MapAsync<PlayerData>(entity);
         }
 
         [TestMethod]
@@ -144,8 +134,8 @@
                 Id   = 1,
                 Name = "Marco Royce"
             };
-            var data = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().Map<IDictionary<string, object>>(entity);
+            var data = new EntityMapping()
+                .Map<IDictionary<string, object>>(entity);
             Assert.AreEqual(2, data.Count);
             Assert.AreEqual(1, data["Id"]);
             Assert.AreEqual("Marco Royce", data["Name"]);
@@ -159,8 +149,7 @@
                 {"Id",   1},
                 {"Name", "Geroge Best"}
             };
-            var entity = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().Map<PlayerEntity>(data);
+            var entity = new EntityMapping().Map<PlayerEntity>(data);
             Assert.AreEqual(1, entity.Id);
             Assert.AreEqual("Geroge Best", entity.Name);
         }
@@ -173,8 +162,8 @@
                 {"Id",   1},
                 {"Name", "Geroge Best"}
             };
-            var entity = (new EntityMapping() + _handler)
-                .Proxy<IMapping>().Map<PlayerEntity>(data.ToArray());
+            var entity = new EntityMapping()
+                .Map<PlayerEntity>(data.ToArray());
             Assert.AreEqual(1, entity.Id);
             Assert.AreEqual("Geroge Best", entity.Name);
         }
@@ -184,8 +173,8 @@
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
             var exception = new ArgumentException("Value is bad");
-            var value     = (new ExceptionMapping() + _handler).Resolve()
-                .Proxy<IMapping>().Map<object>(exception);
+            var value     = new ExceptionMapping().Resolve()
+                .Map<object>(exception);
             Assert.AreEqual("System.ArgumentException: Value is bad", value);
         }
 
@@ -193,11 +182,11 @@
         public void Should_Map_Simple_Results()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
-            var handler   = (new ExceptionMapping() + _handler).Resolve();
+            var handler   = new ExceptionMapping().Resolve();
             var exception = new NotSupportedException("Close not found");
-            var value     = handler.Proxy<IMapping>().Map<object>(exception);
+            var value     = handler.Map<object>(exception);
             Assert.AreEqual(500, value);
-            value = handler.Proxy<IMapping>().Map<object>(
+            value = handler.Map<object>(
                 new InvalidOperationException("Operation not allowed"));
             Assert.AreEqual("Operation not allowed", value);
         }
@@ -206,9 +195,9 @@
         public void Should_Map_Simple_Default_If_Best_Effort()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
-            var value = (new ExceptionMapping() + _handler)
+            var value = new ExceptionMapping()
                 .Resolve().BestEffort()
-                .Proxy<IMapping>().Map<int>(new AggregateException());
+                .Map<int>(new AggregateException());
             Assert.AreEqual(0, value);
         }
 
@@ -216,9 +205,9 @@
         public async Task Should_Map_Simple_Default_If_Best_Effort_Async()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
-            var value = await (new ExceptionMapping() + _handler)
+            var value = await new ExceptionMapping()
                 .Resolve().BestEffort()
-                .Proxy<IMapping>().MapAsync<int>(new AggregateException());
+                .MapAsync<int>(new AggregateException());
             Assert.AreEqual(0, value);
         }
 
@@ -230,8 +219,7 @@
                 Id   = 1,
                 Name = "Tim Howard"
             };
-            var data = (new OpenMapping() + _handler)
-                .Proxy<IMapping>().Map<PlayerData>(entity);
+            var data = new OpenMapping().Map<PlayerData>(entity);
             Assert.AreEqual(entity.Id, data.Id);
             Assert.AreEqual(entity.Name, data.Name);
         }
@@ -249,16 +237,16 @@
                 Id   = 12,
                 Name = "Roberto Carlose"
             };
-            var handler = new EntityMapping() + new ExplicitMapping() + _handler;
+            var handler = new EntityMapping() + new ExplicitMapping();
             var handled = handler.All(bundle =>
                 bundle.Add(h =>
                 {
-                    var data = h.Proxy<IMapping>().Map<PlayerData>(entity);
+                    var data = h.Map<PlayerData>(entity);
                     Assert.AreEqual(entity.Id, data.Id);
                     Assert.AreEqual(entity.Name, data.Name);
                 }).Add(h =>
                 {
-                    var json = h.Proxy<IMapping>().Map<string>(player, "application/json");
+                    var json = h.Map<string>(player, "application/json");
                     Assert.AreEqual("{id:12,name:'Roberto Carlose'}", json);
 
                 }));

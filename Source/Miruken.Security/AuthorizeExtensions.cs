@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Security
 {
+    using System;
     using System.Security.Principal;
     using Callback;
     using Concurrency;
@@ -10,6 +11,8 @@
             this IHandler handler, object target,
             IPrincipal principal, object policy = null)
         {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
             return handler.CanAccessAsync(target, principal, policy)
                 .GetAwaiter().GetResult();
         }
@@ -18,7 +21,8 @@
             this IHandler handler, object target,
             IPrincipal principal, object policy = null)
         {
-            if (handler == null) return Promise.False;
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
             var authorization = new Authorization(target, principal, policy);
             handler.Handle(authorization);
             return authorization.Result;

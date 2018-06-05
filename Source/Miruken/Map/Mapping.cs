@@ -5,6 +5,7 @@
     using Callback;
     using Callback.Policy;
     using Concurrency;
+    using Infrastructure;
 
     public class Mapping : ICallback,
         IAsyncCallback, IDispatchCallback
@@ -42,6 +43,9 @@
         {
             get
             {
+                if (_result == null)
+                    _result = RuntimeHelper.GetDefault(Type);
+
                 if (IsAsync)
                 {
                     if (!WantsAsync)
@@ -54,7 +58,7 @@
             }
             set
             {
-                _result = value;
+                _result = value ?? RuntimeHelper.GetDefault(Type);
                 IsAsync = _result is Promise || _result is Task;
             }
         }

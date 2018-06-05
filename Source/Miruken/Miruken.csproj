@@ -86,9 +86,8 @@
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
     <Compile Include="Map\IFormatMatching.cs" />
-    <Compile Include="Map\IMapping.cs" />
+    <Compile Include="Map\MappingExtensions.cs" />
     <Compile Include="Map\Mapping.cs" />
-    <Compile Include="Map\MappingHandler.cs" />
     <Compile Include="Map\Maps.cs" />
     <Compile Include="Monads.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />

@@ -10,7 +10,6 @@
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.SubSystems.Configuration;
     using Infrastructure;
-    using Map;
 
     public class HandleFeature : FeatureInstaller
     {
@@ -40,7 +39,6 @@
         {
             yield return Types.From(
                 typeof(ErrorsHandler),
-                typeof(MappingHandler),
                 typeof(LogFilter<,>));
         }
 
