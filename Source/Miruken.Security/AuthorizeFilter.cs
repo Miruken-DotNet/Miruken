@@ -17,9 +17,9 @@
         public Task<TRes> Next(
             TCb callback, Next<TRes> next,
             IPrincipal principal, IHandler composer,
-            MethodBinding method, AuthorizeAttribute attribute)
+            MethodBinding method, IFilterProvider provider)
         {
-            if (!attribute.AllowAnonymousUser)
+            if ((provider as AuthorizeAttribute)?.AllowAnonymousUser != true)
                 principal.RequireAuthenticatedClaims();
             var policy = GetPolicy(callback, method);
             var authorization = new Authorization(callback, principal, policy);

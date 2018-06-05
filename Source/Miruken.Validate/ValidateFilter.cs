@@ -11,7 +11,7 @@
 
         public Task<TRes> Next(TCb callback, MethodBinding method,
             IHandler composer, Next<TRes> next,
-            IFilterProvider provider = null)
+            IFilterProvider provider)
         {
             return Validate(callback, composer)
                 .Then((req, s) => next())
