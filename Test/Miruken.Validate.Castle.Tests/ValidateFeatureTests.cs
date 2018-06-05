@@ -49,11 +49,10 @@
         [TestMethod]
         public async Task Should_Validate_Target()
         {
-            var handler = new ValidationHandler()
-                        + new FluentValidationValidator()
+            var handler = new FluentValidationValidator()
                         + _handler;
             var player  = new Player();
-            var outcome = await Proxy<IValidating>(handler).ValidateAsync(player);
+            var outcome = await handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
@@ -65,8 +64,7 @@
         public async Task Should_Validate_Target_Resolving()
         {
             var player  = new Player();
-            var outcome = await Proxy<IValidating>(_handler.Resolve())
-                .ValidateAsync(player);
+            var outcome = await _handler.Resolve().ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             var firstName = outcome.GetErrors("FirstName").Cast<string>().ToArray();
@@ -95,8 +93,7 @@
         [TestMethod]
         public async Task Should_Compose_Validation()
         {
-            var handler = new ValidationHandler()
-                        + new FluentValidationValidator()
+            var handler = new FluentValidationValidator()
                         + _handler;
             var team = new Team
             {
@@ -119,7 +116,7 @@
                 }
             };
 
-            var outcome = await Proxy<IValidating>(handler).ValidateAsync(team);
+            var outcome = await handler.ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new[] { "Coach", "Players" }, outcome.Culprits);

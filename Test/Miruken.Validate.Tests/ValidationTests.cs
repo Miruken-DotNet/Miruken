@@ -7,7 +7,6 @@
     using Concurrency;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
-    using static Protocol;
 
     [TestClass]
     public class ValidationTests
@@ -15,13 +14,12 @@
         [TestMethod]
         public void Should_Validate_Target()
         {
-            var handler = new ValidationHandler()
-                        + new ValidatePlayer();
+            var handler = new ValidatePlayer();
             var player  = new Player
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = Proxy<IValidating>(handler).Validate(player);
+            var outcome = handler.Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("First name is required", outcome["FirstName"]);
@@ -31,13 +29,12 @@
         [TestMethod]
         public void Should_Validate_Target_For_Scope()
         {
-            var handler = new ValidationHandler()
-                        + new ValidatePlayer();
+            var handler = new ValidatePlayer();
             var player  = new Player
             {
                 DOB = new DateTime(2005, 6, 14)
             };
-            var outcome = Proxy<IValidating>(handler).Validate(player, null, "Recreational");
+            var outcome = handler.Validate(player, null, "Recreational");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("Age must be 10 or younger", outcome["DOB"]);
@@ -46,10 +43,9 @@
         [TestMethod]
         public async Task Should_Validate_Target_Async()
         {
-            var handler = new ValidationHandler()
-                        + new ValidateTeam();
+            var handler = new ValidateTeam();
             var team    = new Team();
-            var outcome = await Proxy<IValidating>(handler).ValidateAsync(team);
+            var outcome = await handler.ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             Assert.AreEqual("Name is required", outcome["Name"]);
@@ -58,14 +54,12 @@
         [TestMethod]
         public async Task Should_Validate_Target_For_Scope_Async()
         {
-            var handler = new ValidationHandler()
-                        + new ValidateTeam();
+            var handler = new ValidateTeam();
             var team    = new Team
             {
                 Coach = new Coach()
             };
-            var outcome = await Proxy<IValidating>(handler)
-                .ValidateAsync(team, null, "ECNL");
+            var outcome = await handler.ValidateAsync(team, null, "ECNL");
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             var coach = outcome.GetOutcome("Coach");
@@ -76,8 +70,7 @@
         [TestMethod]
         public async Task Should_Handle_Method_If_Valid()
         {
-            var handler = new ValidationHandler()
-                        + new ManageTeamHandler()
+            var handler = new ManageTeamHandler()
                         + new ValidatePlayer();
             var team    = new Team();
             var player  = new Player
@@ -95,8 +88,7 @@
             AllowDerivedTypes = true)]
         public async Task Should_Reject_Method_If_Invalid()
         {
-            var handler = new ValidationHandler()
-                        + new ManageTeamHandler()
+            var handler = new ManageTeamHandler()
                         + new ValidatePlayer();
             var team    = new Team();
             var player  = new Player();
@@ -108,8 +100,7 @@
             AllowDerivedTypes = true)]
         public async Task Should_Reject_Method_If_Invalid_Async()
         {
-            var handler = new ValidationHandler()
-                        + new ManageTeamHandler()
+            var handler = new ManageTeamHandler()
                         + new ValidateTeam();
             var team    = new Team();
             var player  = new Player();

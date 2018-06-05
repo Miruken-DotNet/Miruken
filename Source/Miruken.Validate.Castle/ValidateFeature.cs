@@ -19,7 +19,7 @@
 
         public override IEnumerable<FromDescriptor> GetFeatures()
         {
-            yield return Classes.FromAssemblyContaining<ValidationHandler>();
+            yield return Classes.FromAssemblyContaining<Validation>();
         }
 
         public override void InstallFeatures(FromDescriptor from)

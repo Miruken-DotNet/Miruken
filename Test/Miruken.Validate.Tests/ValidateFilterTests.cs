@@ -26,8 +26,7 @@
             _handler = new TeamHandler()
                      + new FilterProvider()
                      + new DataAnnotationsValidator()
-                     + new FluentValidationValidator()
-                     + new ValidationHandler();
+                     + new FluentValidationValidator();
         }
 
         [TestMethod]

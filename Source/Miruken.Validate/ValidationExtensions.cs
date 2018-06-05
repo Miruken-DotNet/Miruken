@@ -3,18 +3,17 @@
     using Callback;
     using Concurrency;
 
-    public class ValidationHandler : Handler, IValidating
+    public static class ValidationExtensions
     {
-        public ValidationOutcome Validate(
+        public static ValidationOutcome Validate(this IHandler handler,
             object target, params object[] scopes)
         {
-            var composer   = Composer;
-            var options    = composer.GetOptions<ValidationOptions>();
+            var options = handler.GetOptions<ValidationOptions>();
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true
             };
-            composer.Handle(validation, true);
+            handler.Handle(validation, true);
             var result = validation.Result;
 
             var outcome = validation.Outcome;
@@ -23,17 +22,16 @@
             return outcome;
         }
 
-        public Promise<ValidationOutcome> ValidateAsync(
-            object target, params object[] scopes)
+        public static Promise<ValidationOutcome> ValidateAsync(
+            this IHandler handler, object target, params object[] scopes)
         {
-            var composer   = Composer;
-            var options    = composer.GetOptions<ValidationOptions>();
+            var options = handler.GetOptions<ValidationOptions>();
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true,
-                WantsAsync    = true
+                WantsAsync = true
             };
-            composer.Handle(validation, true);
+            handler.Handle(validation, true);
 
             return ((Promise)validation.Result).Then((r, s) =>
             {
@@ -43,23 +41,19 @@
                 return outcome;
             });
         }
-    }
 
-    public static class ValidationExtensions
-    {
-        public static IHandler Valid(
-            this IHandler handler, object target, params object[] scopes)
+        public static IHandler Valid(this IHandler handler,
+            object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.Proxy<IValidating>().Validate(target, scopes)
-                        .IsValid);
+                composer.Validate(target, scopes).IsValid);
         }
 
-        public static IHandler ValidAsync(
-             this IHandler handler, object target, params object[] scopes)
+        public static IHandler ValidAsync(this IHandler handler,
+            object target, params object[] scopes)
         {
             return handler.Aspect((_, composer) =>
-                composer.Proxy<IValidating>().ValidateAsync(target, scopes)
+                composer.ValidateAsync(target, scopes)
                     .Then((outcome, s) => outcome.IsValid));
         }
     }

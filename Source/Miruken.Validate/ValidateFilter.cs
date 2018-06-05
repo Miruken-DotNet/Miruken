@@ -13,16 +13,15 @@
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null)
         {
-            var validator = composer.Proxy<IValidating>();
-            return Validate(callback, validator)
+            return Validate(callback, composer)
                 .Then((req, s) => next())
-                .Then((resp, s) => Validate(resp, validator));
+                .Then((resp, s) => Validate(resp, composer));
         }
 
-        private static Promise<T> Validate<T>(T target, IValidating validator)
+        private static Promise<T> Validate<T>(T target, IHandler handler)
         {
             return target == null ? Promise<T>.Empty
-                : validator.ValidateAsync(target).Then((outcome, s) =>
+                : handler.ValidateAsync(target).Then((outcome, s) =>
                 {
                     if (!outcome.IsValid)
                         throw new ValidationException(outcome);

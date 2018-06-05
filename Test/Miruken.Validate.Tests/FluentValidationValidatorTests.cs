@@ -8,7 +8,6 @@
     using global::FluentValidation;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
-    using static Protocol;
 
     [TestClass]
     public class FluentValidationValidatorTests
@@ -16,11 +15,10 @@
         [TestMethod]
         public async Task Should_Validate_Target()
         {
-            var handler = new ValidationHandler()
-                        + new FluentValidationValidator()
+            var handler = new FluentValidationValidator()
                         + new ValidatorProvider();
             var player  = new Player();
-            var outcome = await Proxy<IValidating>(handler).ValidateAsync(player);
+            var outcome = await handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
@@ -31,8 +29,7 @@
         [TestMethod]
         public async Task Should_Compose_Validation()
         {
-            var handler = new ValidationHandler()
-                        + new FluentValidationValidator()
+            var handler = new FluentValidationValidator()
                         + new ValidatorProvider();
             var team    = new Team
             {
@@ -55,7 +52,7 @@
                 }
             };
 
-            var outcome = await Proxy<IValidating>(handler).ValidateAsync(team);
+            var outcome = await handler.ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new [] { "Coach", "Players"}, outcome.Culprits);
@@ -91,8 +88,7 @@
         [TestMethod]
         public async Task Should_Validation_Target_For_Scope()
         {
-            var handler = new ValidationHandler()
-                        + new FluentValidationValidator()
+            var handler = new FluentValidationValidator()
                         + new ValidatorProvider();
             var team = new Team
             {
@@ -114,7 +110,7 @@
                 }
             };
 
-            var outcome = await Proxy<IValidating>(handler)
+            var outcome = await handler
                 .ValidateAsync(team, Scopes.Default, "Quickfoot");
             Assert.IsFalse(outcome.IsValid);
             var errors = outcome.GetErrors("Players").Cast<object>().ToArray();

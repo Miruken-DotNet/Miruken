@@ -14,13 +14,12 @@
         [TestMethod]
         public void Should_Validate_Target()
         {
-            var handler = new ValidationHandler()
-                        + new DataAnnotationsValidator();
+            var handler = new DataAnnotationsValidator();
             var player = new Player
             {
                 DOB = new DateTime(2007, 6, 14)
             };
-            var outcome = Proxy<IValidating>(handler).Validate(player);
+            var outcome = handler.Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);
@@ -30,8 +29,7 @@
         [TestMethod]
         public void Should_Compose_Validation()
         {
-            var handler = new ValidationHandler()
-                        + new DataAnnotationsValidator();
+            var handler = new DataAnnotationsValidator();
             var team = new Team
             {
                 Division = "10",
@@ -47,7 +45,7 @@
                     new Player { FirstName = "Lionel"}
                 }
             };
-            var outcome = Proxy<IValidating>(handler).Validate(team);
+            var outcome = handler.Validate(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(
@@ -83,15 +81,13 @@
         [TestMethod]
         public void Should_Validate_Target_Resolving()
         {
-            HandlerDescriptor.GetDescriptor<ValidationHandler>();
             HandlerDescriptor.GetDescriptor<DataAnnotationsValidator>();
-            var handler = new ValidationHandler()
-                        + new DataAnnotationsValidator();
-            var player = new Player
+            var handler = new DataAnnotationsValidator();
+            var player  = new Player
             {
                 DOB = new DateTime(2007, 6, 14)
             };
-            var outcome = Proxy<IValidating>(handler.Resolve()).Validate(player);
+            var outcome = handler.Resolve().Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);
@@ -102,8 +98,7 @@
          ExpectedException(typeof(RejectedException))]
         public void Should_Reject_Operation_If_Invalid()
         {
-            var handler = new ValidationHandler()
-                        + new DataAnnotationsValidator()
+            var handler = new DataAnnotationsValidator()
                         + new RegistrationHandler();
 
             var team = new Team();
