@@ -1,4 +1,4 @@
-﻿namespace Example.MirukenCastleExamples
+﻿namespace Example.mirukenCastleExamples
 {
     using Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using Castle.Windsor;

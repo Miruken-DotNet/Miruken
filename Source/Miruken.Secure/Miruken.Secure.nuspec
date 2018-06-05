@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Miruken.Security</id>
+    <id>Miruken.Secure</id>
     <version>$version$</version>
-    <title>Miruken Security</title>
+    <title>Miruken Secure</title>
     <authors>cneuwirt</authors>
     <owners>cneuwirt</owners>
     <licenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</licenseUrl>

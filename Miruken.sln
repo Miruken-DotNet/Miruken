@@ -49,9 +49,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "example.school", "Doc\schoo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "examples", "Doc\examples\examples.csproj", "{F73C6936-E41E-49C6-9E2B-C7A87DAF81D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Security", "Source\Miruken.Security\Miruken.Security.csproj", "{0633ABDD-552D-41DD-AD5C-00238482ABAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Secure", "Source\Miruken.Secure\Miruken.Secure.csproj", "{0633ABDD-552D-41DD-AD5C-00238482ABAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Security.Tests", "Test\Miruken.Security.Tests\Miruken.Security.Tests.csproj", "{A217B57D-A52C-4C29-910A-83205A9FCE13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Secure.Tests", "Test\Miruken.Secure.Tests\Miruken.Secure.Tests.csproj", "{A217B57D-A52C-4C29-910A-83205A9FCE13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

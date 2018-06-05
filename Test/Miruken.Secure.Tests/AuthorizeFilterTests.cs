@@ -1,4 +1,4 @@
-﻿namespace Miruken.Security.Tests
+﻿namespace Miruken.Secure.Tests
 {
     using System;
     using System.Security.Claims;
@@ -282,7 +282,7 @@
                     .HasScope("defcon");
             }
 
-            [Authorizes("Miruken.Security.Tests.AuthorizeFilterTests+MissileControlHandler:Shutdown")]
+            [Authorizes("Miruken.Secure.Tests.AuthorizeFilterTests+MissileControlHandler:Shutdown")]
             public bool CanShutdown(
                 HandleMethod method, IPrincipal principal)
             {

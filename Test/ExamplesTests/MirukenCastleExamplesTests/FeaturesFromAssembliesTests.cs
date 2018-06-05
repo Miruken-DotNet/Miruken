@@ -1,7 +1,7 @@
 ﻿namespace ExampleTests.MirukenCastleExamplesTests
 {
+    using Example.mirukenCastleExamples;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Example.MirukenCastleExamples;
 
     [TestClass]
     public class FeaturesFromAssembliesTests

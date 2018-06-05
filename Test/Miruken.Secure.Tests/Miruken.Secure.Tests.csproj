@@ -7,7 +7,7 @@
     <ProjectGuid>{A217B57D-A52C-4C29-910A-83205A9FCE13}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Miruken.Security.Tests</RootNamespace>
+    <RootNamespace>Miruken.Secure.Tests</RootNamespace>
     <AssemblyName>Miruken.Security.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -48,7 +48,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizedAttributeTests.cs" />
     <Compile Include="AuthorizeFilterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -56,7 +55,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Miruken.Security\Miruken.Security.csproj">
+    <ProjectReference Include="..\..\Source\Miruken.Secure\Miruken.Secure.csproj">
       <Project>{0633abdd-552d-41dd-ad5c-00238482abaa}</Project>
       <Name>Miruken.Security</Name>
     </ProjectReference>

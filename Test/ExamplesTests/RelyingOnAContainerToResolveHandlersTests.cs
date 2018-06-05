@@ -1,7 +1,7 @@
 ﻿namespace ExampleTests
 {
+    using Example.mirukenExamples.context;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Example.MirukenExamples.Context;
 
     [TestClass]
     public class RelyingOnAContainerToResolveHandlersTests

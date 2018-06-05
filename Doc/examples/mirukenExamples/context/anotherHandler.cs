@@ -1,4 +1,4 @@
-namespace Example.MirukenExamples.Context
+namespace Example.mirukenExamples.context
 {
     using Miruken.Callback;
 

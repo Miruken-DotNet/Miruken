@@ -1,4 +1,4 @@
-﻿namespace Miruken.Security
+﻿namespace Miruken.Secure
 {
     using System;
     using System.Linq;
