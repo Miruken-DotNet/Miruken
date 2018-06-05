@@ -15,6 +15,7 @@
                 StopOnFailure = options?.StopOnFailure == true
             };
             composer.Handle(validation, true);
+            var result = validation.Result;
 
             var outcome = validation.Outcome;
             if (target is IValidationAware validationAware)

@@ -13,8 +13,7 @@
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
-            if (command.IsAsync)
-                ((Promise)command.Result).Wait();
+            var result = command.Result;
         }
 
         public static Promise CommandAsync(this IHandler handler, object callback)
@@ -40,12 +39,8 @@
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
-            var result = command.Result;
-            return command.IsAsync 
-                 ? (TRes)((Promise)result).Wait()
-                 : (result == null 
-                    ? (TRes)RuntimeHelper.GetDefault(typeof(TRes)) 
-                    : (TRes)result);
+            var result = command.Result ?? RuntimeHelper.GetDefault(typeof(TRes));
+            return (TRes) result;
         }
 
         public static Promise<TRes> CommandAsync<TRes>(
@@ -96,14 +91,11 @@
         {
             if (handler == null)
                 return Array.Empty<TRes>();
-            var command = new Command(callback, true) { WantsAsync = true };
+            var command = new Command(callback, true);
             if (!handler.Handle(command, true))
                 throw new NotSupportedException(
                     $"{callback.GetType()} not handled");
-            var result = command.Result;
-            return command.IsAsync
-                 ? ((object[])((Promise)result).Wait()).Cast<TRes>().ToArray()
-                 : ((object[])result).Cast<TRes>().ToArray();
+            return ((object[])command.Result).Cast<TRes>().ToArray();
         }
 
         public static Promise<TRes[]> CommandAllAsync<TRes>(

@@ -42,8 +42,14 @@
         {
             get
             {
-                if (WantsAsync && !IsAsync)
+                if (IsAsync)
+                {
+                    if (!WantsAsync)
+                        _result = (_result as Promise)?.Wait();
+                }
+                else if (WantsAsync)
                     _result = Promise.Resolved(_result);
+
                 return _result;
             }
             set

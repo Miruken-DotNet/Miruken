@@ -46,8 +46,15 @@
                     else if (_asyncResults.Count > 1)
                         _result = Promise.All(_asyncResults.ToArray());
                 }
-                if (WantsAsync && !IsAsync)
+
+                if (IsAsync)
+                {
+                    if (!WantsAsync)
+                        _result = (_result as Promise)?.Wait();
+                }
+                else if (WantsAsync)
                     _result = Promise.Resolved(_result);
+
                 return _result;
             }
             set

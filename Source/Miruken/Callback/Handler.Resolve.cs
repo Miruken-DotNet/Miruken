@@ -59,12 +59,7 @@
             if (handler == null) return null;
             var inquiry = key as Inquiry ?? new Inquiry(key);
             if (handler.Handle(inquiry))
-            {
-                var result = inquiry.Result;
-                return inquiry.IsAsync 
-                     ? ((Promise)result).Wait()
-                     : result;
-            }
+                return inquiry.Result;
             var type = key as Type;
             return type != null 
                  ? RuntimeHelper.GetDefault(type)
@@ -105,9 +100,7 @@
                 if (handler.Handle(inquiry, true))
                 {
                     var result = inquiry.Result;
-                    return CoerceArray(inquiry.IsAsync
-                         ? ((Promise<object[]>)result).Wait()
-                         : (object[]) result, key);
+                    return CoerceArray((object[]) result, key);
                 }
             }
             return CoerceArray(Array.Empty<object>(), key);
@@ -122,10 +115,8 @@
                 if (handler.Handle(inquiry, true))
                 {
                     var result = inquiry.Result;
-                    return inquiry.IsAsync
-                         ? ((Promise<object[]>)result)
-                                .Then((arr,s) => CoerceArray(arr, key))
-                         : Promise.Resolved(CoerceArray((object[])result, key));
+                    return ((Promise<object[]>) result)
+                        .Then((arr, s) => CoerceArray(arr, key));
                 }
             }
             var empty = CoerceArray(Array.Empty<object>(), key);

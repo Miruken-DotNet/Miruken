@@ -41,24 +41,33 @@
         {
             get
             {
-                if (_result != null) return _result;
-                if (!Many)
+                if (_result == null)
                 {
-                    if (_results.Count > 0)
-                        _result = _results[0];
+                    if (!Many)
+                    {
+                        if (_results.Count > 0)
+                            _result = _results[0];
+                    }
+                    else if (IsAsync)
+                    {
+                        _result = Promise.All(_results
+                                .Select(r => (r as Promise) ?? Promise.Resolved(r))
+                                .ToArray())
+                            .Then((results, s) => results.Where(r => r != null)
+                                .ToArray());
+                    }
+                    else
+                        _result = _results;
                 }
-                else if (IsAsync)
+
+                if (IsAsync)
                 {
-                    _result = Promise.All(_results
-                        .Select(r => (r as Promise) ?? Promise.Resolved(r))
-                        .ToArray())
-                        .Then((results, s) => results.Where(r => r != null)
-                        .ToArray());
+                    if (!WantsAsync)
+                        _result = (_result as Promise)?.Wait();
                 }
-                else
-                    _result = _results;
-                if (WantsAsync && !IsAsync)
+                else if (WantsAsync)
                     _result = Promise.Resolved(_result);
+
                 return _result;
             }
             set

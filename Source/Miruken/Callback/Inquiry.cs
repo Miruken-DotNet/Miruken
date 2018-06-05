@@ -34,30 +34,39 @@
         {
             get
             {
-                if (_result != null) return _result;
-                if (!Many)
+                if (_result == null)
                 {
-                    if (_resolutions.Count > 0)
+                    if (!Many)
                     {
-                        var result = _resolutions[0];
-                        _result = (result as Promise)?.Then(
-                            (r, s) => r is object[] array ? array.FirstOrDefault() : r) 
-                            ?? result;
+                        if (_resolutions.Count > 0)
+                        {
+                            var result = _resolutions[0];
+                            _result = (result as Promise)?.Then(
+                                (r, s) => r is object[] array ? array.FirstOrDefault() : r)
+                              ?? result;
+                        }
+                    }
+                    else if (IsAsync)
+                    {
+                        _result = Promise.All(_resolutions
+                                .Select(Promise.Resolved).ToArray())
+                            .Then((results, s) => Flatten(results)
+                                .ToArray());
+                    }
+                    else
+                    {
+                        _result = Flatten(_resolutions).ToArray();
                     }
                 }
-                else if (IsAsync)
+
+                if (IsAsync)
                 {
-                    _result = Promise.All(_resolutions
-                        .Select(Promise.Resolved).ToArray())
-                        .Then((results, s) => Flatten(results)
-                        .ToArray());
+                    if (!WantsAsync)
+                        _result = (_result as Promise)?.Wait();
                 }
-                else
-                {
-                    _result = Flatten(_resolutions).ToArray();
-                }
-                if (WantsAsync && !IsAsync)
+                else if (WantsAsync)
                     _result = Promise.Resolved(_result);
+
                 return _result;
             }
             set
