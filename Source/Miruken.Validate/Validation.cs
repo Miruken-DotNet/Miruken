@@ -30,7 +30,7 @@
         public bool              IsAsync       { get; private set; }
         public bool              StopOnFailure { get; set; }
 
-        public CallbackPolicy Policy => ValidatesAttribute.Policy;
+        public CallbackPolicy Policy => Validates.Policy;
 
         public Type ResultType => WantsAsync
                                || IsAsync ? typeof(Promise) : null;

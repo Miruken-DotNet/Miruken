@@ -117,7 +117,7 @@
         public static CallbackPolicy GetCallbackPolicy(object callback)
         {
             var dispatch = callback as IDispatchCallback;
-            return dispatch?.Policy ?? HandlesAttribute.Policy;
+            return dispatch?.Policy ?? Handles.Policy;
         }
     }
 }

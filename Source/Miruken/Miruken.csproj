@@ -89,7 +89,7 @@
     <Compile Include="Map\IMapping.cs" />
     <Compile Include="Map\Mapping.cs" />
     <Compile Include="Map\MappingHandler.cs" />
-    <Compile Include="Map\MapsAttribute.cs" />
+    <Compile Include="Map\Maps.cs" />
     <Compile Include="Monads.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
@@ -115,7 +115,7 @@
     <Compile Include="Callback\CompositeHandler.cs" />
     <Compile Include="Callback\Composition.cs" />
     <Compile Include="Callback\HandleMethod.cs" />
-    <Compile Include="Callback\HandlesAttribute.cs" />
+    <Compile Include="Callback\Handles.cs" />
     <Compile Include="Callback\ICallback.cs" />
     <Compile Include="Callback\IHandler.cs" />
     <Compile Include="Callback\Policy\ReturnAsync.cs" />
@@ -124,7 +124,7 @@
     <Compile Include="Callback\Policy\Return.cs" />
     <Compile Include="Callback\Policy\TargetArgument.cs" />
     <Compile Include="Callback\Provider.cs" />
-    <Compile Include="Callback\ProvidesAttribute.cs" />
+    <Compile Include="Callback\Provides.cs" />
     <Compile Include="Callback\Resolving.cs" />
     <Compile Include="Callback\Handler.Bounds.cs" />
     <Compile Include="Callback\VarianceOptions.cs" />

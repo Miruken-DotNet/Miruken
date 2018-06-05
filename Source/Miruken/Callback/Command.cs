@@ -29,7 +29,7 @@
 
         public CallbackPolicy Policy
         {
-            get => _policy ?? HandlesAttribute.Policy;
+            get => _policy ?? Handles.Policy;
             set => _policy = value;
         }
 

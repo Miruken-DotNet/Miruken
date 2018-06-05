@@ -26,7 +26,7 @@
         public object     Target    { get; }
         public IPrincipal Principal { get; }
 
-        public CallbackPolicy Policy => AuthorizesAttribute.Policy;
+        public CallbackPolicy Policy => Authorizes.Policy;
 
         public Promise<bool> Result => _result ?? Promise.True;
 

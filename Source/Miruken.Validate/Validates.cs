@@ -4,13 +4,13 @@
     using Callback;
     using Callback.Policy;
 
-    public class ValidatesAttribute : CategoryAttribute
+    public class Validates : CategoryAttribute
     {
-        public ValidatesAttribute()
+        public Validates()
         {          
         }
 
-        public ValidatesAttribute(Type key)
+        public Validates(Type key)
         {
             InKey = key;
         }
@@ -28,6 +28,12 @@
                    !(validation.StopOnFailure || SkipIfInvalid))
                 && validation.ScopeMatcher.Matches(Scope);
         }
+
+        public static void AddFilters(params IFilterProvider[] providers) =>
+            Policy.AddFilters(providers);
+
+        public static void AddFilters(params Type[] filterTypes) =>
+            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
              ContravariantPolicy.Create<Validation>(v => v.Target,

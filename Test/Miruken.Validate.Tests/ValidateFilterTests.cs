@@ -21,7 +21,7 @@
         {
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<TeamHandler>();
-            HandlesAttribute.Policy.AddFilters(typeof(ValidateFilter<,>));
+            Handles.Policy.AddFilters(typeof(ValidateFilter<,>));
 
             _handler = new TeamHandler()
                      + new FilterProvider()

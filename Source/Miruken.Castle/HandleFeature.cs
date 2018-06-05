@@ -46,7 +46,7 @@
 
         public HandleFeature AddFilters(params IFilterProvider[] providers)
         {
-            HandlesAttribute.Policy.AddFilters(providers);
+            Handles.AddFilters(providers);
             return this;
         }
 
@@ -58,7 +58,7 @@
 
         public HandleFeature AddFilters(params Type[] filterTypes)
         {
-            HandlesAttribute.Policy.AddFilters(filterTypes);
+            Handles.AddFilters(filterTypes);
             return this;
         }
 

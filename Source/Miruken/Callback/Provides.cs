@@ -5,23 +5,29 @@
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property,
         AllowMultiple = true, Inherited = false)]
-    public class ProvidesAttribute : CategoryAttribute
+    public class Provides : CategoryAttribute
     {
-        public ProvidesAttribute()
+        public Provides()
         {
         }
 
-        public ProvidesAttribute(object key)
+        public Provides(object key)
         {
             OutKey = key;
         }
 
-        public ProvidesAttribute(string key, StringComparison comparison)
+        public Provides(string key, StringComparison comparison)
         {
             OutKey = new StringKey(key, comparison);
         }
 
         public override CallbackPolicy CallbackPolicy => Policy;
+
+        public static void AddFilters(params IFilterProvider[] providers) =>
+            Policy.AddFilters(providers);
+
+        public static void AddFilters(params Type[] filterTypes) =>
+            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
              CovariantPolicy.Create<Inquiry>(r => r.Key,

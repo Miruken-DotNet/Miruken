@@ -36,7 +36,6 @@
             return callback is IResolveCallback resolving
                  ? (resolving.GetResolveCallback() ?? callback)
                  : Resolving.GetDefaultResolvingCallback(callback);
-
         }
     }
 

@@ -1,19 +1,26 @@
 ﻿namespace Miruken.Callback
 {
+    using System;
     using Policy;
 
-    public class HandlesAttribute : CategoryAttribute
+    public class Handles : CategoryAttribute
     {
-        public HandlesAttribute()
+        public Handles()
         {
         }
 
-        public HandlesAttribute(object key)
+        public Handles(object key)
         {
             InKey = key;
         }
 
         public override CallbackPolicy CallbackPolicy => Policy;
+
+        public static void AddFilters(params IFilterProvider[] providers) =>
+            Policy.AddFilters(providers);
+
+        public static void AddFilters(params Type[] filterTypes) =>
+            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
             ContravariantPolicy.Create<Command>(r => r.Callback,

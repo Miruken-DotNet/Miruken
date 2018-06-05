@@ -36,7 +36,7 @@
         public Type ResultType => 
             WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();
 
-        public CallbackPolicy Policy => MapsAttribute.Policy;
+        public CallbackPolicy Policy => Maps.Policy;
 
         public object Result
         {

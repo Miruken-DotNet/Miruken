@@ -31,9 +31,8 @@
             handler.Command<LaunchConfirmation>(launch);
         }
 
-        [TestMethod,
-         ExpectedException(typeof(UnauthorizedAccessException))]
-        public void Rejects_Callback_If_Missing_Policy()
+        [TestMethod]
+        public void Allows_Callback_If_Missing_Policy()
         {
             var handler = new MissileControlHandler()
                         + new FilterHandler();

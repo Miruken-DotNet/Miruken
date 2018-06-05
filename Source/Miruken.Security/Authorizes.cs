@@ -1,20 +1,27 @@
 ﻿namespace Miruken.Security
 {
+    using System;
     using Callback;
     using Callback.Policy;
 
-    public class AuthorizesAttribute : CategoryAttribute
+    public class Authorizes : CategoryAttribute
     {
-        public AuthorizesAttribute()
+        public Authorizes()
         {          
         }
 
-        public AuthorizesAttribute(object policy)
+        public Authorizes(object policy)
         {
             InKey = policy;
         }
 
         public override CallbackPolicy CallbackPolicy => Policy;
+
+        public static void AddFilters(params IFilterProvider[] providers) =>
+            Policy.AddFilters(providers);
+
+        public static void AddFilters(params Type[] filterTypes) =>
+            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
              ContravariantPolicy.Create<Authorization>(v => v.Target,

@@ -49,7 +49,7 @@
     <Compile Include="PrincipalExtensions.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AuthorizesAttribute.cs" />
+    <Compile Include="Authorizes.cs" />
     <Compile Include="AuthorizeFilter.cs" />
   </ItemGroup>
   <ItemGroup>

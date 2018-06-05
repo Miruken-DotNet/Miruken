@@ -70,6 +70,7 @@
     <Compile Include="FeatureInstaller.cs" />
     <Compile Include="FeaturesInstaller.cs" />
     <Compile Include="HandleFeature.cs" />
+    <Compile Include="LogAttribute.cs" />
     <Compile Include="LogFilter.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

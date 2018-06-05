@@ -10,13 +10,10 @@
         public AuthorizeAttribute()
             : base(typeof(AuthorizeFilter<,>))
         {
-            Required                 = true;
-            RequireAuthenticatedUser = true;
-            RequirePolicy            = true;
+            Required = true;
         }
 
-        public bool? RequireAuthenticatedUser { get; set; }
-        public bool? RequirePolicy            { get; set; }
+        public bool AllowAnonymousUser { get; set; }
 
         protected override bool AllowFilterType(
             Type filterType, MethodBinding binding)
