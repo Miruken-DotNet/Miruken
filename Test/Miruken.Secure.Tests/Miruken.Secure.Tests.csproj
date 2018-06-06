@@ -57,7 +57,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Miruken.Secure\Miruken.Secure.csproj">
       <Project>{0633abdd-552d-41dd-ad5c-00238482abaa}</Project>
-      <Name>Miruken.Security</Name>
+      <Name>Miruken.Secure</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
       <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
