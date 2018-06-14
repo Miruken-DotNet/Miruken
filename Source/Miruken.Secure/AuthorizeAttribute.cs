@@ -15,7 +15,7 @@
 
         public bool AllowAnonymousUser { get; set; }
 
-        protected override bool AllowFilterType(
+        protected override bool AcceptFilterType(
             Type filterType, MethodBinding binding)
         {
             return !binding.Dispatcher.Attributes

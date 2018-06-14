@@ -102,6 +102,103 @@
             Assert.AreEqual(entity.Name, data.Name);
         }
 
+        [TestMethod]
+        public void Should_Map_All_Implicitly()
+        {
+            var entities = new[]
+            {
+                new PlayerEntity
+                {
+                    Id   = 1,
+                    Name = "Tim Howard"
+                },
+                new PlayerEntity
+                {
+                    Id   = 9,
+                    Name = "Josh Sargent"
+                }
+            };
+            var data = new EntityMapping().MapAll<PlayerData>(entities);
+            Assert.AreEqual(2, data.Length);
+            for (var i = 0; i < data.Length; ++i)
+            {
+                Assert.AreEqual(data[i].Id, entities[i].Id);
+                Assert.AreEqual(data[i].Name, entities[i].Name);
+            }
+        }
+
+        [TestMethod]
+        public async Task Should_Map_All_Implicitly_Async()
+        {
+            var entities = new[]
+            {
+                new PlayerEntity
+                {
+                    Id   = 2,
+                    Name = "David Silva"
+                },
+                new PlayerEntity
+                {
+                    Id   = 9,
+                    Name = "Marco Asensio"
+                }
+            };
+            var data = await new EntityMapping()
+                .MapAllAsync<PlayerData>(entities);
+            Assert.AreEqual(2, data.Length);
+            for (var i = 0; i < data.Length; ++i)
+            {
+                Assert.AreEqual(data[i].Id, entities[i].Id);
+                Assert.AreEqual(data[i].Name, entities[i].Name);
+            }
+        }
+
+        [TestMethod]
+        public void Should_Map_All_Explicitly()
+        {
+            var handler = new ExplicitMapping();
+            var players = new []
+            {
+                new PlayerData
+                {
+                    Id   = 3,
+                    Name = "Franz Beckenbauer"
+                },
+                new PlayerData
+                {
+                    Id   = 8,
+                    Name = "Toni Kroos"
+                }
+            };
+            var json = handler.MapAll<string>(players, "application/json");
+            Assert.AreEqual(2, json.Length); 
+            Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json[0]);
+            Assert.AreEqual("{id:8,name:'Toni Kroos'}", json[1]);
+        }
+
+        [TestMethod]
+        public async Task Should_Map_All_Explicitly_Async()
+        {
+            var handler = new ExplicitMapping();
+            var players = new[]
+            {
+                new PlayerData
+                {
+                    Id   = 3,
+                    Name = "Franz Beckenbauer"
+                },
+                new PlayerData
+                {
+                    Id   = 8,
+                    Name = "Toni Kroos"
+                }
+            };
+            var json = await handler.MapAllAsync<string>(players, "application/json");
+            Assert.AreEqual(2, json.Length);
+            Assert.AreEqual("{id:3,name:'Franz Beckenbauer'}", json[0]);
+            Assert.AreEqual("{id:8,name:'Toni Kroos'}", json[1]);
+        }
+
         [TestMethod,
          ExpectedException(typeof(NotSupportedException))]
         public void Should_Reject_Missing_Mapping()

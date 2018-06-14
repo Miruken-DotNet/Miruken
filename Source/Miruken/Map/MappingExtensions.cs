@@ -1,6 +1,8 @@
 ﻿namespace Miruken.Map
 {
     using System;
+    using System.Collections;
+    using System.Linq;
     using Callback;
     using Concurrency;
     using Infrastructure;
@@ -53,6 +55,22 @@
             var result = handler.MapAsync(source, typeof(T), format);
             return result == null ? Promise.Resolved(default(T))
                  : (Promise<T>)result.Coerce(typeof(Promise<T>));
+        }
+
+        public static T[] MapAll<T>(this IHandler handler,
+            IEnumerable source, object format = null)
+        {
+            return source.Cast<object>()
+                .Select(s => handler.Map<T>(s, format))
+                .ToArray();
+        }
+
+        public static Promise<T[]> MapAllAsync<T>(this IHandler handler,
+            IEnumerable source, object format = null)
+        {
+            return Promise.All(source.Cast<object>()
+                    .Select(s => handler.MapAsync<T>(s, format)))
+                .Then((r, s) => r.Cast<T>().ToArray());
         }
 
         public static T MapInto<T>(this IHandler handler,

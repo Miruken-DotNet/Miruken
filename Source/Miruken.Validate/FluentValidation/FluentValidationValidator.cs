@@ -7,6 +7,7 @@
     using Callback;
     using global::FluentValidation;
     using global::FluentValidation.Results;
+    using global::FluentValidation.Validators;
 
     public class FluentValidationValidator : Handler
     {
@@ -50,7 +51,7 @@
 
     public static class FluentValidatorExtensions
     {
-        private const string ComposerKey   = "Miruken.Composer";
+        private const string ComposerKey = "Miruken.Composer";
         private const string ValidationKey = "Miruken.Validation";
 
         public static void SetValidation(
@@ -113,8 +114,9 @@
             return ruleBuilder.MustAsync((target, prop, ctx, token) =>
             {
                 var composer = ctx.ParentContext?.GetComposer();
-                return composer == null ? Task.FromResult(true)
-                     : predicate(target, prop, composer, token);
+                return composer == null
+                    ? Task.FromResult(true)
+                    : predicate(target, prop, composer, token);
             });
         }
 
@@ -140,8 +142,70 @@
             return ruleBuilder.MustAsync((target, prop, ctx, token) =>
             {
                 var composer = ctx.ParentContext?.GetComposer();
-                return composer != null ? Task.FromResult(true)
+                return composer != null
+                     ? Task.FromResult(true)
                      : predicate(target, prop, token);
+            });
+        }
+
+        public static IRuleBuilderInitial<T, TProperty>
+            WithComposerCustom<T, TProperty>(
+            this IRuleBuilder<T, TProperty> ruleBuilder,
+            Action<TProperty, CustomContext, IHandler> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return ruleBuilder.Custom((prop, ctx) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                if (composer != null)
+                    action(prop, ctx, composer);
+            });
+        }
+
+        public static IRuleBuilderInitial<T, TProperty>
+            WithComposerCustomAsync<T, TProperty>(
+                this IRuleBuilder<T, TProperty> ruleBuilder, 
+                Func<TProperty, CustomContext, CancellationToken, IHandler, Task> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer != null 
+                     ? action(prop, ctx, cancel, composer)
+                     : Task.CompletedTask;
+            });
+        }
+
+        public static IRuleBuilderInitial<T, TProperty>
+            WithoutComposerCustom<T, TProperty>(
+                this IRuleBuilder<T, TProperty> ruleBuilder,
+                Action<TProperty, CustomContext> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return ruleBuilder.Custom((prop, ctx) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                if (composer == null) action(prop, ctx);
+            });
+        }
+
+        public static IRuleBuilderInitial<T, TProperty>
+            WithoutComposerCustomAsync<T, TProperty>(
+                this IRuleBuilder<T, TProperty> ruleBuilder,
+                Func<TProperty, CustomContext, CancellationToken, Task> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+            return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
+            {
+                var composer = ctx.ParentContext?.GetComposer();
+                return composer == null
+                     ? action(prop, ctx, cancel)
+                     : Task.CompletedTask;
             });
         }
     }

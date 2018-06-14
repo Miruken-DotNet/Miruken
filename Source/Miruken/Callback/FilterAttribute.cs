@@ -27,7 +27,7 @@
         {
             var filterTypes = FilterTypes
                 .Select(f => CloseFilterType(f, callbackType, logicalResultType))
-                .Where(f => f != null && AllowFilterType(f, binding))
+                .Where(f => f != null && AcceptFilterType(f, binding))
                 .ToArray();
 
             if (filterTypes.Length == 0)
@@ -54,7 +54,7 @@
         {          
         }
 
-        protected virtual bool AllowFilterType(Type filterType, MethodBinding binding)
+        protected virtual bool AcceptFilterType(Type filterType, MethodBinding binding)
         {
             return true;
         }
