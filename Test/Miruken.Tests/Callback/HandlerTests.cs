@@ -91,6 +91,15 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Callbacks_Implicitly_Genericly()
+        {
+            var baz     = new BazInt(29);
+            var handler = new CustomHandler();
+            Assert.IsTrue(handler.Handle(baz));
+            Assert.AreEqual(0, baz.Stuff);
+        }
+
+        [TestMethod]
         public void Should_Handle_Arrays()
         {
             var handler = new ArrayHandler();
@@ -762,6 +771,13 @@
             }
 
             public R OtherStuff { get; set; }
+        }
+
+        private class BazInt : Baz<int>
+        {
+            public BazInt(int stuff) : base(stuff)
+            {              
+            }
         }
 
         private class Bee : Callback

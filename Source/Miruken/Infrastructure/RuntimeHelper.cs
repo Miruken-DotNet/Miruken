@@ -130,10 +130,10 @@
                         .Select(t => GetOpenTypeConformance(t, openType))
                         .FirstOrDefault(t => t != null);
                 }
-                while (type != typeof(object) &&
-                        type?.IsGenericType == true)
+                while (type != null && type != typeof(object))
                 {
-                    if (type.GetGenericTypeDefinition() == openType)
+                    if (type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == openType)
                         return type;
                     type = type.BaseType;
                 }

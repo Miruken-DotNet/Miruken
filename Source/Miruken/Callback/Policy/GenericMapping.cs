@@ -49,12 +49,6 @@
 
         public bool Complete { get; }
 
-        public Type[] MapArgs(object[] args, Type returnType = null)
-        {
-            var types = args.Select(arg => arg.GetType()).ToArray();
-            return MapTypes(types, returnType);
-        }
-
         public Type[] MapTypes(Type[] types, Type returnType = null)
         {
             return _mapping.Select(mapping =>

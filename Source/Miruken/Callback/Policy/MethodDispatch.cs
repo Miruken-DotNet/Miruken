@@ -167,7 +167,18 @@
 
         private MethodInfo ClosedMethod(object[] args, Type returnType)
         {
-            var argTypes = _mapping.MapArgs(args, returnType);
+            var types = args.Select((arg, index) =>
+            {
+                var type = arg.GetType();
+                if (type.IsGenericType) return type;
+                var paramType = Arguments[index].ParameterType;
+                if (!paramType.IsGenericParameter &&
+                    paramType.ContainsGenericParameters)
+                    type = type.GetOpenTypeConformance(
+                        paramType.GetGenericTypeDefinition());
+                return type;
+            }).ToArray();
+            var argTypes = _mapping.MapTypes(types, returnType);
             return Method.MakeGenericMethod(argTypes);
         }
 
