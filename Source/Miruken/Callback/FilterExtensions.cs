@@ -50,7 +50,7 @@
         }
 
         private static IEnumerable<(IFilter, IFilterProvider)> GetOrderedFilters(
-            this IHandler composer, MethodBinding binding, Type callbackType,
+            this IHandler handler, MethodBinding binding, Type callbackType,
             Type logicalResultType, FilterOptions options, params
                 IEnumerable<IFilterProvider>[] providers)
         {
@@ -67,7 +67,7 @@
                             Enumerable.Empty<IFilterProvider>())
                     .Where(provider => provider != null)
                     .SelectMany(provider => provider
-                        .GetFilters(binding, callbackType, logicalResultType, composer)
+                        .GetFilters(binding, callbackType, logicalResultType, handler)
                         .Where(filter => filter != null)
                         .Select(filter => (filter, provider))),
                 FilterComparer.Instance);

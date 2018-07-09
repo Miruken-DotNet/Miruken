@@ -5,7 +5,6 @@
     using System.Linq;
     using Callback;
     using Concurrency;
-    using Infrastructure;
 
     public static class MappingExtensions
     {
@@ -37,9 +36,10 @@
             {
                 WantsAsync = true
             };
-            if (!handler.Handle(mapping))
-                throw new NotSupportedException($"Mapping {mapping} not handled");
-            return (Promise) mapping.Result;
+            return handler.Handle(mapping)
+                 ? (Promise)mapping.Result
+                 : Promise.Rejected(new NotSupportedException(
+                    $"Mapping {mapping} not handled"));
         }
 
         public static T Map<T>(this IHandler handler,

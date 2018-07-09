@@ -18,7 +18,7 @@
         {       
         }
 
-        public IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
+        public static IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
 
         public static void AddGlobalFilters(params IFilterProvider[] providers)
         {
