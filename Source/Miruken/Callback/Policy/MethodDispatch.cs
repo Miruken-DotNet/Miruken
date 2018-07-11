@@ -45,8 +45,10 @@
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            Arguments  = method.GetParameters().Select(p => new Argument(p)).ToArray();
-            Attributes = attributes ?? Attribute.GetCustomAttributes(method, false);
+            Arguments   = method.GetParameters().Select(p => new Argument(p)).ToArray();
+            Attributes  = attributes ?? Attribute.GetCustomAttributes(method, false);
+            SkipFilters = Attributes.OfType<SkipFiltersAttribute>().Any() ||
+                          method.ReflectedType?.IsDefined(typeof(SkipFiltersAttribute)) == true;
             ConfigureMethod(method);
             Method     = method;
         }
@@ -54,7 +56,9 @@
         public MethodInfo  Method            { get; }
         public Argument[]  Arguments         { get; }
         public Attribute[] Attributes        { get; }
+        public bool        SkipFilters       { get; }
         public Type        LogicalReturnType { get; private set; }
+
 
         public Type ReturnType => Method.ReturnType;
         public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;

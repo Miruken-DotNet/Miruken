@@ -54,7 +54,9 @@
             Type logicalResultType, FilterOptions options, params
                 IEnumerable<IFilterProvider>[] providers)
         {
-            if (options?.SkipFilters == true)
+            var skipFilters = options?.SkipFilters;
+            if (skipFilters == true || 
+                (skipFilters == null && binding.Dispatcher.SkipFilters))
                 return Array.Empty<(IFilter, IFilterProvider)>();
 
             if (logicalResultType == typeof(void))

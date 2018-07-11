@@ -597,7 +597,7 @@
         }
 
         [TestMethod]
-        public void Should_Create_Pipelines()
+        public void Should_Create_Filters()
         {
             var bar     = new Bar();
             var handler = new FilteredHandler();
@@ -606,6 +606,15 @@
             Assert.AreEqual(2, bar.Filters.Count);
             Assert.AreSame(handler, bar.Filters[1]);
             Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, object>));
+        }
+
+        [TestMethod]
+        public void Should_Skip_Filters()
+        {
+            var bee     = new Bee();
+            var handler = new FilteredHandler();
+            Assert.IsTrue(handler.Handle(bee));
+            Assert.AreEqual(0, bee.Filters.Count);
         }
 
         [TestMethod,
@@ -1179,6 +1188,13 @@
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
+            }
+
+            [Handles,
+             Filter(typeof(IFilter<,>), Many = true),
+             SkipFilters]
+            public void HandleBee(Bee bee)
+            {
             }
 
             [Provides(typeof(IFilter<,>))]
