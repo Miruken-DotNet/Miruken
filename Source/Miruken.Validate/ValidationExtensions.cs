@@ -14,7 +14,6 @@
                 StopOnFailure = options?.StopOnFailure == true
             };
             handler.Handle(validation, true);
-            var result = validation.Result;
 
             var outcome = validation.Outcome;
             if (target is IValidationAware validationAware)
@@ -25,7 +24,7 @@
         public static Promise<ValidationOutcome> ValidateAsync(
             this IHandler handler, object target, params object[] scopes)
         {
-            var options = handler.GetOptions<ValidationOptions>();
+            var options    = handler.GetOptions<ValidationOptions>();
             var validation = new Validation(target, scopes)
             {
                 StopOnFailure = options?.StopOnFailure == true,
