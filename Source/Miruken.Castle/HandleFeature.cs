@@ -16,10 +16,17 @@
         private FeatureFilter _filter;
         private Action<ComponentRegistration> _configureHandlers;
         private Action<ComponentRegistration> _configureFilters;
+        private Predicate<Type> _excludeHandlers;
 
         public HandleFeature SelectHandlers(FeatureFilter filter)
         {
             _filter += filter;
+            return this;
+        }
+
+        public HandleFeature ExcludeHandlers(Predicate<Type> exclude)
+        {
+            _excludeHandlers += exclude;
             return this;
         }
 
@@ -83,7 +90,7 @@
                 var selector = filter(from);
                 foreach (var basedOn in selector)
                 {
-                    basedOn.Configure(handler =>
+                    basedOn.Unless(ExcludeHandler).Configure(handler =>
                     {
                         _configureHandlers?.Invoke(handler);
                         HandlerDescriptor.GetDescriptor(handler.Implementation);
@@ -110,6 +117,14 @@
                                 .Eq(FilterGenericsHook.Instance));
                     }
                 });
+        }
+
+        private bool ExcludeHandler(Type handlerType)
+        {
+            return _excludeHandlers?.GetInvocationList()
+                .Cast<Predicate<Type>>()
+                .Any(exclude => exclude(handlerType))
+                ?? false;
         }
 
         private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)

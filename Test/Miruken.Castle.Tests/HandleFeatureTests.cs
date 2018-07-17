@@ -6,6 +6,7 @@
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Infrastructure;
     using IHandler = Callback.IHandler;
 
     [TestClass]
@@ -31,8 +32,21 @@
             _container.Install(
                 new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
-            var handler = _container.Resolve<MyHandler>();
-            Assert.IsNotNull(handler);
+            var handler = new WindsorHandler(_container);
+            Assert.IsNotNull(handler.Resolve<MyHandler>());
+            Assert.IsTrue(handler.Resolve().Handle(new A()));
+        }
+
+        [TestMethod]
+        public void Should_Exclude_Handlers()
+        {
+            _container.Install(
+                new FeaturesInstaller(new HandleFeature()
+                        .ExcludeHandlers(type => type.Is<MyHandler>()))
+                    .Use(Classes.FromThisAssembly()));
+            var handler = new WindsorHandler(_container);
+            Assert.IsNull(handler.Resolve<MyHandler>());
+            Assert.IsFalse(handler.Resolve().Handle(new A()));
         }
 
         [TestMethod]
@@ -48,7 +62,6 @@
                 Assert.IsTrue(handler.Resolve().Handle(new A()));
             } 
         }
-
 
         [TestMethod]
         public void Should_Ignore_Filters_With_Unmatched_Constraints()
