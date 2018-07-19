@@ -617,6 +617,14 @@
             Assert.AreEqual(0, bee.Filters.Count);
         }
 
+        [TestMethod]
+        public void Should_Reject_Method_If_Skpping_Required_Filters()
+        {
+            var handler = new FilteredHandler();
+            Assert.IsTrue(handler.Handle(new Bar()));
+            Assert.IsFalse(handler.SkipFilters().Handle(new Bar()));
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public async Task Should_Propogate_Rejected_Filter_Promise()
@@ -1184,7 +1192,8 @@
             int? IFilter.Order { get; set; }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(IFilter<,>),
+                 Many = true, Required = true)]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;

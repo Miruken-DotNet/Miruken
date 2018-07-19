@@ -118,7 +118,9 @@
             var filters = composer.GetOrderedFilters(
                 this, callbackType, logicalType, Filters,
                 dispatcher.Owner.Filters, Policy.Filters, targetFilters)
-                .ToArray();
+                ?.ToArray();
+
+            if (filters == null) return false;
 
             object baseResult = this;
 

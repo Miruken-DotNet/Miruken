@@ -23,6 +23,8 @@
 
     public interface IFilterProvider
     {
+        bool Required { get;}
+
         IEnumerable<IFilter> GetFilters(MethodBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer);
     }

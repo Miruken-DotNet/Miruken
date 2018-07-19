@@ -66,7 +66,9 @@
             var filters   = composer.GetOrderedFilters(
                 this, typeof(HandleMethod), typeof(object),
                 Filters, Dispatcher.Owner.Filters, GlobalFilters)
-                .ToArray();
+                ?.ToArray();
+
+            if (filters == null) return false;
 
             bool handled;
             object returnValue;

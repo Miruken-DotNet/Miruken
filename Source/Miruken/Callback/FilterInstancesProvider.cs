@@ -11,7 +11,10 @@
         public FilterInstancesProvider(params IFilter[] filters)
         {
             _filters = filters;
+            Required = filters.Length > 0;
         }
+
+        public bool Required { get; }
 
         public IEnumerable<IFilter> GetFilters(MethodBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer)
