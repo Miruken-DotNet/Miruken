@@ -114,7 +114,7 @@
                 IFilterProvider provider = null)
             {
                 Console.WriteLine(callback);
-                composer.SkipFilters(false).Handle(new Bar());
+                composer.EnableFilters().Handle(new Bar());
                 return next();
             }
         }

@@ -17,6 +17,16 @@
                 }.Decorate(handler);
         }
 
+        public static IHandler EnableFilters(
+            this IHandler handler, bool enable = true)
+        {
+            return handler == null ? null
+                : new FilterOptions
+                {
+                    SkipFilters = !enable
+                }.Decorate(handler);
+        }
+
         public static IHandler WithFilters(
             this IHandler handler, params IFilter[] filters)
         {
