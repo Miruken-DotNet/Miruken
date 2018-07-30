@@ -11,7 +11,13 @@
         public FilterInstancesProvider(params IFilter[] filters)
         {
             _filters = filters;
-            Required = filters.Length > 0;
+        }
+
+        public FilterInstancesProvider(
+            bool required, params IFilter[] filters)
+            : this(filters)
+        {
+            Required = required;
         }
 
         public bool Required { get; }

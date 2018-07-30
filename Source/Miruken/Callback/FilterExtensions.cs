@@ -55,9 +55,12 @@
             var options = handler.GetOptions<FilterOptions>();
             switch (options?.SkipFilters)
             {
-                case true when providers.Any(pa => pa?.Any(p => p.Required) == true):
-                    return null;
+                case true:
+                    return providers.Any(pa => pa?.Any(p => p.Required) == true)
+                         ? null : Array.Empty<(IFilter, IFilterProvider)>();
                 case null:
+                    if (binding.Dispatcher.SkipFilters)
+                        return Array.Empty<(IFilter, IFilterProvider)>();
                     handler = handler.SkipFilters();
                     break;
             }
@@ -70,11 +73,6 @@
             Type logicalResultType, FilterOptions options, params
                 IEnumerable<IFilterProvider>[] providers)
         {
-            var skipFilters = options?.SkipFilters;
-            if (skipFilters == true || 
-                (skipFilters == null && binding.Dispatcher.SkipFilters))
-                return Array.Empty<(IFilter, IFilterProvider)>();
-
             if (logicalResultType == typeof(void))
                 logicalResultType = typeof(object);
 

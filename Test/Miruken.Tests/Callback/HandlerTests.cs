@@ -618,7 +618,7 @@
         }
 
         [TestMethod]
-        public void Should_Reject_Method_If_Skpping_Required_Filters()
+        public void Should_Reject_Method_If_Skipping_Required_Filters()
         {
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(new Bar()));
