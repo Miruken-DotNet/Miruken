@@ -40,8 +40,8 @@
         {
         }
 
-        protected virtual object Resolve
-            (object key, IHandler handler, IHandler composer)
+        protected virtual object Resolve(
+            object key, IHandler handler, IHandler composer)
         {
             return handler.Resolve(key);
         }

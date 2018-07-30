@@ -63,6 +63,16 @@ namespace Miruken.Tests
             }
         }
 
+        public class Service
+        {
+            public Service(IFoo foo)
+            {
+                Foo = foo;
+            }
+
+            public IFoo Foo { get; }
+        }
+
         public interface IFoo {}
         public interface IBar {}
         public interface IBoo : IBar {}
@@ -88,6 +98,15 @@ namespace Miruken.Tests
             Assert.IsFalse(typeof(IBar).IsTopLevelInterface(typeof(Baz)));
             Assert.IsFalse(typeof(IFoo).IsTopLevelInterface(typeof(Bar)));
             Assert.IsFalse(typeof(IFoo).IsTopLevelInterface(typeof(Baz)));
+        }
+
+        [TestMethod]
+        public void Should_Create_No_Arg_Action()
+        {
+            var call = RuntimeHelper.CreateCall<NoArgsDelegate>(
+                typeof(Handler).GetMethod(nameof(Handler.Handle)));
+            var handler = new Handler();
+            call(handler);
         }
 
         [TestMethod]
@@ -172,6 +191,26 @@ namespace Miruken.Tests
                 typeof(Provider).GetMethod(nameof(Provider.ProvideThree)));
             var provider = new Provider();
             Assert.AreEqual(-5.5, call(provider, 2, 3.5f, true));
+        }
+
+        [TestMethod]
+        public void Should_Create_No_Arg_Constructor()
+        {
+            var ctor = RuntimeHelper.CreateCtorNoArgs(
+                typeof(Provider).GetConstructor(Type.EmptyTypes));
+            var provider = ctor() as Provider;
+            Assert.IsNotNull(provider);
+        }
+
+        [TestMethod]
+        public void Should_Create_One_Arg_Constructor()
+        {
+            var ctor = RuntimeHelper.CreateCtorOneArg(
+                typeof(Service).GetConstructor(new[] { typeof(IFoo) }));
+            var baz = new Baz();
+            var service = ctor(baz) as Service;
+            Assert.IsNotNull(service);
+            Assert.AreSame(baz, service.Foo);
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]

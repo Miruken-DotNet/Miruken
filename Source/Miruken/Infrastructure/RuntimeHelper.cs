@@ -11,6 +11,8 @@
 
     #region Delegates
 
+    // Methods
+
     public delegate void   NoArgsDelegate(object instance);
     public delegate void   OneArgDelegate(object instance, object arg);
     public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
@@ -19,6 +21,9 @@
     public delegate void   FiveArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
     public delegate void   SixArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
     public delegate void   SevenArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
+
+    // Functions
+
     public delegate object NoArgsReturnDelegate(object instance);
     public delegate object OneArgReturnDelegate(object instance, object arg);
     public delegate object TwoArgsReturnDelegate(object instance, object arg1, object arg2);
@@ -28,6 +33,17 @@
     public delegate object SixArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
     public delegate object SevenArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
     public delegate object PropertyGetDelegate(object instance);
+
+    // Constructors
+
+    public delegate object NoArgsCtorDelegate();
+    public delegate object OneArgCtorDelegate(object arg);
+    public delegate object TwoArgsCtorDelegate(object arg1, object arg2);
+    public delegate object ThreeArgsCtorDelegate(object arg1, object arg2, object arg3);
+    public delegate object FourArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4);
+    public delegate object FiveArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5);
+    public delegate object SixArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
+    public delegate object SevenArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
 
     #endregion
 
@@ -267,7 +283,9 @@
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
-        public static NoArgsDelegate CreateCallNoArgs(MethodInfo method)
+        #region Action factories     
+
+        public static TDel CreateCall<TDel>(MethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
@@ -275,457 +293,166 @@
             if (target == null || method.IsStatic)
                 throw new NotSupportedException("Only instance methods supported");
             var parameters = method.GetParameters();
-            if (parameters.Length != 0)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
+            var arguments  = CreateArguments(parameters.Length + 1);
             var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method
-                );
-            return Expression.Lambda<NoArgsDelegate>(
-                methodCall, instance
-                ).Compile();
+                Expression.Convert(arguments[0], target), method,
+                arguments.Skip(1).Select((arg, index) =>
+                        Expression.Convert(arg, parameters[index].ParameterType))
+                    .ToArray());
+            var lambda = method.ReturnType == typeof(void)
+                       ? Expression.Lambda<TDel>(methodCall, arguments)
+                       : Expression.Lambda<TDel>(
+                            Expression.Convert(methodCall, typeof(object)),
+                            arguments);
+            return lambda.Compile();
+        }
+
+        public static NoArgsDelegate CreateCallNoArgs(MethodInfo method)
+        {
+            return CreateCall<NoArgsDelegate>(method);
         }
 
         public static OneArgDelegate CreateCallOneArg(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 1)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument   = Expression.Parameter(typeof(object), "argument");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument, parameters[0].ParameterType)
-                );
-            return Expression.Lambda<OneArgDelegate>(
-                methodCall, instance, argument
-                ).Compile();
+            return CreateCall<OneArgDelegate>(method);
         }
 
         public static TwoArgsDelegate CreateCallTwoArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 2)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType)
-                );
-            return Expression.Lambda<TwoArgsDelegate>(
-                methodCall, instance, argument1, argument2
-                ).Compile();
+            return CreateCall<TwoArgsDelegate>(method);
         }
 
         public static ThreeArgsDelegate CreateCallThreeArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 3)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType)
-                );
-            return Expression.Lambda<ThreeArgsDelegate>(
-                methodCall, instance, argument1, argument2, argument3
-                ).Compile();
+            return CreateCall<ThreeArgsDelegate>(method);
         }
 
         public static FourArgsDelegate CreateCallFourArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 4)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType)
-                );
-            return Expression.Lambda<FourArgsDelegate>(
-                methodCall, instance, argument1, argument2, argument3, argument4
-                ).Compile();
+            return CreateCall<FourArgsDelegate>(method);
         }
 
         public static FiveArgsDelegate CreateCallFiveArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 5)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType)
-                );
-            return Expression.Lambda<FiveArgsDelegate>(
-                methodCall, instance, argument1, argument2, argument3, argument4, argument5
-                ).Compile();
+            return CreateCall<FiveArgsDelegate>(method);
         }
 
         public static SixArgsDelegate CreateCallSixArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 6)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var argument6  = Expression.Parameter(typeof(object), "argument6");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType),
-                Expression.Convert(argument6, parameters[5].ParameterType)
-            );
-            return Expression.Lambda<SixArgsDelegate>(
-                methodCall, instance, argument1, argument2, argument3, argument4,
-                argument5, argument6
-            ).Compile();
+            return CreateCall<SixArgsDelegate>(method);
         }
 
         public static SevenArgsDelegate CreateCallSevenArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 7)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var argument6  = Expression.Parameter(typeof(object), "argument6");
-            var argument7  = Expression.Parameter(typeof(object), "argument7");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType),
-                Expression.Convert(argument6, parameters[5].ParameterType),
-                Expression.Convert(argument7, parameters[6].ParameterType)
-            );
-            return Expression.Lambda<SevenArgsDelegate>(
-                methodCall, instance, argument1, argument2, argument3, argument4,
-                argument5, argument6, argument7
-            ).Compile();
+            return CreateCall<SevenArgsDelegate>(method);
         }
+
+        #endregion
+
+        #region Function factories
 
         public static NoArgsReturnDelegate CreateFuncNoArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 0)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance = Expression.Parameter(typeof(object), "instance");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method
-                );
-            return Expression.Lambda<NoArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance
-                ).Compile();
+            return CreateCall<NoArgsReturnDelegate>(method);
         }
 
         public static OneArgReturnDelegate CreateFuncOneArg(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 1)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument   = Expression.Parameter(typeof(object), "argument");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument, parameters[0].ParameterType)
-                );
-            return Expression.Lambda<OneArgReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument
-                ).Compile();
+            return CreateCall<OneArgReturnDelegate>(method);
         }
 
         public static TwoArgsReturnDelegate CreateFuncTwoArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 2)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType)
-                );
-            return Expression.Lambda<TwoArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2
-                ).Compile();
+            return CreateCall<TwoArgsReturnDelegate>(method);
         }
 
         public static ThreeArgsReturnDelegate CreateFuncThreeArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 3)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType)
-                );
-            return Expression.Lambda<ThreeArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2, argument3
-                ).Compile();
+            return CreateCall<ThreeArgsReturnDelegate>(method);
         }
 
         public static FourArgsReturnDelegate CreateFuncFourArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 4)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType)
-                );
-            return Expression.Lambda<FourArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2, argument3, argument4
-                ).Compile();
+            return CreateCall<FourArgsReturnDelegate>(method);
         }
 
         public static FiveArgsReturnDelegate CreateFuncFiveArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 5)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType)
-                );
-            return Expression.Lambda<FiveArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2, argument3, argument4, argument5
-                ).Compile();
+            return CreateCall<FiveArgsReturnDelegate>(method);
         }
 
         public static SixArgsReturnDelegate CreateFuncSixArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 6)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var argument6  = Expression.Parameter(typeof(object), "argument6");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType),
-                Expression.Convert(argument6, parameters[5].ParameterType)
-            );
-            return Expression.Lambda<SixArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2, argument3, argument4,
-                argument5, argument6
-            ).Compile();
+            return CreateCall<SixArgsReturnDelegate>(method);
         }
 
         public static SevenArgsReturnDelegate CreateFuncSevenArgs(MethodInfo method)
         {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
-            var parameters = method.GetParameters();
-            if (parameters.Length != 7)
-                throw new ArgumentException($"Method {method.Name} expects {parameters.Length} argument(s)");
-            if (method.ReturnType == typeof(void))
-                throw new ArgumentException($"Method {method.Name} is void");
-            var instance   = Expression.Parameter(typeof(object), "instance");
-            var argument1  = Expression.Parameter(typeof(object), "argument1");
-            var argument2  = Expression.Parameter(typeof(object), "argument2");
-            var argument3  = Expression.Parameter(typeof(object), "argument3");
-            var argument4  = Expression.Parameter(typeof(object), "argument4");
-            var argument5  = Expression.Parameter(typeof(object), "argument5");
-            var argument6  = Expression.Parameter(typeof(object), "argument6");
-            var argument7  = Expression.Parameter(typeof(object), "argument7");
-            var methodCall = Expression.Call(
-                Expression.Convert(instance, target),
-                method,
-                Expression.Convert(argument1, parameters[0].ParameterType),
-                Expression.Convert(argument2, parameters[1].ParameterType),
-                Expression.Convert(argument3, parameters[2].ParameterType),
-                Expression.Convert(argument4, parameters[3].ParameterType),
-                Expression.Convert(argument5, parameters[4].ParameterType),
-                Expression.Convert(argument6, parameters[5].ParameterType),
-                Expression.Convert(argument7, parameters[6].ParameterType)
-            );
-            return Expression.Lambda<SevenArgsReturnDelegate>(
-                Expression.Convert(methodCall, typeof(object)),
-                instance, argument1, argument2, argument3, argument4,
-                argument5, argument6, argument7
+            return CreateCall<SevenArgsReturnDelegate>(method);
+        }
+
+        #endregion
+
+        #region Constructor factories
+
+        public static TDel CreateCtor<TDel>(ConstructorInfo constructor)
+        {
+            if (constructor == null)
+                throw new ArgumentNullException(nameof(constructor));
+            var parameters = constructor.GetParameters();
+            var arguments  = CreateArguments(parameters.Length);
+            var constructorCall = Expression.New(
+                constructor,
+                arguments.Select((arg, index) =>
+                        Expression.Convert(arg, parameters[index].ParameterType))
+                    .ToArray());
+            return Expression.Lambda<TDel>(
+                Expression.Convert(constructorCall, typeof(object)),
+                arguments
             ).Compile();
         }
+
+        public static NoArgsCtorDelegate CreateCtorNoArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<NoArgsCtorDelegate>(constructor);
+        }
+
+        public static OneArgCtorDelegate CreateCtorOneArg(ConstructorInfo constructor)
+        {
+            return CreateCtor<OneArgCtorDelegate>(constructor);
+        }
+
+        public static TwoArgsCtorDelegate CreateCtorTwoArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<TwoArgsCtorDelegate>(constructor);
+        }
+
+        public static ThreeArgsCtorDelegate CreateCtorThreeArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<ThreeArgsCtorDelegate>(constructor);
+        }
+
+        public static FourArgsCtorDelegate CreateCtorFourArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<FourArgsCtorDelegate>(constructor);
+        }
+
+        public static FiveArgsCtorDelegate CreateCtorFiveArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<FiveArgsCtorDelegate>(constructor);
+        }
+
+        public static SixArgsCtorDelegate CreateCtorSixArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<SixArgsCtorDelegate>(constructor);
+        }
+
+        public static SevenArgsCtorDelegate CreateCtorSevenArgs(ConstructorInfo constructor)
+        {
+            return CreateCtor<SevenArgsCtorDelegate>(constructor);
+        }
+
+        #endregion
 
         public static Func<T, TRet> CreateGenericFuncNoArgs<T, TRet>(
             string methodName, params Type[] genericParams)
@@ -767,6 +494,13 @@
         {
             if (array == null) return null;
             return array.Length == 0 ? Array.Empty<T>() : array;
+        }
+
+        private static ParameterExpression[] CreateArguments(int count)
+        {
+            return Enumerable.Range(0, count)
+                .Select(index => Expression.Parameter(typeof(object), $"argument{index}"))
+                .ToArray();
         }
 
         private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)
