@@ -34,10 +34,9 @@ namespace Miruken.Callback.Policy
                 return;
             }
 
-            var type = key as Type;
             List<PolicyMethodBinding> methods;
 
-            if (type != null)
+            if (key is Type type)
             {
                 if (!_typed.TryGetValue(type, out methods))
                 {
@@ -75,9 +74,8 @@ namespace Miruken.Callback.Policy
         internal IEnumerable<PolicyMethodBinding> GetInvariantMethods(object callback)
         {
             var key  = Policy.GetKey(callback);
-            var type = key as Type;
             List<PolicyMethodBinding> methods = null;
-            if (type != null)
+            if (key is Type type)
                 _typed.TryGetValue(type, out methods);
             else
                 _indexed?.TryGetValue(key, out methods);
@@ -96,8 +94,7 @@ namespace Miruken.Callback.Policy
         {
             var compatible = new List<PolicyMethodBinding>();
 
-            var type = key as Type;
-            if (type != null)
+            if (key is Type)
             {
                 var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
                 foreach (Type next in keys)

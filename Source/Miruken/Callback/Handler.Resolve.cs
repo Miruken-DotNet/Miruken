@@ -60,8 +60,7 @@
             var inquiry = key as Inquiry ?? new Inquiry(key);
             if (handler.Handle(inquiry))
                 return inquiry.Result;
-            var type = key as Type;
-            return type != null 
+            return key is Type type
                  ? RuntimeHelper.GetDefault(type)
                  : null;
         }
@@ -73,8 +72,7 @@
             inquiry.WantsAsync = true;
             if (handler.Handle(inquiry))
                 return (Promise)inquiry.Result;
-            var type = key as Type;
-            return type != null 
+            return key is Type type
                  ? Promise.Resolved(RuntimeHelper.GetDefault(type))
                  : Promise.Empty;
         }

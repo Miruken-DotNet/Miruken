@@ -83,7 +83,7 @@
 
         public override void InstallFeatures(FromDescriptor from)
         {
-            var selection = _filter ?? SelectDefault;
+            var selection = _filter ?? DefaultHandlers;
 
             foreach (FeatureFilter filter in selection.GetInvocationList())
             {
@@ -127,7 +127,7 @@
                 ?? false;
         }
 
-        private static IEnumerable<BasedOnDescriptor> SelectDefault(FromDescriptor descriptor)
+        public static IEnumerable<BasedOnDescriptor> DefaultHandlers(FromDescriptor descriptor)
         {
             yield return descriptor.BasedOn<IResolving>()
                 .WithServiceFromInterface()

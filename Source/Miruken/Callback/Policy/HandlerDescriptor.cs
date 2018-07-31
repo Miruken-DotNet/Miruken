@@ -190,14 +190,14 @@ namespace Miruken.Callback.Policy
             if (member.DeclaringType == typeof(object) ||
                 member.DeclaringType == typeof(MarshalByRefObject))
                 return false;
-            var method = member as MethodInfo;
-            if (method != null)
+            switch (member)
             {
-                if (method.IsSpecialName || method.IsFamily)
+                case MethodInfo method when
+                    method.IsSpecialName || method.IsFamily:
+                    return false;
+                case PropertyInfo property when !property.CanRead:
                     return false;
             }
-            else if (!((PropertyInfo)member).CanRead)
-                return false; 
             return member.IsDefined(typeof(CategoryAttribute));
         }
 
@@ -205,7 +205,8 @@ namespace Miruken.Callback.Policy
             Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         private const MemberTypes Members  = MemberTypes.Method 
-                                           | MemberTypes.Property;
+                                           | MemberTypes.Property
+                                           | MemberTypes.Constructor;
 
         private const BindingFlags Binding = BindingFlags.Instance 
                                            | BindingFlags.Public 
