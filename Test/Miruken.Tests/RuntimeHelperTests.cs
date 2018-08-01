@@ -1,9 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Infrastructure;
-
-namespace Miruken.Tests
+﻿namespace Miruken.Tests
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Infrastructure;
+
     [TestClass]
     public class RuntimeHelperTests
     {
@@ -194,7 +194,7 @@ namespace Miruken.Tests
         }
 
         [TestMethod]
-        public void Should_Create_No_Arg_Constructor()
+        public void Should_sCreate_No_Arg_Constructor()
         {
             var ctor = RuntimeHelper.CreateCtorNoArgs(
                 typeof(Provider).GetConstructor(Type.EmptyTypes));
