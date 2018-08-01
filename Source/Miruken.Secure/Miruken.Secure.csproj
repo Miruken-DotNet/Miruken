@@ -41,6 +41,7 @@
     <Compile Include="AuthorizationOptions.cs" />
     <Compile Include="AuthorizeAttribute.cs" />
     <Compile Include="AuthorizeExtensions.cs" />
+    <Compile Include="ClaimAttribute.cs" />
     <Compile Include="PrincipalExtensions.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
