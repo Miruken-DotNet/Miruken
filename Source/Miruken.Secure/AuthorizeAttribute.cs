@@ -13,7 +13,9 @@
             Required = true;
         }
 
-        public bool AllowAnonymousUser { get; set; }
+        public bool AllowAnonymous { get; set; }
+
+        public bool AllowUnprotected { get; set; }
 
         protected override bool AcceptFilterType(
             Type filterType, MethodBinding binding)

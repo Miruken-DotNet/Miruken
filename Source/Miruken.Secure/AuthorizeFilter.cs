@@ -19,11 +19,17 @@
             IPrincipal principal, IHandler composer,
             MethodBinding method, IFilterProvider provider)
         {
-            if ((provider as AuthorizeAttribute)?.AllowAnonymousUser != true)
+            var authorize = provider as AuthorizeAttribute;
+            if (authorize?.AllowAnonymous != true)
                 principal.RequireAuthenticatedClaims();
             var policy = GetPolicy(callback, method);
             var authorization = new Authorization(callback, principal, policy);
-            if (!composer.Handle(authorization)) return next();
+            if (!composer.Handle(authorization))
+            {
+                if (authorize?.AllowUnprotected != true)
+                    AccessDenied();
+                return next();
+            }
             return authorization.Result.Then((canAccess, s) =>
             {
                 if (!canAccess) AccessDenied();
