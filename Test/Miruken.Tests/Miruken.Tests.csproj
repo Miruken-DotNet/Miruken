@@ -79,6 +79,7 @@
     <Compile Include="Infrastructure\PropertyChangeExtensionsTests.cs" />
     <Compile Include="Infrastructure\TypedKeyedCollectionTests.cs" />
     <Compile Include="Map\MappingTests.cs" />
+    <Compile Include="MonadsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeHelperTests.cs" />
     <Compile Include="TestRunner.cs" />
