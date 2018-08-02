@@ -2,6 +2,8 @@
 
 namespace Miruken.Callback
 {
+    using System;
+
     public class RejectedException : CancelledException
     {
         public RejectedException()
@@ -11,6 +13,11 @@ namespace Miruken.Callback
         public RejectedException(string message)
             : base(message)
         {          
+        }
+
+        public RejectedException(string message, Exception inner)
+            : base(message, inner)
+        {
         }
 
         public RejectedException(object callback)

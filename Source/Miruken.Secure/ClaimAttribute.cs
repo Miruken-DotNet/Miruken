@@ -34,8 +34,17 @@
             if (!(principal?.Identity is ClaimsIdentity identity))
                 throw new RejectedException();
             var claim = identity.FindFirst(ClaimType);
-            return claim == null ? throw new RejectedException()
-                 : RuntimeHelper.ChangeType(claim.Value, argument.ParameterType);
+            if (claim == null)
+                throw new RejectedException($"Missing claim '{ClaimType}'");
+            try
+            {
+                return RuntimeHelper.ChangeType(claim.Value, argument.ParameterType);
+            }
+            catch (Exception ex)
+            {
+                throw new RejectedException(
+                    $"Unable to extract claim '{ClaimType}'", ex);
+            }
         }
     }
 }

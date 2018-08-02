@@ -11,5 +11,10 @@ namespace Miruken.Concurrency
         public CancelledException(string message) : base(message)
         {          
         }
+
+        public CancelledException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
     }
 }
