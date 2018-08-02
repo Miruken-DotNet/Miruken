@@ -25,9 +25,7 @@
 
         public static readonly CallbackPolicy Policy =
              ContravariantPolicy.Create<Authorization>(v => v.Target,
-                    x => x.MatchCallbackMethod(
-                            Return.Of<bool>(), x.Target, x.Extract(v => v.Principal))
-                          .MatchMethod(Return.Of<bool>(), x.Target, x.Callback)
+                    x => x.MatchCallbackMethod(Return.Of<bool>(), x.Target)
                           .MatchMethod(Return.Of<bool>(), x.Callback)
              );
     }

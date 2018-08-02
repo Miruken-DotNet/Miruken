@@ -22,7 +22,7 @@
             var authorize = provider as AuthorizeAttribute;
             if (authorize?.AllowAnonymous != true)
                 principal.RequireAuthenticatedClaims();
-            var policy = GetPolicy(callback, method);
+            var policy        = GetPolicy(callback, method);
             var authorization = new Authorization(callback, principal, policy);
             if (!composer.Handle(authorization))
             {
