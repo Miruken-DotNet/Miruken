@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
@@ -9,34 +8,16 @@
 
     public delegate bool ResultsDelegate(object result, bool strict);
 
-    public abstract class MethodBinding
+    public abstract class MethodBinding : FilteredObject
     {
-        private IFilterProvider[] _filters;
-
         protected MethodBinding(MethodDispatch dispatch)
         {
             Dispatcher = dispatch 
                       ?? throw new ArgumentNullException(nameof(dispatch));
-            _filters = dispatch.Attributes.OfType<IFilterProvider>()
-                .ToArray().Normalize();
+            AddFilters(dispatch.Attributes.OfType<IFilterProvider>().ToArray());
         }
 
         public MethodDispatch Dispatcher { get; }
-
-        public IEnumerable<IFilterProvider> Filters => _filters;
-
-        public void AddFilters(params IFilterProvider[] providers)
-        {
-            if (providers == null || providers.Length == 0) return;
-            _filters = _filters.Concat(providers.Where(p => p != null))
-                .ToArray().Normalize();
-        }
-
-        public void AddFilters(params Type[] filterTypes)
-        {
-            if (filterTypes == null || filterTypes.Length == 0) return;
-            AddFilters(new FilterAttribute(filterTypes));
-        }
 
         public abstract bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null);

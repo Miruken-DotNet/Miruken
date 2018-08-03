@@ -9,32 +9,17 @@
     public delegate bool AcceptResultDelegate(object result, MethodBinding binding);
 
     public abstract class CallbackPolicy 
-        : IComparer<PolicyMethodBinding>, IComparer<object>
+        : FilteredObject, IComparer<PolicyMethodBinding>, IComparer<object>
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
-        private readonly List<IFilterProvider> _filters = new List<IFilterProvider>();
 
         public AcceptResultDelegate AcceptResult { get; set; }
         public Func<object, Type>   ResultType   { get; set; }
         public BindMethodDelegate   Binder       { get; set; }
 
-        public IEnumerable<IFilterProvider> Filters => _filters;
-
         public void AddMethodRule(MethodRule rule)
         {
             _rules.Add(rule);
-        }
-
-        public void AddFilters(params IFilterProvider[] providers)
-        {
-            if (providers == null || providers.Length == 0) return;
-            _filters.AddRange(providers.Where(p => p != null));
-        }
-
-        public void AddFilters(params Type[] filterTypes)
-        {
-            if (filterTypes == null || filterTypes.Length == 0) return;
-            AddFilters(new FilterAttribute(filterTypes));
         }
 
         public MethodRule MatchMethod(MethodInfo method, CategoryAttribute category)

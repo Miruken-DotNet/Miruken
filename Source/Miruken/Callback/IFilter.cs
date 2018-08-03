@@ -28,4 +28,11 @@
         IEnumerable<IFilter> GetFilters(MethodBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer);
     }
+
+    public interface IFiltered
+    {
+        IEnumerable<IFilterProvider> Filters { get; }
+        void AddFilters(params IFilterProvider[] providers);
+        void AddFilters(params Type[] filterTypes);
+    }
 }
