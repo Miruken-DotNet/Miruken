@@ -17,19 +17,16 @@
         public Task<TRes> Next(
             TCb callback, Next<TRes> next,
             IPrincipal principal, IHandler composer,
-            MethodBinding method, IFilterProvider provider)
+            MemberBinding member, IFilterProvider provider)
         {
             var authorize = provider as AuthorizeAttribute;
             if (authorize?.AllowAnonymous != true)
                 principal.RequireAuthenticatedClaims();
-            var policy        = GetPolicy(callback, method);
-            var authorization = new Authorization(callback, principal, policy);
-            if (!composer.Handle(authorization))
-            {
-                if (authorize?.AllowUnprotected != true)
-                    AccessDenied();
+            if (authorize?.NoAccessPolicy == true)
                 return next();
-            }
+            var policy        = GetPolicy(callback, member);
+            var authorization = new Authorization(callback, principal, policy);
+            if (!composer.Handle(authorization)) AccessDenied();
             return authorization.Result.Then((canAccess, s) =>
             {
                 if (!canAccess) AccessDenied();
@@ -37,17 +34,17 @@
             });
         }
 
-        private static object GetPolicy(TCb callback, MethodBinding method)
+        private static object GetPolicy(TCb callback, MemberBinding member)
         {
-            var policy = method.Dispatcher.Attributes
+            var policy = member.Dispatcher.Attributes
                 .OfType<AccessPolicyAttribute>().FirstOrDefault();
             if (policy == null && callback is HandleMethod)
             {
-                var m     = method.Dispatcher.Method;
+                var m     = member.Dispatcher.Member;
                 var owner = m.ReflectedType ?? m.DeclaringType;
                 var delim = owner != null ? ":" : "";
                 return $"{owner?.FullName ?? ""}{delim}{m.Name}";
-            };
+            }
             return policy?.Policy;
         }
 

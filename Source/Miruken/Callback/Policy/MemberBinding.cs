@@ -8,16 +8,16 @@
 
     public delegate bool ResultsDelegate(object result, bool strict);
 
-    public abstract class MethodBinding : FilteredObject
+    public abstract class MemberBinding : FilteredObject
     {
-        protected MethodBinding(MethodDispatch dispatch)
+        protected MemberBinding(MemberDispatch dispatch)
         {
             Dispatcher = dispatch 
                       ?? throw new ArgumentNullException(nameof(dispatch));
             AddFilters(dispatch.Attributes.OfType<IFilterProvider>().ToArray());
         }
 
-        public MethodDispatch Dispatcher { get; }
+        public MemberDispatch Dispatcher { get; }
 
         public abstract bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null);

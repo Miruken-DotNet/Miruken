@@ -4,21 +4,21 @@ namespace Miruken.Callback.Policy
     using System.Linq;
     using System.Reflection;
 
-    public delegate PolicyMethodBinding MethodBinder(
-        PolicyMethodBindingInfo policyMethodBindingInfo);
+    public delegate PolicyMemberBinding MemberBinder(
+        PolicyMemberBindingInfo policyMemberBindingInfo);
 
     public class MethodRule
     {
-        private readonly MethodBinder _binder;
+        private readonly MemberBinder _binder;
 
-        public MethodRule(MethodBinder binder, params ArgumentRule[] args)
+        public MethodRule(MemberBinder binder, params ArgumentRule[] args)
         {
             _binder = binder 
                    ?? throw new ArgumentNullException(nameof(binder));
             Args = args;
         }
 
-        public MethodRule(MethodBinder binder, ReturnRule returnValue,
+        public MethodRule(MemberBinder binder, ReturnRule returnValue,
                           params ArgumentRule[] args)
             : this(binder, args)
         {
@@ -39,10 +39,10 @@ namespace Miruken.Callback.Policy
                     .All(m => m);
         }
 
-        public PolicyMethodBinding Bind(
+        public PolicyMemberBinding Bind(
             MethodDispatch dispatch, CategoryAttribute category)
         {
-            var policyBindingInfo = new PolicyMethodBindingInfo(this, dispatch, category);
+            var policyBindingInfo = new PolicyMemberBindingInfo(this, dispatch, category);
             ReturnValue?.Configure(policyBindingInfo);
             var parameters = dispatch.Method.GetParameters();
             for (var i = 0; i < Args.Length; ++i)

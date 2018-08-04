@@ -16,7 +16,7 @@
     public interface IFilter<in TCb, TRes> : IFilter
     {
         Task<TRes> Next(
-            TCb callback, MethodBinding method,
+            TCb callback, MemberBinding member,
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null);
     }
@@ -25,7 +25,7 @@
     {
         bool Required { get;}
 
-        IEnumerable<IFilter> GetFilters(MethodBinding binding,
+        IEnumerable<IFilter> GetFilters(MemberBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer);
     }
 

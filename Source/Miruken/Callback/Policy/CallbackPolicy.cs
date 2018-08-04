@@ -6,16 +6,16 @@
     using System.Linq;
     using System.Reflection;
 
-    public delegate bool AcceptResultDelegate(object result, MethodBinding binding);
+    public delegate bool AcceptResultDelegate(object result, MemberBinding binding);
 
     public abstract class CallbackPolicy 
-        : FilteredObject, IComparer<PolicyMethodBinding>, IComparer<object>
+        : FilteredObject, IComparer<PolicyMemberBinding>, IComparer<object>
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
 
         public AcceptResultDelegate AcceptResult { get; set; }
         public Func<object, Type>   ResultType   { get; set; }
-        public BindMethodDelegate   Binder       { get; set; }
+        public BindMemberDelegate   Binder       { get; set; }
 
         public void AddMethodRule(MethodRule rule)
         {
@@ -27,14 +27,14 @@
             return _rules.FirstOrDefault(r => r.Matches(method, category));
         }
 
-        public virtual PolicyMethodBinding BindMethod(
-            PolicyMethodBindingInfo policyMethodBindingInfo)
+        public virtual PolicyMemberBinding BindMethod(
+            PolicyMemberBindingInfo policyMemberBindingInfo)
         {
-            return Binder?.Invoke(this, policyMethodBindingInfo)
-                ?? new PolicyMethodBinding(this, policyMethodBindingInfo);
+            return Binder?.Invoke(this, policyMemberBindingInfo)
+                ?? new PolicyMemberBinding(this, policyMemberBindingInfo);
         }
 
-        public virtual object CreateKey(PolicyMethodBindingInfo bindingInfo)
+        public virtual object CreateKey(PolicyMemberBindingInfo bindingInfo)
         {
             return bindingInfo.InKey != null
                  ? NormalizeKey(bindingInfo.InKey)
@@ -59,7 +59,7 @@
 
         public abstract int Compare(object key1, object key2);
 
-        public int Compare(PolicyMethodBinding x, PolicyMethodBinding y)
+        public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
         {
             return Compare(x?.Key, y?.Key);
         }
@@ -72,31 +72,32 @@
                                        composer, results);
         }
 
-        public IEnumerable<PolicyMethodBinding> GetMethods()
+        public IEnumerable<PolicyMemberBinding> GetMethods()
         {
             return HandlerDescriptor.GetPolicyMethods(this);
         }
 
-        public IEnumerable<PolicyMethodBinding> GetMethods<T>()
+        public IEnumerable<PolicyMemberBinding> GetMethods<T>()
         {
             return HandlerDescriptor.GetPolicyMethods<T>(this);
         }
 
-        public IEnumerable<PolicyMethodBinding> GetMethods(object key)
+        public static IEnumerable<Type> GetInstanceHandlers(object callback)
         {
-            return HandlerDescriptor.GetPolicyMethods(this, key);
+            var policy = GetCallbackPolicy(callback);
+            return HandlerDescriptor.GetInstanceHandlers(policy, callback);
+        }
+
+        public static IEnumerable<Type> GetStaticHandlers(object callback)
+        {
+            var policy = GetCallbackPolicy(callback);
+            return HandlerDescriptor.GetStaticHandlers(policy, callback);
         }
 
         public static IEnumerable<Type> GetCallbackHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
             return HandlerDescriptor.GetCallbackHandlers(policy, callback);
-        }
-
-        public static IEnumerable<PolicyMethodBinding> GetCallbackMethods(object callback)
-        {
-            var policy = GetCallbackPolicy(callback);
-            return policy.GetMethods(policy.GetKey(callback));
         }
 
         public static CallbackPolicy GetCallbackPolicy(object callback)

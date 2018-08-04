@@ -9,7 +9,7 @@
     {
         public int? Order { get; set; } = Stage.Validation;
 
-        public Task<TRes> Next(TCb callback, MethodBinding method,
+        public Task<TRes> Next(TCb callback, MemberBinding member,
             IHandler composer, Next<TRes> next,
             IFilterProvider provider)
         {

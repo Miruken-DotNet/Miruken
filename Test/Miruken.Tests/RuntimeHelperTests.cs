@@ -34,6 +34,10 @@
                 Arg2 = arg2;
                 Arg3 = arg3;
             }
+
+            public static void HandleStatic()
+            {
+            }
         }
 
         public class Provider
@@ -60,6 +64,11 @@
 
             public void ProvideVoid()
             {
+            }
+
+            public static string StaticProvideOne(int arg)
+            {
+                return $"Static {arg}";
             }
         }
 
@@ -112,7 +121,7 @@
         [TestMethod]
         public void Should_Create_Single_Arg_Action()
         {
-            var call = RuntimeHelper.CreateCallOneArg(
+            var call = RuntimeHelper.CreateCall<OneArgDelegate>(
                 typeof(Handler).GetMethod(nameof(Handler.HandleOne)));
             var handler = new Handler();
             call(handler, "Hello");
@@ -122,7 +131,7 @@
         [TestMethod]
         public void Should_Create_Double_Arg_Action()
         {
-            var call = RuntimeHelper.CreateCallTwoArgs(
+            var call = RuntimeHelper.CreateCall<TwoArgsDelegate>(
                 typeof(Handler).GetMethod(nameof(Handler.HandleTwo)));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14));
@@ -133,7 +142,7 @@
         [TestMethod]
         public void Should_Create_Triple_Arg_Action()
         {
-            var call = RuntimeHelper.CreateCallThreeArgs(
+            var call = RuntimeHelper.CreateCall<ThreeArgsDelegate>(
                 typeof(Handler).GetMethod(nameof(Handler.HandleThree)));
             var handler = new Handler();
             call(handler, false, new DateTime(2007, 6, 14), 22);
@@ -142,24 +151,32 @@
             Assert.AreEqual(22, handler.Arg3);
         }
 
+        [TestMethod]
+        public void Should_Create_Static_No_Arg_Action()
+        {
+            var call = RuntimeHelper.CreateStaticCall<StaticNoArgsDelegate>(
+                typeof(Handler).GetMethod(nameof(Handler.HandleStatic)));
+            call();
+        }
+
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_Action_Arg_Mismatch()
         {
-            RuntimeHelper.CreateFuncOneArg(
+            RuntimeHelper.CreateCall<FuncOneArgDelegate>(
                 typeof(Handler).GetMethod(nameof(Handler.HandleTwo)));
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_Args()
         {
-            RuntimeHelper.CreateCallOneArg(
+            RuntimeHelper.CreateCall<OneArgDelegate>(
                 typeof(Handler).GetMethod(nameof(Handler.Handle)));
         }
 
         [TestMethod]
         public void Should_Create_No_Arg_Function()
         {
-            var call = RuntimeHelper.CreateFuncNoArgs(
+            var call = RuntimeHelper.CreateCall<FuncNoArgsDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.Provide)));
             var provider = new Provider();
             Assert.AreEqual("Hello", call(provider));
@@ -168,7 +185,7 @@
         [TestMethod]
         public void Should_Create_One_Arg_Function()
         {
-            var call = RuntimeHelper.CreateFuncOneArg(
+            var call = RuntimeHelper.CreateCall<FuncOneArgDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.ProvideOne)));
             var provider = new Provider();
             Assert.AreEqual("22", call(provider, 22));
@@ -177,7 +194,7 @@
         [TestMethod]
         public void Should_Create_Two_Args_Function()
         {
-            var call = RuntimeHelper.CreateFuncTwoArgs(
+            var call = RuntimeHelper.CreateCall<FuncTwoArgsDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.ProvideTwo)));
             var provider = new Provider();
             Assert.AreEqual(new DateTime(2003, 4, 9),
@@ -187,7 +204,7 @@
         [TestMethod]
         public void Should_Create_Three_Args_Function()
         {
-            var call = RuntimeHelper.CreateFuncThreeArgs(
+            var call = RuntimeHelper.CreateCall<FuncThreeArgsDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.ProvideThree)));
             var provider = new Provider();
             Assert.AreEqual(-5.5, call(provider, 2, 3.5f, true));
@@ -196,7 +213,7 @@
         [TestMethod]
         public void Should_sCreate_No_Arg_Constructor()
         {
-            var ctor = RuntimeHelper.CreateCtorNoArgs(
+            var ctor = RuntimeHelper.CreateCtor<CtorNoArgsDelegate>(
                 typeof(Provider).GetConstructor(Type.EmptyTypes));
             var provider = ctor() as Provider;
             Assert.IsNotNull(provider);
@@ -205,7 +222,7 @@
         [TestMethod]
         public void Should_Create_One_Arg_Constructor()
         {
-            var ctor = RuntimeHelper.CreateCtorOneArg(
+            var ctor = RuntimeHelper.CreateCtor<CtorOneArgDelegate>(
                 typeof(Service).GetConstructor(new[] { typeof(IFoo) }));
             var baz = new Baz();
             var service = ctor(baz) as Service;
@@ -213,17 +230,25 @@
             Assert.AreSame(baz, service.Foo);
         }
 
+        [TestMethod]
+        public void Should_Create_Static_One_Arg_Function()
+        {
+            var call = RuntimeHelper.CreateStaticCall<StaticFuncOneArgDelegate>(
+                typeof(Provider).GetMethod(nameof(Provider.StaticProvideOne)));
+            Assert.AreEqual("Static 28", call(28));
+        }
+
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_Function_Arg_Mismatch()
         {
-            RuntimeHelper.CreateFuncTwoArgs(
+            RuntimeHelper.CreateCall<FuncTwoArgsDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.ProvideOne)));
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]
         public void Should_Fail_If_No_ReturnType()
         {
-            RuntimeHelper.CreateCallOneArg(
+            RuntimeHelper.CreateCall<OneArgDelegate>(
                 typeof(Provider).GetMethod(nameof(Provider.ProvideVoid)));
         }
     }

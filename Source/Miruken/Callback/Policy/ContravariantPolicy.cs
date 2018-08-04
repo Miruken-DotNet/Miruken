@@ -49,7 +49,7 @@
             return type2.IsAssignableFrom(type1) ? -1 : 1;
         }
 
-        private static bool VerifyResult(object result, MethodBinding binding)
+        private static bool VerifyResult(object result, MemberBinding binding)
         {
             return result != null || binding.Dispatcher.IsVoid;
         }

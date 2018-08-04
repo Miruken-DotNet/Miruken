@@ -199,16 +199,15 @@
         private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
         {
             public Task<Res> Next(Cb callback, Next<Res> next,
-                MethodBinding method,
+                MemberBinding member,
                 Repository<Message> repository,
                 IBilling billing)
             {
-                var send = callback as SendEmail;
-                if (send != null)
+                if (callback is SendEmail send)
                 {
                     var message = new Message { Content = send.Body };
                     repository.Create(new Create<Message>(message));
-                    send.Body = method.Dispatcher.Method.Name;
+                    send.Body = member.Dispatcher.Member.Name;
                     if (typeof(Res) == typeof(int))
                     {
                         billing.Bill(message.Id);

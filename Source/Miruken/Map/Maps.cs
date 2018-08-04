@@ -14,7 +14,7 @@
 
         public override CallbackPolicy CallbackPolicy => Policy;
 
-        public override bool Approve(object callback, PolicyMethodBinding binding)
+        public override bool Approve(object callback, PolicyMemberBinding binding)
         {
             var mapping = (Mapping)callback;
             var format  = mapping.Format;

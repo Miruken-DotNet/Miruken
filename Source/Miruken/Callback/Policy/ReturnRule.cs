@@ -5,14 +5,14 @@
 
     public abstract class ReturnRule
     {
-        public ReturnVoid OrVoid => new ReturnVoid(this);
-        public ReturnAsync Async => new ReturnAsync(this);
+        public ReturnVoid  OrVoid => new ReturnVoid(this);
+        public ReturnAsync Async  => new ReturnAsync(this);
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,
             RuleContext context);
 
-        public virtual void Configure(PolicyMethodBindingInfo policyMethodBindingInfo)
+        public virtual void Configure(PolicyMemberBindingInfo policyMemberBindingInfo)
         {
         }
 
@@ -52,9 +52,9 @@
         }
 
         public override void Configure(
-            PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMemberBindingInfo policyMemberBindingInfo)
         {
-            Rule.Configure(policyMethodBindingInfo);
+            Rule.Configure(policyMemberBindingInfo);
         }
 
         public override R GetInnerRule<R>()
@@ -78,10 +78,10 @@
         }
 
         public override void Configure(
-            PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMemberBindingInfo policyMemberBindingInfo)
         {
-            if (!policyMethodBindingInfo.Dispatch.IsVoid)
-                Rule.Configure(policyMethodBindingInfo);
+            if (!policyMemberBindingInfo.Dispatch.IsVoid)
+                Rule.Configure(policyMemberBindingInfo);
         }
     }
 

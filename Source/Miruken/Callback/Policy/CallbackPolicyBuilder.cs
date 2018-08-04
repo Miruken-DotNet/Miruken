@@ -25,7 +25,7 @@ namespace Miruken.Callback.Policy
             return (TBuilder)this;
         }
 
-        public TBuilder BindMethod(BindMethodDelegate binder)
+        public TBuilder BindMethod(BindMemberDelegate binder)
         {
             Policy.Binder = binder;
             return (TBuilder)this;

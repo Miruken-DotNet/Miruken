@@ -4,14 +4,14 @@
     using System.Diagnostics;
     using System.Linq;
 
-    public delegate PolicyMethodBinding BindMethodDelegate(
+    public delegate PolicyMemberBinding BindMemberDelegate(
         CallbackPolicy policy,
-        PolicyMethodBindingInfo policyMethodBindingInfo);
+        PolicyMemberBindingInfo policyMemberBindingInfo);
 
-    public class PolicyMethodBindingInfo
+    public class PolicyMemberBindingInfo
     {
-        public PolicyMethodBindingInfo(
-            MethodRule rule, MethodDispatch dispatch,
+        public PolicyMemberBindingInfo(
+            MethodRule rule, MemberDispatch dispatch,
             CategoryAttribute category)
         {
             Rule          = rule;
@@ -25,16 +25,16 @@
         public object            InKey;
         public object            OutKey;
         public int?              CallbackIndex;
-        public MethodRule        Rule           { get; }
-        public MethodDispatch    Dispatch       { get; }
-        public CategoryAttribute Category       { get; }
+        public MethodRule        Rule     { get; }
+        public MemberDispatch    Dispatch { get; }
+        public CategoryAttribute Category { get; }
     }
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class PolicyMethodBinding : MethodBinding
+    public class PolicyMemberBinding : MemberBinding
     {
-        public PolicyMethodBinding(CallbackPolicy policy,
-                                   PolicyMethodBindingInfo bindingInfo)
+        public PolicyMemberBinding(CallbackPolicy policy,
+                                   PolicyMemberBindingInfo bindingInfo)
             : base(bindingInfo.Dispatch)
         {
             Policy        = policy;
@@ -49,6 +49,9 @@
         public CallbackPolicy    Policy        { get; }
         public int?              CallbackIndex { get; }
         public object            Key           { get; }
+
+        public bool IsStatic => Dispatcher.Member.IsStatic
+            || Dispatcher is ConstructorDispatch;
 
         public bool Approves(object callback)
         {
@@ -85,7 +88,7 @@
             IHandler composer, Type resultType, ResultsDelegate results)
         {
             object result;
-            var args       = Rule.ResolveArgs(callback);
+            var args       = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(args, resultType);
             if (CallbackIndex.HasValue)
             {
@@ -202,7 +205,7 @@
         }
 
         private object GetCallbackInfo(object callback, object[] args,
-            MethodDispatch dispatcher, out Type callbackType)
+            MemberDispatch dispatcher, out Type callbackType)
         {
             if (CallbackIndex.HasValue)
             {
@@ -219,7 +222,7 @@
             get
             {
                 var category = Category.GetType().Name.Replace("Attribute", "");
-                return $"{category} | {Dispatcher.Method}";
+                return $"{category} | {Dispatcher.Member}";
             }
         }
     }

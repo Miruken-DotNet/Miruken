@@ -20,11 +20,11 @@
         public ILoggerFactory LoggerFactory { get; set; }
 
         public async Task<TResponse> Next(
-            TRequest request, MethodBinding method,
+            TRequest request, MemberBinding member,
             IHandler composer, Next<TResponse> next,
             IFilterProvider provider)
         {
-            var logger = GetLogger(method);
+            var logger = GetLogger(member);
             var debug  = logger.IsDebugEnabled;
             var start  = Stopwatch.GetTimestamp();
 
@@ -99,9 +99,9 @@
                 .ToString();
         }
 
-        private ILogger GetLogger(MethodBinding method)
+        private ILogger GetLogger(MemberBinding member)
         {
-            var type = method.Dispatcher.Method.ReflectedType;
+            var type = member.Dispatcher.Member.ReflectedType;
             return LoggerFactory?.Create(type) ?? NullLogger.Instance;
         }
     }

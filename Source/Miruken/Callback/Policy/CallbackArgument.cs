@@ -38,11 +38,11 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(ParameterInfo parameter,
-            PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMemberBindingInfo policyMemberBindingInfo)
         {
-            var key       = policyMethodBindingInfo.InKey;
+            var key       = policyMemberBindingInfo.InKey;
             var restrict  = key as Type;
-            policyMethodBindingInfo.CallbackIndex = parameter.Position;
+            policyMemberBindingInfo.CallbackIndex = parameter.Position;
             if (key != null && restrict == null) return;
             var paramType = parameter.ParameterType;
             if (paramType.IsGenericParameter)
@@ -54,7 +54,7 @@ namespace Miruken.Callback.Policy
             }
             if (paramType != typeof(object) &&
                 (restrict == null || paramType.Is(restrict)))
-                policyMethodBindingInfo.InKey = paramType;
+                policyMemberBindingInfo.InKey = paramType;
         }
 
         public override object Resolve(object callback)
@@ -80,7 +80,7 @@ namespace Miruken.Callback.Policy
         }
 
         public override void Configure(ParameterInfo parameter,
-            PolicyMethodBindingInfo policyMethodBindingInfo) { }
+            PolicyMemberBindingInfo policyMemberBindingInfo) { }
 
         public override object Resolve(object callback)
         {

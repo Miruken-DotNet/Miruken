@@ -9,44 +9,6 @@
     using System.Reflection;
     using System.Text;
 
-    #region Delegates
-
-    // Methods
-
-    public delegate void   NoArgsDelegate(object instance);
-    public delegate void   OneArgDelegate(object instance, object arg);
-    public delegate void   TwoArgsDelegate(object instance, object arg1, object arg2);
-    public delegate void   ThreeArgsDelegate(object instance, object arg1, object arg2, object arg3);
-    public delegate void   FourArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
-    public delegate void   FiveArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
-    public delegate void   SixArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
-    public delegate void   SevenArgsDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
-
-    // Functions
-
-    public delegate object NoArgsReturnDelegate(object instance);
-    public delegate object OneArgReturnDelegate(object instance, object arg);
-    public delegate object TwoArgsReturnDelegate(object instance, object arg1, object arg2);
-    public delegate object ThreeArgsReturnDelegate(object instance, object arg1, object arg2, object arg3);
-    public delegate object FourArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4);
-    public delegate object FiveArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5);
-    public delegate object SixArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
-    public delegate object SevenArgsReturnDelegate(object instance, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
-    public delegate object PropertyGetDelegate(object instance);
-
-    // Constructors
-
-    public delegate object NoArgsCtorDelegate();
-    public delegate object OneArgCtorDelegate(object arg);
-    public delegate object TwoArgsCtorDelegate(object arg1, object arg2);
-    public delegate object ThreeArgsCtorDelegate(object arg1, object arg2, object arg3);
-    public delegate object FourArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4);
-    public delegate object FiveArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5);
-    public delegate object SixArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
-    public delegate object SevenArgsCtorDelegate(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
-
-    #endregion
-
     public static class RuntimeHelper
     {
         private static readonly ConcurrentDictionary<Type, object> 
@@ -283,8 +245,6 @@
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
-        #region Action factories     
-
         public static TDel CreateCall<TDel>(MethodInfo method)
         {
             if (method == null)
@@ -307,93 +267,25 @@
             return lambda.Compile();
         }
 
-        public static NoArgsDelegate CreateCallNoArgs(MethodInfo method)
+        public static TDel CreateStaticCall<TDel>(MethodInfo method)
         {
-            return CreateCall<NoArgsDelegate>(method);
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+            if (!method.IsStatic)
+                throw new NotSupportedException("Only static methods supported");
+            var parameters = method.GetParameters();
+            var arguments = CreateArguments(parameters.Length);
+            var methodCall = Expression.Call(
+                method, arguments.Select((arg, index) =>
+                        Expression.Convert(arg, parameters[index].ParameterType))
+                    .ToArray());
+            var lambda = method.ReturnType == typeof(void)
+                ? Expression.Lambda<TDel>(methodCall, arguments)
+                : Expression.Lambda<TDel>(
+                    Expression.Convert(methodCall, typeof(object)),
+                    arguments);
+            return lambda.Compile();
         }
-
-        public static OneArgDelegate CreateCallOneArg(MethodInfo method)
-        {
-            return CreateCall<OneArgDelegate>(method);
-        }
-
-        public static TwoArgsDelegate CreateCallTwoArgs(MethodInfo method)
-        {
-            return CreateCall<TwoArgsDelegate>(method);
-        }
-
-        public static ThreeArgsDelegate CreateCallThreeArgs(MethodInfo method)
-        {
-            return CreateCall<ThreeArgsDelegate>(method);
-        }
-
-        public static FourArgsDelegate CreateCallFourArgs(MethodInfo method)
-        {
-            return CreateCall<FourArgsDelegate>(method);
-        }
-
-        public static FiveArgsDelegate CreateCallFiveArgs(MethodInfo method)
-        {
-            return CreateCall<FiveArgsDelegate>(method);
-        }
-
-        public static SixArgsDelegate CreateCallSixArgs(MethodInfo method)
-        {
-            return CreateCall<SixArgsDelegate>(method);
-        }
-
-        public static SevenArgsDelegate CreateCallSevenArgs(MethodInfo method)
-        {
-            return CreateCall<SevenArgsDelegate>(method);
-        }
-
-        #endregion
-
-        #region Function factories
-
-        public static NoArgsReturnDelegate CreateFuncNoArgs(MethodInfo method)
-        {
-            return CreateCall<NoArgsReturnDelegate>(method);
-        }
-
-        public static OneArgReturnDelegate CreateFuncOneArg(MethodInfo method)
-        {
-            return CreateCall<OneArgReturnDelegate>(method);
-        }
-
-        public static TwoArgsReturnDelegate CreateFuncTwoArgs(MethodInfo method)
-        {
-            return CreateCall<TwoArgsReturnDelegate>(method);
-        }
-
-        public static ThreeArgsReturnDelegate CreateFuncThreeArgs(MethodInfo method)
-        {
-            return CreateCall<ThreeArgsReturnDelegate>(method);
-        }
-
-        public static FourArgsReturnDelegate CreateFuncFourArgs(MethodInfo method)
-        {
-            return CreateCall<FourArgsReturnDelegate>(method);
-        }
-
-        public static FiveArgsReturnDelegate CreateFuncFiveArgs(MethodInfo method)
-        {
-            return CreateCall<FiveArgsReturnDelegate>(method);
-        }
-
-        public static SixArgsReturnDelegate CreateFuncSixArgs(MethodInfo method)
-        {
-            return CreateCall<SixArgsReturnDelegate>(method);
-        }
-
-        public static SevenArgsReturnDelegate CreateFuncSevenArgs(MethodInfo method)
-        {
-            return CreateCall<SevenArgsReturnDelegate>(method);
-        }
-
-        #endregion
-
-        #region Constructor factories
 
         public static TDel CreateCtor<TDel>(ConstructorInfo constructor)
         {
@@ -412,56 +304,13 @@
             ).Compile();
         }
 
-        public static NoArgsCtorDelegate CreateCtorNoArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<NoArgsCtorDelegate>(constructor);
-        }
-
-        public static OneArgCtorDelegate CreateCtorOneArg(ConstructorInfo constructor)
-        {
-            return CreateCtor<OneArgCtorDelegate>(constructor);
-        }
-
-        public static TwoArgsCtorDelegate CreateCtorTwoArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<TwoArgsCtorDelegate>(constructor);
-        }
-
-        public static ThreeArgsCtorDelegate CreateCtorThreeArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<ThreeArgsCtorDelegate>(constructor);
-        }
-
-        public static FourArgsCtorDelegate CreateCtorFourArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<FourArgsCtorDelegate>(constructor);
-        }
-
-        public static FiveArgsCtorDelegate CreateCtorFiveArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<FiveArgsCtorDelegate>(constructor);
-        }
-
-        public static SixArgsCtorDelegate CreateCtorSixArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<SixArgsCtorDelegate>(constructor);
-        }
-
-        public static SevenArgsCtorDelegate CreateCtorSevenArgs(ConstructorInfo constructor)
-        {
-            return CreateCtor<SevenArgsCtorDelegate>(constructor);
-        }
-
-        #endregion
-
         public static Func<T, TRet> CreateGenericFuncNoArgs<T, TRet>(
             string methodName, params Type[] genericParams)
         {
             var instance   = Expression.Parameter(typeof(T), "instance");
             var methodCall = Expression.Call(instance, methodName, genericParams);
             return Expression.Lambda<Func<T, TRet>>(
-               methodCall, instance
-               ).Compile();
+               methodCall, instance).Compile();
         }
 
         public static Func<TArg, TRet> CreateStaticFuncOneArg<T, TArg, TRet>(

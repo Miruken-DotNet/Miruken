@@ -5,74 +5,34 @@
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using Concurrency;
     using Infrastructure;
 
-    public class MethodDispatch
+    public class MethodDispatch : MemberDispatch
     {
         private Delegate _delegate;
-        private DispatchType _dispatchType;
         private GenericMapping _mapping;
         private ConcurrentDictionary<MethodInfo, MethodDispatch> _closed;
 
-        #region DispatchType
-
-        [Flags]
-        private enum DispatchType
+        public MethodDispatch(
+            MethodInfo method, Attribute[] attributes = null)
+            : base(method, method.ReturnType, attributes)
         {
-            FastNoArgs     = 1 << 0,
-            FastOneArg     = 1 << 1,
-            FastTwoArgs    = 1 << 2,
-            FastThreeArgs  = 1 << 3,
-            FastFourArgs   = 1 << 4,
-            FastFiveArgs   = 1 << 5,
-            FastSixArgs    = 1 << 6,
-            FastSevenArgs  = 1 << 7,
-            Promise        = 1 << 8,
-            Task           = 1 << 9,
-            Void           = 1 << 10,
-            LateBound      = 1 << 11,
-            Fast           = FastNoArgs   | FastOneArg
-                           | FastTwoArgs  | FastThreeArgs
-                           | FastFourArgs | FastFiveArgs
-                           | FastSixArgs  | FastSevenArgs
-        }
-
-        #endregion
-
-        public MethodDispatch(MethodInfo method, Attribute[] attributes = null)
-        {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            Arguments   = method.GetParameters().Select(p => new Argument(p)).ToArray();
-            Attributes  = attributes ?? Attribute.GetCustomAttributes(method, false);
-            SkipFilters = Attributes.OfType<SkipFiltersAttribute>().Any() ||
-                          method.ReflectedType?.IsDefined(typeof(SkipFiltersAttribute)) == true;
             ConfigureMethod(method);
-            Method     = method;
         }
 
-        public MethodInfo  Method            { get; }
-        public Argument[]  Arguments         { get; }
-        public Attribute[] Attributes        { get; }
-        public bool        SkipFilters       { get; }
-        public Type        LogicalReturnType { get; private set; }
+        public MethodInfo Method => (MethodInfo)Member;
 
-
-        public Type ReturnType => Method.ReturnType;
-        public bool IsVoid     => (_dispatchType & DispatchType.Void) > 0;
-        public bool IsPromise  => (_dispatchType & DispatchType.Promise) > 0;
-        public bool IsTask     => (_dispatchType & DispatchType.Task) > 0;
-        public bool IsAsync    => IsPromise || IsTask;
-
-        public HandlerDescriptor Owner => 
-            HandlerDescriptor.GetDescriptor(Method.ReflectedType);
-
-        public object Invoke(object target, object[] args, Type returnType = null)
+        public override object Invoke(
+            object target, object[] args, Type returnType = null)
         {
+            if (_mapping != null)
+                throw new InvalidOperationException(
+                    "Only closed methods can be invoked");
+
             if (!IsPromise)
                 return Dispatch(target, args, returnType);
+
             try
             {
                 return Dispatch(target, args, returnType);
@@ -87,83 +47,86 @@
 
         private object Dispatch(object target, object[] args, Type returnType)
         {
-            switch (_dispatchType & (DispatchType.Fast | DispatchType.Void))
+            switch (DispatchType & (DispatchTypeEnum.Fast | DispatchTypeEnum.Void))
             {
                 #region Fast Invocation
-                case DispatchType.FastNoArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastNoArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(0, args);
                     ((NoArgsDelegate)_delegate)(target);
                     return null;
-                case DispatchType.FastOneArg | DispatchType.Void:
+                case DispatchTypeEnum.FastOneArg | DispatchTypeEnum.Void:
                     AssertArgsCount(1, args);
                     ((OneArgDelegate)_delegate)(target, args[0]);
                     return null;
-                case DispatchType.FastTwoArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastTwoArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(2, args);
                     ((TwoArgsDelegate)_delegate)(target, args[0], args[1]);
                     return null;
-                case DispatchType.FastThreeArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastThreeArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(3, args);
                     ((ThreeArgsDelegate)_delegate)(target, args[0], args[1], args[2]);
                     return null;
-                case DispatchType.FastFourArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastFourArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(4, args);
                     ((FourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
                     return null;
-                case DispatchType.FastFiveArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastFiveArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(5, args);
                     ((FiveArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
                     return null;
-                case DispatchType.FastSixArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastSixArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(6, args);
                     ((SixArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
                     return null;
-                case DispatchType.FastSevenArgs | DispatchType.Void:
+                case DispatchTypeEnum.FastSevenArgs | DispatchTypeEnum.Void:
                     AssertArgsCount(7, args);
                     ((SevenArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
                     return null;
-                case DispatchType.FastNoArgs:
+                case DispatchTypeEnum.FastNoArgs:
                     AssertArgsCount(0, args);
-                    return ((NoArgsReturnDelegate)_delegate)(target);
-                case DispatchType.FastOneArg:
+                    return ((FuncNoArgsDelegate)_delegate)(target);
+                case DispatchTypeEnum.FastOneArg:
                     AssertArgsCount(1, args);
-                    return ((OneArgReturnDelegate)_delegate)(target, args[0]);
-                case DispatchType.FastTwoArgs:
+                    return ((FuncOneArgDelegate)_delegate)(target, args[0]);
+                case DispatchTypeEnum.FastTwoArgs:
                     AssertArgsCount(2, args);
-                    return ((TwoArgsReturnDelegate)_delegate)(target, args[0], args[1]);
-                case DispatchType.FastThreeArgs:
+                    return ((FuncTwoArgsDelegate)_delegate)(target, args[0], args[1]);
+                case DispatchTypeEnum.FastThreeArgs:
                     AssertArgsCount(3, args);
-                    return ((ThreeArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2]);
-                case DispatchType.FastFourArgs:
+                    return ((FuncThreeArgsDelegate)_delegate)(target, args[0], args[1], args[2]);
+                case DispatchTypeEnum.FastFourArgs:
                     AssertArgsCount(4, args);
-                    return ((FourArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
-                case DispatchType.FastFiveArgs:
+                    return ((FuncFourArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3]);
+                case DispatchTypeEnum.FastFiveArgs:
                     AssertArgsCount(5, args);
-                    return ((FiveArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
-                case DispatchType.FastSixArgs:
+                    return ((FuncFiveArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4]);
+                case DispatchTypeEnum.FastSixArgs:
                     AssertArgsCount(6, args);
-                    return ((SixArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
-                case DispatchType.FastSevenArgs:
+                    return ((FuncSixArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5]);
+                case DispatchTypeEnum.FastSevenArgs:
                     AssertArgsCount(7, args);
-                    return ((SevenArgsReturnDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+                    return ((FuncSevenArgsDelegate)_delegate)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
                 #endregion
                 default:
                     return DispatchLate(target, args, returnType);
             }
         }
 
-        public MethodDispatch CloseDispatch(object[] args, Type returnType = null)
+        public override MemberDispatch CloseDispatch(
+            object[] args, Type returnType = null)
         {
             if (_mapping == null) return this;
             var closedMethod = ClosedMethod(args, returnType);
-            return _closed.GetOrAdd(closedMethod, m => new MethodDispatch(m, Attributes));
+            return _closed.GetOrAdd(closedMethod,
+                m => new MethodDispatch(m, Attributes));
         }
 
         protected object DispatchLate(object target, object[] args, Type returnType = null)
         {
             var method = Method;
             if (Arguments.Length > (args?.Length ?? 0))
-                throw new ArgumentException($"Method {Method.GetDescription()} expects {Arguments.Length} arguments");
+                throw new ArgumentException(
+                    $"Method {Method.GetDescription()} expects {Arguments.Length} arguments");
             if (_mapping != null)
                 method = ClosedMethod(args, returnType);
             return method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
@@ -191,30 +154,6 @@
             var returnType = method.ReturnType;
             var isVoid     = returnType == typeof(void);
 
-            if (isVoid)
-            {
-                _dispatchType |= DispatchType.Void;
-                LogicalReturnType = returnType;
-            }
-            else if (returnType.Is<Promise>())
-            {
-                _dispatchType |= DispatchType.Promise;
-                var promise = returnType.GetOpenTypeConformance(typeof(Promise<>));
-                LogicalReturnType = promise != null
-                    ? promise.GetGenericArguments()[0]
-                    : typeof(object);
-            }
-            else if (returnType.Is<Task>())
-            {
-                _dispatchType |= DispatchType.Task;
-                var task = returnType.GetOpenTypeConformance(typeof(Task<>));
-                LogicalReturnType = task != null
-                    ? task.GetGenericArguments()[0]
-                    : typeof(object);
-            }
-            else
-                LogicalReturnType = returnType;
-
             var arguments = Arguments;
             if (!method.ContainsGenericParameters)
             {
@@ -223,49 +162,56 @@
                     #region Early Bound
                     case 0:
                         _delegate  = isVoid
-                                   ? (Delegate)RuntimeHelper.CreateCallNoArgs(method)
-                                   : RuntimeHelper.CreateFuncNoArgs(method);
-                        _dispatchType |= DispatchType.FastNoArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<NoArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncNoArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastNoArgs;
                         return;
                     case 1:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateCallOneArg(method)
-                                  : RuntimeHelper.CreateFuncOneArg(method);
-                        _dispatchType |= DispatchType.FastOneArg;
+                            ? (Delegate)RuntimeHelper.CreateCall<OneArgDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncOneArgDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastOneArg;
                         return;
                     case 2:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateCallTwoArgs(method)
-                                  : RuntimeHelper.CreateFuncTwoArgs(method);
-                        _dispatchType |= DispatchType.FastTwoArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<TwoArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncTwoArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastTwoArgs;
                         return;
                     case 3:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateCallThreeArgs(method)
-                                  : RuntimeHelper.CreateFuncThreeArgs(method);
-                        _dispatchType |= DispatchType.FastThreeArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<ThreeArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncThreeArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastThreeArgs;
                         return;
                     case 4:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateCallFourArgs(method)
-                                  : RuntimeHelper.CreateFuncFourArgs(method);
-                        _dispatchType |= DispatchType.FastFourArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<FourArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncFourArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastFourArgs;
                         return;
                     case 5:
                         _delegate = isVoid
-                                  ? (Delegate)RuntimeHelper.CreateCallFiveArgs(method)
-                                  : RuntimeHelper.CreateFuncFiveArgs(method);
-                        _dispatchType |= DispatchType.FastFiveArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<FiveArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncFiveArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastFiveArgs;
                         return;
                     case 6:
                         _delegate = isVoid
-                            ? (Delegate)RuntimeHelper.CreateCallSixArgs(method)
-                            : RuntimeHelper.CreateFuncSixArgs(method);
-                        _dispatchType |= DispatchType.FastSixArgs;
+                            ? (Delegate)RuntimeHelper.CreateCall<SixArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncSixArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastSixArgs;
                         return;
+                    case 7:
+                        _delegate = isVoid
+                            ? (Delegate)RuntimeHelper.CreateCall<SevenArgsDelegate>(method)
+                            : RuntimeHelper.CreateCall<FuncSevenArgsDelegate>(method);
+                        DispatchType |= DispatchTypeEnum.FastSevenArgs;
+                        return;
+
                     #endregion
                     default:
-                        _dispatchType |= DispatchType.LateBound;
+                        DispatchType |= DispatchTypeEnum.LateBound;
                         return;
                 }
             }
@@ -279,19 +225,8 @@
                 throw new InvalidOperationException(
                     $"Type mapping for {method.GetDescription()} could not be inferred");
 
-            _dispatchType |= DispatchType.LateBound;
+            DispatchType |= DispatchTypeEnum.LateBound;
             _closed  = new ConcurrentDictionary<MethodInfo, MethodDispatch>();
         }
-
-        private static void AssertArgsCount(int expected, params object[] args)
-        {
-            if (args.Length != expected)
-                throw new ArgumentException(
-                    $"Expected {expected} arguments, but {args.Length} provided");
-        }
-
-        private const BindingFlags Binding = BindingFlags.Instance
-                                           | BindingFlags.Public
-                                           | BindingFlags.NonPublic;
     }
 }

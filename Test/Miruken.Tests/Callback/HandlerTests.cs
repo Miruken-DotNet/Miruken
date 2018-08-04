@@ -675,6 +675,13 @@
             Assert.IsFalse(handler.Break().Handle(new FilterOptions()));
         }
 
+        [TestMethod]
+        public void Should_Create_Instances()
+        {
+            HandlerDescriptor.GetDescriptor<Controller>();
+            var instance = new Handler().Resolve<Controller>();
+        }
+
         public class FilterResolver : Handler
         {
             public Type RequestedType { get; set; }
@@ -691,7 +698,7 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(T callback, MethodBinding method,
+            public Task<object> Next(T callback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -703,7 +710,7 @@
         {
             public int? Order { get; set; }
 
-            public Task<T> Next(object callback, MethodBinding method,
+            public Task<T> Next(object callback, MemberBinding member,
                 IHandler composer, Next<T> next,
                 IFilterProvider provider)
             {
@@ -716,7 +723,7 @@
             public int? Order { get; set; }
 
             public Task<object> Next(
-                object callback, MethodBinding method,
+                object callback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -994,7 +1001,7 @@
             }
 
             [Provides(typeof(Boo))]
-            public object ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
+            public object ProvideBooKey(IHandler composer, PolicyMemberBinding binding)
             {
                 return new Boo { HasComposer = true };
             }
@@ -1034,7 +1041,7 @@
 
             [Provides]
             public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer,
-                                             PolicyMethodBinding binding)
+                                             PolicyMemberBinding binding)
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {
@@ -1054,7 +1061,7 @@
         private class SpecialAsyncHandler : Handler
         {
             [Provides(typeof(Boo))]
-            public Promise ProvideBooKey(IHandler composer, PolicyMethodBinding binding)
+            public Promise ProvideBooKey(IHandler composer, PolicyMemberBinding binding)
             {
                 return Promise.Resolved(new Boo { HasComposer = true });
             }
@@ -1095,7 +1102,7 @@
 
             [Provides]
             public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer,
-                                             PolicyMethodBinding binding)
+                                             PolicyMemberBinding binding)
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {
@@ -1174,6 +1181,11 @@
 
         private class Controller
         {
+            [Provides]
+            public Controller()
+            {            
+            }
+
             [Handles]
             public void HandleFooImplict(Foo foo)
             {
@@ -1233,7 +1245,7 @@
             }
 
             Task<object> IFilter<Bar, object>.Next(
-                Bar callback, MethodBinding binding, IHandler composer,
+                Bar callback, MemberBinding binding, IHandler composer,
                 Next<object> next, IFilterProvider provider)
             {
                 callback.Filters.Add(this);
@@ -1287,7 +1299,7 @@
         {
             public int? Order { get; set; } = 1;
 
-            public Task<Res> Next(Cb callback, MethodBinding binding,
+            public Task<Res> Next(Cb callback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -1302,7 +1314,7 @@
         {
             public int? Order { get; set; } = 2;
 
-            public Task<Res> Next(Req request, MethodBinding binding,
+            public Task<Res> Next(Req request, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

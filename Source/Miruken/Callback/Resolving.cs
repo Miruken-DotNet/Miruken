@@ -35,7 +35,7 @@
 
         public static object GetDefaultResolvingCallback(object callback)
         {
-            var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
+            var handlers = CallbackPolicy.GetInstanceHandlers(callback).ToArray();
             if (handlers.Length == 0) return callback;
             var bundle = new Bundle(false)
                 .Add(h => h.Handle(new NoResolving(callback)), 

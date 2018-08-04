@@ -49,7 +49,7 @@
         }
 
         public static IEnumerable<(IFilter, IFilterProvider)> GetOrderedFilters(
-            this IHandler handler, MethodBinding binding, Type callbackType,
+            this IHandler handler, MemberBinding binding, Type callbackType,
             Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetOptions<FilterOptions>();
@@ -69,7 +69,7 @@
         }
 
         private static IEnumerable<(IFilter, IFilterProvider)> GetOrderedFilters(
-            this IHandler handler, MethodBinding binding, Type callbackType,
+            this IHandler handler, MemberBinding binding, Type callbackType,
             Type logicalResultType, FilterOptions options, params
                 IEnumerable<IFilterProvider>[] providers)
         {

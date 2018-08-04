@@ -142,8 +142,7 @@
 
         private bool Implied(object item, bool greedy, IHandler composer)
         {
-            var type = Key as Type;
-            if (type == null) return false;
+            if (item == null || !(Key is Type type)) return false;
             var compatible =  type.IsInstanceOfType(item);
             return compatible && Resolve(item, false, greedy, composer);
         }

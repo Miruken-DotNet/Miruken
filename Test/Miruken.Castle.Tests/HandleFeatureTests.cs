@@ -166,7 +166,7 @@
         {
             public int? Order { get; set; }
 
-            public async Task<object> Next(Job job, MethodBinding method,
+            public async Task<object> Next(Job job, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -180,7 +180,7 @@
         {
             public int? Order { get; set; }
 
-            public Task<Res> Next(Job job, MethodBinding method,
+            public Task<Res> Next(Job job, MemberBinding member,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -194,7 +194,7 @@
         {
             public int? Order { get; set; }
 
-            public Task<Res> Next(Req job, MethodBinding method,
+            public Task<Res> Next(Req job, MemberBinding member,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

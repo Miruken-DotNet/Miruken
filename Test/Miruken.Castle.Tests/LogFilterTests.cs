@@ -109,7 +109,7 @@
             public int? Order { get; set; }
 
             public Task<object> Next(
-                Foo callback, MethodBinding method, 
+                Foo callback, MemberBinding member, 
                 IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {

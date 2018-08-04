@@ -29,7 +29,7 @@
             ParameterInfo parameter, RuleContext context);
 
         public virtual void Configure(ParameterInfo parameter,
-            PolicyMethodBindingInfo policyMethodBindingInfo) { }
+            PolicyMemberBindingInfo policyMemberBindingInfo) { }
 
         public abstract object Resolve(object callback);
     }
@@ -50,9 +50,9 @@
         }
 
         public override void Configure(ParameterInfo parameter,
-            PolicyMethodBindingInfo policyMethodBindingInfo)
+            PolicyMemberBindingInfo policyMemberBindingInfo)
         {
-            Argument.Configure(parameter, policyMethodBindingInfo);
+            Argument.Configure(parameter, policyMemberBindingInfo);
         }
 
         public override object Resolve(object callback)

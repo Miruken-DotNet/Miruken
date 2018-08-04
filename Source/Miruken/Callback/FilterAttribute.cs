@@ -22,7 +22,7 @@
         public int?   Order       { get; set; }
         public bool   Required    { get; set; }
 
-        public IEnumerable<IFilter> GetFilters(MethodBinding binding, 
+        public IEnumerable<IFilter> GetFilters(MemberBinding binding, 
             Type callbackType, Type logicalResultType, IHandler composer)
         {
             var filterTypes = FilterTypes
@@ -54,12 +54,12 @@
         {          
         }
 
-        protected virtual bool AcceptFilterType(Type filterType, MethodBinding binding)
+        protected virtual bool AcceptFilterType(Type filterType, MemberBinding binding)
         {
             return true;
         }
 
-        protected virtual void ResolvedFilters(IFilter[] filters, MethodBinding binding)
+        protected virtual void ResolvedFilters(IFilter[] filters, MemberBinding binding)
         {
             if (Required && filters.Length == 0)
                 throw new InvalidOperationException(

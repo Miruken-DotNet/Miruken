@@ -9,46 +9,86 @@ namespace Miruken.Callback.Policy
 
     public class HandlerDescriptor
     {
-        private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
         private readonly ConcurrentDictionary<object, Type> _closed;
-        private readonly Lazy<Attribute[]> _attributes;
+        private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
+        private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _staticPolicies;
         private readonly Lazy<IFilterProvider[]> _filters;
+        private readonly Lazy<Attribute[]> _attributes;
+
+        private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
+            Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         public HandlerDescriptor(Type handlerType)
         {
-            if (!handlerType.IsClass || handlerType.IsAbstract)
-                throw new ArgumentException("Only concrete classes can be handlers");
+            if (!handlerType.IsClass)
+                throw new ArgumentException("Only classes can be handlers");
 
             HandlerType = handlerType;
             var members = handlerType.FindMembers(Members, Binding, IsCategory, null);
+
             foreach (var member in members)
             {
-                MethodDispatch dispatch = null;
-                var method = member as MethodInfo
-                          ?? ((PropertyInfo)member).GetMethod;
+                MethodInfo          method              = null;
+                MethodDispatch      methodDispatch      = null;
+                ConstructorInfo     constructor         = null;
+                ConstructorDispatch constructorDispatch = null;
+
+                switch (member)
+                {
+                    case MethodInfo mi:
+                        method = mi;
+                        break;
+                    case PropertyInfo pi:
+                        method = pi.GetMethod;
+                        break;
+                    case ConstructorInfo ci:
+                        constructor = ci;
+                        break;
+                    default:
+                        continue;
+                }
+
                 var attributes = Attribute.GetCustomAttributes(member, false);
 
                 foreach (var category in attributes.OfType<CategoryAttribute>())
                 {
+                    PolicyMemberBinding memberBinding;
                     var policy = category.CallbackPolicy;
-                    var rule   = policy.MatchMethod(method, category);
-                    if (rule == null)
-                        throw new InvalidOperationException(
-                            $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                    dispatch = dispatch ?? new MethodDispatch(method, attributes);
-                    var binding = rule.Bind(dispatch, category);
+                    if (constructor != null)
+                    {
+                        constructorDispatch = constructorDispatch 
+                            ?? new ConstructorDispatch(constructor, attributes);
+                        memberBinding = new PolicyMemberBinding(policy,
+                            new PolicyMemberBindingInfo(null, constructorDispatch, category)
+                            {
+                                OutKey = constructor.ReflectedType
+                            });
+                    }
+                    else
+                    {
+                        var rule = policy.MatchMethod(method, category);
+                        if (rule == null)
+                            throw new InvalidOperationException(
+                                $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                    if (_policies == null)
-                        _policies = new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>();
+                        methodDispatch = methodDispatch ?? new MethodDispatch(method, attributes);
+                        memberBinding  = rule.Bind(methodDispatch, category);
+                    }
+      
+                    var policies = constructor != null || method.IsStatic
+                        ? _staticPolicies ?? (_staticPolicies = 
+                              new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>())
+                        : _policies ?? (_policies =
+                              new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>());
 
-                    if (!_policies.TryGetValue(policy, out var descriptor))
+                    if (!policies.TryGetValue(policy, out var descriptor))
                     {
                         descriptor = new CallbackPolicyDescriptor(policy);
-                        _policies.Add(policy, descriptor);
+                        policies.Add(policy, descriptor);
                     }
 
-                    descriptor.Add(binding);
+                    descriptor.Add(memberBinding);
                 }
             }
 
@@ -77,23 +117,22 @@ namespace Miruken.Callback.Policy
                 throw new ArgumentNullException(nameof(policy));
 
             CallbackPolicyDescriptor descriptor = null;
-            if (_policies?.TryGetValue(policy, out descriptor) != true)
+            var policies = target == null ? _staticPolicies : _policies;
+            if (policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
             var dispatched = false;
             foreach (var method in descriptor.GetInvariantMethods(callback))
             {
                 dispatched = method.Dispatch(
-                    target, callback, composer, results) 
-                    || dispatched;
+                    target, callback, composer, results) || dispatched;
                 if (dispatched && !greedy) return true;
             }
 
             foreach (var method in descriptor.GetCompatibleMethods(callback))
             {
                 dispatched = method.Dispatch(
-                    target, callback, composer, results) 
-                    || dispatched;
+                    target, callback, composer, results) || dispatched;
                 if (dispatched && !greedy) return true;
             }
 
@@ -125,17 +164,49 @@ namespace Miruken.Callback.Policy
             Descriptors.Clear();
         }
 
+        public static IEnumerable<Type> GetInstanceHandlers(
+            CallbackPolicy policy, object callback)
+        {
+            return GetCallbackHandlers(policy, callback, true, false);
+        }
+
+        public static IEnumerable<Type> GetStaticHandlers(
+            CallbackPolicy policy, object callback)
+        {
+            return GetCallbackHandlers(policy, callback, false, true);
+        }
+
         public static IEnumerable<Type> GetCallbackHandlers(
             CallbackPolicy policy, object callback)
+        {
+            return GetCallbackHandlers(policy, callback, true, true);
+        }
+
+        private static IEnumerable<Type> GetCallbackHandlers(
+            CallbackPolicy policy, object callback, bool instance, bool @static)
         {
             return Descriptors.Select(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                return handler._policies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
-                       cpd.GetCompatibleMethods(callback).FirstOrDefault()
-                     : null;
+                if (@static)
+                {
+                    var binding =
+                        handler._staticPolicies?.TryGetValue(policy, out cpd) == true
+                        ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
+                          cpd.GetCompatibleMethods(callback).FirstOrDefault()
+                        : null;
+                    if (binding != null) return binding;
+                }
+
+                if (instance)
+                {
+                    return handler._policies?.TryGetValue(policy, out cpd) == true
+                         ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
+                           cpd.GetCompatibleMethods(callback).FirstOrDefault()
+                         : null;
+                }
+                return null;
             })
             .Where(binding => binding != null)
             .OrderBy(binding => binding.Key, policy)
@@ -154,33 +225,24 @@ namespace Miruken.Callback.Policy
             .Distinct();
         }
 
-        public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(
-            CallbackPolicy policy, object key)
+        public static IEnumerable<PolicyMemberBinding> GetPolicyMethods(CallbackPolicy policy)
         {
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                return handler._policies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMethods(key).Concat(cpd.GetCompatibleMethods(key))
-                     : Enumerable.Empty<PolicyMethodBinding>();
-            })
-            .OrderBy(binding => binding.Key, policy);
-        }
-
-        public static IEnumerable<PolicyMethodBinding> GetPolicyMethods(CallbackPolicy policy)
-        {
-            return Descriptors.SelectMany(descriptor =>
-            {
-                CallbackPolicyDescriptor cpd = null;
-                var handler = descriptor.Value.Value;
-                return handler._policies?.TryGetValue(policy, out cpd) == true
+                var smethods = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
                      ? cpd.GetInvariantMethods()
-                     : Enumerable.Empty<PolicyMethodBinding>();
+                     : Enumerable.Empty<PolicyMemberBinding>();
+                var methods = handler._policies?.TryGetValue(policy, out cpd) == true
+                    ? cpd.GetInvariantMethods()
+                    : Enumerable.Empty<PolicyMemberBinding>();
+                if (smethods == null) return methods;
+                return methods == null ? smethods : smethods.Concat(methods);
             });
         }
 
-        public static IEnumerable<PolicyMethodBinding> GetPolicyMethods<T>(CallbackPolicy policy)
+        public static IEnumerable<PolicyMemberBinding> GetPolicyMethods<T>(CallbackPolicy policy)
         {
             return GetPolicyMethods(policy).Where(m => (m.Key as Type)?.Is<T>() == true);
         }
@@ -200,9 +262,6 @@ namespace Miruken.Callback.Policy
             }
             return member.IsDefined(typeof(CategoryAttribute));
         }
-
-        private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         private const MemberTypes Members  = MemberTypes.Method 
                                            | MemberTypes.Property

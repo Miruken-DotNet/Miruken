@@ -15,10 +15,10 @@
 
         public bool AllowAnonymous { get; set; }
 
-        public bool AllowUnprotected { get; set; }
+        public bool NoAccessPolicy { get; set; }
 
         protected override bool AcceptFilterType(
-            Type filterType, MethodBinding binding)
+            Type filterType, MemberBinding binding)
         {
             return !binding.Dispatcher.Attributes
                 .OfType<AllowAttribute>().Any();

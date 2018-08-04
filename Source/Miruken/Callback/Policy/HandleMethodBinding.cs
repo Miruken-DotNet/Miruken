@@ -8,7 +8,7 @@
     using Infrastructure;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class HandleMethodBinding : MethodBinding
+    public class HandleMethodBinding : MemberBinding
     {
         private static readonly List<IFilterProvider> 
             _globalFilters = new List<IFilterProvider>();
@@ -101,7 +101,7 @@
         {
             get
             {
-                var method = Dispatcher.Method;
+                var method = Dispatcher.Member;
                 return $"{method.ReflectedType?.FullName} | {method}";
 
             }

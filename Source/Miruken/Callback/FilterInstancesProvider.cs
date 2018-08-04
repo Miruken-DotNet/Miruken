@@ -22,7 +22,7 @@
 
         public bool Required { get; }
 
-        public IEnumerable<IFilter> GetFilters(MethodBinding binding,
+        public IEnumerable<IFilter> GetFilters(MemberBinding binding,
             Type callbackType, Type logicalResultType, IHandler composer)
         {
             return _filters;

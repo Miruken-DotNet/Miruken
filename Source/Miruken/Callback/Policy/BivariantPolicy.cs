@@ -7,7 +7,7 @@
 
     public abstract class BivariantPolicy : CallbackPolicy
     {
-        public override object CreateKey(PolicyMethodBindingInfo bindingInfo)
+        public override object CreateKey(PolicyMemberBindingInfo bindingInfo)
         {
             var inKey  = bindingInfo.InKey;
             var outKey = bindingInfo.OutKey;

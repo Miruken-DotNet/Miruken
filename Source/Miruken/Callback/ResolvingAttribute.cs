@@ -17,8 +17,8 @@
             typeof(ResolvingAttribute).GetMethod(nameof(ResolveLazy),
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private static readonly ConcurrentDictionary<Type, TwoArgsReturnDelegate>
-            Lazy = new ConcurrentDictionary<Type, TwoArgsReturnDelegate>();
+        private static readonly ConcurrentDictionary<Type, FuncTwoArgsDelegate>
+            Lazy = new ConcurrentDictionary<Type, FuncTwoArgsDelegate>();
 
         public bool IsOptional => false;
 
@@ -31,7 +31,7 @@
             {
                 var func   = l.GenericTypeArguments[0];
                 var method = CreateLazy.MakeGenericMethod(func);
-                return RuntimeHelper.CreateFuncTwoArgs(method);
+                return RuntimeHelper.CreateCall<FuncTwoArgsDelegate>(method);
             });
             return lazy(this, argument, composer);
         }

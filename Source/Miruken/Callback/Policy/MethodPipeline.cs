@@ -10,7 +10,7 @@
 
     internal abstract class MethodPipeline
     {
-        public abstract bool Invoke(MethodBinding binding, object target,
+        public abstract bool Invoke(MemberBinding binding, object target,
             object callback, CompletePipelineDelegate complete, IHandler composer,
             IEnumerable<(IFilter, IFilterProvider)> filters, out object result);
 
@@ -31,7 +31,7 @@
 
     internal class MethodPipeline<TCb, TRes> : MethodPipeline
     {
-        public override bool Invoke(MethodBinding binding, object target, 
+        public override bool Invoke(MemberBinding binding, object target, 
             object callback, CompletePipelineDelegate complete, IHandler composer,
             IEnumerable<(IFilter, IFilterProvider)> filters, out object result)
         {
