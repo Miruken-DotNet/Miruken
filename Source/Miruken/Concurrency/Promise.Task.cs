@@ -107,7 +107,7 @@
         }
 
         public Promise(Task<T> task,
-            CancellationToken cancellationToken = default(CancellationToken),
+            CancellationToken cancellationToken = default,
             ChildCancelMode mode = ChildCancelMode.All)
             : this(task, null, mode)
         {

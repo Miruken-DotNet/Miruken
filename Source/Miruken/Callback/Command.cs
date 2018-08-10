@@ -7,7 +7,7 @@
     using Concurrency;
     using Policy;
 
-    public class Command 
+    public sealed class Command 
         : ICallback, IAsyncCallback, IDispatchCallback
     {
         private CallbackPolicy _policy;

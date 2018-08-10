@@ -53,7 +53,7 @@
             HandleMethodBinding.Unhandled = true;
         }
 
-        public static TRet Unhandled<TRet>(TRet result = default(TRet))
+        public static TRet Unhandled<TRet>(TRet result = default)
         {
             HandleMethodBinding.Unhandled = true;
             return result;

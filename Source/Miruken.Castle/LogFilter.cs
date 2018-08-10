@@ -54,7 +54,7 @@
                 // Never caught, because `LogException()` returns false.
             }
 
-            return default(TResponse);
+            return default;
         }
 
         private static bool LogException(TRequest request,

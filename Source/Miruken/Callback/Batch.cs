@@ -14,7 +14,7 @@
         Promise<object[]> Complete(IHandler composer);
     }
 
-    public class Batch : CompositeHandler, IBatchingComplete
+    public sealed class Batch : CompositeHandler, IBatchingComplete
     {
         private readonly HashSet<object> _tags;
 
@@ -38,7 +38,7 @@
         }
     }
 
-    public class NoBatch : Trampoline, IBatchCallback
+    public sealed class NoBatch : Trampoline, IBatchCallback
     {
         public NoBatch(object callback)
             : base(callback)

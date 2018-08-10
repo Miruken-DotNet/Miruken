@@ -46,7 +46,7 @@
             object source, object format = null)
         {
             var result = handler.Map(source, typeof(T), format);
-            return result == null ? default(T) : (T)result;
+            return result == null ? default : (T)result;
         }
 
         public static Promise<T> MapAsync<T>(this IHandler handler,
@@ -77,7 +77,7 @@
             object source, T instance, object format = null)
         {
             var result = handler.Map(source, instance, format);
-            return result == null ? default(T) : (T)result;
+            return result == null ? default : (T)result;
         }
 
         public static Promise<T> MapIntoAsync<T>(this IHandler handler,
