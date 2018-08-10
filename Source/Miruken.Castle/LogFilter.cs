@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Callback;
@@ -53,7 +54,7 @@
                 // Never caught, because `LogException()` returns false.
             }
 
-            return default(TResponse);
+            return default;
         }
 
         private static bool LogException(TRequest request,
@@ -113,7 +114,9 @@
         public static Type[] WarningExceptions =
         {
             typeof(ArgumentException),
-            typeof(InvalidOperationException)
+            typeof(InvalidOperationException),
+            typeof(AuthenticationException),
+            typeof(UnauthorizedAccessException)
         };
 
         protected static readonly JsonSerializerSettings JsonSettings =

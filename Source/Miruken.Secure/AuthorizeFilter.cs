@@ -24,7 +24,7 @@
                 principal.RequireAuthenticatedClaims();
             if (authorize?.NoAccessPolicy == true)
                 return next();
-            var policy        = GetPolicy(callback, member);
+            var policy = GetPolicy(callback, member);
             var authorization = new Authorization(callback, principal, policy);
             if (!composer.Handle(authorization)) AccessDenied();
             return authorization.Result.Then((canAccess, s) =>

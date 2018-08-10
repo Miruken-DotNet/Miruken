@@ -34,7 +34,7 @@
 
         public static Promise<object> ToPromise(
              this Task task,
-             CancellationToken cancellationToken = default(CancellationToken),
+             CancellationToken cancellationToken = default,
              ChildCancelMode mode = ChildCancelMode.All)
         {
             return task.Cast<object>().ToPromise(cancellationToken, mode);
@@ -50,7 +50,7 @@
 
         public static Promise<T> ToPromise<T>(
             this Task<T> task,
-            CancellationToken cancellationToken = default(CancellationToken),
+            CancellationToken cancellationToken = default,
             ChildCancelMode mode = ChildCancelMode.All)
         {
             return new Promise<T>(task, cancellationToken, mode);

@@ -13,7 +13,7 @@ namespace Miruken.Callback
         Notify     = Broadcast | BestEffort
     }
 
-    public class CallbackSemantics 
+    public sealed class CallbackSemantics 
         : Composition, IResolveCallback, IFilterCallback,
           IBatchCallback
     {
@@ -74,7 +74,7 @@ namespace Miruken.Callback
         }
     }
 
-    public class CallbackSemanticsDecorator : Handler, IDecorator
+    public sealed class CallbackSemanticsDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
         private readonly CallbackSemantics _semantics;

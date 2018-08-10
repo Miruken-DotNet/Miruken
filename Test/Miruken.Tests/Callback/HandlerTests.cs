@@ -837,7 +837,7 @@
             {
                 if (typeof (T) == typeof (char)) 
                     return null;
-                baz.Stuff = default(T);
+                baz.Stuff = default;
                 return true;
             }
 
@@ -846,8 +846,8 @@
             {
                 if (typeof(T) == typeof(char))
                     return null;
-                baz.Stuff      = default(T);
-                baz.OtherStuff = default(R);
+                baz.Stuff      = default;
+                baz.OtherStuff = default;
                 return true;
             }
 
@@ -882,13 +882,13 @@
             [Provides]
             public Baz<T> ProvidesBazGenerically<T>()
             {
-                return new Baz<T>(default(T));
+                return new Baz<T>(default);
             }
 
             [Provides]
             public Baz<T,R> ProvidesBazMapped<R,T>()
             {
-                return new Baz<T,R>(default(T), default(R));
+                return new Baz<T,R>(default, default);
             }
 
             [Provides]
@@ -959,13 +959,13 @@
             [Provides]
             public Promise<Baz<T>> ProvidesBazGenerically<T>()
             {
-                return Promise.Resolved(new Baz<T>(default(T)));
+                return Promise.Resolved(new Baz<T>(default));
             }
 
             [Provides]
             public Promise<Baz<T, R>> ProvidesBazMapped<R, T>()
             {
-                return Promise.Resolved(new Baz<T, R>(default(T), default(R)));
+                return Promise.Resolved(new Baz<T, R>(default, default));
             }
 
             [Provides]

@@ -46,7 +46,7 @@
         }
     }
 
-    public class NoResolving : Trampoline, IResolveCallback
+    public sealed class NoResolving : Trampoline, IResolveCallback
     {
         public NoResolving(object callback)
             : base(callback)

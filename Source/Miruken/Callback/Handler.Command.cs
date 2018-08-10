@@ -13,7 +13,7 @@
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
-            var result = command.Result;
+            var unused = command.Result;
         }
 
         public static Promise CommandAsync(this IHandler handler, object callback)
@@ -35,7 +35,7 @@
 
         public static TRes Command<TRes>(this IHandler handler, object callback)
         {
-            if (handler == null) return default(TRes);
+            if (handler == null) return default;
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");

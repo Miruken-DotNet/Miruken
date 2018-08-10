@@ -59,7 +59,7 @@
         }
     }
 
-    public class NoBatchDecorator : Handler, IDecorator
+    public sealed class NoBatchDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
 

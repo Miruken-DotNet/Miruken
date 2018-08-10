@@ -13,7 +13,7 @@
         }
     }
 
-    public class ResolveDecorator : Handler, IDecorator
+    public sealed class ResolveDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
 
@@ -79,7 +79,7 @@
 
         public static T Resolve<T>(this IHandler handler)
         {
-            return handler == null ? default(T)
+            return handler == null ? default
                  : (T)Resolve(handler, typeof(T));
         }
 

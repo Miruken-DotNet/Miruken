@@ -295,7 +295,7 @@
             {
                 try
                 {
-                    var result = func != null ? func() : default(T);
+                    var result = func != null ? func() : default;
                     resolve(result, true);
                 }
                 catch (Exception exception)
@@ -332,7 +332,7 @@
                 {
                     var result = func?.Invoke();
                     if (result == null)
-                        resolve(default(T), true);
+                        resolve(default, true);
                     else
                         result.Then(resolve, reject);
                 }
@@ -514,7 +514,7 @@
         public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback fail)
         {
             return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null,
-                (ex, s) => { fail(ex, s); return default(R); });
+                (ex, s) => { fail(ex, s); return default; });
         }
 
         public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback<R> fail)
@@ -568,7 +568,7 @@
                         try
                         {
                             fail(ex, s);
-                            resolve(default(T), s);
+                            resolve(default, s);
                         }
                         catch (Exception exo)
                         {
@@ -1183,7 +1183,7 @@
         }
 
         public new static readonly Promise<T> Empty = 
-            new Promise<T>((resolve, _) => resolve(default(T), true));
+            new Promise<T>((resolve, _) => resolve(default, true));
 
         #endregion
     }
