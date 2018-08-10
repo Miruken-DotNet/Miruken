@@ -26,7 +26,7 @@
             var authorization = new Authorization(callback, principal, policy);
             if (!composer.Handle(authorization))
             {
-                if (authorize?.AllowUnprotected != true)
+                if (authorize?.NoAccessPolicy != true)
                     AccessDenied();
                 return next();
             }
