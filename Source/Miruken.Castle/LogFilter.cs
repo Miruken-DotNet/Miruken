@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Callback;
@@ -113,7 +114,9 @@
         public static Type[] WarningExceptions =
         {
             typeof(ArgumentException),
-            typeof(InvalidOperationException)
+            typeof(InvalidOperationException),
+            typeof(AuthenticationException),
+            typeof(UnauthorizedAccessException)
         };
 
         protected static readonly JsonSerializerSettings JsonSettings =
