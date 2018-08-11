@@ -3,12 +3,13 @@
     using System;
     using Policy;
 
-    public class Trampoline : IDispatchCallback
+    public class Trampoline :
+        IDispatchCallback, IDispatchCallbackGuard
     {
         public Trampoline(object callback)
         {
             Callback = callback 
-                    ?? throw new ArgumentNullException(nameof(callback));
+                ?? throw new ArgumentNullException(nameof(callback));
         }
 
         protected Trampoline()
@@ -19,6 +20,13 @@
 
         CallbackPolicy IDispatchCallback.Policy =>
             (Callback as IDispatchCallback)?.Policy;
+
+        bool IDispatchCallbackGuard.CanDispatch(
+            object handler, PolicyMemberBinding binding)
+        {
+            return (Callback as IDispatchCallbackGuard)
+                   ?.CanDispatch(handler, binding) != false;
+        }
 
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)

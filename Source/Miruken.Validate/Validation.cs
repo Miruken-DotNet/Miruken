@@ -16,8 +16,8 @@
 
         public Validation(object target, object[] scopes)
         {
-            Target = target 
-                  ?? throw new ArgumentNullException(nameof(target));
+            Target        = target 
+                ?? throw new ArgumentNullException(nameof(target));
             Outcome       = new ValidationOutcome();
             ScopeMatcher  = CreateScopeMatcher(scopes);
             _asyncResults = new List<Promise>();

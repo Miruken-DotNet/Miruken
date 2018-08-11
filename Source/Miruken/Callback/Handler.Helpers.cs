@@ -1,7 +1,5 @@
 ﻿namespace Miruken.Callback
 {
-    using System;
-
     public static class HandlerHelpers
     {
         public static bool Handle(this IHandler handler, object callback,
@@ -28,26 +26,6 @@
                     return new CompositeHandler(h);
                 }
             }
-        }
-
-        public static IHandler Resolve<T>(
-            this IHandler handler, Func<T> provider, out T result)
-        {
-            var inquiry = new Inquiry(typeof(T));
-            if (handler.Handle(inquiry))
-            {
-                result = (T)inquiry.Result;
-                return handler;
-            }
-            result = provider();
-            return handler.Provide(result);
-        }
-
-        public static T Rssolve<T>(
-            this IHandler handler, Func<T> provider, out IHandler composer)
-        {
-            composer = Resolve(handler, provider, out var result);
-            return result;
         }
 
         public static IHandler Provide<T>(this IHandler handler, T result)

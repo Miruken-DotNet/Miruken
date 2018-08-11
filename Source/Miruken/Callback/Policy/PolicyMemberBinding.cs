@@ -50,9 +50,6 @@
         public int?              CallbackIndex { get; }
         public object            Key           { get; }
 
-        public bool IsStatic => Dispatcher.Member.IsStatic
-            || Dispatcher is ConstructorDispatch;
-
         public bool Approves(object callback)
         {
             return Category.Approve(callback, this);
@@ -61,6 +58,8 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
+            if ((callback as IDispatchCallbackGuard)
+                ?.CanDispatch(target, this) == false) return false;
             var resultType = Policy.ResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType, results);
         }
@@ -71,15 +70,28 @@
             if (type == null || !handlerType.IsGenericTypeDefinition)
                 return handlerType;
             var index = CallbackIndex;
-            if (!index.HasValue) return null;
-            var callback = Dispatcher.Arguments[index.Value];
-            var mapping  = new GenericMapping(
-                handlerType.GetGenericArguments(),
-                new [] { callback });
-            if (mapping.Complete)
+            if (index.HasValue)
             {
-                var closed = mapping.MapTypes(new[] { type });
-                return handlerType.MakeGenericType(closed);
+                var callback = Dispatcher.Arguments[index.Value];
+                var mapping  = new GenericMapping(
+                    handlerType.GetGenericArguments(),
+                    new[] { callback });
+                if (mapping.Complete)
+                {
+                    var closed = mapping.MapTypes(new[] { type });
+                    return handlerType.MakeGenericType(closed);
+                }
+            }
+            else if (!Dispatcher.IsVoid)
+            {
+                var mapping = new GenericMapping(
+                    handlerType.GetGenericArguments(),
+                    Array.Empty<Argument>(), Dispatcher.ReturnType);
+                if (mapping.Complete)
+                {
+                    var closed = mapping.MapTypes(Array.Empty<Type>(), type);
+                    return handlerType.MakeGenericType(closed);
+                }
             }
             return null;
         }
@@ -101,7 +113,7 @@
 
             if ((callback as IFilterCallback)?.CanFilter == false)
             {
-                args = ResolveArgs(args, composer, out var completed);
+                args = ResolveArgs(callback, args, composer, out var completed);
                 if (completed)
                 {
                     result = dispatcher.Invoke(target, args, resultType);
@@ -129,15 +141,15 @@
 
             if (filters.Length == 0)
             {
-                args = ResolveArgs(args, composer, out var completed);
+                args = ResolveArgs(callback, args, composer, out var completed);
                 if (!completed) return false;
                 result = baseResult = dispatcher.Invoke(target, args, resultType);
             }
-            else if (!MethodPipeline.GetPipeline(callbackType, logicalType)
+            else if (!MemberPipeline.GetPipeline(callbackType, logicalType)
                 .Invoke(this, target, actualCallback,
                     (IHandler comp, out bool completed) =>
                         baseResult = dispatcher.Invoke(target,
-                        ResolveArgs(args, comp, out completed),
+                        ResolveArgs(callback, args, comp, out completed),
                             resultType), composer, filters, out result))
                 return false;
 
@@ -160,10 +172,11 @@
             return accepted;
         }
 
-        private object[] ResolveArgs(
+        private object[] ResolveArgs(object callback,
             object[] ruleArgs, IHandler composer, out bool completed)
         {
-            completed = true;
+            completed     = true;
+            var parent    = callback as Inquiry;
             var arguments = Dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
@@ -186,7 +199,7 @@
                     {
                         var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                         bundle.Add(h => args[index] =
-                                resolver.ResolveArgument(argument, h, composer),
+                                resolver.ResolveArgument(parent, argument, h, composer),
                             (ref bool resolved) =>
                             {
                                 resolved = resolved || optional;

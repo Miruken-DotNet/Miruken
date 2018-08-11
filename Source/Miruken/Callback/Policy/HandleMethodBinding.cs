@@ -107,7 +107,7 @@
             }
         }
 
-        private static readonly MethodPipeline Pipeline = MethodPipeline
+        private static readonly MemberPipeline Pipeline = MemberPipeline
             .GetPipeline(typeof(HandleMethod), typeof(object));
 
         [ThreadStatic] internal static IHandler Composer;

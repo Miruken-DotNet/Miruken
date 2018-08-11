@@ -74,16 +74,17 @@
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\Policy\GenericMapping.cs" />
     <Compile Include="Callback\Policy\ConstructorDispatch.cs" />
+    <Compile Include="Callback\Policy\ICallbackPolicyDispatch.cs" />
     <Compile Include="Callback\Policy\MemberDispatch.cs" />
     <Compile Include="Callback\Policy\RuleContext.cs" />
     <Compile Include="Callback\ProxyAttribute.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
+    <Compile Include="Callback\StaticHandler.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Callback\SkipFiltersAttribute.cs" />
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
-    <Compile Include="Infrastructure\Delegates.cs" />
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
     <Compile Include="Map\IFormatMatching.cs" />
@@ -105,7 +106,7 @@
     <Compile Include="Callback\Policy\MethodDispatch.cs" />
     <Compile Include="Callback\Policy\MemberBinding.cs" />
     <Compile Include="Callback\Policy\PolicyMemberBinding.cs" />
-    <Compile Include="Callback\Policy\MethodPipeline.cs" />
+    <Compile Include="Callback\Policy\MemberPipeline.cs" />
     <Compile Include="Callback\Policy\MethodRule.cs" />
     <Compile Include="Callback\Policy\CallbackPolicy.cs" />
     <Compile Include="Callback\CategoryAttribute.cs" />

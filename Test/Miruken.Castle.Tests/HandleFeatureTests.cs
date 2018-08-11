@@ -6,7 +6,7 @@
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Infrastructure;
+    using Infrastructure;
     using IHandler = Callback.IHandler;
 
     [TestClass]

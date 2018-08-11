@@ -27,7 +27,7 @@
                     "Claim parameters must be simple types");
         }
 
-        public object ResolveArgument(
+        public object ResolveArgument(Inquiry parent,
             Argument argument, IHandler handler, IHandler composer)
         {
             var principal = composer.Resolve<IPrincipal>();

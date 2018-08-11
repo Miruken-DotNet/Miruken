@@ -13,7 +13,7 @@
         protected MemberBinding(MemberDispatch dispatch)
         {
             Dispatcher = dispatch 
-                      ?? throw new ArgumentNullException(nameof(dispatch));
+                ?? throw new ArgumentNullException(nameof(dispatch));
             AddFilters(dispatch.Attributes.OfType<IFilterProvider>().ToArray());
         }
 

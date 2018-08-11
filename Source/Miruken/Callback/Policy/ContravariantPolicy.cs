@@ -91,7 +91,7 @@
         public ContravariantPolicy(Func<TCb, object> target)
         {
             Target = target 
-                  ?? throw new ArgumentNullException(nameof(target));
+                ?? throw new ArgumentNullException(nameof(target));
         }
 
         public Func<TCb, object> Target { get; }

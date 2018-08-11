@@ -9,7 +9,7 @@
         public FormatAttribute(object format)
         {
             Format = format 
-                  ?? throw new ArgumentNullException(nameof(format));
+                ?? throw new ArgumentNullException(nameof(format));
         }
 
         public object Format { get; }

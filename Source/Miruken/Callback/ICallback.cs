@@ -40,6 +40,11 @@ namespace Miruken.Callback
         bool CanFilter { get; }
     }
 
+    public interface IDispatchCallbackGuard
+    {
+        bool CanDispatch(object handler, PolicyMemberBinding binding);
+    }
+
     public interface IDispatchCallback
     {
         CallbackPolicy Policy { get; }

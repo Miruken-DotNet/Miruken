@@ -245,49 +245,32 @@
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
-        public static TDel CreateCall<TDel>(MethodInfo method)
+        public static Delegate CompileMethod(MethodInfo method, Type delegateType)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            var target = method.ReflectedType;
-            if (target == null || method.IsStatic)
-                throw new NotSupportedException("Only instance methods supported");
+            var isStatic   = method.IsStatic;
+            var target     = method.ReflectedType;
+            if (!isStatic && target == null)
+                throw new ArgumentException("Instance method require a class");
             var parameters = method.GetParameters();
-            var arguments  = CreateArguments(parameters.Length + 1);
-            var methodCall = Expression.Call(
-                Expression.Convert(arguments[0], target), method,
-                arguments.Skip(1).Select((arg, index) =>
+            var arguments  = CreateArguments(parameters.Length + (isStatic ? 0 : 1));
+            var methodCall = isStatic ?
+                 Expression.Call(method, arguments.Select((arg, index) =>
+                 Expression.Convert(arg, parameters[index].ParameterType)).ToArray())
+               : Expression.Call(Expression.Convert(arguments[0], target), method,
+                    arguments.Skip(1).Select((arg, index) =>
                         Expression.Convert(arg, parameters[index].ParameterType))
                     .ToArray());
             var lambda = method.ReturnType == typeof(void)
-                       ? Expression.Lambda<TDel>(methodCall, arguments)
-                       : Expression.Lambda<TDel>(
+                       ? Expression.Lambda(delegateType, methodCall, arguments)
+                       : Expression.Lambda(delegateType,
                             Expression.Convert(methodCall, typeof(object)),
                             arguments);
             return lambda.Compile();
         }
 
-        public static TDel CreateStaticCall<TDel>(MethodInfo method)
-        {
-            if (method == null)
-                throw new ArgumentNullException(nameof(method));
-            if (!method.IsStatic)
-                throw new NotSupportedException("Only static methods supported");
-            var parameters = method.GetParameters();
-            var arguments = CreateArguments(parameters.Length);
-            var methodCall = Expression.Call(
-                method, arguments.Select((arg, index) =>
-                        Expression.Convert(arg, parameters[index].ParameterType))
-                    .ToArray());
-            var lambda = method.ReturnType == typeof(void)
-                ? Expression.Lambda<TDel>(methodCall, arguments)
-                : Expression.Lambda<TDel>(
-                    Expression.Convert(methodCall, typeof(object)),
-                    arguments);
-            return lambda.Compile();
-        }
-
-        public static TDel CreateCtor<TDel>(ConstructorInfo constructor)
+        public static Delegate CompileConstructor(ConstructorInfo constructor, Type delegateType)
         {
             if (constructor == null)
                 throw new ArgumentNullException(nameof(constructor));
@@ -298,7 +281,7 @@
                 arguments.Select((arg, index) =>
                         Expression.Convert(arg, parameters[index].ParameterType))
                     .ToArray());
-            return Expression.Lambda<TDel>(
+            return Expression.Lambda(delegateType,
                 Expression.Convert(constructorCall, typeof(object)),
                 arguments
             ).Compile();
@@ -318,12 +301,10 @@
         {
             var arg        = Expression.Parameter(typeof(TArg), "arg");
             var methodCall = Expression.Call(typeof(T), methodName, genericParams, arg);
-            return Expression.Lambda<Func<TArg, TRet>>(
-               methodCall, arg
-               ).Compile();
+            return Expression.Lambda<Func<TArg, TRet>>(methodCall, arg).Compile();
         }
 
-        public static PropertyGetDelegate CreatePropertyGetter(string name, Type owner)
+        public static Func<object, object> CreatePropertyGetter(string name, Type owner)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException(@"Name cannot be empty", nameof(name));
@@ -331,7 +312,7 @@
                 throw new ArgumentNullException(nameof(owner));
             var instance = Expression.Parameter(typeof(object), "instance");
             var target   = Expression.Convert(instance, owner);
-            return Expression.Lambda<PropertyGetDelegate>(
+            return Expression.Lambda<Func<object, object>>(
                 Expression.Convert(
                     Expression.Property(target, name),
                     typeof(object)

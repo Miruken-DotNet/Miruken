@@ -5,26 +5,26 @@
 
     public class ContainerAttribute : ResolvingAttribute
     {
-        protected override object Resolve(
+        protected override object Resolve(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
             return handler.Proxy<IContainer>().Resolve(key);
         }
 
-        protected override Promise ResolveAsync(
+        protected override Promise ResolveAsync(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
             return handler.Proxy<IContainer>().ResolveAsync(key);
         }
 
-        protected override object[] ResolveAll(
+        protected override object[] ResolveAll(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
             return handler.Proxy<IContainer>().ResolveAll(key);
         }
 
         protected override Promise<object[]> ResolveAllAsync(
-            object key, IHandler handler, IHandler composer)
+            Inquiry parent, object key, IHandler handler, IHandler composer)
         {
             return handler.Proxy<IContainer>().ResolveAllAsync(key);
         }

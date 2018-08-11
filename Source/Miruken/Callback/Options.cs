@@ -35,7 +35,7 @@
             : base(handler)
         {
             _options = options 
-                    ?? throw new ArgumentNullException(nameof(options));
+                ?? throw new ArgumentNullException(nameof(options));
         }
 
         protected override bool HandleCallback(

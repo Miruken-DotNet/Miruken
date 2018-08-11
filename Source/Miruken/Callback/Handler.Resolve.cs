@@ -54,10 +54,11 @@
                        CallbackOptions.Broadcast);
         }
 
-        public static object Resolve(this IHandler handler, object key)
+        public static object Resolve(this IHandler handler, 
+            object key, Inquiry parent = null)
         {
             if (handler == null) return null;
-            var inquiry = key as Inquiry ?? new Inquiry(key);
+            var inquiry = key as Inquiry ?? new Inquiry(key, parent);
             if (handler.Handle(inquiry))
                 return inquiry.Result;
             return key is Type type
@@ -65,10 +66,11 @@
                  : null;
         }
 
-        public static Promise ResolveAsync(this IHandler handler, object key)
+        public static Promise ResolveAsync(this IHandler handler,
+            object key, Inquiry parent = null)
         {
             if (handler == null) return null;
-            var inquiry = key as Inquiry ?? new Inquiry(key);
+            var inquiry = key as Inquiry ?? new Inquiry(key, parent);
             inquiry.WantsAsync = true;
             if (handler.Handle(inquiry))
                 return (Promise)inquiry.Result;
@@ -77,24 +79,27 @@
                  : Promise.Empty;
         }
 
-        public static T Resolve<T>(this IHandler handler)
+        public static T Resolve<T>(
+            this IHandler handler, Inquiry parent = null)
         {
             return handler == null ? default
-                 : (T)Resolve(handler, typeof(T));
+                 : (T)Resolve(handler, typeof(T), parent);
         }
 
-        public static Promise<T> ResolveAsync<T>(this IHandler handler)
+        public static Promise<T> ResolveAsync<T>(
+            this IHandler handler, Inquiry parent = null)
         {
             return handler == null ? Promise<T>.Empty
-                 : (Promise<T>)ResolveAsync(handler, typeof(T))
+                 : (Promise<T>)ResolveAsync(handler, typeof(T), parent)
                  .Coerce(typeof(Promise<T>));
         }
 
-        public static object[] ResolveAll(this IHandler handler, object key)
+        public static object[] ResolveAll(this IHandler handler,
+            object key, Inquiry parent = null)
         {
             if (handler != null)
             {
-                var inquiry = key as Inquiry ?? new Inquiry(key, true);
+                var inquiry = key as Inquiry ?? new Inquiry(key, parent, true);
                 if (handler.Handle(inquiry, true))
                 {
                     var result = inquiry.Result;
@@ -104,11 +109,12 @@
             return CoerceArray(Array.Empty<object>(), key);
         }
 
-        public static Promise<object[]> ResolveAllAsync(this IHandler handler, object key)
+        public static Promise<object[]> ResolveAllAsync(this IHandler handler,
+            object key, Inquiry parent = null)
         {
             if (handler != null)
             {
-                var inquiry = key as Inquiry ?? new Inquiry(key, true);
+                var inquiry = key as Inquiry ?? new Inquiry(key, parent, true);
                 inquiry.WantsAsync = true;
                 if (handler.Handle(inquiry, true))
                 {
@@ -121,18 +127,20 @@
             return Promise.Resolved(empty);
         }
 
-        public static T[] ResolveAll<T>(this IHandler handler)
+        public static T[] ResolveAll<T>(
+            this IHandler handler, Inquiry parent = null)
         {
             if (handler == null)
                 return Array.Empty<T>();
-            var results = ResolveAll(handler, typeof(T));
+            var results = ResolveAll(handler, typeof(T), parent);
             return results?.Cast<T>().ToArray() ?? Array.Empty<T>();
         }
 
-        public static Promise<T[]> ResolveAllAsync<T>(this IHandler handler)
+        public static Promise<T[]> ResolveAllAsync<T>(
+            this IHandler handler, Inquiry parent = null)
         {
             return handler == null ? Promise.Resolved(Array.Empty<T>())
-                 : ResolveAllAsync(handler, typeof(T))
+                 : ResolveAllAsync(handler, typeof(T), parent)
                       .Then((r, s) => r?.Cast<T>().ToArray() 
                                    ?? Array.Empty<T>());
         }

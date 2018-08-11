@@ -13,7 +13,7 @@
 
         void ValidateArgument(Argument argument);
 
-        object ResolveArgument(
+        object ResolveArgument(Inquiry parent,
             Argument argument, IHandler handler, IHandler composer);
     } 
 

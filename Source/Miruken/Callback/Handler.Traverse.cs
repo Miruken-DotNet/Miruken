@@ -17,7 +17,7 @@ namespace Miruken.Callback
         public HandlerAxis(IHandlerAxis handler, TraversingAxis axis)
         {
             _handler = handler 
-                    ?? throw new ArgumentNullException(nameof(handler));
+                ?? throw new ArgumentNullException(nameof(handler));
             _axis    = axis;
         }
 

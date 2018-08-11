@@ -32,7 +32,7 @@
             return (Task<TRes>)dispatch.Invoke(this, args);
         }
 
-        private static object[] ResolveArgs(MethodDispatch dispatch,
+        private static object[] ResolveArgs(MemberDispatch dispatch,
             TCb callback, MemberBinding member, IHandler composer,
             Next<TRes> next, IFilterProvider provider)
         {
@@ -41,7 +41,8 @@
                 return new object[] { callback, next };
 
             List<Argument> culprits = null;
-            var args = new object[arguments.Length];
+            var args   = new object[arguments.Length];
+            var parent = callback as Inquiry;
 
             if (!composer.All(bundle =>
             {
@@ -60,7 +61,7 @@
                         args[i] = provider;
                     else
                         bundle.Add(h => args[index] = resolver.ResolveArgument(
-                            argument, optional ? h.BestEffort() : h, composer),
+                            parent, argument, optional ? h.BestEffort() : h, composer),
                             (ref bool resolved) =>
                             {
                                 if (!resolved)

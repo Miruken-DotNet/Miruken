@@ -15,11 +15,11 @@
             object target, IPrincipal principal,
             object key = null)
         {
-            Target = target
+            Target    = target
                 ?? throw new ArgumentNullException(nameof(target));
             Principal = principal
                 ?? throw new ArgumentNullException(nameof(principal));
-            Key = key;
+            Key       = key;
         }
 
         public object     Key       { get; }

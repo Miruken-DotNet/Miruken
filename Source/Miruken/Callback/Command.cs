@@ -17,7 +17,7 @@
         public Command(object callback, bool many = false)
         {
             Callback = callback 
-                    ?? throw new ArgumentNullException(nameof(callback));
+                ?? throw new ArgumentNullException(nameof(callback));
             Many     = many;
             _results = new List<object>();
         }

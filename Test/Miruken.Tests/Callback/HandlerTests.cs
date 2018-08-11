@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,9 +10,6 @@
     using Miruken.Callback.Policy;
     using Miruken.Concurrency;
 
-    /// <summary>
-    /// Summary description for HandlerTests
-    /// </summary>
     [TestClass]
     public class HandlerTests
     {
@@ -34,6 +32,16 @@
         {
             var foo     = new Foo();
             var handler = new CustomHandler();
+            Assert.IsTrue(handler.Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Static_Callbacks_Implicitly()
+        {
+            HandlerDescriptor.GetDescriptor<CustomHandler>();
+            var foo     = new Foo();
+            var handler = new StaticHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
@@ -676,10 +684,78 @@
         }
 
         [TestMethod]
-        public void Should_Create_Instances()
+        public void Should_Create_Instance()
         {
             HandlerDescriptor.GetDescriptor<Controller>();
-            var instance = new Handler().Resolve<Controller>();
+            var instance = new StaticHandler().Resolve<Controller>();
+            Assert.IsInstanceOfType(instance, typeof(Controller));
+        }
+
+        [TestMethod]
+        public void Should_Create_Generic_Instance()
+        {
+            var foo = new Foo();
+            var bar = new SuperBar();
+            HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
+            var controller = new StaticHandler()
+                .Provide(foo).Provide(bar)
+                .Resolve<Controller<Foo, Bar>>();
+            Assert.IsInstanceOfType(controller, typeof(Controller<Foo, Bar>));
+            Assert.AreSame(foo, controller.View);
+            Assert.AreSame(bar, controller.Model);
+        }
+
+        [TestMethod]
+        public void Should_Create_Resolving_Instance()
+        {
+            HandlerDescriptor.GetDescriptor<Controller>();
+            Assert.IsTrue(new StaticHandler().Resolve().Handle(new Foo()));
+        }
+
+        [TestMethod]
+        public void Should_Create_Resolving_Generic_Instance()
+        {
+            var boo = new Boo();
+            var baz = new SuperBaz();
+            HandlerDescriptor.GetDescriptor<Controller>();
+            HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
+            var instance = new StaticHandler().Resolve()
+                .Provide(boo).Provide(baz)
+                .Resolve<Controller<Boo, Baz>>();
+            Assert.IsInstanceOfType(instance, typeof(Controller));
+        }
+
+        [TestMethod]
+        public void Should_Create_Instance_Provider()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Controller>();
+            var bar = new StaticHandler().Resolve().Resolve<Bar>();
+            Assert.IsNotNull(bar);
+        }
+
+        [TestMethod]
+        public void Should_Create_Dependencies_Statically()
+        {
+            var foo = new Foo();
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller));
+            HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
+            var instance = new StaticHandler().Resolve()
+                .Provide(foo).Resolve<Controller<Foo, Bar>>();
+            Assert.IsNotNull(instance);
+            Assert.AreSame(foo, instance.View);
+        }
+
+        [TestMethod]
+        public void Should_Detect_Circular_Dependencies()
+        {
+            var foo = new Foo();
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
+            var instance = new StaticHandler().Resolve()
+                .Provide(foo).Resolve<Controller<Foo, Bar>>();
+            Assert.IsNull(instance);
         }
 
         public class FilterResolver : Handler
@@ -849,6 +925,12 @@
                 baz.Stuff      = default;
                 baz.OtherStuff = default;
                 return true;
+            }
+
+            [Handles]
+            public static void StaticHandleFooImplict(Foo foo)
+            {
+                ++foo.Handled;
             }
 
             [Provides]
@@ -1197,6 +1279,20 @@
             {
                 return new Bar { Handled = 1 };
             }
+        }
+
+        private class Controller<TView, TModel> : Controller
+        {
+
+            [Provides]
+            public Controller(TView view, TModel model)
+            {
+                View  = view;
+                Model = model;
+            }
+
+            public TView  View  { get; }
+            public TModel Model { get; }
         }
 
         private class FilteredHandler : Handler, IFilter<Bar, object>

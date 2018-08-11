@@ -25,9 +25,10 @@
 	    public static bool Dispatch(
 	        object handler, object callback, ref bool greedy, IHandler composer)
 	    {
-	        if (handler != null && SkipTypes.Contains(handler.GetType()))
-	            return false;
-	        var dispatch = callback as IDispatchCallback?? new Command(callback);
+	        var type = handler as Type ?? handler?.GetType()
+	            ?? throw new ArgumentNullException(nameof(handler));
+	        if (SkipTypes.Contains(type)) return false;
+            var dispatch = callback as IDispatchCallback ?? new Command(callback);
 	        return dispatch.Dispatch(handler, ref greedy, composer);
 	    }
 

@@ -11,7 +11,7 @@ namespace Miruken.Callback.Policy
         public TargetArgument(Func<TCb, object> target)
         {
             _target = target 
-                   ?? throw new ArgumentNullException(nameof(target));
+                ?? throw new ArgumentNullException(nameof(target));
         }
 
         public override bool Matches(

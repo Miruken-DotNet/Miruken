@@ -8,28 +8,28 @@
     public delegate object CompletePipelineDelegate(
         IHandler handler, out bool completed);
 
-    internal abstract class MethodPipeline
+    internal abstract class MemberPipeline
     {
         public abstract bool Invoke(MemberBinding binding, object target,
             object callback, CompletePipelineDelegate complete, IHandler composer,
             IEnumerable<(IFilter, IFilterProvider)> filters, out object result);
 
-        public static MethodPipeline GetPipeline(Type callbackType, Type resultType)
+        public static MemberPipeline GetPipeline(Type callbackType, Type resultType)
         {
             if (resultType == typeof(void))
-                resultType  = typeof(object);
+                resultType = typeof(object);
             var key = (callbackType, resultType);
             return Pipelines.GetOrAdd(key, k =>
-                (MethodPipeline)Activator.CreateInstance(
-                    typeof(MethodPipeline<,>).MakeGenericType(k.Item1, k.Item2)
+                (MemberPipeline)Activator.CreateInstance(
+                    typeof(MemberPipeline<,>).MakeGenericType(k.Item1, k.Item2)
             ));
         }
 
-        private static readonly ConcurrentDictionary<(Type, Type), MethodPipeline>
-            Pipelines = new ConcurrentDictionary<(Type, Type), MethodPipeline>();
+        private static readonly ConcurrentDictionary<(Type, Type), MemberPipeline>
+            Pipelines = new ConcurrentDictionary<(Type, Type), MemberPipeline>();
     }
 
-    internal class MethodPipeline<TCb, TRes> : MethodPipeline
+    internal class MemberPipeline<TCb, TRes> : MemberPipeline
     {
         public override bool Invoke(MemberBinding binding, object target, 
             object callback, CompletePipelineDelegate complete, IHandler composer,

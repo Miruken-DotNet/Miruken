@@ -67,7 +67,10 @@
         public bool Dispatch(object handler, object callback, bool greedy,
             IHandler composer, ResultsDelegate results = null)
         {
-            var descriptor = HandlerDescriptor.GetDescriptor(handler.GetType());
+            if (handler is ICallbackPolicyDispatch dispatcher)
+                return dispatcher.Dispatch(this, callback, greedy, composer, results);
+            var type = handler as Type ?? handler.GetType();
+            var descriptor = HandlerDescriptor.GetDescriptor(type);
             return descriptor.Dispatch(this, handler, callback, greedy, 
                                        composer, results);
         }

@@ -108,8 +108,8 @@
                 return getter?.Invoke(task) ?? RuntimeHelper.GetDefault(type);
             }
 
-            private static readonly ConcurrentDictionary<Type, PropertyGetDelegate>
-                TaskResultGetters = new ConcurrentDictionary<Type, PropertyGetDelegate>();
+            private static readonly ConcurrentDictionary<Type, Func<object, object>>
+                TaskResultGetters = new ConcurrentDictionary<Type, Func<object, object>>();
         }
 
         #endregion

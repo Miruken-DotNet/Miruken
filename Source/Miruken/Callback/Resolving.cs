@@ -1,20 +1,22 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using Policy;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry,
-        IResolveCallback, IFilterCallback
+        IResolveCallback, IFilterCallback, IDispatchCallbackGuard
     {
         private readonly object _callback;
         private bool _handled;
 
         public Resolving(object key, object callback)
-            : base(key, true)
+            : base(key, callback as Inquiry, true)
         {
             _callback = callback 
-                     ?? throw new ArgumentNullException(nameof(callback));
+                ?? throw new ArgumentNullException(nameof(callback));
         }
 
         bool IFilterCallback.CanFilter => false;
@@ -22,6 +24,13 @@
         object IResolveCallback.GetResolveCallback()
         {
             return this;
+        }
+
+        bool IDispatchCallbackGuard.CanDispatch(
+            object handler, PolicyMemberBinding binding)
+        {
+            return (_callback as IDispatchCallbackGuard)
+                   ?.CanDispatch(handler, binding) != false;
         }
 
         protected override bool IsSatisfied(
@@ -35,7 +44,7 @@
 
         public static object GetDefaultResolvingCallback(object callback)
         {
-            var handlers = CallbackPolicy.GetInstanceHandlers(callback).ToArray();
+            var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
             if (handlers.Length == 0) return callback;
             var bundle = new Bundle(false)
                 .Add(h => h.Handle(new NoResolving(callback)), 
@@ -43,6 +52,15 @@
             foreach (var handler in handlers)
                 bundle.Add(h => h.Handle(new Resolving(handler, callback)));
             return bundle;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var many = Many ? "many " : "";
+                return $"Resolving {many}| {Key}";
+            }
         }
     }
 

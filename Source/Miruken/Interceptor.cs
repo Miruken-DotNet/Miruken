@@ -15,7 +15,7 @@
             : base(typeof(MarshalByRefObject))
         {
             _adapter = adapter 
-                    ?? throw new ArgumentNullException(nameof(adapter));
+                ?? throw new ArgumentNullException(nameof(adapter));
             _protocol = protocol;
         }
 

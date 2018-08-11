@@ -11,7 +11,7 @@ namespace Miruken.Callback.Policy
         public ExtractArgument(Func<TCb, TRes> extract)
         {
             _extract = extract 
-                    ?? throw new ArgumentNullException(nameof(extract));
+                ?? throw new ArgumentNullException(nameof(extract));
         }
 
         public override bool Matches(

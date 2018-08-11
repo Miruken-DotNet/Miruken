@@ -2,21 +2,33 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
 
-    public class Inquiry : ICallback, IAsyncCallback, IDispatchCallback
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
+    public class Inquiry : ICallback, IAsyncCallback,
+        IDispatchCallback, IDispatchCallbackGuard
     {
+        private readonly Inquiry _parent;
         private readonly List<object> _resolutions;
         private object _result;
+        private object _handler;
+        private PolicyMemberBinding _binding;
 
         public Inquiry(object key, bool many = false)
         {
             Key          = key ?? throw new ArgumentNullException(nameof(key));
             Many         = many;
             _resolutions = new List<object>();
+        }
+
+        public Inquiry(object key, Inquiry parent, bool many = false)
+            : this(key, many)
+        {
+            _parent = parent;
         }
 
         public object Key        { get; }
@@ -127,6 +139,15 @@
             return true;
         }
 
+        bool IDispatchCallbackGuard.CanDispatch(
+            object handler, PolicyMemberBinding binding)
+        {
+            if (InProgress(handler, binding)) return false;
+            _handler = handler;
+            _binding = binding;
+            return true;
+        }
+
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
@@ -147,12 +168,28 @@
             return compatible && Resolve(item, false, greedy, composer);
         }
 
+        private bool InProgress(object handler, PolicyMemberBinding binding)
+        {
+            return ReferenceEquals(handler, _handler) &&
+                   ReferenceEquals(binding, _binding) ||
+                   _parent?.InProgress(handler, binding) == true;
+        }
+
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)
         {
             return collection
                 .Where(item => item != null)
                 .SelectMany(item => item as object[] ?? new[] {item})
                 .Distinct();
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var many = Many ? "many " : "";
+                return $"Inquiry {many}| {Key}";
+            }
         }
     }
 }

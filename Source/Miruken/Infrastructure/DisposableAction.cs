@@ -9,7 +9,7 @@
         public DisposableAction(Action<T> action, T val)
         {
             _action = action
-                   ?? throw new ArgumentNullException(nameof(action));
+                ?? throw new ArgumentNullException(nameof(action));
             Value   = val;
         }
 

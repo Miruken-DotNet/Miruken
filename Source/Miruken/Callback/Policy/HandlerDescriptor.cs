@@ -6,7 +6,7 @@ namespace Miruken.Callback.Policy
     using System.Linq;
     using System.Reflection;
     using Infrastructure;
-
+    
     public class HandlerDescriptor
     {
         private readonly ConcurrentDictionary<object, Type> _closed;
@@ -104,8 +104,9 @@ namespace Miruken.Callback.Policy
 
         public Type HandlerType { get; }
 
-        public Attribute[] Attributes => _attributes.Value;
-        public IFilterProvider[] Filters => _filters.Value;
+        public Attribute[]       Attributes => _attributes.Value;
+        public IFilterProvider[] Filters    => _filters.Value;
+
         public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 
         internal bool Dispatch(
@@ -117,7 +118,8 @@ namespace Miruken.Callback.Policy
                 throw new ArgumentNullException(nameof(policy));
 
             CallbackPolicyDescriptor descriptor = null;
-            var policies = target == null ? _staticPolicies : _policies;
+            var policies = target == null || target is Type 
+                ? _staticPolicies : _policies;
             if (policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
@@ -164,16 +166,16 @@ namespace Miruken.Callback.Policy
             Descriptors.Clear();
         }
 
-        public static IEnumerable<Type> GetInstanceHandlers(
-            CallbackPolicy policy, object callback)
-        {
-            return GetCallbackHandlers(policy, callback, true, false);
-        }
-
         public static IEnumerable<Type> GetStaticHandlers(
             CallbackPolicy policy, object callback)
         {
             return GetCallbackHandlers(policy, callback, false, true);
+        }
+
+        public static IEnumerable<Type> GetInstanceHandlers(
+            CallbackPolicy policy, object callback)
+        {
+            return GetCallbackHandlers(policy, callback, true, false);
         }
 
         public static IEnumerable<Type> GetCallbackHandlers(
@@ -198,7 +200,6 @@ namespace Miruken.Callback.Policy
                         : null;
                     if (binding != null) return binding;
                 }
-
                 if (instance)
                 {
                     return handler._policies?.TryGetValue(policy, out cpd) == true
@@ -268,7 +269,8 @@ namespace Miruken.Callback.Policy
                                            | MemberTypes.Constructor;
 
         private const BindingFlags Binding = BindingFlags.Instance 
-                                           | BindingFlags.Public 
+                                           | BindingFlags.Public
+                                           | BindingFlags.Static
                                            | BindingFlags.NonPublic;
     }
 }

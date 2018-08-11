@@ -7,7 +7,7 @@
         protected DecoratedHandler(IHandler decoratee)
         {
             Decoratee = decoratee
-                     ?? throw new ArgumentNullException(nameof(decoratee));
+                ?? throw new ArgumentNullException(nameof(decoratee));
         }
 
         public IHandler Decoratee { get; }
