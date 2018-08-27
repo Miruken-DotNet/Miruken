@@ -2,11 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public sealed class Command 
         : ICallback, IAsyncCallback, IDispatchCallback
     {
@@ -102,6 +104,15 @@
             var count = _results.Count;
             return Policy.Dispatch(handler, this, greedy, composer, Respond)
                 || (_results.Count > count);
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var many = Many ? "many " : "";
+                return $"Command {many}| {Callback}";
+            }
         }
     }
 }

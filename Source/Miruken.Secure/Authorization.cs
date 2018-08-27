@@ -1,12 +1,14 @@
 ﻿namespace Miruken.Secure
 {
     using System;
+    using System.Diagnostics;
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
     using Concurrency;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Authorization : ICallbackKey, IDispatchCallback
     {
         private Promise<bool> _result;
@@ -15,11 +17,11 @@
             object target, IPrincipal principal,
             object key = null)
         {
-            Target    = target
+            Target = target
                 ?? throw new ArgumentNullException(nameof(target));
             Principal = principal
                 ?? throw new ArgumentNullException(nameof(principal));
-            Key       = key;
+            Key = key;
         }
 
         public object     Key       { get; }
@@ -56,5 +58,8 @@
             }
             return true;
         }
+
+        private string DebuggerDisplay => 
+            $"Authorization | { Key ?? Target}";
     }
 }

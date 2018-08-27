@@ -73,7 +73,7 @@ namespace Miruken.Callback.Policy
 
         internal IEnumerable<PolicyMemberBinding> GetInvariantMethods(object callback)
         {
-            var key  = Policy.GetKey(callback);
+            var key = Policy.GetKey(callback);
             List<PolicyMemberBinding> methods = null;
             if (key is Type type)
                 _typed.TryGetValue(type, out methods);

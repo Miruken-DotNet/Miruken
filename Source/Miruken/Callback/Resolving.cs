@@ -54,14 +54,7 @@
             return bundle;
         }
 
-        private string DebuggerDisplay
-        {
-            get
-            {
-                var many = Many ? "many " : "";
-                return $"Resolving {many}| {Key}";
-            }
-        }
+        private string DebuggerDisplay => $"Resolving | {Key} => {_callback}";
     }
 
     public sealed class NoResolving : Trampoline, IResolveCallback

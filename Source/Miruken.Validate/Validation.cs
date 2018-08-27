@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
     using Concurrency;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Validation :
         ICallback, IAsyncCallback, IDispatchCallback
     {
@@ -101,5 +103,7 @@
             return new CompositeScopeMatcher(scopes.Select(scope => 
                 CreateScopeMatcher(new [] {scope})).ToArray());
         }
+
+        private string DebuggerDisplay => $"Validation | {Target}";
     }
 }

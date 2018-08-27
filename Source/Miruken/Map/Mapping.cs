@@ -1,12 +1,14 @@
 ﻿namespace Miruken.Map
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
     using Concurrency;
     using Infrastructure;
 
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Mapping : ICallback,
         IAsyncCallback, IDispatchCallback
     {
@@ -76,6 +78,15 @@
             var mapped = mapping != null;
             if (mapped) Result = mapping;
             return mapped;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var format = Format != null ? $"as {Format}" : "";
+                return $"Mapping | {Source} to {TypeOrTarget}{format}";
+            }
         }
     }
 }

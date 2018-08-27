@@ -226,26 +226,29 @@ namespace Miruken.Callback.Policy
             .Distinct();
         }
 
-        public static IEnumerable<PolicyMemberBinding> GetPolicyMethods(CallbackPolicy policy)
+        public static IEnumerable<PolicyMemberBinding>
+            GetPolicyMethods(CallbackPolicy policy)
         {
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler = descriptor.Value.Value;
+                var handler  = descriptor.Value.Value;
                 var smethods = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
                      ? cpd.GetInvariantMethods()
                      : Enumerable.Empty<PolicyMemberBinding>();
-                var methods = handler._policies?.TryGetValue(policy, out cpd) == true
-                    ? cpd.GetInvariantMethods()
-                    : Enumerable.Empty<PolicyMemberBinding>();
+                var methods  = handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMethods()
+                     : Enumerable.Empty<PolicyMemberBinding>();
                 if (smethods == null) return methods;
                 return methods == null ? smethods : smethods.Concat(methods);
             });
         }
 
-        public static IEnumerable<PolicyMemberBinding> GetPolicyMethods<T>(CallbackPolicy policy)
+        public static IEnumerable<PolicyMemberBinding> 
+            GetPolicyMethods<T>(CallbackPolicy policy)
         {
-            return GetPolicyMethods(policy).Where(m => (m.Key as Type)?.Is<T>() == true);
+            return GetPolicyMethods(policy)
+                .Where(m => (m.Key as Type)?.Is<T>() == true);
         }
 
         private static bool IsCategory(MemberInfo member, object criteria)
