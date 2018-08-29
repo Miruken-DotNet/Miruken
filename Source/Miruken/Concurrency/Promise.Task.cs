@@ -100,7 +100,7 @@
                         reject(new CancelledException("Task was cancelled"), false);
                     else
                         resolve(t.Result, false);
-                });
+                }, TaskContinuationOptions.ExecuteSynchronously);
             })
         {
             cancellationTokenSource?.Token.Register(Cancel, false);

@@ -84,7 +84,9 @@
                 if (task is Task<T> ttask) return ttask;
                 return task.IsCompleted 
                      ? Complete<T>(task) 
-                     : task.ContinueWith(Complete<T>).Unwrap();
+                     : task.ContinueWith(Complete<T>,
+                        TaskContinuationOptions.ExecuteSynchronously)
+                        .Unwrap();
             }
 
             private static Task<T> Complete<T>(Task task)

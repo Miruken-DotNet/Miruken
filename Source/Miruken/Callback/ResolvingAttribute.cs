@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Reflection;
+    using System.Threading.Tasks;
     using Concurrency;
     using Infrastructure;
     using Policy;
@@ -100,7 +101,8 @@
                     var array  = ResolveAllAsync(parent, key, handler, composer).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
-                                    RuntimeHelper.ChangeArrayType(task.Result, logicalType))
+                                    RuntimeHelper.ChangeArrayType(task.Result, logicalType),
+                                TaskContinuationOptions.ExecuteSynchronously)
                                     .Coerce(argumentType)
                                : array.Coerce(argumentType);
                 }
@@ -119,7 +121,8 @@
             {
                 var task = ResolveAsync(parent, key, handler, composer).ToTask();
                 if (argument.IsSimple)
-                    task = task.ContinueWith(t => RuntimeHelper.ChangeType(t.Result, logicalType));
+                    task = task.ContinueWith(t => RuntimeHelper.ChangeType(t.Result, logicalType),
+                        TaskContinuationOptions.ExecuteSynchronously);
                 dependency = task.Coerce(argumentType);
             }
             else
