@@ -29,6 +29,11 @@
             Type callbackType, Type logicalResultType, IHandler composer);
     }
 
+    public interface IValidateFilterProvider
+    {
+        void Validate(MemberBinding binding);
+    }
+
     public interface IFiltered
     {
         IEnumerable<IFilterProvider> Filters { get; }

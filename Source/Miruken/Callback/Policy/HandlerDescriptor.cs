@@ -75,7 +75,10 @@ namespace Miruken.Callback.Policy
                         methodDispatch = methodDispatch ?? new MethodDispatch(method, attributes);
                         memberBinding  = rule.Bind(methodDispatch, category);
                     }
-      
+
+                    foreach (var filterProvider in attributes.OfType<IValidateFilterProvider>())
+                        filterProvider.Validate(memberBinding);
+
                     var policies = constructor != null || method.IsStatic
                         ? _staticPolicies ?? (_staticPolicies = 
                               new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>())

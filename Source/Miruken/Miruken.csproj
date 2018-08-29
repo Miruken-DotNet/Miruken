@@ -68,6 +68,7 @@
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\FilteredHandler.cs" />
     <Compile Include="Callback\KeyAttribute.cs" />
+    <Compile Include="Callback\Lifestyle.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />
     <Compile Include="Callback\Policy\BivariantPolicy.cs" />
@@ -79,11 +80,13 @@
     <Compile Include="Callback\Policy\RuleContext.cs" />
     <Compile Include="Callback\ProxyAttribute.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
+    <Compile Include="Callback\SingletonLifestyle.cs" />
     <Compile Include="Callback\StaticHandler.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Callback\SkipFiltersAttribute.cs" />
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
+    <Compile Include="Context\ContextulLifestyle.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
     <Compile Include="Map\FormatAttribute.cs" />

@@ -8,6 +8,7 @@
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Concurrency;
+    using Miruken.Context;
 
     [TestClass]
     public class HandlerTests
@@ -683,36 +684,38 @@
         }
 
         [TestMethod]
-        public void Should_Create_Instance()
+        public void Should_Create_Implicitly()
         {
+            var handler = new StaticHandler();
             HandlerDescriptor.GetDescriptor<Controller>();
-            var instance = new StaticHandler().Resolve<Controller>();
-            Assert.IsInstanceOfType(instance, typeof(Controller));
+            var instance = handler.Resolve<Controller>();
+            Assert.IsNotNull(instance);
+            Assert.AreNotSame(instance, handler.Resolve<Controller>());
         }
 
         [TestMethod]
-        public void Should_Create_Generic_Instance()
+        public void Should_Create_Generic_Implicitly()
         {
-            var foo = new Foo();
-            var bar = new SuperBar();
+            var view = new Screen();
+            var bar  = new SuperBar();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var controller = new StaticHandler()
-                .Provide(foo).Provide(bar)
-                .Resolve<Controller<Foo, Bar>>();
-            Assert.IsInstanceOfType(controller, typeof(Controller<Foo, Bar>));
-            Assert.AreSame(foo, controller.View);
+                .Provide(view).Provide(bar)
+                .Resolve<Controller<Screen, Bar>>();
+            Assert.IsNotNull(controller);
+            Assert.AreSame(view, controller.View);
             Assert.AreSame(bar, controller.Model);
         }
 
         [TestMethod]
-        public void Should_Create_Resolving_Instance()
+        public void Should_Create_Resolving_Implicitly()
         {
             HandlerDescriptor.GetDescriptor<Controller>();
             Assert.IsTrue(new StaticHandler().Resolve().Handle(new Foo()));
         }
 
         [TestMethod]
-        public void Should_Create_Resolving_Generic_Instance()
+        public void Should_Create_Resolving_Generic_Implicitly()
         {
             var boo = new Boo();
             var baz = new SuperBaz();
@@ -721,11 +724,11 @@
             var instance = new StaticHandler().Resolve()
                 .Provide(boo).Provide(baz)
                 .Resolve<Controller<Boo, Baz>>();
-            Assert.IsInstanceOfType(instance, typeof(Controller));
+            Assert.IsNotNull(instance);
         }
 
         [TestMethod]
-        public void Should_Create_Instance_Provider()
+        public void Should_Provide_Instance_Implicitly()
         {
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<Controller>();
@@ -734,27 +737,90 @@
         }
 
         [TestMethod]
-        public void Should_Create_Dependencies_Statically()
+        public void Should_Provide_Dependencies_Implicitly()
         {
-            var foo = new Foo();
+            var view = new Screen();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var instance = new StaticHandler().Resolve()
-                .Provide(foo).Resolve<Controller<Foo, Bar>>();
+                .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNotNull(instance);
-            Assert.AreSame(foo, instance.View);
+            Assert.AreSame(view, instance.View);
         }
 
         [TestMethod]
         public void Should_Detect_Circular_Dependencies()
         {
-            var foo = new Foo();
+            var view = new Screen();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var instance = new StaticHandler().Resolve()
-                .Provide(foo).Resolve<Controller<Foo, Bar>>();
+                .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNull(instance);
+        }
+
+        [TestMethod]
+        public void Should_Create_Singletons_Implicitly()
+        {
+            var handler = new StaticHandler();
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Application>();
+            var app = handler.Resolve<Application>();
+            Assert.IsNotNull(app);
+            Assert.AreSame(app, handler.Resolve<Application>());
+        }
+
+        [TestMethod]
+        public void Should_Create_Generic_Singletons_Implicitly()
+        {
+            var view    = new Screen();
+            var handler = new StaticHandler().Resolve();
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller));
+            HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
+            HandlerDescriptor.GetDescriptor(typeof(Application<>));
+            var app1 = handler.Provide(view)
+                .Resolve<Application<Controller<Screen, Bar>>>();
+            Assert.IsNotNull(app1);
+            Assert.AreSame(view, app1.RootController.View);
+            Assert.AreSame(view, app1.MainScreen);
+            var app2 = handler.Provide(view)
+                .Resolve<Application<Controller<Screen, Bar>>>();
+            Assert.AreSame(app1, app2);
+        }
+
+        [TestMethod]
+        public void Should_Create_Contextual_Implicitly()
+        {
+            Screen screen;
+            var handler = new StaticHandler();
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+            using (var context = new Context())
+            {
+                var h  = handler + context;
+                screen = h.Resolve<Screen>();
+                Assert.IsNotNull(screen);
+                Assert.AreSame(context, screen.Context);
+                Assert.AreSame(screen, h.Resolve<Screen>());
+                Assert.IsFalse(screen.Disposed);
+                using (var child = context.CreateChild())
+                {
+                    var screen2 = (child + h).Resolve<Screen>();
+                    Assert.IsNotNull(screen);
+                    Assert.AreNotSame(screen, screen2);
+                    Assert.AreSame(child, screen2.Context);
+                }
+            }
+            Assert.IsTrue(screen.Disposed);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
+        public void Should_Reject_Lifestye_If_Not_Provider()
+        {
+            HandlerDescriptor.GetDescriptor<SayHello>();
         }
 
         public class FilterResolver : Handler
@@ -1282,7 +1348,6 @@
 
         private class Controller<TView, TModel> : Controller
         {
-
             [Provides]
             public Controller(TView view, TModel model)
             {
@@ -1292,6 +1357,50 @@
 
             public TView  View  { get; }
             public TModel Model { get; }
+        }
+
+        private class Screen : Contextual, IDisposable
+        {
+            [Provides, Contextual]
+            public Screen()
+            {
+            }
+
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
+            }
+        }
+
+        private class Application
+        {
+            [Provides, Singleton]
+            public Application()
+            {
+                
+            }
+        }
+
+        private class Application<C>
+            where C : Controller
+        {
+            [Provides, Singleton]
+            public Application(C rootController, Screen screen)
+            {
+                RootController = rootController;
+                MainScreen     = screen;
+            }
+
+            public C      RootController { get; }
+            public Screen MainScreen     { get; }
+        }
+
+        private class SayHello
+        {
+            [Handles, Singleton]
+            public string Hello(string name) => $"Hello {name}";
         }
 
         private class FilteredHandler : Handler, IFilter<Bar, object>

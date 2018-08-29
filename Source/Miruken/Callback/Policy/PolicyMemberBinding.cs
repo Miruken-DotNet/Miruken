@@ -148,9 +148,12 @@
             else if (!MemberPipeline.GetPipeline(callbackType, logicalType)
                 .Invoke(this, target, actualCallback,
                     (IHandler comp, out bool completed) =>
-                        baseResult = dispatcher.Invoke(target,
-                        ResolveArgs(callback, args, comp, out completed),
-                            resultType), composer, filters, out result))
+                    {
+                        args = ResolveArgs(callback, args, comp, out completed);
+                        return completed
+                             ? baseResult = dispatcher.Invoke(target, args, resultType)
+                             : null;
+                    }, composer, filters, out result))
                 return false;
 
             var testResult = ReferenceEquals(baseResult, this) 
