@@ -4,9 +4,9 @@
 
     public class ContextualHandler : Handler, IContextual
     {
-        private IContext _context;
+        private Context _context;
 
-        public IContext Context
+        public Context Context
         {
             get => _context;
             set
@@ -22,7 +22,7 @@
             }
         }
 
-        public event ContextChangingDelegate<IContext> ContextChanging;
-        public event ContextChangedDelegate<IContext> ContextChanged;
+        public event ContextChangingDelegate ContextChanging;
+        public event ContextChangedDelegate ContextChanged;
     }
 }

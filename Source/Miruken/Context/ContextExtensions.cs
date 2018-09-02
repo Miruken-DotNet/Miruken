@@ -6,7 +6,7 @@ namespace Miruken.Context
     public static class ContextExtensions
     {
         public static IHandler TrackPromise(
-            this IHandler handler, IContext context)
+            this IHandler handler, Context context)
         {
             if (handler == null || context == null) return handler;
             return handler.Filter((callback, composer, proceed) =>
@@ -17,7 +17,7 @@ namespace Miruken.Context
                 if (!(cb?.Result is Promise promise)) return true;
                 if (context.State == ContextState.Active)
                 {
-                    void Ended(IContext ctx) => promise.Cancel();
+                    void Ended(Context ctx) => promise.Cancel();
                     context.ContextEnded += Ended;
                     promise.Finally(() => context.ContextEnded -= Ended);
                 }

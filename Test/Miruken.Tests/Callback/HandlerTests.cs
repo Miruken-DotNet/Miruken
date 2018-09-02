@@ -794,20 +794,19 @@
         public void Should_Create_Contextual_Implicitly()
         {
             Screen screen;
-            var handler = new StaticHandler();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<Screen>();
             using (var context = new Context())
             {
-                var h  = handler + context;
-                screen = h.Resolve<Screen>();
+                context.AddHandlers(new StaticHandler());
+                screen = context.Resolve<Screen>();
                 Assert.IsNotNull(screen);
                 Assert.AreSame(context, screen.Context);
-                Assert.AreSame(screen, h.Resolve<Screen>());
+                Assert.AreSame(screen, context.Resolve<Screen>());
                 Assert.IsFalse(screen.Disposed);
                 using (var child = context.CreateChild())
                 {
-                    var screen2 = (child + h).Resolve<Screen>();
+                    var screen2 = child.Resolve<Screen>();
                     Assert.IsNotNull(screen);
                     Assert.AreNotSame(screen, screen2);
                     Assert.AreSame(child, screen2.Context);

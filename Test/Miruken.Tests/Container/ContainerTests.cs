@@ -10,7 +10,7 @@ namespace Miruken.Tests.Container
     [TestClass]
     public class ContainerTests
     {
-        protected IContext _rootContext;
+        protected Context _rootContext;
         protected TestContainer _container;
 
         public class MyHandler : Handler

@@ -147,9 +147,7 @@
     <Compile Include="Container\ContainerExtensions.cs" />
     <Compile Include="Container\IContainer.cs" />
     <Compile Include="Context\Context.cs" />
-    <Compile Include="Context\ContextBase.cs" />
     <Compile Include="Context\ContextExtensions.cs" />
-    <Compile Include="Context\IContext.cs" />
     <Compile Include="Context\IContextual.cs" />
     <Compile Include="Error\ErrorsHandler.cs" />
     <Compile Include="Error\IErrors.cs" />

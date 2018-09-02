@@ -12,7 +12,7 @@
     [TestClass]
     public class ContextualLifestyleManagerTests
     {
-        protected IContext _rootContext;
+        protected Context _rootContext;
         protected WindsorHandler _container;
 
         public class Controller : Contextual, IDisposable

@@ -71,11 +71,11 @@
                 Cars      = Array.Empty<ICar>();
             }
 
-            public event ContextChangingDelegate<IContext> ContextChanging;
-            public event ContextChangedDelegate<IContext> ContextChanged;
+            public event ContextChangingDelegate ContextChanging;
+            public event ContextChangedDelegate ContextChanged;
 
             public ICar[]   Cars    { get; set; }
-            public IContext Context { get; set; }
+            public Context Context { get; set; }
             public object[] Junk => _junkyard.Parts;
 
             public bool Dispose(object part)

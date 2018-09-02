@@ -10,7 +10,7 @@
         protected override bool GetInstance(MemberBinding member,
             Next<T> next, IHandler composer, out T instance)
         {
-            var context = composer.Resolve<IContext>();
+            var context = composer.Resolve<Context>();
             if (context == null)
             {
                 instance = default;
@@ -19,7 +19,7 @@
             instance = _cache.GetOrAdd(context, ctx =>
             {
                 var result = next().GetAwaiter().GetResult();
-                if (result is IContextual contextual)
+                if (result is Contextual contextual)
                 {
                     contextual.Context = ctx;
                     contextual.ContextChanging += ThrowManagedContextException;
@@ -38,16 +38,26 @@
             return true;
         }
 
-        private static void ThrowManagedContextException(
-            IContextual<IContext> contextual, IContext oldContext,
-            ref IContext newContext)
+        private void ThrowManagedContextException(
+            IContextual contextual, Context oldContext,
+            ref Context newContext)
         {
-            throw new InvalidOperationException(
-                "Managed instances cannot change the context");
+            if (oldContext == newContext) return;
+            if (newContext != null)
+            {
+                throw new InvalidOperationException(
+                    "Managed instances cannot change the context");
+            }
+            if (_cache.TryGetValue(oldContext, out var instance) &&
+                ReferenceEquals(contextual, instance))
+            {
+                _cache.TryRemove(oldContext, out _);
+                (contextual as IDisposable)?.Dispose();
+            }
         }
 
-        private static readonly ConcurrentDictionary<IContext, T>
-            _cache = new ConcurrentDictionary<IContext, T>();
+        private readonly ConcurrentDictionary<Context, T>
+            _cache = new ConcurrentDictionary<Context, T>();
     }
 
     public class ContextualAttribute : LifestyleAttribute

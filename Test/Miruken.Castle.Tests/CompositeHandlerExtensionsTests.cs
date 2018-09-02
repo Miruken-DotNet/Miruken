@@ -8,17 +8,17 @@
     [TestClass]
     public class CompositeHandlerExtensionsTests
     {
-        protected IContext _rootContext;
+        protected Context _rootContext;
         protected WindsorHandler _container;
 
         public class MyHandler : Handler
         {
-            public MyHandler(IContext context)
+            public MyHandler(Context context)
             {
                 Context = context;
             }
 
-            public IContext Context { get; }
+            public Context Context { get; }
         }
 
         [TestInitialize]

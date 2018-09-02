@@ -1,11 +1,10 @@
 ﻿namespace Miruken.Context
 {
-    public class Contextual<TContext> : IContextual<TContext>
-        where TContext : class, IContext<TContext>
+    public class Contextual : IContextual
     {
-        private TContext _context;
+        private Context _context;
 
-        public TContext Context
+        public Context Context
         {
             get => _context;
             set
@@ -21,11 +20,7 @@
             }
         }
 
-        public event ContextChangingDelegate<TContext> ContextChanging;
-        public event ContextChangedDelegate<TContext> ContextChanged;
-    }
-
-    public class Contextual : Contextual<IContext>, IContextual
-    {   
+        public event ContextChangingDelegate ContextChanging;
+        public event ContextChangedDelegate ContextChanged;
     }
 }

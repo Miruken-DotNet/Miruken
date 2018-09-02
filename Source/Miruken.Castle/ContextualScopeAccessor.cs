@@ -16,20 +16,20 @@
 
     public class ContextualScopeAccessor : IScopeAccessor
     {
-        private readonly ConcurrentDictionary<IContext, ILifetimeScope>
-            _cache = new ConcurrentDictionary<IContext, ILifetimeScope>();
+        private readonly ConcurrentDictionary<Context, ILifetimeScope>
+            _cache = new ConcurrentDictionary<Context, ILifetimeScope>();
 
         public ILifetimeScope GetScope(CreationContext creationContext)
         {
-            if (!creationContext.RequestedType.Is<IContextual>())
+            if (!creationContext.RequestedType.Is<Contextual>())
                 return null;
             var extra = creationContext.AdditionalArguments;
             var composer = extra[WindsorHandler.ComposerKey] as IHandler;
-            var context = composer?.Resolve<IContext>();
+            var context = composer?.Resolve<Context>();
             return context == null ? null : _cache.GetOrAdd(context, CreateContextScope);
         }
 
-        private ILifetimeScope CreateContextScope(IContext context)
+        private ILifetimeScope CreateContextScope(Context context)
         {
             var scope = new ContextLifetimeScope(context);
             context.ContextEnded += ctx =>
@@ -49,11 +49,11 @@
 
         private class ContextLifetimeScope : ILifetimeScope
         {
-            private readonly IContext _context;
+            private readonly Context _context;
             private readonly Lock _lock = Lock.Create();
             private IDictionary<object, Burden> _cache;
 
-            public ContextLifetimeScope(IContext context)
+            public ContextLifetimeScope(Context context)
             {
                 _context = context;
                 _cache = new Dictionary<object, Burden>();
@@ -91,7 +91,7 @@
 
             private void OnCreated(Burden burden)
             {
-                var contextual = (IContextual) burden.Instance;
+                var contextual = (Contextual) burden.Instance;
                 var existingContext = contextual.Context;
                 if (existingContext == null)
                     contextual.Context = _context;
@@ -99,14 +99,14 @@
                     throw new InvalidOperationException(
                         $"Component {contextual.GetType().FullName} is already bound to a context");
 
-                void Changing(IContextual<IContext> _, IContext oldContext, ref IContext newContext)
+                void Changing(IContextual _, Context oldContext, ref Context newContext)
                 {
                     if (newContext != null)
                         throw new InvalidOperationException(
                             "Container managed instances cannot change context");
                 }
 
-                void Changed(IContextual<IContext> _, IContext oldContext, IContext newContext)
+                void Changed(IContextual _, Context oldContext, Context newContext)
                 {
                     _cache.Remove(burden.Handler.ComponentModel);
                     burden.Release();

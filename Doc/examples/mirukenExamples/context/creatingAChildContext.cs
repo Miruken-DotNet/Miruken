@@ -4,8 +4,8 @@ namespace Example.mirukenExamples.context
 
     public class CreatingAChildContext
     {
-        public IContext Parent { get; set; }
-        public IContext Child  { get; set; }
+        public Context Parent { get; set; }
+        public Context Child  { get; set; }
 
         public CreatingAChildContext()
         {
