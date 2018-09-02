@@ -817,6 +817,38 @@
 
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
+        public void Should_Reject_Changing_Managed_Context()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen = context.Resolve<Screen>();
+                Assert.AreSame(context, screen.Context);
+                screen.Context = new Context();
+            }
+        }
+
+        [TestMethod]
+        public void Should_Detach_From_Context_If_Null()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen = context.Resolve<Screen>();
+                Assert.AreSame(context, screen.Context);
+                screen.Context = null;
+                Assert.AreNotSame(screen, context.Resolve<Screen>());
+            }
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Lifestye_If_Not_Provider()
         {
             HandlerDescriptor.GetDescriptor<SayHello>();

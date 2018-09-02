@@ -22,6 +22,7 @@
                 if (result is Contextual contextual)
                 {
                     contextual.Context = ctx;
+                    ctx.RemoveHandlers(result);
                     contextual.ContextChanging += ThrowManagedContextException;
                     context.ContextEnded += _ =>
                     {
@@ -46,7 +47,7 @@
             if (newContext != null)
             {
                 throw new InvalidOperationException(
-                    "Managed instances cannot change the context");
+                    "Managed instance contexts cannot be changed");
             }
             if (_cache.TryGetValue(oldContext, out var instance) &&
                 ReferenceEquals(contextual, instance))
