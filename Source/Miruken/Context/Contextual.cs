@@ -4,6 +4,9 @@
     {
         private Context _context;
 
+        public event ContextChangingDelegate ContextChanging;
+        public event ContextChangedDelegate ContextChanged;
+
         public Context Context
         {
             get => _context;
@@ -19,8 +22,5 @@
                 ContextChanged?.Invoke(this, oldContext, _context);
             }
         }
-
-        public event ContextChangingDelegate ContextChanging;
-        public event ContextChangedDelegate ContextChanged;
     }
 }

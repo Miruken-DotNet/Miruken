@@ -23,31 +23,33 @@
                 {
                     contextual.Context = ctx;
                     ctx.RemoveHandlers(result);
-                    contextual.ContextChanging += ThrowManagedContextException;
-                    context.ContextEnded += _ =>
+                    contextual.ContextChanging += ChangeContext;
+                    context.ContextEnded += c =>
                     {
-                        _cache.TryRemove(ctx, out var _);
-                        contextual.ContextChanging -= ThrowManagedContextException;
+                        _cache.TryRemove(ctx, out _);
+                        contextual.ContextChanging -= ChangeContext;
                         contextual.Context = null;
                         (result as IDisposable)?.Dispose();
                     };
                 }
                 else
-                    context.ContextEnded += _ => (result as IDisposable)?.Dispose();
+                {
+                    context.ContextEnded += _ =>
+                        (result as IDisposable)?.Dispose();
+                }
                 return result;
             });
             return true;
         }
 
-        private void ThrowManagedContextException(
-            IContextual contextual, Context oldContext,
-            ref Context newContext)
+        private void ChangeContext(IContextual contextual,
+            Context oldContext, ref Context newContext)
         {
             if (oldContext == newContext) return;
             if (newContext != null)
             {
                 throw new InvalidOperationException(
-                    "Managed instance contexts cannot be changed");
+                    "Managed instances cannot change context");
             }
             if (_cache.TryGetValue(oldContext, out var instance) &&
                 ReferenceEquals(contextual, instance))

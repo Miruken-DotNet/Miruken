@@ -12,11 +12,10 @@
     public class Inquiry : ICallback, IAsyncCallback,
         IDispatchCallback, IDispatchCallbackGuard
     {
-        private readonly Inquiry _parent;
-        private readonly List<object> _resolutions;
         private object _result;
         private object _handler;
         private PolicyMemberBinding _binding;
+        private readonly List<object> _resolutions;
 
         public Inquiry(object key, bool many = false)
         {
@@ -28,19 +27,22 @@
         public Inquiry(object key, Inquiry parent, bool many = false)
             : this(key, many)
         {
-            _parent = parent;
+            Parent = parent;
         }
 
-        public object Key        { get; }
-        public bool   Many       { get; }
-        public bool   WantsAsync { get; set; }
-        public bool   IsAsync    { get; private set; }
+        public object  Key        { get; }
+        public bool    Many       { get; }
+        public Inquiry Parent     { get; }
+        public bool    WantsAsync { get; set; }
+        public bool    IsAsync    { get; private set; }
 
         public CallbackPolicy Policy => Provides.Policy;
 
-        public ICollection<object> Resolutions => _resolutions.AsReadOnly();
+        public ICollection<object> Resolutions =>
+            _resolutions.AsReadOnly();
 
-        public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
+        public Type ResultType =>
+            WantsAsync || IsAsync ? typeof(Promise) : null;
 
         public object Result
         {
@@ -172,7 +174,7 @@
         {
             return ReferenceEquals(handler, _handler) &&
                    ReferenceEquals(binding, _binding) ||
-                   _parent?.InProgress(handler, binding) == true;
+                   Parent?.InProgress(handler, binding) == true;
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)
