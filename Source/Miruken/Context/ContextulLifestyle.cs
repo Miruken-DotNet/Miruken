@@ -19,7 +19,7 @@
             instance = _cache.GetOrAdd(context, ctx =>
             {
                 var result = next().GetAwaiter().GetResult();
-                if (result is Contextual contextual)
+                if (result is IContextual contextual)
                 {
                     contextual.Context = ctx;
                     ctx.RemoveHandlers(result);
