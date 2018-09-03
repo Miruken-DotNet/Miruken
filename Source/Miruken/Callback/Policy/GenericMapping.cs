@@ -36,7 +36,6 @@
                 var sourceGenericArgs = sourceArg.GetGenericArguments();
                 for (var i = 0; i < open.Length; ++i)
                 {
-                    if (_mapping[i] != null) continue;
                     var index = Array.IndexOf(sourceGenericArgs, open[i]);
                     if (index >= 0)
                         _mapping[i] = Tuple.Create(source.Item1, index);

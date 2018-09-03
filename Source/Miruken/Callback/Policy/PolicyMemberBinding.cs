@@ -113,7 +113,8 @@
 
             if ((callback as IFilterCallback)?.CanFilter == false)
             {
-                args = ResolveArgs(callback, args, composer, out var completed);
+                args = ResolveArgs(dispatcher, callback, args, 
+                                   composer, out var completed);
                 if (completed)
                 {
                     result = dispatcher.Invoke(target, args, resultType);
@@ -141,7 +142,8 @@
 
             if (filters.Length == 0)
             {
-                args = ResolveArgs(callback, args, composer, out var completed);
+                args = ResolveArgs(dispatcher, callback, args, 
+                                   composer, out var completed);
                 if (!completed) return false;
                 result = baseResult = dispatcher.Invoke(target, args, resultType);
             }
@@ -149,9 +151,10 @@
                 .Invoke(this, target, actualCallback,
                     (IHandler comp, out bool completed) =>
                     {
-                        args = ResolveArgs(callback, args, comp, out completed);
-                        return completed
-                             ? baseResult = dispatcher.Invoke(target, args, resultType)
+                        args = ResolveArgs(dispatcher, callback, args,
+                                           comp, out completed);
+                        return completed ? baseResult =
+                                dispatcher.Invoke(target, args, resultType)
                              : null;
                     }, composer, filters, out result))
                 return false;
@@ -175,12 +178,13 @@
             return accepted;
         }
 
-        private object[] ResolveArgs(object callback,
-            object[] ruleArgs, IHandler composer, out bool completed)
+        private object[] ResolveArgs(MemberDispatch dispatcher,
+            object callback, object[] ruleArgs, IHandler composer,
+            out bool completed)
         {
             completed     = true;
             var parent    = callback as Inquiry;
-            var arguments = Dispatcher.Arguments;
+            var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
 

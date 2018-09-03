@@ -815,6 +815,40 @@
             Assert.IsTrue(screen.Disposed);
         }
 
+        [TestMethod]
+        public void Should_Create_Generic_Contextual_Implicitly()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Screen<>));
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
+                Assert.IsNotNull(screen1);
+                var screen2 = context.Provide(new Bar()).Resolve<Screen<Bar>>();
+                Assert.IsNotNull(screen2);
+                Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
+                Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
+            }
+        }
+
+        [TestMethod]
+        public void Should_Provide_Generic_Contextual_Implicitly()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<ScreenProvider>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
+                Assert.IsNotNull(screen1);
+                var screen2 = context.Provide(new Bar()).Resolve<Screen<Bar>>();
+                Assert.IsNotNull(screen2);
+                Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
+                Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
+            }
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Changing_Managed_Context()
@@ -1402,6 +1436,26 @@
             public void Dispose()
             {
                 Disposed = true;
+            }
+        }
+
+        private class Screen<TModel> : Screen
+        {
+            [Provides, Contextual]
+            public Screen(TModel model)
+            {
+                Model = model;
+            }
+
+            public TModel Model { get; }
+        }
+
+        private class ScreenProvider
+        {
+            [Provides, Contextual]
+            public static Screen<TModel> GetScreen<TModel>(TModel model)
+            {
+                return new Screen<TModel>(model);
             }
         }
 
