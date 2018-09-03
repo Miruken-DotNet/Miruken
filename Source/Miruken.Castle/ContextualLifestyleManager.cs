@@ -18,10 +18,10 @@ namespace Miruken.Castle
             IComponentActivator componentActivator, IKernel kernel, ComponentModel model)
         {
             var implementation = model.Implementation;
-            if (!implementation.Is<Contextual>())
+            if (!implementation.Is<IContextual>())
             {
                 throw new InvalidOperationException(
-                    $"Component {implementation.FullName} must implement Contextual to use this lifestyle");
+                    $"Component {implementation.FullName} must implement IContextual to use this lifestyle");
             }
             base.Init(componentActivator, kernel, model);
         }

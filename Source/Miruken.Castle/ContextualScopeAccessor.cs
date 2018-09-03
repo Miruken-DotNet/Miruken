@@ -21,7 +21,7 @@
 
         public ILifetimeScope GetScope(CreationContext creationContext)
         {
-            if (!creationContext.RequestedType.Is<Contextual>())
+            if (!creationContext.RequestedType.Is<IContextual>())
                 return null;
             var extra = creationContext.AdditionalArguments;
             var composer = extra[WindsorHandler.ComposerKey] as IHandler;
@@ -91,7 +91,7 @@
 
             private void OnCreated(Burden burden)
             {
-                var contextual = (Contextual) burden.Instance;
+                var contextual = (IContextual) burden.Instance;
                 var existingContext = contextual.Context;
                 if (existingContext == null)
                     contextual.Context = _context;
