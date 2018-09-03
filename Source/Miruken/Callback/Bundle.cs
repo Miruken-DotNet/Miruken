@@ -9,7 +9,7 @@
     using Policy;
 
     public class Bundle : IAsyncCallback, 
-        IResolveCallback, IDispatchCallback
+        IInferCallback, IDispatchCallback
     {
         private readonly bool _all;
         private List<Operation> _operations;
@@ -121,7 +121,7 @@
             }, notify);
         }
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return _resolving ? this : new Bundle(_all)
             {
@@ -138,7 +138,7 @@
             if (_operations == null) return false;
 
             IHandler proxy = new ProxyHandler(handler, composer);
-            if (_resolving) proxy = proxy.Resolve();
+            if (_resolving) proxy = proxy.Infer();
 
             var handled = _all;
             foreach (var operation in _operations)

@@ -331,7 +331,7 @@
             BowlingBall ball = null;
             HandlerDescriptor.GetDescriptor<Bowling>();
             HandlerDescriptor.GetDescriptor<Lane>();
-            var complete = new BowlingProvider().Resolve().All(b => b
+            var complete = new BowlingProvider().Infer().All(b => b
                 .Add(h => handled = h.Handle(new ResetPins()))
                 .Add(h => pins.AddRange(h.ResolveAll<Pin>()))
                 .Add(h => ball = h.Command<BowlingBall>(new FindBowlingBall(10))));
@@ -381,7 +381,7 @@
             {
                 Assert.IsNotNull(composer);
                 foreach (var t in Pins) t.Up = true;
-                var h = _resolve ? composer.Resolve() : composer;
+                var h = _resolve ? composer.Infer() : composer;
                 h.Command<BowlingBall>(new FindBowlingBall(5));
             }
         }

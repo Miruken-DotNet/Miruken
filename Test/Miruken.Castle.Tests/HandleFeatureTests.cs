@@ -34,7 +34,7 @@
                     .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             Assert.IsNotNull(handler.Resolve<MyHandler>());
-            Assert.IsTrue(handler.Resolve().Handle(new A()));
+            Assert.IsTrue(handler.Infer().Handle(new A()));
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@
                     .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             Assert.IsNull(handler.Resolve<MyHandler>());
-            Assert.IsFalse(handler.Resolve().Handle(new A()));
+            Assert.IsFalse(handler.Infer().Handle(new A()));
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@
                         .Use(Classes.FromThisAssembly()));
             }))
             {
-                Assert.IsTrue(handler.Resolve().Handle(new A()));
+                Assert.IsTrue(handler.Infer().Handle(new A()));
             } 
         }
 
@@ -70,7 +70,7 @@
                 new FeaturesInstaller(new HandleFeature())
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
-            handler.Resolve().Command(new GetResults());
+            handler.Infer().Command(new GetResults());
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             var clear   = new ClearResults();
-            handler.Resolve().Command(clear);
+            handler.Infer().Command(clear);
             Assert.AreEqual(-1, clear.Running);
         }
 
@@ -93,7 +93,7 @@
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
-            handler.Resolve().Command(publish);
+            handler.Infer().Command(publish);
             Assert.AreEqual(7, publish.Running);
         }
 

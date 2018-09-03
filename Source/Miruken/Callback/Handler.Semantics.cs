@@ -14,7 +14,7 @@ namespace Miruken.Callback
     }
 
     public sealed class CallbackSemantics 
-        : Composition, IResolveCallback, IFilterCallback,
+        : Composition, IInferCallback, IFilterCallback,
           IBatchCallback
     {
         private CallbackOptions _options;
@@ -68,7 +68,7 @@ namespace Miruken.Callback
         bool IFilterCallback.CanFilter => false;
         bool IBatchCallback.CanBatch => false;
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return this;
         }

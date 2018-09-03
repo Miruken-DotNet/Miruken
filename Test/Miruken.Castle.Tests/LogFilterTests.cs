@@ -57,7 +57,7 @@
         [TestMethod]
         public void Should_Log_Callbacks()
         {
-            var handled = _handler.Resolve().Handle(new Foo());
+            var handled = _handler.Infer().Handle(new Foo());
             Assert.IsTrue(handled);
 
             var events = _memoryTarget.Logs;

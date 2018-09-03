@@ -711,7 +711,7 @@
         public void Should_Create_Resolving_Implicitly()
         {
             HandlerDescriptor.GetDescriptor<Controller>();
-            Assert.IsTrue(new StaticHandler().Resolve().Handle(new Foo()));
+            Assert.IsTrue(new StaticHandler().Infer().Handle(new Foo()));
         }
 
         [TestMethod]
@@ -721,7 +721,7 @@
             var baz = new SuperBaz();
             HandlerDescriptor.GetDescriptor<Controller>();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
-            var instance = new StaticHandler().Resolve()
+            var instance = new StaticHandler().Infer()
                 .Provide(boo).Provide(baz)
                 .Resolve<Controller<Boo, Baz>>();
             Assert.IsNotNull(instance);
@@ -732,7 +732,7 @@
         {
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<Controller>();
-            var bar = new StaticHandler().Resolve().Resolve<Bar>();
+            var bar = new StaticHandler().Infer().Resolve<Bar>();
             Assert.IsNotNull(bar);
         }
 
@@ -743,7 +743,7 @@
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
-            var instance = new StaticHandler().Resolve()
+            var instance = new StaticHandler().Infer()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNotNull(instance);
             Assert.AreSame(view, instance.View);
@@ -755,7 +755,7 @@
             var view = new Screen();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
-            var instance = new StaticHandler().Resolve()
+            var instance = new StaticHandler().Infer()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNull(instance);
         }
@@ -775,7 +775,7 @@
         public void Should_Create_Generic_Singletons_Implicitly()
         {
             var view    = new Screen();
-            var handler = new StaticHandler().Resolve();
+            var handler = new StaticHandler().Infer();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
@@ -819,14 +819,15 @@
         public void Should_Create_Generic_Contextual_Implicitly()
         {
             HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Screen<>));
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
                 var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
                 Assert.IsNotNull(screen1);
-                var screen2 = context.Provide(new Bar()).Resolve<Screen<Bar>>();
-                Assert.IsNotNull(screen2);
+                var screen2 = context.Infer().Resolve<Screen<Bar>>();
+                 Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
             }
@@ -836,16 +837,18 @@
         public void Should_Provide_Generic_Contextual_Implicitly()
         {
             HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor<ScreenProvider>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
                 var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
                 Assert.IsNotNull(screen1);
-                var screen2 = context.Provide(new Bar()).Resolve<Screen<Bar>>();
+                var screen2 = context.Infer().Resolve<Screen<Bar>>();
                 Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
+                Assert.IsNull(context.Resolve<Screen<Boo>>());
             }
         }
 
@@ -1453,9 +1456,9 @@
         private class ScreenProvider
         {
             [Provides, Contextual]
-            public static Screen<TModel> GetScreen<TModel>(TModel model)
+            public static Promise<Screen<TModel>> GetScreen<TModel>(TModel model)
             {
-                return new Screen<TModel>(model);
+                return Promise.Resolved(new Screen<TModel>(model));
             }
         }
 

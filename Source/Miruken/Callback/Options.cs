@@ -3,7 +3,7 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, IResolveCallback,
+        IBoundCallback, IInferCallback,
         IFilterCallback, IBatchCallback
         where T : Options<T>
     {
@@ -20,7 +20,7 @@
         bool IFilterCallback.CanFilter => false;
         bool IBatchCallback.CanBatch => false;
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return this;
         }

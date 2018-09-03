@@ -323,7 +323,7 @@
         {
             var demo    = new DemoHandler();
             var handler = new Handler();
-            var resolve = handler.Resolve().Provide(demo).Resolve<DemoHandler>();
+            var resolve = handler.Infer().Provide(demo).Resolve<DemoHandler>();
             Assert.AreSame(demo, resolve);
         }
 
@@ -332,7 +332,7 @@
         {
             var email   = new EmailHandler();
             var handler = new Handler();
-            var resolve = handler.Resolve().Provide(email).Resolve<IEmailFeature>();
+            var resolve = handler.Infer().Provide(email).Resolve<IEmailFeature>();
             Assert.AreSame(email, resolve);
         }
 
@@ -342,7 +342,7 @@
             HandlerDescriptor.GetDescriptor<DemoProvider>();
             var demo    = new DemoHandler();
             var handler = new Handler();
-            var resolve = handler.Provide(demo).Resolve().Resolve<DemoHandler>();
+            var resolve = handler.Provide(demo).Infer().Resolve<DemoHandler>();
             Assert.AreSame(demo, resolve);
         }
 
@@ -351,7 +351,7 @@
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider();
-            var id      = handler.Resolve()
+            var id      = handler.Infer()
                 .Command<int>(new SendEmail {Body = "Hello"});
             Assert.AreEqual(1, id);
         }
@@ -360,7 +360,7 @@
         public void Should_Resolve_Implied_Handlers()
         {
             var handler = new EmailHandler();
-            var id      = handler.Resolve()
+            var id      = handler.Infer()
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(1, id);
         }
@@ -370,7 +370,7 @@
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider();
-            var id      = handler.Resolve()
+            var id      = handler.Infer()
                 .Command<int>(new SendEmail<int> { Body = 22 });
             Assert.AreEqual(1, id);
         }
@@ -382,7 +382,7 @@
             HandlerDescriptor.GetDescriptor<OfflineHandler>();
             var handler = new EmailProvider()
                         + new OfflineProvider();
-            var id      = handler.ResolveAll()
+            var id      = handler.InferAll()
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(1, id);
         }
@@ -392,7 +392,7 @@
         {
             var handler = new Repository<Message>();
             var message = new Message();
-            var handled = handler.Resolve().Handle(new Create<Message>(message));
+            var handled = handler.Infer().Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
         }
@@ -403,7 +403,7 @@
             HandlerDescriptor.GetDescriptor(typeof(Repository<>));
             var handler = new RepositoryProvider();
             var message = new Message();
-            var handled = handler.Resolve().Handle(new Create<Message>(message));
+            var handled = handler.Infer().Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
         }
@@ -416,7 +416,7 @@
                         + new Billing()
                         + new RepositoryProvider()
                         + new FilterProvider();
-            var id = handler.Resolve()
+            var id = handler.Infer()
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(10, id);
         }
@@ -428,7 +428,7 @@
         {
             var handler = new Accountant()
                         + new FilterProvider();
-            handler.Resolve().Command<decimal>(
+            handler.Infer().Command<decimal>(
                 new Create<Deposit>(new Deposit { Amount = 10.0M }));
         }
 
@@ -437,7 +437,7 @@
         public void Should_Fail_If_No_Resolve_Handlers()
         {
             var handler = new HandlerAdapter(new Billing());
-            handler.Resolve().Command<int>(new SendEmail { Body = "Hello" });
+            handler.Infer().Command<int>(new SendEmail { Body = "Hello" });
         }
 
         [TestMethod]
@@ -575,7 +575,7 @@
         public void Should_Resolve_Methods_Inferred()
         {
             var provider = new EmailProvider();
-            var id       = Proxy<IEmailFeature>(provider.Resolve()).Email("Hello");
+            var id       = Proxy<IEmailFeature>(provider.Infer()).Email("Hello");
             Assert.AreEqual(1, id);
         }
 

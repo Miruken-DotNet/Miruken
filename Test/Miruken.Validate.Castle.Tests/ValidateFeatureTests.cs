@@ -64,7 +64,7 @@
         public async Task Should_Validate_Target_Resolving()
         {
             var player  = new Player();
-            var outcome = await _handler.Resolve().ValidateAsync(player);
+            var outcome = await _handler.Infer().ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             var firstName = outcome.GetErrors("FirstName").Cast<string>().ToArray();

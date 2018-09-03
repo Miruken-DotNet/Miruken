@@ -28,7 +28,7 @@
             {
                 if (semantics.IsSpecified(CallbackOptions.Broadcast))
                     options |= CallbackOptions.Broadcast;
-                handler = handler.Resolve();
+                handler = handler.Infer();
             }
 
             if (options != CallbackOptions.None)

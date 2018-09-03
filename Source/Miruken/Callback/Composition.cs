@@ -3,7 +3,7 @@
     using System;
 
     public class Composition 
-        : Trampoline, ICallback, IResolveCallback,
+        : Trampoline, ICallback, IInferCallback,
           IFilterCallback, IBatchCallback,
           ICallbackKey
     {
@@ -49,13 +49,11 @@
         bool IBatchCallback.CanBatch =>
             (Callback as IBatchCallback)?.CanBatch != false;
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
-            var resolve = (Callback as IResolveCallback)?.GetResolveCallback();
-            if (ReferenceEquals(resolve, Callback)) return this;
-            if (resolve == null)
-                resolve = Resolving.GetDefaultResolvingCallback(Callback);
-            return new Composition(resolve);
+            var infer = (Callback as IInferCallback)?.InferCallback();
+            return ReferenceEquals(infer, Callback) ? this 
+                 : new Composition(infer ?? Resolving.GetResolving(Callback));
         }
 
         public static bool IsComposed<T>(object callback)

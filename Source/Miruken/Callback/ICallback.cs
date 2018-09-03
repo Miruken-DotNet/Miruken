@@ -25,9 +25,9 @@ namespace Miruken.Callback
         object Bounds { get; }
     }
 
-    public interface IResolveCallback
+    public interface IInferCallback
     {
-        object GetResolveCallback();
+        object InferCallback();
     }
 
     public interface IBatchCallback

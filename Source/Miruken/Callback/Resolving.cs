@@ -7,7 +7,7 @@
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry,
-        IResolveCallback, IFilterCallback, IDispatchCallbackGuard
+        IInferCallback, IFilterCallback, IDispatchCallbackGuard
     {
         private readonly object _callback;
         private bool _handled;
@@ -21,7 +21,7 @@
 
         bool IFilterCallback.CanFilter => false;
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return this;
         }
@@ -42,7 +42,7 @@
                 || _handled;
         }
 
-        public static object GetDefaultResolvingCallback(object callback)
+        public static object GetResolving(object callback)
         {
             var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
             if (handlers.Length == 0) return callback;
@@ -57,14 +57,14 @@
         private string DebuggerDisplay => $"Resolving | {Key} => {_callback}";
     }
 
-    public sealed class NoResolving : Trampoline, IResolveCallback
+    public sealed class NoResolving : Trampoline, IInferCallback
     {
         public NoResolving(object callback)
             : base(callback)
         {
         }
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return Callback;
         }

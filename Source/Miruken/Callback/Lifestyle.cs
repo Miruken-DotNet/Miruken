@@ -53,9 +53,9 @@
         {
             return new[]
             {
-                Lifestyles.GetOrAdd((binding, logicalResultType), b =>
+                Lifestyles.GetOrAdd(logicalResultType, lrt =>
                     (IFilter) Activator.CreateInstance(
-                        LifestyleType.MakeGenericType(b.Item2)))
+                        LifestyleType.MakeGenericType(lrt)))
             };
         }
 
@@ -67,8 +67,7 @@
                     $"{GetType().FullName} can only be applied to Providers");
         }
 
-        private static readonly ConcurrentDictionary<
-                (MemberBinding, Type), IFilter> Lifestyles 
-            = new ConcurrentDictionary<(MemberBinding, Type), IFilter>();
+        private static readonly ConcurrentDictionary<Type, IFilter>
+            Lifestyles = new ConcurrentDictionary<Type, IFilter>();
     }
 }

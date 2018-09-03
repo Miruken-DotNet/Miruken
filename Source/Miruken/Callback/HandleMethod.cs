@@ -8,7 +8,7 @@
     using Policy;
 
     public class HandleMethod 
-        : ICallback, IResolveCallback, IDispatchCallback
+        : ICallback, IInferCallback, IDispatchCallback
     {
         private readonly CallbackSemantics _semantics;
 
@@ -41,7 +41,7 @@
 
         public CallbackPolicy Policy => null;
 
-        object IResolveCallback.GetResolveCallback()
+        object IInferCallback.InferCallback()
         {
             return new Resolving(Protocol, this);
         }

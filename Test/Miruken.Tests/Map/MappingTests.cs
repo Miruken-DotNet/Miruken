@@ -270,7 +270,7 @@
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
             var exception = new ArgumentException("Value is bad");
-            var value     = new ExceptionMapping().Resolve()
+            var value     = new ExceptionMapping().Infer()
                 .Map<object>(exception);
             Assert.AreEqual("System.ArgumentException: Value is bad", value);
         }
@@ -279,7 +279,7 @@
         public void Should_Map_Simple_Results()
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
-            var handler   = new ExceptionMapping().Resolve();
+            var handler   = new ExceptionMapping().Infer();
             var exception = new NotSupportedException("Close not found");
             var value     = handler.Map<object>(exception);
             Assert.AreEqual(500, value);
@@ -293,7 +293,7 @@
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
             var value = new ExceptionMapping()
-                .Resolve().BestEffort()
+                .Infer().BestEffort()
                 .Map<int>(new AggregateException());
             Assert.AreEqual(0, value);
         }
@@ -303,7 +303,7 @@
         {
             HandlerDescriptor.GetDescriptor<ExceptionMapping>();
             var value = await new ExceptionMapping()
-                .Resolve().BestEffort()
+                .Infer().BestEffort()
                 .MapAsync<int>(new AggregateException());
             Assert.AreEqual(0, value);
         }

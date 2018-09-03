@@ -87,7 +87,7 @@
             {
                 DOB = new DateTime(2007, 6, 14)
             };
-            var outcome = handler.Resolve().Validate(player);
+            var outcome = handler.Infer().Validate(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             Assert.AreEqual("The FirstName field is required.", outcome["FirstName"]);

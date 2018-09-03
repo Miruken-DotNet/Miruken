@@ -13,11 +13,11 @@
         }
     }
 
-    public sealed class ResolveDecorator : Handler, IDecorator
+    public sealed class InferDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
 
-        public ResolveDecorator(IHandler handler)
+        public InferDecorator(IHandler handler)
         {
             _handler = handler;
         }
@@ -27,30 +27,30 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            callback = GetResolvingCallback(callback);
+            callback = GetInferCallback(callback);
             return _handler.Handle(callback, ref greedy, composer);
         }
 
-        private static object GetResolvingCallback(object callback)
+        private static object GetInferCallback(object callback)
         {
-            return callback is IResolveCallback resolving
-                 ? (resolving.GetResolveCallback() ?? callback)
-                 : Resolving.GetDefaultResolvingCallback(callback);
+            return callback is IInferCallback resolving
+                 ? resolving.InferCallback() ?? callback
+                 : Resolving.GetResolving(callback);
         }
     }
 
     public static class HandlerResolveExtensions
     {
-        public static IHandler Resolve(this IHandler handler)
+        public static IHandler Infer(this IHandler handler)
         {
-            return handler == null ? null : new ResolveDecorator(handler);
+            return handler == null ? null : new InferDecorator(handler);
         }
 
-        public static IHandler ResolveAll(this IHandler handler)
+        public static IHandler InferAll(this IHandler handler)
         {
             return handler == null ? null
                  : new CallbackSemanticsDecorator(
-                       new ResolveDecorator(handler),
+                       new InferDecorator(handler),
                        CallbackOptions.Broadcast);
         }
 
