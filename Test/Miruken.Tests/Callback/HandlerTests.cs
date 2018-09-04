@@ -70,7 +70,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Contravariantly()
         {
-            var foo     = new SuperFoo();
+            var foo     = new SpecialFoo();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.IsTrue(foo.HasComposer);
@@ -314,8 +314,8 @@
         public void Should_Provide_Callbacks_Covariantly()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Resolve<SuperBar>();
-            Assert.IsInstanceOfType(bar, typeof(SuperBar));
+            var bar     = handler.Resolve<SpecialBar>();
+            Assert.IsInstanceOfType(bar, typeof(SpecialBar));
             Assert.IsTrue(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
         }
@@ -326,7 +326,7 @@
             var handler = new CustomHandler() + new CustomHandler();
             var bars    = handler.ResolveAll<Bar>();
             Assert.AreEqual(4, bars.Length);
-            bars = handler.ResolveAll<SuperBar>();
+            bars = handler.ResolveAll<SpecialBar>();
             Assert.AreEqual(2, bars.Length);
         }
 
@@ -335,7 +335,7 @@
         {
             var handler = new CustomHandler();
             var baz     = handler.Resolve<Baz>();
-            Assert.IsInstanceOfType(baz, typeof(SuperBaz));
+            Assert.IsInstanceOfType(baz, typeof(SpecialBaz));
             Assert.IsFalse(baz.HasComposer);
         }
 
@@ -344,11 +344,11 @@
         {
             var handler = new SpecialHandler();
             var baz     = handler.Resolve<Baz>();
-            Assert.IsInstanceOfType(baz, typeof(SuperBaz));
+            Assert.IsInstanceOfType(baz, typeof(SpecialBaz));
             Assert.IsFalse(baz.HasComposer);
             var bazs    = handler.ResolveAll<Baz>();
             Assert.AreEqual(2, bazs.Length);
-            Assert.IsInstanceOfType(bazs[0], typeof(SuperBaz));
+            Assert.IsInstanceOfType(bazs[0], typeof(SpecialBaz));
             Assert.IsFalse(bazs[0].HasComposer);
             Assert.IsInstanceOfType(bazs[1], typeof(Baz));
             Assert.IsFalse(bazs[1].HasComposer);
@@ -409,7 +409,7 @@
         {
             var handler = new SpecialHandler();
             Assert.IsNotNull(handler.Resolve<Foo>());
-            Assert.IsNotNull(handler.Resolve<SuperFoo>());
+            Assert.IsNotNull(handler.Resolve<SpecialFoo>());
         }
 
         [TestMethod]
@@ -697,7 +697,7 @@
         public void Should_Create_Generic_Implicitly()
         {
             var view = new Screen();
-            var bar  = new SuperBar();
+            var bar  = new SpecialBar();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var controller = new StaticHandler()
                 .Provide(view).Provide(bar)
@@ -718,7 +718,7 @@
         public void Should_Create_Resolving_Generic_Implicitly()
         {
             var boo = new Boo();
-            var baz = new SuperBaz();
+            var baz = new SpecialBaz();
             HandlerDescriptor.GetDescriptor<Controller>();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var instance = new StaticHandler().Infer()
@@ -915,6 +915,37 @@
             }
         }
 
+        [TestMethod]
+        public void Should_Select_Greediest_Provider()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<OverloadedProviders>();
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var provider = context.Resolve<OverloadedProviders>();
+                Assert.IsNotNull(provider);
+                Assert.IsNull(provider.Foo);
+                Assert.IsNull(provider.Bar);
+                using (var child = context.CreateChild())
+                {
+                    provider = child.Provide(new Foo()).Resolve<OverloadedProviders>();
+                    Assert.IsNotNull(provider);
+                    Assert.IsNotNull(provider.Foo);
+                    Assert.IsNull(provider.Bar);
+                }
+                using (var child = context.CreateChild())
+                {
+                    provider = child.Provide(new Foo()).Provide(new Bar())
+                        .Resolve<OverloadedProviders>();
+                    Assert.IsNotNull(provider);
+                    Assert.IsNotNull(provider.Foo);
+                    Assert.IsNotNull(provider.Bar);
+                }
+            }
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Lifestye_If_Not_Provider()
@@ -982,7 +1013,7 @@
             public bool HasComposer { get; set; }
         }
 
-        private class SuperFoo : Foo
+        private class SpecialFoo : Foo
         {
         }
 
@@ -1000,7 +1031,7 @@
 
         }
 
-        private class SuperBar : Bar
+        private class SpecialBar : Bar
         {         
         }
 
@@ -1014,7 +1045,7 @@
             public bool HasComposer { get; set; }
         }
 
-        private class SuperBaz : Baz
+        private class SpecialBaz : Baz
         {          
         }
 
@@ -1057,7 +1088,7 @@
             }
 
             [Handles]
-            public bool? HandleSuperFooImplict(SuperFoo foo, IHandler composer)
+            public bool? HandleSpecialFooImplict(SpecialFoo foo, IHandler composer)
             {
                 ++foo.Handled;
                 foo.HasComposer = true;
@@ -1110,9 +1141,9 @@
             }
 
             [Provides]
-            public SuperBar ProvideSuperBarImplicitly(IHandler composer)
+            public SpecialBar ProvideSpecialBarImplicitly(IHandler composer)
             {
-                return new SuperBar
+                return new SpecialBar
                 {
                     Handled     = 1,
                     HasComposer = true
@@ -1141,7 +1172,7 @@
             public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
                if (Equals(inquiry.Key, typeof(Baz)))
-                   inquiry.Resolve(new SuperBaz(), composer);
+                   inquiry.Resolve(new SpecialBaz(), composer);
             }
 
             [Provides("Foo"),
@@ -1187,9 +1218,9 @@
             }
 
             [Provides]
-            public Promise<SuperBar> ProvideSuperBarImplicitly(IHandler composer)
+            public Promise<SpecialBar> ProvideSpecialBarImplicitly(IHandler composer)
             {
-                return Promise.Resolved(new SuperBar
+                return Promise.Resolved(new SpecialBar
                 {
                     Handled = 1,
                     HasComposer = true
@@ -1218,7 +1249,7 @@
             public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
-                    inquiry.Resolve(Promise.Resolved(new SuperBaz()), composer);
+                    inquiry.Resolve(Promise.Resolved(new SpecialBaz()), composer);
             }
 
             [Provides("Foo"),
@@ -1291,7 +1322,7 @@
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {
-                    inquiry.Resolve(new SuperBaz(), composer);
+                    inquiry.Resolve(new SpecialBaz(), composer);
                     inquiry.Resolve(new Baz(), composer);
                 }
             }
@@ -1352,7 +1383,7 @@
             {
                 if (Equals(inquiry.Key, typeof(Baz)))
                 {
-                    inquiry.Resolve(Promise.Resolved(new SuperBaz()), composer);
+                    inquiry.Resolve(Promise.Resolved(new SpecialBaz()), composer);
                     inquiry.Resolve(Promise.Resolved(new Baz()), composer);
                 }
             }
@@ -1547,6 +1578,35 @@
             public Bar Bar { get; }
         }
 
+        private class OverloadedProviders
+        {
+            [Provides, Contextual]
+            public static OverloadedProviders Provide()
+            {
+                return new OverloadedProviders();
+            }
+
+            [Provides, Contextual]
+            public static OverloadedProviders Provide(Foo foo)
+            {
+                return new OverloadedProviders { Foo = foo };
+            }
+
+            [Provides, Contextual]
+            public static OverloadedProviders Provide(Foo foo, Bar bar)
+            {
+                return new OverloadedProviders
+                {
+                    Foo = foo,
+                    Bar = bar
+                };
+            }
+
+            public Foo Foo { get; private set; }
+
+            public Bar Bar { get; private set; }
+        }
+
         private class FilteredHandler : Handler, IFilter<Bar, object>
         {
             int? IFilter.Order { get; set; }
@@ -1606,23 +1666,23 @@
         {
             [Handles,
              Filter(typeof(IFilter<,>), Many = true)]
-            public SuperFoo HandleFoo(Foo foo)
+            public SpecialFoo HandleFoo(Foo foo)
             {
-                return new SuperFoo();
+                return new SpecialFoo();
             }
 
             [Handles,
              Filter(typeof(IFilter<,>), Many = true)]
-            public Promise<SuperBaz> HandleBaz(Baz baz)
+            public Promise<SpecialBaz> HandleBaz(Baz baz)
             {
-                return Promise.Resolved(new SuperBaz());
+                return Promise.Resolved(new SpecialBaz());
             }
 
             [Handles,
              Filter(typeof(IFilter<,>), Many = true)]
-            public Task<SuperBar> HandleBaz(Bar bar)
+            public Task<SpecialBar> HandleBaz(Bar bar)
             {
-                return Task.FromResult(new SuperBar());
+                return Task.FromResult(new SpecialBar());
             }
 
             [Handles,
