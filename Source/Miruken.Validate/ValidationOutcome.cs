@@ -123,7 +123,7 @@
                             propertyName = propertyName.Substring(0, open);
                         }
                         if (string.IsNullOrEmpty(rest)) return outcome;
-                        outcome = GetOrCreateOutcome(propertyName, create);
+                        outcome = outcome.GetOrCreateOutcome(propertyName, create);
                         propertyName = rest;
                     }
                     else
