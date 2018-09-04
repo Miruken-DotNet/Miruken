@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Infrastructure;
     using Policy;
@@ -65,6 +66,11 @@
                 ?.Category.CallbackPolicy != Provides.Policy)
                 throw new InvalidOperationException(
                     $"{GetType().FullName} can only be applied to Providers");
+
+            if (binding.Dispatcher.Attributes.OfType<LifestyleAttribute>()
+                .Any(lifestyle => !ReferenceEquals(lifestyle, this)))
+                throw new InvalidOperationException(
+                    "Only one Lifestyle attribute is allowed");
         }
 
         private static readonly ConcurrentDictionary<(MemberBinding, Type), IFilter>
