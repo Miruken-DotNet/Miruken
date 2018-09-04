@@ -61,6 +61,7 @@
         public Type                LogicalReturnType { get; }
         protected DispatchTypeEnum DispatchType      { get; set; }
 
+        public int  Arity       => Arguments.Length;
         public bool IsVoid      => (DispatchType & NoReturn) > 0;
         public bool IsPromise   => (DispatchType & ReturnPromise) > 0;
         public bool IsTask      => (DispatchType & ReturnTask) > 0;

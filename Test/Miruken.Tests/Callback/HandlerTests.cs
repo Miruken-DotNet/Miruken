@@ -884,6 +884,37 @@
             }
         }
 
+        [TestMethod]
+        public void Should_Select_Greediest_Constructor()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<OverloadedConstructors>();
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var ctor = context.Resolve<OverloadedConstructors>();
+                Assert.IsNotNull(ctor);
+                Assert.IsNull(ctor.Foo);
+                Assert.IsNull(ctor.Bar);
+                using (var child = context.CreateChild())
+                {
+                    ctor = child.Provide(new Foo()).Resolve<OverloadedConstructors>();
+                    Assert.IsNotNull(ctor);
+                    Assert.IsNotNull(ctor.Foo);
+                    Assert.IsNull(ctor.Bar);
+                }
+                using (var child = context.CreateChild())
+                {
+                    ctor = child.Provide(new Foo()).Provide(new Bar())
+                        .Resolve<OverloadedConstructors>();
+                    Assert.IsNotNull(ctor);
+                    Assert.IsNotNull(ctor.Foo);
+                    Assert.IsNotNull(ctor.Bar);
+                }
+            }
+        }
+
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Lifestye_If_Not_Provider()
@@ -1489,6 +1520,31 @@
         {
             [Handles, Singleton]
             public string Hello(string name) => $"Hello {name}";
+        }
+
+        private class OverloadedConstructors
+        {
+            [Provides, Contextual]
+            public OverloadedConstructors()
+            {                
+            }
+
+            [Provides, Contextual]
+            public OverloadedConstructors(Foo foo)
+            {
+                Foo = foo;
+            }
+
+            [Provides, Contextual]
+            public OverloadedConstructors(Foo foo, Bar bar)
+                : this(foo)
+            {
+                Bar = bar;
+            }
+
+            public Foo Foo { get; }
+
+            public Bar Bar { get; }
         }
 
         private class FilteredHandler : Handler, IFilter<Bar, object>

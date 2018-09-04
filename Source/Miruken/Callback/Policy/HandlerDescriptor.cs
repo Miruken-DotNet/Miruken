@@ -127,16 +127,16 @@ namespace Miruken.Callback.Policy
                 return false;
 
             var dispatched = false;
-            foreach (var method in descriptor.GetInvariantMethods(callback))
+            foreach (var member in descriptor.GetInvariantMembers(callback))
             {
-                dispatched = method.Dispatch(
+                dispatched = member.Dispatch(
                     target, callback, composer, results) || dispatched;
                 if (dispatched && !greedy) return true;
             }
 
-            foreach (var method in descriptor.GetCompatibleMethods(callback))
+            foreach (var member in descriptor.GetCompatibleMembers(callback))
             {
-                dispatched = method.Dispatch(
+                dispatched = member.Dispatch(
                     target, callback, composer, results) || dispatched;
                 if (dispatched && !greedy) return true;
             }
@@ -198,16 +198,16 @@ namespace Miruken.Callback.Policy
                 {
                     var binding =
                         handler._staticPolicies?.TryGetValue(policy, out cpd) == true
-                        ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
-                          cpd.GetCompatibleMethods(callback).FirstOrDefault()
+                        ? cpd.GetInvariantMembers(callback).FirstOrDefault() ??
+                          cpd.GetCompatibleMembers(callback).FirstOrDefault()
                         : null;
                     if (binding != null) return binding;
                 }
                 if (instance)
                 {
                     return handler._policies?.TryGetValue(policy, out cpd) == true
-                         ? cpd.GetInvariantMethods(callback).FirstOrDefault() ??
-                           cpd.GetCompatibleMethods(callback).FirstOrDefault()
+                         ? cpd.GetInvariantMembers(callback).FirstOrDefault() ??
+                           cpd.GetCompatibleMembers(callback).FirstOrDefault()
                          : null;
                 }
                 return null;
@@ -230,27 +230,27 @@ namespace Miruken.Callback.Policy
         }
 
         public static IEnumerable<PolicyMemberBinding>
-            GetPolicyMethods(CallbackPolicy policy)
+            GetPolicyMembers(CallbackPolicy policy)
         {
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler  = descriptor.Value.Value;
-                var smethods = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMethods()
+                var smembers = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMembers()
                      : Enumerable.Empty<PolicyMemberBinding>();
-                var methods  = handler._policies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMethods()
+                var members  = handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.GetInvariantMembers()
                      : Enumerable.Empty<PolicyMemberBinding>();
-                if (smethods == null) return methods;
-                return methods == null ? smethods : smethods.Concat(methods);
+                if (smembers == null) return members;
+                return members == null ? smembers : smembers.Concat(members);
             });
         }
 
         public static IEnumerable<PolicyMemberBinding> 
-            GetPolicyMethods<T>(CallbackPolicy policy)
+            GetPolicyMembers<T>(CallbackPolicy policy)
         {
-            return GetPolicyMethods(policy)
+            return GetPolicyMembers(policy)
                 .Where(m => (m.Key as Type)?.Is<T>() == true);
         }
 

@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
 
@@ -243,6 +244,19 @@
             {
                 var category = Category.GetType().Name.Replace("Attribute", "");
                 return $"{category} | {Dispatcher.Member}";
+            }
+        }
+
+        public static readonly IComparer<PolicyMemberBinding>
+            OrderByArity = new CompareByArity();
+
+        private class CompareByArity : IComparer<PolicyMemberBinding>
+        {
+            public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
+            {
+                if (x == null) return 1;
+                if (y == null) return -1;
+                return y.Dispatcher.Arity - x.Dispatcher.Arity;
             }
         }
     }

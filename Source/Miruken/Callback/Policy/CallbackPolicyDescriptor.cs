@@ -4,6 +4,7 @@ namespace Miruken.Callback.Policy
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using Infrastructure;
 
     public class CallbackPolicyDescriptor
     {
@@ -30,67 +31,68 @@ namespace Miruken.Callback.Policy
             {
                 var unknown = _unknown ??
                     (_unknown = new List<PolicyMemberBinding>());
-                unknown.Add(member);
+                unknown.AddSorted(member,
+                    PolicyMemberBinding.OrderByArity);
                 return;
             }
 
-            List<PolicyMemberBinding> methods;
+            List<PolicyMemberBinding> members;
 
             if (key is Type type)
             {
-                if (!_typed.TryGetValue(type, out methods))
+                if (!_typed.TryGetValue(type, out members))
                 {
-                    methods = new List<PolicyMemberBinding>();
-                    _typed.Add(type, methods);
+                    members = new List<PolicyMemberBinding>();
+                    _typed.Add(type, members);
                 }
             }
             else
             {
                 var indexed = _indexed ?? 
                     (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
-                if (!indexed.TryGetValue(key, out methods))
+                if (!indexed.TryGetValue(key, out members))
                 {
-                    methods = new List<PolicyMemberBinding>();
-                    indexed.Add(key, methods);
+                    members = new List<PolicyMemberBinding>();
+                    indexed.Add(key, members);
                 }
             }
 
-            methods.Add(member);
+            members.AddSorted(member, PolicyMemberBinding.OrderByArity);
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetInvariantMethods()
+        internal IEnumerable<PolicyMemberBinding> GetInvariantMembers()
         {
             foreach (var typed in _typed)
-            foreach (var method in typed.Value)
-                yield return method;
+            foreach (var member in typed.Value)
+                yield return member;
             if (_indexed != null)
             {
                 foreach (var indexed in _indexed)
-                    foreach (var method in indexed.Value)
-                        yield return method;
+                    foreach (var member in indexed.Value)
+                        yield return member;
             }
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetInvariantMethods(object callback)
+        internal IEnumerable<PolicyMemberBinding> GetInvariantMembers(object callback)
         {
             var key = Policy.GetKey(callback);
-            List<PolicyMemberBinding> methods = null;
+            List<PolicyMemberBinding> members = null;
             if (key is Type type)
-                _typed.TryGetValue(type, out methods);
+                _typed.TryGetValue(type, out members);
             else
-                _indexed?.TryGetValue(key, out methods);
-            return methods?.Where(method => method.Approves(callback))
+                _indexed?.TryGetValue(key, out members);
+            return members?.Where(member => member.Approves(callback))
                 ?? Array.Empty<PolicyMemberBinding>();
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetCompatibleMethods(object callback)
+        internal IEnumerable<PolicyMemberBinding> GetCompatibleMembers(object callback)
         {
             var key = Policy.GetKey(callback);
-            return _compatible.GetOrAdd(key, InferCompatibleMethods)
-                .Where(method => method.Approves(callback));
+            return _compatible.GetOrAdd(key, InferCompatibleMembers)
+                .Where(member => member.Approves(callback));
         }
 
-        private List<PolicyMemberBinding> InferCompatibleMethods(object key)
+        private List<PolicyMemberBinding> InferCompatibleMembers(object key)
         {
             var compatible = new List<PolicyMemberBinding>();
 
@@ -99,8 +101,8 @@ namespace Miruken.Callback.Policy
                 var keys = Policy.GetCompatibleKeys(key, _typed.Keys);
                 foreach (Type next in keys)
                 {
-                    if (next != null && _typed.TryGetValue(next, out var methods))
-                        compatible.AddRange(methods);
+                    if (next != null && _typed.TryGetValue(next, out var members))
+                        compatible.AddRange(members);
                 }
             }
             else if (_indexed != null)
@@ -108,8 +110,8 @@ namespace Miruken.Callback.Policy
                 var keys = Policy.GetCompatibleKeys(key, _indexed.Keys);
                 foreach (var next in keys)
                 {
-                    if (_indexed.TryGetValue(next, out var methods))
-                        compatible.AddRange(methods);
+                    if (_indexed.TryGetValue(next, out var members))
+                        compatible.AddRange(members);
                 }
             }
 

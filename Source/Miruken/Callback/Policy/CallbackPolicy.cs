@@ -61,7 +61,11 @@
 
         public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
         {
-            return Compare(x?.Key, y?.Key);
+            var order = Compare(x?.Key, y?.Key);
+            if (order != 0) return order;
+            if (x == null) return 1;
+            if (y == null) return -1;
+            return y.Dispatcher.Arity - x.Dispatcher.Arity;
         }
 
         public bool Dispatch(object handler, object callback, bool greedy,
@@ -77,12 +81,12 @@
 
         public IEnumerable<PolicyMemberBinding> GetMethods()
         {
-            return HandlerDescriptor.GetPolicyMethods(this);
+            return HandlerDescriptor.GetPolicyMembers(this);
         }
 
         public IEnumerable<PolicyMemberBinding> GetMethods<T>()
         {
-            return HandlerDescriptor.GetPolicyMethods<T>(this);
+            return HandlerDescriptor.GetPolicyMembers<T>(this);
         }
 
         public static IEnumerable<Type> GetInstanceHandlers(object callback)

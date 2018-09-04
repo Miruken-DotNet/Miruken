@@ -87,6 +87,7 @@
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
     <Compile Include="Context\ContextulLifestyle.cs" />
+    <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
