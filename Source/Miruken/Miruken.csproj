@@ -1,183 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{82C1E9DE-D611-47CE-A091-2BED66DF5AC6}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Miruken</RootNamespace>
-    <AssemblyName>Miruken</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Messaging" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Callback\Batch.cs" />
-    <Compile Include="Callback\Bundle.cs" />
-    <Compile Include="Callback\ContainerAttribute.cs" />
-    <Compile Include="Callback\DynamicFilter.cs" />
-    <Compile Include="Callback\FilteredObject.cs" />
-    <Compile Include="Callback\FilterInstancesProvider.cs" />
-    <Compile Include="Callback\Handler.Batch.cs" />
-    <Compile Include="Callback\Handler.Bundle.cs" />
-    <Compile Include="Callback\Handler.Command.cs" />
-    <Compile Include="Callback\Command.cs" />
-    <Compile Include="Callback\FilterExtensions.cs" />
-    <Compile Include="Callback\FilterOptions.cs" />
-    <Compile Include="Callback\Handler.Aspect.cs" />
-    <Compile Include="Callback\Handler.cs" />
-    <Compile Include="Callback\Handler.Protocol.cs" />
-    <Compile Include="Callback\Handler.Helpers.cs" />
-    <Compile Include="Callback\Handler.Resolve.cs" />
-    <Compile Include="Callback\Handler.Semantics.cs" />
-    <Compile Include="Callback\Handler.Traverse.cs" />
-    <Compile Include="Callback\DecoratedHandler.cs" />
-    <Compile Include="Callback\HandlerAdapter.cs" />
-    <Compile Include="Callback\FilteredHandler.cs" />
-    <Compile Include="Callback\KeyAttribute.cs" />
-    <Compile Include="Callback\Lifestyle.cs" />
-    <Compile Include="Callback\OptionalAttribute.cs" />
-    <Compile Include="Callback\Policy\Argument.cs" />
-    <Compile Include="Callback\Policy\BivariantPolicy.cs" />
-    <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
-    <Compile Include="Callback\Policy\GenericMapping.cs" />
-    <Compile Include="Callback\Policy\ConstructorDispatch.cs" />
-    <Compile Include="Callback\Policy\ICallbackPolicyDispatch.cs" />
-    <Compile Include="Callback\Policy\MemberDispatch.cs" />
-    <Compile Include="Callback\Policy\RuleContext.cs" />
-    <Compile Include="Callback\ProxyAttribute.cs" />
-    <Compile Include="Callback\ResolvingAttribute.cs" />
-    <Compile Include="Callback\SingletonLifestyle.cs" />
-    <Compile Include="Callback\StaticHandler.cs" />
-    <Compile Include="Callback\StringKey.cs" />
-    <Compile Include="Callback\SkipFiltersAttribute.cs" />
-    <Compile Include="Callback\Trampoline.cs" />
-    <Compile Include="Callback\UnmanagedAttribute.cs" />
-    <Compile Include="Context\ContextulLifestyle.cs" />
-    <Compile Include="Infrastructure\CollectionExtensions.cs" />
-    <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
-    <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
-    <Compile Include="Map\FormatAttribute.cs" />
-    <Compile Include="Map\IFormatMatching.cs" />
-    <Compile Include="Map\MappingExtensions.cs" />
-    <Compile Include="Map\Mapping.cs" />
-    <Compile Include="Map\Maps.cs" />
-    <Compile Include="Monads.cs" />
-    <Compile Include="Properties\GlobalAssemblyInfo.cs" />
-    <Compile Include="IDecorator.cs" />
-    <Compile Include="Callback\Policy\ArgumentRule.cs" />
-    <Compile Include="Callback\Policy\CallbackArgument.cs" />
-    <Compile Include="Callback\Policy\CallbackPolicyBuilder.cs" />
-    <Compile Include="Callback\Policy\ContravariantPolicy.cs" />
-    <Compile Include="Callback\Policy\CovariantPolicy.cs" />
-    <Compile Include="Callback\Policy\ExtractArgument.cs" />
-    <Compile Include="Callback\FilterAttribute.cs" />
-    <Compile Include="Callback\IFilter.cs" />
-    <Compile Include="Callback\Policy\HandleMethodBinding.cs" />
-    <Compile Include="Callback\Policy\MethodDispatch.cs" />
-    <Compile Include="Callback\Policy\MemberBinding.cs" />
-    <Compile Include="Callback\Policy\PolicyMemberBinding.cs" />
-    <Compile Include="Callback\Policy\MemberPipeline.cs" />
-    <Compile Include="Callback\Policy\MethodRule.cs" />
-    <Compile Include="Callback\Policy\CallbackPolicy.cs" />
-    <Compile Include="Callback\CategoryAttribute.cs" />
-    <Compile Include="Callback\Policy\HandlerDescriptor.cs" />
-    <Compile Include="Callback\Options.cs" />
-    <Compile Include="Callback\CascadeHandler.cs" />
-    <Compile Include="Callback\CompositeHandler.cs" />
-    <Compile Include="Callback\Composition.cs" />
-    <Compile Include="Callback\HandleMethod.cs" />
-    <Compile Include="Callback\Handles.cs" />
-    <Compile Include="Callback\ICallback.cs" />
-    <Compile Include="Callback\IHandler.cs" />
-    <Compile Include="Callback\Policy\ReturnAsync.cs" />
-    <Compile Include="Callback\Policy\ReturnRule.cs" />
-    <Compile Include="Callback\Policy\ReturnsKey.cs" />
-    <Compile Include="Callback\Policy\Return.cs" />
-    <Compile Include="Callback\Policy\TargetArgument.cs" />
-    <Compile Include="Callback\Provider.cs" />
-    <Compile Include="Callback\Provides.cs" />
-    <Compile Include="Callback\Resolving.cs" />
-    <Compile Include="Callback\Handler.Bounds.cs" />
-    <Compile Include="Callback\VarianceOptions.cs" />
-    <Compile Include="Concurrency\Promise.Task.cs" />
-    <Compile Include="Concurrency\TaskExtensions.cs" />
-    <Compile Include="Context\Contextual.cs" />
-    <Compile Include="Context\ContextualHandler.cs" />
-    <Compile Include="Infrastructure\MethodSignatureComparer.cs" />
-    <Compile Include="Infrastructure\PropertyChangedExtensions.cs" />
-    <Compile Include="Interceptor.cs" />
-    <Compile Include="Callback\RejectedException.cs" />
-    <Compile Include="Callback\Inquiry.cs" />
-    <Compile Include="Concurrency\AbstractAsyncResult.cs" />
-    <Compile Include="Concurrency\CancelledException.cs" />
-    <Compile Include="Concurrency\Promise.cs" />
-    <Compile Include="Container\ContainerExtensions.cs" />
-    <Compile Include="Container\IContainer.cs" />
-    <Compile Include="Context\Context.cs" />
-    <Compile Include="Context\ContextExtensions.cs" />
-    <Compile Include="Context\IContextual.cs" />
-    <Compile Include="Error\ErrorsHandler.cs" />
-    <Compile Include="Error\IErrors.cs" />
-    <Compile Include="Graph\Traversal.cs" />
-    <Compile Include="Graph\Traversing.cs" />
-    <Compile Include="Infrastructure\DisposableAction.cs" />
-    <Compile Include="Infrastructure\DisposableObject.cs" />
-    <Compile Include="Infrastructure\EventExtensions.cs" />
-    <Compile Include="Infrastructure\RuntimeHelper.cs" />
-    <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs" />
-    <Compile Include="Protocol.cs" />
-    <Compile Include="Stage.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Miruken.nuspec" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
