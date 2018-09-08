@@ -13,9 +13,8 @@ namespace Miruken
         private Type _protocol;
 
         private static readonly MethodInfo CreateProxy =
-            typeof(DispatchProxy).GetMethod("Create",
-                BindingFlags.Public | BindingFlags.Static |
-                BindingFlags.DeclaredOnly);
+            typeof(Interceptor).GetMethod("Create",
+                new [] {typeof(IProtocolAdapter) });
 
         protected override object Invoke(MethodInfo method, object[] args)
         {
@@ -37,14 +36,11 @@ namespace Miruken
             if (protocol == null)
                 throw new ArgumentNullException(nameof(protocol));
             var factory = Factories.GetOrAdd(protocol, p =>
-                (Func<object>)RuntimeHelper.CompileMethod(
-                    CreateProxy.MakeGenericMethod(protocol, typeof(Interceptor)),
-                    typeof(Func<object>))
+                (Func<object, object>)RuntimeHelper.CompileMethod(
+                    CreateProxy.MakeGenericMethod(p),
+                    typeof(Func<object, object>))
             );
-            var interceptor = (Interceptor)factory();
-            interceptor._protocol = protocol;
-            interceptor._adapter = adapter;
-            return interceptor;
+            return (Interceptor)factory(adapter);
         }
 
         public static T Create<T>(IProtocolAdapter adapter)
@@ -56,7 +52,7 @@ namespace Miruken
             return proxy;
         }
 
-        private static readonly ConcurrentDictionary<Type, Func<object>> 
-            Factories = new ConcurrentDictionary<Type, Func<object>>();
+        private static readonly ConcurrentDictionary<Type, Func<object, object>> 
+            Factories = new ConcurrentDictionary<Type, Func<object, object>>();
     }
 }

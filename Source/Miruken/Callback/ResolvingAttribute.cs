@@ -11,19 +11,17 @@
     [AttributeUsage(AttributeTargets.Parameter)]
     public class ResolvingAttribute : Attribute, IArgumentResolver
     {
-        public static readonly ResolvingAttribute 
+        public static readonly ResolvingAttribute
             Default = new ResolvingAttribute();
 
         private static readonly MethodInfo CreateLazy =
             typeof(ResolvingAttribute).GetMethod(nameof(ResolveLazy),
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private delegate object LazyDelegate(
-            ResolvingAttribute instance, Inquiry parent, 
-            Argument argument, IHandler composer);
-
-        private static readonly ConcurrentDictionary<Type, LazyDelegate>
-            Lazy = new ConcurrentDictionary<Type, LazyDelegate>();
+        private static readonly ConcurrentDictionary<Type,
+                Func<object, object, object, object, object>>
+            Lazy = new ConcurrentDictionary<Type,
+                Func<object, object, object, object, object>>();
 
         public bool IsOptional => false;
 
@@ -34,10 +32,11 @@
                 return Resolve(parent, argument, handler, composer);
             var lazy = Lazy.GetOrAdd(argument.ParameterType, l =>
             {
-                var func   = l.GenericTypeArguments[0];
+                var func = l.GenericTypeArguments[0];
                 var method = CreateLazy.MakeGenericMethod(func);
-                return (LazyDelegate)RuntimeHelper.CompileMethod(
-                    method, typeof(LazyDelegate));
+                return (Func<object, object, object, object, object>)
+                    RuntimeHelper.CompileMethod(method,
+                        typeof(Func<object, object, object, object, object>));
             });
             return lazy(this, parent, argument, composer);
         }
@@ -81,15 +80,15 @@
             IHandler handler, IHandler composer)
         {
             object dependency;
-            var key          = argument.Key;
+            var key = argument.Key;
             var argumentType = argument.ArgumentType;
-            var logicalType  = argument.LogicalType;
+            var logicalType = argument.LogicalType;
 
             if (argument.IsArray)
             {
                 if (argument.IsPromise)
                 {
-                    var array  = ResolveAllAsync(parent, key, handler, composer);
+                    var array = ResolveAllAsync(parent, key, handler, composer);
                     dependency = argument.IsSimple
                                ? array.Then((arr, s) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
@@ -98,7 +97,7 @@
                 }
                 else if (argument.IsTask)
                 {
-                    var array  = ResolveAllAsync(parent, key, handler, composer).ToTask();
+                    var array = ResolveAllAsync(parent, key, handler, composer).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
                                     RuntimeHelper.ChangeArrayType(task.Result, logicalType),
@@ -114,8 +113,8 @@
             {
                 var promise = ResolveAsync(parent, key, handler, composer);
                 if (argument.IsSimple)
-                    promise = promise.Then((r,s) => RuntimeHelper.ChangeType(r, logicalType));
-               dependency = promise.Coerce(argumentType);
+                    promise = promise.Then((r, s) => RuntimeHelper.ChangeType(r, logicalType));
+                dependency = promise.Coerce(argumentType);
             }
             else if (argument.IsTask)
             {
