@@ -8,6 +8,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using FastExpressionCompiler;
 
     public static class RuntimeHelper
     {
@@ -252,7 +253,7 @@
             var isStatic   = method.IsStatic;
             var target     = method.ReflectedType;
             if (!isStatic && target == null)
-                throw new ArgumentException("Instance method require a class");
+                throw new ArgumentException("Instance method requires a target");
             var parameters = method.GetParameters();
             var arguments  = CreateArguments(parameters.Length + (isStatic ? 0 : 1));
             var methodCall = isStatic ?
@@ -267,7 +268,7 @@
                        : Expression.Lambda(delegateType,
                             Expression.Convert(methodCall, typeof(object)),
                             arguments);
-            return lambda.Compile();
+            return lambda.TryCompileWithoutClosure<Delegate>();
         }
 
         public static Delegate CompileConstructor(ConstructorInfo constructor, Type delegateType)
@@ -284,7 +285,7 @@
             return Expression.Lambda(delegateType,
                 Expression.Convert(constructorCall, typeof(object)),
                 arguments
-            ).Compile();
+            ).TryCompileWithoutClosure<Delegate>();
         }
 
         public static Func<T, TRet> CreateGenericFuncNoArgs<T, TRet>(
@@ -293,7 +294,7 @@
             var instance   = Expression.Parameter(typeof(T), "instance");
             var methodCall = Expression.Call(instance, methodName, genericParams);
             return Expression.Lambda<Func<T, TRet>>(
-               methodCall, instance).Compile();
+               methodCall, instance).TryCompileWithoutClosure<Func<T, TRet>>();
         }
 
         public static Func<TArg, TRet> CreateStaticFuncOneArg<T, TArg, TRet>(
@@ -301,7 +302,8 @@
         {
             var arg        = Expression.Parameter(typeof(TArg), "arg");
             var methodCall = Expression.Call(typeof(T), methodName, genericParams, arg);
-            return Expression.Lambda<Func<TArg, TRet>>(methodCall, arg).Compile();
+            return Expression.Lambda<Func<TArg, TRet>>(methodCall, arg)
+                .TryCompileWithoutClosure<Func<TArg, TRet>>();
         }
 
         public static Func<object, object> CreatePropertyGetter(string name, Type owner)
@@ -317,7 +319,7 @@
                     Expression.Property(target, name),
                     typeof(object)
                 ), instance
-            ).Compile();
+            ).TryCompileWithoutClosure<Func<object, object>>();
         }
 
         public static T[] Normalize<T>(this T[] array)
