@@ -3,35 +3,32 @@
     using System;
     using System.Collections.Concurrent;
     using System.Reflection;
-    using System.Runtime.Remoting.Messaging;
     using Infrastructure;
     using Policy;
 
     public class HandleMethod 
         : ICallback, IInferCallback, IDispatchCallback
     {
-        private readonly CallbackSemantics _semantics;
-
         private static readonly ConcurrentDictionary<MethodInfo, HandleMethodBinding>
             Bindings = new ConcurrentDictionary<MethodInfo, HandleMethodBinding>();
 
-        public HandleMethod(Type protocol, IMethodMessage methodCall, 
-            CallbackSemantics semantics = null)
+        public HandleMethod(Type protocol, MethodInfo method, object[] args)
         {
-            _semantics = semantics ?? CallbackSemantics.None;
-            Method     = (MethodInfo)methodCall.MethodBase;
-            Arguments  = methodCall.Args;
+            Method     = method;
+            Arguments  = args;
+            Semantics  = CallbackSemantics.None;
             Protocol   = protocol ?? Method.ReflectedType;
             ResultType = Method.ReturnType == typeof(void) ? null
                        : Method.ReturnType;
         }
 
-        public Type       Protocol    { get; }
-        public MethodInfo Method      { get; }
-        public Type       ResultType  { get; }
-        public object[]   Arguments   { get; }
-        public object     ReturnValue { get; set; }
-        public Exception  Exception   { get; set; }
+        public Type              Protocol    { get; }
+        public MethodInfo        Method      { get; }
+        public Type              ResultType  { get; }
+        public object[]          Arguments   { get; }
+        public CallbackSemantics Semantics   { get; set; }
+        public object            ReturnValue { get; set; }
+        public Exception         Exception   { get; set; }
 
         public object Result
         {
@@ -75,9 +72,9 @@
 
         private bool IsTargetAccepted(object target)
         {
-            return _semantics.HasOption(CallbackOptions.Strict)
+            return Semantics.HasOption(CallbackOptions.Strict)
                  ? Protocol.IsTopLevelInterface(target.GetType())
-                 : _semantics.HasOption(CallbackOptions.Duck)
+                 : Semantics.HasOption(CallbackOptions.Duck)
                 || Protocol.IsInstanceOfType(target);
         }
 

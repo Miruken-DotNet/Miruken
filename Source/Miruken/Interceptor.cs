@@ -1,50 +1,62 @@
-﻿namespace Miruken
+﻿using System.Collections.Concurrent;
+using Miruken.Callback;
+using Miruken.Infrastructure;
+
+namespace Miruken
 {
     using System;
     using System.Reflection;
-    using System.Runtime.Remoting;
-    using System.Runtime.Remoting.Messaging;
-    using System.Runtime.Remoting.Proxies;
 
-    public class Interceptor : RealProxy, IRemotingTypeInfo
+    public class Interceptor : DispatchProxy
     {
-        private readonly IProtocolAdapter _adapter;
-        private readonly Type _protocol;
+        private IProtocolAdapter _adapter;
+        private Type _protocol;
 
-        public Interceptor(IProtocolAdapter adapter, Type protocol = null)
-            : base(typeof(MarshalByRefObject))
+        private static readonly MethodInfo CreateProxy =
+            typeof(DispatchProxy).GetMethod("Create",
+                BindingFlags.Public | BindingFlags.Static |
+                BindingFlags.DeclaredOnly);
+
+        protected override object Invoke(MethodInfo method, object[] args)
         {
-            _adapter = adapter 
-                ?? throw new ArgumentNullException(nameof(adapter));
-            _protocol = protocol;
-        }
-
-        public string TypeName { get; set; }
-
-        public bool CanCastTo(Type fromType, object o)
-        {
-            return _protocol == null || fromType.IsAssignableFrom(_protocol);
-        }
-
-        public override IMessage Invoke(IMessage msg)
-        {
-            var methodCall = (IMethodCallMessage) msg;
             try
             {
-                return new ReturnMessage(
-                    _adapter.Dispatch(_protocol, methodCall),
-                    methodCall.Args, methodCall.ArgCount,
-                    methodCall.LogicalCallContext, methodCall);
+                var handleMethod = new HandleMethod(_protocol, method, args);
+                return _adapter.Dispatch(handleMethod);
             }
             catch (TargetInvocationException tex)
             {
-                return new ReturnMessage(tex.InnerException, methodCall);
+                throw tex.InnerException ?? tex;
             }
         }
 
-        public override ObjRef CreateObjRef(Type type)
+        public static object Create(IProtocolAdapter adapter, Type protocol)
         {
-            throw new NotSupportedException();
+            if (adapter == null)
+                throw new ArgumentNullException(nameof(adapter));
+            if (protocol == null)
+                throw new ArgumentNullException(nameof(protocol));
+            var factory = Factories.GetOrAdd(protocol, p =>
+                (Func<object>)RuntimeHelper.CompileMethod(
+                    CreateProxy.MakeGenericMethod(protocol, typeof(Interceptor)),
+                    typeof(Func<object>))
+            );
+            var interceptor = (Interceptor)factory();
+            interceptor._protocol = protocol;
+            interceptor._adapter = adapter;
+            return interceptor;
         }
+
+        public static T Create<T>(IProtocolAdapter adapter)
+        {
+            var proxy       = Create<T, Interceptor>();
+            var interceptor = (Interceptor)(object)proxy;
+            interceptor._protocol = typeof(T);
+            interceptor._adapter = adapter;
+            return proxy;
+        }
+
+        private static readonly ConcurrentDictionary<Type, Func<object>> 
+            Factories = new ConcurrentDictionary<Type, Func<object>>();
     }
 }

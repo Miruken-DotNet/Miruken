@@ -327,16 +327,6 @@
             Assert.IsNotNull(bill);
         }
 
-        [TestMethod]
-        public void Should_Allow_Duck_Typing()
-        {
-            var offline = Proxy(new Handler());
-            var email = (IEmailFeature)offline;
-            Assert.IsNotNull(email);
-            var bill = (IBilling)offline;
-            Assert.IsNotNull(bill);
-        }
-
         [TestMethod, ExpectedException(typeof(InvalidCastException))]
         public void Should_Reject_Invalid_Protocol_Cast()
         {

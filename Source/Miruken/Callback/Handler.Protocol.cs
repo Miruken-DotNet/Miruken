@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Runtime.Remoting.Messaging;
     using Infrastructure;
     using Policy;
 
@@ -9,15 +8,14 @@
 
     public partial class Handler
     {
-        object IProtocolAdapter.Dispatch(Type protocol, IMethodCallMessage message)
+        object IProtocolAdapter.Dispatch(HandleMethod handleMethod)
         {
             IHandler handler = this;
-            protocol = protocol ?? message.MethodBase.ReflectedType;
-
             var options   = CallbackOptions.None;
             var semantics = new CallbackSemantics();
             handler.Handle(semantics, true);
 
+            var protocol = handleMethod.Protocol;
             if (!semantics.IsSpecified(CallbackOptions.Duck) && protocol.Is<IDuck>())
                 options |= CallbackOptions.Duck;
 
@@ -37,10 +35,10 @@
                 handler = handler.Semantics(options);
             }
 
-            var handleMethod = new HandleMethod(protocol, message, semantics);
+            handleMethod.Semantics = semantics;
             if (!handler.Handle(handleMethod))
                 throw new MissingMethodException(
-                    $"Method '{message.MethodName}' on {message.TypeName} not handled");
+                    $"Method '{handleMethod.Method.Name}' on {protocol.FullName} not handled");
 
             return handleMethod.Result 
                 ?? RuntimeHelper.GetDefault(handleMethod.ResultType);
