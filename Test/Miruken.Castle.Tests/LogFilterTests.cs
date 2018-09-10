@@ -15,6 +15,7 @@
     using NLog;
     using NLog.Config;
     using NLog.Targets;
+    using ILogger = global::Castle.Core.Logging.ILogger;
 
     [TestClass]
     public class LogFilterTests
@@ -88,8 +89,56 @@
                 @"DEBUG.*Miruken\.Castle\.Tests\.ResolvingTests\+EmailHandler.*Completed HandleMethod.*with int").Success));
         }
 
+        [TestMethod]
+        public void Should_Log_Warning_Exceptions_As_Info()
+        {
+            try
+            {
+                var handler = new CallbackHandler() + _handler;
+                handler.Handle(new Bad(new ArgumentException("Bad")));
+                Assert.Fail("Should not get here");
+            }
+            catch
+            {
+                var events = _memoryTarget.Logs;
+                Assert.AreEqual(2, events.Count);
+                Assert.IsTrue(events.Any(x => Regex.Match(x,
+                    @"INFO.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
+            }
+        }
+
+        [TestMethod]
+        public void Should_Log_Warning_Exceptions_As_Warning()
+        {
+            _container.Register(Component.For<IExceptionLogger>()
+                      .Instance(new WarningExceptionLogger()));
+            try
+            {
+                var handler = new CallbackHandler() + _handler;
+                handler.Handle(new Bad(new ArgumentException("Bad")));
+                Assert.Fail("Should not get here");
+            }
+            catch
+            {
+                var events = _memoryTarget.Logs;
+                Assert.AreEqual(2, events.Count);
+                Assert.IsTrue(events.Any(x => Regex.Match(x,
+                    @"WARN.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
+            }
+        }
+
         public class Foo { }
         public class Bar { }
+
+        public class Bad
+        {
+            public Bad(Exception exception)
+            {
+                Exception = exception;
+            }
+
+            public Exception Exception { get; }
+        }
 
         public class CallbackHandler : Handler
         {
@@ -101,6 +150,12 @@
             [Handles]
             public void Handle(Bar bar)
             {
+            }
+
+            [Handles]
+            public void Handle(Bad bad)
+            {
+                throw bad.Exception;
             }
         }
 
@@ -116,6 +171,14 @@
                 Console.WriteLine(callback);
                 composer.EnableFilters().Handle(new Bar());
                 return next();
+            }
+        }
+
+        public class WarningExceptionLogger : DefaultExceptonLogger
+        {
+            protected override LogExceptionDelegate GetWarningLogger(ILogger logger)
+            {
+                return logger.WarnFormat;
             }
         }
     }

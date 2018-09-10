@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultExceptonLogger.cs" />
     <Compile Include="ExternalDependencyResolver.cs" />
     <Compile Include="HandlerExtensions.cs" />
     <Compile Include="ConfigurationFeature.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="FeatureInstaller.cs" />
     <Compile Include="FeaturesInstaller.cs" />
     <Compile Include="HandleFeature.cs" />
+    <Compile Include="IExceptionLogger.cs" />
     <Compile Include="LogAttribute.cs" />
     <Compile Include="LogFilter.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />

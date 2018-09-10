@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Callback;
@@ -19,6 +18,8 @@
         public int? Order { get; set; } = Stage.Logging;
 
         public ILoggerFactory LoggerFactory { get; set; }
+
+        public IExceptionLogger ExceptionLogger { get; set; } = DefaultExceptionLogger;
 
         public async Task<TResponse> Next(
             TRequest request, MemberBinding member,
@@ -57,22 +58,12 @@
             return default;
         }
 
-        private static bool LogException(TRequest request,
+        private bool LogException(TRequest request,
             ILogger logger, double elapsedMs, Exception ex)
         {
-            if (WarningExceptions.Any(wex => wex.IsInstanceOfType(ex)))
-            {
-                if (logger.IsWarnEnabled)
-                {
-                    logger.WarnFormat(ex, "Failed {0} in {1}", Describe(request),
-                        FormatElapsedMilliseconds(elapsedMs));
-                }
-            }
-            else if (logger.IsErrorEnabled)
-            {
-                logger.ErrorFormat(ex, "Failed {0} in {1}", Describe(request),
-                    FormatElapsedMilliseconds(elapsedMs));
-            }
+            var logException = ExceptionLogger?.GetLogger(ex, logger);
+            logException?.Invoke(ex, "Failed {0} in {1}", Describe(request),
+                FormatElapsedMilliseconds(elapsedMs));
             ex.Data[Stage.Logging] = true;
             return false;
         }
@@ -105,20 +96,15 @@
             var type = member.Dispatcher.Member.ReflectedType;
             return LoggerFactory?.Create(type) ?? NullLogger.Instance;
         }
+
+        private static readonly IExceptionLogger 
+            DefaultExceptionLogger = new DefaultExceptonLogger();
     }
 
     #region Formatting
 
     public abstract class LogFilter
     {
-        public static Type[] WarningExceptions =
-        {
-            typeof(ArgumentException),
-            typeof(InvalidOperationException),
-            typeof(AuthenticationException),
-            typeof(UnauthorizedAccessException)
-        };
-
         protected static readonly JsonSerializerSettings JsonSettings =
             new JsonSerializerSettings
             {

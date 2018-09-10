@@ -3,7 +3,7 @@
     using System;
     using Policy;
 
-    [AttributeUsage(AttributeTargets.Method  | AttributeTargets.Property |
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property |
                     AttributeTargets.Constructor,
         AllowMultiple = true, Inherited = false)]
     public class Provides : CategoryAttribute

@@ -183,13 +183,13 @@
             object callback, object[] ruleArgs, IHandler composer,
             out bool completed)
         {
-            completed     = true;
-            var parent    = callback as Inquiry;
+            completed = true;
             var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
 
-            var args = new object[arguments.Length];
+            var parent = callback as Inquiry;
+            var args   = new object[arguments.Length];
 
             if (!composer.All(bundle =>
             {

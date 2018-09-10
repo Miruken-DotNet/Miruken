@@ -119,6 +119,60 @@
             Assert.IsFalse(players.IsValid);
             Assert.AreEqual("'Last Name' should not be empty.", players["1.LastName"]);
         }
+
+        [TestMethod]
+        public async Task Should_Handle_Cascade_Propertly()
+        {
+            var handler = new FluentValidationValidator()
+                        + new FooValidatorProvider();
+            var foo     = new Foo
+            {
+                Id   = Guid.Empty,
+                Name = "z"
+            };
+            var outcome = await handler.ValidateAsync(foo);
+            Console.WriteLine(outcome.Error);
+            Assert.IsFalse(outcome.IsValid);
+        }
+    }
+
+    public class Foo
+    {
+        public Guid?  Id   { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class FooValidator : AbstractValidator<Foo>
+    {
+        public FooValidator()
+        {
+            RuleFor(x => x.Id)
+                .Cascade(CascadeMode.StopOnFirstFailure)
+                .NotNull()
+                .NotEqual(Guid.Empty)
+                .WithComposerAsync((foo, id, c, ct) => 
+                    Task.FromResult(    id != null && id.Value != Guid.Empty));
+
+            RuleFor(p => p.Name)
+                .Cascade(CascadeMode.StopOnFirstFailure)
+                .NotEmpty()
+                .MustAsync((name, ct) => Task.FromResult(name.Length > 3))
+                .CustomAsync((name, ctx, ct) =>
+                {
+                    if (name.StartsWith("z"))
+                        ctx.AddFailure("Name cannot start with z");
+                    return Task.CompletedTask;
+                });
+        }
+    }
+
+    public class FooValidatorProvider : Handler
+    {
+        [Provides]
+        public IValidator<Foo>[] GetFooalidators()
+        {
+            return new[] {new FooValidator() };
+        }
     }
 
     public class TeamValidator : AbstractValidator<Team>
