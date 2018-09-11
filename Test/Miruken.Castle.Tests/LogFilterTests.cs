@@ -15,6 +15,7 @@
     using NLog;
     using NLog.Config;
     using NLog.Targets;
+    using Validate;
 
     [TestClass]
     public class LogFilterTests
@@ -94,8 +95,7 @@
         {
             try
             {
-                var handler = new CallbackHandler() + _handler;
-                handler.Handle(new Bad(new ArgumentException("Bad")));
+                _handler.Infer().Handle(new Bad(new ArgumentException("Bad")));
                 Assert.Fail("Should not get here");
             }
             catch
@@ -111,15 +111,15 @@
         public void Should_Filter_Exceptions()
         {
              _loggingConfig.LoggingRules.Insert(0, new LoggingRule(
-                 "System.ArgumentException", LogLevel.Trace, null)
+                 "Miruken.Validate.ValidationException", LogLevel.Trace, null)
              {
                  Final = true
              });
 
             try
             {
-                var handler = new CallbackHandler() + _handler;
-                handler.Handle(new Bad(new ArgumentException("Bad")));
+                _handler.Infer().Handle(new Bad(
+                    new ValidationException(new ValidationOutcome())));
                 Assert.Fail("Should not get here");
             }
             catch
@@ -127,7 +127,7 @@
                 var events = _memoryTarget.Logs;
                 Assert.AreEqual(1, events.Count);
                 Assert.IsFalse(events.Any(x => Regex.Match(x,
-                    @"ERROR.*System\.ArgumentException.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler Failed Bad").Success));
+                    @"ERROR.*Miruken\.Validate\.ValidationException.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler Failed Bad").Success));
             }
         }
 
