@@ -15,11 +15,11 @@
     using NLog;
     using NLog.Config;
     using NLog.Targets;
-    using ILogger = global::Castle.Core.Logging.ILogger;
 
     [TestClass]
     public class LogFilterTests
     {
+        protected LoggingConfiguration _loggingConfig;
         protected IWindsorContainer _container;
         protected MemoryTarget _memoryTarget;
         private IHandler _handler;
@@ -29,16 +29,16 @@
         {
             HandlerDescriptor.ResetDescriptors();
 
-            var config = new LoggingConfiguration();
             _memoryTarget = new MemoryTarget
             {
                 Layout = "${date} [${threadid}] ${level:uppercase=true} ${logger} ${message} ${exception:format=tostring}"
             };
-            config.AddTarget("InMemoryTarget", _memoryTarget);
-            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
-            LogManager.Configuration = config;
+            _loggingConfig = new LoggingConfiguration();
+            _loggingConfig.AddTarget("InMemoryTarget", _memoryTarget);
+            _loggingConfig.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
+            LogManager.Configuration = _loggingConfig;
             _container = new WindsorContainer()
-                .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(config)))
+                .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(_loggingConfig)))
                 .Install(new FeaturesInstaller(
                         new HandleFeature().AddFilters(
                                 typeof(LogFilter<,>), typeof(ConsoleFilter))
@@ -90,7 +90,7 @@
         }
 
         [TestMethod]
-        public void Should_Log_Warning_Exceptions_As_Info()
+        public void Should_Log_Warning_Exceptions_As_Warn()
         {
             try
             {
@@ -103,15 +103,22 @@
                 var events = _memoryTarget.Logs;
                 Assert.AreEqual(2, events.Count);
                 Assert.IsTrue(events.Any(x => Regex.Match(x,
-                    @"INFO.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
+                    @"WARN.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
             }
         }
 
         [TestMethod]
-        public void Should_Log_Warning_Exceptions_As_Warning()
+        public void Should_Filter_Warning_Exceptions()
         {
-            _container.Register(Component.For<IExceptionLogger>()
-                      .Instance(new WarningExceptionLogger()));
+             _loggingConfig.LoggingRules.Add(new LoggingRule(
+                 "Miruken.Castle.LogFilter.Warnings", LogLevel.Info, _memoryTarget)
+             {
+                 Final = true
+             });
+            LogManager.ReconfigExistingLoggers();
+
+            var y = LogManager.GetLogger("Miruken.Castle.LogFilter.Warnings");
+
             try
             {
                 var handler = new CallbackHandler() + _handler;
@@ -171,14 +178,6 @@
                 Console.WriteLine(callback);
                 composer.EnableFilters().Handle(new Bar());
                 return next();
-            }
-        }
-
-        public class WarningExceptionLogger : DefaultExceptonLogger
-        {
-            protected override LogExceptionDelegate GetWarningLogger(ILogger logger)
-            {
-                return logger.WarnFormat;
             }
         }
     }
