@@ -90,7 +90,7 @@
         }
 
         [TestMethod]
-        public void Should_Log_Warning_Exceptions_As_Warn()
+        public void Should_Log_Exceptions_As_Error()
         {
             try
             {
@@ -103,21 +103,18 @@
                 var events = _memoryTarget.Logs;
                 Assert.AreEqual(2, events.Count);
                 Assert.IsTrue(events.Any(x => Regex.Match(x,
-                    @"WARN.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
+                    @"ERROR.*System\.ArgumentException.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler Failed Bad").Success));
             }
         }
 
         [TestMethod]
-        public void Should_Filter_Warning_Exceptions()
+        public void Should_Filter_Exceptions()
         {
-             _loggingConfig.LoggingRules.Add(new LoggingRule(
-                 "Miruken.Castle.LogFilter.Warnings", LogLevel.Info, _memoryTarget)
+             _loggingConfig.LoggingRules.Insert(0, new LoggingRule(
+                 "System.ArgumentException", LogLevel.Trace, null)
              {
                  Final = true
              });
-            LogManager.ReconfigExistingLoggers();
-
-            var y = LogManager.GetLogger("Miruken.Castle.LogFilter.Warnings");
 
             try
             {
@@ -128,9 +125,9 @@
             catch
             {
                 var events = _memoryTarget.Logs;
-                Assert.AreEqual(2, events.Count);
-                Assert.IsTrue(events.Any(x => Regex.Match(x,
-                    @"WARN.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Failed Bad").Success));
+                Assert.AreEqual(1, events.Count);
+                Assert.IsFalse(events.Any(x => Regex.Match(x,
+                    @"ERROR.*System\.ArgumentException.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler Failed Bad").Success));
             }
         }
 

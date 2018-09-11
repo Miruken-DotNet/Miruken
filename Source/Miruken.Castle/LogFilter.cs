@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Security.Authentication;
     using System.Text;
     using System.Threading.Tasks;
     using Callback;
@@ -48,7 +47,7 @@
 
                 return response;
             }
-            catch (Exception ex) when (LogException(request, logger,
+            catch (Exception ex) when (LogException(request, member,
                 GetElapsedMilliseconds(start, Stopwatch.GetTimestamp()), ex))
             {
                 // Never caught, because `LogException()` returns false.
@@ -58,24 +57,15 @@
         }
 
         private bool LogException(TRequest request,
-            ILogger logger, double elapsedMs, Exception ex)
+            MemberBinding member, double elapsedMs, Exception ex)
         {
-            if (WarningExceptions.Any(wex => wex.IsInstanceOfType(ex)))
+            var exceptionLogger = LoggerFactory?.Create(ex.GetType());
+
+            if (exceptionLogger?.IsErrorEnabled == true)
             {
-                if (logger.IsWarnEnabled)
-                {
-                    var warningLogger = LoggerFactory
-                        ?.Create("Miruken.Castle.LogFilter.Warnings");
-                    if (warningLogger?.IsWarnEnabled == true)
-                    {
-                        logger.WarnFormat(ex, "Failed {0} in {1}", Describe(request),
-                            FormatElapsedMilliseconds(elapsedMs));
-                    }
-                }
-            }
-            else if (logger.IsErrorEnabled)
-            {
-                logger.ErrorFormat(ex, "Failed {0} in {1}", Describe(request),
+                exceptionLogger.ErrorFormat(ex, "{0} Failed {1} in {2}",
+                    member.Dispatcher.Member.ReflectedType?.FullName,
+                    Describe(request),
                     FormatElapsedMilliseconds(elapsedMs));
             }
             ex.Data[Stage.Logging] = true;
@@ -116,14 +106,6 @@
 
     public abstract class LogFilter
     {
-        public static Type[] WarningExceptions =
-        {
-            typeof(ArgumentException),
-            typeof(InvalidOperationException),
-            typeof(AuthenticationException),
-            typeof(UnauthorizedAccessException)
-        };
-
         protected static readonly JsonSerializerSettings JsonSettings =
             new JsonSerializerSettings
             {
