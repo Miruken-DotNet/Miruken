@@ -14,7 +14,7 @@
         private readonly bool _all;
         private List<Operation> _operations;
         private List<Promise> _promises;
-        private bool _resolving;
+        private bool _inferring;
 
         public delegate bool NotifyDelegate(ref bool handled);
 
@@ -123,12 +123,12 @@
 
         object IInferCallback.InferCallback()
         {
-            return _resolving ? this : new Bundle(_all)
+            return _inferring ? this : new Bundle(_all)
             {
                 _operations = _operations == null ? null
                             : new List<Operation>(_operations),
                 WantsAsync  = WantsAsync,
-                _resolving  = true
+                _inferring  = true
             };
         }
 
@@ -138,7 +138,7 @@
             if (_operations == null) return false;
 
             IHandler proxy = new ProxyHandler(handler, composer);
-            if (_resolving) proxy = proxy.Infer();
+            if (_inferring) proxy = proxy.Infer();
 
             var handled = _all;
             foreach (var operation in _operations)
