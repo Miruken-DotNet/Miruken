@@ -1,11 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Miruken.Callback;
-using Miruken.Infrastructure;
-
-namespace Miruken
+﻿namespace Miruken
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Reflection;
+    using Callback;
+    using Infrastructure;
 
     public class Interceptor : DispatchProxy
     {
