@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken", "Source\Miruken\Miruken.csproj", "{FEA64421-2E84-4172-8FE8-67B0649B4368}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miruken", "Source\Miruken\Miruken.csproj", "{FEA64421-2E84-4172-8FE8-67B0649B4368}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{35E1E9F5-E005-4E62-A077-0BC135CDB2E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Tests", "Test\Miruken.Tests\Miruken.Tests.csproj", "{270CDE62-63BF-4D26-B82D-F6501C2FA20A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miruken.Tests", "Test\Miruken.Tests\Miruken.Tests.csproj", "{270CDE62-63BF-4D26-B82D-F6501C2FA20A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Secure", "Source\Miruken.Secure\Miruken.Secure.csproj", "{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +25,10 @@ Global
 		{270CDE62-63BF-4D26-B82D-F6501C2FA20A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{270CDE62-63BF-4D26-B82D-F6501C2FA20A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{270CDE62-63BF-4D26-B82D-F6501C2FA20A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
