@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miruken.Tests", "Test\Miruk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Secure", "Source\Miruken.Secure\Miruken.Secure.csproj", "{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Validate", "Source\Miruken.Validate\Miruken.Validate.csproj", "{627FB60E-F11D-48BF-8847-78EC6E01FDAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AF2134B-2A1F-4760-AAAD-FD4715E1B6AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{627FB60E-F11D-48BF-8847-78EC6E01FDAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{627FB60E-F11D-48BF-8847-78EC6E01FDAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{627FB60E-F11D-48BF-8847-78EC6E01FDAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{627FB60E-F11D-48BF-8847-78EC6E01FDAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
