@@ -33,12 +33,12 @@
     {
         public BivariantPolicy(
             Func<TCb, object> input, 
-            Func<TCb, object> ouput)
+            Func<TCb, object> output)
         {
-            Output       = new CovariantPolicy<TCb>(input);
-            Input        = new ContravariantPolicy<TCb>(ouput);
-            ResultType   = Output.ResultType;
-            AcceptResult = Output.AcceptResult;
+            Output        = new CovariantPolicy<TCb>(input);
+            Input         = new ContravariantPolicy<TCb>(output);
+            GetResultType = Output.GetResultType;
+            AcceptResult  = Output.AcceptResult;
         }
 
         public CovariantPolicy<TCb>     Output { get; }

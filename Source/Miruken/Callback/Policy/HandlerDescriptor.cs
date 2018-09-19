@@ -235,15 +235,17 @@ namespace Miruken.Callback.Policy
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler  = descriptor.Value.Value;
-                var smembers = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
+                var handler = descriptor.Value.Value;
+                var staticMembers = handler._staticPolicies
+                                        ?.TryGetValue(policy, out cpd) == true
                      ? cpd.GetInvariantMembers()
                      : Enumerable.Empty<PolicyMemberBinding>();
-                var members  = handler._policies?.TryGetValue(policy, out cpd) == true
+                var members = handler._policies?.TryGetValue(policy, out cpd) == true
                      ? cpd.GetInvariantMembers()
                      : Enumerable.Empty<PolicyMemberBinding>();
-                if (smembers == null) return members;
-                return members == null ? smembers : smembers.Concat(members);
+                if (staticMembers == null) return members;
+                return members == null ? staticMembers 
+                     : staticMembers.Concat(members);
             });
         }
 
