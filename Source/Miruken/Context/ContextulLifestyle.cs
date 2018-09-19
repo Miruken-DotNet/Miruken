@@ -34,8 +34,11 @@
                 }
                 else
                 {
-                    context.ContextEnded += _ =>
+                    context.ContextEnded += c =>
+                    {
+                        _cache.TryRemove(ctx, out _);
                         (result as IDisposable)?.Dispose();
+                    };
                 }
                 return result;
             });

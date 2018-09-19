@@ -21,7 +21,7 @@ namespace Miruken.Callback.Policy
 
         public TBuilder ResultType(Func<object, Type> value)
         {
-            Policy.ResultType = value;
+            Policy.GetResultType = value;
             return (TBuilder)this;
         }
 
