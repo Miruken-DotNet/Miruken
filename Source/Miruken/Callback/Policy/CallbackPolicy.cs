@@ -13,9 +13,9 @@
     {
         private readonly List<MethodRule> _rules = new List<MethodRule>();
 
-        public AcceptResultDelegate AcceptResult { get; set; }
-        public Func<object, Type>   ResultType   { get; set; }
-        public BindMemberDelegate   Binder       { get; set; }
+        public AcceptResultDelegate AcceptResult  { get; set; }
+        public Func<object, Type>   GetResultType { get; set; }
+        public BindMemberDelegate   Binder        { get; set; }
 
         public void AddMethodRule(MethodRule rule)
         {

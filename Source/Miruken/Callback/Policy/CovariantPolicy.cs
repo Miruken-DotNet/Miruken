@@ -53,7 +53,7 @@
         public CovariantPolicy(Func<TCb, object> key)
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
-            ResultType = GetResultType;
+            GetResultType = GetKeyType;
         }
 
         public Func<TCb, object> Key { get; }
@@ -80,7 +80,7 @@
                 .Where(t => t != type && IsCompatible(type, t));
         }
 
-        private Type GetResultType(object callback)
+        private Type GetKeyType(object callback)
         {
             return Key((TCb)callback) as Type;
         }

@@ -710,8 +710,10 @@
         [TestMethod]
         public void Should_Create_Resolving_Implicitly()
         {
+            var foo = new Foo();
             HandlerDescriptor.GetDescriptor<Controller>();
-            Assert.IsTrue(new StaticHandler().Infer().Handle(new Foo()));
+            Assert.IsTrue(new StaticHandler().Infer().Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
         }
 
         [TestMethod]
@@ -725,6 +727,8 @@
                 .Provide(boo).Provide(baz)
                 .Resolve<Controller<Boo, Baz>>();
             Assert.IsNotNull(instance);
+            Assert.AreSame(boo, instance.View);
+            Assert.AreSame(baz, instance.Model);
         }
 
         [TestMethod]
@@ -827,7 +831,7 @@
                 var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
                 Assert.IsNotNull(screen1);
                 var screen2 = context.Infer().Resolve<Screen<Bar>>();
-                 Assert.IsNotNull(screen2);
+                Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
             }
@@ -850,6 +854,15 @@
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
                 Assert.IsNull(context.Resolve<Screen<Boo>>());
             }
+        }
+
+        [TestMethod]
+        public void Should_Reject_Contextual_Creation_If_No_Context()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+            var screen = new StaticHandler().Resolve<Screen>();
+            Assert.IsNull(screen);
         }
 
         [TestMethod,
@@ -881,6 +894,7 @@
                 Assert.AreSame(context, screen.Context);
                 screen.Context = null;
                 Assert.AreNotSame(screen, context.Resolve<Screen>());
+                Assert.IsTrue(screen.Disposed);
             }
         }
 
@@ -1533,7 +1547,7 @@
             }
         }
 
-        private class Application<C>
+        private class Application<C> : Application
             where C : Controller
         {
             [Provides, Singleton]
@@ -1726,6 +1740,7 @@
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
+                next();
                 return Promise<Res>.Rejected(
                     new InvalidOperationException("System shutdown"));
             }

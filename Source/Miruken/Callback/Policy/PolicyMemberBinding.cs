@@ -61,7 +61,7 @@
         {
             if ((callback as IDispatchCallbackGuard)
                 ?.CanDispatch(target, this) == false) return false;
-            var resultType = Policy.ResultType?.Invoke(callback);
+            var resultType = Policy.GetResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType, results);
         }
 
@@ -119,7 +119,7 @@
                 if (completed)
                 {
                     result = dispatcher.Invoke(target, args, resultType);
-                    return Accept(callback, result, result, returnType, results);
+                    return Accept(callback, result, returnType, results);
                 }
                 return false;
             }
@@ -139,42 +139,41 @@
 
             if (filters == null) return false;
 
-            object baseResult = this;
-
             if (filters.Length == 0)
             {
                 args = ResolveArgs(dispatcher, callback, args, 
                                    composer, out var completed);
                 if (!completed) return false;
-                result = baseResult = dispatcher.Invoke(target, args, resultType);
+                result = dispatcher.Invoke(target, args, resultType);
             }
             else if (!MemberPipeline.GetPipeline(callbackType, logicalType)
                 .Invoke(this, target, actualCallback,
                     (IHandler comp, out bool completed) =>
                     {
                         args = ResolveArgs(dispatcher, callback, args,
-                                           comp, out completed);
-                        return completed ? baseResult =
-                                dispatcher.Invoke(target, args, resultType)
-                             : null;
+                            comp, out completed);
+                        if (!completed) return null;
+                        var baseResult = dispatcher.Invoke(target, args, resultType);
+                        completed = Policy.AcceptResult?.Invoke(baseResult, this)
+                                 ?? baseResult != null;
+                        return baseResult;
                     }, composer, filters, out result))
                 return false;
 
-            var testResult = ReferenceEquals(baseResult, this) 
-                           ? result : baseResult;
-            return Accept(callback, testResult, result, returnType, results);
+            return Accept(callback, result, returnType, results);
         }
 
-        private bool Accept(object callback, object testResult, object result,
+        private bool Accept(object callback, object result,
             Type returnType, ResultsDelegate results)
         {
-            var accepted = Policy.AcceptResult?.Invoke(testResult, this)
-                        ?? testResult != null;
-            if (accepted && (testResult != null))
+            var accepted = Policy.AcceptResult?.Invoke(result, this)
+                           ?? result != null;
+            if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
                 result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
-                return results?.Invoke(result, Category.Strict) != false;
+                if (result != null)
+                    return results?.Invoke(result, Category.Strict) != false;
             }
             return accepted;
         }
