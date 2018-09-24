@@ -39,9 +39,15 @@
             if (type.IsGenericTypeDefinition)
                 return key.GetOpenTypeConformance(type) != null;
             if (key.IsGenericTypeDefinition)
-                return type.IsGenericType
-                     ? type.GetGenericTypeDefinition() == key
-                     : type.GetOpenTypeConformance(key) != null;
+            {
+                if (type.IsGenericType)
+                {
+                    var typeGenericDef = type.GetGenericTypeDefinition();
+                    return typeGenericDef == key ||
+                           key.GetOpenTypeConformance(typeGenericDef) != null;
+                }
+                return type.GetOpenTypeConformance(key) != null;
+            }
             return key.IsGenericParameter 
                  ? key.SatisfiesGenericParameterConstraints(type)
                  : type.IsAssignableFrom(key);
