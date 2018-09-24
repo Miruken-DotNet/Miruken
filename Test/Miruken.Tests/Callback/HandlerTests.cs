@@ -610,10 +610,10 @@
             var bar     = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
-            Assert.AreEqual(2, bar.Handled);
-            Assert.AreEqual(2, bar.Filters.Count);
-            Assert.AreSame(handler, bar.Filters[1]);
-            Assert.IsInstanceOfType(bar.Filters[0], typeof(LogFilter<Bar, object>));
+            Assert.AreEqual(3, bar.Filters.Count);
+            Assert.IsTrue(bar.Filters.Contains(handler));
+            Assert.IsTrue(bar.Filters.OfType<LogFilter<Bar, object>>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
 
         [TestMethod]
@@ -792,6 +792,9 @@
             var app2 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.AreSame(app1, app2);
+            var app3 = handler.Provide(view)
+                .Resolve<IApplication<Controller<Screen, Bar>>>();
+            Assert.AreSame(app1, app3);
         }
 
         [TestMethod]
@@ -817,6 +820,35 @@
                 }
             }
             Assert.IsTrue(screen.Disposed);
+        }
+
+        [TestMethod]
+        public void Should_Create_Contextual_Covariantly()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Screen<>));
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var view = context.Provide(new Bar()).Resolve<IView<Bar>>();
+                Assert.IsNotNull(view);
+                Assert.AreSame(view, context.Resolve<IView<Bar>>());
+            }
+        }
+
+        [TestMethod]
+        public void Should_Create_Contextual_Covariantly_Inferred()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(Controller));
+            HandlerDescriptor.GetDescriptor(typeof(Screen<>));
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var view = context.Infer().Resolve<IView<Bar>>();
+                Assert.IsNotNull(view);
+                Assert.AreSame(view, context.Resolve<IView<Bar>>());
+            }
         }
 
         [TestMethod]
@@ -1470,6 +1502,11 @@
             }
         }
 
+        private interface IView<out TModel>
+        {
+            TModel Model { get; }
+        }
+
         private class Controller
         {
             [Provides]
@@ -1518,7 +1555,7 @@
             }
         }
 
-        private class Screen<TModel> : Screen
+        private class Screen<TModel> : Screen, IView<TModel>
         {
             [Provides, Contextual]
             public Screen(TModel model)
@@ -1541,13 +1578,20 @@
         private class Application
         {
             [Provides, Singleton]
-            public Application()
+            protected Application()
             {
                 
             }
         }
 
-        private class Application<C> : Application
+        private interface IApplication<out C>
+            where C : Controller
+        {
+            C      RootController { get; }
+            Screen MainScreen     { get; }
+        }
+
+        private class Application<C> : Application, IApplication<C>
             where C : Controller
         {
             [Provides, Singleton]
@@ -1741,8 +1785,13 @@
                 IFilterProvider provider)
             {
                 next();
-                return Promise<Res>.Rejected(
-                    new InvalidOperationException("System shutdown"));
+                var cb = ExtractCallback(request);
+                cb?.Filters.Add(this);
+                var result = next();
+                if (request is Boo)
+                    return Promise<Res>.Rejected(
+                        new InvalidOperationException("System shutdown"));
+                return result;
             }
         }
     }
