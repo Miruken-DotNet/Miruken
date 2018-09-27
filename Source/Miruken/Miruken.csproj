@@ -8,12 +8,13 @@
     <Authors>cneuwirt,provenstyle</Authors>
     <Product>Miruken</Product>
     <Description>Miruken handles your application</Description>
-    <Copyright>Copyright 2016</Copyright>
+    <Copyright>Copyright 2018</Copyright>
     <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
-    <PackageReleaseNotes>Miruken</PackageReleaseNotes>
+    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
     <Company>Miruken</Company>
+    <PackageTags>Miruken</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

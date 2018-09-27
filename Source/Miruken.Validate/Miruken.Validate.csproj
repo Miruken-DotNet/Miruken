@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Miruken.Validate</PackageId>
+    <Authors>cneuwirt</Authors>
+    <Company>Miruken</Company>
+    <Product>Miruken.Validate</Product>
+    <Description>Miruken validation including DataAnnotations and FluentValidation</Description>
+    <Copyright>Copyright 2018</Copyright>
+    <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
+    <PackageTags>Miruken Validate DataAnnotations FluentValidation</PackageTags>
+    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

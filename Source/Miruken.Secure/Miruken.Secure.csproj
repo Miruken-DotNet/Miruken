@@ -2,6 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Company>Miruken</Company>
+    <Product>Miruken.Secure</Product>
+    <Description>Miruken abstractions for security</Description>
+    <Copyright>Copyright 2018</Copyright>
+    <PackageTags>Miruken Security</PackageTags>
+    <Authors>cneuwirt</Authors>
+    <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
+    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
