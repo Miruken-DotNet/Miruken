@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Miruken</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>cneuwirt,provenstyle</Authors>
+    <Product>Miruken</Product>
+    <Description>Miruken handles your application</Description>
+    <Copyright>Copyright 2016</Copyright>
+    <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
+    <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
+    <PackageReleaseNotes>Miruken</PackageReleaseNotes>
+    <Company>Miruken</Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
