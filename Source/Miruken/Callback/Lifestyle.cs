@@ -67,8 +67,7 @@
                 throw new InvalidOperationException(
                     $"{GetType().FullName} can only be applied to Providers");
 
-            if (binding.Dispatcher.Attributes.OfType<LifestyleAttribute>()
-                .Any(lifestyle => !ReferenceEquals(lifestyle, this)))
+            if (binding.Dispatcher.Attributes.OfType<LifestyleAttribute>().Count() > 1)
                 throw new InvalidOperationException(
                     "Only one Lifestyle attribute is allowed");
         }

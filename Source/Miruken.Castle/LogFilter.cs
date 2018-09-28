@@ -88,10 +88,19 @@
         private static string Describe(object instance)
         {
             if (instance == null) return "";
-            return new StringBuilder(PrettyName(instance.GetType())).Append(" ")
-                .Append(JsonConvert.SerializeObject(instance, JsonSettings))
-                .Replace("\"", "")
-                .ToString();
+            var description = new StringBuilder(PrettyName(instance.GetType()));
+            try
+            {
+                description.Append(" ")
+                    .Append(JsonConvert.SerializeObject(instance, JsonSettings))
+                    .Replace("\"", "");
+            }
+            catch
+            {
+                description.Append(" ").Append(instance);
+            }
+
+            return description.ToString();
         }
 
         private ILogger GetLogger(MemberBinding member)
