@@ -54,11 +54,19 @@
                        CallbackOptions.Broadcast);
         }
 
-        public static object Resolve(this IHandler handler, 
-            object key, Inquiry parent = null)
+        public static object Resolve(this IHandler handler,  object key)
         {
             if (handler == null) return null;
-            var inquiry = key as Inquiry ?? new Inquiry(key, parent);
+            if (key is Inquiry inquiry)
+            {
+                if (inquiry.WantsAsync)
+                    throw new InvalidOperationException(
+                        "Requested Inquiry is asynchronous");
+            }
+            else
+            {
+                inquiry = new Inquiry(key);
+            }
             if (handler.Handle(inquiry))
                 return inquiry.Result;
             return key is Type type
@@ -66,12 +74,19 @@
                  : null;
         }
 
-        public static Promise ResolveAsync(this IHandler handler,
-            object key, Inquiry parent = null)
+        public static Promise ResolveAsync(this IHandler handler, object key)
         {
             if (handler == null) return null;
-            var inquiry = key as Inquiry ?? new Inquiry(key, parent);
-            inquiry.WantsAsync = true;
+            if (key is Inquiry inquiry)
+            {
+                if (!inquiry.WantsAsync)
+                    throw new InvalidOperationException(
+                        "Requested Inquiry is synchronous");
+            }
+            else
+            {
+                inquiry = new Inquiry(key) { WantsAsync = true };
+            }
             if (handler.Handle(inquiry))
                 return (Promise)inquiry.Result;
             return key is Type type
@@ -79,27 +94,37 @@
                  : Promise.Empty;
         }
 
-        public static T Resolve<T>(
-            this IHandler handler, Inquiry parent = null)
+        public static T Resolve<T>(this IHandler handler)
         {
             return handler == null ? default
-                 : (T)Resolve(handler, typeof(T), parent);
+                 : (T)Resolve(handler, typeof(T));
         }
 
-        public static Promise<T> ResolveAsync<T>(
-            this IHandler handler, Inquiry parent = null)
+        public static Promise<T> ResolveAsync<T>(this IHandler handler)
         {
             return handler == null ? Promise<T>.Empty
-                 : (Promise<T>)ResolveAsync(handler, typeof(T), parent)
+                 : (Promise<T>)ResolveAsync(handler, typeof(T))
                  .Coerce(typeof(Promise<T>));
         }
 
-        public static object[] ResolveAll(this IHandler handler,
-            object key, Inquiry parent = null)
+        public static object[] ResolveAll(this IHandler handler, object key)
         {
             if (handler != null)
             {
-                var inquiry = key as Inquiry ?? new Inquiry(key, parent, true);
+                if (key is Inquiry inquiry)
+                {
+                    if (!inquiry.Many)
+                        throw new InvalidOperationException(
+                            "Requested Inquiry expects a single result");
+
+                    if (inquiry.WantsAsync)
+                        throw new InvalidOperationException(
+                            "Requested Inquiry is asynchronous");
+                }
+                else
+                {
+                    inquiry = new Inquiry(key, true);
+                }
                 if (handler.Handle(inquiry, true))
                 {
                     var result = inquiry.Result;
@@ -109,13 +134,28 @@
             return CoerceArray(Array.Empty<object>(), key);
         }
 
-        public static Promise<object[]> ResolveAllAsync(this IHandler handler,
-            object key, Inquiry parent = null)
+        public static Promise<object[]> ResolveAllAsync(
+            this IHandler handler, object key)
         {
             if (handler != null)
             {
-                var inquiry = key as Inquiry ?? new Inquiry(key, parent, true);
-                inquiry.WantsAsync = true;
+                if (key is Inquiry inquiry)
+                {
+                    if (!inquiry.Many)
+                        throw new InvalidOperationException(
+                            "Requested Inquiry expects a single result");
+
+                    if (!inquiry.WantsAsync)
+                        throw new InvalidOperationException(
+                            "Requested Inquiry is synchronous");
+                }
+                else
+                {
+                    inquiry = new Inquiry(key, true)
+                    {
+                        WantsAsync = true
+                    };
+                }
                 if (handler.Handle(inquiry, true))
                 {
                     var result = inquiry.Result;
@@ -127,27 +167,25 @@
             return Promise.Resolved(empty);
         }
 
-        public static T[] ResolveAll<T>(
-            this IHandler handler, Inquiry parent = null)
+        public static T[] ResolveAll<T>(this IHandler handler)
         {
             if (handler == null)
                 return Array.Empty<T>();
-            var results = ResolveAll(handler, typeof(T), parent);
+            var results = ResolveAll(handler, typeof(T));
             return results?.Cast<T>().ToArray() ?? Array.Empty<T>();
         }
 
-        public static Promise<T[]> ResolveAllAsync<T>(
-            this IHandler handler, Inquiry parent = null)
+        public static Promise<T[]> ResolveAllAsync<T>(this IHandler handler)
         {
             return handler == null ? Promise.Resolved(Array.Empty<T>())
-                 : ResolveAllAsync(handler, typeof(T), parent)
+                 : ResolveAllAsync(handler, typeof(T))
                       .Then((r, s) => r?.Cast<T>().ToArray() 
                                    ?? Array.Empty<T>());
         }
 
         private static object[] CoerceArray(object[] array, object key)
         {
-            var type = key as Type;
+            var type = key as Type ?? (key as Inquiry)?.Key as Type;
             if (type == null) return array;
             var typed = Array.CreateInstance(type, array.Length);
             array.CopyTo(typed, 0);

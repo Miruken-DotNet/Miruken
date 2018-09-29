@@ -48,26 +48,32 @@
         protected virtual object Resolve(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
-            return handler.Resolve(key, parent);
+            return handler.Resolve(new Inquiry(key, parent));
         }
 
         protected virtual Promise ResolveAsync(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
-            return handler.ResolveAsync(key, parent);
+            return handler.ResolveAsync(new Inquiry(key, parent)
+            {
+                WantsAsync = true
+            });
         }
 
         protected virtual object[] ResolveAll(Inquiry parent,
             object key, IHandler handler, IHandler composer)
         {
-            return handler.ResolveAll(key, parent);
+            return handler.ResolveAll(new Inquiry(key, parent, true));
         }
 
         protected virtual Promise<object[]> ResolveAllAsync(
             Inquiry parent, object key, IHandler handler,
             IHandler composer)
         {
-            return handler.ResolveAllAsync(key, parent);
+            return handler.ResolveAllAsync(new Inquiry(key, parent, true)
+            {
+                WantsAsync = true
+            });
         }
 
         private Func<T> ResolveLazy<T>(
@@ -88,7 +94,7 @@
             {
                 if (argument.IsPromise)
                 {
-                    var array  = ResolveAllAsync(parent, key, handler, composer);
+                    var array = ResolveAllAsync(parent, key, handler, composer);
                     dependency = argument.IsSimple
                                ? array.Then((arr, s) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
@@ -97,7 +103,7 @@
                 }
                 else if (argument.IsTask)
                 {
-                    var array  = ResolveAllAsync(parent, key, handler, composer).ToTask();
+                    var array = ResolveAllAsync(parent, key, handler, composer).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
                                     RuntimeHelper.ChangeArrayType(task.Result, logicalType),
