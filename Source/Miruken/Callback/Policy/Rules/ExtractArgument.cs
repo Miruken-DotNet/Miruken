@@ -1,4 +1,4 @@
-namespace Miruken.Callback.Policy
+namespace Miruken.Callback.Policy.Rules
 {
     using System;
     using System.Reflection;

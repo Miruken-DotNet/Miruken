@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
     using Miruken.Context;
 
@@ -610,8 +611,9 @@
             var bar = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
-            Assert.AreEqual(3, bar.Filters.Count);
+            Assert.AreEqual(4, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
+            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<LogFilter<Bar, object>>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
@@ -1684,6 +1686,12 @@
             {
             }
 
+            [Provides]
+            public ContravarintFilter CreateFilter()
+            {
+                return new ContravarintFilter();
+            }
+
             [Provides(typeof(IFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
@@ -1759,6 +1767,20 @@
                     cb = command.Callback as Callback;
             }
             return cb;
+        }
+
+        private class ContravarintFilter : IFilter<object, object>
+        {
+            public int? Order { get; set; }
+
+            public Task<object> Next(object callback, MemberBinding member,
+                IHandler composer, Next<object> next,
+                IFilterProvider provider = null)
+            {
+                if (callback is Callback cb)
+                    cb.Filters.Add(this);
+                return next();
+            }
         }
 
         private class LogFilter<Cb, Res> : IFilter<Cb, Res>

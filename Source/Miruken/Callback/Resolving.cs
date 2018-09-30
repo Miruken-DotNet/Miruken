@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.Linq;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry,

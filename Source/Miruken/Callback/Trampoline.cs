@@ -2,6 +2,7 @@
 {
     using System;
     using Policy;
+    using Policy.Bindings;
 
     public class Trampoline :
         IDispatchCallback, IDispatchCallbackGuard

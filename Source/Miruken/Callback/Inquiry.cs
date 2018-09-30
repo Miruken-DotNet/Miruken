@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Inquiry : ICallback, IAsyncCallback,

@@ -4,6 +4,7 @@
     using System.Runtime.Remoting.Messaging;
     using Infrastructure;
     using Policy;
+    using Policy.Bindings;
 
     public interface IResolving {}
 

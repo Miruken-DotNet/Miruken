@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Policy;
+    using Policy.Bindings;
 
     public class FilterInstancesProvider : IFilterProvider
     {

@@ -5,6 +5,7 @@
     using System.Linq;
     using Infrastructure;
     using Policy;
+    using Policy.Bindings;
 
     [AttributeUsage(AttributeTargets.Class |
         AttributeTargets.Method | AttributeTargets.Property,

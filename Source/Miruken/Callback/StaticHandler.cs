@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using Policy;
+    using Policy.Bindings;
 
     public sealed class StaticHandler : Handler, ICallbackPolicyDispatch
     {

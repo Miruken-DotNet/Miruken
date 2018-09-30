@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using Callback;
     using Callback.Policy;
+    using Callback.Policy.Bindings;
 
     public class ContextualLifestyle<T> : Lifestyle<T>
     {

@@ -1,9 +1,11 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using Infrastructure;
+    using Rules;
 
     public delegate PolicyMemberBinding BindMemberDelegate(
         CallbackPolicy policy,
@@ -190,34 +192,45 @@
             var parent = callback as Inquiry;
             var args   = new object[arguments.Length];
 
-            if (!composer.All(bundle =>
+            var dependencies = new Bundle();
+            for (var i = ruleArgs.Length; i < arguments.Length; ++i)
             {
-                for (var i = ruleArgs.Length; i < arguments.Length; ++i)
+                var index        = i;
+                var argument     = arguments[i];
+                var argumentType = argument.ArgumentType;
+                var optional     = argument.Optional;
+                if (argumentType == typeof(IHandler))
+                    args[i] = composer;
+                else if (argumentType.Is<MemberBinding>())
+                    args[i] = this;
+                else if (argumentType == typeof(object))
                 {
-                    var index        = i;
-                    var argument     = arguments[i];
-                    var argumentType = argument.ArgumentType;
-                    var optional     = argument.Optional;
-                    if (argumentType == typeof(IHandler))
-                        args[i] = composer;
-                    else if (argumentType.IsInstanceOfType(this))
-                        args[i] = this;
-                    else
-                    {
-                        var resolver = argument.Resolver ?? ResolvingAttribute.Default;
-                        bundle.Add(h => args[index] =
-                                resolver.ResolveArgument(parent, argument, h, composer),
-                            (ref bool resolved) =>
-                            {
-                                resolved = resolved || optional;
-                                return false;
-                            });
-                    }
+                    completed = false;
+                    return null;
                 }
-            }))
+                else
+                {
+                    var resolver = argument.Resolver ?? ResolvingAttribute.Default;
+                    dependencies.Add(h => args[index] =
+                            resolver.ResolveArgument(parent, argument, h, composer),
+                        (ref bool resolved) =>
+                        {
+                            resolved = resolved || optional;
+                            return false;
+                        });
+                }
+            }
+
+            if (!dependencies.IsEmpty)
             {
-                completed = false;
-                return null;
+                var handled  = composer.Handle(dependencies);
+                var complete = dependencies.Complete();
+                if (dependencies.IsAsync) complete.Wait();
+                if (!(handled || dependencies.Handled))
+                {
+                    completed = false;
+                    return null;
+                }
             }
 
             Array.Copy(ruleArgs, args, ruleArgs.Length);

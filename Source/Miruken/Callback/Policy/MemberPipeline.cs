@@ -4,6 +4,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Bindings;
 
     public delegate object CompletePipelineDelegate(
         IHandler handler, out bool completed);

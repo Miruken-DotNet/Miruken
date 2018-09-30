@@ -5,15 +5,14 @@ namespace Miruken.Callback.Policy
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Bindings;
     using Infrastructure;
     
-    public class HandlerDescriptor
+    public class HandlerDescriptor : FilteredObject
     {
         private readonly ConcurrentDictionary<object, Type> _closed;
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _policies;
         private readonly Dictionary<CallbackPolicy, CallbackPolicyDescriptor> _staticPolicies;
-        private readonly Lazy<IFilterProvider[]> _filters;
-        private readonly Lazy<Attribute[]> _attributes;
 
         private static readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
             Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
@@ -95,11 +94,9 @@ namespace Miruken.Callback.Policy
                 }
             }
 
-            _attributes = new Lazy<Attribute[]>(() => 
-                Attribute.GetCustomAttributes(handlerType, true).Normalize());
+            Attributes = Attribute.GetCustomAttributes(handlerType, true).Normalize();
 
-            _filters = new Lazy<IFilterProvider[]>(() =>
-                Attributes.OfType<IFilterProvider>().ToArray().Normalize());
+            AddFilters(Attributes.OfType<IFilterProvider>().ToArray());
 
             if (handlerType.IsGenericTypeDefinition)
                 _closed = new ConcurrentDictionary<object, Type>();
@@ -107,8 +104,7 @@ namespace Miruken.Callback.Policy
 
         public Type HandlerType { get; }
 
-        public Attribute[]       Attributes => _attributes.Value;
-        public IFilterProvider[] Filters    => _filters.Value;
+        public Attribute[] Attributes { get; }
 
         public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 

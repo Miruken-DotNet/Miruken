@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Policy;
+    using Policy.Bindings;
 
     public delegate Task<Res> Next<Res>(
         IHandler composer = null, bool proceed = true);

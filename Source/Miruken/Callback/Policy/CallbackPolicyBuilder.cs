@@ -1,6 +1,8 @@
 namespace Miruken.Callback.Policy
 {
     using System;
+    using Bindings;
+    using Rules;
 
     public class CallbackPolicyBuilder<TPolicy, TBuilder>
         where TBuilder : CallbackPolicyBuilder<TPolicy, TBuilder>

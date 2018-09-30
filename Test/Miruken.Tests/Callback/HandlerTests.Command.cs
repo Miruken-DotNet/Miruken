@@ -6,6 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
 
     [TestClass]

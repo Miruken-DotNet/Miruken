@@ -5,6 +5,7 @@
     using System.Linq;
     using Callback;
     using Callback.Policy;
+    using Callback.Policy.Bindings;
     using Error;
     using global::Castle.Core.Internal;
     using global::Castle.MicroKernel.Registration;

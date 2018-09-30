@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Policy;
+    using Policy.Bindings;
 
     public static class FilterExtensions
     {

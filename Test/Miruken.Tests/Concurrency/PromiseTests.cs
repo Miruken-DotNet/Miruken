@@ -591,8 +591,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<object>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)))
                 .Then((r,s) => new Promise<int>((res, rej) =>
-                    rej(new Exception("Bad Data"), s)))
-                
+                    rej(new Exception("Bad Data"), s)))              
                 .Catch((ex, s) =>
                 {
                     Thread.Sleep(100);

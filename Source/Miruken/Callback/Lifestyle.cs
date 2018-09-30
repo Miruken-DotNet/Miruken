@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Infrastructure;
     using Policy;
+    using Policy.Bindings;
 
     public abstract class Lifestyle<T> : IFilter<Inquiry, T>
     {
