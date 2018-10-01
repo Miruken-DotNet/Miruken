@@ -18,8 +18,8 @@ namespace Miruken.Castle
             var extra = context.AdditionalArguments;
             if (extra.Contains(dependency)) return true;
             if (!(extra[WindsorHandler.ComposerKey] is IHandler composer)) return false;
-            var parent     = extra[WindsorHandler.ResolutionKey] as DependencyResolution;
-            var resolution = new DependencyResolution(dependency.TargetItemType, parent);
+            var parent     = extra[WindsorHandler.ResolutionKey] as Inquiry;
+            var resolution = new Inquiry(dependency.TargetItemType, parent);
             if (composer.Handle(resolution))
             {
                 extra[dependency] = resolution;

@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="Callback\Batch.cs" />
     <Compile Include="Callback\Bundle.cs" />
-    <Compile Include="Callback\ContainerAttribute.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />
     <Compile Include="Callback\FilteredObject.cs" />
     <Compile Include="Callback\FilterInstancesProvider.cs" />
@@ -149,8 +148,6 @@
     <Compile Include="Concurrency\AbstractAsyncResult.cs" />
     <Compile Include="Concurrency\CancelledException.cs" />
     <Compile Include="Concurrency\Promise.cs" />
-    <Compile Include="Container\ContainerExtensions.cs" />
-    <Compile Include="Container\IContainer.cs" />
     <Compile Include="Context\Context.cs" />
     <Compile Include="Context\ContextExtensions.cs" />
     <Compile Include="Context\IContextual.cs" />

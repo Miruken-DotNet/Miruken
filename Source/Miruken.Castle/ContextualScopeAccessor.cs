@@ -94,7 +94,10 @@
                 var contextual = (IContextual) burden.Instance;
                 var existingContext = contextual.Context;
                 if (existingContext == null)
+                {
                     contextual.Context = _context;
+                    _context.RemoveHandlers(contextual);
+                }
                 else if (existingContext != _context)
                     throw new InvalidOperationException(
                         $"Component {contextual.GetType().FullName} is already bound to a context");

@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using Callback;
-    using Container;
     using Context;
     using Error;
     using global::Castle.MicroKernel.Registration;
@@ -110,7 +109,7 @@
         [TestMethod]
         public void Should_Resolve_Nothing()
         {
-            var car = Proxy<IContainer>(_handler.BestEffort()).Resolve<ICar>();
+            var car = _handler.BestEffort().Resolve<ICar>();
             Assert.IsNull(car);
         }
 
@@ -125,7 +124,7 @@
         public void Should_Resolve_Type_Explicity()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var car = Proxy<IContainer>(_handler).Resolve<ICar>();
+            var car = _handler.Resolve<ICar>();
             Assert.IsNotNull(car);
         }
 
@@ -133,7 +132,7 @@
         public void Should_Resolve_All_Types()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
-            var cars = Proxy<IContainer>(_handler).ResolveAll<ICar>();
+            var cars = _handler.ResolveAll<ICar>();
             Assert.AreEqual(1, cars.Length);
             Assert.IsInstanceOfType(cars, typeof(ICar[]));
         }
@@ -177,8 +176,8 @@
             _container.Install(
                 new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
-            var auction = Proxy<IContainer>(_handler).Resolve<IAuction>();
-            var closing = Proxy<IContainer>(_handler).Resolve<IClosing>();
+            var auction = _handler.Resolve<IAuction>();
+            var closing = _handler.Resolve<IClosing>();
             Assert.AreSame(auction, closing);
         }
 
@@ -188,7 +187,7 @@
             _container.Install(
                 new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
-            var resolving = Proxy<IContainer>(_handler.BestEffort()).ResolveAll<IResolving>();
+            var resolving = _handler.BestEffort().ResolveAll<IResolving>();
             Assert.AreEqual(0, resolving.Length);
         }
 
@@ -204,7 +203,7 @@
                     .WithExternalDependencies()
                     .Use(Classes.FromThisAssembly()));
 
-            var auction = Proxy<IContainer>(context.Provide(new Junkyard()))
+            var auction = context.Provide(new Junkyard())
                 .Resolve<IAuction>();
             Assert.AreSame(context, auction.Context);
             Assert.AreEqual(1, auction.Cars.Length);
@@ -229,7 +228,7 @@
 
             Proxy<IAuction>(context.Publish()).Dispose(ferrari);
 
-            var auction = Proxy<IContainer>(context).Resolve<IAuction>();
+            var auction = context.Resolve<IAuction>();
             CollectionAssert.AreEqual(new [] { ferrari }, auction.Junk);
         }
 

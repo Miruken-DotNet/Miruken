@@ -41,7 +41,7 @@
         [TestMethod]
         public void Should_Resolve_Handler_From_Container()
         {
-            _rootContext.AddHandler<MyHandler>();
+            _rootContext.AddHandlers(_rootContext.Resolve<MyHandler>());
             var handler = _rootContext.Resolve<MyHandler>();
             Assert.AreSame(_rootContext, handler.Context);
         }

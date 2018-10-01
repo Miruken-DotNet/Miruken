@@ -57,7 +57,6 @@
     <Compile Include="mirukenCastleExamples\featuresFromAssemblies.cs" />
     <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
     <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
-    <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
     <Compile Include="mirukenExamples\context\anotherHandler.cs" />
     <Compile Include="mirukenExamples\context\creatingAContext.cs" />
     <Compile Include="mirukenExamples\context\someHandler.cs" />
