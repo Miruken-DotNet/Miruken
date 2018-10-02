@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using Callback;
-    using Callback.Policy;
     using Callback.Policy.Bindings;
 
     public class AuthorizeAttribute : FilterAttribute

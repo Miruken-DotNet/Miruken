@@ -61,8 +61,6 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            if ((callback as IDispatchCallbackGuard)
-                ?.CanDispatch(target, this) == false) return false;
             var resultType = Policy.GetResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType, results);
         }
@@ -105,6 +103,10 @@
             object result;
             var args       = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(args, resultType);
+
+            if ((callback as IDispatchCallbackGuard)
+                ?.CanDispatch(target, dispatcher) == false) return false;
+
             if (CallbackIndex.HasValue)
             {
                 var index = CallbackIndex.Value;
@@ -198,7 +200,7 @@
                 var index        = i;
                 var argument     = arguments[i];
                 var argumentType = argument.ArgumentType;
-                var optional     = argument.Optional;
+                var optional     = argument.IsOptional;
                 if (argumentType == typeof(IHandler))
                     args[i] = composer;
                 else if (argumentType.Is<MemberBinding>())

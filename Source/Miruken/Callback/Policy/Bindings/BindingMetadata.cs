@@ -1,14 +1,17 @@
 ﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
 
-    public class BindingMetadata
+    public class BindingMetadata : IEnumerable<KeyValuePair<object, object>>
     {
         private readonly Dictionary<object, object> 
             _values = new Dictionary<object, object>();
 
         public string Name { get; set; }
+
+        public bool IsEmpty => Name == null && _values.Count == 0;
 
         public bool Has(object key)
         {
@@ -35,12 +38,30 @@
             return false;
         }
 
-        public void Set<V>(object key, V value)
+        public void Set(object key, object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
             _values[key] = value;
+        }
+
+        public void MergeInto(BindingMetadata other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+            foreach (var item in _values)
+                other.Set(item.Key, item.Value);
+        }
+
+        public IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            return _values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

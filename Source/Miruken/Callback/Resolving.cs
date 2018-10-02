@@ -4,7 +4,6 @@
     using System.Diagnostics;
     using System.Linq;
     using Policy;
-    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry,
@@ -28,10 +27,10 @@
         }
 
         bool IDispatchCallbackGuard.CanDispatch(
-            object handler, PolicyMemberBinding binding)
+            object target, MemberDispatch dispatcher)
         {
             return (_callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(handler, binding) != false;
+                   ?.CanDispatch(target, dispatcher) != false;
         }
 
         protected override bool IsSatisfied(

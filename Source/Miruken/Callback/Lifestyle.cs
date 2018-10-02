@@ -26,8 +26,10 @@
             IHandler composer, out T instance);
     }
 
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property |
-                    AttributeTargets.Constructor, Inherited = false)]
+    [AttributeUsage(
+        AttributeTargets.Method | AttributeTargets.Property |
+        AttributeTargets.Constructor,
+        Inherited = false)]
     public abstract class LifestyleAttribute
         : Attribute, IFilterProvider, IValidateFilterProvider
     {
@@ -38,9 +40,11 @@
 
             if (!lifestyleType.IsGenericTypeDefinition ||
                 lifestyleType.GetOpenTypeConformance(typeof(Lifestyle<>)) == null)
+            {
                 throw new ArgumentException(
                     $"Type {lifestyleType} is not a Lifestyle functor");
-
+            }
+    
             LifestyleType = lifestyleType;
         }
 

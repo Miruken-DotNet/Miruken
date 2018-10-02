@@ -52,7 +52,7 @@
                 var index        = i;
                 var argument     = arguments[i];
                 var argumentType = argument.ArgumentType;
-                var optional     = argument.Optional;
+                var optional     = argument.IsOptional;
                 if (argumentType == typeof(IHandler))
                     args[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
