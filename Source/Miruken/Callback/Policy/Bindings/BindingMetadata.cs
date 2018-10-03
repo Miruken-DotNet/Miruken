@@ -1,10 +1,9 @@
 ﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
 
-    public class BindingMetadata : IEnumerable<KeyValuePair<object, object>>
+    public class BindingMetadata
     {
         private readonly Dictionary<object, object> 
             _values = new Dictionary<object, object>();
@@ -52,16 +51,6 @@
                 throw new ArgumentNullException(nameof(other));
             foreach (var item in _values)
                 other.Set(item.Key, item.Value);
-        }
-
-        public IEnumerator<KeyValuePair<object, object>> GetEnumerator()
-        {
-            return _values.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
     }
 }

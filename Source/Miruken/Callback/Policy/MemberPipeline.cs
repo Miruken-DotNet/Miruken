@@ -11,9 +11,11 @@
 
     internal abstract class MemberPipeline
     {
-        public abstract bool Invoke(MemberBinding binding, object target,
-            object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<(IFilter, IFilterProvider)> filters, out object result);
+        public abstract bool Invoke(
+            MemberBinding binding, object target,
+            object callback, CompletePipelineDelegate complete,
+            IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters, 
+            out object result);
 
         public static MemberPipeline GetPipeline(Type callbackType, Type resultType)
         {
@@ -32,9 +34,11 @@
 
     internal class MemberPipeline<TCb, TRes> : MemberPipeline
     {
-        public override bool Invoke(MemberBinding binding, object target, 
-            object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<(IFilter, IFilterProvider)> filters, out object result)
+        public override bool Invoke(
+            MemberBinding binding, object target, 
+            object callback, CompletePipelineDelegate complete,
+            IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters,
+            out object result)
         {
             var completed = true;
             using (var pipeline = filters.GetEnumerator())

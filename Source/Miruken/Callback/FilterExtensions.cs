@@ -49,9 +49,10 @@
                     .Decorate(handler);
         }
 
-        public static IEnumerable<(IFilter, IFilterProvider)> GetOrderedFilters(
-            this IHandler handler, MemberBinding binding, Type callbackType,
-            Type logicalResultType, params IEnumerable<IFilterProvider>[] providers)
+        public static IEnumerable<(IFilter, IFilterProvider)>
+            GetOrderedFilters(this IHandler handler, MemberBinding binding,
+                MemberDispatch dispatcher, Type callbackType,
+                params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetOptions<FilterOptions>();
             switch (options?.SkipFilters)
@@ -65,18 +66,16 @@
                     handler = handler.SkipFilters();
                     break;
             }
-            return handler.GetOrderedFilters(
-                binding, callbackType, logicalResultType, options, providers);
+            return handler.GetOrderedFilters(binding, dispatcher,
+                callbackType, options, providers);
         }
 
-        private static IEnumerable<(IFilter, IFilterProvider)> GetOrderedFilters(
-            this IHandler handler, MemberBinding binding, Type callbackType,
-            Type logicalResultType, FilterOptions options, params
-                IEnumerable<IFilterProvider>[] providers)
+        private static IEnumerable<(IFilter, IFilterProvider)>
+            GetOrderedFilters(this IHandler handler,
+                MemberBinding binding, MemberDispatch dispatcher,
+                Type callbackType, FilterOptions options,
+                params IEnumerable<IFilterProvider>[] providers)
         {
-            if (logicalResultType == typeof(void))
-                logicalResultType = typeof(object);
-
             return new SortedSet<(IFilter, IFilterProvider)>(providers
                     .Where(p => p != null)
                     .SelectMany(p => p)
@@ -84,7 +83,7 @@
                             Enumerable.Empty<IFilterProvider>())
                     .Where(provider => provider != null)
                     .SelectMany(provider => provider
-                        .GetFilters(binding, callbackType, logicalResultType, handler)
+                        .GetFilters(binding, dispatcher, callbackType, handler)
                         .Where(filter => filter != null)
                         .Select(filter => (filter, provider))),
                 FilterComparer.Instance);

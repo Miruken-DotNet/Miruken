@@ -22,9 +22,9 @@
 
         public bool Matches(BindingMetadata metadata)
         {
-            foreach (var item in metadata)
+            foreach (var item in _metadata)
             {
-                if (!(_metadata.TryGetValue(item.Key, out var value) &&
+                if (!(metadata.Get(item.Key, out object value) &&
                       Equals(item.Value, value))) return false;
             }
             return true;
@@ -49,7 +49,7 @@
 
         public bool Matches(BindingMetadata metadata)
         {
-            return metadata.Get<object>(_key, out var value)
+            return metadata.Get(_key, out object value)
                    && Equals(_value, value);
         }
     }

@@ -23,11 +23,16 @@
         public int?   Order       { get; set; }
         public bool   Required    { get; set; }
 
-        public IEnumerable<IFilter> GetFilters(MemberBinding binding, 
-            Type callbackType, Type logicalResultType, IHandler composer)
+        public IEnumerable<IFilter> GetFilters(
+            MemberBinding binding, MemberDispatch dispatcher,
+            Type callbackType, IHandler composer)
         {
+            var logicalReturnType = dispatcher.LogicalReturnType;
+            if (logicalReturnType == typeof(void))
+                logicalReturnType = typeof(object);
+
             var filterTypes = FilterTypes
-                .Select(f => CloseFilterType(f, callbackType, logicalResultType))
+                .Select(f => CloseFilterType(f, callbackType, logicalReturnType))
                 .Where(f => f != null && AcceptFilterType(f, binding))
                 .ToArray();
 
@@ -67,8 +72,8 @@
                     $"At least one filter must be provided by '{GetType().FullName}'");
         }
 
-        private static Type CloseFilterType(Type filterType, Type callbackType,
-            Type logicalResultType)
+        private static Type CloseFilterType(
+            Type filterType, Type callbackType, Type logicalResultType)
         {
             if (!filterType.IsGenericTypeDefinition)
                 return filterType;

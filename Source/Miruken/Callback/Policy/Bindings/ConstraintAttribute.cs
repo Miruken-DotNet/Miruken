@@ -32,12 +32,12 @@
         public IBindingConstraint Constraint { get; }
 
         IEnumerable<IFilter> IFilterProvider.GetFilters(
-            MemberBinding binding, Type callbackType,
-            Type logicalResultType, IHandler composer)
+            MemberBinding binding, MemberDispatch dispatcher,
+            Type callbackType, IHandler composer)
         {
             return new[]
             {
-                Constraints.GetOrAdd(logicalResultType, r =>
+                Constraints.GetOrAdd(dispatcher.LogicalReturnType, r =>
                     (IFilter) Activator.CreateInstance(
                         typeof(ConstraintFilter<>).MakeGenericType(r)))
             };

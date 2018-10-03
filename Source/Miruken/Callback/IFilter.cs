@@ -26,8 +26,9 @@
     {
         bool Required { get;}
 
-        IEnumerable<IFilter> GetFilters(MemberBinding binding,
-            Type callbackType, Type logicalResultType, IHandler composer);
+        IEnumerable<IFilter> GetFilters(
+            MemberBinding binding, MemberDispatch dispatcher,
+            Type callbackType, IHandler composer);
     }
 
     public interface IValidateFilterProvider

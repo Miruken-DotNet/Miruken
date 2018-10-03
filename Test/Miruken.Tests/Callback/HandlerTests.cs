@@ -644,28 +644,6 @@
             await handler.CommandAsync(boo);
         }
 
-        [TestMethod]
-        public void Should_Infer_Callback_Filter_Generic_Types()
-        {
-            var handler  = new FilterResolver();
-            var provider = new FilterAttribute(typeof(RequestFilterCb<>));
-            var filter   = provider.GetFilters(
-                null, typeof(string), typeof(int), handler)
-                .ToArray();
-            Assert.AreEqual(typeof(RequestFilterCb<string>), handler.RequestedType);
-        }
-
-        [TestMethod]
-        public void Should_Infer_Result_Filter_Generic_Types()
-        {
-            var handler  = new FilterResolver();
-            var provider = new FilterAttribute(typeof(RequestFilterRes<>));
-            var filter   = provider.GetFilters(
-                null, typeof(string), typeof(int), handler)
-                .ToArray();
-            Assert.AreEqual(typeof(RequestFilterRes<int>), handler.RequestedType);
-        }
-
         [TestMethod,
          ExpectedException(typeof(ArgumentException))]
         public void Should_Reject_Generic_Types_Not_Inferred()
@@ -999,18 +977,6 @@
         public void Should_Reject_Lifestye_If_Not_Provider()
         {
             HandlerDescriptor.GetDescriptor<SayHello>();
-        }
-
-        public class FilterResolver : Handler
-        {
-            public Type RequestedType { get; set; }
-
-            [Provides]
-            public object ResolveFilter(Inquiry inquiry)
-            {
-                RequestedType = inquiry.Key as Type;
-                return null;
-            }
         }
 
         public class RequestFilterCb<T> : IFilter<T, object>

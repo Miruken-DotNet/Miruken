@@ -23,8 +23,9 @@
 
         public bool Required { get; }
 
-        public IEnumerable<IFilter> GetFilters(MemberBinding binding,
-            Type callbackType, Type logicalResultType, IHandler composer)
+        public IEnumerable<IFilter> GetFilters(
+            MemberBinding binding, MemberDispatch dispatcher,
+            Type callbackType, IHandler composer)
         {
             return _filters;
         }

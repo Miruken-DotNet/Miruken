@@ -101,11 +101,12 @@
             IHandler composer, Type resultType, ResultsDelegate results)
         {
             object result;
-            var args       = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
+            var args = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(args, resultType);
 
             if ((callback as IDispatchCallbackGuard)
-                ?.CanDispatch(target, dispatcher) == false) return false;
+                ?.CanDispatch(target, dispatcher) == false)
+                return false;
 
             if (CallbackIndex.HasValue)
             {
@@ -130,14 +131,13 @@
 
             var actualCallback = GetCallbackInfo(
                 callback, args, dispatcher, out var callbackType);
-            var logicalType    = dispatcher.LogicalReturnType;
 
             var targetFilters  = target is IFilter targetFilter
                 ? new [] {new FilterInstancesProvider(targetFilter)}
                 : null;
 
             var filters = composer.GetOrderedFilters(
-                this, callbackType, logicalType, Filters,
+                this, dispatcher, callbackType, Filters,
                 dispatcher.Owner.Filters, Policy.Filters, targetFilters)
                 ?.ToArray();
 
@@ -150,12 +150,13 @@
                 if (!completed) return false;
                 result = dispatcher.Invoke(target, args, resultType);
             }
-            else if (!MemberPipeline.GetPipeline(callbackType, logicalType)
+            else if (!MemberPipeline.GetPipeline(
+                    callbackType, dispatcher.LogicalReturnType)
                 .Invoke(this, target, actualCallback,
                     (IHandler comp, out bool completed) =>
                     {
                         args = ResolveArgs(dispatcher, callback, args,
-                            comp, out completed);
+                                           comp, out completed);
                         if (!completed) return null;
                         var baseResult = dispatcher.Invoke(target, args, resultType);
                         completed = Policy.AcceptResult?.Invoke(baseResult, this)

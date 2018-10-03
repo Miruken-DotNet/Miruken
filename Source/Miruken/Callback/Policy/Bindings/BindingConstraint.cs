@@ -23,7 +23,7 @@
             if (metadata == null)
                 throw new ArgumentNullException(nameof(metadata));
 
-            return metadata.Get<object>(_key, out var value)
+            return metadata.Get(_key, out object value)
                    && _value == value;
         }
     }
