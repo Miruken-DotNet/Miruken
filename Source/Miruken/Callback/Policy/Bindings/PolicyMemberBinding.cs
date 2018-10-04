@@ -150,19 +150,17 @@
                 if (!completed) return false;
                 result = dispatcher.Invoke(target, args, resultType);
             }
-            else if (!MemberPipeline.GetPipeline(
-                    callbackType, dispatcher.LogicalReturnType)
-                .Invoke(this, target, actualCallback,
-                    (IHandler comp, out bool completed) =>
-                    {
-                        args = ResolveArgs(dispatcher, callback, args,
-                                           comp, out completed);
-                        if (!completed) return null;
-                        var baseResult = dispatcher.Invoke(target, args, resultType);
-                        completed = Policy.AcceptResult?.Invoke(baseResult, this)
-                                 ?? baseResult != null;
-                        return baseResult;
-                    }, composer, filters, out result))
+            else if (!dispatcher.GetPipeline(callbackType).Invoke(
+                this, target, actualCallback, (IHandler comp, out bool completed) =>
+                {
+                    args = ResolveArgs(dispatcher, callback, args,
+                                       comp, out completed);
+                    if (!completed) return null;
+                    var baseResult = dispatcher.Invoke(target, args, resultType);
+                    completed = Policy.AcceptResult?.Invoke(baseResult, this)
+                             ?? baseResult != null;
+                    return baseResult;
+                }, composer, filters, out result))
                 return false;
 
             return Accept(callback, result, returnType, results);

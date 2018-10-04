@@ -14,8 +14,6 @@
         IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
         private object _result;
-        private object _target;
-        private MemberDispatch _dispatcher;
         private readonly List<object> _resolutions;
 
         public Inquiry(object key, bool many = false)
@@ -38,9 +36,11 @@
         public bool    WantsAsync { get; set; }
         public bool    IsAsync    { get; private set; }
 
-        public CallbackPolicy Policy => Provides.Policy;
+        public object          Target     { get; private set; }
+        public MemberDispatch  Dispatcher { get; private set; }
+        public BindingMetadata Metadata   { get; }
 
-        public BindingMetadata Metadata { get; }
+        public CallbackPolicy Policy => Provides.Policy;
 
         public ICollection<object> Resolutions =>
             _resolutions.AsReadOnly();
@@ -149,22 +149,30 @@
             object target, MemberDispatch dispatcher)
         {
             if (InProgress(target, dispatcher)) return false;
-            _target     = target;
-            _dispatcher = dispatcher;
+            Target     = target;
+            Dispatcher = dispatcher;
             return true;
         }
 
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var isGreedy = greedy;
-            var handled  = Implied(handler, isGreedy, composer);
-            if (handled && !greedy) return true;
+            try
+            {
+                var isGreedy = greedy;
+                var handled  = Implied(handler, isGreedy, composer);
+                if (handled && !greedy) return true;
 
-            var count = _resolutions.Count;
-            handled = Policy.Dispatch(handler, this, greedy, composer, 
-                (r,strict) => Resolve(r, strict, isGreedy, composer)) || handled;
-            return handled || (_resolutions.Count > count);
+                var count = _resolutions.Count;
+                handled = Policy.Dispatch(handler, this, greedy, composer,
+                    (r, strict) => Resolve(r, strict, isGreedy, composer)) || handled;
+                return handled || (_resolutions.Count > count);
+            }
+            finally
+            {
+                Dispatcher = null;
+                Target     = null;
+            }
         }
 
         private bool Implied(object item, bool greedy, IHandler composer)
@@ -176,8 +184,8 @@
 
         private bool InProgress(object target, MemberDispatch dispatcher)
         {
-            return ReferenceEquals(target, _target) &&
-                   ReferenceEquals(dispatcher, _dispatcher) ||
+            return ReferenceEquals(target, Target) &&
+                   ReferenceEquals(dispatcher, Dispatcher) ||
                    Parent?.InProgress(target, dispatcher) == true;
         }
 

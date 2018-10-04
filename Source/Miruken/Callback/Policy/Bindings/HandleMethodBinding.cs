@@ -62,10 +62,8 @@
         private bool Invoke(
             HandleMethod handleMethod, object target, IHandler composer)
         {
-            var arguments         = handleMethod.Arguments;
-            var logicalReturnType = Dispatcher.LogicalReturnType;
-
-            var filters = composer.GetOrderedFilters(
+            var arguments = handleMethod.Arguments;
+            var filters   = composer.GetOrderedFilters(
                 this, Dispatcher, typeof(HandleMethod), 
                 Filters, Dispatcher.Owner.Filters, GlobalFilters)
                 ?.ToArray();
@@ -82,11 +80,9 @@
             }
             else
             {
-                var pipeline = MemberPipeline.GetPipeline(
-                    typeof(HandleMethod), logicalReturnType);
-
-                handled = pipeline.Invoke(this, target, handleMethod, 
-                    (IHandler comp, out bool completed) =>
+                handled = Dispatcher.GetPipeline(typeof(HandleMethod))
+                    .Invoke(this, target, handleMethod, 
+                        (IHandler comp, out bool completed) =>
                     {
                         completed = true;
                         if (comp != null && !ReferenceEquals(composer, comp))

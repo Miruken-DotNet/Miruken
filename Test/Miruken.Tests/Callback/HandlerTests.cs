@@ -911,6 +911,20 @@
         }
 
         [TestMethod]
+        public void Should_Reject_Contextual_In_Singleton()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+            HandlerDescriptor.GetDescriptor<LifestyleMismatch>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var c = context.Resolve<LifestyleMismatch>();
+                Assert.IsNull(c);
+            }
+        }
+
+        [TestMethod]
         public void Should_Select_Greediest_Constructor()
         {
             HandlerDescriptor.ResetDescriptors();
@@ -1577,6 +1591,14 @@
         {
             [Handles, Singleton]
             public string Hello(string name) => $"Hello {name}";
+        }
+
+        private class LifestyleMismatch
+        {
+            [Provides, Singleton]
+            public LifestyleMismatch(Screen screen)
+            {
+            }
         }
 
         private class OverloadedConstructors
