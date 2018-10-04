@@ -5,7 +5,7 @@
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Callback;
-    using Callback.Policy;
+    using Callback.Policy.Bindings;
 
     public class AuthorizeFilter<TCb, TRes> : DynamicFilter<TCb, TRes>
     {

@@ -27,10 +27,10 @@
         }
 
         bool IDispatchCallbackGuard.CanDispatch(
-            object handler, PolicyMemberBinding binding)
+            object target, MemberDispatch dispatcher)
         {
             return (_callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(handler, binding) != false;
+                   ?.CanDispatch(target, dispatcher) != false;
         }
 
         protected override bool IsSatisfied(

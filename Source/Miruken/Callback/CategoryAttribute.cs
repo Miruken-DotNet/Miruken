@@ -2,6 +2,7 @@ namespace Miruken.Callback
 {
     using System;
     using Policy;
+    using Policy.Bindings;
 
     [AttributeUsage(AttributeTargets.Method,
         AllowMultiple = true, Inherited = false)]

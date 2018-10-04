@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Policy;
+    using Policy.Bindings;
 
     public delegate Task<Res> Next<Res>(
         IHandler composer = null, bool proceed = true);
@@ -25,8 +26,9 @@
     {
         bool Required { get;}
 
-        IEnumerable<IFilter> GetFilters(MemberBinding binding,
-            Type callbackType, Type logicalResultType, IHandler composer);
+        IEnumerable<IFilter> GetFilters(
+            MemberBinding binding, MemberDispatch dispatcher,
+            Type callbackType, IHandler composer);
     }
 
     public interface IValidateFilterProvider

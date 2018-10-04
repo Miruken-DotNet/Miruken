@@ -1,4 +1,4 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
     using System.Collections.Generic;
@@ -62,9 +62,11 @@
         private bool Invoke(
             HandleMethod handleMethod, object target, IHandler composer)
         {
-            var arguments = handleMethod.Arguments;
-            var filters   = composer.GetOrderedFilters(
-                this, typeof(HandleMethod), typeof(object),
+            var arguments         = handleMethod.Arguments;
+            var logicalReturnType = Dispatcher.LogicalReturnType;
+
+            var filters = composer.GetOrderedFilters(
+                this, Dispatcher, typeof(HandleMethod), 
                 Filters, Dispatcher.Owner.Filters, GlobalFilters)
                 ?.ToArray();
 
@@ -80,7 +82,10 @@
             }
             else
             {
-                handled = Pipeline.Invoke(this, target, handleMethod, 
+                var pipeline = MemberPipeline.GetPipeline(
+                    typeof(HandleMethod), logicalReturnType);
+
+                handled = pipeline.Invoke(this, target, handleMethod, 
                     (IHandler comp, out bool completed) =>
                     {
                         completed = true;
@@ -106,9 +111,6 @@
 
             }
         }
-
-        private static readonly MemberPipeline Pipeline = MemberPipeline
-            .GetPipeline(typeof(HandleMethod), typeof(object));
 
         [ThreadStatic] internal static IHandler Composer;
         [ThreadStatic] internal static bool     Unhandled;

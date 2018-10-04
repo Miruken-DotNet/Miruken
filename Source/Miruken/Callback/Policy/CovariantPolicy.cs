@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Infrastructure;
+    using Rules;
 
     public abstract class CovariantPolicy : CallbackPolicy
     {
@@ -48,7 +49,6 @@
                 }
                 return type.GetOpenTypeConformance(key) != null;
             }
-
             return key.IsGenericParameter 
                  ? key.SatisfiesGenericParameterConstraints(type)
                  : type.IsAssignableFrom(key);

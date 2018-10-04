@@ -2,6 +2,7 @@
 {
     using System.Threading;
     using Policy;
+    using Policy.Bindings;
 
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class

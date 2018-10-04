@@ -6,7 +6,9 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using Infrastructure;
     using Policy;
+    using Policy.Bindings;
 
     public abstract class DynamicFilter : IFilter
     {
@@ -40,43 +42,55 @@
             if (arguments.Length == 2)
                 return new object[] { callback, next };
 
-            List<Argument> culprits = null;
-            var args   = new object[arguments.Length];
-            var parent = callback as Inquiry;
+            var args     = new object[arguments.Length];
+            var parent   = callback as Inquiry;
+            var culprits = new List<Argument>();
 
-            if (!composer.All(bundle =>
+            var dependencies = new Bundle();
+            for (var i = 2; i < arguments.Length; ++i)
             {
-                for (var i = 2; i < arguments.Length; ++i)
+                var index        = i;
+                var argument     = arguments[i];
+                var argumentType = argument.ArgumentType;
+                var optional     = argument.IsOptional;
+                if (argumentType == typeof(IHandler))
+                    args[i] = composer;
+                else if (argumentType.Is<MemberBinding>())
+                    args[i] = member;
+                else if (argumentType.IsInstanceOfType(provider))
+                    args[i] = provider;
+                else if (argumentType == typeof(object))
                 {
-                    var index        = i;
-                    var argument     = arguments[i];
-                    var argumentType = argument.ArgumentType;
-                    var optional     = argument.Optional;
-                    var resolver     = argument.Resolver ?? ResolvingAttribute.Default;
-                    if (argumentType == typeof(IHandler))
-                        args[i] = composer;
-                    else if (argumentType.IsInstanceOfType(member))
-                        args[i] = member;
-                    else if (argumentType.IsInstanceOfType(provider))
-                        args[i] = provider;
-                    else
-                        bundle.Add(h => args[index] = resolver.ResolveArgument(
-                            parent, argument, optional ? h.BestEffort() : h, composer),
-                            (ref bool resolved) =>
-                            {
-                                if (!resolved)
-                                    (culprits ?? (culprits = new List<Argument>()))
-                                        .Add(argument);
-                                return false;
-                            });
+                    throw new InvalidOperationException(
+                        $"Object dependency '{argument.Parameter.Name}' is not allowed");
                 }
-            }))
-            {
-                var errors = new StringBuilder("Missing dependencies");
-                foreach (var culprit in culprits)
-                    errors.Append($" {culprit.Parameter.Name}:{culprit.ParameterType}");
-                throw new InvalidOperationException(errors.ToString());
+                else
+                {
+                    var resolver = argument.Resolver ?? ResolvingAttribute.Default;
+                    dependencies.Add(h => args[index] = resolver.ResolveArgument(
+                            parent, argument, optional ? h.BestEffort() : h, composer),
+                        (ref bool resolved) =>
+                        {
+                            if (!resolved) culprits.Add(argument);
+                            return false;
+                        });
+                }
             }
+
+            if (!dependencies.IsEmpty)
+            {
+                var handled  = composer.Handle(dependencies);
+                var complete = dependencies.Complete();
+                if (dependencies.IsAsync) complete.Wait();
+                if (!(handled || dependencies.Handled))
+                {
+                    var errors = new StringBuilder("Missing dependencies");
+                    foreach (var culprit in culprits)
+                        errors.Append($" {culprit.Parameter.Name}:{culprit.ParameterType}");
+                    throw new InvalidOperationException(errors.ToString());
+                }
+            }
+
             args[0] = callback;
             args[1] = next;
             return args;

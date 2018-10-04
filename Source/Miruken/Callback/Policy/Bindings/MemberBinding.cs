@@ -1,4 +1,4 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
     using System.Linq;

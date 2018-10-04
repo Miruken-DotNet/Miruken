@@ -4,7 +4,9 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using Bindings;
     using Infrastructure;
+    using Rules;
 
     public class ContravariantPolicy : CallbackPolicy
     {

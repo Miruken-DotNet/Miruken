@@ -7,20 +7,22 @@
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Inquiry : ICallback, IAsyncCallback,
-        IDispatchCallback, IDispatchCallbackGuard
+        IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
         private object _result;
-        private object _handler;
-        private PolicyMemberBinding _binding;
+        private object _target;
+        private MemberDispatch _dispatcher;
         private readonly List<object> _resolutions;
 
         public Inquiry(object key, bool many = false)
         {
             Key          = key ?? throw new ArgumentNullException(nameof(key));
             Many         = many;
+            Metadata     = new BindingMetadata();
             _resolutions = new List<object>();
         }
 
@@ -37,6 +39,8 @@
         public bool    IsAsync    { get; private set; }
 
         public CallbackPolicy Policy => Provides.Policy;
+
+        public BindingMetadata Metadata { get; }
 
         public ICollection<object> Resolutions =>
             _resolutions.AsReadOnly();
@@ -142,11 +146,11 @@
         }
 
         bool IDispatchCallbackGuard.CanDispatch(
-            object handler, PolicyMemberBinding binding)
+            object target, MemberDispatch dispatcher)
         {
-            if (InProgress(handler, binding)) return false;
-            _handler = handler;
-            _binding = binding;
+            if (InProgress(target, dispatcher)) return false;
+            _target     = target;
+            _dispatcher = dispatcher;
             return true;
         }
 
@@ -170,11 +174,11 @@
             return compatible && Resolve(item, false, greedy, composer);
         }
 
-        private bool InProgress(object handler, PolicyMemberBinding binding)
+        private bool InProgress(object target, MemberDispatch dispatcher)
         {
-            return ReferenceEquals(handler, _handler) &&
-                   ReferenceEquals(binding, _binding) ||
-                   Parent?.InProgress(handler, binding) == true;
+            return ReferenceEquals(target, _target) &&
+                   ReferenceEquals(dispatcher, _dispatcher) ||
+                   Parent?.InProgress(target, dispatcher) == true;
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)

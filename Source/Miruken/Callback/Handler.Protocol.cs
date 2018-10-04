@@ -3,6 +3,7 @@
     using System;
     using Infrastructure;
     using Policy;
+    using Policy.Bindings;
 
     public interface IResolving {}
 
