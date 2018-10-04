@@ -17,14 +17,17 @@
             MemberBinding member, IHandler composer,
             Next<T> next, IFilterProvider provider)
         {
-            return GetInstance(member, next, composer, out var instance)
+            return GetInstance(
+                callback, member, next, composer,
+                out var instance)
                  ? Task.FromResult(instance)
                  : null;
         }
 
         protected abstract bool GetInstance(
-            MemberBinding member,  Next<T> next,
-            IHandler composer, out T instance);
+            Inquiry inquiry, MemberBinding member,
+            Next<T> next, IHandler composer,
+            out T instance);
     }
 
     [AttributeUsage(

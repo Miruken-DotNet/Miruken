@@ -9,7 +9,7 @@
     public delegate object CompletePipelineDelegate(
         IHandler handler, out bool completed);
 
-    internal abstract class MemberPipeline
+    public abstract class MemberPipeline
     {
         public abstract bool Invoke(
             MemberBinding binding, object target,
@@ -32,7 +32,7 @@
             Pipelines = new ConcurrentDictionary<(Type, Type), MemberPipeline>();
     }
 
-    internal class MemberPipeline<TCb, TRes> : MemberPipeline
+    public class MemberPipeline<TCb, TRes> : MemberPipeline
     {
         public override bool Invoke(
             MemberBinding binding, object target, 
