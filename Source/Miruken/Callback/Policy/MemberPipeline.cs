@@ -4,15 +4,18 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Bindings;
 
     public delegate object CompletePipelineDelegate(
         IHandler handler, out bool completed);
 
-    internal abstract class MemberPipeline
+    public abstract class MemberPipeline
     {
-        public abstract bool Invoke(MemberBinding binding, object target,
-            object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<(IFilter, IFilterProvider)> filters, out object result);
+        public abstract bool Invoke(
+            MemberBinding binding, object target,
+            object callback, CompletePipelineDelegate complete,
+            IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters, 
+            out object result);
 
         public static MemberPipeline GetPipeline(Type callbackType, Type resultType)
         {
@@ -29,11 +32,13 @@
             Pipelines = new ConcurrentDictionary<(Type, Type), MemberPipeline>();
     }
 
-    internal class MemberPipeline<TCb, TRes> : MemberPipeline
+    public class MemberPipeline<TCb, TRes> : MemberPipeline
     {
-        public override bool Invoke(MemberBinding binding, object target, 
-            object callback, CompletePipelineDelegate complete, IHandler composer,
-            IEnumerable<(IFilter, IFilterProvider)> filters, out object result)
+        public override bool Invoke(
+            MemberBinding binding, object target, 
+            object callback, CompletePipelineDelegate complete,
+            IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters,
+            out object result)
         {
             var completed = true;
             using (var pipeline = filters.GetEnumerator())

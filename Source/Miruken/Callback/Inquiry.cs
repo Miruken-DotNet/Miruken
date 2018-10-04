@@ -7,20 +7,20 @@
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Inquiry : ICallback, IAsyncCallback,
-        IDispatchCallback, IDispatchCallbackGuard
+        IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
         private object _result;
-        private object _handler;
-        private PolicyMemberBinding _binding;
         private readonly List<object> _resolutions;
 
         public Inquiry(object key, bool many = false)
         {
             Key          = key ?? throw new ArgumentNullException(nameof(key));
             Many         = many;
+            Metadata     = new BindingMetadata();
             _resolutions = new List<object>();
         }
 
@@ -35,6 +35,10 @@
         public Inquiry Parent     { get; }
         public bool    WantsAsync { get; set; }
         public bool    IsAsync    { get; private set; }
+
+        public object          Target     { get; private set; }
+        public MemberDispatch  Dispatcher { get; private set; }
+        public BindingMetadata Metadata   { get; }
 
         public CallbackPolicy Policy => Provides.Policy;
 
@@ -142,25 +146,33 @@
         }
 
         bool IDispatchCallbackGuard.CanDispatch(
-            object handler, PolicyMemberBinding binding)
+            object target, MemberDispatch dispatcher)
         {
-            if (InProgress(handler, binding)) return false;
-            _handler = handler;
-            _binding = binding;
+            if (InProgress(target, dispatcher)) return false;
+            Target     = target;
+            Dispatcher = dispatcher;
             return true;
         }
 
         bool IDispatchCallback.Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
-            var isGreedy = greedy;
-            var handled  = Implied(handler, isGreedy, composer);
-            if (handled && !greedy) return true;
+            try
+            {
+                var isGreedy = greedy;
+                var handled  = Implied(handler, isGreedy, composer);
+                if (handled && !greedy) return true;
 
-            var count = _resolutions.Count;
-            handled = Policy.Dispatch(handler, this, greedy, composer, 
-                (r,strict) => Resolve(r, strict, isGreedy, composer)) || handled;
-            return handled || (_resolutions.Count > count);
+                var count = _resolutions.Count;
+                handled = Policy.Dispatch(handler, this, greedy, composer,
+                    (r, strict) => Resolve(r, strict, isGreedy, composer)) || handled;
+                return handled || (_resolutions.Count > count);
+            }
+            finally
+            {
+                Dispatcher = null;
+                Target     = null;
+            }
         }
 
         private bool Implied(object item, bool greedy, IHandler composer)
@@ -170,11 +182,11 @@
             return compatible && Resolve(item, false, greedy, composer);
         }
 
-        private bool InProgress(object handler, PolicyMemberBinding binding)
+        private bool InProgress(object target, MemberDispatch dispatcher)
         {
-            return ReferenceEquals(handler, _handler) &&
-                   ReferenceEquals(binding, _binding) ||
-                   Parent?.InProgress(handler, binding) == true;
+            return ReferenceEquals(target, Target) &&
+                   ReferenceEquals(dispatcher, Dispatcher) ||
+                   Parent?.InProgress(target, dispatcher) == true;
         }
 
         private static IEnumerable<object> Flatten(IEnumerable<object> collection)

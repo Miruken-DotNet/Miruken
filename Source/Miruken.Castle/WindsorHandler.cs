@@ -2,17 +2,14 @@
 {
     using System;
     using System.Collections;
-    using System.Linq;
     using global::Castle.MicroKernel;
     using global::Castle.Windsor;
     using Callback;
-    using Concurrency;
-    using Container;
     using global::Castle.MicroKernel.Handlers;
     using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using IHandler = Callback.IHandler;
 
-    public class WindsorHandler : Handler, IContainer, IDisposable
+    public class WindsorHandler : Handler, IDisposable
     {
         public WindsorHandler(Action<IWindsorContainer> config = null)
         {
@@ -35,64 +32,6 @@
 
         public IWindsorContainer Container { get; }
 
-        T IContainer.Resolve<T>()
-        {
-            return (T)((IContainer)this).Resolve(typeof(T));
-        }
-
-        object IContainer.Resolve(object key)
-        {
-            var resolution = new DependencyResolution(key);
-            var greedy = false;
-            return Handle(resolution, ref greedy, Composer)
-                 ? resolution.Result
-                 : null;
-        }
-
-        Promise<T> IContainer.ResolveAsync<T>()
-        {
-            var container = (IContainer)this;
-            return Promise.Resolved(container.Resolve<T>());
-        }
-
-        Promise IContainer.ResolveAsync(object key)
-        {
-            var container = (IContainer)this;
-            return Promise.Resolved(container.Resolve(key));
-        }
-
-        T[] IContainer.ResolveAll<T>()
-        {
-            return ((IContainer)this).ResolveAll(typeof(T))
-                .Cast<T>().ToArray();
-        }
-
-        object[] IContainer.ResolveAll(object key)
-        {
-            var resolution = new DependencyResolution(key, null, true);
-            var greedy = true;
-            return Handle(resolution, ref greedy, Composer)
-                 ? (object[])resolution.Result
-                 : Array.Empty<object>();
-        }
-
-        Promise<T[]> IContainer.ResolveAllAsync<T>()
-        {
-            var container = (IContainer)this;
-            return Promise.Resolved(container.ResolveAll<T>());
-        }
-
-        Promise<object[]> IContainer.ResolveAllAsync(object key)
-        {
-            var container = (IContainer)this;
-            return Promise.Resolved(container.ResolveAll(key));
-        }
-
-        void IContainer.Release(object component)
-        {
-            Container.Release(component);
-        }
-
         [Provides]
         private object Resolve(Inquiry inquiry, IHandler composer)
         {
@@ -100,15 +39,9 @@
             if (type == null || type.IsGenericTypeDefinition)
                 return null;
 
-            var dependency = inquiry as DependencyResolution
-                          ?? new DependencyResolution(inquiry.Key);
-
-            if (!dependency.Claim(this))
-                return null;  // cycle detected
-
             try
             {
-                var args = CreateArgs(composer, dependency);
+                var args = CreateArgs(composer, inquiry);
                 return inquiry.Many || inquiry is Resolving
                      ? Container.ResolveAll(type, args)
                      : Resolve(type, args);
@@ -139,13 +72,12 @@
                 return null;
             }
         }
-        private static IDictionary CreateArgs(
-            IHandler composer, DependencyResolution resolution)
+        private static IDictionary CreateArgs(IHandler composer, Inquiry inquiry)
         {
             composer = composer ?? Composer;
             return composer == null ? null : new Hashtable
             {
-                [ResolutionKey] = resolution,
+                [ResolutionKey] = inquiry,
                 [ComposerKey]   = composer
             };
         }

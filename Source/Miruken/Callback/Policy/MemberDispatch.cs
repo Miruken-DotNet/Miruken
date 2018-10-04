@@ -82,6 +82,39 @@
             return this;
         }
 
+        public MemberPipeline GetPipeline(Type callbackType)
+        {
+            return MemberPipeline.GetPipeline(callbackType, LogicalReturnType);
+        }
+
+        public Type CloseFilterType(Type filterType, Type callbackType)
+        {
+            if (!filterType.IsGenericTypeDefinition)
+                return filterType;
+            var logicalResultType = LogicalReturnType;
+            if (logicalResultType == typeof(void))
+                logicalResultType = typeof(object);
+
+            var openFilterType = typeof(IFilter<,>);
+            if (filterType == openFilterType)
+                return filterType.MakeGenericType(callbackType, logicalResultType);
+            var conformance  = filterType.GetOpenTypeConformance(openFilterType);
+            var inferredArgs = conformance.GetGenericArguments();
+            var closedArgs = new List<Type>();
+            for (var i = 0; i < inferredArgs.Length; ++i)
+            {
+                var arg = inferredArgs[i];
+                if (!arg.ContainsGenericParameters) continue;
+                var closedArg = i == 0 ? callbackType : logicalResultType;
+                if (arg.IsGenericParameter &&
+                    !arg.GetGenericParameterConstraints().All(
+                        constraint => closedArg.Is(constraint)))
+                    return null;
+                closedArgs.Add(closedArg);
+            }
+            return filterType.MakeGenericType(closedArgs.ToArray());
+        }
+
         private Type ConfigureMember()
         {
             if (Member.ContainsGenericParameters)

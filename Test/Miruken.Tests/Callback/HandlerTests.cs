@@ -7,6 +7,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
     using Miruken.Context;
 
@@ -610,8 +611,9 @@
             var bar = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
-            Assert.AreEqual(3, bar.Filters.Count);
+            Assert.AreEqual(4, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
+            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<LogFilter<Bar, object>>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
@@ -640,28 +642,6 @@
             var boo     = new Boo();
             var handler = new SpecialFilteredHandler() + new FilteredHandler();
             await handler.CommandAsync(boo);
-        }
-
-        [TestMethod]
-        public void Should_Infer_Callback_Filter_Generic_Types()
-        {
-            var handler  = new FilterResolver();
-            var provider = new FilterAttribute(typeof(RequestFilterCb<>));
-            var filter   = provider.GetFilters(
-                null, typeof(string), typeof(int), handler)
-                .ToArray();
-            Assert.AreEqual(typeof(RequestFilterCb<string>), handler.RequestedType);
-        }
-
-        [TestMethod]
-        public void Should_Infer_Result_Filter_Generic_Types()
-        {
-            var handler  = new FilterResolver();
-            var provider = new FilterAttribute(typeof(RequestFilterRes<>));
-            var filter   = provider.GetFilters(
-                null, typeof(string), typeof(int), handler)
-                .ToArray();
-            Assert.AreEqual(typeof(RequestFilterRes<int>), handler.RequestedType);
         }
 
         [TestMethod,
@@ -931,6 +911,20 @@
         }
 
         [TestMethod]
+        public void Should_Reject_Contextual_In_Singleton()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+            HandlerDescriptor.GetDescriptor<LifestyleMismatch>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var c = context.Resolve<LifestyleMismatch>();
+                Assert.IsNull(c);
+            }
+        }
+
+        [TestMethod]
         public void Should_Select_Greediest_Constructor()
         {
             HandlerDescriptor.ResetDescriptors();
@@ -997,18 +991,6 @@
         public void Should_Reject_Lifestye_If_Not_Provider()
         {
             HandlerDescriptor.GetDescriptor<SayHello>();
-        }
-
-        public class FilterResolver : Handler
-        {
-            public Type RequestedType { get; set; }
-
-            [Provides]
-            public object ResolveFilter(Inquiry inquiry)
-            {
-                RequestedType = inquiry.Key as Type;
-                return null;
-            }
         }
 
         public class RequestFilterCb<T> : IFilter<T, object>
@@ -1611,6 +1593,14 @@
             public string Hello(string name) => $"Hello {name}";
         }
 
+        private class LifestyleMismatch
+        {
+            [Provides, Singleton]
+            public LifestyleMismatch(Screen screen)
+            {
+            }
+        }
+
         private class OverloadedConstructors
         {
             [Provides, Contextual]
@@ -1682,6 +1672,12 @@
              SkipFilters]
             public void HandleBee(Bee bee)
             {
+            }
+
+            [Provides]
+            public ContravarintFilter CreateFilter()
+            {
+                return new ContravarintFilter();
             }
 
             [Provides(typeof(IFilter<,>))]
@@ -1759,6 +1755,20 @@
                     cb = command.Callback as Callback;
             }
             return cb;
+        }
+
+        private class ContravarintFilter : IFilter<object, object>
+        {
+            public int? Order { get; set; }
+
+            public Task<object> Next(object callback, MemberBinding member,
+                IHandler composer, Next<object> next,
+                IFilterProvider provider = null)
+            {
+                if (callback is Callback cb)
+                    cb.Filters.Add(this);
+                return next();
+            }
         }
 
         private class LogFilter<Cb, Res> : IFilter<Cb, Res>

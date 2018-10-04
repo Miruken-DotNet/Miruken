@@ -12,7 +12,6 @@
     using Miruken.Castle;
     using Validate.Tests;
     using Validate.Tests.Model;
-    using static Protocol;
 
     [TestClass]
     public class ValidateFeatureTests

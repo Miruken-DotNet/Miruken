@@ -5,6 +5,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Bindings;
+    using Rules;
 
     public delegate bool AcceptResultDelegate(object result, MemberBinding binding);
 

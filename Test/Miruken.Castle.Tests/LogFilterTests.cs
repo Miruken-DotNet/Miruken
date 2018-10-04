@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
+    using Callback.Policy.Bindings;
     using Castle;
     using global::Castle.Facilities.Logging;
     using global::Castle.MicroKernel.Registration;

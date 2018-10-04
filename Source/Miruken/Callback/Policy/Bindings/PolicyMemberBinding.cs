@@ -1,9 +1,11 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy.Bindings
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using Infrastructure;
+    using Rules;
 
     public delegate PolicyMemberBinding BindMemberDelegate(
         CallbackPolicy policy,
@@ -59,8 +61,6 @@
         public override bool Dispatch(object target, object callback, 
             IHandler composer, ResultsDelegate results = null)
         {
-            if ((callback as IDispatchCallbackGuard)
-                ?.CanDispatch(target, this) == false) return false;
             var resultType = Policy.GetResultType?.Invoke(callback);
             return Invoke(target, callback, composer, resultType, results);
         }
@@ -101,8 +101,13 @@
             IHandler composer, Type resultType, ResultsDelegate results)
         {
             object result;
-            var args       = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
+            var args = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(args, resultType);
+
+            if ((callback as IDispatchCallbackGuard)
+                ?.CanDispatch(target, dispatcher) == false)
+                return false;
+
             if (CallbackIndex.HasValue)
             {
                 var index = CallbackIndex.Value;
@@ -126,14 +131,13 @@
 
             var actualCallback = GetCallbackInfo(
                 callback, args, dispatcher, out var callbackType);
-            var logicalType    = dispatcher.LogicalReturnType;
 
             var targetFilters  = target is IFilter targetFilter
                 ? new [] {new FilterInstancesProvider(targetFilter)}
                 : null;
 
             var filters = composer.GetOrderedFilters(
-                this, callbackType, logicalType, Filters,
+                this, dispatcher, callbackType, Filters,
                 dispatcher.Owner.Filters, Policy.Filters, targetFilters)
                 ?.ToArray();
 
@@ -146,18 +150,17 @@
                 if (!completed) return false;
                 result = dispatcher.Invoke(target, args, resultType);
             }
-            else if (!MemberPipeline.GetPipeline(callbackType, logicalType)
-                .Invoke(this, target, actualCallback,
-                    (IHandler comp, out bool completed) =>
-                    {
-                        args = ResolveArgs(dispatcher, callback, args,
-                            comp, out completed);
-                        if (!completed) return null;
-                        var baseResult = dispatcher.Invoke(target, args, resultType);
-                        completed = Policy.AcceptResult?.Invoke(baseResult, this)
-                                 ?? baseResult != null;
-                        return baseResult;
-                    }, composer, filters, out result))
+            else if (!dispatcher.GetPipeline(callbackType).Invoke(
+                this, target, actualCallback, (IHandler comp, out bool completed) =>
+                {
+                    args = ResolveArgs(dispatcher, callback, args,
+                                       comp, out completed);
+                    if (!completed) return null;
+                    var baseResult = dispatcher.Invoke(target, args, resultType);
+                    completed = Policy.AcceptResult?.Invoke(baseResult, this)
+                             ?? baseResult != null;
+                    return baseResult;
+                }, composer, filters, out result))
                 return false;
 
             return Accept(callback, result, returnType, results);
@@ -190,34 +193,45 @@
             var parent = callback as Inquiry;
             var args   = new object[arguments.Length];
 
-            if (!composer.All(bundle =>
+            var dependencies = new Bundle();
+            for (var i = ruleArgs.Length; i < arguments.Length; ++i)
             {
-                for (var i = ruleArgs.Length; i < arguments.Length; ++i)
+                var index        = i;
+                var argument     = arguments[i];
+                var argumentType = argument.ArgumentType;
+                var optional     = argument.IsOptional;
+                if (argumentType == typeof(IHandler))
+                    args[i] = composer;
+                else if (argumentType.Is<MemberBinding>())
+                    args[i] = this;
+                else if (argumentType == typeof(object))
                 {
-                    var index        = i;
-                    var argument     = arguments[i];
-                    var argumentType = argument.ArgumentType;
-                    var optional     = argument.Optional;
-                    if (argumentType == typeof(IHandler))
-                        args[i] = composer;
-                    else if (argumentType.IsInstanceOfType(this))
-                        args[i] = this;
-                    else
-                    {
-                        var resolver = argument.Resolver ?? ResolvingAttribute.Default;
-                        bundle.Add(h => args[index] =
-                                resolver.ResolveArgument(parent, argument, h, composer),
-                            (ref bool resolved) =>
-                            {
-                                resolved = resolved || optional;
-                                return false;
-                            });
-                    }
+                    completed = false;
+                    return null;
                 }
-            }))
+                else
+                {
+                    var resolver = argument.Resolver ?? ResolvingAttribute.Default;
+                    dependencies.Add(h => args[index] =
+                            resolver.ResolveArgument(parent, argument, h, composer),
+                        (ref bool resolved) =>
+                        {
+                            resolved = resolved || optional;
+                            return false;
+                        });
+                }
+            }
+
+            if (!dependencies.IsEmpty)
             {
-                completed = false;
-                return null;
+                var handled  = composer.Handle(dependencies);
+                var complete = dependencies.Complete();
+                if (dependencies.IsAsync) complete.Wait();
+                if (!(handled || dependencies.Handled))
+                {
+                    completed = false;
+                    return null;
+                }
             }
 
             Array.Copy(ruleArgs, args, ruleArgs.Length);

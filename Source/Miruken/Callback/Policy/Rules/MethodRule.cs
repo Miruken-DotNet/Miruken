@@ -1,8 +1,9 @@
-namespace Miruken.Callback.Policy
+namespace Miruken.Callback.Policy.Rules
 {
     using System;
     using System.Linq;
     using System.Reflection;
+    using Bindings;
 
     public delegate PolicyMemberBinding MemberBinder(
         PolicyMemberBindingInfo policyMemberBindingInfo);

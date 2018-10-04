@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Infrastructure;
+    using Rules;
 
     public abstract class CovariantPolicy : CallbackPolicy
     {

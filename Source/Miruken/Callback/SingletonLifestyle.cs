@@ -1,7 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System.Threading;
-    using Policy;
+    using Policy.Bindings;
 
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class
@@ -9,8 +9,10 @@
         private T _instance;
         private bool _initialized;
 
-        protected override bool GetInstance(MemberBinding member,
-            Next<T> next, IHandler composer, out T instance)
+        protected override bool GetInstance(
+            Inquiry inquiry, MemberBinding member,
+            Next<T> next, IHandler composer,
+            out T instance)
         {
             if (_initialized)
             {

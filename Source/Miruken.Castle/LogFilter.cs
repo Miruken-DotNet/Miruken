@@ -7,7 +7,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Callback;
-    using Callback.Policy;
+    using Callback.Policy.Bindings;
     using global::Castle.Core.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;

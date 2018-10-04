@@ -1,7 +1,8 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy.Rules
 {
     using System;
     using System.Reflection;
+    using Bindings;
 
     public abstract class ReturnRule
     {

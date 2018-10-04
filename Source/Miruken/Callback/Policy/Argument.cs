@@ -4,77 +4,115 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Bindings;
     using Concurrency;
     using Infrastructure;
 
-    public interface IArgumentResolver
-    {
-        bool IsOptional { get;  }
-
-        void ValidateArgument(Argument argument);
-
-        object ResolveArgument(Inquiry parent,
-            Argument argument, IHandler handler, IHandler composer);
-    } 
-
     public class Argument
     {
+        [Flags]
+        public enum Flags
+        {
+            None     = 0,
+            Lazy     = 1 << 0,
+            Array    = 1 << 1,
+            Simple   = 1 << 2,
+            Promise  = 1 << 3,
+            Task     = 1 << 4,
+            Optional = 1 << 5
+        }
+
         public Argument(ParameterInfo parameter)
         {
             Parameter     = parameter;
-            ParameterType = parameter.ParameterType;
-            ExtractFlags(ParameterType);
+            ArgumentFlags = ExtractFlags(ParameterType);
             Attributes    = Attribute.GetCustomAttributes(parameter, false);
-            if (Attributes.Length > 0)
-            {
-                var key = Attributes.OfType<KeyAttribute>().SingleOrDefault();
-                if (key != null) Key = key.Key;
-                Resolver = Attributes.OfType<IArgumentResolver>().SingleOrDefault();
-                Optional = Resolver?.IsOptional == true
-                        || Attributes.OfType<OptionalAttribute>().Any();
-            }
+
+            if (Attributes.Length == 0)
+                Attributes = Array.Empty<Attribute>();
             else
             {
-                Attributes = Array.Empty<Attribute>();
+                foreach (var attribute in Attributes)
+                {
+                    switch (attribute)
+                    {
+                        case KeyAttribute key:
+                            if (Key != null)
+                                throw new InvalidOperationException(
+                                    $"Only one KeyAttribute allowed for {parameter.Member}");
+                            Key = key.Key;
+                            break;
+                        case IArgumentResolver resolver:
+                            if (Resolver != null)
+                                throw new InvalidOperationException(
+                                    $"Only one IArgumentResolver allowed for {parameter.Member}");
+                            Resolver = resolver;
+                            break;
+                        case ConstraintAttribute constraint:
+                            if (Metadata == null)
+                                Metadata = new  BindingMetadata();
+                            constraint.Constraint.Require(Metadata);
+                            break;
+                    }        
+                }
             }
+            if (Resolver?.IsOptional == true ||
+                Attributes.OfType<OptionalAttribute>().Any())
+                ArgumentFlags |= Flags.Optional;
+
             if (Resolver == null && ParameterType.IsInterface &&
                 (ParameterType.Is<IProtocol>() || ParameterType.Is<IResolving>()))
-            {
                 Resolver = ProxyAttribute.Instance;
-            }
+
             if (Key == null)
                 Key = IsSimple ? Parameter.Name : (object)LogicalType;
+
             Resolver?.ValidateArgument(this);
         }
 
         public object            Key           { get; }
         public ParameterInfo     Parameter     { get; }
-        public Type              ParameterType { get; }
+        public Flags             ArgumentFlags { get; }
         public Type              ArgumentType  { get; private set; }
         public Type              LogicalType   { get; private set; }
         public Attribute[]       Attributes    { get; }
         public IArgumentResolver Resolver      { get; }
-        public bool              Optional      { get; }
+        public BindingMetadata   Metadata      { get; }
 
-        public bool              IsLazy        { get; private set; }
-        public bool              IsArray       { get; private set; }
-        public bool              IsSimple      { get; private set; }
-        public bool              IsPromise     { get; private set; }
-        public bool              IsTask        { get; private set; }
+        public Type ParameterType => Parameter.ParameterType;
+        public bool IsLazy        => ArgumentFlags.HasFlag(Flags.Lazy);
+        public bool IsArray       => ArgumentFlags.HasFlag(Flags.Array);
+        public bool IsSimple      => ArgumentFlags.HasFlag(Flags.Simple);
+        public bool IsPromise     => ArgumentFlags.HasFlag(Flags.Promise);
+        public bool IsTask        => ArgumentFlags.HasFlag(Flags.Task);
+        public bool IsOptional    => ArgumentFlags.HasFlag(Flags.Optional);
 
         public bool IsInstanceOf(object argument) =>
             ParameterType.IsInstanceOfType(argument);
 
-        private void ExtractFlags(Type parameterType)
+        public Action<ConstraintBuilder> GetConstraints()
         {
-            var type     = parameterType;
-            IsLazy       = ExtractLazy(ref type);
+            if (Metadata == null) return null;
+            return builder => builder.Require(Metadata);
+        }
+
+        private Flags ExtractFlags(Type parameterType)
+        {
+            var flags = Flags.None;
+            var type  = parameterType;
+            if (ExtractLazy(ref type))
+                flags |= Flags.Lazy;
             ArgumentType = type;
-            IsPromise    = ExtractPromise(ref type);
-            IsTask       = ExtractTask(ref type);
-            IsArray      = ExtractArray(ref type);
-            IsSimple     = type.IsSimpleType();
-            LogicalType  = type;
+            if (ExtractPromise(ref type))
+                flags |= Flags.Promise;
+            if (ExtractTask(ref type))
+                flags |= Flags.Task;
+            if (ExtractArray(ref type))
+                flags |= Flags.Array;
+            if (type.IsSimpleType())
+                flags |= Flags.Simple;
+            LogicalType = type;
+            return flags;
         }
 
         private static bool ExtractPromise(ref Type type)

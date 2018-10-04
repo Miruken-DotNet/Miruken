@@ -1,5 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
+    using Bindings;
+
     public interface ICallbackPolicyDispatch
     {
         bool Dispatch(

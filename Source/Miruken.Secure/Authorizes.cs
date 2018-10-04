@@ -3,6 +3,7 @@
     using System;
     using Callback;
     using Callback.Policy;
+    using Callback.Policy.Rules;
 
     public class Authorizes : CategoryAttribute
     {

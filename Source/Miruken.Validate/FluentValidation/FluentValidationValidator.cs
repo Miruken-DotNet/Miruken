@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Validate.FluentValidation
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Callback;
@@ -83,13 +82,6 @@
             this IRuleBuilder<T, TProp> builder)
         {
             return builder.SetValidator(FluentValidator<TProp>.Instance);
-        }
-
-        public static CollectionValidatorExtensions
-            .ICollectionValidatorRuleBuilder<T, TElem> ValidCollection<T, TElem>(
-                this IRuleBuilder<T, IEnumerable<TElem>> builder)
-        {
-            return builder.SetCollectionValidator(FluentValidator<TElem>.Instance);
         }
 
         public static IRuleBuilderOptions<T, TProperty> WithComposer<T, TProperty>(
