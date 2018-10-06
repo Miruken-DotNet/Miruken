@@ -76,7 +76,7 @@
             foreach (var filterType in filterTypes)
             {
                 if (filterType == null)
-                    throw new ArgumentException("Filter types cannot be nulll");  
+                    throw new ArgumentException("Filter types cannot be null");  
                 if (filterType == anyFilter) continue;
                 var conformance = filterType.GetOpenTypeConformance(anyFilter);
                 if (conformance == null)
