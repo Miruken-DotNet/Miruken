@@ -3,7 +3,7 @@
     using Callback;
     using Concurrency;
 
-    public static class ValidationExtensions
+    public static class HandlerValidateExtensions
     {
         public static ValidationOutcome Validate(this IHandler handler,
             object target, params object[] scopes)

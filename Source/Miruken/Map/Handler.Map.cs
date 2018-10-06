@@ -6,7 +6,7 @@
     using Callback;
     using Concurrency;
 
-    public static class MappingExtensions
+    public static class HandlerMapExtensions
     {
         public static object Map(this IHandler handler,
             object source, object typeOrInstance, object format = null)
