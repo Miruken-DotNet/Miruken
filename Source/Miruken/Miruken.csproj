@@ -102,7 +102,7 @@
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
     <Compile Include="Map\IFormatMatching.cs" />
-    <Compile Include="Map\MappingExtensions.cs" />
+    <Compile Include="Map\Handler.Map.cs" />
     <Compile Include="Map\Mapping.cs" />
     <Compile Include="Map\Maps.cs" />
     <Compile Include="Monads.cs" />

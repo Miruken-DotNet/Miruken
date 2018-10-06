@@ -49,8 +49,7 @@
             Inquiry parent, Argument argument,
             object key, IHandler handler, IHandler composer)
         {
-            return handler.Resolve(new Inquiry(key, parent),
-                argument.GetConstraints());
+            return handler.Resolve(new Inquiry(key, parent), argument.Constraints);
         }
 
         protected virtual Promise ResolveAsync(
@@ -60,7 +59,7 @@
             return handler.ResolveAsync(new Inquiry(key, parent)
             {
                 WantsAsync = true
-            }, argument.GetConstraints());
+            }, argument.Constraints);
         }
 
         protected virtual object[] ResolveAll(
@@ -68,7 +67,7 @@
             object key, IHandler handler, IHandler composer)
         {
             return handler.ResolveAll(new Inquiry(key, parent, true),
-                argument.GetConstraints());
+                argument.Constraints);
         }
 
         protected virtual Promise<object[]> ResolveAllAsync(
@@ -78,7 +77,7 @@
             return handler.ResolveAllAsync(new Inquiry(key, parent, true)
             {
                 WantsAsync = true
-            }, argument.GetConstraints());
+            }, argument.Constraints);
         }
 
         private Func<T> ResolveLazy<T>(

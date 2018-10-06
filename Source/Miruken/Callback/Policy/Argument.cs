@@ -49,9 +49,7 @@
                             Resolver = resolver;
                             break;
                         case ConstraintAttribute constraint:
-                            if (Metadata == null)
-                                Metadata = new  BindingMetadata();
-                            constraint.Constraint.Require(Metadata);
+                            Constraints += b => b.Require(constraint);
                             break;
                     }        
                 }
@@ -70,14 +68,14 @@
             Resolver?.ValidateArgument(this);
         }
 
-        public object            Key           { get; }
-        public ParameterInfo     Parameter     { get; }
-        public Flags             ArgumentFlags { get; }
-        public Type              ArgumentType  { get; private set; }
-        public Type              LogicalType   { get; private set; }
-        public Attribute[]       Attributes    { get; }
-        public IArgumentResolver Resolver      { get; }
-        public BindingMetadata   Metadata      { get; }
+        public object                    Key           { get; }
+        public ParameterInfo             Parameter     { get; }
+        public Flags                     ArgumentFlags { get; }
+        public Type                      ArgumentType  { get; private set; }
+        public Type                      LogicalType   { get; private set; }
+        public Attribute[]               Attributes    { get; }
+        public IArgumentResolver         Resolver      { get; }
+        public Action<ConstraintBuilder> Constraints   { get; }
 
         public Type ParameterType => Parameter.ParameterType;
         public bool IsLazy        => ArgumentFlags.HasFlag(Flags.Lazy);
@@ -89,12 +87,6 @@
 
         public bool IsInstanceOf(object argument) =>
             ParameterType.IsInstanceOfType(argument);
-
-        public Action<ConstraintBuilder> GetConstraints()
-        {
-            if (Metadata == null) return null;
-            return builder => builder.Require(Metadata);
-        }
 
         private Flags ExtractFlags(Type parameterType)
         {
