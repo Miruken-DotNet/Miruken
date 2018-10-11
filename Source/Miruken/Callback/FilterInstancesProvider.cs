@@ -11,6 +11,8 @@
 
         public FilterInstancesProvider(params IFilter[] filters)
         {
+            if (filters.Length == 0)
+                throw new ArgumentException("At least one filter must be provided");
             _filters = filters;
         }
 

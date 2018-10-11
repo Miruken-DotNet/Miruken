@@ -12,7 +12,7 @@
     public class AuthorizeFilterTests
     {
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+         ExpectedException(typeof(NotSupportedException))]
         public void Rejects_Callback_If_Filter_Not_Resolved()
         {
             var handler = new MissileControlHandler();

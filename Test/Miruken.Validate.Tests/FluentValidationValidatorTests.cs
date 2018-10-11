@@ -182,7 +182,7 @@
             RuleFor(p => p.Name).NotEmpty();
             RuleFor(p => p.Coach).NotNull().Valid();
             RuleFor(p => p.Division).Matches(@"^[u|U]\d\d?$");
-            RuleFor(p => p.Players).NotEmpty().ValidCollection();
+            RuleForEach(p => p.Players).NotEmpty().Valid();
 
             RuleSet("Quickfoot", () =>
             {

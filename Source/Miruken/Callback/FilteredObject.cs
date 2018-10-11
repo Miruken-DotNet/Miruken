@@ -21,11 +21,5 @@
             _filters = _filters.Concat(providers.Where(p => p != null))
                 .ToArray().Normalize();
         }
-
-        public void AddFilters(params Type[] filterTypes)
-        {
-            if (filterTypes == null || filterTypes.Length == 0) return;
-            AddFilters(new FilterAttribute(filterTypes));
-        }
     }
 }

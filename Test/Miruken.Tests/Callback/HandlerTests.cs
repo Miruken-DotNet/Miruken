@@ -608,7 +608,7 @@
         [TestMethod]
         public void Should_Create_Filters()
         {
-            var bar = new Bar();
+            var bar     = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(4, bar.Filters.Count);
@@ -628,11 +628,14 @@
         }
 
         [TestMethod]
-        public void Should_Reject_Method_If_Skipping_Required_Filters()
+        public void Should_Skip_Non_Required_Filters()
         {
+            var bar     = new Bar();
             var handler = new FilteredHandler();
-            Assert.IsTrue(handler.Handle(new Bar()));
-            Assert.IsFalse(handler.SkipFilters().Handle(new Bar()));
+            Assert.IsTrue(handler.SkipFilters().Handle(bar));
+            Assert.AreEqual(2, bar.Filters.Count);
+            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
 
         [TestMethod,
@@ -984,13 +987,6 @@
                     Assert.IsNotNull(provider.Bar);
                 }
             }
-        }
-
-        [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
-        public void Should_Reject_Lifestye_If_Not_Provider()
-        {
-            HandlerDescriptor.GetDescriptor<SayHello>();
         }
 
         public class RequestFilterCb<T> : IFilter<T, object>
@@ -1588,7 +1584,7 @@
 
         private class SayHello
         {
-            [Handles, Singleton]
+            [Handles]
             public string Hello(string name) => $"Hello {name}";
         }
 
@@ -1659,15 +1655,16 @@
             int? IFilter.Order { get; set; }
 
             [Handles,
-             Filter(typeof(IFilter<,>),
-                 Many = true, Required = true)]
+             Filter(typeof(LogFilter<,>)),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true),
+             Filter(typeof(LogFilter<,>)),
              SkipFilters]
             public void HandleBee(Bee bee)
             {
@@ -1679,7 +1676,7 @@
                 return new ContravarintFilter();
             }
 
-            [Provides(typeof(IFilter<,>))]
+            [Provides(typeof(LogFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
                 var type = (Type)inquiry.Key;
@@ -1687,9 +1684,9 @@
                 if (type.IsInterface)
                     return Activator.CreateInstance(
                         typeof(LogFilter<,>).
-                        MakeGenericType(type.GenericTypeArguments));
+                            MakeGenericType(type.GenericTypeArguments));
                 return type.IsAbstract ? null
-                     : Activator.CreateInstance(type);
+                    : Activator.CreateInstance(type);
             }
 
             [Provides(typeof(ExceptionBehavior<,>))]
@@ -1718,21 +1715,27 @@
         private class SpecialFilteredHandler : Handler
         {
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public SpecialFoo HandleFoo(Foo foo)
             {
                 return new SpecialFoo();
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Promise<SpecialBaz> HandleBaz(Baz baz)
             {
                 return Promise.Resolved(new SpecialBaz());
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Task<SpecialBar> HandleBaz(Bar bar)
             {
                 return Task.FromResult(new SpecialBar());

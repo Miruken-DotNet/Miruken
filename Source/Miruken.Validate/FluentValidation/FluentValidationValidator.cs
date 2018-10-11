@@ -85,13 +85,6 @@
             return builder.SetValidator(FluentValidator<TProp>.Instance);
         }
 
-        public static CollectionValidatorExtensions
-            .ICollectionValidatorRuleBuilder<T, TElem> ValidCollection<T, TElem>(
-                this IRuleBuilder<T, IEnumerable<TElem>> builder)
-        {
-            return builder.SetCollectionValidator(FluentValidator<TElem>.Instance);
-        }
-
         public static IRuleBuilderOptions<T, TProperty> WithComposer<T, TProperty>(
             this IRuleBuilder<T, TProperty> ruleBuilder,
             Func<T, TProperty, IHandler, bool> predicate)

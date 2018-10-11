@@ -351,26 +351,34 @@
         public void Should_Resolve_Handlers()
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
-            var handler = new EmailProvider();
+            var handler = new EmailProvider()
+                        + new Billing()
+                        + new RepositoryProvider()
+                        + new FilterProvider();
             var id      = handler.Infer()
                 .Command<int>(new SendEmail {Body = "Hello"});
-            Assert.AreEqual(1, id);
+            Assert.AreEqual(10, id);
         }
 
         [TestMethod]
         public void Should_Resolve_Implied_Handlers()
         {
-            var handler = new EmailHandler();
+            var handler = new EmailHandler()
+                        + new Billing()
+                        + new RepositoryProvider()
+                        + new FilterProvider(); ;
             var id      = handler.Infer()
                 .Command<int>(new SendEmail { Body = "Hello" });
-            Assert.AreEqual(1, id);
+            Assert.AreEqual(10, id);
         }
 
         [TestMethod]
         public void Should_Resolve_Generic_Handlers()
         {
             HandlerDescriptor.GetDescriptor<EmailHandler>();
-            var handler = new EmailProvider();
+            var handler = new EmailProvider()
+                        + new RepositoryProvider()
+                        + new FilterProvider(); ;
             var id      = handler.Infer()
                 .Command<int>(new SendEmail<int> { Body = 22 });
             Assert.AreEqual(1, id);
@@ -444,7 +452,9 @@
         [TestMethod]
         public void Should_Provide_Methods()
         {
-            var provider = new EmailProvider();
+            var provider = new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             var id       = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
             id = provider.Proxy<IEmailFeature>().Email("Hello");
@@ -454,7 +464,9 @@
         [TestMethod]
         public void Should_Provide_Properties()
         {
-            var provider = new EmailProvider();
+            var provider = new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             var count    = Proxy<IEmailFeature>(provider).Count;
             Assert.AreEqual(0, count);
         }
@@ -470,7 +482,10 @@
         [TestMethod]
         public void Should_Provide_Methods_Polymorphically()
         {
-            var provider = new EmailProvider() + new OfflineProvider();
+            var provider = new EmailProvider() 
+                         + new OfflineProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             var id = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
             id = provider.Proxy<IEmailFeature>().Email("Hello");
@@ -489,7 +504,10 @@
         [TestMethod]
         public void Should_Chain_Provide_Methods_Strictly()
         {
-            var provider = new OfflineProvider() + new EmailProvider();
+            var provider = new OfflineProvider()
+                         + new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider();
             var id = Proxy<IEmailFeature>(provider.Strict()).Email("22");
             Assert.AreEqual(1, id);
         }
@@ -511,14 +529,19 @@
         [TestMethod]
         public void Should_Provide_Void_Methods()
         {
-            var provider = new EmailProvider() + new BillingProvider(new Billing());
+            var provider = new EmailProvider() 
+                         + new BillingProvider(new Billing())
+                         + new RepositoryProvider()
+                         + new FilterProvider();
             Proxy<IEmailFeature>(provider).CancelEmail(1);
         }
 
         [TestMethod]
         public void Should_Visit_All_Providers()
         {
-            var provider = new ManyProvider();
+            var provider = new ManyProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             Proxy<IEmailFeature>(provider).CancelEmail(13);
         }
 
@@ -532,7 +555,10 @@
         [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void Should_Find_Matching_Method()
         {
-            var provider = new OfflineHandler() + new EmailProvider();
+            var provider = new OfflineHandler() 
+                         + new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider();
             Proxy<IEmailFeature>(provider).CancelEmail(13);
         }
 
@@ -547,7 +573,9 @@
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
         public void Should_Not_Propogate_Best_Effort()
         {
-            var provider = new EmailProvider();
+            var provider = new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             Proxy<IEmailFeature>(provider.BestEffort()).CancelEmail(1);
         }
 
@@ -564,7 +592,9 @@
             var master = new EmailProvider();
             var mirror = new EmailProvider();
             var backup = new EmailProvider();
-            var email  = master + mirror + backup;
+            var email  = master + mirror + backup
+                       + new RepositoryProvider() 
+                       + new FilterProvider();
             var id     = Proxy<IEmailFeature>(email.Broadcast()).Email("Hello");
             Assert.AreEqual(1, id);
             Assert.AreEqual(1, master.Resolve<EmailHandler>().Count);
@@ -575,7 +605,9 @@
         [TestMethod]
         public void Should_Resolve_Methods_Inferred()
         {
-            var provider = new EmailProvider();
+            var provider = new EmailProvider()
+                         + new RepositoryProvider()
+                         + new FilterProvider(); ;
             var id       = Proxy<IEmailFeature>(provider.Infer()).Email("Hello");
             Assert.AreEqual(1, id);
         }

@@ -196,7 +196,7 @@
         [TestMethod]
         public void Should_Handle_Methods_Loosely()
         {
-            var handler = new DemoHandler();
+            var handler = new DemoHandler() + new LogFilter();
             var id = Proxy<IEmailFeature>(handler.Duck()).Email("22");
             Assert.AreEqual(22, id);
         }
@@ -298,7 +298,7 @@
         [TestMethod]
         public void Should_Resolve_Methods_Implicitly()
         {
-            var handler = new HandlerAdapter(new Billing());
+            var handler = new HandlerAdapter(new Billing()) + new LogFilter();
             var total   = Proxy<IBilling>(handler).Bill(7.50M);
             Assert.AreEqual(9.50M, total);
         }
@@ -313,7 +313,7 @@
         [TestMethod]
         public void Should_Handle_Methods_Using_Protocol()
         {
-            var billing = new HandlerAdapter(new Billing(4M));
+            var billing = new HandlerAdapter(new Billing(4M)) + new LogFilter();
             Assert.AreEqual(7M, Proxy<IBilling>(billing).Bill(3M));
         }
 

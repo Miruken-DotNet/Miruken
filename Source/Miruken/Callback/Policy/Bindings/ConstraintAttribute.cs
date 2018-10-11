@@ -12,12 +12,12 @@
     public class ConstraintAttribute : Attribute, IFilterProvider
     {
         public ConstraintAttribute(object key, object value)
-            : this(new MetadataKey(key, value))
+            : this(new MetadataKeyConstraint(key, value))
         {
         }
 
         public ConstraintAttribute(IDictionary<object, object> metadata)
-            : this(new Metadata(metadata))
+            : this(new MetadataConstraint(metadata))
         {
         }
 

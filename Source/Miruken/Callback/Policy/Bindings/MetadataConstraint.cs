@@ -3,11 +3,11 @@
     using System;
     using System.Collections.Generic;
 
-    public class Metadata : IBindingConstraint
+    public class MetadataConstraint : IBindingConstraint
     {
         private readonly IDictionary<object, object> _metadata;
 
-        public Metadata(IDictionary<object, object> metadata)
+        public MetadataConstraint(IDictionary<object, object> metadata)
         {
             if (metadata == null)
                 throw new ArgumentNullException(nameof(metadata));
@@ -31,12 +31,12 @@
         }
     }
 
-    public class MetadataKey : IBindingConstraint
+    public class MetadataKeyConstraint : IBindingConstraint
     {
         private readonly object _key;
         private readonly object _value;
 
-        public MetadataKey(object key, object value)
+        public MetadataKeyConstraint(object key, object value)
         {
             _key   = key ?? throw new ArgumentNullException(nameof(key));
             _value = value;

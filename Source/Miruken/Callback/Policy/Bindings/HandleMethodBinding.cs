@@ -26,12 +26,6 @@
             _globalFilters.AddRange(providers.Where(p => p != null));
         }
 
-        public static void AddGlobalFilters(params Type[] filterTypes)
-        {
-            if (filterTypes == null || filterTypes.Length == 0) return;
-            AddGlobalFilters(new FilterAttribute(filterTypes));
-        }
-
         public override bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null)
         {
@@ -63,17 +57,16 @@
             HandleMethod handleMethod, object target, IHandler composer)
         {
             var arguments = handleMethod.Arguments;
-            var filters   = composer.GetOrderedFilters(
-                this, Dispatcher, typeof(HandleMethod), 
-                Filters, Dispatcher.Owner.Filters, GlobalFilters)
-                ?.ToArray();
+            var filters = composer.GetOrderedFilters(
+                this, Dispatcher, typeof(HandleMethod),
+                Filters, Dispatcher.Owner.Filters, GlobalFilters);
 
             if (filters == null) return false;
 
             bool handled;
             object returnValue;
 
-            if (filters.Length == 0)
+            if (filters.Count == 0)
             {
                 returnValue = Dispatcher.Invoke(target, arguments);
                 handled     = !Unhandled;
