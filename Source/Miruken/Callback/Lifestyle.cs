@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Infrastructure;
     using Policy;
@@ -35,7 +34,7 @@
         AttributeTargets.Constructor,
         Inherited = false)]
     public abstract class LifestyleAttribute
-        : Attribute, IFilterProvider, IValidateFilterProvider
+        : Attribute, IFilterProvider
     {
         protected LifestyleAttribute(Type lifestyleType)
         {
@@ -66,18 +65,6 @@
                     (IFilter) Activator.CreateInstance(
                         LifestyleType.MakeGenericType(d.LogicalReturnType)))
             };
-        }
-
-        void IValidateFilterProvider.Validate(MemberBinding binding)
-        {
-            if ((binding as PolicyMemberBinding)
-                ?.Category.CallbackPolicy != Provides.Policy)
-                throw new InvalidOperationException(
-                    $"{GetType().FullName} can only be applied to Providers");
-
-            if (binding.Dispatcher.Attributes.OfType<LifestyleAttribute>().Count() > 1)
-                throw new InvalidOperationException(
-                    "Only one Lifestyle attribute is allowed");
         }
 
         private static readonly ConcurrentDictionary<MemberDispatch, IFilter>

@@ -31,11 +31,6 @@
             Type callbackType, IHandler composer);
     }
 
-    public interface IValidateFilterProvider
-    {
-        void Validate(MemberBinding binding);
-    }
-
     public interface IFiltered
     {
         IEnumerable<IFilterProvider> Filters { get; }

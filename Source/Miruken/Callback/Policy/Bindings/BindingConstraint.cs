@@ -15,6 +15,9 @@
 
         public void Require(BindingMetadata metadata)
         {
+            if (metadata == null)
+                throw new ArgumentNullException(nameof(metadata));
+
             metadata.Set(_key, _value);
         }
 

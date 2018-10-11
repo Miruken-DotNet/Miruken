@@ -77,8 +77,8 @@
         {
             var parentDispatcher = parent?.Dispatcher;
             if (parentDispatcher == null) return true;
-            return !parentDispatcher.Attributes.OfType<LifestyleAttribute>()
-                .Any(lifestyle => !(lifestyle is ContextualAttribute));
+            return parentDispatcher.Attributes.OfType<LifestyleAttribute>()
+                .All(lifestyle => lifestyle is ContextualAttribute);
         }
 
         private readonly ConcurrentDictionary<Context, T>
