@@ -55,7 +55,7 @@
                        CallbackOptions.Broadcast);
         }
 
-        public static object Resolve(this IHandler handler,  object key,
+        public static object Resolve(this IHandler handler, object key,
             Action<ConstraintBuilder> constraints = null)
         {
             if (handler == null) return null;

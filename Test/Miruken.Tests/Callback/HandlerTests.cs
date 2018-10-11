@@ -986,13 +986,6 @@
             }
         }
 
-        [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
-        public void Should_Reject_Lifestye_If_Not_Provider()
-        {
-            HandlerDescriptor.GetDescriptor<SayHello>();
-        }
-
         public class RequestFilterCb<T> : IFilter<T, object>
         {
             public int? Order { get; set; }
@@ -1589,7 +1582,7 @@
 
         private class SayHello
         {
-            [Handles, Singleton]
+            [Handles]
             public string Hello(string name) => $"Hello {name}";
         }
 
