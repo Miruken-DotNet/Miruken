@@ -155,23 +155,23 @@
             public Promise Process(Command command, IHandler composer)
             {
                 var callback = command.Callback;
-                if (callback is FulfillOrder)
-                    return new Promise<bool>((resolve, reject) => resolve(true, true));
-                return null;
+                return callback is FulfillOrder 
+                     ? new Promise<bool>((resolve, reject) => resolve(true, true))
+                     : null;
             }
         }
 
         private class NullHandler : Handler
         {
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(NullBehavior<,>))]
             public object Place(PlaceOrder order)
             {
                 return null;
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(NullBehavior<,>))]
             public Promise Cancel(CancelOrder cancel)
             {
                 return null;

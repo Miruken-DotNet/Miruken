@@ -190,8 +190,9 @@
         {
             using (var handler = new WindsorHandler(container =>
             {
-                container.Register(
-                    Component.For<IEmailFeature>()
+                container
+                    .Install(new FeaturesInstaller(new HandleFeature()))
+                    .Register(Component.For<IEmailFeature>()
                         .ImplementedBy<OfflineHandler>())
                     .Register(Component.For<IEmailFeature>()
                         .ImplementedBy<EmailHandler>());

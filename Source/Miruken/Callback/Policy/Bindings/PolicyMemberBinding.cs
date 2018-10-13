@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using Infrastructure;
     using Rules;
 
@@ -138,12 +137,11 @@
 
             var filters = composer.GetOrderedFilters(
                 this, dispatcher, callbackType, Filters,
-                dispatcher.Owner.Filters, Policy.Filters, targetFilters)
-                ?.ToArray();
+                dispatcher.Owner.Filters, Policy.Filters, targetFilters);
 
             if (filters == null) return false;
 
-            if (filters.Length == 0)
+            if (filters.Count == 0)
             {
                 args = ResolveArgs(dispatcher, callback, args, 
                                    composer, out var completed);
@@ -154,7 +152,7 @@
                 this, target, actualCallback, (IHandler comp, out bool completed) =>
                 {
                     args = ResolveArgs(dispatcher, callback, args,
-                                       comp.EnableFilters(), out completed);
+                                       comp, out completed);
                     if (!completed) return null;
                     var baseResult = dispatcher.Invoke(target, args, resultType);
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)

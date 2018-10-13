@@ -74,7 +74,7 @@
         }
 
         [TestMethod]
-        public void Should_Use_Most_Specific_Filter()
+        public void Should_Use_Partial_Filters()
         {
             _container.Install(
                 new FeaturesInstaller(new HandleFeature())
@@ -82,7 +82,7 @@
             var handler = new WindsorHandler(_container);
             var clear   = new ClearResults();
             handler.Infer().Command(clear);
-            Assert.AreEqual(-1, clear.Running);
+            Assert.AreEqual(9, clear.Running);
         }
 
         [TestMethod]
@@ -94,7 +94,7 @@
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
             handler.Infer().Command(publish);
-            Assert.AreEqual(7, publish.Running);
+            Assert.AreEqual(8, publish.Running);
         }
 
         public class A { }
@@ -133,7 +133,7 @@
 
         public class PublishResults : Job { }
 
-        [Filter(typeof(IFilter<,>))]
+        [Filter(typeof(JobFilter))]
         public class GetResultsHandler : Handler
         {
             [Handles]
@@ -142,7 +142,7 @@
             }
         }
 
-        [Filter(typeof(IFilter<,>))]
+        [Filter(typeof(JobFilter<>))]
         public class ClearResultsHandler : Handler
         {
             [Handles]
@@ -152,7 +152,8 @@
             }
         }
 
-        [Filter(typeof(IFilter<,>), Many = true)]
+        [Filter(typeof(JobFilter<>)),
+         Filter(typeof(RunningFilter<,>))]
         public class PublishResultsHandler : Handler
         {
             [Handles]
@@ -164,7 +165,7 @@
 
         public class JobFilter : IFilter<Job, object>
         {
-            public int? Order { get; set; }
+            public int? Order { get; set; } = 1;
 
             public async Task<object> Next(Job job, MemberBinding member,
                 IHandler composer, Next<object> next,
@@ -192,7 +193,7 @@
         public class RunningFilter<Req, Res> : IFilter<Req, Res>
             where Req : Job
         {
-            public int? Order { get; set; }
+            public int? Order { get; set; } = 2;
 
             public Task<Res> Next(Req job, MemberBinding member,
                 IHandler composer, Next<Res> next,

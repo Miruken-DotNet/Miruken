@@ -16,12 +16,17 @@
     {
         private IHandler _handler;
 
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+        {
+            Handles.Policy.AddFilters(new FilterAttribute(typeof(ValidateFilter<,>)));
+        }
+
         [TestInitialize]
         public void TestInitialize()
         {
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor<TeamHandler>();
-            Handles.Policy.AddFilters(typeof(ValidateFilter<,>));
 
             _handler = new TeamHandler()
                      + new FilterProvider()
@@ -181,8 +186,9 @@
             [Handles]
             public void Remove(RemoveTeam remove, IHandler composer)
             {
-                remove.Team.Active = false;
-
+                var team = remove.Team;
+                team.Active = false;
+                composer.CommandAllAsync(new TeamRemoved { Team = team });
             }
         }
 

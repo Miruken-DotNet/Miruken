@@ -17,9 +17,9 @@
             if (validators.Length == 0) return;
 
             var outcome = validation.Outcome;
-            var scope   = validation.ScopeMatcher;
+            var scope = validation.ScopeMatcher;
             var context = scope != null && scope != EqualsScopeMatcher.Default
-                ? new ValidationContext(target, null, new ScopeSelector(scope)) 
+                ? new ValidationContext(target, null, new ScopeSelector(scope))
                 : new ValidationContext(target);
             context.SetValidation(validation);
             context.SetComposer(composer);
@@ -41,7 +41,7 @@
         {
             foreach (var error in result.Errors)
             {
-                var child   = error as OutcomeFailure;
+                var child = error as OutcomeFailure;
                 var failure = child?.FailedOutcome ?? (object)error.ErrorMessage;
                 outcome.AddError(error.PropertyName, failure);
             }
@@ -62,7 +62,7 @@
         public static Validation GetValidation(this ValidationContext context)
         {
             return context.RootContextData.TryGetValue(ValidationKey, out var validation)
-                ? (Validation) validation
+                ? (Validation)validation
                 : null;
         }
 
@@ -74,7 +74,7 @@
         public static IHandler GetComposer(this ValidationContext context)
         {
             return context.RootContextData.TryGetValue(ComposerKey, out var composer)
-                ? (IHandler) composer
+                ? (IHandler)composer
                 : null;
         }
 
@@ -157,7 +157,7 @@
 
         public static IRuleBuilderInitial<T, TProperty>
             WithComposerCustomAsync<T, TProperty>(
-                this IRuleBuilder<T, TProperty> ruleBuilder, 
+                this IRuleBuilder<T, TProperty> ruleBuilder,
                 Func<TProperty, CustomContext, CancellationToken, IHandler, Task> action)
         {
             if (action == null)
@@ -165,7 +165,7 @@
             return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
             {
                 var composer = ctx.ParentContext?.GetComposer();
-                return composer != null 
+                return composer != null
                      ? action(prop, ctx, cancel, composer)
                      : Task.CompletedTask;
             });

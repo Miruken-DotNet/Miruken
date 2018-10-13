@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Map
 {
-    using System;
     using System.Linq;
     using Callback;
     using Callback.Policy;
@@ -18,7 +17,7 @@
         public override bool Approve(object callback, PolicyMemberBinding binding)
         {
             var mapping = (Mapping)callback;
-            var format  = mapping.Format;
+            var format = mapping.Format;
             if (format == null) return true;
             var dispatch = binding.Dispatcher;
             return dispatch.Attributes.OfType<IFormatMatching>()
@@ -29,9 +28,6 @@
 
         public static void AddFilters(params IFilterProvider[] providers) =>
             Policy.AddFilters(providers);
-
-        public static void AddFilters(params Type[] filterTypes) =>
-            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
             BivariantPolicy.Create<Mapping>(m => m.Type, m => m.Source,

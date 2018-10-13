@@ -8,7 +8,7 @@
     public class Validates : CategoryAttribute
     {
         public Validates()
-        {          
+        {
         }
 
         public Validates(Type key)
@@ -25,16 +25,13 @@
         public override bool Approve(object callback, PolicyMemberBinding binding)
         {
             var validation = (Validation)callback;
-            return (validation.Outcome.IsValid || 
+            return (validation.Outcome.IsValid ||
                    !(validation.StopOnFailure || SkipIfInvalid))
                 && validation.ScopeMatcher.Matches(Scope);
         }
 
         public static void AddFilters(params IFilterProvider[] providers) =>
             Policy.AddFilters(providers);
-
-        public static void AddFilters(params Type[] filterTypes) =>
-            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
              ContravariantPolicy.Create<Validation>(v => v.Target,

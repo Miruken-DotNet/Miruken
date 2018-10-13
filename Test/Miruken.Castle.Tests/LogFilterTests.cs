@@ -25,7 +25,17 @@
         protected IWindsorContainer _container;
         protected MemoryTarget _memoryTarget;
         private IHandler _handler;
-    
+
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+        {
+            Handles.Policy.AddFilters(
+                new FilterAttribute(typeof(LogFilter<,>)),
+                new FilterAttribute(typeof(ConsoleFilter)));
+            HandleMethodBinding.AddGlobalFilters(
+                new FilterAttribute(typeof(LogFilter<,>)));
+        }
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -41,10 +51,7 @@
             LogManager.Configuration = _loggingConfig;
             _container = new WindsorContainer()
                 .AddFacility<LoggingFacility>(f => f.LogUsing(new NLogFactory(_loggingConfig)))
-                .Install(new FeaturesInstaller(
-                        new HandleFeature().AddFilters(
-                                typeof(LogFilter<,>), typeof(ConsoleFilter))
-                            .AddMethodFilters(typeof(LogFilter<,>)))
+                .Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
 

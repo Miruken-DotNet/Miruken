@@ -102,9 +102,11 @@
             var actualArgs = context.RequestedType.GetGenericArguments();
             if (filterArgs.Length == 2) return actualArgs;
             var openFilter = filter.GetOpenTypeConformance(typeof(IFilter<,>));
-            var openArgs   = openFilter.GetGenericArguments();
+            var openArgs   = openFilter.GetGenericArguments()
+                .Where(arg => arg.IsGenericParameter)
+                .ToArray();
             var filterArg  = filterArgs[0];
-            for (var i = 0; i < 2; ++i)
+            for (var i = 0; i < openArgs.Length; ++i)
             {
                 var openArg = openArgs[i];
                 if (openArg == filterArg ||

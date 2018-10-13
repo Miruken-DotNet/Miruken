@@ -62,18 +62,6 @@
             return this;
         }
 
-        public HandleFeature AddFilters(params Type[] filterTypes)
-        {
-            Handles.AddFilters(filterTypes);
-            return this;
-        }
-
-        public HandleFeature AddMethodFilters(params Type[] filterTypes)
-        {
-            HandleMethodBinding.AddGlobalFilters(filterTypes);
-            return this;
-        }
-
         protected override void Install(IConfigurationStore store)
         {
             base.Install(store);

@@ -1,6 +1,5 @@
 ﻿namespace Miruken.Callback
 {
-    using System;
     using Policy;
 
     public class Handles : CategoryAttribute
@@ -18,9 +17,6 @@
 
         public static void AddFilters(params IFilterProvider[] providers) =>
             Policy.AddFilters(providers);
-
-        public static void AddFilters(params Type[] filterTypes) =>
-            Policy.AddFilters(filterTypes);
 
         public static readonly CallbackPolicy Policy =
             ContravariantPolicy.Create<Command>(r => r.Callback,

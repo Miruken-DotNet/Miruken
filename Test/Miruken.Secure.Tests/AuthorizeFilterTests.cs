@@ -3,7 +3,6 @@
     using System;
     using System.Security.Claims;
     using System.Security.Principal;
-    using System.Threading;
     using System.Threading.Tasks;
     using Callback;
     using Concurrency;
@@ -13,7 +12,7 @@
     public class AuthorizeFilterTests
     {
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+         ExpectedException(typeof(NotSupportedException))]
         public void Rejects_Callback_If_Filter_Not_Resolved()
         {
             var handler = new MissileControlHandler();
@@ -38,7 +37,8 @@
             var handler = new MissileControlHandler()
                         + new FilterHandler();
             var launch  = new LaunchMissile("Patriot");
-            handler.Provide(Thread.CurrentPrincipal)
+            handler.Provide(new ClaimsPrincipal(
+                    new ClaimsIdentity(new Claim[0], "test")))
                 .Command<LaunchConfirmation>(launch);
         }
 
