@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Infrastructure;
     using Policy;
     using Policy.Bindings;
 
@@ -49,44 +50,49 @@
                     .Decorate(handler);
         }
 
-        public static IEnumerable<(IFilter, IFilterProvider)>
+        public static IList<(IFilter, IFilterProvider)>
             GetOrderedFilters(this IHandler handler, MemberBinding binding,
                 MemberDispatch dispatcher, Type callbackType,
                 params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetOptions<FilterOptions>();
+            var allProviders = providers
+                .Where(pa => pa != null)
+                .SelectMany(pa => pa)
+                .Where(p => p != null)
+                .Concat(options?.ExtraFilters ??
+                        Enumerable.Empty<IFilterProvider>());
+
             switch (options?.SkipFilters)
             {
                 case true:
-                    return providers.Any(pa => pa?.Any(p => p.Required) == true)
-                         ? null : Array.Empty<(IFilter, IFilterProvider)>();
+                    allProviders = allProviders.Where(p => p.Required);
+                    break;
                 case null:
                     if (binding.Dispatcher.SkipFilters)
-                        return Array.Empty<(IFilter, IFilterProvider)>();
+                        allProviders = allProviders.Where(p => p.Required);
                     handler = handler.SkipFilters();
                     break;
             }
-            return handler.GetOrderedFilters(binding, dispatcher,
-                callbackType, options, providers);
-        }
 
-        private static IEnumerable<(IFilter, IFilterProvider)>
-            GetOrderedFilters(this IHandler handler,
-                MemberBinding binding, MemberDispatch dispatcher,
-                Type callbackType, FilterOptions options,
-                params IEnumerable<IFilterProvider>[] providers)
-        {
-            return new SortedSet<(IFilter, IFilterProvider)>(providers
-                    .Where(p => p != null)
-                    .SelectMany(p => p)
-                    .Concat(options?.ExtraFilters ??
-                            Enumerable.Empty<IFilterProvider>())
-                    .Where(provider => provider != null)
-                    .SelectMany(provider => provider
-                        .GetFilters(binding, dispatcher, callbackType, handler)
-                        .Where(filter => filter != null)
-                        .Select(filter => (filter, provider))),
-                FilterComparer.Instance);
+            var ordered = new List<(IFilter, IFilterProvider)>();
+
+            foreach (var provider in allProviders)
+            {
+                var found   = false;
+                var filters = provider.GetFilters(
+                    binding, dispatcher, callbackType, handler);
+                if (filters == null) return null;
+                foreach (var filter in filters)
+                {
+                    if (filter == null) return null;
+                    found = true;
+                    ordered.AddSorted((filter, provider), FilterComparer.Instance);
+                }
+                if (!found) return null;
+            }
+
+            return ordered;
         }
 
         private class FilterComparer : IComparer<(IFilter, IFilterProvider)>

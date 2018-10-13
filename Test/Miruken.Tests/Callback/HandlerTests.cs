@@ -31,7 +31,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Implicitly()
         {
-            var foo     = new Foo();
+            var foo = new Foo();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -41,7 +41,7 @@
         public void Should_Handle_Static_Callbacks_Implicitly()
         {
             HandlerDescriptor.GetDescriptor<CustomHandler>();
-            var foo     = new Foo();
+            var foo = new Foo();
             var handler = new StaticHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -50,7 +50,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Implicitly_Adapter()
         {
-            var foo     = new Foo();
+            var foo = new Foo();
             var handler = new HandlerAdapter(new Controller());
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -59,7 +59,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Explicitly()
         {
-            var bar     = new Bar();
+            var bar = new Bar();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.IsTrue(bar.HasComposer);
@@ -71,7 +71,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Contravariantly()
         {
-            var foo     = new SpecialFoo();
+            var foo = new SpecialFoo();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.IsTrue(foo.HasComposer);
@@ -81,7 +81,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Genericly()
         {
-            var baz     = new Baz<int>(22);
+            var baz = new Baz<int>(22);
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
@@ -91,18 +91,18 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Genericly_Mapped()
         {
-            var baz     = new Baz<int,float>(22,15.5f);
+            var baz = new Baz<int, float>(22, 15.5f);
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
             Assert.AreEqual(0, baz.OtherStuff);
-            Assert.IsFalse(handler.Handle(new Baz<char,float>('M',2)));
+            Assert.IsFalse(handler.Handle(new Baz<char, float>('M', 2)));
         }
 
         [TestMethod]
         public void Should_Handle_Callbacks_Implicitly_Genericly()
         {
-            var baz     = new BazInt(29);
+            var baz = new BazInt(29);
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
@@ -112,11 +112,11 @@
         public void Should_Handle_Arrays()
         {
             var handler = new ArrayHandler();
-            var type    = handler.Command<string>(new[] { 1, 2, 3 });
+            var type = handler.Command<string>(new[] { 1, 2, 3 });
             Assert.AreEqual("integers", type);
             type = handler.Command<string>(new[] { "red", "green", "blue" });
             Assert.AreEqual("string", type);
-            type = handler.Command<string>(new[] { typeof(int), typeof(string)});
+            type = handler.Command<string>(new[] { typeof(int), typeof(string) });
             Assert.AreEqual("types", type);
             type = handler.Command<string>(new[] { 'a', 'b', 'c' });
             Assert.AreEqual("array", type);
@@ -127,9 +127,9 @@
         {
             var handler = new ArrayHandler();
             Array array = handler.Resolve<int[]>();
-            CollectionAssert.AreEqual(new [] { 2, 4, 6 }, array);
+            CollectionAssert.AreEqual(new[] { 2, 4, 6 }, array);
             array = handler.Resolve<string[]>();
-            CollectionAssert.AreEqual(new[] { "square", "circle"}, array);
+            CollectionAssert.AreEqual(new[] { "square", "circle" }, array);
             array = handler.Resolve<Type[]>();
             CollectionAssert.AreEqual(new[] { typeof(float), typeof(object) }, array);
         }
@@ -137,7 +137,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_With_Keys()
         {
-            var foo     = new Foo();
+            var foo = new Foo();
             var handler = new SpecialHandler();
             Assert.IsTrue(handler.Handle(foo, true));
             Assert.AreEqual(1, foo.Handled);
@@ -155,7 +155,7 @@
         public void Should_Indicate_Not_Provided()
         {
             var handler = new CustomHandler();
-            var bee     = handler.Resolve<Bee>();
+            var bee = handler.Resolve<Bee>();
             Assert.IsNull(bee);
         }
 
@@ -163,7 +163,7 @@
         public void Should_Indicate_Not_Provided__Adapter()
         {
             var handler = new HandlerAdapter(new Controller());
-            var bee     = handler.Resolve<Bee>();
+            var bee = handler.Resolve<Bee>();
             Assert.IsNull(bee);
         }
 
@@ -171,7 +171,7 @@
         public void Should_Provide_Callbacks_Implicitly()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Resolve<Bar>();
+            var bar = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -181,7 +181,7 @@
         public async Task Should_Provide_Callbacks_Implicitly_Async()
         {
             var handler = new CustomAsyncHandler();
-            var bar     = await handler.ResolveAsync<Bar>();
+            var bar = await handler.ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -191,7 +191,7 @@
         public void Should_Provide_Callbacks_Implicitly_Waiting()
         {
             var handler = new CustomAsyncHandler();
-            var bar     = handler.Resolve<Bar>();
+            var bar = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -201,11 +201,11 @@
         public void Should_Provide_Many_Callbacks_Implicitly()
         {
             var handler = new SpecialHandler();
-            var bar     = handler.Resolve<Bar>();
+            var bar = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
-            var bars    = handler.ResolveAll<Bar>();
+            var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(3, bars.Length);
             Assert.AreEqual(1, bars[0].Handled);
             Assert.IsFalse(bars[0].HasComposer);
@@ -219,7 +219,7 @@
         public async Task Should_Provide_Many_Callbacks_Implicitly_Async()
         {
             var handler = new SpecialAsyncHandler();
-            var bar     = await handler.ResolveAsync<Bar>();
+            var bar = await handler.ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -237,7 +237,7 @@
         public void Should_Provide_Callbacks_By_Key()
         {
             var handler = new SpecialHandler();
-            var boo     = handler.Resolve<Boo>();
+            var boo = handler.Resolve<Boo>();
             Assert.IsNotNull(boo);
             Assert.IsTrue(boo.HasComposer);
         }
@@ -246,7 +246,7 @@
         public async Task Should_Provide_Callbacks_By_Key_Async()
         {
             var handler = new SpecialAsyncHandler();
-            var boo     = await handler.ResolveAsync<Boo>();
+            var boo = await handler.ResolveAsync<Boo>();
             Assert.IsNotNull(boo);
             Assert.IsTrue(boo.HasComposer);
         }
@@ -255,7 +255,7 @@
         public void Should_Provide_Many_Callbacks_By_Key()
         {
             var handler = new SpecialHandler();
-            var bees    = handler.ResolveAll<Bee>();
+            var bees = handler.ResolveAll<Bee>();
             Assert.AreEqual(3, bees.Length);
         }
 
@@ -263,7 +263,7 @@
         public async Task Should_Provide_Many_Callbacks_By_Key_Async()
         {
             var handler = new SpecialAsyncHandler();
-            var bees    = await handler.ResolveAllAsync<Bee>();
+            var bees = await handler.ResolveAllAsync<Bee>();
             Assert.AreEqual(3, bees.Length);
         }
 
@@ -271,11 +271,11 @@
         public void Should_Provide_Callbacks_With_Many_Keys()
         {
             var handler = new SpecialHandler();
-            var baz1    = handler.Resolve<Baz<int>>();
+            var baz1 = handler.Resolve<Baz<int>>();
             Assert.AreEqual(1, baz1.Stuff);
-            var baz2    = handler.Resolve<Baz<string>>();
+            var baz2 = handler.Resolve<Baz<string>>();
             Assert.AreEqual("Hello", baz2.Stuff);
-            var baz3    = handler.Resolve<Baz<float>>();
+            var baz3 = handler.Resolve<Baz<float>>();
             Assert.IsNull(baz3);
         }
 
@@ -283,7 +283,7 @@
         public async Task Should_Provide_Callbacks_With_Many_Keys_Async()
         {
             var handler = new SpecialAsyncHandler();
-            var baz1    = await handler.ResolveAsync<Baz<int>>();
+            var baz1 = await handler.ResolveAsync<Baz<int>>();
             Assert.AreEqual(1, baz1.Stuff);
             var baz2 = handler.Resolve<Baz<string>>();
             Assert.AreEqual("Hello", baz2.Stuff);
@@ -295,7 +295,7 @@
         public void Should_Provide_Callbacks_Implicitly_Adapter()
         {
             var handler = new HandlerAdapter(new Controller());
-            var bar     = handler.Resolve<Bar>();
+            var bar = handler.Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -305,7 +305,7 @@
         public void Should_Provide_Callbacks_Implicitly_With_Composer()
         {
             var handler = new CustomHandler();
-            var boo     = handler.Resolve<Boo>();
+            var boo = handler.Resolve<Boo>();
             Assert.IsNotNull(boo);
             Assert.AreEqual(boo.GetType(), typeof(Boo));
             Assert.IsTrue(boo.HasComposer);
@@ -315,7 +315,7 @@
         public void Should_Provide_Callbacks_Covariantly()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Resolve<SpecialBar>();
+            var bar = handler.Resolve<SpecialBar>();
             Assert.IsInstanceOfType(bar, typeof(SpecialBar));
             Assert.IsTrue(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -325,7 +325,7 @@
         public void Should_Provide_Callbacks_Greedily()
         {
             var handler = new CustomHandler() + new CustomHandler();
-            var bars    = handler.ResolveAll<Bar>();
+            var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(4, bars.Length);
             bars = handler.ResolveAll<SpecialBar>();
             Assert.AreEqual(2, bars.Length);
@@ -335,7 +335,7 @@
         public void Should_Provide_Callbacks_Explicitly()
         {
             var handler = new CustomHandler();
-            var baz     = handler.Resolve<Baz>();
+            var baz = handler.Resolve<Baz>();
             Assert.IsInstanceOfType(baz, typeof(SpecialBaz));
             Assert.IsFalse(baz.HasComposer);
         }
@@ -344,10 +344,10 @@
         public void Should_Provide_Many_Callbacks_Explicitly()
         {
             var handler = new SpecialHandler();
-            var baz     = handler.Resolve<Baz>();
+            var baz = handler.Resolve<Baz>();
             Assert.IsInstanceOfType(baz, typeof(SpecialBaz));
             Assert.IsFalse(baz.HasComposer);
-            var bazs    = handler.ResolveAll<Baz>();
+            var bazs = handler.ResolveAll<Baz>();
             Assert.AreEqual(2, bazs.Length);
             Assert.IsInstanceOfType(bazs[0], typeof(SpecialBaz));
             Assert.IsFalse(bazs[0].HasComposer);
@@ -359,7 +359,7 @@
         public void Should_Provide_Callbacks_Generically()
         {
             var handler = new CustomHandler();
-            var baz     = handler.Resolve<Baz<int>>();
+            var baz = handler.Resolve<Baz<int>>();
             Assert.IsInstanceOfType(baz, typeof(Baz<int>));
             Assert.AreEqual(0, baz.Stuff);
         }
@@ -368,8 +368,8 @@
         public void Should_Provide_Callbacks_Mapped()
         {
             var handler = new CustomHandler();
-            var baz     = handler.Resolve<Baz<int,string>>();
-            Assert.IsInstanceOfType(baz, typeof(Baz<int,string>));
+            var baz = handler.Resolve<Baz<int, string>>();
+            Assert.IsInstanceOfType(baz, typeof(Baz<int, string>));
             Assert.AreEqual(0, baz.Stuff);
         }
 
@@ -377,7 +377,7 @@
         public void Should_Provide_All_Callbacks()
         {
             var handler = new CustomHandler();
-            var bars    = handler.ResolveAll<Bar>();
+            var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(2, bars.Length);
         }
 
@@ -385,7 +385,7 @@
         public void Should_Provide_Empty_Array_If_No_Matches()
         {
             var handler = new Handler();
-            var bars    = handler.ResolveAll<Bar>();
+            var bars = handler.ResolveAll<Bar>();
             Assert.AreEqual(0, bars.Length);
         }
 
@@ -393,7 +393,7 @@
         public void Should_Provide_Callbacks_By_String_Key()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Resolve("Bar") as Bar;
+            var bar = handler.Resolve("Bar") as Bar;
             Assert.IsNotNull(bar);
         }
 
@@ -401,7 +401,7 @@
         public void Should_Provide_Callbacks_By_String_Case_Insensitive_Key()
         {
             var handler = new CustomHandler();
-            var boo     = handler.Resolve("boo") as Boo;
+            var boo = handler.Resolve("boo") as Boo;
             Assert.IsNotNull(boo);
         }
 
@@ -432,7 +432,7 @@
         public async Task Should_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = await handler.Aspect((_, c) => true)
+            var bar = await handler.Aspect((_, c) => true)
                                        .ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -443,7 +443,7 @@
         public void Should_Async_Filter_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Aspect((_, c) => Promise.True)
+            var bar = handler.Aspect((_, c) => Promise.True)
                                  .Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -454,7 +454,7 @@
         public async Task Should_Async_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = await handler.Aspect((_,c) => Promise.True)
+            var bar = await handler.Aspect((_, c) => Promise.True)
                                        .ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
@@ -501,7 +501,7 @@
         public void Should_Resolve_Self_Implicitly()
         {
             var handler = new CustomHandler();
-            var result  = handler.Resolve<CustomHandler>();
+            var result = handler.Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -509,7 +509,7 @@
         public void Should_Resolve_Self_Implicitly_Decorated()
         {
             var handler = new CustomHandler();
-            var result  = handler.Broadcast().Resolve<CustomHandler>();
+            var result = handler.Broadcast().Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -517,8 +517,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly()
         {
             var controller = new Controller();
-            var handler    = new HandlerAdapter(controller);
-            var result     = handler.Resolve<Controller>();
+            var handler = new HandlerAdapter(controller);
+            var result = handler.Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -526,8 +526,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly_Decorated()
         {
             var controller = new Controller();
-            var handler    = new HandlerAdapter(controller);
-            var result     = handler.Broadcast().Resolve<Controller>();
+            var handler = new HandlerAdapter(controller);
+            var result = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -535,7 +535,7 @@
         public void Should_Resolve_Using_IServiceProvider()
         {
             var handler = (IServiceProvider)new CustomHandler();
-            var bar     = (Bar)handler.GetService(typeof(Bar));
+            var bar = (Bar)handler.GetService(typeof(Bar));
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -544,7 +544,7 @@
         [TestMethod]
         public void Should_Resolve_All()
         {
-            var custom  = new CustomHandler();
+            var custom = new CustomHandler();
             var special = new SpecialHandler();
             var handler = custom + special;
             var objects = handler.ResolveAll<object>();
@@ -556,7 +556,7 @@
         [TestMethod]
         public void Should_Broadcast_Callbacks()
         {
-            var foo   = new Foo();
+            var foo = new Foo();
             var group = new CustomHandler()
                       + new CustomHandler()
                       + new CustomHandler();
@@ -583,32 +583,32 @@
         public void Should_Override_Providers()
         {
             var handler = new Handler();
-            var foo     = handler.Provide(new Foo()).Resolve<Foo>();
+            var foo = handler.Provide(new Foo()).Resolve<Foo>();
             Assert.IsNotNull(foo);
         }
 
         [TestMethod]
         public void Should_Override_Providers_Many()
         {
-            var foo1    = new Foo();
-            var foo2    = new Foo();
+            var foo1 = new Foo();
+            var foo2 = new Foo();
             var handler = new Handler();
-            var foos    = handler.Provide(new [] {foo1, foo2}).ResolveAll<Foo>();
-            CollectionAssert.AreEqual(new [] {foo1, foo2}, foos);
+            var foos = handler.Provide(new[] { foo1, foo2 }).ResolveAll<Foo>();
+            CollectionAssert.AreEqual(new[] { foo1, foo2 }, foos);
         }
 
         [TestMethod]
         public void Should_Ignore_Providers()
         {
             var handler = new Handler();
-            var foo     = handler.Provide(new Bar()).Resolve<Foo>();
+            var foo = handler.Provide(new Bar()).Resolve<Foo>();
             Assert.IsNull(foo);
         }
 
         [TestMethod]
         public void Should_Create_Filters()
         {
-            var bar = new Bar();
+            var bar     = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(4, bar.Filters.Count);
@@ -621,25 +621,28 @@
         [TestMethod]
         public void Should_Skip_Filters()
         {
-            var bee     = new Bee();
+            var bee = new Bee();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bee));
             Assert.AreEqual(0, bee.Filters.Count);
         }
 
         [TestMethod]
-        public void Should_Reject_Method_If_Skipping_Required_Filters()
+        public void Should_Skip_Non_Required_Filters()
         {
+            var bar     = new Bar();
             var handler = new FilteredHandler();
-            Assert.IsTrue(handler.Handle(new Bar()));
-            Assert.IsFalse(handler.SkipFilters().Handle(new Bar()));
+            Assert.IsTrue(handler.SkipFilters().Handle(bar));
+            Assert.AreEqual(2, bar.Filters.Count);
+            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
 
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public async Task Should_Propogate_Rejected_Filter_Promise()
         {
-            var boo     = new Boo();
+            var boo = new Boo();
             var handler = new SpecialFilteredHandler() + new FilteredHandler();
             await handler.CommandAsync(boo);
         }
@@ -677,7 +680,7 @@
         public void Should_Create_Generic_Implicitly()
         {
             var view = new Screen();
-            var bar  = new SpecialBar();
+            var bar = new SpecialBar();
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             var controller = new StaticHandler()
                 .Provide(view).Provide(bar)
@@ -758,7 +761,7 @@
         [TestMethod]
         public void Should_Create_Generic_Singletons_Implicitly()
         {
-            var view    = new Screen();
+            var view = new Screen();
             var handler = new StaticHandler().Infer();
             HandlerDescriptor.ResetDescriptors();
             HandlerDescriptor.GetDescriptor(typeof(Controller));
@@ -1029,8 +1032,8 @@
         }
 
         private class Foo : Callback
-        {     
-            public int  Handled     { get; set; }
+        {
+            public int Handled { get; set; }
             public bool HasComposer { get; set; }
         }
 
@@ -1041,19 +1044,19 @@
         private class FooDecorator : Foo
         {
             private FooDecorator(Foo foo)
-            {           
+            {
             }
         }
 
         private class Bar : Callback
         {
-            public int  Handled     { get; set; }
+            public int Handled { get; set; }
             public bool HasComposer { get; set; }
 
         }
 
         private class SpecialBar : Bar
-        {         
+        {
         }
 
         private class Boo : Callback
@@ -1067,7 +1070,7 @@
         }
 
         private class SpecialBaz : Baz
-        {          
+        {
         }
 
         private class Baz<T> : Baz
@@ -1079,7 +1082,7 @@
             public T Stuff { get; set; }
         }
 
-        private class Baz<T,R> : Baz<T>
+        private class Baz<T, R> : Baz<T>
         {
             public Baz(T stuff, R otherStuff) : base(stuff)
             {
@@ -1092,12 +1095,12 @@
         private class BazInt : Baz<int>
         {
             public BazInt(int stuff) : base(stuff)
-            {              
+            {
             }
         }
 
         private class Bee : Callback
-        {       
+        {
         }
 
         private class CustomHandler : Handler
@@ -1127,18 +1130,18 @@
             [Handles]
             public bool? HandlesGenericBaz<T>(Baz<T> baz)
             {
-                if (typeof (T) == typeof (char)) 
+                if (typeof(T) == typeof(char))
                     return null;
                 baz.Stuff = default;
                 return true;
             }
 
             [Handles]
-            public bool? HandlesGenericBazMapping<R,T>(Baz<T,R> baz)
+            public bool? HandlesGenericBazMapping<R, T>(Baz<T, R> baz)
             {
                 if (typeof(T) == typeof(char))
                     return null;
-                baz.Stuff      = default;
+                baz.Stuff = default;
                 baz.OtherStuff = default;
                 return true;
             }
@@ -1166,7 +1169,7 @@
             {
                 return new SpecialBar
                 {
-                    Handled     = 1,
+                    Handled = 1,
                     HasComposer = true
                 };
             }
@@ -1184,16 +1187,16 @@
             }
 
             [Provides]
-            public Baz<T,R> ProvidesBazMapped<R,T>()
+            public Baz<T, R> ProvidesBazMapped<R, T>()
             {
-                return new Baz<T,R>(default, default);
+                return new Baz<T, R>(default, default);
             }
 
             [Provides]
             public void ProvideBazExplicitly(Inquiry inquiry, IHandler composer)
             {
-               if (Equals(inquiry.Key, typeof(Baz)))
-                   inquiry.Resolve(new SpecialBaz(), composer);
+                if (Equals(inquiry.Key, typeof(Baz)))
+                    inquiry.Resolve(new SpecialBaz(), composer);
             }
 
             [Provides("Foo"),
@@ -1375,7 +1378,7 @@
             }
 
             [Provides]
-            public Promise<Bar> ProvideBar { get; } 
+            public Promise<Bar> ProvideBar { get; }
                 = Promise.Resolved(new Bar { Handled = 3 });
 
             [Provides(typeof(Bee))]
@@ -1444,7 +1447,7 @@
             [Provides(Strict = true)]
             public int[] ProvidesIntegers()
             {
-                return new[] {2, 4, 6};
+                return new[] { 2, 4, 6 };
             }
 
             [Provides(Strict = true)]
@@ -1481,7 +1484,7 @@
         {
             [Provides]
             public Controller()
-            {            
+            {
             }
 
             [Handles]
@@ -1507,11 +1510,11 @@
             [Provides]
             public Controller(TView view, TModel model)
             {
-                View  = view;
+                View = view;
                 Model = model;
             }
 
-            public TView  View  { get; }
+            public TView View { get; }
             public TModel Model { get; }
         }
 
@@ -1555,7 +1558,6 @@
             [Provides, Singleton]
             protected Application()
             {
-                
             }
         }
 
@@ -1573,7 +1575,7 @@
             public Application(C rootController, Screen screen)
             {
                 RootController = rootController;
-                MainScreen     = screen;
+                MainScreen = screen;
             }
 
             public C      RootController { get; }
@@ -1598,7 +1600,7 @@
         {
             [Provides, Contextual]
             public OverloadedConstructors()
-            {                
+            {
             }
 
             [Provides, Contextual]
@@ -1653,15 +1655,16 @@
             int? IFilter.Order { get; set; }
 
             [Handles,
-             Filter(typeof(IFilter<,>),
-                 Many = true, Required = true)]
+             Filter(typeof(LogFilter<,>)),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public void HandleBar(Bar bar)
             {
                 bar.Handled++;
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true),
+             Filter(typeof(LogFilter<,>)),
              SkipFilters]
             public void HandleBee(Bee bee)
             {
@@ -1673,7 +1676,7 @@
                 return new ContravarintFilter();
             }
 
-            [Provides(typeof(IFilter<,>))]
+            [Provides(typeof(LogFilter<,>))]
             public object CreateFilter(Inquiry inquiry)
             {
                 var type = (Type)inquiry.Key;
@@ -1681,9 +1684,9 @@
                 if (type.IsInterface)
                     return Activator.CreateInstance(
                         typeof(LogFilter<,>).
-                        MakeGenericType(type.GenericTypeArguments));
+                            MakeGenericType(type.GenericTypeArguments));
                 return type.IsAbstract ? null
-                     : Activator.CreateInstance(type);
+                    : Activator.CreateInstance(type);
             }
 
             [Provides(typeof(ExceptionBehavior<,>))]
@@ -1712,21 +1715,27 @@
         private class SpecialFilteredHandler : Handler
         {
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public SpecialFoo HandleFoo(Foo foo)
             {
                 return new SpecialFoo();
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Promise<SpecialBaz> HandleBaz(Baz baz)
             {
                 return Promise.Resolved(new SpecialBaz());
             }
 
             [Handles,
-             Filter(typeof(IFilter<,>), Many = true)]
+             Filter(typeof(LogFilter<,>), Required = true),
+             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Task<SpecialBar> HandleBaz(Bar bar)
             {
                 return Task.FromResult(new SpecialBar());
@@ -1735,7 +1744,7 @@
             [Handles,
              Filter(typeof(ExceptionBehavior<,>))]
             public void Remove(Boo boo)
-            {          
+            {
             }
         }
 

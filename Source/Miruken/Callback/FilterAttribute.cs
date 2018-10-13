@@ -12,48 +12,33 @@
         AllowMultiple = true, Inherited = false)]
     public class FilterAttribute : Attribute, IFilterProvider
     {
-        public FilterAttribute(params Type[] filterTypes)
+        public FilterAttribute(Type filterType)
         {
-            ValidateFilters(filterTypes);
-            FilterTypes = filterTypes;
+            ValidateFilterConformance(filterType);
+            FilterType = filterType;
         }
 
-        public Type[] FilterTypes { get; }
-        public bool   Many        { get; set; }
-        public int?   Order       { get; set; }
-        public bool   Required    { get; set; }
+        public Type FilterType { get; }
+        public int? Order      { get; set; }
+        public bool Required   { get; set; }
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             Type callbackType, IHandler composer)
         {
-            var filterTypes = FilterTypes
-                .Select(f => dispatcher.CloseFilterType(f, callbackType))
-                .Where(f => f != null && AcceptFilterType(f, binding))
-                .ToArray();
-
-            if (filterTypes.Length == 0)
+            var closedFilterType = dispatcher.CloseFilterType(FilterType, callbackType);
+            if (!AcceptFilterType(closedFilterType, binding))
                 return Enumerable.Empty<IFilter>();
 
-            var filters = filterTypes.SelectMany(filterType => Many
-                    ? composer.Break().ResolveAll(filterType)
-                    : new[] { composer.Break().Resolve(filterType) })
-                .OfType<IFilter>()
-                .ToArray();
+            var filter = (IFilter)composer.Break().Resolve(closedFilterType);
+            if (filter == null) return Enumerable.Empty<IFilter>();
+            if (Order.HasValue) filter.Order = Order.Value;
 
-            var relativeOrder = Order;
-            foreach (var filter in filters)
-            {
-                if (!filter.Order.HasValue && relativeOrder.HasValue)
-                    filter.Order = relativeOrder++;
-            }
-
-            ResolvedFilters(filters, binding);
-            return filters;
+            return new[] { filter };
         }
 
         protected virtual void ValidateFilterType(Type filterType)
-        {
+        {          
         }
 
         protected virtual bool AcceptFilterType(Type filterType, MemberBinding binding)
@@ -61,30 +46,20 @@
             return true;
         }
 
-        protected virtual void ResolvedFilters(IFilter[] filters, MemberBinding binding)
+        private void ValidateFilterConformance(Type filterType)
         {
-            if (Required && filters.Length == 0)
-                throw new InvalidOperationException(
-                    $"At least one filter must be provided by '{GetType().FullName}'");
-        }
-
-        private void ValidateFilters(Type[] filterTypes)
-        {
-            if (filterTypes == null)
-                throw new ArgumentNullException(nameof(filterTypes));
-            var anyFilter = typeof(IFilter<,>);
-            foreach (var filterType in filterTypes)
-            {
-                if (filterType == null)
-                    throw new ArgumentException("Filter types cannot be null");
-                if (filterType == anyFilter) continue;
-                var conformance = filterType.GetOpenTypeConformance(anyFilter);
-                if (conformance == null)
-                    throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
-                if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
-                    throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
-                ValidateFilterType(filterType);
-            }
+            if (filterType == null)
+                throw new ArgumentNullException(nameof(filterType));
+            if (filterType == null)
+                throw new ArgumentException("Filter types cannot be null");
+            if (filterType == typeof(IFilter<,>)) 
+                throw new ArgumentException("Filter type unspecified");
+            var conformance = filterType.GetOpenTypeConformance(typeof(IFilter<,>));
+            if (conformance == null)
+                throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
+            if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
+                throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
+            ValidateFilterType(filterType);
         }
     }
 }
