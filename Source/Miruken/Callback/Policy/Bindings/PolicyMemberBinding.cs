@@ -152,7 +152,7 @@
                 this, target, actualCallback, (IHandler comp, out bool completed) =>
                 {
                     args = ResolveArgs(dispatcher, callback, args,
-                                       comp.EnableFilters(), out completed);
+                                       comp, out completed);
                     if (!completed) return null;
                     var baseResult = dispatcher.Invoke(target, args, resultType);
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)
