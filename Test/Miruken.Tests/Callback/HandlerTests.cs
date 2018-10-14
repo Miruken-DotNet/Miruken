@@ -633,7 +633,8 @@
             var bar     = new Bar();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.SkipFilters().Handle(bar));
-            Assert.AreEqual(2, bar.Filters.Count);
+            Assert.AreEqual(3, bar.Filters.Count);
+            Assert.IsTrue(bar.Filters.Contains(handler));
             Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }

@@ -24,7 +24,7 @@
 
     public interface IFilterProvider
     {
-        bool Required { get;}
+        bool Required { get; }
 
         IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,

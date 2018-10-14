@@ -53,7 +53,7 @@
             if (filterType == null)
                 throw new ArgumentException("Filter types cannot be null");
             if (filterType == typeof(IFilter<,>)) 
-                throw new ArgumentException("Filter type unspecified");
+                throw new ArgumentException("Filter type cannot be unspecified");
             var conformance = filterType.GetOpenTypeConformance(typeof(IFilter<,>));
             if (conformance == null)
                 throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
