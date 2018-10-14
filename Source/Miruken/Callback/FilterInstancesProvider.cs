@@ -7,11 +7,13 @@
 
     public class FilterInstancesProvider : IFilterProvider
     {
-        private readonly IFilter[] _filters;
+        private readonly HashSet<IFilter> _filters;
 
         public FilterInstancesProvider(params IFilter[] filters)
         {
-            _filters = filters;
+            if (filters.Length == 0)
+                throw new ArgumentException("At least one filter must be provided");
+            _filters = new HashSet<IFilter>(filters);
         }
 
         public FilterInstancesProvider(
