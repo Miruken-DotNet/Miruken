@@ -485,7 +485,7 @@
             var provider = new EmailProvider() 
                          + new OfflineProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             var id = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
             id = provider.Proxy<IEmailFeature>().Email("Hello");

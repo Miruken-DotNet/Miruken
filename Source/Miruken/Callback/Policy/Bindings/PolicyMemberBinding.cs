@@ -132,7 +132,7 @@
                 callback, args, dispatcher, out var callbackType);
 
             var targetFilters  = target is IFilter targetFilter
-                ? new [] {new FilterInstancesProvider(targetFilter)}
+                ? new [] {new FilterInstancesProvider(true, targetFilter)}
                 : null;
 
             var filters = composer.GetOrderedFilters(
