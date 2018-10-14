@@ -63,8 +63,9 @@
         {
             unchecked
             {
-                return (31 * FilterType.GetHashCode() + (Order?.GetHashCode() ?? 0)) ^ 
-                       Required.GetHashCode();
+                return (FilterType.GetHashCode() * 31
+                     + (Order?.GetHashCode() ?? 0)) * 31
+                      + Required.GetHashCode();
             }
         }
 
