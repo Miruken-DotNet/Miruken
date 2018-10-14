@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Infrastructure;
     using Policy;
@@ -9,7 +10,8 @@
 
     [AttributeUsage(AttributeTargets.Class |
         AttributeTargets.Method | AttributeTargets.Property,
-        AllowMultiple = true, Inherited = false)]
+        AllowMultiple = true, Inherited = false),
+    DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class FilterAttribute : Attribute, IFilterProvider
     {
         public FilterAttribute(Type filterType)
@@ -46,6 +48,26 @@
             return true;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            return obj is FilterAttribute other
+                && other.FilterType == FilterType
+                && other.Order == Order
+                && other.Required == Required;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (31 * FilterType.GetHashCode() + (Order?.GetHashCode() ?? 0)) ^ 
+                       Required.GetHashCode();
+            }
+        }
+
         private void ValidateFilterConformance(Type filterType)
         {
             if (filterType == null)
@@ -60,6 +82,16 @@
             if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
                 throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
             ValidateFilterType(filterType);
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var order    = Order.HasValue ? ", Order = " + Order : "";
+                var required = Required ? ", Required" : "";
+                return $"{FilterType.FullName}{order}{required}";
+            }
         }
     }
 }

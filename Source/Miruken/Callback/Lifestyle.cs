@@ -67,6 +67,16 @@
             };
         }
 
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || GetType() == obj?.GetType();
+        }
+
+        public override int GetHashCode()
+        {
+            return LifestyleType.GetHashCode();
+        }
+
         private static readonly ConcurrentDictionary<MemberDispatch, IFilter>
             Lifestyles = new ConcurrentDictionary<MemberDispatch, IFilter>();
     }
