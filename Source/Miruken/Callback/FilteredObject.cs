@@ -2,12 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using Infrastructure;
 
     public abstract class FilteredObject : IFiltered
     {
-        private IFilterProvider[] _filters = Array.Empty<IFilterProvider>();
+        private HashSet<IFilterProvider> _filters;
 
         protected FilteredObject()
         {
@@ -18,8 +16,10 @@
         public void AddFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
-            _filters = _filters.Concat(providers.Where(p => p != null))
-                .ToArray().Normalize();
+            if (_filters == null)
+                _filters = new HashSet<IFilterProvider>(providers);
+            else 
+                Array.ForEach(providers, p => _filters.Add(p));
         }
     }
 }

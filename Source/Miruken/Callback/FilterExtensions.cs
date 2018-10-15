@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Infrastructure;
     using Policy;
     using Policy.Bindings;
 
@@ -50,7 +49,7 @@
                     .Decorate(handler);
         }
 
-        public static IList<(IFilter, IFilterProvider)>
+        public static ICollection<(IFilter, IFilterProvider)>
             GetOrderedFilters(this IHandler handler, MemberBinding binding,
                 MemberDispatch dispatcher, Type callbackType,
                 params IEnumerable<IFilterProvider>[] providers)
@@ -75,7 +74,7 @@
                     break;
             }
 
-            var ordered = new List<(IFilter, IFilterProvider)>();
+            var ordered = new SortedSet<(IFilter, IFilterProvider)>(FilterComparer.Instance);
 
             foreach (var provider in allProviders)
             {
@@ -87,7 +86,7 @@
                 {
                     if (filter == null) return null;
                     found = true;
-                    ordered.AddSorted((filter, provider), FilterComparer.Instance);
+                    ordered.Add((filter, provider));
                 }
                 if (!found) return null;
             }
