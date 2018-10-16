@@ -60,7 +60,6 @@
             MemberBinding member, double elapsedMs, Exception ex)
         {
             var exceptionLogger = LoggerFactory?.Create(ex.GetType());
-
             if (exceptionLogger?.IsErrorEnabled == true)
             {
                 exceptionLogger.ErrorFormat(ex, "{0} Failed {1} in {2}",
