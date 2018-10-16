@@ -21,7 +21,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+         ExpectedException(typeof(NotSupportedException))]
         public void Rejects_Callback_If_No_Principal()
         {
             var handler = new MissileControlHandler()

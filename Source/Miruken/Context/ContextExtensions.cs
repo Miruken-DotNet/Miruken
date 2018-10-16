@@ -26,5 +26,11 @@ namespace Miruken.Context
                 return true;
             });
         }
+
+        public static IHandler PublishFromRoot(this IHandler handler)
+        {
+            var context = handler.Resolve<Context>();
+            return context != null ? context.Root.Publish() : handler;
+        }
     }
 }

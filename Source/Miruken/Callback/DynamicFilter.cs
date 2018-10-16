@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Reflection;
-    using System.Text;
     using System.Threading.Tasks;
     using Infrastructure;
     using Policy;
@@ -31,6 +29,7 @@
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
             var args = ResolveArgs(dispatch, callback, member, composer, next, provider);
+            if (args == null) return next(proceed: false);
             return (Task<TRes>)dispatch.Invoke(this, args);
         }
 
@@ -42,9 +41,8 @@
             if (arguments.Length == 2)
                 return new object[] { callback, next };
 
-            var args     = new object[arguments.Length];
-            var parent   = callback as Inquiry;
-            var culprits = new List<Argument>();
+            var args   = new object[arguments.Length];
+            var parent = callback as Inquiry;
 
             var dependencies = new Bundle();
             for (var i = 2; i < arguments.Length; ++i)
@@ -68,10 +66,10 @@
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     dependencies.Add(h => args[index] = resolver.ResolveArgument(
-                            parent, argument, optional ? h.BestEffort() : h, composer),
+                            parent, argument, h, composer),
                         (ref bool resolved) =>
                         {
-                            if (!resolved) culprits.Add(argument);
+                            resolved = resolved || optional;
                             return false;
                         });
                 }
@@ -83,12 +81,7 @@
                 var complete = dependencies.Complete();
                 if (dependencies.IsAsync) complete.Wait();
                 if (!(handled || dependencies.Handled))
-                {
-                    var errors = new StringBuilder("Missing dependencies");
-                    foreach (var culprit in culprits)
-                        errors.Append($" {culprit.Parameter.Name}:{culprit.ParameterType}");
-                    throw new InvalidOperationException(errors.ToString());
-                }
+                    return null;
             }
 
             args[0] = callback;
