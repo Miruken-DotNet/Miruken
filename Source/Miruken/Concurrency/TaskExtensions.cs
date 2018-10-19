@@ -89,7 +89,7 @@
                         .Unwrap();
             }
 
-            private static async Task<T> Complete<T>(Task task)
+            private static Task<T> Complete<T>(Task task)
             {
                 var source = new TaskCompletionSource<T>();
                 if (task.IsFaulted)
@@ -98,13 +98,13 @@
                     source.SetCanceled();
                 else
                     source.SetResult((T)GetResult(task, typeof(T)));
-                return await source.Task.ConfigureAwait(false);
+                return source.Task;
             }
 
             private static object GetResult(Task task, Type type = null)
             {
                 var taskType = task.GetType();
-                var getter   = TaskResultGetters.GetOrAdd(taskType, t =>
+                var getter = TaskResultGetters.GetOrAdd(taskType, t =>
                 t.GetOpenTypeConformance(typeof(Task<>)) == null ? null
                     : RuntimeHelper.CreatePropertyGetter("Result", t));
                 return getter?.Invoke(task) ?? RuntimeHelper.GetDefault(type);

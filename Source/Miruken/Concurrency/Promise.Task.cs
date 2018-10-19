@@ -30,19 +30,24 @@
                 (ex, s) => fail(ex, s).ToPromise()) : null);
         }
 
-        public async Task<object> ToTask()
+        public Task<object> ToTask()
         {
             var tcs = new TaskCompletionSource<object>();
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());
-            return await tcs.Task.ConfigureAwait(false);
+            return tcs.Task;
         }
 
         public TaskAwaiter<object> GetAwaiter()
         {
             return (ToTaskInternal() as Task<object> ?? ToTask())
                 .GetAwaiter();
+        }
+
+        public ConfiguredTaskAwaitable<object> ConfigureAwait(bool continueOnCapturedContext)
+        {
+            return ToTask().ConfigureAwait(continueOnCapturedContext);
         }
 
         Task ITaskConversion.ToTask()
@@ -147,19 +152,24 @@
                  : null);
         }
 
-        public new async Task<T> ToTask()
+        public new Task<T> ToTask()
         {
             var tcs = new TaskCompletionSource<T>();
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());
-            return await tcs.Task.ConfigureAwait(false);
+            return tcs.Task;
         }
 
         public new TaskAwaiter<T> GetAwaiter()
         {
             return (ToTaskInternal() as Task<T> ?? ToTask())
                 .GetAwaiter();
+        }
+
+        public new ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext)
+        {
+            return ToTask().ConfigureAwait(continueOnCapturedContext);
         }
 
         protected override Task ToTaskInternal()
