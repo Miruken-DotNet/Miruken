@@ -28,7 +28,7 @@
 
             instance = _cache.GetOrAdd(context, ctx =>
             {
-                var result = next().GetAwaiter().GetResult();
+                var result = next().Result;
                 if (result is IContextual contextual)
                 {
                     contextual.Context = ctx;

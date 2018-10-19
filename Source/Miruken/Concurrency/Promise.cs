@@ -201,9 +201,9 @@
             return Decorate(resolve, null);
         }
 
-        public object Wait()
+        public object Wait(int? millisecondsTimeout = null)
         {
-            return End(this);
+            return End(this, millisecondsTimeout);
         }
 
         public Promise Timeout(TimeSpan timeout)
@@ -1165,9 +1165,9 @@
             return new Promise<R>(mode, owner);
         }
 
-        public new T Wait()
+        public new T Wait(int? millisecondsTimeout = null)
         {
-            return (T)End(this);
+            return (T)End(this, millisecondsTimeout);
         }
 
         #region Build

@@ -23,7 +23,7 @@
                 object guard = this;
                 instance = LazyInitializer.EnsureInitialized(
                     ref _instance, ref _initialized, ref guard,
-                    () => next().GetAwaiter().GetResult());
+                    () => next().Result);
             }
             return true;
         }

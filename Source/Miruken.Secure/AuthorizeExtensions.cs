@@ -14,7 +14,7 @@
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
             return handler.CanAccessAsync(target, principal, policy)
-                .GetAwaiter().GetResult();
+                .Wait();
         }
 
         public static Promise<bool> CanAccessAsync(
