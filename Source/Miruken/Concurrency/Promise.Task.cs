@@ -39,10 +39,10 @@
             return tcs.Task;
         }
 
-        public TaskAwaiter<object> GetAwaiter()
+        public ConfiguredTaskAwaitable<object>.ConfiguredTaskAwaiter GetAwaiter()
         {
             return (ToTaskInternal() as Task<object> ?? ToTask())
-                .GetAwaiter();
+                .ConfigureAwait(false).GetAwaiter();
         }
 
         public ConfiguredTaskAwaitable<object> ConfigureAwait(bool continueOnCapturedContext)
@@ -161,15 +161,10 @@
             return tcs.Task;
         }
 
-        public new TaskAwaiter<T> GetAwaiter()
+        public new ConfiguredTaskAwaitable<T>.ConfiguredTaskAwaiter GetAwaiter()
         {
             return (ToTaskInternal() as Task<T> ?? ToTask())
-                .GetAwaiter();
-        }
-
-        public new ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext)
-        {
-            return ToTask().ConfigureAwait(continueOnCapturedContext);
+                .ConfigureAwait(false).GetAwaiter();
         }
 
         protected override Task ToTaskInternal()
