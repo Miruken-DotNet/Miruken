@@ -353,11 +353,11 @@
             var child2     = root.CreateChild();
             var child3     = root.CreateChild();
             var grandChild = child3.CreateChild();
-            root.AddHandlers(new Observer(count));
-            child1.AddHandlers(new Observer(count), new Observer(count));
-            child2.AddHandlers(new Observer(count));
-            child3.AddHandlers(new Observer(count), new Observer(count));
-            Proxy<IObserving>(root.Publish()).Observe();
+            root.AddHandlers(new Observer());
+            child1.AddHandlers(new Observer(), new Observer());
+            child2.AddHandlers(new Observer());
+            child3.AddHandlers(new Observer(), new Observer());
+            Proxy<IObserving>(root.Publish()).Observe(count);
             Assert.AreEqual(6, count.Count);
         }
 
@@ -370,23 +370,42 @@
             var child2     = root.CreateChild();
             var child3     = root.CreateChild();
             var grandChild = child3.CreateChild();
-            root.AddHandlers(new Observer(count));
-            child1.AddHandlers(new Observer(count), new Observer(count));
-            child2.AddHandlers(new Observer(count));
-            child3.AddHandlers(new Observer(count), new Observer(count));
-            Proxy<IObserving>(root.Publish()).Observe();
+            root.AddHandlers(new Observer());
+            child1.AddHandlers(new Observer(), new Observer());
+            child2.AddHandlers(new Observer());
+            child3.AddHandlers(new Observer(), new Observer());
+            Proxy<IObserving>(root.Publish()).Observe(count);
             Assert.AreEqual(6, count.Count);
         }
 
         [TestMethod]
         public void Should_Publish_Reverse_Descendants_Using_Protocol_BestEffort()
         {
-            var root = new Context();
+            var root   = new Context();
             var child1 = root.CreateChild();
             var child2 = root.CreateChild();
             var child3 = root.CreateChild();
             var grandChild = child3.CreateChild();
-            Proxy<IObserving>(root.SelfOrDescendantReverse().BestEffort()).Observe();
+            Proxy<IObserving>(root.SelfOrDescendantReverse()
+                .BestEffort()).Observe(new Counter());
+        }
+
+        [TestMethod]
+        public void Should_Publish_From_Root_Context()
+        {
+            var count  = new Counter();
+            var root   = new Context();
+            new Observer().Context = root;
+            var child1 = root.CreateChild();
+            new Observer().Context = child1;
+            var child2 = root.CreateChild();
+            new Observer().Context = child2;
+            var child3 = root.CreateChild();
+            new Observer().Context = child3;
+            var grandChild = child3.CreateChild();
+            new Observer().Context = grandChild;
+            child2.PublishFromRoot().Handle(count);
+            Assert.AreEqual(5, count.Count);
         }
 
         private class Counter
@@ -400,21 +419,22 @@
 
         private interface IObserving
         {
-            void Observe();
+            void Observe(Counter counter);
         }
 
-        private class Observer : Handler, IObserving
+        private class Observer : ContextualHandler, IObserving
         {
-            private readonly Counter _counter;
-
-            public Observer(Counter counter)
+            public void Observe(Counter counter)
             {
-                _counter = counter;
+                counter.Increment();
             }
 
-            public void Observe()
+            [Handles]
+            private void Observe(Counter counter, IHandler composer)
             {
-                _counter.Increment();
+                var context = composer.Resolve<Context>();
+                Assert.AreSame(Context.Root, context);
+                counter.Increment();
             }
         }
     }

@@ -3,6 +3,8 @@ using Miruken.Concurrency;
 
 namespace Miruken.Context
 {
+    using System;
+
     public static class ContextExtensions
     {
         public static IHandler TrackPromise(
@@ -26,5 +28,10 @@ namespace Miruken.Context
                 return true;
             });
         }
+
+        public static IHandler PublishFromRoot(this IHandler handler) =>
+            handler.Resolve<Context>()?.Root?.Publish()
+                ?? throw new InvalidOperationException(
+                    "The root context could not be found");
     }
 }
