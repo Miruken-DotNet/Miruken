@@ -30,13 +30,13 @@
                 (ex, s) => fail(ex, s).ToPromise()) : null);
         }
 
-        public Task<object> ToTask()
+        public async Task<object> ToTask()
         {
             var tcs = new TaskCompletionSource<object>();
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());
-            return tcs.Task;
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         public TaskAwaiter<object> GetAwaiter()
@@ -147,13 +147,13 @@
                  : null);
         }
 
-        public new Task<T> ToTask()
+        public new async Task<T> ToTask()
         {
             var tcs = new TaskCompletionSource<T>();
             Then((result, s) => tcs.SetResult(result))
             .Catch((exception, s) => tcs.SetException(exception))
             .Cancelled(cancel => tcs.SetCanceled());
-            return tcs.Task;
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         public new TaskAwaiter<T> GetAwaiter()
