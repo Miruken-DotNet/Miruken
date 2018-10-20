@@ -119,7 +119,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentException))]
-        public async Task Should_Await_Rejetced_Promise()
+        public async Task Should_Await_Rejected_Promise()
         {
             var exception = new ArgumentException("Bad parameter");
             await Promise.Rejected(exception);

@@ -48,7 +48,7 @@ namespace Miruken.Concurrency
             }
         }
 
-        public static object End(IAsyncResult asyncResult)
+        public static object End(IAsyncResult asyncResult, int? millisecondsTimeout = null)
         {
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
@@ -57,7 +57,17 @@ namespace Miruken.Concurrency
                 throw new ArgumentException(@"Unrecognized IAsyncResult", nameof(asyncResult));
 
             if (result._completed == 0)
-                result.AsyncWaitHandle.WaitOne();
+            {
+                if (millisecondsTimeout.HasValue)
+                {
+                    if (!result.AsyncWaitHandle.WaitOne(millisecondsTimeout.Value))
+                        throw new TimeoutException();
+                }
+                else
+                {
+                    result.AsyncWaitHandle.WaitOne();
+                }
+            }
 
             if (result._exception != null)
                 throw result._exception;

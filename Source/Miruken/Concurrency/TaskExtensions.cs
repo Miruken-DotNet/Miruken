@@ -81,7 +81,7 @@
         {
             internal static Task<T> Coerce<T>(Task task)
             {
-                if (task is Task<T> ttask) return ttask;
+                if (task is Task<T> t) return t;
                 return task.IsCompleted 
                      ? Complete<T>(task) 
                      : task.ContinueWith(Complete<T>,
@@ -104,9 +104,9 @@
             private static object GetResult(Task task, Type type = null)
             {
                 var taskType = task.GetType();
-                var getter = TaskResultGetters.GetOrAdd(taskType, ttype =>
-                ttype.GetOpenTypeConformance(typeof(Task<>)) == null ? null
-                    : RuntimeHelper.CreatePropertyGetter("Result", ttype));
+                var getter = TaskResultGetters.GetOrAdd(taskType, t =>
+                t.GetOpenTypeConformance(typeof(Task<>)) == null ? null
+                    : RuntimeHelper.CreatePropertyGetter("Result", t));
                 return getter?.Invoke(task) ?? RuntimeHelper.GetDefault(type);
             }
 

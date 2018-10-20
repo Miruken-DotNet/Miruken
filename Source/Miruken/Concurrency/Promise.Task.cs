@@ -41,8 +41,12 @@
 
         public TaskAwaiter<object> GetAwaiter()
         {
-            return (ToTaskInternal() as Task<object> ?? ToTask())
-                .GetAwaiter();
+            return (ToTaskInternal() as Task<object> ?? ToTask()).GetAwaiter();
+        }
+
+        public ConfiguredTaskAwaitable<object> ConfigureAwait(bool continueOnCapturedContext)
+        {
+            return ToTask().ConfigureAwait(continueOnCapturedContext);
         }
 
         Task ITaskConversion.ToTask()
@@ -158,8 +162,12 @@
 
         public new TaskAwaiter<T> GetAwaiter()
         {
-            return (ToTaskInternal() as Task<T> ?? ToTask())
-                .GetAwaiter();
+            return (ToTaskInternal() as Task<T> ?? ToTask()).GetAwaiter();
+        }
+
+        public ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext)
+        {
+            return ToTask().ConfigureAwait(continueOnCapturedContext);
         }
 
         protected override Task ToTaskInternal()

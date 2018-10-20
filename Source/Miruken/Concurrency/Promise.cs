@@ -1165,9 +1165,9 @@
             return new Promise<R>(mode, owner);
         }
 
-        public new T Wait()
+        public new T Wait(int? millisecondsTimeout = null)
         {
-            return (T)End(this);
+            return (T)End(this, millisecondsTimeout);
         }
 
         #region Build
