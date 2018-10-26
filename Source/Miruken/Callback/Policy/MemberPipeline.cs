@@ -56,9 +56,8 @@
                     {
                         var (filter, provider) = pipeline.Current;
                         if (filter is IFilter<TCb, TRes> typedFilter)
-                            return typedFilter.Next((TCb) callback, binding, composer,
-                                (c, p) => Next((c ?? composer).SkipFilters(), p),
-                                provider);
+                         return typedFilter.Next((TCb)callback, binding,
+                             composer.SkipFilters(), Next, provider);
                     }
 
                     return (Task<TRes>) binding.CoerceResult(

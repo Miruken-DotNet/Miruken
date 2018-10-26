@@ -38,7 +38,6 @@ namespace Miruken.Context
             });
         }
 
-
         public static IHandler Dispose(
             this IHandler handler, IDisposable disposable)
         {
