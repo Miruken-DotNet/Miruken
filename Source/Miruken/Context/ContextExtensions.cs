@@ -28,7 +28,7 @@ namespace Miruken.Context
                 if (!(cb?.Result is Promise promise)) return true;
                 if (context.State == ContextState.Active)
                 {
-                    void Ended(Context ctx) => promise.Cancel();
+                    void Ended(Context ctx, object reason) => promise.Cancel();
                     context.ContextEnded += Ended;
                     promise.Finally(() => context.ContextEnded -= Ended);
                 }
@@ -45,7 +45,7 @@ namespace Miruken.Context
             var context = handler as Context ?? handler.Resolve<Context>()
                         ?? throw new InvalidOperationException(
                                "Disposal support requires a Context");
-            context.ContextEnded += ctx =>
+            context.ContextEnded += (ctx, _) =>
             {
                 try
                 {

@@ -165,7 +165,7 @@
             return (ToTaskInternal() as Task<T> ?? ToTask()).GetAwaiter();
         }
 
-        public ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext)
+        public new ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext)
         {
             return ToTask().ConfigureAwait(continueOnCapturedContext);
         }

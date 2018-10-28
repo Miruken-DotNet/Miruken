@@ -32,7 +32,7 @@
         private ILifetimeScope CreateContextScope(Context context)
         {
             var scope = new ContextLifetimeScope(context);
-            context.ContextEnded += ctx =>
+            context.ContextEnded += (ctx, _) =>
             {
                 if (_cache.TryRemove(ctx, out var lifetimeScope))
                     lifetimeScope.Dispose();
