@@ -134,7 +134,7 @@ namespace Miruken.Context
             TraversingHelper.Traverse(this, axis, visitor);
         }
 
-	    public Context UnwindToRoot()
+	    public Context UnwindToRoot(object reason = null)
 	    {
             var current = this;
             while (true)
@@ -142,17 +142,17 @@ namespace Miruken.Context
                 var parent = current.Parent;
                 if (parent == null)
                 {
-                    current.Unwind();
+                    current.Unwind(reason);
                     return current;
                 }
                 current = parent;
             }
 	    }
 
-	    public Context Unwind()
+	    public Context Unwind(object reason = null)
 	    {
             foreach (var child in Children)
-                child.End(Unwinded);
+                child.End(reason ?? Unwinded);
 	        return this;
 	    }
 
@@ -166,7 +166,7 @@ namespace Miruken.Context
 
             try
             {
-                Unwind();
+                Unwind(reason);
                 InternalEnd(reason);
             }
             finally
