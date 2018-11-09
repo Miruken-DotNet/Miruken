@@ -62,6 +62,9 @@
         [TestMethod]
         public async Task Should_Validate_Target_Resolving()
         {
+            // Duplicate Person/Player errors come from
+            // Miruken.Validate.Tests.ValidatorProvider in FluentValidationValidatorTests.cs
+
             var player  = new Player();
             var outcome = await _handler.Infer().ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
@@ -71,6 +74,7 @@
             {
                 "First name is required",
                 "'First Name' should not be empty.",
+                "'First Name' should not be empty.", 
                 "The FirstName field is required."
             }, firstName);
             var lastName = outcome.GetErrors("LastName").Cast<string>().ToArray();
@@ -78,12 +82,14 @@
             {
                 "Last name is required",
                 "'Last Name' should not be empty.",
+                "'Last Name' should not be empty.",
                 "The LastName field is required."
             }, lastName);
             var dob = outcome.GetErrors("DOB").Cast<string>().ToArray();
             CollectionAssert.AreEquivalent(new[]
             {
                 "DOB is required",
+                "'DOB' must not be empty.",
                 "'DOB' must not be empty.",
                 "The DOB field is required."
             }, dob);

@@ -53,7 +53,7 @@
         {
             var infer = (Callback as IInferCallback)?.InferCallback();
             return ReferenceEquals(infer, Callback) ? this 
-                 : new Composition(infer ?? Resolving.GetResolving(Callback));
+                 : new Composition(infer ?? Inference.Get(Callback));
         }
 
         public static bool IsComposed<T>(object callback)

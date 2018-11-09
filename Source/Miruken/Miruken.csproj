@@ -46,12 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Callback\Batch.cs" />
-    <Compile Include="Callback\Bundle.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />
     <Compile Include="Callback\FilteredObject.cs" />
     <Compile Include="Callback\FilterInstancesProvider.cs" />
     <Compile Include="Callback\Handler.Batch.cs" />
-    <Compile Include="Callback\Handler.Bundle.cs" />
     <Compile Include="Callback\Handler.Command.cs" />
     <Compile Include="Callback\Command.cs" />
     <Compile Include="Callback\FilterExtensions.cs" />
@@ -66,6 +64,7 @@
     <Compile Include="Callback\DecoratedHandler.cs" />
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\FilteredHandler.cs" />
+    <Compile Include="Callback\Inference.cs" />
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\Lifestyle.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />

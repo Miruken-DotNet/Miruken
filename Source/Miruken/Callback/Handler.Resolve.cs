@@ -14,32 +14,6 @@
         }
     }
 
-    public sealed class InferDecorator : Handler, IDecorator
-    {
-        private readonly IHandler _handler;
-
-        public InferDecorator(IHandler handler)
-        {
-            _handler = handler;
-        }
-
-        object IDecorator.Decoratee => _handler;
-
-        protected override bool HandleCallback(
-            object callback, ref bool greedy, IHandler composer)
-        {
-            callback = GetInferCallback(callback);
-            return _handler.Handle(callback, ref greedy, composer);
-        }
-
-        private static object GetInferCallback(object callback)
-        {
-            return callback is IInferCallback resolving
-                 ? resolving.InferCallback() ?? callback
-                 : Resolving.GetResolving(callback);
-        }
-    }
-
     public static class HandlerResolveExtensions
     {
         public static IHandler Infer(this IHandler handler)

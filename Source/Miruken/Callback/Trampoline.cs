@@ -21,15 +21,15 @@
         CallbackPolicy IDispatchCallback.Policy =>
             (Callback as IDispatchCallback)?.Policy;
 
-        bool IDispatchCallbackGuard.CanDispatch(
+        public bool CanDispatch(
             object target, MemberDispatch dispatcher)
         {
             return (Callback as IDispatchCallbackGuard)
                    ?.CanDispatch(target, dispatcher) != false;
         }
 
-        bool IDispatchCallback.Dispatch(
-            object handler, ref bool greedy, IHandler composer)
+        public virtual bool Dispatch(object handler,
+            ref bool greedy, IHandler composer)
         {
             return Callback != null &&
                 Handler.Dispatch(handler, Callback, ref greedy, composer);

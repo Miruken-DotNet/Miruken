@@ -59,7 +59,6 @@
     <Compile Include="Callback\HandlerTests.Args.cs" />
     <Compile Include="Callback\HandlerTests.Batch.cs" />
     <Compile Include="Callback\HandlerTests.Binding.cs" />
-    <Compile Include="Callback\HandlerTests.Bundle.cs" />
     <Compile Include="Callback\HandlerTests.Command.cs" />
     <Compile Include="Callback\ResolvingTests.cs" />
     <Compile Include="Callback\HandleMethodTests.cs" />

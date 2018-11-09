@@ -28,14 +28,13 @@
         }
 
         public object ResolveArgument(Inquiry parent,
-            Argument argument, IHandler handler, IHandler composer)
+            Argument argument, IHandler handler)
         {
-            var principal = composer.Resolve<IPrincipal>();
+            var principal = handler.Resolve<IPrincipal>();
             if (!(principal?.Identity is ClaimsIdentity identity))
                 throw new RejectedException();
             var claim = identity.FindFirst(ClaimType);
-            if (claim == null)
-                throw new RejectedException($"Missing claim '{ClaimType}'");
+            if (claim == null) return null;
             try
             {
                 return RuntimeHelper.ChangeType(claim.Value, argument.ParameterType);

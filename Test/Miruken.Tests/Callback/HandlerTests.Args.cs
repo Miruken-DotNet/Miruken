@@ -61,7 +61,7 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(NotSupportedException))]
+         ExpectedException(typeof(InvalidOperationException))]
         public void Should_Fail_If_Unresolved_Promise_Dependency()
         {
             var handler = new InventoryHandler();

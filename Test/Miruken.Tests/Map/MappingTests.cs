@@ -321,35 +321,6 @@
             Assert.AreEqual(entity.Name, data.Name);
         }
 
-        [TestMethod]
-        public void Should_Bundle_Mapping()
-        {
-            var entity = new PlayerEntity
-            {
-                Id   = 4,
-                Name = "Michel Platini"
-            };
-            var player = new PlayerData
-            {
-                Id   = 12,
-                Name = "Roberto Carlose"
-            };
-            var handler = new EntityMapping() + new ExplicitMapping();
-            var handled = handler.All(bundle =>
-                bundle.Add(h =>
-                {
-                    var data = h.Map<PlayerData>(entity);
-                    Assert.AreEqual(entity.Id, data.Id);
-                    Assert.AreEqual(entity.Name, data.Name);
-                }).Add(h =>
-                {
-                    var json = h.Map<string>(player, "application/json");
-                    Assert.AreEqual("{id:12,name:'Roberto Carlose'}", json);
-
-                }));
-            Assert.IsTrue(handled);
-        }
-
         private class Entity
         {
             public int Id { get; set; }
