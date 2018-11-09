@@ -10,7 +10,9 @@
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public sealed class Command 
-        : ICallback, IAsyncCallback, IDispatchCallback
+        : ICallback, IAsyncCallback,
+            IFilterCallback, IBatchCallback,
+            IDispatchCallback
     {
         private CallbackPolicy _policy;
         private readonly List<object> _results;
@@ -38,6 +40,12 @@
         public ICollection<object> Results => _results.AsReadOnly();
 
         public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
+
+        bool IFilterCallback.CanFilter =>
+            (Callback as IFilterCallback)?.CanFilter != false;
+
+        bool IBatchCallback.CanBatch =>
+            (Callback as IBatchCallback)?.CanBatch != false;
 
         public object Result
         {
