@@ -25,9 +25,9 @@
 
         protected override object Resolve(
             Inquiry parent, Argument argument,
-            object key, IHandler handler, IHandler composer)
+            object key, IHandler handler)
         {
-            return composer.Proxy((Type)key);
+            return handler.Proxy((Type)key);
         }
     }
 }

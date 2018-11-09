@@ -145,7 +145,7 @@
             return true;
         }
 
-        bool IDispatchCallbackGuard.CanDispatch(
+        public virtual bool CanDispatch(
             object target, MemberDispatch dispatcher)
         {
             if (InProgress(target, dispatcher)) return false;
@@ -154,7 +154,7 @@
             return true;
         }
 
-        bool IDispatchCallback.Dispatch(
+        public virtual bool Dispatch(
             object handler, ref bool greedy, IHandler composer)
         {
             try

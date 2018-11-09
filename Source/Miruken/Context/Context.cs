@@ -19,8 +19,12 @@ namespace Miruken.Context
 	{
 	    private EventHandlerList _events;
 	    private readonly List<Context> _children;
- 
-		public Context()
+
+	    public static readonly object AlreadyEnded = new object();
+	    public static readonly object Unwinded     = new object();
+	    public static readonly object Disposed     = new object();
+
+        public Context()
 		{
             State     = ContextState.Active;
             _children = new List<Context>();
@@ -55,10 +59,11 @@ namespace Miruken.Context
 	    {
             AssertActive();
 	        var child = InternalCreateChild();
-	        child.ContextEnding += ctx => Raise(ContextEvents.ChildContextEnding, ctx);
-            child.ContextEnded += ctx => {
+	        child.ContextEnding += (ctx, reason) => 
+	            Raise(ContextEvents.ChildContextEnding, ctx, reason);
+            child.ContextEnded += (ctx, reason) => {
                 _children.Remove(ctx);
-                Raise(ContextEvents.ChildContextEnded, ctx);
+                Raise(ContextEvents.ChildContextEnded, ctx, reason);
             };
             _children.Add(child);
 	        return child;
@@ -129,7 +134,7 @@ namespace Miruken.Context
             TraversingHelper.Traverse(this, axis, visitor);
         }
 
-	    public Context UnwindToRoot()
+	    public Context UnwindToRoot(object reason = null)
 	    {
             var current = this;
             while (true)
@@ -137,49 +142,49 @@ namespace Miruken.Context
                 var parent = current.Parent;
                 if (parent == null)
                 {
-                    current.Unwind();
+                    current.Unwind(reason);
                     return current;
                 }
                 current = parent;
             }
 	    }
 
-	    public Context Unwind()
+	    public Context Unwind(object reason = null)
 	    {
             foreach (var child in Children)
-                child.End();
+                child.End(reason ?? Unwinded);
 	        return this;
 	    }
 
-	    public void End()
+	    public void End(object reason = null)
 	    {
 	        if (State != ContextState.Active)
 	            return;
 
             State = ContextState.Ending;
-            Raise(ContextEvents.ContextEnding, this);
+            Raise(ContextEvents.ContextEnding, this, reason);
 
             try
             {
-                Unwind();
-                InternalEnd();
+                Unwind(reason);
+                InternalEnd(reason);
             }
             finally
             {
                 State = ContextState.Ended;
-                Raise(ContextEvents.ContextEnded, this);
+                Raise(ContextEvents.ContextEnded, this, reason);
                 _events.Dispose();
                 _events = null;
             }	        
 	    }
 
-	    protected virtual void InternalEnd()
+	    protected virtual void InternalEnd(object reason)
 	    {
 	    }
 
         #region Events
 
-        public event Action<Context> ContextEnding
+        public event Action<Context, object> ContextEnding
         {
             add
             {
@@ -189,14 +194,14 @@ namespace Miruken.Context
                         _events.AddHandler(ContextEvents.ContextEnding, value);
                         break;
                     case ContextState.Ending:
-                        value(this);
+                        value(this, AlreadyEnded);
                         break;
                 }
             }
             remove => _events.RemoveHandler(ContextEvents.ContextEnding, value);
         } 
 
-        public event Action<Context> ContextEnded
+        public event Action<Context, object> ContextEnded
         {
             add
             {
@@ -206,20 +211,20 @@ namespace Miruken.Context
                         _events.AddHandler(ContextEvents.ContextEnded, value);
                         break;
                     case ContextState.Ended:
-                        value(this);
+                        value(this, AlreadyEnded);
                         break;
                 }
             }
             remove => _events.RemoveHandler(ContextEvents.ContextEnded, value);
         }
 
-        public event Action<Context> ChildContextEnding
+        public event Action<Context, object> ChildContextEnding
         {
             add => _events?.AddHandler(ContextEvents.ChildContextEnding, value);
             remove => _events.RemoveHandler(ContextEvents.ChildContextEnding, value);
         }
 
-        public event Action<Context> ChildContextEnded
+        public event Action<Context, object> ChildContextEnded
         {
             add => _events?.AddHandler(ContextEvents.ChildContextEnded, value);
             remove => _events.RemoveHandler(ContextEvents.ChildContextEnded, value);
@@ -247,15 +252,15 @@ namespace Miruken.Context
 
 		protected virtual void Dispose(bool managed)
 		{
-            End();
+            End(Disposed);
 		}
 
 		#endregion
 
-        private void Raise(object key, Context context)
+        private void Raise(object key, Context context, object reason)
         {
-            var eventHandler = (Action<Context>) _events?[key];
-            eventHandler?.Invoke(context);
+            var eventHandler = (Action<Context, object>) _events?[key];
+            eventHandler?.Invoke(context, reason);
         }
 
         private void AssertActive()

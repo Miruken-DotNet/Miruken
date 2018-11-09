@@ -191,13 +191,10 @@
             var parent = callback as Inquiry;
             var args   = new object[arguments.Length];
 
-            var dependencies = new Bundle();
             for (var i = ruleArgs.Length; i < arguments.Length; ++i)
             {
-                var index        = i;
                 var argument     = arguments[i];
                 var argumentType = argument.ArgumentType;
-                var optional     = argument.IsOptional;
                 if (argumentType == typeof(IHandler))
                     args[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
@@ -210,25 +207,13 @@
                 else
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
-                    dependencies.Add(h => args[index] =
-                            resolver.ResolveArgument(parent, argument, h, composer),
-                        (ref bool resolved) =>
-                        {
-                            resolved = resolved || optional;
-                            return false;
-                        });
-                }
-            }
-
-            if (!dependencies.IsEmpty)
-            {
-                var handled  = composer.Handle(dependencies);
-                var complete = dependencies.Complete();
-                if (dependencies.IsAsync) complete.Wait();
-                if (!(handled || dependencies.Handled))
-                {
-                    completed = false;
-                    return null;
+                    resolver.ValidateArgument(argument);
+                    var arg = args[i] = resolver.ResolveArgument(parent, argument, composer);
+                    if (arg == null && !argument.IsOptional)
+                    {
+                        completed = false;
+                        return null;
+                    }
                 }
             }
 

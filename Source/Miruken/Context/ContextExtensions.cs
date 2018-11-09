@@ -7,6 +7,15 @@ namespace Miruken.Context
 
     public static class ContextExtensions
     {
+        public static IHandler Async(this IHandler handler)
+        {
+            if (handler == null) return null;
+            var context = handler as Context ?? handler.Resolve<Context>()
+                       ?? throw new InvalidOperationException(
+                              "Async support requires a Context");
+            return handler.TrackPromise(context);
+        }
+
         public static IHandler TrackPromise(
             this IHandler handler, Context context)
         {
@@ -19,7 +28,7 @@ namespace Miruken.Context
                 if (!(cb?.Result is Promise promise)) return true;
                 if (context.State == ContextState.Active)
                 {
-                    void Ended(Context ctx) => promise.Cancel();
+                    void Ended(Context ctx, object reason) => promise.Cancel();
                     context.ContextEnded += Ended;
                     promise.Finally(() => context.ContextEnded -= Ended);
                 }
@@ -29,9 +38,33 @@ namespace Miruken.Context
             });
         }
 
-        public static IHandler PublishFromRoot(this IHandler handler) =>
-            handler.Resolve<Context>()?.Root?.Publish()
+        public static IHandler Dispose(
+            this IHandler handler, IDisposable disposable)
+        {
+            if (handler == null || disposable == null) return handler;
+            var context = handler as Context ?? handler.Resolve<Context>()
+                        ?? throw new InvalidOperationException(
+                               "Disposal support requires a Context");
+            context.ContextEnded += (ctx, _) =>
+            {
+                try
+                {
+                    disposable.Dispose();
+                }
+                catch
+                {
+                    // don't care
+                }
+            };
+            return handler;
+        }
+
+        public static IHandler PublishFromRoot(this IHandler handler)
+        {
+            var context = handler.Resolve<Context>()
                 ?? throw new InvalidOperationException(
-                    "The root context could not be found");
+                              "he root context could not be found");
+            return context.Root.Publish();
+        }
     }
 }

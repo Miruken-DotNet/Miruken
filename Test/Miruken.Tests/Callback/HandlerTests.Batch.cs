@@ -299,7 +299,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Supress_Batching()
+        public async Task Should_Suppress_Batching()
         {
             var called  = false;
             var handler = new EmailHandler();
@@ -314,7 +314,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Supress_Batching_When_Resolving()
+        public async Task Should_Suppress_Batching_When_Resolving()
         {
             var called  = false;
             var handler = new EmailHandler();

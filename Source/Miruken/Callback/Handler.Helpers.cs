@@ -33,6 +33,11 @@
             return new Provider(result) + handler;
         }
 
+        public static IHandler With<T>(this IHandler handler, T result)
+        {
+            return new Provider(result) + handler;
+        }
+
         public static FilteredHandler Filter(
             this IHandler handler, HandlerFilterDelegate filter,
             bool reentrant = false)

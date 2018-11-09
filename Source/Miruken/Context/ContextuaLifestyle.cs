@@ -34,7 +34,7 @@
                     contextual.Context = ctx;
                     ctx.RemoveHandlers(result);
                     contextual.ContextChanging += ChangeContext;
-                    context.ContextEnded += c =>
+                    context.ContextEnded += (c, r) =>
                     {
                         _cache.TryRemove(ctx, out _);
                         contextual.ContextChanging -= ChangeContext;
@@ -44,7 +44,7 @@
                 }
                 else
                 {
-                    context.ContextEnded += c =>
+                    context.ContextEnded += (c, r)  =>
                     {
                         _cache.TryRemove(ctx, out _);
                         (result as IDisposable)?.Dispose();

@@ -2,12 +2,10 @@
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
     using Policy;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class Resolving : Inquiry,
-        IInferCallback, IFilterCallback, IDispatchCallbackGuard
+    public class Resolving : Inquiry, IInferCallback, IFilterCallback
     {
         private readonly object _callback;
         private bool _handled;
@@ -15,7 +13,7 @@
         public Resolving(object key, object callback)
             : base(key, callback as Inquiry, true)
         {
-            _callback = callback 
+            _callback = callback
                 ?? throw new ArgumentNullException(nameof(callback));
         }
 
@@ -26,7 +24,7 @@
             return this;
         }
 
-        bool IDispatchCallbackGuard.CanDispatch(
+        public override bool CanDispatch(
             object target, MemberDispatch dispatcher)
         {
             return (_callback as IDispatchCallbackGuard)
@@ -42,31 +40,6 @@
                 || _handled;
         }
 
-        public static object GetResolving(object callback)
-        {
-            var handlers = CallbackPolicy.GetCallbackHandlers(callback).ToArray();
-            if (handlers.Length == 0) return callback;
-            var bundle = new Bundle(false)
-                .Add(h => h.Handle(new NoResolving(callback)), 
-                    (ref bool handled) => handled);
-            foreach (var handler in handlers)
-                bundle.Add(h => h.Handle(new Resolving(handler, callback)));
-            return bundle;
-        }
-
         private string DebuggerDisplay => $"Resolving | {Key} => {_callback}";
-    }
-
-    public sealed class NoResolving : Trampoline, IInferCallback
-    {
-        public NoResolving(object callback)
-            : base(callback)
-        {
-        }
-
-        object IInferCallback.InferCallback()
-        {
-            return Callback;
-        }
     }
 }

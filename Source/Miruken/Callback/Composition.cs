@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class Composition 
+    public class Composition
         : Trampoline, ICallback, IInferCallback,
           IFilterCallback, IBatchCallback,
           ICallbackKey
@@ -13,7 +13,7 @@
         }
 
         protected Composition()
-        {         
+        {
         }
 
         public Type ResultType
@@ -52,8 +52,8 @@
         object IInferCallback.InferCallback()
         {
             var infer = (Callback as IInferCallback)?.InferCallback();
-            return ReferenceEquals(infer, Callback) ? this 
-                 : new Composition(infer ?? Resolving.GetResolving(Callback));
+            return ReferenceEquals(infer, Callback) ? this
+                 : new Composition(infer ?? Inference.Get(Callback));
         }
 
         public static bool IsComposed<T>(object callback)
