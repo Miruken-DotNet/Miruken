@@ -38,6 +38,15 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Callbacks_Inferred_Greedy()
+        {
+            var foo = new Foo();
+            var handler = new CustomHandler();
+            Assert.IsTrue(handler.Infer().Handle(foo, true));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
         public void Should_Handle_Static_Callbacks_Implicitly()
         {
             HandlerDescriptor.GetDescriptor<CustomHandler>();

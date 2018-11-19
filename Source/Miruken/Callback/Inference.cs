@@ -21,7 +21,7 @@
             ref bool greedy, IHandler composer)
         {
             var handled = base.Dispatch(handler, ref greedy, composer);
-            if (handled && !greedy) return true;
+            if (handled) return true;
             LazyInitializer.EnsureInitialized(ref _inferred, CreateInferred);
             foreach (var infer in _inferred)
             {
