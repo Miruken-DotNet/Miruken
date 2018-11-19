@@ -41,7 +41,7 @@
         {
             foreach (var error in result.Errors)
             {
-                var child = error as OutcomeFailure;
+                var child   = error as OutcomeFailure;
                 var failure = child?.FailedOutcome ?? (object)error.ErrorMessage;
                 outcome.AddError(error.PropertyName, failure);
             }
