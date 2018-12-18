@@ -25,7 +25,7 @@
         {
             if (Batch != null)
             {
-                var batcher = Batch.Find<TBatch>();
+                var batcher = Batch.FindHandler<TBatch>();
                 if (batcher == null)
                     Batch.AddHandlers(batcher = new TBatch());
                 return batcher;
@@ -159,7 +159,7 @@
             var batch = handler.GetBatch(tag);
             if (batch != null)
             {
-                var batcher = batch.Find<TBatch>();
+                var batcher = batch.FindHandler<TBatch>();
                 if (batcher == null)
                     batch.AddHandlers(batcher = new TBatch());
                 return batcher;

@@ -50,7 +50,7 @@ namespace Miruken.Callback
             return this;
         }
 
-	    public T Find<T>()
+	    public T FindHandler<T>()
 	    {
 	        foreach (var handler in _handlers)
 	        {
