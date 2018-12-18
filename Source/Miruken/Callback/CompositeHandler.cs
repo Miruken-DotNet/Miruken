@@ -5,6 +5,8 @@ namespace Miruken.Callback
 {
     public interface ICompositeHandler : IHandler
     {
+        T FindHandler<T>();
+
         ICompositeHandler AddHandlers(params object[] handlers);
 
         ICompositeHandler InsertHandlers(int atIndex, params object[] handlers);
