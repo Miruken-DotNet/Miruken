@@ -19,19 +19,6 @@
         [Provides]
         public Batch Batch { get; private set; }
 
-        [Provides]
-        public TBatch GetBatch<TBatch>()
-            where TBatch : class, IBatching, new()
-        {
-            if (Batch != null)
-            {
-                var batchInstance = new TBatch();
-                Batch.AddHandlers(batchInstance);
-                return batchInstance;
-            }
-            return null;
-        }
-
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
@@ -155,14 +142,7 @@
             this IHandler handler, object tag = null)
             where TBatch : class, IBatching, new()
         {
-            var batch = handler.GetBatch(tag);
-            if (batch != null)
-            {
-                var batchInstance = new TBatch();
-                batch.AddHandlers(batchInstance);
-                return batchInstance;
-            }
-            return null;
+            return handler.GetBatch(tag)?.Resolve<TBatch>();
         }
 
         public static TTag GetBatch<TTag, TBatch>(

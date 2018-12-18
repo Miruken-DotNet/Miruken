@@ -24,6 +24,16 @@
                 _tags = new HashSet<object>(tags);
         }
 
+        [Provides]
+        public TBatch GetBatcher<TBatch>()
+            where TBatch : class, IBatching, new()
+        {
+            var batchInstance = Find<TBatch>();
+            if (batchInstance == null)
+                AddHandlers(batchInstance = new TBatch());
+            return batchInstance;
+        }
+
         public bool ShouldBatch(object tag)
         {
             return _tags == null || _tags.Count == 0 

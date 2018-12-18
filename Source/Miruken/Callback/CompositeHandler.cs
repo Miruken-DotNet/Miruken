@@ -64,16 +64,29 @@ namespace Miruken.Callback
             return handled;                                                                                     
 		}
 
-	    private IHandler Find(object instance)
+	    protected IHandler Find(object instance)
 	    {
 	        foreach (var handler in _handlers)
 	        {
 	            if (handler == instance) return handler;
-	            if (handler is HandlerAdapter adapter &&
-                    adapter.Handler == instance)
+	            if (handler is HandlerAdapter adapter && adapter.Handler == instance)
 	                return adapter;
 	        }
             return null;
 	    }
-	}
+
+	    protected T Find<T>()
+	    {
+	        foreach (var handler in _handlers)
+	        {
+	            switch (handler)
+	            {
+	                case T t: return t;
+	                case HandlerAdapter adapter when adapter.Handler is T t:
+	                    return t;
+	            }
+	        }
+	        return default;
+	    }
+    }
 }

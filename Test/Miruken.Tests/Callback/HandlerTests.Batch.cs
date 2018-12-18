@@ -104,6 +104,17 @@
         }
 
         [TestMethod]
+        public void Should_Get_Same_Batcher()
+        {
+            new EmailHandler().Batch(batch =>
+            {
+                var b = batch.GetBatch<IEmailing, EmailBatch>();
+                Assert.IsNotNull(b);
+                Assert.AreSame(b, batch.GetBatch<IEmailing, EmailBatch>());
+            });
+        }
+
+        [TestMethod]
         public void Should_Batch_Protocols()
         {
             var completed = false;
