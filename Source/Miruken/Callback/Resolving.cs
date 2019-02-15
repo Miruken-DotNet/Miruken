@@ -5,7 +5,7 @@
     using Policy;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class Resolving : Inquiry, IInferCallback, IFilterCallback
+    public class Resolving : Inquiry, IInferCallback
     {
         private readonly object _callback;
         private bool _handled;
@@ -16,8 +16,6 @@
             _callback = callback 
                 ?? throw new ArgumentNullException(nameof(callback));
         }
-
-        bool IFilterCallback.CanFilter => false;
 
         object IInferCallback.InferCallback()
         {
