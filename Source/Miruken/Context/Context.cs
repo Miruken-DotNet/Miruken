@@ -166,7 +166,7 @@ namespace Miruken.Context
 
             try
             {
-                Unwind(reason);
+                Unwind();
                 InternalEnd(reason);
             }
             finally

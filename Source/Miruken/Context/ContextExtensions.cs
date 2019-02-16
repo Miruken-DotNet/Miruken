@@ -4,6 +4,7 @@ using Miruken.Concurrency;
 namespace Miruken.Context
 {
     using System;
+    using System.Linq;
 
     public static class ContextExtensions
     {
@@ -65,6 +66,19 @@ namespace Miruken.Context
                 ?? throw new InvalidOperationException(
                               "he root context could not be found");
             return context.Root.Publish();
+        }
+
+        public static Context Deepest(this Context context)
+        {
+            while (true)
+            {
+                if (context.HasChildren)
+                {
+                    context = context.Children.Last();
+                    continue;
+                }
+                return context;
+            }
         }
     }
 }
