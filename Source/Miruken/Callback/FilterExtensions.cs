@@ -72,6 +72,9 @@
                         allProviders = allProviders.Where(p => p.Required);
                     handler = handler.SkipFilters();
                     break;
+                case false:
+                    handler = handler.SkipFilters();
+                    break;
             }
 
             var ordered = new SortedSet<(IFilter, IFilterProvider)>(FilterComparer.Instance);
