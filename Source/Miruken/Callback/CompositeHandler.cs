@@ -5,6 +5,8 @@ namespace Miruken.Callback
 {
     public interface ICompositeHandler : IHandler
     {
+        T FindHandler<T>();
+
         ICompositeHandler AddHandlers(params object[] handlers);
 
         ICompositeHandler InsertHandlers(int atIndex, params object[] handlers);
@@ -27,7 +29,7 @@ namespace Miruken.Callback
 	    public ICompositeHandler AddHandlers(params object[] handlers)
         {
             foreach (var handler in handlers
-                .Where(h => h != null && Find(h) == null))
+                .Where(h => h != null && FindHandler(h) == null))
                 _handlers.Add(ToHandler(handler));
             return this;
         }
@@ -36,7 +38,7 @@ namespace Miruken.Callback
 	    {
 	        var index = 0;
             foreach (var handler in handlers
-                .Where(h => h != null && Find(h) == null))
+                .Where(h => h != null && FindHandler(h) == null))
                 _handlers.Insert(atIndex + index++, ToHandler(handler));
 	        return this;
 	    }
@@ -44,13 +46,27 @@ namespace Miruken.Callback
         public ICompositeHandler RemoveHandlers(params object[] handlers)
         {
             foreach (var match in handlers
-                .Select(Find)
+                .Select(FindHandler)
                 .Where(match => match != null))
                 _handlers.Remove(match);
             return this;
         }
 
-	    protected override bool HandleCallback(
+	    public T FindHandler<T>()
+	    {
+	        foreach (var handler in _handlers)
+	        {
+	            switch (handler)
+	            {
+	                case T t: return t;
+	                case HandlerAdapter adapter when adapter.Handler is T t:
+	                    return t;
+	            }
+	        }
+	        return default;
+	    }
+
+        protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
 		{
             var handled = base.HandleCallback(callback, ref greedy, composer);
@@ -64,16 +80,16 @@ namespace Miruken.Callback
             return handled;                                                                                     
 		}
 
-	    private IHandler Find(object instance)
+	    private IHandler FindHandler(object instance)
 	    {
 	        foreach (var handler in _handlers)
 	        {
 	            if (handler == instance) return handler;
-	            if (handler is HandlerAdapter adapter &&
-                    adapter.Handler == instance)
+	            if (handler is HandlerAdapter adapter && adapter.Handler == instance)
 	                return adapter;
 	        }
-            return null;
+	        return null;
 	    }
-	}
+
+    }
 }

@@ -26,7 +26,7 @@
 
         public bool ShouldBatch(object tag)
         {
-            return _tags == null || _tags.Count == 0 
+            return _tags == null || _tags.Count == 0
                 || _tags.Contains(tag);
         }
 

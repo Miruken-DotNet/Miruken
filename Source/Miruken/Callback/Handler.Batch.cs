@@ -20,14 +20,15 @@
         public Batch Batch { get; private set; }
 
         [Provides]
-        public TBatch GetBatch<TBatch>()
+        public TBatch GetBatcher<TBatch>()
             where TBatch : class, IBatching, new()
         {
             if (Batch != null)
             {
-                var batchInstance = new TBatch();
-                Batch.AddHandlers(batchInstance);
-                return batchInstance;
+                var batcher = Batch.FindHandler<TBatch>();
+                if (batcher == null)
+                    Batch.AddHandlers(batcher = new TBatch());
+                return batcher;
             }
             return null;
         }
@@ -158,9 +159,10 @@
             var batch = handler.GetBatch(tag);
             if (batch != null)
             {
-                var batchInstance = new TBatch();
-                batch.AddHandlers(batchInstance);
-                return batchInstance;
+                var batcher = batch.FindHandler<TBatch>();
+                if (batcher == null)
+                    batch.AddHandlers(batcher = new TBatch());
+                return batcher;
             }
             return null;
         }
