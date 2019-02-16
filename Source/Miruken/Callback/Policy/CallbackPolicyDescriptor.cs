@@ -4,26 +4,29 @@ namespace Miruken.Callback.Policy
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Bindings;
     using Infrastructure;
 
     public class CallbackPolicyDescriptor
     {
         private readonly Dictionary<Type, List<PolicyMemberBinding>> _typed;
-        private readonly ConcurrentDictionary
-            <object, List<PolicyMemberBinding>> _compatible;
+        private readonly ConcurrentDictionary<object, List<PolicyMemberBinding>> _compatible;
         private Dictionary<object, List<PolicyMemberBinding>> _indexed;
         private List<PolicyMemberBinding> _unknown;
+        private IEnumerable<PolicyMemberBinding> _invariant;
 
         public CallbackPolicyDescriptor(CallbackPolicy policy)
         {
             Policy      = policy;
             _typed      = new Dictionary<Type, List<PolicyMemberBinding>>();
-            _compatible = new ConcurrentDictionary
-                <object, List<PolicyMemberBinding>>();
+            _compatible = new ConcurrentDictionary <object, List<PolicyMemberBinding>>();
         }
 
         public CallbackPolicy Policy { get; }
+
+        public IEnumerable<PolicyMemberBinding> InvariantMembers =>
+            LazyInitializer.EnsureInitialized(ref _invariant, GetInvariantMembers);
 
         internal void Add(PolicyMemberBinding member)
         {
@@ -61,7 +64,7 @@ namespace Miruken.Callback.Policy
             members.AddSorted(member, PolicyMemberBinding.OrderByArity);
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetInvariantMembers()
+        private IEnumerable<PolicyMemberBinding> GetInvariantMembers()
         {
             foreach (var typed in _typed)
             foreach (var member in typed.Value)
@@ -74,7 +77,7 @@ namespace Miruken.Callback.Policy
             }
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetInvariantMembers(object callback)
+        public IEnumerable<PolicyMemberBinding> GetInvariantMembers(object callback)
         {
             var key = Policy.GetKey(callback);
             List<PolicyMemberBinding> members = null;
@@ -86,7 +89,7 @@ namespace Miruken.Callback.Policy
                 ?? Array.Empty<PolicyMemberBinding>();
         }
 
-        internal IEnumerable<PolicyMemberBinding> GetCompatibleMembers(object callback)
+        public IEnumerable<PolicyMemberBinding> GetCompatibleMembers(object callback)
         {
             var key = Policy.GetKey(callback);
             return _compatible.GetOrAdd(key, InferCompatibleMembers)

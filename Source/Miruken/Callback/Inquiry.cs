@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
@@ -15,6 +16,7 @@
     {
         private object _result;
         private readonly List<object> _resolutions;
+        private readonly List<object> _promises;
 
         public Inquiry(object key, bool many = false)
         {
@@ -22,6 +24,7 @@
             Many         = many;
             Metadata     = new BindingMetadata();
             _resolutions = new List<object>();
+            _promises    = new List<object>();
         }
 
         public Inquiry(object key, Inquiry parent, bool many = false)
@@ -42,8 +45,7 @@
 
         public CallbackPolicy Policy => Provides.Policy;
 
-        public ICollection<object> Resolutions =>
-            _resolutions.AsReadOnly();
+        public ICollection<object> Resolutions => _resolutions.AsReadOnly();
 
         public Type ResultType =>
             WantsAsync || IsAsync ? typeof(Promise) : null;
@@ -54,26 +56,18 @@
             {
                 if (_result == null)
                 {
-                    if (!Many)
+                    if (IsAsync)
                     {
-                        if (_resolutions.Count > 0)
-                        {
-                            var result = _resolutions[0];
-                            _result = (result as Promise)?.Then(
-                                (r, s) => r is object[] array ? array.FirstOrDefault() : r)
-                              ?? result;
-                        }
-                    }
-                    else if (IsAsync)
-                    {
-                        _result = Promise.All(_resolutions
-                                .Select(Promise.Resolved).ToArray())
-                            .Then((results, s) => Flatten(results)
-                                .ToArray());
+                        _result = Many
+                            ? Promise.All(_promises)
+                                .Then((_, s) => _resolutions.ToArray())
+                            : (object)Promise.All(_promises)
+                                .Then((_, s) => _resolutions.FirstOrDefault());
                     }
                     else
                     {
-                        _result = Flatten(_resolutions).ToArray();
+                        _result = Many ? _resolutions.ToArray()
+                            : _resolutions.FirstOrDefault();
                     }
                 }
 
@@ -83,7 +77,12 @@
                         _result = (_result as Promise)?.Wait();
                 }
                 else if (WantsAsync)
-                    _result = Promise.Resolved(_result);
+                {
+                    if (Many)
+                        _result = Promise.Resolved(_result as object[]);
+                    else
+                        _result = Promise.Resolved(_result);
+                }
 
                 return _result;
             }
@@ -102,11 +101,22 @@
         public bool Resolve(object resolution, bool strict,
             bool greedy, IHandler composer)
         {
+            bool resolved;
             if (resolution == null) return false;
-            var array    = strict ? null : resolution as object[];
-            var resolved = array?.Aggregate(false, 
-                (s, res) => Include(res, false, greedy, composer) || s) 
-                         ?? Include(resolution, strict, greedy, composer);
+            if (!strict && resolution is object[] array)
+            {
+                resolved = array.Aggregate(false,
+                    (s, res) => Include(res, false, greedy, composer) || s);
+            }
+            else if (!strict && resolution is ICollection collection)
+            {
+                resolved = collection.Cast<object>().Aggregate(false,
+                    (s, res) => Include(res, false, greedy, composer) || s);
+            }
+            else
+            {
+                resolved = Include(resolution, strict, greedy, composer);
+            }
             if (resolved) _result = null;
             return resolved;
         }
@@ -114,28 +124,58 @@
         private bool Include(object resolution, bool strict,
             bool greedy, IHandler composer)
         {
-            if (resolution == null || (!Many && _resolutions.Count > 0))
-                return false;
+            if (resolution == null) return false;
 
             var promise = resolution as Promise
                        ?? (resolution as Task)?.ToPromise();
 
+            if (promise?.State == PromiseState.Fulfilled)
+            {
+                resolution = promise.Wait();
+                promise    = null;
+            }
+
             if (promise != null)
             {
                 IsAsync = true;
-                if (Many)
-                    promise = promise.Catch((ex,s) => (object)null);
-                resolution = promise.Then((result, s) =>
+                _promises.Add(promise.Then((result, s) =>
                 {
-                    var array = strict ? null : result as object[];
-                    return array?.Where(res => IsSatisfied(res, greedy, composer))
-                               .ToArray() ?? result;
-                });
+                    switch (result)
+                    {
+                        case object[] array:
+                            _resolutions.AddRange(array.Where(res =>
+                                res != null && IsSatisfied(res, greedy, composer)));
+                            break;
+                        case ICollection collection:
+                            _resolutions.AddRange(collection.Cast<object>().Where(res =>
+                                res != null && IsSatisfied(res, greedy, composer)));
+                            break;
+                        default:
+                            _resolutions.Add(resolution);
+                            break;
+                    }
+                }).Catch((_, s) => (object)null));
             }
             else if (!IsSatisfied(resolution, greedy, composer))
                 return false;
-
-            _resolutions.Add(resolution);
+            else if (strict)
+            {
+                _resolutions.Add(resolution);
+            }
+            else switch (resolution)
+            {
+                case object[] array:
+                    _resolutions.AddRange(array.Where(res =>
+                        res != null && IsSatisfied(res, greedy, composer)));
+                    break;
+                case ICollection collection:
+                    _resolutions.AddRange(collection.Cast<object>().Where(res =>
+                        res != null && IsSatisfied(res, greedy, composer)));
+                    break;
+                default:
+                    _resolutions.Add(resolution);
+                    break;
+            }
             return true;
         }
 
@@ -163,10 +203,10 @@
                 var handled  = Implied(handler, isGreedy, composer);
                 if (handled && !greedy) return true;
 
-                var count = _resolutions.Count;
+                var count = _resolutions.Count + _promises.Count;
                 handled = Policy.Dispatch(handler, this, greedy, composer,
                     (r, strict) => Resolve(r, strict, isGreedy, composer)) || handled;
-                return handled || (_resolutions.Count > count);
+                return handled || (_resolutions.Count + _promises.Count> count);
             }
             finally
             {
@@ -187,14 +227,6 @@
             return ReferenceEquals(target, Target) &&
                    ReferenceEquals(dispatcher, Dispatcher) ||
                    Parent?.InProgress(target, dispatcher) == true;
-        }
-
-        private static IEnumerable<object> Flatten(IEnumerable<object> collection)
-        {
-            return collection
-                .Where(item => item != null)
-                .SelectMany(item => item as object[] ?? new[] {item})
-                .Distinct();
         }
 
         private string DebuggerDisplay

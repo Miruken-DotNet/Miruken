@@ -250,18 +250,16 @@ namespace Miruken.Callback.Policy
         }
 
         public static IEnumerable<PolicyMemberBinding>
-            GetPolicyMembers(CallbackPolicy policy)
+              GetPolicyMembers(CallbackPolicy policy)
         {
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler       = descriptor.Value.Value;
+                var handler = descriptor.Value.Value;
                 var staticMembers = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMembers()
-                     : Enumerable.Empty<PolicyMemberBinding>();
-                var members  = handler._policies?.TryGetValue(policy, out cpd) == true
-                     ? cpd.GetInvariantMembers()
-                     : Enumerable.Empty<PolicyMemberBinding>();
+                     ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
+                var members = handler._policies?.TryGetValue(policy, out cpd) == true
+                     ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
                 if (staticMembers == null) return members;
                 return members == null ? staticMembers : staticMembers.Concat(members);
             });
