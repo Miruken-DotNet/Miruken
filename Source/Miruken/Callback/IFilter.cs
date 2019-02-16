@@ -35,5 +35,7 @@
     {
         IEnumerable<IFilterProvider> Filters { get; }
         void AddFilters(params IFilterProvider[] providers);
+        void RemoveFilters(params IFilterProvider[] providers);
+        void RemoveAllFilters();
     }
 }

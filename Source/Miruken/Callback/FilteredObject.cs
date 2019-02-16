@@ -21,5 +21,17 @@
             else 
                 Array.ForEach(providers, p => _filters.Add(p));
         }
+
+        public void RemoveFilters(params IFilterProvider[] providers)
+        {
+            if (providers == null || providers.Length == 0) return;
+            if (_filters != null)
+                Array.ForEach(providers, p => _filters.Remove(p));
+        }
+
+        public void RemoveAllFilters()
+        {
+            _filters?.Clear();
+        }
     }
 }
