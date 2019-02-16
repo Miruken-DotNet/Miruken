@@ -19,8 +19,8 @@
 
         public ILoggerFactory LoggerFactory { get; set; }
 
-        public async Task<TResponse> Next(
-            TRequest request, MemberBinding member,
+        public async Task<TResponse> Next(TRequest request,
+            object rawCallback, MemberBinding member,
             IHandler composer, Next<TResponse> next,
             IFilterProvider provider)
         {

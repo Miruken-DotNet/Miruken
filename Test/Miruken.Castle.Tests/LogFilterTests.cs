@@ -175,8 +175,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(
-                Foo callback, MemberBinding member, 
+            public Task<object> Next(Foo callback,
+                object rawCallback, MemberBinding member, 
                 IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {

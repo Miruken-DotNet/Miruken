@@ -128,7 +128,7 @@
                 return false;
             }
 
-            var actualCallback = GetCallbackInfo(
+            var filterCallback = GetCallbackInfo(
                 callback, args, dispatcher, out var callbackType);
 
             var targetFilters  = target is IFilter targetFilter
@@ -149,7 +149,7 @@
                 result = dispatcher.Invoke(target, args, resultType);
             }
             else if (!dispatcher.GetPipeline(callbackType).Invoke(
-                this, target, actualCallback, (IHandler comp, out bool completed) =>
+                this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                 {
                     args = ResolveArgs(dispatcher, callback, args,
                                        comp, out completed);

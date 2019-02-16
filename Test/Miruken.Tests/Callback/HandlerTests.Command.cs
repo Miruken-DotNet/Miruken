@@ -196,7 +196,8 @@
         {
             public int? Order { get; set; } = 1;
 
-            public Task<Res> Next(Cb callback, MemberBinding binding,
+            public Task<Res> Next(Cb callback,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

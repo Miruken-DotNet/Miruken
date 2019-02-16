@@ -167,7 +167,8 @@
         {
             public int? Order { get; set; } = 1;
 
-            public async Task<object> Next(Job job, MemberBinding member,
+            public async Task<object> Next(Job job,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -181,7 +182,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<Res> Next(Job job, MemberBinding member,
+            public Task<Res> Next(Job job,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -195,7 +197,8 @@
         {
             public int? Order { get; set; } = 2;
 
-            public Task<Res> Next(Req job, MemberBinding member,
+            public Task<Res> Next(Req job,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

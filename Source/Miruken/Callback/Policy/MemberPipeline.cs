@@ -12,8 +12,8 @@
     public abstract class MemberPipeline
     {
         public abstract bool Invoke(
-            MemberBinding binding, object target,
-            object callback, CompletePipelineDelegate complete,
+            MemberBinding binding, object target, object callback,
+            object rawCallback, CompletePipelineDelegate complete,
             IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters, 
             out object result);
 
@@ -35,8 +35,8 @@
     public class MemberPipeline<TCb, TRes> : MemberPipeline
     {
         public override bool Invoke(
-            MemberBinding binding, object target, 
-            object callback, CompletePipelineDelegate complete,
+            MemberBinding binding, object target, object callback,
+            object rawCallback, CompletePipelineDelegate complete,
             IHandler composer, IEnumerable<(IFilter, IFilterProvider)> filters,
             out object result)
         {
@@ -56,8 +56,8 @@
                     {
                         var (filter, provider) = pipeline.Current;
                         if (filter is IFilter<TCb, TRes> typedFilter)
-                         return typedFilter.Next((TCb)callback, binding,
-                             composer.SkipFilters(), Next, provider);
+                            return typedFilter.Next((TCb)callback, rawCallback,
+                                binding, composer, Next, provider);
                     }
 
                     return (Task<TRes>) binding.CoerceResult(

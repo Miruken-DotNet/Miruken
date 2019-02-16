@@ -6,8 +6,8 @@
     {
         public int? Order { get; set; } = Stage.Filter;
 
-        public Task<TRes> Next(
-            IBindingScope callback, MemberBinding member,
+        public Task<TRes> Next(IBindingScope callback,
+            object rawCallback, MemberBinding member,
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null)
         {

@@ -622,7 +622,7 @@
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(4, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
-            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ContravariantFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<LogFilter<Bar, object>>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
@@ -644,7 +644,7 @@
             Assert.IsTrue(handler.SkipFilters().Handle(bar));
             Assert.AreEqual(3, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
-            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ContravariantFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
 
@@ -1003,7 +1003,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(T callback, MemberBinding member,
+            public Task<object> Next(T callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -1015,7 +1016,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<T> Next(object callback, MemberBinding member,
+            public Task<T> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<T> next,
                 IFilterProvider provider)
             {
@@ -1027,8 +1029,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(
-                object callback, MemberBinding member,
+            public Task<object> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -1666,7 +1668,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>)),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public void HandleBar(Bar bar)
             {
@@ -1681,9 +1683,9 @@
             }
 
             [Provides]
-            public ContravarintFilter CreateFilter()
+            public ContravariantFilter CreateFilter()
             {
-                return new ContravarintFilter();
+                return new ContravariantFilter();
             }
 
             [Provides(typeof(LogFilter<,>))]
@@ -1713,7 +1715,8 @@
             }
 
             Task<object> IFilter<Bar, object>.Next(
-                Bar callback, MemberBinding binding, IHandler composer,
+                Bar callback, object rawCallback,
+                MemberBinding binding, IHandler composer,
                 Next<object> next, IFilterProvider provider)
             {
                 callback.Filters.Add(this);
@@ -1726,7 +1729,7 @@
         {
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public SpecialFoo HandleFoo(Foo foo)
             {
@@ -1735,7 +1738,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Promise<SpecialBaz> HandleBaz(Baz baz)
             {
@@ -1744,7 +1747,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Task<SpecialBar> HandleBaz(Bar bar)
             {
@@ -1769,11 +1772,12 @@
             return cb;
         }
 
-        private class ContravarintFilter : IFilter<object, object>
+        private class ContravariantFilter : IFilter<object, object>
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(object callback, MemberBinding member,
+            public Task<object> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {
@@ -1787,7 +1791,8 @@
         {
             public int? Order { get; set; } = 1;
 
-            public Task<Res> Next(Cb callback, MemberBinding binding,
+            public Task<Res> Next(Cb callback,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -1802,7 +1807,8 @@
         {
             public int? Order { get; set; } = 2;
 
-            public Task<Res> Next(Req request, MemberBinding binding,
+            public Task<Res> Next(Req request,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
