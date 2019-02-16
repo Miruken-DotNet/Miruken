@@ -5,6 +5,8 @@
     using System.Linq;
     using Callback;
     using Map;
+    using FluentValidation;
+    using FluentValidationException = global::FluentValidation.ValidationException;
 
     public class ValidationErrors
     {
@@ -19,6 +21,19 @@
         public ValidationErrors[] Map(ValidationException exception)
         {
             return CreateErrors(exception.Outcome);
+        }
+
+        [Maps, Format(typeof(Exception))]
+        public ValidationErrors[] Map(FluentValidationException exception)
+        {
+            var outcome = new ValidationOutcome();
+            foreach (var error in exception.Errors)
+            {
+                var child   = error as OutcomeFailure;
+                var failure = child?.FailedOutcome ?? (object)error.ErrorMessage;
+                outcome.AddError(error.PropertyName, failure);
+            }
+            return CreateErrors(outcome);
         }
 
         [Maps, Format(typeof(Exception))]

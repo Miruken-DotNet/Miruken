@@ -38,8 +38,8 @@
                     {
                         _cache.TryRemove(ctx, out _);
                         contextual.ContextChanging -= ChangeContext;
-                        contextual.Context = null;
                         (result as IDisposable)?.Dispose();
+                        contextual.Context = null;
                     };
                 }
                 else
