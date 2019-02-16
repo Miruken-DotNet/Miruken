@@ -181,33 +181,60 @@ namespace Miruken.Callback.Policy
         }
 
         private static IEnumerable<Type> GetCallbackHandlers(
-            CallbackPolicy policy, object callback, bool instance, bool @static)
+             CallbackPolicy policy, object callback, bool instance, bool @static)
         {
-            return Descriptors.Select(descriptor =>
+            if (Descriptors.Count == 0)
+                return Enumerable.Empty<Type>();
+
+            List<PolicyMemberBinding> invariants = null;
+            List<PolicyMemberBinding> compatible = null;
+
+            foreach (var descriptor in Descriptors)
             {
-                CallbackPolicyDescriptor cpd = null;
                 var handler = descriptor.Value.Value;
-                if (@static)
-                {
-                    var binding =
-                        handler._staticPolicies?.TryGetValue(policy, out cpd) == true
-                        ? cpd.GetInvariantMembers(callback).FirstOrDefault() ??
-                          cpd.GetCompatibleMembers(callback).FirstOrDefault()
-                        : null;
-                    if (binding != null) return binding;
-                }
+                CallbackPolicyDescriptor instanceCallbacks = null;
                 if (instance)
+                    handler._policies?.TryGetValue(policy, out instanceCallbacks);
+
+                var binding = instanceCallbacks?.GetInvariantMembers(callback).FirstOrDefault();
+                if (binding != null)
                 {
-                    return handler._policies?.TryGetValue(policy, out cpd) == true
-                         ? cpd.GetInvariantMembers(callback).FirstOrDefault() ??
-                           cpd.GetCompatibleMembers(callback).FirstOrDefault()
-                         : null;
+                    if (invariants == null)
+                        invariants = new List<PolicyMemberBinding>();
+                    invariants.Add(binding);
+                    continue;
                 }
-                return null;
-            })
-            .Where(binding => binding != null)
-            .OrderBy(binding => binding.Key, policy)
-            .Select(binding =>
+
+                CallbackPolicyDescriptor staticCallbacks = null;
+                if (@static)
+                    handler._staticPolicies?.TryGetValue(policy, out staticCallbacks);
+                binding = staticCallbacks?.GetInvariantMembers(callback).FirstOrDefault();
+                if (binding != null)
+                {
+                    if (invariants == null)
+                        invariants = new List<PolicyMemberBinding>();
+                    invariants.Add(binding);
+                    continue;
+                }
+
+                binding = instanceCallbacks?.GetCompatibleMembers(callback).FirstOrDefault()
+                       ?? staticCallbacks?.GetCompatibleMembers(callback).FirstOrDefault();
+                if (binding != null)
+                {
+                    if (compatible == null)
+                        compatible = new List<PolicyMemberBinding>();
+                    compatible.AddSorted(binding, policy);
+                }
+            }
+
+            if (invariants == null && compatible == null)
+                return Enumerable.Empty<Type>();
+
+            var bindings = invariants == null ? compatible
+                : compatible == null ? invariants
+                : invariants.Concat(compatible);
+
+            return bindings.Select(binding =>
             {
                 var handler = binding.Dispatcher.Owner;
                 if (handler.IsOpenGeneric)
