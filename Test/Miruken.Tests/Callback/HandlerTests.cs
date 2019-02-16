@@ -1003,7 +1003,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(T callback, MemberBinding member,
+            public Task<object> Next(T callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -1015,7 +1016,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<T> Next(object callback, MemberBinding member,
+            public Task<T> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<T> next,
                 IFilterProvider provider)
             {
@@ -1027,8 +1029,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(
-                object callback, MemberBinding member,
+            public Task<object> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
@@ -1712,9 +1714,10 @@
                      : Activator.CreateInstance(type);
             }
 
-            Task<object> IFilter<Bar, object>.Next(
-                Bar callback, MemberBinding binding, IHandler composer,
-                Next<object> next, IFilterProvider provider)
+            Task<object> IFilter<Bar, object>.Next(Bar callback,
+                object rawCallback, MemberBinding binding,
+                IHandler composer, Next<object> next,
+                IFilterProvider provider)
             {
                 callback.Filters.Add(this);
                 callback.Handled++;
@@ -1773,7 +1776,8 @@
         {
             public int? Order { get; set; }
 
-            public Task<object> Next(object callback, MemberBinding member,
+            public Task<object> Next(object callback,
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {
@@ -1787,7 +1791,8 @@
         {
             public int? Order { get; set; } = 1;
 
-            public Task<Res> Next(Cb callback, MemberBinding binding,
+            public Task<Res> Next(Cb callback,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {
@@ -1802,7 +1807,8 @@
         {
             public int? Order { get; set; } = 2;
 
-            public Task<Res> Next(Req request, MemberBinding binding,
+            public Task<Res> Next(Req request,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<Res> next,
                 IFilterProvider provider)
             {

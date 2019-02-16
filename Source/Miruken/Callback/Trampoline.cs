@@ -31,8 +31,9 @@
         public virtual bool Dispatch(object handler,
             ref bool greedy, IHandler composer)
         {
-            return Callback != null &&
-                Handler.Dispatch(handler, Callback, ref greedy, composer);
+            return Callback != null
+                  ? Handler.Dispatch(handler, Callback, ref greedy, composer)
+                  : new Command(this).Dispatch(handler, ref greedy, composer);
         }
     }
 }

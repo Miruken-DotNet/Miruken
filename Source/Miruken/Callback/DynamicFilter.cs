@@ -21,39 +21,51 @@
 
     public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
     {
-        Task<TRes> IFilter<TCb, TRes>.Next(
-            TCb callback, MemberBinding member, 
+        Task<TRes> IFilter<TCb, TRes>.Next(TCb callback,
+            object rawCallback, MemberBinding member, 
             IHandler composer, Next<TRes> next,
             IFilterProvider provider)
         {
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
-            var args = ResolveArgs(dispatch, callback, member, composer, next, provider);
+            var args = ResolveArgs(dispatch, callback, rawCallback,
+                member, composer, next, provider);
             if (args == null) return next(proceed: false);
             return (Task<TRes>)dispatch.Invoke(this, args);
         }
 
         private static object[] ResolveArgs(MemberDispatch dispatch,
-            TCb callback, MemberBinding member, IHandler composer,
-            Next<TRes> next, IFilterProvider provider)
+            TCb callback, object rawCallback, MemberBinding member,
+            IHandler composer, Next<TRes> next, IFilterProvider provider)
         {
             var arguments = dispatch.Arguments;
             if (arguments.Length == 2)
                 return new object[] { callback, next };
 
-            var args   = new object[arguments.Length];
-            var parent = callback as Inquiry;
+            var parent   = callback as Inquiry;
+            var resolved = new object[arguments.Length];
+            resolved[0] = callback;
 
-            for (var i = 2; i < arguments.Length; ++i)
+            for (var i = 1; i < arguments.Length; ++i)
             {
-                var argument     = arguments[i];
-                var argumentType = argument.ArgumentType;
+                var argument = arguments[i];
+                switch (i)
+                {
+                    case 1:
+                        resolved[1] = argument.ArgumentType == typeof(object)
+                                    ? rawCallback : next;
+                        continue;
+                    case 2 when ReferenceEquals(resolved[1], rawCallback):
+                        resolved[2] = next;
+                        continue;
+                }
+                var argumentType = argument.LogicalType;
                 if (argumentType == typeof(IHandler))
-                    args[i] = composer;
+                    resolved[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
-                    args[i] = member;
+                    resolved[i] = member;
                 else if (argumentType.IsInstanceOfType(provider))
-                    args[i] = provider;
+                    resolved[i] = provider;
                 else if (argumentType == typeof(object))
                 {
                     throw new InvalidOperationException(
@@ -63,14 +75,12 @@
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
-                    var arg = args[i] = resolver.ResolveArgument(parent, argument, composer);
+                    var arg = resolved[i] = resolver.ResolveArgument(parent, argument, composer);
                     if (arg == null && !argument.IsOptional) return null;
                 }
             }
 
-            args[0] = callback;
-            args[1] = next;
-            return args;
+            return resolved;
         }
 
         private static MethodDispatch GetDynamicNext(Type type)

@@ -32,8 +32,7 @@
 
         public Promise<bool> Result => _result ?? Promise.True;
 
-        bool IDispatchCallback.Dispatch(
-            object handler, ref bool greedy, IHandler composer)
+        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
             return _result == null && Policy.Dispatch(
                 handler, this, greedy, composer, SetResult);

@@ -56,8 +56,7 @@
             return binding.Dispatch(target, this, composer);
         }
 
-        bool IDispatchCallback.Dispatch(
-            object handler, ref bool greedy, IHandler composer)
+        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
             return InvokeOn(handler, composer);
         }

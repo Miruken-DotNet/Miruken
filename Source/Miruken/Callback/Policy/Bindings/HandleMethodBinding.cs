@@ -74,7 +74,7 @@
             else
             {
                 handled = Dispatcher.GetPipeline(typeof(HandleMethod))
-                    .Invoke(this, target, handleMethod, 
+                    .Invoke(this, target, handleMethod, handleMethod,
                         (IHandler comp, out bool completed) =>
                     {
                         completed = true;

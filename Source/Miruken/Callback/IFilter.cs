@@ -16,8 +16,8 @@
 
     public interface IFilter<in TCb, TRes> : IFilter
     {
-        Task<TRes> Next(
-            TCb callback, MemberBinding member,
+        Task<TRes> Next(TCb callback,
+            object rawCallback, MemberBinding member,
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null);
     }

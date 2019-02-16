@@ -127,8 +127,8 @@
         {
             public int? Order { get; set; }
 
-            public async Task<object> Next(
-                HandleMethod method, MemberBinding binding,
+            public async Task<object> Next(HandleMethod method,
+                object rawCallback, MemberBinding binding,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider)
             {
