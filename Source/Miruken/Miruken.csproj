@@ -93,6 +93,7 @@
     <Compile Include="Callback\StaticHandler.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Callback\SkipFiltersAttribute.cs" />
+    <Compile Include="Callback\TargetAction.cs" />
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
     <Compile Include="Context\ContextuaLifestyle.cs" />
@@ -105,7 +106,8 @@
     <Compile Include="Map\Handler.Map.cs" />
     <Compile Include="Map\Mapping.cs" />
     <Compile Include="Map\Maps.cs" />
-    <Compile Include="Monads.cs" />
+    <Compile Include="Either.cs" />
+    <Compile Include="Maybe.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IDecorator.cs" />
     <Compile Include="Callback\Policy\Rules\ArgumentRule.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="Properties\Resources.Designer.cs" />
     <Compile Include="Protocol.cs" />
     <Compile Include="Stage.cs" />
+    <Compile Include="Try.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx" />

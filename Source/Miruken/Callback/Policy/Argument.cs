@@ -19,7 +19,8 @@
             Simple   = 1 << 2,
             Promise  = 1 << 3,
             Task     = 1 << 4,
-            Optional = 1 << 5
+            Optional = 1 << 5,
+            Maybe    = 1 << 6
         }
 
         public Argument(ParameterInfo parameter)
@@ -84,6 +85,7 @@
         public bool IsPromise     => ArgumentFlags.HasFlag(Flags.Promise);
         public bool IsTask        => ArgumentFlags.HasFlag(Flags.Task);
         public bool IsOptional    => ArgumentFlags.HasFlag(Flags.Optional);
+        public bool IsMaybe       => ArgumentFlags.HasFlag(Flags.Maybe);
 
         public bool IsInstanceOf(object argument) =>
             ParameterType.IsInstanceOfType(argument);
@@ -92,6 +94,8 @@
         {
             var flags = Flags.None;
             var type  = parameterType;
+            if (ExtractMaybe(ref type))
+                flags |= Flags.Maybe;
             if (ExtractLazy(ref type))
                 flags |= Flags.Lazy;
             ArgumentType = type;
@@ -105,6 +109,14 @@
                 flags |= Flags.Simple;
             LogicalType = type;
             return flags;
+        }
+
+        private static bool ExtractMaybe(ref Type type)
+        {
+            var promise = type.GetOpenTypeConformance(typeof(Maybe<>));
+            if (promise == null) return false;
+            type = promise.GetGenericArguments()[0];
+            return true;
         }
 
         private static bool ExtractPromise(ref Type type)

@@ -17,9 +17,7 @@
             IHandler composer, Next<T> next,
             IFilterProvider provider)
         {
-            return GetInstance(
-                callback, member, next, composer,
-                out var instance)
+            return GetInstance(callback, member, next, composer, out var instance)
                  ? Task.FromResult(instance)
                  : null;
         }
