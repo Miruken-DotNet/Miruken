@@ -86,7 +86,8 @@ namespace Miruken.Context
 
 	    public void Store(object data)
 	    {
-	        AddHandlers(data);
+            if (data != null)
+	            AddHandlers(data);
 	    }
 
 	    protected override bool HandleCallback(
