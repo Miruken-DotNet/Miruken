@@ -9,7 +9,8 @@
         AttributeTargets.Property | AttributeTargets.Parameter |
         AttributeTargets.Constructor,
         Inherited = false)]
-    public class ConstraintAttribute : Attribute, IFilterProvider
+    public class ConstraintAttribute : Attribute,
+        IFilterProvider, IBindingConstraintProvider
     {
         public ConstraintAttribute(object key, object value)
             : this(new MetadataKeyConstraint(key, value))
@@ -31,7 +32,7 @@
 
         public IBindingConstraint Constraint { get; }
 
-        IEnumerable<IFilter> IFilterProvider.GetFilters(
+        public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             Type callbackType, IHandler composer)
         {

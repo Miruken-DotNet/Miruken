@@ -11,10 +11,11 @@
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null)
         {
-            if (!(provider is ConstraintAttribute attribute))
+            if (!(provider is IBindingConstraintProvider constraintProvider))
                 return next(proceed: false);
             var metadata = callback.Metadata;
-            return !(metadata == null || attribute.Constraint.Matches(metadata))
+            return !(metadata == null ||
+                     constraintProvider.Constraint.Matches(metadata))
                  ? next(proceed: false)
                  : next();
         }

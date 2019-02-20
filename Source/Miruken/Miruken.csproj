@@ -75,9 +75,11 @@
     <Compile Include="Callback\Policy\Bindings\ConstraintAttribute.cs" />
     <Compile Include="Callback\Policy\Bindings\ConstraintBuilder.cs" />
     <Compile Include="Callback\Policy\Bindings\ConstraintFilter.cs" />
+    <Compile Include="Callback\Policy\Bindings\IBindingConstraintProvider.cs" />
     <Compile Include="Callback\Policy\Bindings\IBindingScope.cs" />
     <Compile Include="Callback\Policy\Bindings\MetadataConstraint.cs" />
     <Compile Include="Callback\Named.cs" />
+    <Compile Include="Callback\Policy\Bindings\Qualifier.cs" />
     <Compile Include="Callback\Policy\BivariantPolicy.cs" />
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\Policy\GenericMapping.cs" />
