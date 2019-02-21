@@ -11,8 +11,7 @@
     [AttributeUsage(AttributeTargets.Parameter)]
     public class ResolvingAttribute : Attribute, IArgumentResolver
     {
-        public static readonly ResolvingAttribute 
-            Default = new ResolvingAttribute();
+        public static readonly ResolvingAttribute Default = new ResolvingAttribute();
 
         private static readonly MethodInfo CreateLazy =
             typeof(ResolvingAttribute).GetMethod(nameof(ResolveLazy),
@@ -154,6 +153,13 @@
                 dependency = Resolve(parent, argument, key, handler);
                 if (argument.IsSimple)
                     dependency = RuntimeHelper.ChangeType(dependency, argumentType);
+            }
+
+            if (argument.IsMaybe)
+            {
+                return dependency == null
+                     ? Maybe.DynamicNothing(argument.ParameterType)
+                     : Maybe.DynamicSome(dependency);
             }
 
             return dependency;

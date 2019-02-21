@@ -1,5 +1,9 @@
 ﻿namespace Miruken.Callback
 {
+    using System;
+    using System.Linq;
+    using Policy;
+
     public static class HandlerHelpers
     {
         public static bool Handle(this IHandler handler, object callback,
@@ -36,6 +40,31 @@
         public static IHandler With<T>(this IHandler handler, T result)
         {
             return new Provider(result) + handler;
+        }
+
+        public static object[] ResolveArgs(this IHandler handler, params Argument[] args)
+        {
+            if (args.Any(arg => arg == null))
+                throw new ArgumentException("One or more null args provided");
+            var resolver = ResolvingAttribute.Default;
+            var resolved = new object[args.Length];
+            for (var i = 0; i < args.Length; ++i)
+            {
+                var arg = resolver.ResolveArgument(null, args[i], handler);
+                if (arg == null) return null;
+                resolved[i] = arg;
+            }
+            return resolved;
+        }
+
+        public static TargetActionBuilder<IHandler> Target(this IHandler handler)
+        {
+            return new TargetActionBuilder<IHandler>(action =>
+            {
+                if (!action(handler, handler))
+                    throw new InvalidOperationException(
+                        "One more or arguments could not be resolved");
+            });
         }
 
         public static FilteredHandler Filter(

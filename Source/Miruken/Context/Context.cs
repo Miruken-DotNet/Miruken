@@ -86,10 +86,11 @@ namespace Miruken.Context
 
 	    public void Store(object data)
 	    {
-	        AddHandlers(data);
-	    }
+	        if (data != null)
+	            AddHandlers(data);
+        }
 
-	    protected override bool HandleCallback(
+        protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
 	    {
 	        var handled = base.HandleCallback(callback, ref greedy, composer);

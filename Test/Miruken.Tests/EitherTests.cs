@@ -4,7 +4,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class MonadsTests
+    public class EitherTests
     {
         [TestMethod]
         public void Linq_Works_With_Either()
@@ -18,7 +18,7 @@
         }
 
         [TestMethod]
-        public void Linq_Either_Propogates_Left()
+        public void Linq_Either_Propagates_Left()
         {
             var result =
                 from e1 in new Either<string, int>("error")
@@ -40,7 +40,7 @@
         }
 
         [TestMethod]
-        public void Linq_Try_Propogates_Exception()
+        public void Linq_Try_Propagates_Exception()
         {
             var result =
                 from e1 in new Either<Exception, string>("apple")

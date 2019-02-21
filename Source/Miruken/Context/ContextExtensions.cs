@@ -17,8 +17,7 @@ namespace Miruken.Context
             return handler.TrackPromise(context);
         }
 
-        public static IHandler TrackPromise(
-            this IHandler handler, Context context)
+        public static IHandler TrackPromise(this IHandler handler, Context context)
         {
             if (handler == null || context == null) return handler;
             return handler.Filter((callback, composer, proceed) =>
@@ -27,20 +26,26 @@ namespace Miruken.Context
                 if (!handled) return false;
                 var cb = callback as ICallback;
                 if (!(cb?.Result is Promise promise)) return true;
-                if (context.State == ContextState.Active)
-                {
-                    void Ended(Context ctx, object reason) => promise.Cancel();
-                    context.ContextEnded += Ended;
-                    promise.Finally(() => context.ContextEnded -= Ended);
-                }
-                else
-                    promise.Cancel();
+                context.Track(promise);
                 return true;
             });
         }
 
-        public static IHandler Dispose(
-            this IHandler handler, IDisposable disposable)
+        public static IHandler Track(this IHandler handler, Promise promise)
+        {
+            if (promise == null)
+                throw new ArgumentNullException(nameof(promise));
+            var context = handler as Context ?? handler.Resolve<Context>()
+                ?? throw new InvalidOperationException(
+                              "Tracking support requires a Context");
+            if (context.State == ContextState.Active)
+                promise.Finally(() => context.ContextEnded += (ctx, _) => promise.Cancel());
+            else
+                promise.Cancel();
+            return handler;
+        }
+
+        public static IHandler Dispose(this IHandler handler, IDisposable disposable)
         {
             if (handler == null || disposable == null) return handler;
             var context = handler as Context ?? handler.Resolve<Context>()
@@ -66,6 +71,17 @@ namespace Miruken.Context
                 ?? throw new InvalidOperationException(
                               "he root context could not be found");
             return context.Root.Publish();
+        }
+
+        public static Context Parent(this Context context, int howMany)
+        {
+            while (true)
+            {
+                if (context == null || howMany < 0) return null;
+                if (howMany == 0) return context;
+                context = context.Parent;
+                howMany = howMany - 1;
+            }
         }
 
         public static Context Deepest(this Context context)
