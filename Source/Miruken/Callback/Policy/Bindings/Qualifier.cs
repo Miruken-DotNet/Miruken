@@ -35,4 +35,12 @@
             return new Qualifier(typeof(T));
         }
     }
+
+    public class QualifierAttribute : ConstraintAttribute
+    {
+        public QualifierAttribute()
+        {
+            Constraint = Qualifier.Of(GetType());
+        }
+    }
 }

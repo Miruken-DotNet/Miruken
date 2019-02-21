@@ -122,11 +122,8 @@
             }
         }
 
-        public class ProgrammerAttribute : ConstraintAttribute
+        public class ProgrammerAttribute : QualifierAttribute
         {
-            public ProgrammerAttribute() : base("Job", "Programmer")
-            {
-            }
         }
 
         public class Hospital

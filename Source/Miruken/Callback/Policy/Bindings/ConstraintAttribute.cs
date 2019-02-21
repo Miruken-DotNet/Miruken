@@ -28,9 +28,13 @@
                       ?? throw new ArgumentNullException(nameof(constraint));
         }
 
+        protected ConstraintAttribute()
+        {
+        }
+
         public bool Required { get; } = true;
 
-        public IBindingConstraint Constraint { get; }
+        public IBindingConstraint Constraint { get; protected set; }
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
