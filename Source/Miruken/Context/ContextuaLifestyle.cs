@@ -32,7 +32,6 @@
                 if (result is IContextual contextual)
                 {
                     contextual.Context = ctx;
-                    ctx.RemoveHandlers(result);
                     contextual.ContextChanging += ChangeContext;
                     context.ContextEnded += (c, r) =>
                     {
@@ -85,11 +84,15 @@
             _cache = new ConcurrentDictionary<Context, T>();
     }
 
-    public class ContextualAttribute : LifestyleAttribute
+    public class ContextualAttribute : LifestyleAttribute, IBindingConstraintProvider
     {
         public ContextualAttribute()
             : base(typeof(ContextualLifestyle<>))
         {          
         }
+
+        public IBindingConstraint Constraint => Qualifier;
+
+        private static readonly Qualifier Qualifier = Qualifier.Of<ContextualAttribute>();
     }
 }

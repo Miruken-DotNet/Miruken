@@ -5,11 +5,12 @@
     using System.Collections.Generic;
 
     [AttributeUsage(
-        AttributeTargets.Class    | AttributeTargets.Method |
+        AttributeTargets.Class | AttributeTargets.Method |
         AttributeTargets.Property | AttributeTargets.Parameter |
         AttributeTargets.Constructor,
         Inherited = false)]
-    public class ConstraintAttribute : Attribute, IFilterProvider
+    public class ConstraintAttribute : Attribute,
+        IFilterProvider, IBindingConstraintProvider
     {
         public ConstraintAttribute(object key, object value)
             : this(new MetadataKeyConstraint(key, value))
@@ -23,15 +24,19 @@
 
         public ConstraintAttribute(IBindingConstraint constraint)
         {
-            Constraint = constraint 
+            Constraint = constraint
                       ?? throw new ArgumentNullException(nameof(constraint));
+        }
+
+        protected ConstraintAttribute()
+        {
         }
 
         public bool Required { get; } = true;
 
-        public IBindingConstraint Constraint { get; }
+        public IBindingConstraint Constraint { get; protected set; }
 
-        IEnumerable<IFilter> IFilterProvider.GetFilters(
+        public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             Type callbackType, IHandler composer)
         {

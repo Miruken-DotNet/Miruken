@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Infrastructure;
     using Policy;
@@ -13,9 +14,9 @@
         public int? Order { get; set; }
 
         public Task<T> Next(Inquiry callback,
-             object rawCallback, MemberBinding member,
-             IHandler composer, Next<T> next,
-             IFilterProvider provider)
+            object rawCallback, MemberBinding member,
+            IHandler composer, Next<T> next,
+            IFilterProvider provider)
         {
             return GetInstance(callback, member, next, composer, out var instance)
                  ? Task.FromResult(instance)
@@ -58,12 +59,14 @@
             MemberBinding binding, MemberDispatch dispatcher,
             Type callbackType, IHandler composer)
         {
-            return new[]
-            {
-                Lifestyles.GetOrAdd(dispatcher, d =>
-                    (IFilter) Activator.CreateInstance(
-                        LifestyleType.MakeGenericType(d.LogicalReturnType)))
-            };
+            var lifestyle = Lifestyles.GetOrAdd(dispatcher, d =>
+                (IFilter)Activator.CreateInstance(
+                    LifestyleType.MakeGenericType(d.LogicalReturnType)));
+
+            var filters = new [] { lifestyle };
+            return !(this is IBindingConstraintProvider provider) ? filters
+                : filters.Concat(new ConstraintAttribute(provider.Constraint)
+                    .GetFilters(binding, dispatcher, callbackType, composer));
         }
 
         public override bool Equals(object obj)

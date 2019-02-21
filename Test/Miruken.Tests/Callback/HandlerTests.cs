@@ -791,7 +791,7 @@
         }
 
         [TestMethod]
-        public void Should_Create_Contextual_Implicitly()
+        public void Should_Return_Same_Contextual_Without_Qualifier()
         {
             Screen screen;
             HandlerDescriptor.ResetDescriptors();
@@ -807,6 +807,32 @@
                 using (var child = context.CreateChild())
                 {
                     var screen2 = child.Resolve<Screen>();
+                    Assert.IsNotNull(screen);
+                    Assert.AreSame(screen, screen2);
+                    Assert.AreSame(child.Parent, screen2.Context);
+                }
+            }
+            Assert.IsTrue(screen.Disposed);
+        }
+
+        [TestMethod]
+        public void Should_Create_Contextual_Implicitly()
+        {
+            Screen screen;
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<Screen>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                screen = context.Resolve<Screen>();
+                Assert.IsNotNull(screen);
+                Assert.AreSame(context, screen.Context);
+                Assert.AreSame(screen, context.Resolve<Screen>());
+                Assert.IsFalse(screen.Disposed);
+                using (var child = context.CreateChild())
+                {
+                    var screen2 = child.Resolve<Screen>(constraints =>
+                        constraints.Require(Qualifier.Of<ContextualAttribute>()));
                     Assert.IsNotNull(screen);
                     Assert.AreNotSame(screen, screen2);
                     Assert.AreSame(child, screen2.Context);

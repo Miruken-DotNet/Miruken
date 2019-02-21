@@ -7,14 +7,15 @@
         public int? Order { get; set; } = Stage.Filter;
 
         public Task<TRes> Next(IBindingScope callback,
-             object rawCallback, MemberBinding member,
-             IHandler composer, Next<TRes> next,
-             IFilterProvider provider = null)
+            object rawCallback, MemberBinding member,
+            IHandler composer, Next<TRes> next,
+            IFilterProvider provider = null)
         {
-            if (!(provider is ConstraintAttribute attribute))
+            if (!(provider is IBindingConstraintProvider constraintProvider))
                 return next(proceed: false);
             var metadata = callback.Metadata;
-            return !(metadata == null || attribute.Constraint.Matches(metadata))
+            return !(metadata == null ||
+                     constraintProvider.Constraint.Matches(metadata))
                  ? next(proceed: false)
                  : next();
         }
