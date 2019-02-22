@@ -84,10 +84,11 @@ namespace Miruken.Context
             return new Context(this);
 	    }
 
-	    public void Store(object data)
+	    public Context Store(object data)
 	    {
             if (data != null)
 	            AddHandlers(data);
+	        return this;
 	    }
 
 	    protected override bool HandleCallback(
