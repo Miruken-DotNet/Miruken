@@ -17,7 +17,7 @@
             var called = false;
             var target = new TargetActionBuilder<TargetActionBuilderTests, int>(action =>
             {
-                Assert.IsTrue(action(this, new Handler()));
+                Assert.IsTrue(action(this, _ => Array.Empty<object>()));
                 called = true;
                 return 22;
             });
@@ -31,7 +31,7 @@
             var called = false;
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsTrue(action(this, new Handler()));
+                Assert.IsTrue(action(this, _ => Array.Empty<object>()));
                 called = true;
             });
             target.Invoke(_ => {});
@@ -45,7 +45,7 @@
             var foo    = new Foo();
             var target = new TargetActionBuilder<TargetActionBuilderTests, string>(action =>
             {
-                Assert.IsTrue(action(this, new Handler().With(foo)));
+                Assert.IsTrue(action(this, args => new Handler().With(foo).ResolveArgs(args)));
                 called = true;
                 return "Hello";
             });
@@ -63,7 +63,7 @@
             var foo    = new Foo();
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsTrue(action(this, new Handler().With(foo)));
+                Assert.IsTrue(action(this, args => new Handler().With(foo).ResolveArgs(args)));
                 called = true;
             });
             target.Invoke((TargetActionBuilderTests _, Foo a) =>
@@ -81,7 +81,7 @@
             var bar    = new Bar<string>();
             var target = new TargetActionBuilder<TargetActionBuilderTests, double>(action =>
             {
-                Assert.IsTrue(action(this, new Handler().With(foo).With(bar)));
+                Assert.IsTrue(action(this, args => new Handler().With(foo).With(bar).ResolveArgs(args)));
                 called = true;
                 return 3.5;
             });
@@ -102,7 +102,7 @@
             var bar    = new Bar<string>();
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsTrue(action(this, new Handler().With(foo).With(bar)));
+                Assert.IsTrue(action(this, args => new Handler().With(foo).With(bar).ResolveArgs(args)));
                 called = true;
             });
             target.Invoke((TargetActionBuilderTests _, Foo a, Bar<string> b) =>
@@ -121,7 +121,7 @@
             var foo    = new Foo();
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsTrue(action(this, new Handler().With(foo)));
+                Assert.IsTrue(action(this, args => new Handler().With(foo).ResolveArgs(args)));
                 called = true;
             });
             target.Invoke((TargetActionBuilderTests _, Maybe<Foo> a) =>
@@ -137,7 +137,7 @@
             var called = false;
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsTrue(action(this, new Handler()));
+                Assert.IsTrue(action(this, args => new Handler().ResolveArgs(args)));
                 called = true;
             });
             target.Invoke((TargetActionBuilderTests _, Maybe<Foo> a) =>
@@ -153,7 +153,7 @@
             var called = false;
             var target = new TargetActionBuilder<TargetActionBuilderTests>(action =>
             {
-                Assert.IsFalse(action(this, new Handler()));
+                Assert.IsFalse(action(this, args => new Handler().ResolveArgs(args)));
                 called = true;
             });
             target.Invoke((TargetActionBuilderTests _, Foo a) => {});
