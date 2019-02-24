@@ -44,6 +44,9 @@
 
         public static object[] ResolveArgs(this IHandler handler, params Argument[] args)
         {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
+            if (args.Length == 0) return Array.Empty<object>();
             if (args.Any(arg => arg == null))
                 throw new ArgumentException("One or more null args provided");
             var resolver = ResolvingAttribute.Default;
@@ -59,9 +62,11 @@
 
         public static TargetActionBuilder<IHandler> Target(this IHandler handler)
         {
+            if (handler == null)
+                throw new ArgumentNullException(nameof(handler));
             return new TargetActionBuilder<IHandler>(action =>
             {
-                if (!action(handler, handler))
+                if (!action(handler, args => ResolveArgs(handler, args)))
                     throw new InvalidOperationException(
                         "One more or arguments could not be resolved");
             });
