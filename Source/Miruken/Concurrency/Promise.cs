@@ -201,9 +201,9 @@
             return Decorate(resolve, null);
         }
 
-        public object Wait()
+        public object Wait(int? millisecondsTimeout = null)
         {
-            return End(this);
+            return End(this, millisecondsTimeout);
         }
 
         public Promise Timeout(TimeSpan timeout)
@@ -347,16 +347,16 @@
 
         #region Build
 
-        public static readonly Promise<bool> True  = Resolved(true);
-        public static readonly Promise<bool> False = Resolved(false);
-        public static readonly Promise       Empty = Resolved<object>((object)null);
+        public static readonly Promise<bool> True  = new Promise<bool>(true);
+        public static readonly Promise<bool> False = new Promise<bool>(false);
+        public static readonly Promise       Empty = new Promise<object>((object)null);
 
         public static Promise<object> Resolved(object value)
         {
             if (value is Promise promise)
                 return Resolved(promise);
             return !(value is Task task)  
-                 ? Resolved<object>(value) 
+                 ? new Promise<object>(value)
                  : task.ToPromise(); // 2.3.2
         }
 
@@ -375,7 +375,7 @@
 
         public static Promise<T> Resolved<T>(T value, bool synchronous = true)
         {
-            return new Promise<T>((resolve, reject) => resolve(value, synchronous));
+            return new Promise<T>(value, synchronous);
         }
 
         public static Promise<T> Resolved<T>(Promise<T> promise)
@@ -488,6 +488,28 @@
             {
                 Reject(exception, true);
             }
+        }
+
+        protected internal Promise(T resolved, bool synchronous = true)
+        {
+            _mode = ChildCancelMode.All;
+
+            Complete(resolved, synchronous, () =>
+            {
+                State = PromiseState.Fulfilled;
+            });
+        }
+
+        protected internal Promise(Exception rejected, bool synchronous = true)
+        {
+            _mode = ChildCancelMode.All;
+
+            Complete(rejected, synchronous, () =>
+            {    
+                State = rejected is CancelledException
+                      ? PromiseState.Cancelled
+                      : PromiseState.Rejected;      
+            });
         }
 
         public override Type UnderlyingType => typeof (T);
@@ -1174,16 +1196,15 @@
 
         public new static Promise<T> Rejected(Exception exception)
         {
-            return new Promise<T>((resolve, reject) => reject(exception, true));
+            return new Promise<T>(exception);
         }
 
         public new static Promise<T> Rejected(Exception exception, bool synchronous)
         {
-            return new Promise<T>((resolve, reject) => reject(exception, synchronous));
+            return new Promise<T>(exception, synchronous);
         }
 
-        public new static readonly Promise<T> Empty = 
-            new Promise<T>((resolve, _) => resolve(default, true));
+        public new static readonly Promise<T> Empty = new Promise<T>(default(T));
 
         #endregion
     }

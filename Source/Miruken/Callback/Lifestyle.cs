@@ -18,10 +18,14 @@
             IHandler composer, Next<T> next,
             IFilterProvider provider)
         {
-            return GetInstance(callback, member, next, composer, out var instance)
+            var parent = callback.Parent;
+            return (parent == null || IsCompatibleWithParent(parent)) &&
+                   GetInstance(callback, member, next, composer, out var instance)
                  ? Task.FromResult(instance)
                  : null;
         }
+
+        protected abstract bool IsCompatibleWithParent(Inquiry parent);
 
         protected abstract bool GetInstance(
             Inquiry inquiry, MemberBinding member,

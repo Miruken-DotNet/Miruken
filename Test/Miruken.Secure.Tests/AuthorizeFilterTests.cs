@@ -49,7 +49,7 @@
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim("scope", "test"));
             var handler = new MissileControlHandler()
-                        + new MissleAccessPolicy()
+                        + new MissileAccessPolicy()
                         + new FilterHandler();
             var launch = new LaunchMissile("Patriot");
             handler.Provide(new ClaimsPrincipal(identity))
@@ -62,13 +62,13 @@
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim("scope", "launch"));
             var handler  = new MissileControlHandler()
-                         + new MissleAccessPolicy()
+                         + new MissileAccessPolicy()
                          + new FilterHandler();
-            var launch      = new LaunchMissile("Patriot");
-            var confirmtion = handler
+            var launch       = new LaunchMissile("Patriot");
+            var confirmation = handler
                 .Provide(new ClaimsPrincipal(identity))
                 .Command<LaunchConfirmation>(launch);
-            Assert.AreEqual("Patriot", confirmtion.Missle);
+            Assert.AreEqual("Patriot", confirmation.Missle);
         }
 
         [TestMethod]
@@ -78,13 +78,13 @@
             identity.AddClaim(new Claim("scope", "launch"));
             identity.AddClaim(new Claim(ClaimTypes.Role, "president"));
             var handler  = (new MissileControlHandler()
-                         + new MissleAccessPolicy()
+                         + new MissileAccessPolicy()
                          + new FilterHandler()).Provide(
                 new ClaimsPrincipal(identity));
-            var launch      = new LaunchMissile("Scud");
-            var confirmtion = handler
+            var launch       = new LaunchMissile("Scud");
+            var confirmation = handler
                 .Command<LaunchConfirmation>(launch);
-            var abortLaunch = new AbortLaunch(confirmtion);
+            var abortLaunch = new AbortLaunch(confirmation);
             var aborted     = await handler.CommandAsync<LaunchAborted>(abortLaunch);
             Assert.AreEqual("Scud", aborted.Launch.Missle);
         }
@@ -95,14 +95,14 @@
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim(ClaimTypes.Role, "tester"));
             var handler = new MissileControlHandler()
-                        + new MissleAccessPolicy()
+                        + new MissileAccessPolicy()
                         + new FilterHandler();
             var test = new TestMissile("Tomahawk");
-            var confirmtion = handler
+            var confirmation = handler
                 .Provide(new ClaimsPrincipal(identity))
                 .Command<MissleReport>(test);
-            Assert.AreEqual("Tomahawk", confirmtion.Missle);
-            Assert.IsTrue(confirmtion.Passed);
+            Assert.AreEqual("Tomahawk", confirmation.Missle);
+            Assert.IsTrue(confirmation.Passed);
         }
 
         [TestMethod]
@@ -111,7 +111,7 @@
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim("scope", "shutdown"));
             var handler = new MissileControlHandler()
-                        + new MissleAccessPolicy()
+                        + new MissileAccessPolicy()
                         + new FilterHandler();
             handler.Provide(new ClaimsPrincipal(identity))
                 .Proxy<IControl>().Shutdown();
@@ -123,7 +123,7 @@
         {
             var identity = new ClaimsIdentity("test");
             var handler  = new MissileControlHandler()
-                         + new MissleAccessPolicy()
+                         + new MissileAccessPolicy()
                          + new FilterHandler();
             handler.Provide(new ClaimsPrincipal(identity))
                 .Proxy<IControl>().Shutdown();
@@ -135,7 +135,7 @@
             var identity = new ClaimsIdentity("test");
             identity.AddClaim(new Claim("scope", "defcon"));
             var handler = new MissileControlHandler()
-                        + new MissleAccessPolicy()
+                        + new MissileAccessPolicy()
                         + new FilterHandler();
             var level = handler.Provide(new ClaimsPrincipal(identity))
                 .Proxy<IControl>().EnterDefcon(3);
@@ -148,7 +148,7 @@
         {
             var identity = new ClaimsIdentity("test");
             var handler  = new MissileControlHandler()
-                         + new MissleAccessPolicy()
+                         + new MissileAccessPolicy()
                          + new FilterHandler();
             handler.Provide(new ClaimsPrincipal(identity))
                 .Proxy<IControl>().EnterDefcon(3);
@@ -254,7 +254,7 @@
             }
         }
 
-        private class MissleAccessPolicy : Handler
+        private class MissileAccessPolicy : Handler
         {
             [Authorizes]
             public bool Authorize(
