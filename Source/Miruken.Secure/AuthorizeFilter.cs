@@ -9,6 +9,7 @@
 
     public class AuthorizeFilter<TCb, TRes> : DynamicFilter<TCb, TRes>
     {
+        [Provides, Singleton]
         public AuthorizeFilter()
         {
             Order = Stage.Authorization;

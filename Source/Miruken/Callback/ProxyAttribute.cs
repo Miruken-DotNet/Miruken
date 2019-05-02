@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using Concurrency;
     using Policy;
 
     public class ProxyAttribute : ResolvingAttribute
@@ -28,6 +29,13 @@
             object key, IHandler handler)
         {
             return handler.Proxy((Type)key);
+        }
+
+        protected override Promise ResolveAsync(
+            Inquiry parent, Argument argument,
+            object key, IHandler handler)
+        {
+            return Promise.Resolved(handler.Proxy((Type)key));
         }
     }
 }

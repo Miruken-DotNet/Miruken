@@ -9,6 +9,8 @@
         private T _instance;
         private bool _initialized;
 
+        protected override bool IsCompatibleWithParent(Inquiry parent) => true;
+
         protected override bool GetInstance(
             Inquiry inquiry, MemberBinding member,
             Next<T> next, IHandler composer,
