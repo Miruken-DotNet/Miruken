@@ -833,12 +833,34 @@
                 {
                     var screen2 = child.Resolve<Screen>(constraints =>
                         constraints.Require(Qualifier.Of<ContextualAttribute>()));
-                    Assert.IsNotNull(screen);
+                    Assert.IsNotNull(screen2);
                     Assert.AreNotSame(screen, screen2);
                     Assert.AreSame(child, screen2.Context);
                 }
             }
             Assert.IsTrue(screen.Disposed);
+        }
+
+        [TestMethod]
+        public void Should_Create_Rooted_Contextual_Implicitly()
+        {
+            RootedComponent rooted;
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<RootedComponent>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                rooted = context.Resolve<RootedComponent>();
+                Assert.IsNotNull(rooted);
+                using (var child = context.CreateChild())
+                {
+                    var rooted2 = child.Resolve<RootedComponent>(constraints =>
+                        constraints.Require(Qualifier.Of<ContextualAttribute>()));
+                    Assert.IsNotNull(rooted2);
+                    Assert.AreSame(rooted, rooted2);
+                }
+            }
+            Assert.IsTrue(rooted.Disposed);
         }
 
         [TestMethod]
@@ -1618,6 +1640,22 @@
 
             public C      RootController { get; }
             public Screen MainScreen     { get; }
+        }
+
+        private class RootedComponent : IDisposable
+        {
+            [Provides, Contextual(Rooted = true)]
+            public RootedComponent()
+            {
+                
+            }
+
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
+            }
         }
 
         private class SayHello

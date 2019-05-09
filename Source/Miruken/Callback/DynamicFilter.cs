@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Concurrency;
     using Infrastructure;
     using Policy;
     using Policy.Bindings;
@@ -29,12 +31,21 @@
             var dispatch = DynamicNext.GetOrAdd(GetType(), GetDynamicNext);
             if (dispatch == null) return next();
             var args = ResolveArgs(dispatch, callback, rawCallback,
-                member, composer, next, provider);
-            if (args == null) return next(proceed: false);
-            return (Task<TRes>)dispatch.Invoke(this, args);
+                                   member, composer, next, provider);
+            switch (args)
+            {
+                case null:
+                    return next(proceed: false);
+                case Promise promise:
+                    return promise.Then((res, _) =>
+                        (Task<TRes>)dispatch.Invoke(this, res as object[]))
+                        .ToTask();
+                default:
+                    return (Task<TRes>)dispatch.Invoke(this, args as object[]);
+            }
         }
 
-        private static object[] ResolveArgs(MemberDispatch dispatch,
+        private static object ResolveArgs(MemberDispatch dispatch,
             TCb callback, object rawCallback, MemberBinding member,
             IHandler composer, Next<TRes> next, IFilterProvider provider)
         {
@@ -44,10 +55,12 @@
 
             var parent   = callback as Inquiry;
             var resolved = new object[arguments.Length];
+            var promises = new List<Promise>();
             resolved[0] = callback;
 
             for (var i = 1; i < arguments.Length; ++i)
             {
+                var index    = i;
                 var argument = arguments[i];
                 switch (i)
                 {
@@ -75,10 +88,38 @@
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
-                    var arg = resolved[i] = resolver.ResolveArgument(parent, argument, composer);
+                    var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
                     if (arg == null && !argument.IsOptional) return null;
+
+                    switch (arg)
+                    {
+                        case Promise promise
+                            when !argument.ArgumentFlags.HasFlag(Argument.Flags.Promise):
+                            switch (promise.State)
+                            {
+                                case PromiseState.Fulfilled:
+                                    resolved[i] = promise.Wait();
+                                    break;
+                                case PromiseState.Pending:
+                                    promises.Add(promise.Then((res, _) => resolved[index] = res));
+                                    break;
+                                default:
+                                    return null;
+                            }
+                            break;
+                        default:
+                            resolved[i] = arg;
+                            break;
+                    }
                 }
             }
+
+
+            if (promises.Count == 1)
+                return promises[0].Then((r, _) => resolved);
+
+            if (promises.Count > 1)
+                return Promise.All(promises).Then((r, _) => resolved);
 
             return resolved;
         }

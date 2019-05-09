@@ -13,7 +13,8 @@
             var parentDispatcher = parent?.Dispatcher;
             if (parentDispatcher == null) return true;
             return parentDispatcher.Attributes.OfType<LifestyleAttribute>()
-                .All(lifestyle => lifestyle is ContextualAttribute);
+                .All(lifestyle => lifestyle is ContextualAttribute c &&
+                    ((Attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
         }
 
         protected override bool GetInstance(
@@ -27,6 +28,9 @@
                 instance = default;
                 return false;
             }
+
+            if ((Attribute as ContextualAttribute)?.Rooted == true)
+                context = context.Root;
 
             instance = _cache.GetOrAdd(context, ctx =>
             {
@@ -84,6 +88,8 @@
             : base(typeof(ContextualLifestyle<>))
         {          
         }
+
+        public bool Rooted { get; set; }
 
         public IBindingConstraint Constraint => Qualifier;
 

@@ -9,9 +9,16 @@
     using Policy;
     using Policy.Bindings;
 
-    public abstract class Lifestyle<T> : IFilter<Inquiry, T>
+    public interface ILifestyle : IFilter
+    {
+        LifestyleAttribute Attribute { get; set; }
+    }
+
+    public abstract class Lifestyle<T> : IFilter<Inquiry, T>, ILifestyle
     {
         public int? Order { get; set; }
+
+        public LifestyleAttribute Attribute { get; set; }
 
         public Task<T> Next(Inquiry callback,
             object rawCallback, MemberBinding member,
@@ -64,8 +71,12 @@
             Type callbackType, IHandler composer)
         {
             var lifestyle = Lifestyles.GetOrAdd(dispatcher, d =>
-                (IFilter)Activator.CreateInstance(
-                    LifestyleType.MakeGenericType(d.LogicalReturnType)));
+            {
+                var l = (ILifestyle) Activator.CreateInstance(
+                    LifestyleType.MakeGenericType(d.LogicalReturnType));
+                l.Attribute = this;
+                return l;
+            });
 
             var filters = new [] { lifestyle };
             return !(this is IBindingConstraintProvider provider) ? filters

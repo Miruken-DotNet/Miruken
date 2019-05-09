@@ -27,26 +27,21 @@
         public virtual object ResolveArgument(Inquiry parent,
             Argument argument, IHandler handler)
         {
-            if (!argument.IsLazy)
-                return Resolve(parent, argument, handler);
-            var lazy = Lazy.GetOrAdd(argument.ParameterType, l =>
-            {
-                var func   = l.GenericTypeArguments[0];
-                var method = CreateLazy.MakeGenericMethod(func);
-                return (Func<object, object, object, object, object>)
-                    RuntimeHelper.CompileMethod(method, 
-                        typeof(Func<object, object, object, object, object>));
-            });
-            return lazy(this, parent, argument, handler);
+            return Resolve(parent, argument, handler, argument.IsLazy, false);
+        }
+
+        public object ResolveArgumentAsync(Inquiry parent,
+            Argument argument, IHandler handler)
+        {
+            return Resolve(parent, argument, handler, argument.IsLazy, true);
         }
 
         public virtual void ValidateArgument(Argument argument)
         {
         }
 
-        protected virtual object Resolve(
-            Inquiry parent, Argument argument,
-            object key, IHandler handler)
+        protected virtual object Resolve(Inquiry parent,
+            Argument argument, object key, IHandler handler)
         {
             return handler.Resolve(new Inquiry(key, parent), argument.Constraints);
         }
@@ -90,12 +85,25 @@
         private Func<T> ResolveLazy<T>(
             Inquiry parent, Argument argument, IHandler handler)
         {
-            return () => (T)Resolve(parent, argument, handler);
+            return () => (T)Resolve(parent, argument, handler, false, false);
         }
 
-        private object Resolve(Inquiry parent,
-            Argument argument, IHandler handler)
+        private object Resolve(Inquiry parent, Argument argument,
+            IHandler handler, bool lazy, bool wantsAsync)
         {
+            if (lazy)
+            {
+                var lazyFunc = Lazy.GetOrAdd(argument.ParameterType, l =>
+                {
+                    var func = l.GenericTypeArguments[0];
+                    var method = CreateLazy.MakeGenericMethod(func);
+                    return (Func<object, object, object, object, object>)
+                        RuntimeHelper.CompileMethod(method,
+                            typeof(Func<object, object, object, object, object>));
+                });
+                return lazyFunc(this, parent, argument, handler);
+            }
+
             object dependency;
             var key          = argument.Key;
             var argumentType = argument.ArgumentType;
@@ -105,17 +113,16 @@
             {
                 if (argument.IsPromise)
                 {
-                    var array = ResolveAllAsync(
-                        parent, argument, key, handler);
+                    var array = ResolveAllAsync(parent, argument, key, handler);
                     dependency = argument.IsSimple
                                ? array.Then((arr, s) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
                                      .Coerce(argumentType)
                                : array.Coerce(argumentType);
                 }
-                else if (argument.IsTask)
+                else  if (argument.IsTask)
                 {
-                    var array  = ResolveAllAsync( parent, argument, key, handler).ToTask();
+                    var array  = ResolveAllAsync(parent, argument, key, handler).ToTask();
                     dependency = argument.IsSimple
                                ? array.ContinueWith(task =>
                                     RuntimeHelper.ChangeArrayType(task.Result, logicalType),
@@ -123,9 +130,16 @@
                                     .Coerce(argumentType)
                                : array.Coerce(argumentType);
                 }
+                else if (wantsAsync)
+                {
+                    dependency = ResolveAllAsync(parent, argument, key, handler)
+                        .Then((array, _) => RuntimeHelper.ChangeArrayType(array, logicalType));
+                }
                 else
+                {
                     dependency = RuntimeHelper.ChangeArrayType(
                         ResolveAll(parent, argument, key, handler), logicalType);
+                }
             }
             else if (argument.IsPromise)
             {
@@ -147,6 +161,10 @@
                         TaskContinuationOptions.ExecuteSynchronously);
                 }
                 dependency = task.Coerce(argumentType);
+            }
+            else if (wantsAsync)
+            {
+                dependency = ResolveAsync(parent, argument, key, handler);
             }
             else
             {
