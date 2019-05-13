@@ -63,6 +63,8 @@ namespace Miruken.Callback.Policy
                             {
                                 OutKey = constructor.ReflectedType
                             });
+                        if (HandlerType.Is<IInitialize>())
+                            memberBinding.AddFilters(InitializeProvider.Instance);
                     }
                     else
                     {

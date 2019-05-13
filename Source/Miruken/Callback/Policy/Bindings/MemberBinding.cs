@@ -22,8 +22,7 @@
         public abstract bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null);
 
-        internal object CoerceResult(
-            object result, Type resultType, bool? wantsAsync = null)
+        internal object CoerceResult(object result, Type resultType, bool? wantsAsync = null)
         {
             if (wantsAsync == true)
             {

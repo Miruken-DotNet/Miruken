@@ -79,11 +79,11 @@
                         children.AddRange(CreateErrors(child));
                     else
                         messages.Add(error.ToString());
-                    if (messages.Count > 0)
-                        failure.Errors = messages.ToArray();
-                    if (children.Count > 0)
-                        failure.Nested = children.ToArray();
                 }
+                if (messages.Count > 0)
+                    failure.Errors = messages.ToArray();
+                if (children.Count > 0)
+                    failure.Nested = children.ToArray();
                 return failure;
             }).ToArray();
         }

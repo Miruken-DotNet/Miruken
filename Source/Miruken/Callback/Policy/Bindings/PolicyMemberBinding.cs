@@ -100,12 +100,11 @@
         private bool Invoke(object target, object callback,
             IHandler composer, Type resultType, ResultsDelegate results)
         {
-            object result;
-            var ruleArgs = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
+            var ruleArgs   = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(ruleArgs, resultType);
 
-            if ((callback as IDispatchCallbackGuard)
-                ?.CanDispatch(target, dispatcher) == false)
+            if (callback is IDispatchCallbackGuard guard &&
+                !guard.CanDispatch(target, dispatcher))
                 return false;
 
             if (CallbackIndex.HasValue)
@@ -117,22 +116,36 @@
 
             var returnType = dispatcher.ReturnType;
 
-            if ((callback as IFilterCallback)?.CanFilter == false)
+            bool ResolveArgsAndDispatch(out object res, out bool isPromise)
             {
                 var args = ResolveArgs(dispatcher, callback, ruleArgs, composer);
                 switch (args)
                 {
                     case null:
+                        res     = null;
+                        isPromise = false;
                         return false;
-                    case Promise promise:
-                        result = promise.Then((res, _) =>
-                            dispatcher.Invoke(target, res as object[], resultType));
-                        break;
+                    case object[] array:
+                        isPromise = false;
+                        res = dispatcher.Invoke(target, array, resultType);
+                        return true;
+                    case Promise<object[]> promise:
+                        isPromise = true;
+                        res = promise.Then((array, _) =>
+                            dispatcher.Invoke(target, array, resultType));
+                        return true;
                     default:
-                        result = dispatcher.Invoke(target, args as object[], resultType);
-                        break;
+                        throw new InvalidOperationException("Unable to resolve arguments");
                 }
-                return Accept(callback, result, returnType, results);
+            }
+
+            object result;
+            var isAsync = false;
+
+            if ((callback as IFilterCallback)?.CanFilter == false)
+            {             
+                return ResolveArgsAndDispatch(out result, out isAsync) && 
+                    Accept(callback, result, returnType, results, isAsync);
             }
 
             var filterCallback = GetCallbackInfo(
@@ -150,37 +163,15 @@
 
             if (filters.Count == 0)
             {
-                var args = ResolveArgs(dispatcher, callback, ruleArgs, composer);
-                switch (args)
-                {
-                    case null:
-                        return false;
-                    case Promise promise:
-                        result = promise.Then((res, _) =>
-                            dispatcher.Invoke(target, res as object[], resultType));
-                        break;
-                    default:
-                        result = dispatcher.Invoke(target, args as object[], resultType);
-                        break;
-                }
+                if (!ResolveArgsAndDispatch(out result, out _)) return false;
             }
             else if (!dispatcher.GetPipeline(callbackType).Invoke(
                 this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                 {
-                    object baseResult;
-                    var args = ResolveArgs(dispatcher, callback, ruleArgs, comp);
-                    switch (args)
+                    if (!ResolveArgsAndDispatch(out var baseResult, out isAsync))
                     {
-                        case null:
-                            completed = false;
-                            return null;
-                        case Promise promise:
-                            baseResult = promise.Then((res, _) =>
-                                dispatcher.Invoke(target, res as object[], resultType));
-                            break;
-                        default:
-                            baseResult = dispatcher.Invoke(target, args as object[], resultType);
-                            break;
+                        completed = false;
+                        return null;
                     }
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)
                               ?? baseResult != null;
@@ -188,18 +179,19 @@
                 }, composer, filters, out result))
                 return false;
 
-            return Accept(callback, result, returnType, results);
+            return Accept(callback, result, returnType, results, isAsync);
         }
 
         private bool Accept(object callback, object result,
-            Type returnType, ResultsDelegate results)
+            Type returnType, ResultsDelegate results, bool isAsync)
         {
             var accepted = Policy.AcceptResult?.Invoke(result, this)
                            ?? result != null;
             if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
-                result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
+                result = CoerceResult(result, returnType,
+                    isAsync || asyncCallback?.WantsAsync == true);
                 if (result != null)
                     return results?.Invoke(result, Category.Strict) != false;
             }

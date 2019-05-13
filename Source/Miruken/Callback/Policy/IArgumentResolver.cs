@@ -1,7 +1,5 @@
 ﻿namespace Miruken.Callback.Policy
 {
-    using Concurrency;
-
     public interface IArgumentResolver
     {
         bool IsOptional { get;  }

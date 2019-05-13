@@ -46,9 +46,8 @@
             return handler.Resolve(new Inquiry(key, parent), argument.Constraints);
         }
 
-        protected virtual Promise ResolveAsync(
-            Inquiry parent, Argument argument,
-            object key, IHandler handler)
+        protected virtual Promise ResolveAsync(Inquiry parent,
+            Argument argument, object key, IHandler handler)
         {
             return handler.ResolveAsync(new Inquiry(key, parent)
             {
@@ -162,7 +161,7 @@
                 }
                 dependency = task.Coerce(argumentType);
             }
-            else if (wantsAsync)
+            else if (wantsAsync && !argument.IsMaybe)
             {
                 dependency = ResolveAsync(parent, argument, key, handler);
             }

@@ -66,6 +66,7 @@
     <Compile Include="Callback\HandlerAdapter.cs" />
     <Compile Include="Callback\FilteredHandler.cs" />
     <Compile Include="Callback\Inference.cs" />
+    <Compile Include="Callback\Initializer.cs" />
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\Lifestyle.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Callback\Trampoline.cs" />
     <Compile Include="Callback\UnmanagedAttribute.cs" />
     <Compile Include="Context\ContextuaLifestyle.cs" />
+    <Compile Include="IInitialize.cs" />
     <Compile Include="Infrastructure\CollectionExtensions.cs" />
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Infrastructure\FastExpressionCompiler.cs" />

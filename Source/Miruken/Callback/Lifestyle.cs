@@ -16,7 +16,7 @@
 
     public abstract class Lifestyle<T> : IFilter<Inquiry, T>, ILifestyle
     {
-        public int? Order { get; set; }
+        public int? Order { get; set; } = int.MaxValue - 100;
 
         public LifestyleAttribute Attribute { get; set; }
 

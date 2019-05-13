@@ -148,7 +148,6 @@
                 Id   = Guid.NewGuid(),
                 Name = "Rabbit"
             };
-            Console.WriteLine("Hello");
             await handler.CommandAsync(foo);
         }
     }
@@ -172,7 +171,7 @@
         [Handles, Filter(typeof(ValidateFilter<,>))]
         public void Handle(Foo foo, Bar bar)
         {
-
+            Console.WriteLine("Handle Foo");
         }
 
         [Handles]

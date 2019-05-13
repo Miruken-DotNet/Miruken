@@ -10,6 +10,7 @@
     using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
     using Miruken.Context;
+    using Miruken.Infrastructure;
 
     [TestClass]
     public class HandlerTests
@@ -768,6 +769,17 @@
             Assert.AreSame(app, handler.Resolve<Application>());
         }
 
+
+        [TestMethod]
+        public async Task Should_Initialize_Asynchronously()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent1));
+            var component = await new StaticHandler().ResolveAsync<InitializedComponent1>();
+            Assert.IsNotNull(component);
+            Assert.IsTrue(component.Initialized);
+        }
+
         [TestMethod]
         public void Should_Create_Generic_Singletons_Implicitly()
         {
@@ -777,14 +789,20 @@
             HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             HandlerDescriptor.GetDescriptor(typeof(Application<>));
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent1));
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent2));
             var app1 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.IsNotNull(app1);
+            Assert.IsTrue(app1.Initialized);
+            Assert.AreEqual(1, app1.InitializedCount);
             Assert.AreSame(view, app1.RootController.View);
             Assert.AreSame(view, app1.MainScreen);
             var app2 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.AreSame(app1, app2);
+            Assert.IsTrue(app2.Initialized);
+            Assert.AreEqual(1, app2.InitializedCount);
             var app3 = handler.Provide(view)
                 .Resolve<IApplication<Controller<Screen, Bar>>>();
             Assert.AreSame(app1, app3);
@@ -969,6 +987,16 @@
                 Assert.AreNotSame(screen, context.Resolve<Screen>());
                 Assert.IsTrue(screen.Disposed);
             }
+        }
+
+        [TestMethod]
+        public async Task Should_Reject_Constructor_If_Initializer_Fails()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<FailedInitialization>();
+
+            var result = await (new StaticHandler()).ResolveAsync<FailedInitialization>();
+            Assert.IsNull(result);
         }
 
         [TestMethod]
@@ -1628,18 +1656,34 @@
             Screen MainScreen     { get; }
         }
 
-        private class Application<C> : Application, IApplication<C>
+        private class Application<C> : Application, IApplication<C>, IInitialize
             where C : Controller
         {
             [Provides, Singleton]
-            public Application(C rootController, Screen screen)
+            public Application(C rootController, Screen screen,
+                InitializedComponent1 component1, InitializedComponent2 component2)
             {
                 RootController = rootController;
                 MainScreen = screen;
             }
 
-            public C      RootController { get; }
-            public Screen MainScreen     { get; }
+            public C      RootController   { get; }
+            public Screen MainScreen       { get; }
+            public bool   Initialized      { get; set; }
+            public int    InitializedCount { get; private set; }
+
+            public Promise Initialize()
+            {
+                return Promise.True.Then((res, _) =>
+                {
+                    Initialized = true;
+                    ++InitializedCount;
+                });
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
         }
 
         private class RootedComponent : IDisposable
@@ -1655,6 +1699,67 @@
             public void Dispose()
             {
                 Disposed = true;
+            }
+        }
+
+        private class InitializedComponent1 : IInitialize
+        {
+            [Provides, Singleton]
+            public InitializedComponent1()
+            {             
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Delay(100.Millis())
+                    .Then((res, _) => Initialized = true);
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+        }
+
+        private class InitializedComponent2 : IInitialize
+        {
+            [Provides, Singleton]
+            public InitializedComponent2()
+            {
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Delay(200.Millis())
+                    .Then((res, _) => Initialized = true);
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+        }
+
+        private class FailedInitialization : IInitialize
+        {
+            [Provides, Singleton]
+            public FailedInitialization()
+            {
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Rejected(new InvalidOperationException(
+                    "Initialization Failed"));
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+                Assert.AreEqual("Initialization Failed", exception?.Message);
             }
         }
 
