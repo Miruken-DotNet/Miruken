@@ -769,7 +769,6 @@
             Assert.AreSame(app, handler.Resolve<Application>());
         }
 
-
         [TestMethod]
         public async Task Should_Initialize_Asynchronously()
         {

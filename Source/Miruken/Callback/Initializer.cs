@@ -30,7 +30,7 @@
                         {
                             initialize.Initialized = true;
                             return result;
-                        },  (ex, _) =>
+                        }, (ex, _) =>
                         {
                             initialize.Initialized = false;
                             initialize.FailedInitialize(ex);

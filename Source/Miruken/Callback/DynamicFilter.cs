@@ -114,7 +114,6 @@
                 }
             }
 
-
             if (promises.Count == 1)
                 return promises[0].Then((r, _) => resolved);
 

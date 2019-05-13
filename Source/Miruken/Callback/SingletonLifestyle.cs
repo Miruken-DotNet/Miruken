@@ -1,33 +1,28 @@
 ﻿namespace Miruken.Callback
 {
     using System.Threading;
+    using System.Threading.Tasks;
     using Policy.Bindings;
 
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class
     {
-        private T _instance;
+        private Task<T> _instance;
         private bool _initialized;
 
         protected override bool IsCompatibleWithParent(Inquiry parent) => true;
 
-        protected override bool GetInstance(
+        protected override Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer,
-            out T instance)
+            Next<T> next, IHandler composer)
         {
             if (_initialized)
-            {
-                instance = _instance;
-            }
-            else
-            {
-                object guard = this;
-                instance = LazyInitializer.EnsureInitialized(
-                    ref _instance, ref _initialized, ref guard,
-                    () => next().Result);
-            }
-            return true;
+                return _instance;
+
+            object guard = this;
+            return LazyInitializer.EnsureInitialized(
+                ref _instance, ref _initialized, ref guard,
+                () => _instance = next());
         }
     }
 

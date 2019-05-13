@@ -26,18 +26,16 @@
             IFilterProvider provider)
         {
             var parent = callback.Parent;
-            return (parent == null || IsCompatibleWithParent(parent)) &&
-                GetInstance(callback, member, next, composer, out var instance)
-                 ? Task.FromResult(instance)
+            return parent == null || IsCompatibleWithParent(parent)
+                 ? GetInstance(callback, member, next, composer)
                  : null;
         }
 
         protected abstract bool IsCompatibleWithParent(Inquiry parent);
 
-        protected abstract bool GetInstance(
+        protected abstract Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer,
-            out T instance);
+            Next<T> next, IHandler composer);
     }
 
     [AttributeUsage(
