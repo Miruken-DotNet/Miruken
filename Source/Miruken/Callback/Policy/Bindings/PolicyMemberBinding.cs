@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Threading.Tasks;
     using Concurrency;
     using Infrastructure;
     using Rules;
@@ -171,7 +172,8 @@
                     if (!ResolveArgsAndDispatch(out var baseResult, out isAsync))
                     {
                         completed = false;
-                        return null;
+                        return Task.FromException(new InvalidOperationException(
+                            $"{dispatcher.Member} is missing one or more dependencies"));
                     }
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)
                               ?? baseResult != null;

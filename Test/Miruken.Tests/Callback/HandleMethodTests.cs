@@ -231,7 +231,7 @@
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
-        public void Should_Not_Propogate_Best_Effort()
+        public void Should_Not_Propagate_Best_Effort()
         {
             var handler = new EmailHandler();
             Proxy<IEmailFeature>(handler.BestEffort()).CancelEmail(1);

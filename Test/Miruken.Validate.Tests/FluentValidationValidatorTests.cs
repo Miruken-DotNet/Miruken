@@ -126,7 +126,8 @@
         public async Task Should_Handle_Cascade_Properly()
         {
             var handler = new FluentValidationValidator()
-                        + new FooValidatorProvider();
+                        + new FooValidatorProvider()
+                        + new FooBarHandler();
             var foo     = new Foo
             {
                 Id   = Guid.Empty,
@@ -146,9 +147,25 @@
             var foo = new Foo
             {
                 Id   = Guid.NewGuid(),
-                Name = "Rabbit"
+                Name = "Spike"
             };
-            await handler.CommandAsync(foo);
+            var bar = await handler.CommandAsync<Bar>(foo);
+            Assert.IsNotNull(bar);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
+        public async Task Should_Detect_Missing_Dependencies()
+        {
+            var handler = new FluentValidationValidator()
+                        + new FooValidatorProvider()
+                        + new FooBarHandler { NoBar = true };
+            var foo = new Foo
+            {
+                Id   = Guid.NewGuid(),
+                Name = "Patch"
+            };
+            await handler.CommandAsync<Bar>(foo);
         }
     }
 
@@ -168,16 +185,25 @@
 
     public class FooBarHandler : Handler
     {
+        public bool NoBar { get; set; }
+
+        [Provides]
+        public Bar Bar { get; private set; }
+
         [Handles, Filter(typeof(ValidateFilter<,>))]
-        public void Handle(Foo foo, Bar bar)
+        public Task<Bar> Handle(Foo foo, Bar bar)
         {
-            Console.WriteLine("Handle Foo");
+            return Task.FromResult(bar);
         }
 
         [Handles]
         public Promise Handle(Baz baz)
         {
-             return Promise.Delay(10.Millis());
+             return Promise.Delay(10.Millis())
+                      .Then((res, _) =>
+                 {
+                     if (!NoBar) Bar = new Bar();
+                 });
         }
     }
 
@@ -193,8 +219,7 @@
             RuleFor(x => x)
                 .WithComposerCustomAsync(async (foo, ctx, ct, c) =>
                 {
-                    await Task.Delay(10);
-                    //await c.CommandAsync(new Baz());
+                    await c.CommandAsync(new Baz());
                 });
 
             RuleFor(p => p.Name)

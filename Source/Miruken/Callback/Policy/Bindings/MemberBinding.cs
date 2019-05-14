@@ -32,14 +32,30 @@
             if (result == null || !resultType.IsInstanceOfType(result))
             {
                 if (resultType.Is<Task>())
-                    return Promise.Resolved(result).ToTask().Coerce(resultType);
+                {
+                    switch (result)
+                    {
+                        case Task task:
+                            return task.Coerce(resultType);
+                        case Promise promise:
+                            return promise.ToTask().Coerce(resultType);
+                        default:
+                            return Task.FromResult(result).Coerce(resultType);
+                    }
+                }
                 if (resultType.Is<Promise>())
                     return Promise.Resolved(result).Coerce(resultType);
-                var promise = result as Promise;
-                if (promise == null)
-                    if (result is Task task) promise = Promise.Resolved(task);
-                if (promise != null)
-                    return promise.Wait();
+                else
+                {
+                    var promise = result as Promise;
+                    if (promise == null)
+                    {
+                        if (result is Task task)
+                            promise = Promise.Resolved(task);
+                    }
+                    if (promise != null)
+                        return promise.Wait();
+                }
             }
             return result;
         }

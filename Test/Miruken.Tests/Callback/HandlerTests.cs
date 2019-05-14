@@ -651,9 +651,9 @@
 
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
-        public async Task Should_Propogate_Rejected_Filter_Promise()
+        public async Task Should_Propagate_Rejected_Filter_Promise()
         {
-            var boo = new Boo();
+            var boo     = new Boo();
             var handler = new SpecialFilteredHandler() + new FilteredHandler();
             await handler.CommandAsync(boo);
         }

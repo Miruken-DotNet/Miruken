@@ -289,7 +289,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Simple_Fulfilled_Callback()
+        public void Should_Propagate_Simple_Fulfilled_Callback()
         {
             var called = 0;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true));
@@ -303,7 +303,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Promise_Fulfilled_Callback()
+        public void Should_Propagate_Promise_Fulfilled_Callback()
         {
             var called = 0;
             var promise = new Promise<object>((resolve, reject) => resolve("Hello", true));
@@ -318,7 +318,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Fulfilled_Callback()
+        public void Should_Propagate_Exceptions_In_Fulfilled_Callback()
         {
             var called = 0;
             var verify = false;
@@ -341,7 +341,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Async_Fulfilled_Callback()
+        public void Should_Propagate_Exceptions_In_Async_Fulfilled_Callback()
         {
             var called = false;
             var verify = false;
@@ -366,7 +366,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Rejected_Callback()
+        public void Should_Propagate_Exceptions_In_Rejected_Callback()
         {
             var called = false;
             var verify = false;
@@ -387,7 +387,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Async_Rejected_Callback()
+        public void Should_Propagate_Exceptions_In_Async_Rejected_Callback()
         {
             var called = false;
             var verify = true;
@@ -485,7 +485,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Filtered_Fulfilled_Callback()
+        public void Should_Propagate_Exceptions_In_Filtered_Fulfilled_Callback()
         {
             var called = false;
             var verify = false;
@@ -510,7 +510,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Exceptions_In_Filtered_Rejected_Callback()
+        public void Should_Propagate_Exceptions_In_Filtered_Rejected_Callback()
         {
             var called = false;
             var verify = false;
@@ -697,7 +697,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Finalize_Fulfill_Exception_Synchronously_Using_callbacks()
+        public void Should_Propagate_Finalize_Fulfill_Exception_Synchronously_Using_callbacks()
         {
             var called = 0;
             var promise = new Promise<string>((resolve, reject) => resolve("Hello", true));
@@ -734,7 +734,7 @@ namespace Miruken.Tests.Concurrency
         }
 
         [TestMethod]
-        public void Should_Propogate_Finalize_Reject_Exception_Synchronously_Using_Callbacks()
+        public void Should_Propagate_Finalize_Reject_Exception_Synchronously_Using_Callbacks()
         {
             var called = 0;
             var promise = new Promise<object>((resolve, reject) =>

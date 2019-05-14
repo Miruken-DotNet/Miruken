@@ -14,9 +14,9 @@
     public class Inquiry : ICallback, IAsyncCallback,
         IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
-        private object _result;
         private readonly List<object> _resolutions;
         private readonly List<object> _promises;
+        private object _result;
 
         public Inquiry(object key, bool many = false)
         {
