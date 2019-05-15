@@ -116,9 +116,9 @@
 
             var returnType = dispatcher.ReturnType;
 
-            bool ResolveArgsAndDispatch(out object res, out bool isPromise)
+            bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
             {
-                var args = ResolveArgs(dispatcher, callback, ruleArgs, composer);
+                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler);
                 switch (args)
                 {
                     case null:
@@ -148,7 +148,7 @@
 
             if ((callback as IFilterCallback)?.CanFilter == false)
             {             
-                return ResolveArgsAndDispatch(out result, out isAsync) && 
+                return ResolveArgsAndDispatch(composer, out result, out isAsync) && 
                     Accept(callback, result, returnType, results, isAsync);
             }
 
@@ -167,13 +167,13 @@
 
             if (filters.Count == 0)
             {
-                if (!ResolveArgsAndDispatch(out result, out isAsync))
+                if (!ResolveArgsAndDispatch(composer, out result, out isAsync))
                     return false;
             }
             else if (!dispatcher.GetPipeline(callbackType).Invoke(
                 this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                 {
-                    if (!ResolveArgsAndDispatch(out var baseResult, out isAsync))
+                    if (!ResolveArgsAndDispatch(comp, out var baseResult, out isAsync))
                     {
                         completed = false;
                         return baseResult;
