@@ -228,7 +228,8 @@
             var fulfilled   = new object[promises.Length];
             var synchronous = true;
 
-            return new Promise<object[]>((resolve, reject) => {
+            return new Promise<object[]>(ChildCancelMode.Any, (resolve, reject, onCancel) => {
+                onCancel(() => Array.ForEach(promises, p => p.Cancel()));
                 for (var index = 0; index < promises.Length; ++index)
                 {
                     var pos = index;
@@ -492,7 +493,7 @@
 
         protected internal Promise(T resolved, bool synchronous = true)
         {
-            _mode = ChildCancelMode.All;
+            _mode = ChildCancelMode.Any;
 
             Complete(resolved, synchronous, () =>
             {
@@ -502,7 +503,7 @@
 
         protected internal Promise(Exception rejected, bool synchronous = true)
         {
-            _mode = ChildCancelMode.All;
+            _mode = ChildCancelMode.Any;
 
             Complete(rejected, synchronous, () =>
             {    
