@@ -95,12 +95,12 @@
         public bool Respond(object response, bool strict)
         {
             if (response == null) return false;
-            var accepted = Include(response, strict);
+            var accepted = Include(response);
             if (accepted) _result = null;
             return accepted;
         }
 
-        private bool Include(object response, bool strict)
+        private bool Include(object response)
         {
             if (response == null) return false;
 
@@ -116,10 +116,14 @@
             if (promise != null)
             {
                 IsAsync = true;
-                _promises.Add(promise.Then((result, s) => _results.Add(result)));
+                _promises.Add(promise.Then((result, s) =>
+                {
+                    if (result != null) _results.Add(result);
+                }));
             }
             else
                 _results.Add(response);
+
             return true;
         }
 

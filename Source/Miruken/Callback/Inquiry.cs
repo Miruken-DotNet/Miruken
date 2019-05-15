@@ -151,7 +151,8 @@
                                 res != null && IsSatisfied(res, greedy, composer)));
                             break;
                         default:
-                            _resolutions.Add(result);
+                            if (result != null)
+                                _resolutions.Add(result);
                             break;
                     }
                 }).Catch((_, s) => (object)null));
