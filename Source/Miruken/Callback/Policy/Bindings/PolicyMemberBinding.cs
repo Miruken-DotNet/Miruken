@@ -76,8 +76,7 @@
             {
                 var callback = Dispatcher.Arguments[index.Value];
                 var mapping  = new GenericMapping(
-                    handlerType.GetGenericArguments(),
-                    new[] { callback });
+                    handlerType.GetGenericArguments(), new[] { callback });
                 if (mapping.Complete)
                 {
                     var closed = mapping.MapTypes(new[] { type });
@@ -123,8 +122,9 @@
                 switch (args)
                 {
                     case null:
-                        res     = null;
                         isPromise = false;
+                        res = Task.FromException(new InvalidOperationException(
+                            $"{dispatcher.Member} is missing one or more dependencies")); ;
                         return false;
                     case object[] array:
                         isPromise = false;
@@ -136,7 +136,10 @@
                             dispatcher.Invoke(target, array, resultType));
                         return true;
                     default:
-                        throw new InvalidOperationException("Unable to resolve arguments");
+                        isPromise = false;
+                        res = Task.FromException(new InvalidOperationException(
+                            $"Unable to resolve arguments for {dispatcher.Member}"));
+                        return false;
                 }
             }
 
@@ -164,7 +167,8 @@
 
             if (filters.Count == 0)
             {
-                if (!ResolveArgsAndDispatch(out result, out _)) return false;
+                if (!ResolveArgsAndDispatch(out result, out isAsync))
+                    return false;
             }
             else if (!dispatcher.GetPipeline(callbackType).Invoke(
                 this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
@@ -172,12 +176,13 @@
                     if (!ResolveArgsAndDispatch(out var baseResult, out isAsync))
                     {
                         completed = false;
-                        return Task.FromException(new InvalidOperationException(
-                            $"{dispatcher.Member} is missing one or more dependencies"));
+                        return baseResult;
                     }
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)
                               ?? baseResult != null;
-                    return baseResult;
+                    return completed ? baseResult
+                         : Task.FromException(new NotSupportedException(
+                                $"{dispatcher.Member} not handled"));
                 }, composer, filters, out result))
                 return false;
 
