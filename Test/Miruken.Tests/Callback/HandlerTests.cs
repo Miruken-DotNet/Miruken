@@ -89,7 +89,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Genericly()
+        public void Should_Handle_Callbacks_Generically()
         {
             var baz = new Baz<int>(22);
             var handler = new CustomHandler();
@@ -99,7 +99,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Genericly_Mapped()
+        public void Should_Handle_Callbacks_Generically_Mapped()
         {
             var baz = new Baz<int, float>(22, 15.5f);
             var handler = new CustomHandler();
@@ -110,12 +110,20 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Implicitly_Genericly()
+        public void Should_Handle_Callbacks_Implicitly_Generically()
         {
             var baz = new BazInt(29);
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
+        }
+
+        [TestMethod]
+        public void Should_Replace_Composer_In_Filter()
+        {
+            var handler = new FilterHandlerTests();
+            var bar = handler.Command<Bar>(new Foo());
+            Assert.IsNotNull(bar);
         }
 
         [TestMethod]
@@ -442,8 +450,7 @@
         public async Task Should_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = await handler.Aspect((_, c) => true)
-                                       .ResolveAsync<Bar>();
+            var bar = await handler.Aspect((_, c) => true).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -453,8 +460,7 @@
         public void Should_Async_Filter_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = handler.Aspect((_, c) => Promise.True)
-                                 .Resolve<Bar>();
+            var bar = handler.Aspect((_, c) => Promise.True).Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -464,8 +470,7 @@
         public async Task Should_Async_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = await handler.Aspect((_, c) => Promise.True)
-                                       .ResolveAsync<Bar>();
+            var bar = await handler.Aspect((_, c) => Promise.True).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -1550,6 +1555,29 @@
             }
         }
 
+        private class FilterHandlerTests : Handler
+        {
+            [Handles,
+             Filter(typeof(ReplaceComposerFilter<,>))]
+            public Bar HandleFoo(Foo foo, Bar bar)
+            {
+                return bar;
+            }
+
+            [Provides(typeof(ReplaceComposerFilter<,>))]
+            public object CreateFilter(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(LogFilter<,>).
+                            MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                    : Activator.CreateInstance(type);
+            }
+        }
+
         private class BadHandler : Handler
         {
             [Handles]
@@ -1987,6 +2015,19 @@
                     return Promise<Res>.Rejected(
                         new InvalidOperationException("System shutdown"));
                 return result;
+            }
+        }
+
+        private class ReplaceComposerFilter<Cb, Res> : IFilter<Cb, Res>
+        {
+            public int? Order { get; set; } = Stage.Filter;
+
+            public Task<Res> Next(Cb callback,
+                object rawCallback, MemberBinding binding,
+                IHandler composer, Next<Res> next,
+                IFilterProvider provider)
+            {
+                return next(composer.Provide(new Bar()));
             }
         }
     }

@@ -124,7 +124,7 @@
                     case null:
                         isPromise = false;
                         res = Task.FromException(new InvalidOperationException(
-                            $"{dispatcher.Member} is missing one or more dependencies")); ;
+                            $"{dispatcher.Member} is missing one or more dependencies"));
                         return false;
                     case object[] array:
                         isPromise = false;

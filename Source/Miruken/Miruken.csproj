@@ -91,6 +91,7 @@
     <Compile Include="Callback\Policy\MemberDispatch.cs" />
     <Compile Include="Callback\Policy\Rules\RuleContext.cs" />
     <Compile Include="Callback\ProxyAttribute.cs" />
+    <Compile Include="Callback\NotHandledException.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\SingletonLifestyle.cs" />
     <Compile Include="Callback\StaticHandler.cs" />

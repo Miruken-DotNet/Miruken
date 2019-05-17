@@ -1055,7 +1055,7 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Wait_For_All_Promises_To_Fulfill()
         {
-            var called = false;
+            var called   = false;
             var promises = Enumerable.Range(0, 5).Select(
                 i => new Promise<object>((resolve, reject) =>
                     ThreadPool.QueueUserWorkItem(_ => resolve(i, false))))
@@ -1078,7 +1078,7 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Reject_All_If_Any_Promise_Rejected()
         {
-            var called = false;
+            var called   = false;
             var promises = Enumerable.Range(0, 5).Select(
                 i => new Promise<object>((resolve, reject) =>
                     ThreadPool.QueueUserWorkItem(_ => {
@@ -1097,6 +1097,36 @@ namespace Miruken.Tests.Concurrency
             {
                 Assert.IsTrue(called);
                 Assert.IsFalse(all.CompletedSynchronously);
+            }
+            else
+                Assert.Fail("Operation timed out");
+        }
+
+        [TestMethod]
+        public void Should_Cancel_All_If_Any_Promise_Cancelled()
+        {
+            var called   = false;
+            var promises = Enumerable.Range(0, 5).Select(i =>
+                    {
+                        if (i == 3)
+                        {
+                            var promise = new Promise<object>((_, __) => { });
+                            promise.Cancel();
+                            return promise;
+                        }
+                        return new Promise<object>((resolve, reject) =>
+                            ThreadPool.QueueUserWorkItem(_ => resolve(i, false)));
+                    })
+                .ToArray();
+            var all = Promise.All(promises);
+            all.Cancelled(_ =>
+            {
+                called = true;
+            });
+            if (all.AsyncWaitHandle.WaitOne(5.Sec()))
+            {
+                Assert.IsTrue(called);
+                Assert.IsTrue(all.CompletedSynchronously);
             }
             else
                 Assert.Fail("Operation timed out");

@@ -48,7 +48,8 @@
                     if (!proceed)
                     {
                         completed = false;
-                        return Task.FromResult(default(TRes));
+                        return Task.FromException<TRes>(new NotHandledException(callback,
+                            $"{binding.Dispatcher.Member} was aborted"));
                     }
 
                     composer = comp ?? composer;
