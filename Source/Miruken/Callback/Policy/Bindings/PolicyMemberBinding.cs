@@ -193,7 +193,7 @@
             Type returnType, ResultsDelegate results, bool isAsync)
         {
             var accepted = Policy.AcceptResult?.Invoke(result, this)
-                           ?? result != null;
+                         ?? result != null;
             if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
