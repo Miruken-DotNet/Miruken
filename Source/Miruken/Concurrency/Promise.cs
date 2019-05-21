@@ -1128,11 +1128,6 @@
 
         protected void Resolve(T result, bool synchronous)
         {
-            if (result is Promise)
-            {
-                var z = 0;
-            }
-
             Complete(result, synchronous, () =>
             {
                 lock (_guard)
