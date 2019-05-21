@@ -127,10 +127,10 @@
         {
             public int? Order { get; set; }
 
-            public async Task<object> Next(HandleMethod method,
-                object rawCallback, MemberBinding binding,
-                IHandler composer, Next<object> next,
-                IFilterProvider provider)
+            public async Task<object> Next(
+                HandleMethod method, object rawCallback,
+                MemberBinding binding, IHandler composer,
+                Next<object> next, IFilterProvider provider)
             {
                 Console.Write($@"Handle method '{method.Method.Name}' with result ");
                 var result = await next();
@@ -231,7 +231,7 @@
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
-        public void Should_Not_Propogate_Best_Effort()
+        public void Should_Not_Propagate_Best_Effort()
         {
             var handler = new EmailHandler();
             Proxy<IEmailFeature>(handler.BestEffort()).CancelEmail(1);

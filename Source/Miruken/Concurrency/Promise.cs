@@ -223,12 +223,15 @@
             if (results.Length == 0)
                 return Resolved(Array.Empty<object>());
 
-            var promises    = results.Select(Resolved).ToArray();
+            var promises = results.Select(r => r is Promise promise ? promise : Resolved(r))
+                .ToArray();
+
             var pending     = 0;
             var fulfilled   = new object[promises.Length];
             var synchronous = true;
 
-            return new Promise<object[]>((resolve, reject) => {
+            return new Promise<object[]>(ChildCancelMode.Any, (resolve, reject, onCancel) => {
+                onCancel(() => Array.ForEach(promises, p => p.Cancel()));
                 for (var index = 0; index < promises.Length; ++index)
                 {
                     var pos = index;
@@ -237,7 +240,8 @@
                         fulfilled[pos] = r;
                         if (Interlocked.Increment(ref pending) == promises.Length)
                             resolve(fulfilled, synchronous); 
-                    }, reject);
+                    }, reject)
+                        .Cancelled(ex => reject(new CancelledException(), true));
                 }
             });
         }
@@ -363,7 +367,8 @@
         public static Promise<object> Resolved(Promise promise)
         {
             return new Promise<object>((resolve, reject) =>
-                promise.Then((r, s) => resolve(r, s), reject));
+                promise.Then((r, s) => resolve(r, s), reject)
+                    .Cancelled(ex => reject(ex, true)));
         }
 
         public static Promise<object> Resolved(Task task)
@@ -492,7 +497,7 @@
 
         protected internal Promise(T resolved, bool synchronous = true)
         {
-            _mode = ChildCancelMode.All;
+            _mode = ChildCancelMode.Any;
 
             Complete(resolved, synchronous, () =>
             {
@@ -502,7 +507,7 @@
 
         protected internal Promise(Exception rejected, bool synchronous = true)
         {
-            _mode = ChildCancelMode.All;
+            _mode = ChildCancelMode.Any;
 
             Complete(rejected, synchronous, () =>
             {    
@@ -1123,6 +1128,11 @@
 
         protected void Resolve(T result, bool synchronous)
         {
+            if (result is Promise)
+            {
+                var z = 0;
+            }
+
             Complete(result, synchronous, () =>
             {
                 lock (_guard)

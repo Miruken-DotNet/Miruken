@@ -4,8 +4,10 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Concurrency;
     using FluentValidation;
     using global::FluentValidation;
+    using Infrastructure;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
 
@@ -121,10 +123,11 @@
         }
 
         [TestMethod]
-        public async Task Should_Handle_Cascade_Propertly()
+        public async Task Should_Handle_Cascade_Properly()
         {
             var handler = new FluentValidationValidator()
-                        + new FooValidatorProvider();
+                        + new FooValidatorProvider()
+                        + new FooBarHandler();
             var foo     = new Foo
             {
                 Id   = Guid.Empty,
@@ -134,12 +137,74 @@
             Console.WriteLine(outcome.Error);
             Assert.IsFalse(outcome.IsValid);
         }
+
+        [TestMethod]
+        public async Task Should_Handle_Callback_With_Validators()
+        {
+            var handler = new FluentValidationValidator()
+                        + new FooValidatorProvider()
+                        + new FooBarHandler();
+            var foo = new Foo
+            {
+                Id   = Guid.NewGuid(),
+                Name = "Spike"
+            };
+            var bar = await handler.CommandAsync<Bar>(foo);
+            Assert.IsNotNull(bar);
+        }
+
+        [TestMethod,
+         ExpectedException(typeof(InvalidOperationException))]
+        public async Task Should_Detect_Missing_Dependencies()
+        {
+            var handler = new FluentValidationValidator()
+                        + new FooValidatorProvider()
+                        + new FooBarHandler { NoBar = true };
+            var foo = new Foo
+            {
+                Id   = Guid.NewGuid(),
+                Name = "Patch"
+            };
+            await handler.CommandAsync<Bar>(foo);
+        }
     }
 
     public class Foo
     {
         public Guid?  Id   { get; set; }
         public string Name { get; set; }
+    }
+
+    public class Bar
+    {
+    }
+
+    public class Baz
+    {
+    }
+
+    public class FooBarHandler : Handler
+    {
+        public bool NoBar { get; set; }
+
+        [Provides]
+        public Bar Bar { get; private set; }
+
+        [Handles, Filter(typeof(ValidateFilter<,>))]
+        public Task<Bar> Handle(Foo foo, Bar bar)
+        {
+            return Task.FromResult(bar);
+        }
+
+        [Handles]
+        public Promise Handle(Baz baz)
+        {
+             return Promise.Delay(10.Millis())
+                      .Then((res, _) =>
+                 {
+                     if (!NoBar) Bar = new Bar();
+                 });
+        }
     }
 
     public class FooValidator : AbstractValidator<Foo>
@@ -149,9 +214,13 @@
             RuleFor(x => x.Id)
                 .Cascade(CascadeMode.StopOnFirstFailure)
                 .NotNull()
-                .NotEqual(Guid.Empty)
-                .WithComposerAsync((foo, id, c, ct) => 
-                    Task.FromResult(    id != null && id.Value != Guid.Empty));
+                .NotEqual(Guid.Empty);
+
+            RuleFor(x => x)
+                .WithComposerCustomAsync(async (foo, ctx, ct, c) =>
+                {
+                    await c.CommandAsync(new Baz());
+                });
 
             RuleFor(p => p.Name)
                 .Cascade(CascadeMode.StopOnFirstFailure)
@@ -172,6 +241,12 @@
         public IValidator<Foo>[] GetFooalidators()
         {
             return new[] {new FooValidator() };
+        }
+
+        [Provides]
+        public ValidateFilter<TCb, TRes> Create<TCb, TRes>()
+        {
+            return new ValidateFilter<TCb, TRes>();
         }
     }
 

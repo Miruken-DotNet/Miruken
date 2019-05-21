@@ -9,9 +9,16 @@
     using Policy;
     using Policy.Bindings;
 
-    public abstract class Lifestyle<T> : IFilter<Inquiry, T>
+    public interface ILifestyle : IFilter
     {
-        public int? Order { get; set; }
+        LifestyleAttribute Attribute { get; set; }
+    }
+
+    public abstract class Lifestyle<T> : IFilter<Inquiry, T>, ILifestyle
+    {
+        public int? Order { get; set; } = int.MaxValue - 100;
+
+        public LifestyleAttribute Attribute { get; set; }
 
         public Task<T> Next(Inquiry callback,
             object rawCallback, MemberBinding member,
@@ -19,18 +26,16 @@
             IFilterProvider provider)
         {
             var parent = callback.Parent;
-            return (parent == null || IsCompatibleWithParent(parent)) &&
-                   GetInstance(callback, member, next, composer, out var instance)
-                 ? Task.FromResult(instance)
+            return parent == null || IsCompatibleWithParent(parent)
+                 ? GetInstance(callback, member, next, composer)
                  : null;
         }
 
         protected abstract bool IsCompatibleWithParent(Inquiry parent);
 
-        protected abstract bool GetInstance(
+        protected abstract Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer,
-            out T instance);
+            Next<T> next, IHandler composer);
     }
 
     [AttributeUsage(
@@ -64,8 +69,12 @@
             Type callbackType, IHandler composer)
         {
             var lifestyle = Lifestyles.GetOrAdd(dispatcher, d =>
-                (IFilter)Activator.CreateInstance(
-                    LifestyleType.MakeGenericType(d.LogicalReturnType)));
+            {
+                var l = (ILifestyle) Activator.CreateInstance(
+                    LifestyleType.MakeGenericType(d.LogicalReturnType));
+                l.Attribute = this;
+                return l;
+            });
 
             var filters = new [] { lifestyle };
             return !(this is IBindingConstraintProvider provider) ? filters

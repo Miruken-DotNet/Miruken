@@ -14,9 +14,9 @@
     public class Inquiry : ICallback, IAsyncCallback,
         IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
-        private object _result;
         private readonly List<object> _resolutions;
         private readonly List<object> _promises;
+        private object _result;
 
         public Inquiry(object key, bool many = false)
         {
@@ -151,7 +151,8 @@
                                 res != null && IsSatisfied(res, greedy, composer)));
                             break;
                         default:
-                            _resolutions.Add(resolution);
+                            if (result != null)
+                                _resolutions.Add(result);
                             break;
                     }
                 }).Catch((_, s) => (object)null));

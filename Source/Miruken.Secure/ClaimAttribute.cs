@@ -5,6 +5,7 @@
     using System.Security.Principal;
     using Callback;
     using Callback.Policy;
+    using Concurrency;
     using Infrastructure;
 
     public class ClaimAttribute : Attribute, IArgumentResolver
@@ -44,6 +45,13 @@
                 throw new RejectedException(
                     $"Unable to extract claim '{ClaimType}'", ex);
             }
+        }
+
+        public object ResolveArgumentAsync(Inquiry parent,
+            Argument argument, IHandler handler)
+        {
+            var claim = ResolveArgument(parent, argument, handler);
+            return claim != null ? Promise.Resolved(claim) : null;
         }
     }
 }

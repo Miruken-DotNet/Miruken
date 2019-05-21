@@ -10,6 +10,7 @@
     using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
     using Miruken.Context;
+    using Miruken.Infrastructure;
 
     [TestClass]
     public class HandlerTests
@@ -88,7 +89,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Genericly()
+        public void Should_Handle_Callbacks_Generically()
         {
             var baz = new Baz<int>(22);
             var handler = new CustomHandler();
@@ -98,7 +99,7 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Genericly_Mapped()
+        public void Should_Handle_Callbacks_Generically_Mapped()
         {
             var baz = new Baz<int, float>(22, 15.5f);
             var handler = new CustomHandler();
@@ -109,12 +110,20 @@
         }
 
         [TestMethod]
-        public void Should_Handle_Callbacks_Implicitly_Genericly()
+        public void Should_Handle_Callbacks_Implicitly_Generically()
         {
             var baz = new BazInt(29);
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
+        }
+
+        [TestMethod]
+        public void Should_Replace_Composer_In_Filter()
+        {
+            var handler = new FilterHandlerTests();
+            var bar = handler.Command<Bar>(new Foo());
+            Assert.IsNotNull(bar);
         }
 
         [TestMethod]
@@ -441,8 +450,7 @@
         public async Task Should_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = await handler.Aspect((_, c) => true)
-                                       .ResolveAsync<Bar>();
+            var bar = await handler.Aspect((_, c) => true).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -452,8 +460,7 @@
         public void Should_Async_Filter_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = handler.Aspect((_, c) => Promise.True)
-                                 .Resolve<Bar>();
+            var bar = handler.Aspect((_, c) => Promise.True).Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -463,8 +470,7 @@
         public async Task Should_Async_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar = await handler.Aspect((_, c) => Promise.True)
-                                       .ResolveAsync<Bar>();
+            var bar = await handler.Aspect((_, c) => Promise.True).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -622,7 +628,7 @@
             Assert.IsTrue(handler.Handle(bar));
             Assert.AreEqual(4, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
-            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ContravariantFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<LogFilter<Bar, object>>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
@@ -644,15 +650,15 @@
             Assert.IsTrue(handler.SkipFilters().Handle(bar));
             Assert.AreEqual(3, bar.Filters.Count);
             Assert.IsTrue(bar.Filters.Contains(handler));
-            Assert.IsTrue(bar.Filters.OfType<ContravarintFilter>().Count() == 1);
+            Assert.IsTrue(bar.Filters.OfType<ContravariantFilter>().Count() == 1);
             Assert.IsTrue(bar.Filters.OfType<ExceptionBehavior<Bar, object>>().Count() == 1);
         }
 
         [TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
-        public async Task Should_Propogate_Rejected_Filter_Promise()
+        public async Task Should_Propagate_Rejected_Filter_Promise()
         {
-            var boo = new Boo();
+            var boo     = new Boo();
             var handler = new SpecialFilteredHandler() + new FilteredHandler();
             await handler.CommandAsync(boo);
         }
@@ -769,6 +775,16 @@
         }
 
         [TestMethod]
+        public async Task Should_Initialize_Asynchronously()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent1));
+            var component = await new StaticHandler().ResolveAsync<InitializedComponent1>();
+            Assert.IsNotNull(component);
+            Assert.IsTrue(component.Initialized);
+        }
+
+        [TestMethod]
         public void Should_Create_Generic_Singletons_Implicitly()
         {
             var view = new Screen();
@@ -777,14 +793,20 @@
             HandlerDescriptor.GetDescriptor(typeof(Controller));
             HandlerDescriptor.GetDescriptor(typeof(Controller<,>));
             HandlerDescriptor.GetDescriptor(typeof(Application<>));
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent1));
+            HandlerDescriptor.GetDescriptor(typeof(InitializedComponent2));
             var app1 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.IsNotNull(app1);
+            Assert.IsTrue(app1.Initialized);
+            Assert.AreEqual(1, app1.InitializedCount);
             Assert.AreSame(view, app1.RootController.View);
             Assert.AreSame(view, app1.MainScreen);
             var app2 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.AreSame(app1, app2);
+            Assert.IsTrue(app2.Initialized);
+            Assert.AreEqual(1, app2.InitializedCount);
             var app3 = handler.Provide(view)
                 .Resolve<IApplication<Controller<Screen, Bar>>>();
             Assert.AreSame(app1, app3);
@@ -833,12 +855,34 @@
                 {
                     var screen2 = child.Resolve<Screen>(constraints =>
                         constraints.Require(Qualifier.Of<ContextualAttribute>()));
-                    Assert.IsNotNull(screen);
+                    Assert.IsNotNull(screen2);
                     Assert.AreNotSame(screen, screen2);
                     Assert.AreSame(child, screen2.Context);
                 }
             }
             Assert.IsTrue(screen.Disposed);
+        }
+
+        [TestMethod]
+        public void Should_Create_Rooted_Contextual_Implicitly()
+        {
+            RootedComponent rooted;
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<RootedComponent>();
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                rooted = context.Resolve<RootedComponent>();
+                Assert.IsNotNull(rooted);
+                using (var child = context.CreateChild())
+                {
+                    var rooted2 = child.Resolve<RootedComponent>(constraints =>
+                        constraints.Require(Qualifier.Of<ContextualAttribute>()));
+                    Assert.IsNotNull(rooted2);
+                    Assert.AreSame(rooted, rooted2);
+                }
+            }
+            Assert.IsTrue(rooted.Disposed);
         }
 
         [TestMethod]
@@ -947,6 +991,16 @@
                 Assert.AreNotSame(screen, context.Resolve<Screen>());
                 Assert.IsTrue(screen.Disposed);
             }
+        }
+
+        [TestMethod]
+        public async Task Should_Reject_Constructor_If_Initializer_Fails()
+        {
+            HandlerDescriptor.ResetDescriptors();
+            HandlerDescriptor.GetDescriptor<FailedInitialization>();
+
+            var result = await (new StaticHandler()).ResolveAsync<FailedInitialization>();
+            Assert.IsNull(result);
         }
 
         [TestMethod]
@@ -1501,6 +1555,29 @@
             }
         }
 
+        private class FilterHandlerTests : Handler
+        {
+            [Handles,
+             Filter(typeof(ReplaceComposerFilter<,>))]
+            public Bar HandleFoo(Foo foo, Bar bar)
+            {
+                return bar;
+            }
+
+            [Provides(typeof(ReplaceComposerFilter<,>))]
+            public object CreateFilter(Inquiry inquiry)
+            {
+                var type = (Type)inquiry.Key;
+                if (type.IsGenericTypeDefinition) return null;
+                if (type.IsInterface)
+                    return Activator.CreateInstance(
+                        typeof(LogFilter<,>).
+                            MakeGenericType(type.GenericTypeArguments));
+                return type.IsAbstract ? null
+                    : Activator.CreateInstance(type);
+            }
+        }
+
         private class BadHandler : Handler
         {
             [Handles]
@@ -1606,18 +1683,111 @@
             Screen MainScreen     { get; }
         }
 
-        private class Application<C> : Application, IApplication<C>
+        private class Application<C> : Application, IApplication<C>, IInitialize
             where C : Controller
         {
             [Provides, Singleton]
-            public Application(C rootController, Screen screen)
+            public Application(C rootController, Screen screen,
+                InitializedComponent1 component1, InitializedComponent2 component2)
             {
                 RootController = rootController;
                 MainScreen = screen;
             }
 
-            public C      RootController { get; }
-            public Screen MainScreen     { get; }
+            public C      RootController   { get; }
+            public Screen MainScreen       { get; }
+            public bool   Initialized      { get; set; }
+            public int    InitializedCount { get; private set; }
+
+            public Promise Initialize()
+            {
+                return Promise.True.Then((res, _) =>
+                {
+                    Initialized = true;
+                    ++InitializedCount;
+                });
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+        }
+
+        private class RootedComponent : IDisposable
+        {
+            [Provides, Contextual(Rooted = true)]
+            public RootedComponent()
+            {
+                
+            }
+
+            public bool Disposed { get; private set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
+            }
+        }
+
+        private class InitializedComponent1 : IInitialize
+        {
+            [Provides, Singleton]
+            public InitializedComponent1()
+            {             
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Delay(100.Millis())
+                    .Then((res, _) => Initialized = true);
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+        }
+
+        private class InitializedComponent2 : IInitialize
+        {
+            [Provides, Singleton]
+            public InitializedComponent2()
+            {
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Delay(200.Millis())
+                    .Then((res, _) => Initialized = true);
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+        }
+
+        private class FailedInitialization : IInitialize
+        {
+            [Provides, Singleton]
+            public FailedInitialization()
+            {
+            }
+
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                return Promise.Rejected(new InvalidOperationException(
+                    "Initialization Failed"));
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+                Assert.AreEqual("Initialization Failed", exception?.Message);
+            }
         }
 
         private class SayHello
@@ -1694,7 +1864,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>)),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public void HandleBar(Bar bar)
             {
@@ -1709,9 +1879,9 @@
             }
 
             [Provides]
-            public ContravarintFilter CreateFilter()
+            public ContravariantFilter CreateFilter()
             {
-                return new ContravarintFilter();
+                return new ContravariantFilter();
             }
 
             [Provides(typeof(LogFilter<,>))]
@@ -1740,10 +1910,10 @@
                      : Activator.CreateInstance(type);
             }
 
-            Task<object> IFilter<Bar, object>.Next(Bar callback,
-                object rawCallback, MemberBinding binding,
-                IHandler composer, Next<object> next,
-                IFilterProvider provider)
+            Task<object> IFilter<Bar, object>.Next(
+                Bar callback, object rawCallback,
+                MemberBinding binding, IHandler composer,
+                Next<object> next, IFilterProvider provider)
             {
                 callback.Filters.Add(this);
                 callback.Handled++;
@@ -1755,7 +1925,7 @@
         {
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public SpecialFoo HandleFoo(Foo foo)
             {
@@ -1764,7 +1934,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Promise<SpecialBaz> HandleBaz(Baz baz)
             {
@@ -1773,7 +1943,7 @@
 
             [Handles,
              Filter(typeof(LogFilter<,>), Required = true),
-             Filter(typeof(ContravarintFilter), Required = true),
+             Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public Task<SpecialBar> HandleBaz(Bar bar)
             {
@@ -1798,7 +1968,7 @@
             return cb;
         }
 
-        private class ContravarintFilter : IFilter<object, object>
+        private class ContravariantFilter : IFilter<object, object>
         {
             public int? Order { get; set; }
 
@@ -1845,6 +2015,19 @@
                     return Promise<Res>.Rejected(
                         new InvalidOperationException("System shutdown"));
                 return result;
+            }
+        }
+
+        private class ReplaceComposerFilter<Cb, Res> : IFilter<Cb, Res>
+        {
+            public int? Order { get; set; } = Stage.Filter;
+
+            public Task<Res> Next(Cb callback,
+                object rawCallback, MemberBinding binding,
+                IHandler composer, Next<Res> next,
+                IFilterProvider provider)
+            {
+                return next(composer.Provide(new Bar()));
             }
         }
     }

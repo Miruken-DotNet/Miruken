@@ -571,7 +571,7 @@
         }
 
         [TestMethod, ExpectedException(typeof(MissingMethodException))]
-        public void Should_Not_Propogate_Best_Effort()
+        public void Should_Not_Propagate_Best_Effort()
         {
             var provider = new EmailProvider()
                          + new RepositoryProvider()

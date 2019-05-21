@@ -63,6 +63,8 @@ namespace Miruken.Callback.Policy
                             {
                                 OutKey = constructor.ReflectedType
                             });
+                        if (HandlerType.Is<IInitialize>())
+                            memberBinding.AddFilters(InitializeProvider.Instance);
                     }
                     else
                     {
@@ -181,7 +183,7 @@ namespace Miruken.Callback.Policy
         }
 
         private static IEnumerable<Type> GetCallbackHandlers(
-             CallbackPolicy policy, object callback, bool instance, bool @static)
+            CallbackPolicy policy, object callback, bool instance, bool @static)
         {
             if (Descriptors.Count == 0)
                 return Enumerable.Empty<Type>();
@@ -231,7 +233,7 @@ namespace Miruken.Callback.Policy
                 return Enumerable.Empty<Type>();
 
             var bindings = invariants == null ? compatible
-                : compatible == null ? invariants
+                : compatible == null ? invariants 
                 : invariants.Concat(compatible);
 
             return bindings.Select(binding =>
@@ -250,15 +252,15 @@ namespace Miruken.Callback.Policy
         }
 
         public static IEnumerable<PolicyMemberBinding>
-              GetPolicyMembers(CallbackPolicy policy)
+            GetPolicyMembers(CallbackPolicy policy)
         {
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler = descriptor.Value.Value;
+                var handler       = descriptor.Value.Value;
                 var staticMembers = handler._staticPolicies?.TryGetValue(policy, out cpd) == true
                      ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
-                var members = handler._policies?.TryGetValue(policy, out cpd) == true
+                var members  = handler._policies?.TryGetValue(policy, out cpd) == true
                      ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
                 if (staticMembers == null) return members;
                 return members == null ? staticMembers : staticMembers.Concat(members);

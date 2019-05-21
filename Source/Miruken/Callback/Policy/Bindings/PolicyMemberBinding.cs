@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Threading.Tasks;
+    using Concurrency;
     using Infrastructure;
     using Rules;
 
@@ -74,8 +76,7 @@
             {
                 var callback = Dispatcher.Arguments[index.Value];
                 var mapping  = new GenericMapping(
-                    handlerType.GetGenericArguments(),
-                    new[] { callback });
+                    handlerType.GetGenericArguments(), new[] { callback });
                 if (mapping.Complete)
                 {
                     var closed = mapping.MapTypes(new[] { type });
@@ -99,37 +100,60 @@
         private bool Invoke(object target, object callback,
             IHandler composer, Type resultType, ResultsDelegate results)
         {
-            object result;
-            var args = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
-            var dispatcher = Dispatcher.CloseDispatch(args, resultType);
+            var ruleArgs   = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
+            var dispatcher = Dispatcher.CloseDispatch(ruleArgs, resultType);
 
-            if ((callback as IDispatchCallbackGuard)
-                ?.CanDispatch(target, dispatcher) == false)
+            if (callback is IDispatchCallbackGuard guard &&
+                !guard.CanDispatch(target, dispatcher))
                 return false;
 
             if (CallbackIndex.HasValue)
             {
                 var index = CallbackIndex.Value;
-                if (!dispatcher.Arguments[index].IsInstanceOf(args[index]))
+                if (!dispatcher.Arguments[index].IsInstanceOf(ruleArgs[index]))
                     return false;
             }
 
             var returnType = dispatcher.ReturnType;
 
-            if ((callback as IFilterCallback)?.CanFilter == false)
+            bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
             {
-                args = ResolveArgs(dispatcher, callback, args, 
-                                   composer, out var completed);
-                if (completed)
+                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler);
+                switch (args)
                 {
-                    result = dispatcher.Invoke(target, args, resultType);
-                    return Accept(callback, result, returnType, results);
+                    case null:
+                        isPromise = false;
+                        res = Task.FromException(new InvalidOperationException(
+                            $"{dispatcher.Member} is missing one or more dependencies"));
+                        return false;
+                    case object[] array:
+                        isPromise = false;
+                        res = dispatcher.Invoke(target, array, resultType);
+                        return true;
+                    case Promise<object[]> promise:
+                        isPromise = true;
+                        res = promise.Then((array, _) =>
+                            dispatcher.Invoke(target, array, resultType));
+                        return true;
+                    default:
+                        isPromise = false;
+                        res = Task.FromException(new InvalidOperationException(
+                            $"Unable to resolve arguments for {dispatcher.Member}"));
+                        return false;
                 }
-                return false;
+            }
+
+            object result;
+            var isAsync = false;
+
+            if ((callback as IFilterCallback)?.CanFilter == false)
+            {             
+                return ResolveArgsAndDispatch(composer, out result, out isAsync) && 
+                    Accept(callback, result, returnType, results, isAsync);
             }
 
             var filterCallback = GetCallbackInfo(
-                callback, args, dispatcher, out var callbackType);
+                callback, ruleArgs, dispatcher, out var callbackType);
 
             var targetFilters  = target is IFilter targetFilter
                 ? new [] {new FilterInstancesProvider(true, targetFilter)}
@@ -143,82 +167,105 @@
 
             if (filters.Count == 0)
             {
-                args = ResolveArgs(dispatcher, callback, args, 
-                                   composer, out var completed);
-                if (!completed) return false;
-                result = dispatcher.Invoke(target, args, resultType);
+                if (!ResolveArgsAndDispatch(composer, out result, out isAsync))
+                    return false;
             }
             else if (!dispatcher.GetPipeline(callbackType).Invoke(
                 this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                 {
-                    args = ResolveArgs(dispatcher, callback, args,
-                                       comp, out completed);
-                    if (!completed) return null;
-                    var baseResult = dispatcher.Invoke(target, args, resultType);
+                    if (!ResolveArgsAndDispatch(comp, out var baseResult, out isAsync))
+                    {
+                        completed = false;
+                        return baseResult;
+                    }
                     completed = Policy.AcceptResult?.Invoke(baseResult, this)
-                             ?? baseResult != null;
-                    return baseResult;
+                              ?? baseResult != null;
+                    return completed ? baseResult
+                         : Task.FromException(new NotSupportedException(
+                                $"{dispatcher.Member} not handled"));
                 }, composer, filters, out result))
                 return false;
 
-            return Accept(callback, result, returnType, results);
+            return Accept(callback, result, returnType, results, isAsync);
         }
 
         private bool Accept(object callback, object result,
-            Type returnType, ResultsDelegate results)
+            Type returnType, ResultsDelegate results, bool isAsync)
         {
             var accepted = Policy.AcceptResult?.Invoke(result, this)
-                           ?? result != null;
+                         ?? result != null;
             if (accepted && (result != null))
             {
                 var asyncCallback = callback as IAsyncCallback;
-                result = CoerceResult(result, returnType, asyncCallback?.WantsAsync);
+                result = CoerceResult(result, returnType,
+                    isAsync || asyncCallback?.WantsAsync == true);
                 if (result != null)
                     return results?.Invoke(result, Category.Strict) != false;
             }
             return accepted;
         }
 
-        private object[] ResolveArgs(MemberDispatch dispatcher,
-            object callback, object[] ruleArgs, IHandler composer,
-            out bool completed)
+        private object ResolveArgs(MemberDispatch dispatcher,
+            object callback, object[] ruleArgs, IHandler composer)
         {
-            completed = true;
             var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
 
-            var parent = callback as Inquiry;
-            var args   = new object[arguments.Length];
+            var parent   = callback as Inquiry;
+            var resolved = new object[arguments.Length];
+            var promises = new List<Promise>();
 
             for (var i = ruleArgs.Length; i < arguments.Length; ++i)
             {
+                var index        = i;
                 var argument     = arguments[i];
                 var argumentType = argument.ArgumentType;
                 if (argumentType == typeof(IHandler))
-                    args[i] = composer;
+                    resolved[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
-                    args[i] = this;
+                    resolved[i] = this;
                 else if (argumentType == typeof(object))
-                {
-                    completed = false;
                     return null;
-                }
                 else
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
-                    var arg = args[i] = resolver.ResolveArgument(parent, argument, composer);
-                    if (arg == null && !argument.IsOptional)
+                    var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
+                    if (arg == null && !argument.IsOptional) return null;
+
+                    switch (arg)
                     {
-                        completed = false;
-                        return null;
+                        case Promise promise
+                            when !argument.ArgumentFlags.HasFlag(Argument.Flags.Promise):
+                            switch (promise.State)
+                            {
+                                case PromiseState.Fulfilled:
+                                    resolved[i] = promise.Wait();
+                                    break;
+                                case PromiseState.Pending:
+                                    promises.Add(promise.Then((res, _) => resolved[index] = res));
+                                    break;
+                                default:
+                                    return null;
+                            }
+                            break;
+                        default:
+                            resolved[i] = arg;
+                            break;
                     }
                 }
             }
 
-            Array.Copy(ruleArgs, args, ruleArgs.Length);
-            return args;
+            Array.Copy(ruleArgs, resolved, ruleArgs.Length);
+
+            if (promises.Count == 1)
+                return promises[0].Then((r, _) => resolved);
+
+            if (promises.Count > 1)
+                return Promise.All(promises).Then((r, _) => resolved);
+
+            return resolved;
         }
 
         private object GetCallbackInfo(object callback, object[] args,

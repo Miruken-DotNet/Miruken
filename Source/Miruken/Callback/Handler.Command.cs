@@ -22,7 +22,7 @@
             var command = new Command(callback) { WantsAsync = true };
             try
             {
-                return handler.Handle(command)
+               return handler.Handle(command)
                     ? (Promise)command.Result
                     : Promise.Rejected(new NotSupportedException(
                         $"{callback.GetType()} not handled"));

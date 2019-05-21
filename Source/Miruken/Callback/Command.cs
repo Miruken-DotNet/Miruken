@@ -16,14 +16,16 @@
     {
         private CallbackPolicy _policy;
         private readonly List<object> _results;
+        private readonly List<object> _promises;
         private object _result;
 
         public Command(object callback, bool many = false)
         {
-            Callback = callback 
-                ?? throw new ArgumentNullException(nameof(callback));
-            Many     = many;
-            _results = new List<object>();
+            Callback  = callback 
+                     ?? throw new ArgumentNullException(nameof(callback));
+            Many      = many;
+            _results  = new List<object>();
+            _promises = new List<object>();
         }
 
         public bool   Many       { get; }
@@ -53,21 +55,19 @@
             {
                 if (_result == null)
                 {
-                    if (!Many)
+                    if (IsAsync)
                     {
-                        if (_results.Count > 0)
-                            _result = _results[0];
-                    }
-                    else if (IsAsync)
-                    {
-                        _result = Promise.All(_results
-                                .Select(r => (r as Promise) ?? Promise.Resolved(r))
-                                .ToArray())
-                            .Then((results, s) => results.Where(r => r != null)
-                                .ToArray());
+                        _result = Many
+                                ? Promise.All(_promises)
+                                    .Then((_, s) => _results.ToArray())
+                                : (object)Promise.All(_promises)
+                                    .Then((_, s) => _results.FirstOrDefault());
                     }
                     else
-                        _result = _results;
+                    {
+                        _result = Many ? _results.ToArray()
+                                : _results.FirstOrDefault();
+                    }
                 }
 
                 if (IsAsync)
@@ -76,7 +76,12 @@
                         _result = (_result as Promise)?.Wait();
                 }
                 else if (WantsAsync)
-                    _result = Promise.Resolved(_result);
+                {
+                    if (Many)
+                        _result = Promise.Resolved(_result as object[]);
+                    else
+                        _result = Promise.Resolved(_result);
+                }
 
                 return _result;
             }
@@ -89,20 +94,36 @@
 
         public bool Respond(object response, bool strict)
         {
-            if (response == null || (!Many && _results.Count > 0))
-                return false;
+            if (response == null) return false;
+            var accepted = Include(response);
+            if (accepted) _result = null;
+            return accepted;
+        }
+
+        private bool Include(object response)
+        {
+            if (response == null) return false;
 
             var promise = response as Promise
                        ?? (response as Task)?.ToPromise();
 
-            if (promise != null)
+            if (promise?.State == PromiseState.Fulfilled)
             {
-                response = promise;
-                IsAsync  = true;
+                response = promise.Wait();
+                promise = null;
             }
 
-            _results.Add(response);
-            _result = null;
+            if (promise != null)
+            {
+                IsAsync = true;
+                _promises.Add(promise.Then((result, s) =>
+                {
+                    if (result != null) _results.Add(result);
+                }));
+            }
+            else
+                _results.Add(response);
+
             return true;
         }
 

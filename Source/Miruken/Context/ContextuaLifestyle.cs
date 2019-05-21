@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
+    using System.Threading.Tasks;
     using Callback;
     using Callback.Policy.Bindings;
 
@@ -13,24 +14,24 @@
             var parentDispatcher = parent?.Dispatcher;
             if (parentDispatcher == null) return true;
             return parentDispatcher.Attributes.OfType<LifestyleAttribute>()
-                .All(lifestyle => lifestyle is ContextualAttribute);
+                .All(lifestyle => lifestyle is ContextualAttribute c &&
+                    ((Attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
         }
 
-        protected override bool GetInstance(
+        protected override async Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer,
-            out T instance)
+            Next<T> next, IHandler composer)
         {
             var context = composer.Resolve<Context>();
             if (context == null)
-            {
-                instance = default;
-                return false;
-            }
+                return await next(proceed: false);
 
-            instance = _cache.GetOrAdd(context, ctx =>
+            if ((Attribute as ContextualAttribute)?.Rooted == true)
+                context = context.Root;
+
+            return await _cache.GetOrAdd(context, async ctx =>
             {
-                var result = next().Result;
+                var result = await next();
                 if (result is IContextual contextual)
                 {
                     contextual.Context = ctx;
@@ -53,8 +54,6 @@
                 }
                 return result;
             });
-
-            return true;
         }
 
         private void ChangeContext(IContextual contextual,
@@ -67,15 +66,15 @@
                     "Managed instances cannot change context");
             }
             if (_cache.TryGetValue(oldContext, out var instance) &&
-                ReferenceEquals(contextual, instance))
+                ReferenceEquals(contextual, instance.Result))
             {
                 _cache.TryRemove(oldContext, out _);
                 (contextual as IDisposable)?.Dispose();
             }
         }
 
-        private readonly ConcurrentDictionary<Context, T>
-            _cache = new ConcurrentDictionary<Context, T>();
+        private readonly ConcurrentDictionary<Context, Task<T>>
+            _cache = new ConcurrentDictionary<Context, Task<T>>();
     }
 
     public class ContextualAttribute : LifestyleAttribute, IBindingConstraintProvider
@@ -84,6 +83,8 @@
             : base(typeof(ContextualLifestyle<>))
         {          
         }
+
+        public bool Rooted { get; set; }
 
         public IBindingConstraint Constraint => Qualifier;
 

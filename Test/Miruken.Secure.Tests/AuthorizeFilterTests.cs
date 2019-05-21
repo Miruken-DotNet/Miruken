@@ -68,7 +68,7 @@
             var confirmation = handler
                 .Provide(new ClaimsPrincipal(identity))
                 .Command<LaunchConfirmation>(launch);
-            Assert.AreEqual("Patriot", confirmation.Missle);
+            Assert.AreEqual("Patriot", confirmation.Missile);
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@
                 .Command<LaunchConfirmation>(launch);
             var abortLaunch = new AbortLaunch(confirmation);
             var aborted     = await handler.CommandAsync<LaunchAborted>(abortLaunch);
-            Assert.AreEqual("Scud", aborted.Launch.Missle);
+            Assert.AreEqual("Scud", aborted.Launch.Missile);
         }
 
         [TestMethod]
@@ -100,8 +100,8 @@
             var test = new TestMissile("Tomahawk");
             var confirmation = handler
                 .Provide(new ClaimsPrincipal(identity))
-                .Command<MissleReport>(test);
-            Assert.AreEqual("Tomahawk", confirmation.Missle);
+                .Command<MissileReport>(test);
+            Assert.AreEqual("Tomahawk", confirmation.Missile);
             Assert.IsTrue(confirmation.Passed);
         }
 
@@ -156,43 +156,43 @@
 
         private class TestMissile
         {
-            public string Missle { get; }
+            public string Missile { get; }
 
-            public TestMissile(string missle)
+            public TestMissile(string missile)
             {
-                Missle = missle;
+                Missile = missile;
             }
         }
 
-        public class MissleReport
+        public class MissileReport
         {
-            public string Missle { get; }
+            public string Missile { get; }
             public bool   Passed { get; }
 
-            public MissleReport(string missle, bool passed)
+            public MissileReport(string missile, bool passed)
             {
-                Missle = missle;
-                Passed = passed;
+                Missile = missile;
+                Passed  = passed;
             }
         }
 
         private class LaunchMissile
         {
-            public string Missle { get; }
+            public string Missile { get; }
 
-            public LaunchMissile(string missle)
+            public LaunchMissile(string missile)
             {
-                Missle = missle;
+                Missile = missile;
             }
         }
 
         public class LaunchConfirmation
         {
-            public string Missle { get; }
+            public string Missile { get; }
 
-            public LaunchConfirmation(string missle)
+            public LaunchConfirmation(string missile)
             {
-                Missle = missle;
+                Missile = missile;
             }
         }
 
@@ -226,15 +226,15 @@
         private class MissileControlHandler : Handler, IControl
         {
             [Handles]
-            public MissleReport Test(TestMissile test)
+            public MissileReport Test(TestMissile test)
             {
-                return new MissleReport(test.Missle, true);
+                return new MissileReport(test.Missile, true);
             }
 
             [Handles]
             public LaunchConfirmation Launch(LaunchMissile launch)
             {
-                return new LaunchConfirmation(launch.Missle);
+                return new LaunchConfirmation(launch.Missile);
             }
 
             [Handles]

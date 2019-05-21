@@ -23,8 +23,8 @@
         public void Converts_Claim_Into_Simple_Type()
         {
             _identity.AddClaim(new Claim(ClaimTypes.Name, "James N. Mattis"));
-            var handler = new MissleControl().Provide(_principal);
-            Assert.IsTrue(handler.Handle(new LaunchMissle()));
+            var handler = new MissileControl().Provide(_principal);
+            Assert.IsTrue(handler.Handle(new LaunchMissile()));
         }
 
         [TestMethod]
@@ -32,32 +32,32 @@
         {
             _identity.AddClaim(new Claim("code",
                 "4402DCD9-980B-426C-B9BD-F06A0798AE56"));
-            var handler = new MissleControl().Provide(_principal);
-            Assert.IsTrue(handler.Handle(new AbortMissleLaunch()));
+            var handler = new MissileControl().Provide(_principal);
+            Assert.IsTrue(handler.Handle(new AbortMissileLaunch()));
         }
 
         [TestMethod]
         public void Rejects_Callback_If_Missing_Claim()
         {
-            var handler = new MissleControl().Provide(_principal);
-            Assert.IsFalse(handler.Handle(new LaunchMissle()));
+            var handler = new MissileControl().Provide(_principal);
+            Assert.IsFalse(handler.Handle(new LaunchMissile()));
         }
         
-        private class LaunchMissle { }
+        private class LaunchMissile { }
 
-        private class AbortMissleLaunch { }
+        private class AbortMissileLaunch { }
 
-        private class MissleControl : Handler
+        private class MissileControl : Handler
         {
             [Handles]
-            public void Launch(LaunchMissle launch,
+            public void Launch(LaunchMissile launch,
                 [Claim(ClaimTypes.Name)] string who)
             {
-                Console.WriteLine($@"{who} launched the missle");
+                Console.WriteLine($@"{who} launched the Missile");
             }
 
             [Handles]
-            public void Abort(AbortMissleLaunch abort,
+            public void Abort(AbortMissileLaunch abort,
                 [Claim("code")] Guid code)
             {
                 Assert.AreEqual(Guid.Parse(
