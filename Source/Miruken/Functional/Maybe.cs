@@ -1,4 +1,4 @@
-﻿namespace Miruken
+﻿namespace Miruken.Functional
 {
     using System;
     using System.Reflection;

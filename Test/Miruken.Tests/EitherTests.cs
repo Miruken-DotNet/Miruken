@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Tests
 {
     using System;
+    using Functional;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]

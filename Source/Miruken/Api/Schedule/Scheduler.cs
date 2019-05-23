@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Functional;
 
     public class Scheduler : Handler
     {

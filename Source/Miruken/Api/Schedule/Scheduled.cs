@@ -2,6 +2,7 @@
 {
     using System;
     using Api;
+    using Functional;
 
     public abstract class Scheduled : IRequest<ScheduledResult>
     {
