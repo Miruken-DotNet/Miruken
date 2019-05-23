@@ -2,6 +2,7 @@
 {
     using System;
 
+    [Unmanaged]
     public class HandlerAdapter : Handler
     {
         public HandlerAdapter(object handler)

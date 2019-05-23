@@ -3,6 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Api.Cache;
+    using Api.Oneway;
+    using Api.Route;
+    using Api.Schedule;
     using Callback;
     using Callback.Policy;
     using Callback.Policy.Bindings;
@@ -46,6 +50,10 @@
         public override IEnumerable<FromDescriptor> GetFeatures()
         {
             yield return Types.From(
+                typeof(CachedHandler),
+                typeof(OnewayHandler),
+                typeof(PassThroughRouter),
+                typeof(Scheduler),
                 typeof(ErrorsHandler),
                 typeof(LogFilter<,>));
         }

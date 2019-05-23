@@ -12,6 +12,7 @@
         bool Drop<T>() where T : class;
     }
 
+    [Unmanaged]
     public class Stash : Handler, IStash
     {
         private readonly bool _root;

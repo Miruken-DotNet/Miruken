@@ -2,6 +2,7 @@
 {
     using System;
 
+    [Unmanaged]
     public class CascadeHandler : Handler
 	{
 		private readonly IHandler _handlerA;

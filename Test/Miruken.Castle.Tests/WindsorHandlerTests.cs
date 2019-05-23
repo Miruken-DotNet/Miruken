@@ -121,7 +121,7 @@
         }
 
         [TestMethod]
-        public void Should_Resolve_Type_Explicity()
+        public void Should_Resolve_Type_Explicitly()
         {
             _container.Register(Component.For<ICar>().ImplementedBy<Car>());
             var car = _handler.Resolve<ICar>();

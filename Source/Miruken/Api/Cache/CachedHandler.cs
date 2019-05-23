@@ -18,6 +18,11 @@
             public DateTime LastUpdated;
         }
 
+        [Provides, Singleton]
+        public CachedHandler()
+        {    
+        }
+
         [Handles]
         public Promise<TResponse> Cached<TResponse>(
             Cached<TResponse> request, IHandler composer)
@@ -37,11 +42,11 @@
 
             return (Promise<TResponse>)_cache.AddOrUpdate(
                 request.Request,   // actual request
-                req => RefreshResponse<TResponse>(req, composer),   // add first time
+                req => RefreshResponse<TResponse>(req, composer),  // add first time
                 (req, cached) =>   // update if stale or invalid
-                    (cached.Response.State == PromiseState.Rejected  ||
-                     cached.Response.State == PromiseState.Cancelled ||
-                     DateTime.UtcNow >= cached.LastUpdated + request.TimeToLive)
+                    cached.Response.State == PromiseState.Rejected  ||
+                    cached.Response.State == PromiseState.Cancelled ||
+                    DateTime.UtcNow >= cached.LastUpdated + request.TimeToLive
                 ? RefreshResponse<TResponse>(req, composer)
                 : cached).Response;
         }

@@ -6,6 +6,11 @@
 
     public class OnewayHandler : Handler
     {
+        [Provides, Singleton]
+        public OnewayHandler()
+        {           
+        }
+
         [Handles]
         public Promise Oneway<TResp>(Oneway<TResp> oneway, IHandler composer)
         {

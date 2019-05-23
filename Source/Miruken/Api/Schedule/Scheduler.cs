@@ -8,6 +8,11 @@
 
     public class Scheduler : Handler
     {
+        [Provides, Singleton]
+        public Scheduler()
+        {           
+        }
+
         [Handles]
         public async Task<ScheduledResult> Concurrent(
             Concurrent concurrent, IHandler composer)
@@ -44,7 +49,7 @@
         }
 
         [Handles]
-        public async Task<ScheduledResult> Parallel(Schedule.Parallel parallel, IHandler composer)
+        public async Task<ScheduledResult> Parallel(Parallel parallel, IHandler composer)
         {
             var requests  = parallel.Requests;
             var responses = requests != null && requests.Length > 0

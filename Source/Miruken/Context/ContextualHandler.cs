@@ -2,6 +2,7 @@
 {
     using Callback;
 
+    [Unmanaged]
     public class ContextualHandler : Handler, IContextual
     {
         private Context _context;

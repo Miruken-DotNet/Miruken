@@ -60,6 +60,7 @@
         }
     }
 
+    [Unmanaged]
     public sealed class NoBatchDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;
