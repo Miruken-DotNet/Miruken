@@ -56,6 +56,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Api\Cache\CacheHandlerTests.cs" />
+    <Compile Include="Api\GetStockQuote.cs" />
+    <Compile Include="Api\HandlerTests.Mediate.cs" />
+    <Compile Include="Api\Oneway\OnewayHandlerTests.cs" />
+    <Compile Include="Api\Route\RouteTests.cs" />
+    <Compile Include="Api\Schedule\ConcurrentTests.cs" />
+    <Compile Include="Api\Schedule\ParallelTests.cs" />
+    <Compile Include="Api\Schedule\SequentialTests.cs" />
+    <Compile Include="Api\StashTests.cs" />
+    <Compile Include="Api\StockQuoteHandler.cs" />
     <Compile Include="Callback\HandlerTests.Args.cs" />
     <Compile Include="Callback\HandlerTests.Batch.cs" />
     <Compile Include="Callback\HandlerTests.Binding.cs" />

@@ -45,6 +45,29 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\Cache\Cached.cs" />
+    <Compile Include="Api\Cache\CachedHandler.cs" />
+    <Compile Include="Api\Cache\CacheExtensions.cs" />
+    <Compile Include="Api\Decorator.cs" />
+    <Compile Include="Api\Handler.Api.cs" />
+    <Compile Include="Api\IKeyProperties.cs" />
+    <Compile Include="Api\IRequest.cs" />
+    <Compile Include="Api\Oneway\Oneway.cs" />
+    <Compile Include="Api\Oneway\OnewayHandler.cs" />
+    <Compile Include="Api\Resources.cs" />
+    <Compile Include="Api\Route\BatchRouter.cs" />
+    <Compile Include="Api\Route\PassThroughRouter.cs" />
+    <Compile Include="Api\Route\Routed.cs" />
+    <Compile Include="Api\Route\RouteExtensions.cs" />
+    <Compile Include="Api\Route\RoutesAttribute.cs" />
+    <Compile Include="Api\Schedule\Concurrent.cs" />
+    <Compile Include="Api\Schedule\Parallel.cs" />
+    <Compile Include="Api\Schedule\Publish.cs" />
+    <Compile Include="Api\Schedule\Scheduled.cs" />
+    <Compile Include="Api\Schedule\ScheduleExtensions.cs" />
+    <Compile Include="Api\Schedule\Scheduler.cs" />
+    <Compile Include="Api\Schedule\Sequential.cs" />
+    <Compile Include="Api\Stash.cs" />
     <Compile Include="Callback\Batch.cs" />
     <Compile Include="Callback\Batched.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />
