@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Concurrency;
 
+    [Unmanaged]
     public class BatchHandler : DecoratedHandler
     {
         private int _completed;
