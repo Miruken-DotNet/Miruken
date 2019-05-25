@@ -130,7 +130,6 @@
 
         public class Hospital
         {
-            [Provides]
             public Hospital(
                 [Doctor]     IPerson doctor,
                 [Programmer] IPerson programmer)
@@ -173,7 +172,7 @@
 
         public class LocalConfiguration : IConfiguration
         {
-            [Provides, Singleton, Named("local")]
+            [Singleton, Named("local")]
             public LocalConfiguration()
             {
             }
@@ -193,7 +192,6 @@
 
         public class Client
         {
-            [Provides]
             public Client(
                 [Named("local")]  IConfiguration local,
                 [Named("remote")] IConfiguration remote)

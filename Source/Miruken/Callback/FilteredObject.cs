@@ -11,7 +11,14 @@
         {
         }
 
-        public IEnumerable<IFilterProvider> Filters => _filters;
+        public IEnumerable<IFilterProvider> Filters
+        {
+            get
+            {
+                if (_filters != null) return _filters;
+                return Array.Empty<IFilterProvider>();
+            }
+        }
 
         public void AddFilters(params IFilterProvider[] providers)
         {

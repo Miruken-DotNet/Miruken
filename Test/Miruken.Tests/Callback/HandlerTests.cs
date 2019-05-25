@@ -1663,7 +1663,7 @@
 
         private class Screen : Contextual, IDisposable
         {
-            [Provides, Contextual]
+            [Contextual]
             public Screen()
             {
             }
@@ -1678,7 +1678,7 @@
 
         private class Screen<TModel> : Screen, IView<TModel>
         {
-            [Provides, Contextual]
+            [Contextual]
             public Screen(TModel model)
             {
                 Model = model;
@@ -1714,7 +1714,7 @@
         private class Application<C> : Application, IApplication<C>, IInitialize
             where C : Controller
         {
-            [Provides, Singleton]
+            [Singleton]
             public Application(C rootController, Screen screen,
                 InitializedComponent1 component1, InitializedComponent2 component2)
             {
@@ -1743,7 +1743,7 @@
 
         private class RootedComponent : IDisposable
         {
-            [Provides, Contextual(Rooted = true)]
+            [Contextual(Rooted = true)]
             public RootedComponent()
             {
                 
@@ -1759,7 +1759,7 @@
 
         private class InitializedComponent1 : IInitialize
         {
-            [Provides, Singleton]
+            [Singleton]
             public InitializedComponent1()
             {             
             }
@@ -1779,7 +1779,7 @@
 
         private class InitializedComponent2 : IInitialize
         {
-            [Provides, Singleton]
+            [Singleton]
             public InitializedComponent2()
             {
             }
@@ -1799,7 +1799,7 @@
 
         private class FailedInitialization : IInitialize
         {
-            [Provides, Singleton]
+            [Singleton]
             public FailedInitialization()
             {
             }
@@ -1826,7 +1826,7 @@
 
         private class LifestyleMismatch
         {
-            [Provides, Singleton]
+            [Singleton]
             public LifestyleMismatch(Screen screen)
             {
             }
@@ -1834,18 +1834,18 @@
 
         private class OverloadedConstructors
         {
-            [Provides, Contextual]
+            [Contextual]
             public OverloadedConstructors()
             {
             }
 
-            [Provides, Contextual]
+            [Contextual]
             public OverloadedConstructors(Foo foo)
             {
                 Foo = foo;
             }
 
-            [Provides, Contextual]
+            [Contextual]
             public OverloadedConstructors(Foo foo, Bar bar)
                 : this(foo)
             {

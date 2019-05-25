@@ -10,22 +10,28 @@
 
     public class MutableHandlerDescriptorFactory : IHandlerDescriptorFactory
     {
-        private HandlerDescriptorVisitor _visitor;
+        private readonly HandlerDescriptorVisitor _visitor;
 
-        public static MutableHandlerDescriptorFactory Default = new MutableHandlerDescriptorFactory();
+        public static readonly MutableHandlerDescriptorFactory 
+            Default = new MutableHandlerDescriptorFactory();
 
         private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
             Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
+        private static readonly Provides[] ImplicitProvides = { new Provides() };
+
         public MutableHandlerDescriptorFactory()
-        {          
+        {      
+            ImplicitProvidesLifestyle = new SingletonAttribute();
         }
 
-        public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor)
+        public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor) : this()
         {
             _visitor = visitor;
         }
 
+        public LifestyleAttribute ImplicitProvidesLifestyle { get; set; }
+      
         public HandlerDescriptor GetDescriptor(Type type)
         {
             try
@@ -168,9 +174,15 @@
                         continue;
                 }
 
-                var attributes = Attribute.GetCustomAttributes(member, false);
+                var attributes      = Attribute.GetCustomAttributes(member, false);
+                var categories      = attributes.OfType<CategoryAttribute>().ToArray();
+                var provideImplicit = categories.Length == 0 && constructor?.IsPublic == true
+                                   && !handlerType.IsDefined(typeof(UnmanagedAttribute), true);
 
-                foreach (var category in attributes.OfType<CategoryAttribute>())
+                if (provideImplicit)
+                    categories = ImplicitProvides;
+
+                foreach (var category in categories)
                 {
                     PolicyMemberBinding memberBinding;
                     var policy = category.CallbackPolicy;
@@ -184,6 +196,11 @@
                             {
                                 OutKey = constructor.ReflectedType
                             });
+
+                        if (provideImplicit && ImplicitProvidesLifestyle != null &&
+                            !memberBinding.Filters.OfType<LifestyleAttribute>().Any())
+                            memberBinding.AddFilters(ImplicitProvidesLifestyle);
+
                         if (handlerType.Is<IInitialize>())
                             memberBinding.AddFilters(InitializeProvider.Instance);
                     }
@@ -245,11 +262,14 @@
                 return false;
             switch (member)
             {
+                case ConstructorInfo _:
+                    return true;
                 case MethodInfo method when
                     method.IsSpecialName || method.IsFamily:
                     return false;
                 case PropertyInfo property when !property.CanRead:
                     return false;
+
             }
             return member.IsDefined(typeof(CategoryAttribute));
         }
