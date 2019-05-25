@@ -10,10 +10,11 @@
             IHandler composer, ResultsDelegate results)
         {
             var handled        = false;
-            var staticHandlers = HandlerDescriptor.GetStaticHandlers(policy, callback);
+            var factory        = HandlerDescriptorFactory.Current;
+            var staticHandlers = factory.GetStaticHandlers(policy, callback);
             foreach (var handler in staticHandlers)
             {
-                var descriptor = HandlerDescriptor.GetDescriptor(handler);
+                var descriptor = factory.GetDescriptor(handler);
                 if (descriptor.Dispatch(policy, handler, callback,
                                         greedy, composer, results))
                 {

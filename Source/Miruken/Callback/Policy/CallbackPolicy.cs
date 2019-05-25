@@ -76,37 +76,37 @@
             if (handler is ICallbackPolicyDispatch dispatcher)
                 return dispatcher.Dispatch(this, callback, greedy, composer, results);
             var type = handler as Type ?? handler.GetType();
-            var descriptor = HandlerDescriptor.GetDescriptor(type);
+            var descriptor = HandlerDescriptorFactory.Current.GetDescriptor(type);
             return descriptor.Dispatch(this, handler, callback, greedy, 
                                        composer, results);
         }
 
         public IEnumerable<PolicyMemberBinding> GetMethods()
         {
-            return HandlerDescriptor.GetPolicyMembers(this);
+            return HandlerDescriptorFactory.Current.GetPolicyMembers(this);
         }
 
         public IEnumerable<PolicyMemberBinding> GetMethods<T>()
         {
-            return HandlerDescriptor.GetPolicyMembers<T>(this);
+            return HandlerDescriptorFactory.Current.GetPolicyMembers<T>(this);
         }
 
         public static IEnumerable<Type> GetInstanceHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptor.GetInstanceHandlers(policy, callback);
+            return HandlerDescriptorFactory.Current.GetInstanceHandlers(policy, callback);
         }
 
         public static IEnumerable<Type> GetStaticHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptor.GetStaticHandlers(policy, callback);
+            return HandlerDescriptorFactory.Current.GetStaticHandlers(policy, callback);
         }
 
         public static IEnumerable<Type> GetCallbackHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptor.GetCallbackHandlers(policy, callback);
+            return HandlerDescriptorFactory.Current.GetCallbackHandlers(policy, callback);
         }
 
         public static CallbackPolicy GetCallbackPolicy(object callback)

@@ -11,6 +11,15 @@
     [TestClass]
     public class DataAnnotationsValidatorTests
     {
+        private IHandlerDescriptorFactory _factory;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(_factory);
+        }
+
         [TestMethod]
         public void Should_Validate_Target()
         {
@@ -81,7 +90,7 @@
         [TestMethod]
         public void Should_Validate_Target_Resolving()
         {
-            HandlerDescriptor.GetDescriptor<DataAnnotationsValidator>();
+            _factory.GetDescriptor<DataAnnotationsValidator>();
             var handler = new DataAnnotationsValidator();
             var player  = new Player
             {

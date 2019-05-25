@@ -57,10 +57,13 @@
             }
         }
 
+        private IHandlerDescriptorFactory _factory;
+
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.ResetDescriptors();
+            _factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(_factory);
         }
 
         [TestMethod]

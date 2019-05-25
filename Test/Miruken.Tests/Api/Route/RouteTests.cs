@@ -18,9 +18,11 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.GetDescriptor<StockQuoteHandler>();
-            HandlerDescriptor.GetDescriptor<PassThroughRouter>();
-            HandlerDescriptor.GetDescriptor<TrashHandler>();
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.GetDescriptor<StockQuoteHandler>();
+            factory.GetDescriptor<PassThroughRouter>();
+            factory.GetDescriptor<TrashHandler>();
 
             _handler = new StockQuoteHandler()
                      + new PassThroughRouter()

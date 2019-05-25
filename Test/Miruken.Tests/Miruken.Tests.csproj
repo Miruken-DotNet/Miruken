@@ -58,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Api\Cache\CacheHandlerTests.cs" />
     <Compile Include="Api\GetStockQuote.cs" />
-    <Compile Include="Api\HandlerTests.Mediate.cs" />
+    <Compile Include="Api\HandlerTests.Api.cs" />
     <Compile Include="Api\Oneway\OnewayHandlerTests.cs" />
     <Compile Include="Api\Route\RouteTests.cs" />
     <Compile Include="Api\Schedule\ConcurrentTests.cs" />

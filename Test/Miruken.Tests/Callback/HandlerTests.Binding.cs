@@ -14,10 +14,12 @@
         public void Setup()
         {
             _handler = new StaticHandler();
-            HandlerDescriptor.GetDescriptor<LocalConfiguration>();
-            HandlerDescriptor.GetDescriptor<RemoteConfiguration>();
-            HandlerDescriptor.GetDescriptor<Hospital>();
-            HandlerDescriptor.GetDescriptor<Client>();
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.GetDescriptor<LocalConfiguration>();
+            factory.GetDescriptor<RemoteConfiguration>();
+            factory.GetDescriptor<Hospital>();
+            factory.GetDescriptor<Client>();
         }
 
         [TestMethod]

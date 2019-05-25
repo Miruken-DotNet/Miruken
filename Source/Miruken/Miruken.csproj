@@ -108,9 +108,12 @@
     <Compile Include="Callback\Policy\CallbackPolicyDescriptor.cs" />
     <Compile Include="Callback\Policy\GenericMapping.cs" />
     <Compile Include="Callback\Policy\ConstructorDispatch.cs" />
+    <Compile Include="Callback\Policy\HandlerDescriptorFactory.cs" />
     <Compile Include="Callback\Policy\IArgumentResolver.cs" />
     <Compile Include="Callback\Policy\ICallbackPolicyDispatch.cs" />
     <Compile Include="Callback\Policy\Bindings\IBindingConstraint.cs" />
+    <Compile Include="Callback\Policy\IHandlerDescriptorFactory.cs" />
+    <Compile Include="Callback\Policy\MutableHandlerDescriptorFactory.cs" />
     <Compile Include="Callback\Policy\MemberDispatch.cs" />
     <Compile Include="Callback\Policy\Rules\RuleContext.cs" />
     <Compile Include="Callback\ProxyAttribute.cs" />

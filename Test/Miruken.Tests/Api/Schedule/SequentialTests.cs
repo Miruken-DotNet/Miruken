@@ -14,9 +14,10 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.ResetDescriptors();
-            HandlerDescriptor.GetDescriptor<StockQuoteHandler>();
-            HandlerDescriptor.GetDescriptor<Scheduler>();
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.GetDescriptor<StockQuoteHandler>();
+            factory.GetDescriptor<Scheduler>();
             StockQuoteHandler.Called = 0;
         }
 

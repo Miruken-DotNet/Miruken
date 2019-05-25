@@ -15,6 +15,7 @@
     public class ValidateFilterTests
     {
         private IHandler _handler;
+        private IHandlerDescriptorFactory _factory;
 
         [ClassInitialize]
         public static void Initialize(TestContext context)
@@ -25,8 +26,9 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.ResetDescriptors();
-            HandlerDescriptor.GetDescriptor<TeamHandler>();
+            _factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(_factory);
+            _factory.GetDescriptor<TeamHandler>();
 
             _handler = new TeamHandler()
                      + new FilterProvider()

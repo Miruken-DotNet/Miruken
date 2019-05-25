@@ -10,15 +10,15 @@
     using Miruken.Concurrency;
 
     [TestClass]
-    public class HandlerMediateTests
+    public class HandlerApiTests
     {
         private IHandler _handler;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.ResetDescriptors();
-            HandlerDescriptor.GetDescriptor<TeamHandler>();
+            HandlerDescriptorFactory.UseFactory(new MutableHandlerDescriptorFactory());
+            HandlerDescriptorFactory.Current.GetDescriptor<TeamHandler>();
 
             _handler = new TeamHandler() + new FilterProvider();
         }

@@ -90,7 +90,7 @@
                     basedOn.Unless(ExcludeHandler).Configure(handler =>
                     {
                         _configureHandlers?.Invoke(handler);
-                        HandlerDescriptor.GetDescriptor(handler.Implementation);
+                        HandlerDescriptorFactory.Current.GetDescriptor(handler.Implementation);
                     });
                 }
             }

@@ -71,7 +71,7 @@
         public bool IsAsync     => IsPromise || IsTask;
 
         public HandlerDescriptor Owner =>
-            HandlerDescriptor.GetDescriptor(Member.ReflectedType);
+            HandlerDescriptorFactory.Current.GetDescriptor(Member.ReflectedType);
 
         public abstract object Invoke(
             object target, object[] args, Type returnType = null);

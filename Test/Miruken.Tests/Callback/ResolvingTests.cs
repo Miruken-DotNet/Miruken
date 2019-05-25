@@ -14,6 +14,15 @@
     [TestClass]
     public class ResolvingTests
     {
+        private IHandlerDescriptorFactory _factory;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(_factory);
+        }
+
         public class SendEmail
         {
             public string Body { get; set; }
@@ -340,7 +349,7 @@
         [TestMethod]
         public void Should_Override_Providers_Resolving()
         {
-            HandlerDescriptor.GetDescriptor<DemoProvider>();
+            _factory.GetDescriptor<DemoProvider>();
             var demo    = new DemoHandler();
             var handler = new Handler();
             var resolve = handler.Provide(demo).Infer().Resolve<DemoHandler>();
@@ -350,7 +359,7 @@
         [TestMethod]
         public void Should_Resolve_Handlers()
         {
-            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            _factory.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider()
                         + new Billing()
                         + new RepositoryProvider()
@@ -375,7 +384,7 @@
         [TestMethod]
         public void Should_Resolve_Generic_Handlers()
         {
-            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            _factory.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider()
                         + new RepositoryProvider()
                         + new FilterProvider(); ;
@@ -387,8 +396,8 @@
         [TestMethod]
         public void Should_Resolve_All_Handlers()
         {
-            HandlerDescriptor.GetDescriptor<EmailHandler>();
-            HandlerDescriptor.GetDescriptor<OfflineHandler>();
+            _factory.GetDescriptor<EmailHandler>();
+            _factory.GetDescriptor<OfflineHandler>();
             var handler = new EmailProvider()
                         + new OfflineProvider();
             var id      = handler.InferAll()
@@ -409,7 +418,7 @@
         [TestMethod]
         public void Should_Resolve_Open_Generic_Handlers()
         {
-            HandlerDescriptor.GetDescriptor(typeof(Repository<>));
+            _factory.GetDescriptor(typeof(Repository<>));
             var handler = new RepositoryProvider();
             var message = new Message();
             var handled = handler.Infer().Handle(new Create<Message>(message));
@@ -420,7 +429,7 @@
         [TestMethod]
         public void Should_Resolve_Handlers_With_Filters()
         {
-            HandlerDescriptor.GetDescriptor<EmailHandler>();
+            _factory.GetDescriptor<EmailHandler>();
             var handler = new EmailProvider()
                         + new Billing()
                         + new RepositoryProvider()
