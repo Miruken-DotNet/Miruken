@@ -15,7 +15,7 @@
     <copyright>Copyright 2018</copyright>
     <tags>Miruken Security</tags>
     <dependencies>
-      <dependency id="Miruken" version="2.0"/>
+      <dependency id="Miruken" version="3.0"/>
     </dependencies>
   </metadata>
 </package>
