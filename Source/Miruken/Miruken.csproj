@@ -50,10 +50,11 @@
     <Compile Include="Api\Cache\CacheExtensions.cs" />
     <Compile Include="Api\Decorator.cs" />
     <Compile Include="Api\Handler.Api.cs" />
-    <Compile Include="Api\IKeyProperties.cs" />
+    <Compile Include="Api\Identifiable.cs" />
     <Compile Include="Api\IRequest.cs" />
     <Compile Include="Api\Oneway\Oneway.cs" />
     <Compile Include="Api\Oneway\OnewayHandler.cs" />
+    <Compile Include="Api\Relationship.cs" />
     <Compile Include="Api\Resources.cs" />
     <Compile Include="Api\Route\BatchRouter.cs" />
     <Compile Include="Api\Route\PassThroughRouter.cs" />

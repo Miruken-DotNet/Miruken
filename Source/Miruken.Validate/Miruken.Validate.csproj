@@ -54,10 +54,13 @@
     <Compile Include="DataAnnotations\CompositeResult.cs" />
     <Compile Include="DataAnnotations\DataAnnotationsValidator.cs" />
     <Compile Include="DataAnnotations\ValidAttribute.cs" />
+    <Compile Include="FluentValidation\CheckConcurrency.cs" />
+    <Compile Include="FluentValidation\CheckRelatedConcurrency.cs" />
     <Compile Include="FluentValidation\FluentValidationValidator.cs" />
     <Compile Include="FluentValidation\FluentValidator.cs" />
     <Compile Include="FluentValidation\ScopeSelector.cs" />
     <Compile Include="FluentValidation\OutcomeFailure.cs" />
+    <Compile Include="OptimisticConcurrencyException.cs" />
     <Compile Include="Properties\GlobalAssemblyInfo.cs" />
     <Compile Include="IScopeMatching.cs" />
     <Compile Include="IValidationAware.cs" />

@@ -2,9 +2,8 @@
 {
     using System;
 
-    public interface IResource<out TId>
+    public interface IResource<TId> : IIdentifiable<TId>
     {
-        TId       Id         { get; }
         byte[]    RowVersion { get; }
         DateTime? Created    { get; }
         string    CreatedBy  { get; }
@@ -27,8 +26,7 @@
         TRes Resource { get; set; }
     }
 
-    public class ResourceAction<TRes, TId> : IRequest<TRes>,
-        IResourceAction<TRes, TId>
+    public class ResourceAction<TRes, TId> : IRequest<TRes>, IResourceAction<TRes, TId>
         where TRes : Resource<TId>
     {
         public ResourceAction()
