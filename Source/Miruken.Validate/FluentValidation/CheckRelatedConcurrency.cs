@@ -12,7 +12,7 @@
 
     public abstract class CheckRelatedConcurrency<TId, TEntity, TRel>
         : AbstractValidator<RelationshipAction<TRel, TId>>
-        where TEntity : IIdentifiable<TId>, IVersioned
+        where TEntity : class, IIdentifiable<TId>, IVersioned
         where TRel : Resource<TId>
         where TId : struct
     {
@@ -58,8 +58,8 @@
 
     public abstract class CheckRelatedConcurrency<TId, TEntity, TRelated, TRel> 
         : AbstractValidator<UpdateRelationship<TRel, TId>>
-        where TEntity  : IIdentifiable<TId>, IVersioned
-        where TRelated : IIdentifiable<TId>, IVersioned
+        where TEntity  : class, IIdentifiable<TId>, IVersioned
+        where TRelated : class, IIdentifiable<TId>, IVersioned
         where TRel     : Resource<TId>
     {
         protected CheckRelatedConcurrency()
