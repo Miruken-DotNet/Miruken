@@ -13,8 +13,8 @@
     public abstract class CheckConcurrency<TEntity, TRes, TId>
            : CheckConcurrency<TEntity, TRes, UpdateResource<TRes, TId?>, TId>
            where TEntity : class, IIdentifiable<TId>, IVersioned
-           where TRes : Resource<TId?>
-           where TId : struct
+           where TRes    : Resource<TId?>
+           where TId     : struct
     {
     }
 
@@ -22,8 +22,8 @@
         : AbstractValidator<TAction>
         where TEntity : class, IIdentifiable<TId>, IVersioned
         where TAction : UpdateResource<TRes, TId?>
-        where TRes : Resource<TId?>
-        where TId : struct
+        where TRes    : Resource<TId?>
+        where TId     : struct
     {
         protected CheckConcurrency()
         {
@@ -60,7 +60,7 @@
                 return;
             }
 
-            if (resource.RowVersion?.SequenceEqual(entity.RowVersion) == false)
+            if (resource.RowVersion?.SequenceEqual(entity.Version) == false)
                 throw new OptimisticConcurrencyException(
                     $"Concurrency exception detected for {entity.GetType()} with id {entity.Id}.");
         }

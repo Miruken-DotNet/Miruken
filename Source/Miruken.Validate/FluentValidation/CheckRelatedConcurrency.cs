@@ -13,8 +13,8 @@
     public abstract class CheckRelatedConcurrency<TId, TEntity, TRel>
         : AbstractValidator<RelationshipAction<TRel, TId?>>
         where TEntity : class, IIdentifiable<TId>, IVersioned
-        where TRel : Resource<TId?>
-        where TId : struct
+        where TRel    : Resource<TId?>
+        where TId     : struct
     {
         protected CheckRelatedConcurrency()
         {
@@ -50,7 +50,7 @@
                 return;
             }
 
-            if (resource.RowVersion?.SequenceEqual(entity.RowVersion) == false)
+            if (resource.RowVersion?.SequenceEqual(entity.Version) == false)
                 throw new OptimisticConcurrencyException(
                     $"Concurrency exception detected for {entity.GetType()} with id {entity.Id}.");
         }
@@ -61,7 +61,7 @@
         where TEntity  : class, IIdentifiable<TId>, IVersioned
         where TRelated : class, IIdentifiable<TId>, IVersioned
         where TRel     : Resource<TId?>
-        where TId : struct
+        where TId      : struct
     {
         protected CheckRelatedConcurrency()
         {
@@ -111,7 +111,7 @@
                 return;
             }
 
-            if (related.RowVersion?.SequenceEqual(relatedEntity.RowVersion) == false)
+            if (related.RowVersion?.SequenceEqual(relatedEntity.Version) == false)
                 throw new OptimisticConcurrencyException(
                     $"Concurrency exception detected for {relatedEntity.GetType()} with id {relatedEntity.Id}.");
         }

@@ -18,7 +18,7 @@
 
     public interface IVersioned
     {
-        byte[]   RowVersion { get; set; }
-        DateTime Modified   { get; set; }
+        byte[]   Version  { get; set; }
+        DateTime Modified { get; set; }
     }
 }
