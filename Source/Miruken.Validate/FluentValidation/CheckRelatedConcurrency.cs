@@ -11,9 +11,9 @@
     using Validate;
 
     public abstract class CheckRelatedConcurrency<TId, TEntity, TRel>
-        : AbstractValidator<RelationshipAction<TRel, TId>>
+        : AbstractValidator<RelationshipAction<TRel, TId?>>
         where TEntity : class, IIdentifiable<TId>, IVersioned
-        where TRel : Resource<TId>
+        where TRel : Resource<TId?>
         where TId : struct
     {
         protected CheckRelatedConcurrency()
@@ -22,9 +22,9 @@
         }
 
         protected abstract Task<TEntity> GetEntity(
-            RelationshipAction<TRel, TId> action, IHandler composer);
+            RelationshipAction<TRel, TId?> action, IHandler composer);
 
-        private async Task BeExpectedVersion(RelationshipAction<TRel, TId> action,
+        private async Task BeExpectedVersion(RelationshipAction<TRel, TId?> action,
             CustomContext context, CancellationToken cancellation)
         {
             var resource = action.Resource;
@@ -57,10 +57,11 @@
     }
 
     public abstract class CheckRelatedConcurrency<TId, TEntity, TRelated, TRel> 
-        : AbstractValidator<UpdateRelationship<TRel, TId>>
+        : AbstractValidator<UpdateRelationship<TRel, TId?>>
         where TEntity  : class, IIdentifiable<TId>, IVersioned
         where TRelated : class, IIdentifiable<TId>, IVersioned
-        where TRel     : Resource<TId>
+        where TRel     : Resource<TId?>
+        where TId : struct
     {
         protected CheckRelatedConcurrency()
         {
@@ -68,12 +69,12 @@
         }
 
         protected abstract Task<TEntity> GetEntity(
-            UpdateRelationship<TRel, TId> action, IHandler composer);
+            UpdateRelationship<TRel, TId?> action, IHandler composer);
 
         protected abstract Task<TRelated> GetRelated(
-            TEntity entity, UpdateRelationship<TRel, TId> action, IHandler composer);
+            TEntity entity, UpdateRelationship<TRel, TId?> action, IHandler composer);
 
-        private async Task BeExpectedVersion(UpdateRelationship<TRel, TId> action,
+        private async Task BeExpectedVersion(UpdateRelationship<TRel, TId?> action,
             CustomContext context, CancellationToken cancellation)
         {
             var resource = action.Resource;
