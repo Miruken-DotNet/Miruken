@@ -174,9 +174,12 @@
                         continue;
                 }
 
-                var attributes      = Attribute.GetCustomAttributes(member, false);
-                var categories      = attributes.OfType<CategoryAttribute>().ToArray();
-                var provideImplicit = categories.Length == 0 && constructor?.IsPublic == true
+                var attributes = Attribute.GetCustomAttributes(member, false);
+                var categories = attributes.OfType<CategoryAttribute>().ToArray();
+
+                var provideImplicit = categories.Length == 0
+                                   && constructor?.IsPublic == true
+                                   && !handlerType.IsAbstract
                                    && !handlerType.IsDefined(typeof(UnmanagedAttribute), true);
 
                 if (provideImplicit)
