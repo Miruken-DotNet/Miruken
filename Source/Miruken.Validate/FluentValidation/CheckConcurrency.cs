@@ -9,7 +9,6 @@
     using Callback;
     using global::FluentValidation;
     using global::FluentValidation.Validators;
-    using Validate;
 
     public abstract class CheckConcurrency<TEntity, TRes, TId>
            : CheckConcurrency<TEntity, TRes, UpdateResource<TRes, TId?>, TId>

@@ -50,7 +50,7 @@
     <Compile Include="Api\Cache\CacheExtensions.cs" />
     <Compile Include="Api\Decorator.cs" />
     <Compile Include="Api\Handler.Api.cs" />
-    <Compile Include="Api\Identifiable.cs" />
+    <Compile Include="IIdentifiable.cs" />
     <Compile Include="Api\IRequest.cs" />
     <Compile Include="Api\Key.cs" />
     <Compile Include="Api\KeyExtensions.cs" />
@@ -135,6 +135,7 @@
     <Compile Include="Infrastructure\ConcurrentDictionaryExtensions.cs" />
     <Compile Include="Infrastructure\FastExpressionCompiler.cs" />
     <Compile Include="Infrastructure\TypeKeyedCollection.cs" />
+    <Compile Include="IVersioned.cs" />
     <Compile Include="Map\FormatAttribute.cs" />
     <Compile Include="Map\IFormatMatching.cs" />
     <Compile Include="Map\Handler.Map.cs" />
