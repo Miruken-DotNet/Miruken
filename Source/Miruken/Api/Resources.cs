@@ -2,8 +2,9 @@
 {
     using System;
 
-    public interface IResource<TId> : IIdentifiable<TId>
+    public interface IResource<out TId>
     {
+        TId       Id         { get; }
         byte[]    RowVersion { get; }
         DateTime? Created    { get; }
         string    CreatedBy  { get; }

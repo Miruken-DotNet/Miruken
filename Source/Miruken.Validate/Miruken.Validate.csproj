@@ -46,8 +46,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Entity" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
@@ -56,8 +54,6 @@
     <Compile Include="DataAnnotations\CompositeResult.cs" />
     <Compile Include="DataAnnotations\DataAnnotationsValidator.cs" />
     <Compile Include="DataAnnotations\ValidAttribute.cs" />
-    <Compile Include="FluentValidation\CheckConcurrency.cs" />
-    <Compile Include="FluentValidation\CheckRelatedConcurrency.cs" />
     <Compile Include="FluentValidation\FluentValidationValidator.cs" />
     <Compile Include="FluentValidation\FluentValidator.cs" />
     <Compile Include="FluentValidation\ScopeSelector.cs" />
