@@ -109,7 +109,9 @@ namespace Miruken.Graph
             this ITraversing node, Visitor visitor, bool withSelf)
         {
             if (withSelf && visitor(node)) return;
-            node.Children?.Any(child => visitor(child));
+            var children = node.Children;
+            if (children != null)
+                Array.ForEach(children, child => visitor(child));
         }
 
         public static void TraverseAncestors(

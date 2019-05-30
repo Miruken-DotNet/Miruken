@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using Miruken.Callback;
 using Miruken.Graph;
 
 namespace Miruken.Context
 {
+    using System.Threading;
+
     public enum ContextState
     {
         Active = 0,
@@ -18,9 +19,10 @@ namespace Miruken.Context
         IHandlerAxis, ITraversing, IDisposable
 	{
 	    private EventHandlerList _events;
+	    private ReaderWriterLockSlim _lock;
 	    private readonly List<Context> _children;
 
-	    public static readonly object AlreadyEnded = new object();
+        public static readonly object AlreadyEnded = new object();
 	    public static readonly object Unwinded     = new object();
 	    public static readonly object Disposed     = new object();
 
@@ -29,7 +31,8 @@ namespace Miruken.Context
             State     = ContextState.Active;
             _children = new List<Context>();
             _events   = new EventHandlerList();
-		}
+		    _lock     = new ReaderWriterLockSlim();
+        }
 
 		public Context(Context parent) : this()
 		{
@@ -42,9 +45,23 @@ namespace Miruken.Context
 
 	    public Context Parent { get; }
 
-	    public bool HasChildren => _children.Count > 0;
+        public bool HasChildren
+        {
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return _children.Count > 0;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
+        }
 
-	    public Context Root
+        public Context Root
         {
             get
             {
@@ -55,29 +72,53 @@ namespace Miruken.Context
             }
         }
 
-	    public Context CreateChild()
+	    ITraversing[] ITraversing.Children => Children;
+
+	    public Context[] Children
+	    {
+	        get
+	        {
+	            _lock.EnterReadLock();
+	            try
+	            {
+	                return _children.ToArray();
+                }
+	            finally
+	            {
+	                _lock.ExitReadLock();
+	            }
+	        }
+	    }
+
+        public Context CreateChild()
 	    {
             AssertActive();
 	        var child = InternalCreateChild();
 	        child.ContextEnding += (ctx, reason) => 
 	            Raise(ContextEvents.ChildContextEnding, ctx, reason);
             child.ContextEnded += (ctx, reason) => {
-                _children.Remove(ctx);
+                _lock.EnterWriteLock();
+                try
+                {
+                    _children.Remove(ctx);
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
                 Raise(ContextEvents.ChildContextEnded, ctx, reason);
             };
-            _children.Add(child);
+	        _lock.EnterWriteLock();
+	        try
+	        {
+	            _children.Add(child);
+            }
+	        finally
+	        {
+	            _lock.ExitWriteLock();
+	        }
 	        return child;
 	    }
-
-        ITraversing[] ITraversing.Children
-        {
-            get
-            {
-                return _children.Select(c => c as ITraversing).ToArray();
-            }
-        }
-
-	    public Context[] Children => _children.ToArray();
 
 	    protected virtual Context InternalCreateChild()
 	    {
@@ -176,7 +217,9 @@ namespace Miruken.Context
                 State = ContextState.Ended;
                 Raise(ContextEvents.ContextEnded, this, reason);
                 _events.Dispose();
+                _lock.Dispose();
                 _events = null;
+                _lock   = null;
             }	        
 	    }
 
