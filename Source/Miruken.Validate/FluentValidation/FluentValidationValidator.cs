@@ -7,9 +7,15 @@
     using global::FluentValidation;
     using global::FluentValidation.Results;
     using global::FluentValidation.Validators;
+    using Infrastructure;
 
     public class FluentValidationValidator : Handler
     {
+        [Provides, Singleton]
+        public FluentValidationValidator()
+        {        
+        }
+
         [Validates(Scope = Scopes.Any)]
         public async Task Validate<T>(T target, Validation validation, IHandler composer)
         {
@@ -17,12 +23,14 @@
             if (validators.Length == 0) return;
 
             var outcome = validation.Outcome;
-            var scope = validation.ScopeMatcher;
+            var scope   = validation.ScopeMatcher;
             var context = scope != null && scope != EqualsScopeMatcher.Default
                 ? new ValidationContext(target, null, new ScopeSelector(scope))
                 : new ValidationContext(target);
             context.SetValidation(validation);
             context.SetComposer(composer);
+
+            Array.Sort(validators, OrderedComparer<IValidator<T>>.Instance);
 
             foreach (var validator in validators)
             {

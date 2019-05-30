@@ -1888,7 +1888,7 @@
 
         private class FilteredHandler : Handler, IFilter<Bar, object>
         {
-            int? IFilter.Order { get; set; }
+            int? IOrdered.Order { get; set; }
 
             [Handles,
              Filter(typeof(LogFilter<,>)),

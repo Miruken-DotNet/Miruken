@@ -6,6 +6,11 @@
 
     public class DataAnnotationsValidator : Handler
     {
+        [Provides, Singleton]
+        public DataAnnotationsValidator()
+        {         
+        }
+
         [Validates(Scope = Scopes.Any)]
         public void Validate(Validation validation, IHandler composer)
         {
