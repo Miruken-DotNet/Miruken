@@ -153,8 +153,7 @@
             Assert.IsNotNull(bar);
         }
 
-        [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+        [TestMethod]
         public async Task Should_Detect_Missing_Dependencies()
         {
             var handler = new FluentValidationValidator()
@@ -165,7 +164,19 @@
                 Id   = Guid.NewGuid(),
                 Name = "Patch"
             };
-            await handler.CommandAsync<Bar>(foo);
+            try
+            {
+                await handler.CommandAsync<Bar>(foo);
+                Assert.Fail("Expected an exception");
+            }
+            catch (InvalidOperationException)
+            {
+                // Asynchronous failure
+            }
+            catch (NotSupportedException)
+            {
+                // Synchronous failure
+            }
         }
     }
 
@@ -238,9 +249,9 @@
     public class FooValidatorProvider : Handler
     {
         [Provides]
-        public IValidator<Foo>[] GetFooalidators()
+        public IValidator<Foo>[] GetFooValidators()
         {
-            return new[] {new FooValidator() };
+            return new[] { new FooValidator() };
         }
 
         [Provides]
