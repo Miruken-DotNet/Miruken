@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Callback.Policy.Bindings;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Windsor;
@@ -18,6 +19,11 @@
         public void TestInitialize()
         {
             _container = new WindsorContainer();
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<MyHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]

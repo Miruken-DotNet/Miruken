@@ -5,12 +5,24 @@
     using System.Security.Principal;
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Concurrency;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class AuthorizeFilterTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<MissileControlHandler>();
+            factory.RegisterDescriptor<MissileAccessPolicy>();
+            factory.RegisterDescriptor<FilterHandler>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod,
          ExpectedException(typeof(NotSupportedException))]
         public void Rejects_Callback_If_Filter_Not_Resolved()

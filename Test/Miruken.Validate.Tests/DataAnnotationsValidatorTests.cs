@@ -17,6 +17,7 @@
         public void TestInitialize()
         {
             _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<DataAnnotationsValidator>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
 
@@ -90,7 +91,7 @@
         [TestMethod]
         public void Should_Validate_Target_Resolving()
         {
-            _factory.GetDescriptor<DataAnnotationsValidator>();
+            _factory.RegisterDescriptor<DataAnnotationsValidator>();
             var handler = new DataAnnotationsValidator();
             var player  = new Player
             {

@@ -27,8 +27,11 @@
         public void TestInitialize()
         {
             _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<TeamHandler>();
+            _factory.RegisterDescriptor<FilterProvider>();
+            _factory.RegisterDescriptor<DataAnnotationsValidator>();
+            _factory.RegisterDescriptor<FluentValidationValidator>();
             HandlerDescriptorFactory.UseFactory(_factory);
-            _factory.GetDescriptor<TeamHandler>();
 
             _handler = new TeamHandler()
                      + new FilterProvider()

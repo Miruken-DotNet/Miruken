@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Callback;
+    using Callback.Policy;
     using Context;
     using Error;
     using global::Castle.MicroKernel.Registration;
@@ -37,7 +38,7 @@
 
         public interface IJunkyard : IResolving
         {
-            object[] Parts  { get; }
+            object[] Parts { get; }
             void     Decommision(object part);
         }
 
@@ -98,6 +99,12 @@
             _container = new WindsorContainer();
             _container.Kernel.Resolver.AddSubResolver(new ArrayResolver(_container.Kernel));
             _handler = new WindsorHandler(_container);
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<Auction>();
+            factory.RegisterDescriptor<Junkyard>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]

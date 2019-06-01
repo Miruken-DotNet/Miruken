@@ -59,6 +59,12 @@
             _container.Kernel.AddHandlersFilter(new ContravariantFilter());
 
             _handler = new WindsorHandler(_container);
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<CallbackHandler>();
+            factory.RegisterDescriptor<ResolvingTests.EmailHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]

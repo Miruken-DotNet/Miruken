@@ -63,6 +63,8 @@
         public void TestInitialize()
         {
             _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<OrderHandler>();
+            _factory.RegisterDescriptor<Stash>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
 

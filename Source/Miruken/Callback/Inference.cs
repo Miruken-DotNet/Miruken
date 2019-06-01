@@ -34,7 +34,7 @@
 
         private Resolving[] CreateInferred() =>
             CallbackPolicy.GetCallbackHandlers(Callback)
-                .Select(handler => new Resolving(handler, Callback))
+                .Select(handler => new Resolving(handler.HandlerType, Callback))
                 .ToArray();
 
         public static object Get(object callback) => new Inference(callback);

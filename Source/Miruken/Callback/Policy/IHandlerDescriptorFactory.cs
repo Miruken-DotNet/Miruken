@@ -11,11 +11,13 @@
     {
         HandlerDescriptor GetDescriptor(Type type);
 
-        IEnumerable<Type> GetStaticHandlers(CallbackPolicy policy, object callback);
+        HandlerDescriptor RegisterDescriptor(Type type);
 
-        IEnumerable<Type> GetInstanceHandlers(CallbackPolicy policy, object callback);
+        IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback);
 
-        IEnumerable<Type> GetCallbackHandlers(CallbackPolicy policy, object callback);
+        IEnumerable<HandlerDescriptor> GetInstanceHandlers(CallbackPolicy policy, object callback);
+
+        IEnumerable<HandlerDescriptor> GetCallbackHandlers(CallbackPolicy policy, object callback);
 
         IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy);
     }

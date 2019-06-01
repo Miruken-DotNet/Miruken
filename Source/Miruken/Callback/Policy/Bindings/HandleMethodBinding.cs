@@ -59,7 +59,7 @@
             var arguments = handleMethod.Arguments;
             var filters = composer.GetOrderedFilters(
                 this, Dispatcher, typeof(HandleMethod),
-                Filters, Dispatcher.Owner.Filters, GlobalFilters);
+                Filters, Dispatcher.Owner?.Filters, GlobalFilters);
 
             if (filters == null) return false;
 

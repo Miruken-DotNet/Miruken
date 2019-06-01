@@ -21,6 +21,16 @@
         public void TestInitialize()
         {
             _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<CustomHandler>();
+            _factory.RegisterDescriptor<CustomAsyncHandler>();
+            _factory.RegisterDescriptor<SpecialHandler>();
+            _factory.RegisterDescriptor<SpecialAsyncHandler>();
+            _factory.RegisterDescriptor<ArrayHandler>();
+            _factory.RegisterDescriptor<FilteredHandler>();
+            _factory.RegisterDescriptor<SpecialFilteredHandler>();
+            _factory.RegisterDescriptor<FilterHandlerTests>();
+            _factory.RegisterDescriptor<Controller>();
+            _factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
 
@@ -41,7 +51,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Implicitly()
         {
-            var foo = new Foo();
+            var foo     = new Foo();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -50,7 +60,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Inferred_Greedy()
         {
-            var foo = new Foo();
+            var foo     = new Foo();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Infer().Handle(foo, true));
             Assert.AreEqual(1, foo.Handled);
@@ -59,8 +69,8 @@
         [TestMethod]
         public void Should_Handle_Static_Callbacks_Implicitly()
         {
-           _factory.GetDescriptor<CustomHandler>();
-            var foo = new Foo();
+           _factory.RegisterDescriptor<CustomHandler>();
+            var foo     = new Foo();
             var handler = new StaticHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -69,7 +79,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Implicitly_Adapter()
         {
-            var foo = new Foo();
+            var foo     = new Foo();
             var handler = new HandlerAdapter(new Controller());
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -78,7 +88,7 @@
         [TestMethod]
         public void Should_Handle_Callbacks_Explicitly()
         {
-            var bar = new Bar();
+            var bar     = new Bar();
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(bar));
             Assert.IsTrue(bar.HasComposer);
@@ -174,8 +184,7 @@
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Handlers()
         {
-            var handler = new BadHandler();
-            handler.Handle(new Foo());
+            _factory.RegisterDescriptor<BadHandler>();
         }
 
         [TestMethod]
@@ -451,8 +460,7 @@
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Providers()
         {
-            var handler = new BadProvider();
-            handler.Resolve<Foo>();
+            _factory.RegisterDescriptor<BadProvider>();
         }
 
         [TestMethod]
@@ -695,7 +703,7 @@
         public void Should_Create_Implicitly()
         {
             var handler = new StaticHandler();
-           _factory.GetDescriptor<Controller>();
+            _factory.RegisterDescriptor<Controller>();
             var instance = handler.Resolve<Controller>();
             Assert.IsNotNull(instance);
             Assert.AreNotSame(instance, handler.Resolve<Controller>());
@@ -705,8 +713,9 @@
         public void Should_Create_Generic_Implicitly()
         {
             var view = new Screen();
-            var bar = new SpecialBar();
-           _factory.GetDescriptor(typeof(Controller<,>));
+            var bar  = new SpecialBar();
+            _factory.RegisterDescriptor(typeof(Controller<,>));
+            _factory.RegisterDescriptor<Provider>(); 
             var controller = new StaticHandler()
                 .Provide(view).Provide(bar)
                 .Resolve<Controller<Screen, Bar>>();
@@ -719,7 +728,7 @@
         public void Should_Create_Resolving_Implicitly()
         {
             var foo = new Foo();
-           _factory.GetDescriptor<Controller>();
+            _factory.RegisterDescriptor<Controller>();
             Assert.IsTrue(new StaticHandler().Infer().Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
@@ -729,8 +738,9 @@
         {
             var boo = new Boo();
             var baz = new SpecialBaz();
-           _factory.GetDescriptor<Controller>();
-           _factory.GetDescriptor(typeof(Controller<,>));
+            _factory.RegisterDescriptor<Controller>();
+            _factory.RegisterDescriptor(typeof(Controller<,>));
+            _factory.RegisterDescriptor<Provider>();
             var instance = new StaticHandler().Infer()
                 .Provide(boo).Provide(baz)
                 .Resolve<Controller<Boo, Baz>>();
@@ -744,7 +754,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Controller>();
+            factory.RegisterDescriptor<Controller>();
             var bar = new StaticHandler().Infer().Resolve<Bar>();
             Assert.IsNotNull(bar);
         }
@@ -754,9 +764,10 @@
         {
             var view = new Screen();
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor(typeof(Controller<,>));
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller));
-            factory.GetDescriptor(typeof(Controller<,>));
             var instance = new StaticHandler().Infer()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNotNull(instance);
@@ -769,7 +780,7 @@
             var view    = new Screen();
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller<,>));
+            factory.RegisterDescriptor(typeof(Controller<,>));
             var instance = new StaticHandler().Infer()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNull(instance);
@@ -781,7 +792,7 @@
             var handler = new StaticHandler();
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Application>();
+            factory.RegisterDescriptor<Application>();
             var app = handler.Resolve<Application>();
             Assert.IsNotNull(app);
             Assert.AreSame(app, handler.Resolve<Application>());
@@ -792,7 +803,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(InitializedComponent1));
+            factory.RegisterDescriptor(typeof(InitializedComponent1));
             var component = await new StaticHandler().ResolveAsync<InitializedComponent1>();
             Assert.IsNotNull(component);
             Assert.IsTrue(component.Initialized);
@@ -801,15 +812,16 @@
         [TestMethod]
         public void Should_Create_Generic_Singletons_Implicitly()
         {
-            var view = new Screen();
+            var view    = new Screen();
             var handler = new StaticHandler().Infer();
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor(typeof(Controller<,>));
+            factory.RegisterDescriptor(typeof(Application<>));
+            factory.RegisterDescriptor(typeof(InitializedComponent1));
+            factory.RegisterDescriptor(typeof(InitializedComponent2));
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller));
-            factory.GetDescriptor(typeof(Controller<,>));
-            factory.GetDescriptor(typeof(Application<>));
-            factory.GetDescriptor(typeof(InitializedComponent1));
-            factory.GetDescriptor(typeof(InitializedComponent2));
             var app1 = handler.Provide(view)
                 .Resolve<Application<Controller<Screen, Bar>>>();
             Assert.IsNotNull(app1);
@@ -833,7 +845,7 @@
             Screen screen;
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
+            factory.RegisterDescriptor<Screen>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -859,7 +871,7 @@
             Screen screen;
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
+            factory.RegisterDescriptor<Screen>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -886,7 +898,7 @@
             RootedComponent rooted;
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<RootedComponent>();
+            factory.RegisterDescriptor<RootedComponent>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -907,8 +919,9 @@
         public void Should_Create_Contextual_Covariantly()
         {
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor(typeof(Screen<>));
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Screen<>));
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -923,8 +936,8 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller));
-            factory.GetDescriptor(typeof(Screen<>));
+            factory.RegisterDescriptor(typeof(Controller));
+            factory.RegisterDescriptor(typeof(Screen<>));
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -939,8 +952,9 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller));
-            factory.GetDescriptor(typeof(Screen<>));
+            factory.RegisterDescriptor(typeof(Controller));
+            factory.RegisterDescriptor(typeof(Screen<>));
+            factory.RegisterDescriptor<Provider>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -957,9 +971,10 @@
         public void Should_Provide_Generic_Contextual_Implicitly()
         {
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor<ScreenProvider>();
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor(typeof(Controller));
-            factory.GetDescriptor<ScreenProvider>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -978,7 +993,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
+            factory.RegisterDescriptor<Screen>();
             var screen = new StaticHandler().Resolve<Screen>();
             Assert.IsNull(screen);
         }
@@ -989,7 +1004,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
+            factory.RegisterDescriptor<Screen>();
 
             using (var context = new Context())
             {
@@ -1005,7 +1020,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
+            factory.RegisterDescriptor<Screen>();
 
             using (var context = new Context())
             {
@@ -1023,7 +1038,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<FailedInitialization>();
+            factory.RegisterDescriptor<FailedInitialization>();
             var result = await (new StaticHandler()).ResolveAsync<FailedInitialization>();
             Assert.IsNull(result);
         }
@@ -1033,8 +1048,8 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<Screen>();
-            factory.GetDescriptor<LifestyleMismatch>();
+            factory.RegisterDescriptor<Screen>();
+            factory.RegisterDescriptor<LifestyleMismatch>();
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
@@ -1047,8 +1062,9 @@
         public void Should_Select_Greediest_Constructor()
         {
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<OverloadedConstructors>();
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<OverloadedConstructors>();
 
             using (var context = new Context())
             {
@@ -1079,8 +1095,9 @@
         public void Should_Select_Greediest_Provider()
         {
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<OverloadedProviders>();
+            factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<OverloadedProviders>();
 
             using (var context = new Context())
             {

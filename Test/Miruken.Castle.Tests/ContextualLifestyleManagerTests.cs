@@ -2,6 +2,7 @@
 {
     using System;
     using Callback;
+    using Callback.Policy;
     using Context;
     using global::Castle.MicroKernel;
     using global::Castle.MicroKernel.Registration;
@@ -31,6 +32,11 @@
             _rootContext.AddHandlers(_container);
             _container.Container.Register(Component.For<Controller>()
                 .LifestyleCustom<ContextualLifestyleManager>());
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<Controller>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]

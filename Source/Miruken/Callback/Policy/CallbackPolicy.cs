@@ -77,8 +77,8 @@
                 return dispatcher.Dispatch(this, callback, greedy, composer, results);
             var type = handler as Type ?? handler.GetType();
             var descriptor = HandlerDescriptorFactory.Current.GetDescriptor(type);
-            return descriptor.Dispatch(this, handler, callback, greedy, 
-                                       composer, results);
+            return descriptor?.Dispatch(this, handler, callback, greedy, 
+                                       composer, results) == true;
         }
 
         public IEnumerable<PolicyMemberBinding> GetMethods()
@@ -91,19 +91,19 @@
             return HandlerDescriptorFactory.Current.GetPolicyMembers<T>(this);
         }
 
-        public static IEnumerable<Type> GetInstanceHandlers(object callback)
+        public static IEnumerable<HandlerDescriptor> GetInstanceHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
             return HandlerDescriptorFactory.Current.GetInstanceHandlers(policy, callback);
         }
 
-        public static IEnumerable<Type> GetStaticHandlers(object callback)
+        public static IEnumerable<HandlerDescriptor> GetStaticHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
             return HandlerDescriptorFactory.Current.GetStaticHandlers(policy, callback);
         }
 
-        public static IEnumerable<Type> GetCallbackHandlers(object callback)
+        public static IEnumerable<HandlerDescriptor> GetCallbackHandlers(object callback)
         {
             var policy = GetCallbackPolicy(callback);
             return HandlerDescriptorFactory.Current.GetCallbackHandlers(policy, callback);

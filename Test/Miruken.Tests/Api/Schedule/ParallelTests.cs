@@ -17,8 +17,8 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<StockQuoteHandler>();
-            factory.GetDescriptor<Scheduler>();
+            factory.RegisterDescriptor<StockQuoteHandler>();
+            factory.RegisterDescriptor<Scheduler>();
             StockQuoteHandler.Called = 0;
         }
 

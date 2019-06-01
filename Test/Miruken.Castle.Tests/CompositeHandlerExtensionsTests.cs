@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Castle.Tests
 {
     using Callback;
+    using Callback.Policy;
     using Context;
     using global::Castle.MicroKernel.Registration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,6 +30,11 @@
                 container.Kernel.Resolver.AddSubResolver(new ExternalDependencyResolver()));
             _rootContext.AddHandlers(_container);
             _container.Container.Register(Component.For<MyHandler>());
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<MyHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]

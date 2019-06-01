@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Api;
     using Api.Cache;
     using Api.Oneway;
     using Api.Route;
@@ -50,12 +51,15 @@
         public override IEnumerable<FromDescriptor> GetFeatures()
         {
             yield return Types.From(
+                typeof(Provider),
+                typeof(ErrorsHandler),
                 typeof(CachedHandler),
                 typeof(OnewayHandler),
+                typeof(BatchRouter),
                 typeof(PassThroughRouter),
                 typeof(Scheduler),
-                typeof(ErrorsHandler),
-                typeof(LogFilter<,>));
+                typeof(Stash));
+            yield return Classes.FromThisAssembly();
         }
 
         public HandleFeature AddFilters(params IFilterProvider[] providers)
@@ -87,11 +91,8 @@
                 var selector = filter(from);
                 foreach (var basedOn in selector)
                 {
-                    basedOn.Unless(ExcludeHandler).Configure(handler =>
-                    {
-                        _configureHandlers?.Invoke(handler);
-                        HandlerDescriptorFactory.Current.GetDescriptor(handler.Implementation);
-                    });
+                    basedOn.Unless(ExcludeHandler).Configure(
+                        handler => _configureHandlers?.Invoke(handler));
                 }
             }
 
@@ -118,6 +119,8 @@
 
         private bool ExcludeHandler(Type handlerType)
         {
+            HandlerDescriptorFactory.Current.RegisterDescriptor(handlerType);
+            if (handlerType.IsDefined(typeof(UnmanagedAttribute), true)) return true;
             return _excludeHandlers?.GetInvocationList()
                 .Cast<Predicate<Type>>()
                 .Any(exclude => exclude(handlerType))
@@ -131,8 +134,7 @@
                 .WithServiceSelf();
             yield return descriptor.Where(
                 type => (RuntimeHelper.Is<IHandler>(type) ||
-                         type.Name.EndsWith("Handler")) &&
-                         !type.IsDefined(typeof(UnmanagedAttribute), true))
+                         type.Name.EndsWith("Handler")))
                 .WithServiceSelect(HandlerInterfaces)
                 .WithServiceSelf();
         }

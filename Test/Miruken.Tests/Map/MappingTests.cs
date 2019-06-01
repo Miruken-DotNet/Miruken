@@ -19,6 +19,10 @@
         public void TestInitialize()
         {
             _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<EntityMapping>();
+            _factory.RegisterDescriptor<ExplicitMapping>();
+            _factory.RegisterDescriptor<OpenMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
 
@@ -277,7 +281,7 @@
         [TestMethod]
         public void Should_Map_Resolving()
         {
-            _factory.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var exception = new ArgumentException("Value is bad");
             var value     = new ExceptionMapping().Infer()
                 .Map<object>(exception);
@@ -287,7 +291,7 @@
         [TestMethod]
         public void Should_Map_Simple_Results()
         {
-            _factory.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var handler   = new ExceptionMapping().Infer();
             var exception = new NotSupportedException("Close not found");
             var value     = handler.Map<object>(exception);
@@ -300,7 +304,7 @@
         [TestMethod]
         public void Should_Map_Simple_Default_If_Best_Effort()
         {
-            _factory.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var value = new ExceptionMapping()
                 .Infer().BestEffort()
                 .Map<int>(new AggregateException());
@@ -310,7 +314,7 @@
         [TestMethod]
         public async Task Should_Map_Simple_Default_If_Best_Effort_Async()
         {
-            _factory.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var value = await new ExceptionMapping()
                 .Infer().BestEffort()
                 .MapAsync<int>(new AggregateException());

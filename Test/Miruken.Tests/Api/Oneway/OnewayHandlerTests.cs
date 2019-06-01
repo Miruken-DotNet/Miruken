@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Api;
     using Miruken.Api.Oneway;
+    using Miruken.Callback.Policy;
 
     [TestClass]
     public class OnewayHandlerTests
@@ -13,6 +14,11 @@
         public void TestInitialize()
         {
             StockQuoteHandler.Called = 0;
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<StockQuoteHandler>();
+            factory.RegisterDescriptor<OnewayHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestMethod]

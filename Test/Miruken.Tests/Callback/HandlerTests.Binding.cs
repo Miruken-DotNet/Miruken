@@ -15,11 +15,12 @@
         {
             _handler = new StaticHandler();
             var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<PersonProvider>();
+            factory.RegisterDescriptor<LocalConfiguration>();
+            factory.RegisterDescriptor<RemoteConfiguration>();
+            factory.RegisterDescriptor<Hospital>();
+            factory.RegisterDescriptor<Client>();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<LocalConfiguration>();
-            factory.GetDescriptor<RemoteConfiguration>();
-            factory.GetDescriptor<Hospital>();
-            factory.GetDescriptor<Client>();
         }
 
         [TestMethod]

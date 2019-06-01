@@ -17,8 +17,11 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptorFactory.UseFactory(new MutableHandlerDescriptorFactory());
-            HandlerDescriptorFactory.Current.GetDescriptor<TeamHandler>();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<TeamHandler>();
+            factory.RegisterDescriptor<FilterProvider>();
+            factory.RegisterDescriptor<Stash>();
+            HandlerDescriptorFactory.UseFactory(factory);
 
             _handler = new TeamHandler() + new FilterProvider();
         }

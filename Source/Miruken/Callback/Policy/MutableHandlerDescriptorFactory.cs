@@ -31,14 +31,24 @@
         }
 
         public LifestyleAttribute ImplicitProvidesLifestyle { get; set; }
-      
+
         public HandlerDescriptor GetDescriptor(Type type)
+        {
+            return Descriptors.TryGetValue(type, out var descriptor)
+                 ? descriptor.Value
+                 : null;
+        }
+
+        public HandlerDescriptor RegisterDescriptor(Type type)
         {
             try
             {
-                return Descriptors.GetOrAdd(type,
+                var descriptor = Descriptors.GetOrAdd(type,
                         t => new Lazy<HandlerDescriptor>(() => CreateDescriptor(t)))
                     .Value;
+                if (descriptor == null)
+                    Descriptors.TryRemove(type, out _);
+                return descriptor;
             }
             catch
             {
@@ -47,17 +57,17 @@
             }
         }
 
-        public IEnumerable<Type> GetStaticHandlers(CallbackPolicy policy, object callback)
+        public IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback)
         {
             return GetCallbackHandlers(policy, callback, false, true);
         }
 
-        public IEnumerable<Type> GetInstanceHandlers(CallbackPolicy policy, object callback)
+        public IEnumerable<HandlerDescriptor> GetInstanceHandlers(CallbackPolicy policy, object callback)
         {
             return GetCallbackHandlers(policy, callback, true, false);
         }
 
-        public IEnumerable<Type> GetCallbackHandlers(CallbackPolicy policy, object callback)
+        public IEnumerable<HandlerDescriptor> GetCallbackHandlers(CallbackPolicy policy, object callback)
         {
             return GetCallbackHandlers(policy, callback, true, true);
         }
@@ -77,11 +87,11 @@
             });
         }
 
-        private IEnumerable<Type> GetCallbackHandlers(
+        private IEnumerable<HandlerDescriptor> GetCallbackHandlers(
             CallbackPolicy policy, object callback, bool instance, bool @static)
         {
             if (Descriptors.Count == 0)
-                return Enumerable.Empty<Type>();
+                return Enumerable.Empty<HandlerDescriptor>();
 
             List<PolicyMemberBinding> invariants = null;
             List<PolicyMemberBinding> compatible = null;
@@ -125,7 +135,7 @@
             }
 
             if (invariants == null && compatible == null)
-                return Enumerable.Empty<Type>();
+                return Enumerable.Empty<HandlerDescriptor>();
 
             var bindings = invariants == null ? compatible
                 : compatible == null ? invariants
@@ -137,11 +147,11 @@
                 if (handler.IsOpenGeneric)
                 {
                     var key = policy.GetKey(callback);
-                    return handler.CloseType(key, binding);
+                    return handler.CloseDescriptor(key, binding, this);
                 }
-                return handler.HandlerType;
+                return handler;
             })
-            .Where(type => type != null)
+            .Where(descriptor => descriptor != null)
             .Distinct();
         }
 
@@ -234,6 +244,9 @@
                 }
             }
 
+            if (instancePolicies == null && staticPolicies == null)
+                return null;
+
             var descriptor = new HandlerDescriptor(handlerType,
                 instancePolicies?.ToDictionary(p => p.Key,
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)),
@@ -287,4 +300,3 @@
                                            | BindingFlags.NonPublic;
     }
 }
-

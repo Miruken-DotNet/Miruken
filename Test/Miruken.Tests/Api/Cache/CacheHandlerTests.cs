@@ -7,6 +7,7 @@
     using Miruken.Api;
     using Miruken.Api.Cache;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
 
     [TestClass]
     public class CacheHandlerTests
@@ -16,6 +17,11 @@
         [TestInitialize]
         public void TestInitialize()
         {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<StockQuoteHandler>();
+            factory.RegisterDescriptor<CachedHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
+
             _handler = new StockQuoteHandler()
                      + new CachedHandler();
 

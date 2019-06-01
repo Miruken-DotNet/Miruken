@@ -9,8 +9,7 @@
     using Infrastructure;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class Mapping : ICallback,
-        IAsyncCallback, IDispatchCallback
+    public class Mapping : ICallback, IAsyncCallback, IDispatchCallback
     {
         private object _result;
 

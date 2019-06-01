@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Concurrency;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
@@ -11,6 +12,16 @@
     [TestClass]
     public class ValidationTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<ManageTeamHandler>();
+            factory.RegisterDescriptor<ValidatePlayer>();
+            factory.RegisterDescriptor<ValidateTeam>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod]
         public void Should_Validate_Target()
         {

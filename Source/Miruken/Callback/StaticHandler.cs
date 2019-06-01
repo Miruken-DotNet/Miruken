@@ -12,11 +12,11 @@
             var handled        = false;
             var factory        = HandlerDescriptorFactory.Current;
             var staticHandlers = factory.GetStaticHandlers(policy, callback);
-            foreach (var handler in staticHandlers)
+            foreach (var descriptor in staticHandlers)
             {
-                var descriptor = factory.GetDescriptor(handler);
-                if (descriptor.Dispatch(policy, handler, callback,
-                                        greedy, composer, results))
+                if (descriptor.Dispatch(
+                        policy, descriptor.HandlerType, callback, greedy,
+                        composer, results))
                 {
                     if (!greedy) return true;
                     handled = true;

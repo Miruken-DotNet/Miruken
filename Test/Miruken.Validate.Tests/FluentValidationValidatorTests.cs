@@ -4,7 +4,9 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Concurrency;
+    using DataAnnotations;
     using FluentValidation;
     using global::FluentValidation;
     using Infrastructure;
@@ -14,6 +16,17 @@
     [TestClass]
     public class FluentValidationValidatorTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<FluentValidationValidator>();
+            factory.RegisterDescriptor<ValidatorProvider>();
+            factory.RegisterDescriptor<FooValidatorProvider>();
+            factory.RegisterDescriptor<FooBarHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod]
         public async Task Should_Validate_Target()
         {

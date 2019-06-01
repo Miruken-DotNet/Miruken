@@ -10,9 +10,16 @@
     {
         private static IHandlerDescriptorFactory _factory;
 
-        public static HandlerDescriptor GetDescriptor<T>(this IHandlerDescriptorFactory factory)
+        public static HandlerDescriptor GetDescriptor<T>(
+            this IHandlerDescriptorFactory factory)
         {
             return factory.GetDescriptor(typeof(T));
+        }
+
+        public static HandlerDescriptor RegisterDescriptor<T>(
+            this IHandlerDescriptorFactory factory)
+        {
+            return factory.RegisterDescriptor(typeof(T));
         }
 
         public static IEnumerable<PolicyMemberBinding> GetPolicyMembers<T>(

@@ -20,9 +20,9 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
-            factory.GetDescriptor<StockQuoteHandler>();
-            factory.GetDescriptor<PassThroughRouter>();
-            factory.GetDescriptor<TrashHandler>();
+            factory.RegisterDescriptor<StockQuoteHandler>();
+            factory.RegisterDescriptor<PassThroughRouter>();
+            factory.RegisterDescriptor<TrashHandler>();
 
             _handler = new StockQuoteHandler()
                      + new PassThroughRouter()

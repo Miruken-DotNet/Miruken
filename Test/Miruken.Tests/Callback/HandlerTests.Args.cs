@@ -5,7 +5,9 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Api;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Concurrency;
 
     [TestClass]
@@ -14,6 +16,14 @@
         [TestInitialize]
         public void Setup()
         {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<InventoryHandler>();
+            factory.RegisterDescriptor<CustomerSupport>();
+            factory.RegisterDescriptor<ConfigurationHandler>();
+            factory.RegisterDescriptor<SimpleDependencyHandler>(); 
+            factory.RegisterDescriptor<Stash>();
+            HandlerDescriptorFactory.UseFactory(factory);
+
             NextId = 0;
         }
 

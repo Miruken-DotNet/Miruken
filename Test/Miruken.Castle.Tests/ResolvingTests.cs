@@ -3,6 +3,7 @@
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Callback;
+    using Callback.Policy;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.MicroKernel.Resolvers.SpecializedResolvers;
     using static Protocol;
@@ -117,6 +118,14 @@
                 container.Install(new FeaturesInstaller(new HandleFeature())
                     .Use(Classes.FromThisAssembly()));
             });
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<WindsorHandler>();
+            factory.RegisterDescriptor<EmailHandler>();
+            factory.RegisterDescriptor<OfflineHandler>();
+            factory.RegisterDescriptor<Billing>();
+            factory.RegisterDescriptor<DemoHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestCleanup]
