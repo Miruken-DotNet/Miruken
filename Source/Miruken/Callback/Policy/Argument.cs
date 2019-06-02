@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Bindings;
     using Concurrency;
+    using Functional;
     using Infrastructure;
 
     public class Argument

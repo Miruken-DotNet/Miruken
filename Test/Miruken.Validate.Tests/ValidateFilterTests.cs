@@ -15,6 +15,7 @@
     public class ValidateFilterTests
     {
         private IHandler _handler;
+        private IHandlerDescriptorFactory _factory;
 
         [ClassInitialize]
         public static void Initialize(TestContext context)
@@ -25,8 +26,12 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            HandlerDescriptor.ResetDescriptors();
-            HandlerDescriptor.GetDescriptor<TeamHandler>();
+            _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<TeamHandler>();
+            _factory.RegisterDescriptor<FilterProvider>();
+            _factory.RegisterDescriptor<DataAnnotationsValidator>();
+            _factory.RegisterDescriptor<FluentValidationValidator>();
+            HandlerDescriptorFactory.UseFactory(_factory);
 
             _handler = new TeamHandler()
                      + new FilterProvider()

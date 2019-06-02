@@ -9,7 +9,7 @@
         private Resolving[] _inferred;
 
         public Inference(object callback) : base(callback)
-        {   
+        {
         }
 
         public object InferCallback()
@@ -17,7 +17,7 @@
             return this;
         }
 
-        public override bool Dispatch(object handler, 
+        public override bool Dispatch(object handler,
             ref bool greedy, IHandler composer)
         {
             var handled = base.Dispatch(handler, ref greedy, composer);
@@ -34,7 +34,7 @@
 
         private Resolving[] CreateInferred() =>
             CallbackPolicy.GetCallbackHandlers(Callback)
-                .Select(handler => new Resolving(handler, Callback))
+                .Select(handler => new Resolving(handler.HandlerType, Callback))
                 .ToArray();
 
         public static object Get(object callback) => new Inference(callback);
@@ -43,7 +43,7 @@
     public sealed class InferDecorator : DecoratedHandler
     {
         public InferDecorator(IHandler handler) : base(handler)
-        {         
+        {
         }
 
         protected override bool HandleCallback(

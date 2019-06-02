@@ -14,6 +14,7 @@ namespace Miruken.Callback
         ICompositeHandler RemoveHandlers(params object[] handlers);
     }
 
+    [Unmanaged]
 	public class CompositeHandler : Handler, ICompositeHandler
 	{
         private readonly List<IHandler> _handlers = new List<IHandler>();

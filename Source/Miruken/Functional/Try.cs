@@ -1,4 +1,4 @@
-﻿namespace Miruken
+﻿namespace Miruken.Functional
 {
     public class Try<TE, TR> : Either<TE, TR>
     {

@@ -16,53 +16,20 @@ namespace Miruken.Callback.Policy
         private List<PolicyMemberBinding> _unknown;
         private IEnumerable<PolicyMemberBinding> _invariant;
 
-        public CallbackPolicyDescriptor(CallbackPolicy policy)
+        public CallbackPolicyDescriptor(CallbackPolicy policy,
+            IEnumerable<PolicyMemberBinding> bindings)
         {
             Policy      = policy;
             _typed      = new Dictionary<Type, List<PolicyMemberBinding>>();
             _compatible = new ConcurrentDictionary <object, List<PolicyMemberBinding>>();
+
+            foreach (var binding in bindings) AddBinding(binding);
         }
 
         public CallbackPolicy Policy { get; }
 
         public IEnumerable<PolicyMemberBinding> InvariantMembers =>
             LazyInitializer.EnsureInitialized(ref _invariant, GetInvariantMembers);
-
-        internal void Add(PolicyMemberBinding member)
-        {
-            var key = member.Key;
-            if (key == null)
-            {
-                var unknown = _unknown ??
-                    (_unknown = new List<PolicyMemberBinding>());
-                unknown.AddSorted(member,
-                    PolicyMemberBinding.OrderByArity);
-                return;
-            }
-
-            List<PolicyMemberBinding> members;
-
-            if (key is Type type)
-            {
-                if (!_typed.TryGetValue(type, out members))
-                {
-                    members = new List<PolicyMemberBinding>();
-                    _typed.Add(type, members);
-                }
-            }
-            else
-            {
-                var indexed = _indexed ?? 
-                    (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
-                if (!indexed.TryGetValue(key, out members))
-                {
-                    members = new List<PolicyMemberBinding>();
-                    indexed.Add(key, members);
-                }
-            }
-
-            members.AddSorted(member, PolicyMemberBinding.OrderByArity);
-        }
 
         private IEnumerable<PolicyMemberBinding> GetInvariantMembers()
         {
@@ -125,6 +92,42 @@ namespace Miruken.Callback.Policy
                 compatible.AddRange(_unknown);
 
             return compatible;
+        }
+
+        private void AddBinding(PolicyMemberBinding member)
+        {
+            var key = member.Key;
+            if (key == null)
+            {
+                var unknown = _unknown ??
+                              (_unknown = new List<PolicyMemberBinding>());
+                unknown.AddSorted(member,
+                    PolicyMemberBinding.OrderByArity);
+                return;
+            }
+
+            List<PolicyMemberBinding> members;
+
+            if (key is Type type)
+            {
+                if (!_typed.TryGetValue(type, out members))
+                {
+                    members = new List<PolicyMemberBinding>();
+                    _typed.Add(type, members);
+                }
+            }
+            else
+            {
+                var indexed = _indexed ??
+                              (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
+                if (!indexed.TryGetValue(key, out members))
+                {
+                    members = new List<PolicyMemberBinding>();
+                    indexed.Add(key, members);
+                }
+            }
+
+            members.AddSorted(member, PolicyMemberBinding.OrderByArity);
         }
     }
 }

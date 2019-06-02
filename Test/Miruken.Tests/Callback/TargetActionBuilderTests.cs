@@ -2,14 +2,24 @@
 {
     using System;
     using System.Linq;
+    using Functional;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
 
     [TestClass]
     public class TargetActionBuilderTests
     {
         private class Foo {}
         private class Bar<T> {}
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
 
         [TestMethod]
         public void Should_Create_No_Argument_Action()

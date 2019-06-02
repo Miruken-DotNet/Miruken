@@ -10,12 +10,12 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandleMethodBinding : MemberBinding
     {
-        private static readonly List<IFilterProvider> 
+        private static readonly List<IFilterProvider>
             _globalFilters = new List<IFilterProvider>();
 
         public HandleMethodBinding(MethodDispatch dispatch)
              : base(dispatch)
-        {       
+        {
         }
 
         public static IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
@@ -29,13 +29,13 @@
         public override bool Dispatch(object target, object callback,
             IHandler composer, ResultsDelegate results = null)
         {
-            var oldComposer  = Composer;
+            var oldComposer = Composer;
             var oldUnhandled = Unhandled;
             var handleMethod = (HandleMethod)callback;
 
             try
             {
-                Composer  = composer;
+                Composer = composer;
                 Unhandled = false;
                 return Invoke(handleMethod, target, composer);
             }
@@ -49,7 +49,7 @@
             finally
             {
                 Unhandled = oldUnhandled;
-                Composer  = oldComposer;
+                Composer = oldComposer;
             }
         }
 
@@ -59,7 +59,7 @@
             var arguments = handleMethod.Arguments;
             var filters = composer.GetOrderedFilters(
                 this, Dispatcher, typeof(HandleMethod),
-                Filters, Dispatcher.Owner.Filters, GlobalFilters);
+                Filters, Dispatcher.Owner?.Filters, GlobalFilters);
 
             if (filters == null) return false;
 
@@ -69,23 +69,23 @@
             if (filters.Count == 0)
             {
                 returnValue = Dispatcher.Invoke(target, arguments);
-                handled     = !Unhandled;
+                handled = !Unhandled;
             }
             else
             {
                 handled = Dispatcher.GetPipeline(typeof(HandleMethod))
                     .Invoke(this, target, handleMethod, handleMethod,
                         (IHandler comp, out bool completed) =>
-                    {
-                        completed = true;
-                        if (comp != null && !ReferenceEquals(composer, comp))
-                            Composer = comp;
-                        return Dispatcher.Invoke(target, arguments);
-                    },
+                        {
+                            completed = true;
+                            if (comp != null && !ReferenceEquals(composer, comp))
+                                Composer = comp;
+                            return Dispatcher.Invoke(target, arguments);
+                        },
                     composer, filters, out returnValue) && !Unhandled;
             }
 
-            handleMethod.ReturnValue = handled 
+            handleMethod.ReturnValue = handled
                    ? CoerceResult(returnValue, handleMethod.Method.ReturnType)
                    : RuntimeHelper.GetDefault(handleMethod.ResultType);
             return handled;
@@ -102,6 +102,6 @@
         }
 
         [ThreadStatic] internal static IHandler Composer;
-        [ThreadStatic] internal static bool     Unhandled;
+        [ThreadStatic] internal static bool Unhandled;
     }
 }

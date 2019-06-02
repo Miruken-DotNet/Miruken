@@ -14,10 +14,13 @@
         public void Setup()
         {
             _handler = new StaticHandler();
-            HandlerDescriptor.GetDescriptor<LocalConfiguration>();
-            HandlerDescriptor.GetDescriptor<RemoteConfiguration>();
-            HandlerDescriptor.GetDescriptor<Hospital>();
-            HandlerDescriptor.GetDescriptor<Client>();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<PersonProvider>();
+            factory.RegisterDescriptor<LocalConfiguration>();
+            factory.RegisterDescriptor<RemoteConfiguration>();
+            factory.RegisterDescriptor<Hospital>();
+            factory.RegisterDescriptor<Client>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestMethod]
@@ -128,7 +131,6 @@
 
         public class Hospital
         {
-            [Provides]
             public Hospital(
                 [Doctor]     IPerson doctor,
                 [Programmer] IPerson programmer)
@@ -171,7 +173,7 @@
 
         public class LocalConfiguration : IConfiguration
         {
-            [Provides, Singleton, Named("local")]
+            [Singleton, Named("local")]
             public LocalConfiguration()
             {
             }
@@ -191,7 +193,6 @@
 
         public class Client
         {
-            [Provides]
             public Client(
                 [Named("local")]  IConfiguration local,
                 [Named("remote")] IConfiguration remote)

@@ -4,6 +4,7 @@
     using System.Data;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Context;
     using static Protocol;
 
@@ -13,6 +14,15 @@
     [TestClass]
     public class ContextTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Counter>();
+            factory.RegisterDescriptor<Observer>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod]
         public void Should_Start_In_Active_State()
         {

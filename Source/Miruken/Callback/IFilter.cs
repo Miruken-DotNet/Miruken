@@ -9,10 +9,7 @@
     public delegate Task<Res> Next<Res>(
         IHandler composer = null, bool proceed = true);
 
-    public interface IFilter
-    {
-        int? Order { get; set; }
-    }
+    public interface IFilter : IOrdered { }
 
     public interface IFilter<in TCb, TRes> : IFilter
     {

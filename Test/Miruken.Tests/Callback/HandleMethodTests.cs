@@ -3,7 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Api;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Callback.Policy.Bindings;
     using static Protocol;
 
@@ -137,6 +139,18 @@
                 Console.WriteLine(result);
                 return result;
             }
+        }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<EmailHandler>();
+            factory.RegisterDescriptor<EmailHandler>();
+            factory.RegisterDescriptor<OfflineHandler>();
+            factory.RegisterDescriptor<DemoHandler>();
+            factory.RegisterDescriptor<Stash>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestMethod]

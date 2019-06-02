@@ -3,6 +3,7 @@
     using System;
     using Infrastructure;
 
+    [Unmanaged]
     public class Provider : Handler
     {
         private readonly object _value;

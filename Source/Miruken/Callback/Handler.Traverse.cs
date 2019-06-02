@@ -9,6 +9,7 @@ namespace Miruken.Callback
             ref bool greedy, IHandler composer);
     }
 
+    [Unmanaged]
     public class HandlerAxis : Handler, IHandlerAxis
     {
         private readonly IHandlerAxis _handler;

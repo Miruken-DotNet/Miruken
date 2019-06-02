@@ -74,6 +74,7 @@ namespace Miruken.Callback
         }
     }
 
+    [Unmanaged]
     public sealed class CallbackSemanticsDecorator : Handler, IDecorator
     {
         private readonly IHandler _handler;

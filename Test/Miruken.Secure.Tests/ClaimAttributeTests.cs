@@ -4,6 +4,7 @@
     using System.Security.Claims;
     using System.Security.Principal;
     using Callback;
+    using Callback.Policy;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -17,6 +18,11 @@
         {
             _identity  = new ClaimsIdentity(Array.Empty<Claim>(), "test");
             _principal = new ClaimsPrincipal(_identity);
+
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<MissileControl>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
         }
 
         [TestMethod]

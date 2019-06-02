@@ -5,12 +5,22 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Callback.Policy;
     using Miruken.Callback.Policy.Bindings;
     using Miruken.Concurrency;
 
     [TestClass]
     public class HandlerCommandTests
     {
+        [TestInitialize]
+        public void Setup()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<OrderHandler>();
+            factory.RegisterDescriptor<NullHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod]
         public void Should_Command_With_Result()
         {

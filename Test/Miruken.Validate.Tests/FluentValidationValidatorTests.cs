@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Callback;
+    using Callback.Policy;
     using Concurrency;
     using FluentValidation;
     using global::FluentValidation;
@@ -14,12 +15,23 @@
     [TestClass]
     public class FluentValidationValidatorTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<FluentValidationValidator>();
+            factory.RegisterDescriptor<ValidatorProvider>();
+            factory.RegisterDescriptor<FooValidatorProvider>();
+            factory.RegisterDescriptor<FooBarHandler>();
+            HandlerDescriptorFactory.UseFactory(factory);
+        }
+
         [TestMethod]
         public async Task Should_Validate_Target()
         {
             var handler = new FluentValidationValidator()
                         + new ValidatorProvider();
-            var player  = new Player();
+            var player = new Player();
             var outcome = await handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
@@ -33,11 +45,11 @@
         {
             var handler = new FluentValidationValidator()
                         + new ValidatorProvider();
-            var team    = new Team
+            var team = new Team
             {
-                Name    = "Arsenal",
-                Coach   = new Coach(),
-                Players = new []
+                Name = "Arsenal",
+                Coach = new Coach(),
+                Players = new[]
                 {
                     new Player(),
                     new Player
@@ -57,7 +69,7 @@
             var outcome = await handler.ValidateAsync(team);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
-            CollectionAssert.AreEquivalent(new [] { "Coach", "Players"}, outcome.Culprits);
+            CollectionAssert.AreEquivalent(new[] { "Coach", "Players" }, outcome.Culprits);
             Assert.AreEqual("'First Name' should not be empty.", outcome["Coach.FirstName"]);
             Assert.AreEqual("'Last Name' should not be empty.", outcome["Coach.LastName"]);
             Assert.AreEqual("'First Name' should not be empty.", outcome["Players[0].FirstName"]);
@@ -94,8 +106,8 @@
                         + new ValidatorProvider();
             var team = new Team
             {
-                Name    = "Arsenal",
-                Coach   = new Coach(),
+                Name = "Arsenal",
+                Coach = new Coach(),
                 Players = new[]
                 {
                     new Player
@@ -128,9 +140,9 @@
             var handler = new FluentValidationValidator()
                         + new FooValidatorProvider()
                         + new FooBarHandler();
-            var foo     = new Foo
+            var foo = new Foo
             {
-                Id   = Guid.Empty,
+                Id = Guid.Empty,
                 Name = "z"
             };
             var outcome = await handler.ValidateAsync(foo);
@@ -146,15 +158,14 @@
                         + new FooBarHandler();
             var foo = new Foo
             {
-                Id   = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = "Spike"
             };
             var bar = await handler.CommandAsync<Bar>(foo);
             Assert.IsNotNull(bar);
         }
 
-        [TestMethod,
-         ExpectedException(typeof(InvalidOperationException))]
+        [TestMethod]
         public async Task Should_Detect_Missing_Dependencies()
         {
             var handler = new FluentValidationValidator()
@@ -162,16 +173,28 @@
                         + new FooBarHandler { NoBar = true };
             var foo = new Foo
             {
-                Id   = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = "Patch"
             };
-            await handler.CommandAsync<Bar>(foo);
+            try
+            {
+                await handler.CommandAsync<Bar>(foo);
+                Assert.Fail("Expected an exception");
+            }
+            catch (InvalidOperationException)
+            {
+                // Asynchronous failure
+            }
+            catch (NotSupportedException)
+            {
+                // Synchronous failure
+            }
         }
     }
 
     public class Foo
     {
-        public Guid?  Id   { get; set; }
+        public Guid? Id { get; set; }
         public string Name { get; set; }
     }
 
@@ -199,11 +222,11 @@
         [Handles]
         public Promise Handle(Baz baz)
         {
-             return Promise.Delay(10.Millis())
-                      .Then((res, _) =>
-                 {
-                     if (!NoBar) Bar = new Bar();
-                 });
+            return Promise.Delay(10.Millis())
+                     .Then((res, _) =>
+                     {
+                         if (!NoBar) Bar = new Bar();
+                     });
         }
     }
 
@@ -238,9 +261,9 @@
     public class FooValidatorProvider : Handler
     {
         [Provides]
-        public IValidator<Foo>[] GetFooalidators()
+        public IValidator<Foo>[] GetFooValidators()
         {
-            return new[] {new FooValidator() };
+            return new[] { new FooValidator() };
         }
 
         [Provides]

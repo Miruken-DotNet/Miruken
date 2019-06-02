@@ -7,9 +7,15 @@
     using global::FluentValidation;
     using global::FluentValidation.Results;
     using global::FluentValidation.Validators;
+    using Infrastructure;
 
     public class FluentValidationValidator : Handler
     {
+        [Provides, Singleton]
+        public FluentValidationValidator()
+        {        
+        }
+
         [Validates(Scope = Scopes.Any)]
         public async Task Validate<T>(T target, Validation validation, IHandler composer)
         {
@@ -19,10 +25,12 @@
             var outcome = validation.Outcome;
             var scope   = validation.ScopeMatcher;
             var context = scope != null && scope != EqualsScopeMatcher.Default
-                ? new ValidationContext(target, null, new ScopeSelector(scope)) 
+                ? new ValidationContext(target, null, new ScopeSelector(scope))
                 : new ValidationContext(target);
             context.SetValidation(validation);
             context.SetComposer(composer);
+
+            Array.Sort(validators, OrderedComparer<IValidator<T>>.Instance);
 
             foreach (var validator in validators)
             {
@@ -62,7 +70,7 @@
         public static Validation GetValidation(this ValidationContext context)
         {
             return context.RootContextData.TryGetValue(ValidationKey, out var validation)
-                ? (Validation) validation
+                ? (Validation)validation
                 : null;
         }
 
@@ -74,7 +82,7 @@
         public static IHandler GetComposer(this ValidationContext context)
         {
             return context.RootContextData.TryGetValue(ComposerKey, out var composer)
-                ? (IHandler) composer
+                ? (IHandler)composer
                 : null;
         }
 
@@ -157,7 +165,7 @@
 
         public static IRuleBuilderInitial<T, TProperty>
             WithComposerCustomAsync<T, TProperty>(
-                this IRuleBuilder<T, TProperty> ruleBuilder, 
+                this IRuleBuilder<T, TProperty> ruleBuilder,
                 Func<TProperty, CustomContext, CancellationToken, IHandler, Task> action)
         {
             if (action == null)
@@ -165,7 +173,7 @@
             return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
             {
                 var composer = ctx.ParentContext?.GetComposer();
-                return composer != null 
+                return composer != null
                      ? action(prop, ctx, cancel, composer)
                      : Task.CompletedTask;
             });

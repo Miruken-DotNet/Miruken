@@ -13,6 +13,19 @@
     [TestClass]
     public class MappingTests
     {
+        private IHandlerDescriptorFactory _factory;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _factory = new MutableHandlerDescriptorFactory();
+            _factory.RegisterDescriptor<EntityMapping>();
+            _factory.RegisterDescriptor<ExplicitMapping>();
+            _factory.RegisterDescriptor<OpenMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
+            HandlerDescriptorFactory.UseFactory(_factory);
+        }
+
         [TestMethod]
         public void Should_Map_Implicitly()
         {
@@ -257,18 +270,18 @@
             var data = new Dictionary<string, object>
             {
                 {"Id",   1},
-                {"Name", "Geroge Best"}
+                {"Name", "George Best"}
             };
             var entity = new EntityMapping()
                 .Map<PlayerEntity>(data.ToArray());
             Assert.AreEqual(1, entity.Id);
-            Assert.AreEqual("Geroge Best", entity.Name);
+            Assert.AreEqual("George Best", entity.Name);
         }
 
         [TestMethod]
         public void Should_Map_Resolving()
         {
-            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var exception = new ArgumentException("Value is bad");
             var value     = new ExceptionMapping().Infer()
                 .Map<object>(exception);
@@ -278,7 +291,7 @@
         [TestMethod]
         public void Should_Map_Simple_Results()
         {
-            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var handler   = new ExceptionMapping().Infer();
             var exception = new NotSupportedException("Close not found");
             var value     = handler.Map<object>(exception);
@@ -291,7 +304,7 @@
         [TestMethod]
         public void Should_Map_Simple_Default_If_Best_Effort()
         {
-            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var value = new ExceptionMapping()
                 .Infer().BestEffort()
                 .Map<int>(new AggregateException());
@@ -301,7 +314,7 @@
         [TestMethod]
         public async Task Should_Map_Simple_Default_If_Best_Effort_Async()
         {
-            HandlerDescriptor.GetDescriptor<ExceptionMapping>();
+            _factory.RegisterDescriptor<ExceptionMapping>();
             var value = await new ExceptionMapping()
                 .Infer().BestEffort()
                 .MapAsync<int>(new AggregateException());
