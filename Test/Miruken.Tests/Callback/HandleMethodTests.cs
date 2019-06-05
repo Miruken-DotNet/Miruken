@@ -146,7 +146,6 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<EmailHandler>();
-            factory.RegisterDescriptor<EmailHandler>();
             factory.RegisterDescriptor<OfflineHandler>();
             factory.RegisterDescriptor<DemoHandler>();
             factory.RegisterDescriptor<Stash>();

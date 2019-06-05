@@ -6,7 +6,6 @@
     using Callback;
     using Callback.Policy;
     using Concurrency;
-    using DataAnnotations;
     using FluentValidation;
     using global::FluentValidation;
     using Infrastructure;

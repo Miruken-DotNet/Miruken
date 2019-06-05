@@ -779,8 +779,9 @@
         {
             var view    = new Screen();
             var factory = new MutableHandlerDescriptorFactory();
-            HandlerDescriptorFactory.UseFactory(factory);
+            factory.RegisterDescriptor<Provider>();
             factory.RegisterDescriptor(typeof(Controller<,>));
+            HandlerDescriptorFactory.UseFactory(factory);
             var instance = new StaticHandler().Infer()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNull(instance);

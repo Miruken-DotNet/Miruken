@@ -3,7 +3,6 @@
     using System;
     using System.Data;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Api;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Context;

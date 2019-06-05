@@ -157,10 +157,9 @@
 
         public class MetricsFilter<TReq, TResp> : DynamicFilter<TReq, TResp>
         {
-            public Task<TResp> Next(TReq request, Next<TResp> next,
-                                    [Proxy]IStash stash)
+            public Task<TResp> Next(TReq request, Next<TResp> next, IHandler composer)
             {
-                stash.Put("Hello");
+                composer.StashPut("Hello");
                 return next();
             }
         }

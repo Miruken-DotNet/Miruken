@@ -50,6 +50,7 @@
     <Compile Include="Api\Cache\CacheExtensions.cs" />
     <Compile Include="Api\Decorator.cs" />
     <Compile Include="Api\Handler.Api.cs" />
+    <Compile Include="Api\Handler.Stash.cs" />
     <Compile Include="Api\IRequest.cs" />
     <Compile Include="Api\Key.cs" />
     <Compile Include="Api\KeyExtensions.cs" />
@@ -70,6 +71,8 @@
     <Compile Include="Api\Schedule\Scheduler.cs" />
     <Compile Include="Api\Schedule\Sequential.cs" />
     <Compile Include="Api\Stash.cs" />
+    <Compile Include="Api\StashAction.cs" />
+    <Compile Include="Api\StashOf.cs" />
     <Compile Include="Callback\Batch.cs" />
     <Compile Include="Callback\Batched.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />

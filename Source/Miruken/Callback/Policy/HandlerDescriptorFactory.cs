@@ -10,6 +10,9 @@
     {
         private static IHandlerDescriptorFactory _factory;
 
+        private static readonly MutableHandlerDescriptorFactory
+            _default = new MutableHandlerDescriptorFactory();
+
         public static HandlerDescriptor GetDescriptor<T>(
             this IHandlerDescriptorFactory factory)
         {
@@ -17,9 +20,10 @@
         }
 
         public static HandlerDescriptor RegisterDescriptor<T>(
-            this IHandlerDescriptorFactory factory)
+            this IHandlerDescriptorFactory factory,
+            HandlerDescriptorVisitor visitor = null)
         {
-            return factory.RegisterDescriptor(typeof(T));
+            return factory.RegisterDescriptor(typeof(T), visitor);
         }
 
         public static IEnumerable<PolicyMemberBinding> GetPolicyMembers<T>(
@@ -29,8 +33,7 @@
                 .Where(m => (m.Key as Type)?.Is<T>() == true);
         }
 
-        public static IHandlerDescriptorFactory Current =>
-            _factory ?? MutableHandlerDescriptorFactory.Default;
+        public static IHandlerDescriptorFactory Current => _factory ?? _default;
 
         public static void UseFactory(IHandlerDescriptorFactory factory)
         {

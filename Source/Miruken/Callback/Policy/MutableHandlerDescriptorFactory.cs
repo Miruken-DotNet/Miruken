@@ -12,9 +12,6 @@
     {
         private readonly HandlerDescriptorVisitor _visitor;
 
-        public static readonly MutableHandlerDescriptorFactory 
-            Default = new MutableHandlerDescriptorFactory();
-
         private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
             Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
@@ -39,12 +36,13 @@
                  : null;
         }
 
-        public HandlerDescriptor RegisterDescriptor(Type type)
+        public HandlerDescriptor RegisterDescriptor(Type type,
+            HandlerDescriptorVisitor visitor = null)
         {
             try
             {
-                var descriptor = Descriptors.GetOrAdd(type,
-                        t => new Lazy<HandlerDescriptor>(() => CreateDescriptor(t)))
+                var descriptor = Descriptors.GetOrAdd(type, t =>
+                        new Lazy<HandlerDescriptor>(() => CreateDescriptor(t, visitor)))
                     .Value;
                 if (descriptor == null)
                     Descriptors.TryRemove(type, out _);
@@ -155,7 +153,8 @@
             .Distinct();
         }
 
-        private HandlerDescriptor CreateDescriptor(Type handlerType)
+        private HandlerDescriptor CreateDescriptor(Type handlerType,
+            HandlerDescriptorVisitor visitor = null)
         {
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies   = null;
@@ -253,18 +252,20 @@
                 staticPolicies?.ToDictionary(p => p.Key,
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)));
 
-            if (_visitor != null)
+            visitor = _visitor + visitor;
+
+            if (visitor != null)
             {
                 if (instancePolicies != null)
                 {
                     foreach (var binding in instancePolicies.SelectMany(p => p.Value))
-                        _visitor(descriptor, binding);
+                        visitor(descriptor, binding);
                 }
 
                 if (staticPolicies != null)
                 {
                     foreach (var binding in staticPolicies.SelectMany(p => p.Value))
-                        _visitor(descriptor, binding);
+                        visitor(descriptor, binding);
                 }
             }
 
