@@ -12,9 +12,6 @@
     {
         private readonly HandlerDescriptorVisitor _visitor;
 
-        public static readonly MutableHandlerDescriptorFactory 
-            Default = new MutableHandlerDescriptorFactory();
-
         private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
             Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 

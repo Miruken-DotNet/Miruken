@@ -59,8 +59,8 @@
         {
             var team = new Team
             {
-                Id     = 1,
-                Name   = "Liverpool Owen",
+                Id = 1,
+                Name = "Liverpool Owen",
                 Active = true
             };
 
@@ -73,7 +73,7 @@
         {
             var teams = new TeamHandler();
             var handler = teams + new FilterProvider();
-            var team  = await handler.Send(new CreateTeam
+            var team = await handler.Send(new CreateTeam
             {
                 Team = new Team
                 {
@@ -88,9 +88,9 @@
         }
         public class Team
         {
-            public int    Id       { get; set; }
-            public string Name     { get; set; }
-            public bool   Active   { get; set; }
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public bool Active { get; set; }
             public string Division { get; set; }
         }
 
@@ -127,10 +127,10 @@
             public Promise<Team> Create(CreateTeam create, IHandler composer)
             {
                 var team = create.Team;
-                team.Id     = ++_teamId;
+                team.Id = ++_teamId;
                 team.Active = true;
 
-                composer.Publish(new TeamCreated {Team = team});
+                composer.Publish(new TeamCreated { Team = team });
                 return Promise.Resolved(team);
             }
 
@@ -139,7 +139,7 @@
             {
                 var team = remove.Team;
                 team.Active = false;
-                composer.Publish(new TeamRemoved {Team = team});
+                composer.Publish(new TeamRemoved { Team = team });
             }
 
             [Handles]
@@ -157,10 +157,9 @@
 
         public class MetricsFilter<TReq, TResp> : DynamicFilter<TReq, TResp>
         {
-            public Task<TResp> Next(TReq request, Next<TResp> next,
-                                    [Proxy]IStash stash)
+            public Task<TResp> Next(TReq request, Next<TResp> next, IHandler composer)
             {
-                stash.Put("Hello");
+                composer.StashPut("Hello");
                 return next();
             }
         }
@@ -170,7 +169,7 @@
             [Provides]
             public MetricsFilter<TReq, TResp>[] GetMetricsFilter<TReq, TResp>()
             {
-                return new []
+                return new[]
                 {
                     new MetricsFilter<TReq, TResp>()
                 };

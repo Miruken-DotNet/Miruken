@@ -52,7 +52,7 @@
                 IFilterProvider provider)
             {
                 var order = new Order { Id = cancelOrder.OrderId };
-                composer.Proxy<IStash>().Put(order);
+                composer.StashPut(order);
                 return next();
             }
         }
@@ -73,8 +73,8 @@
         {
             var order   = new Order();
             var handler = new Stash();
-            handler.Proxy<IStash>().Put(order);
-            Assert.AreSame(order, handler.Proxy<IStash>().Get<Order>());
+            handler.StashPut(order);
+            Assert.AreSame(order, handler.StashGet<Order>());
         }
 
         [TestMethod]
@@ -82,9 +82,9 @@
         {
             var order   = new Order();
             var handler = new Stash();
-            var result  = handler.Proxy<IStash>().GetOrPut(order);
+            var result  = handler.StashGetOrPut(order);
             Assert.AreSame(order, result);
-            Assert.AreSame(order, handler.Proxy<IStash>().Get<Order>());
+            Assert.AreSame(order, handler.StashGet<Order>());
         }
 
         [TestMethod]
@@ -93,9 +93,9 @@
             var order   = new Order();
             var stash   = new Stash();
             var handler = stash + new Stash(true);
-            handler.Proxy<IStash>().Put(order);
-            handler.Proxy<IStash>().Drop<Order>();
-            Assert.IsNull(handler.Proxy<IStash>().Get<Order>());
+            handler.StashPut(order);
+            handler.StashDrop<Order>();
+            Assert.IsNull(handler.StashGet<Order>());
         }
 
         [TestMethod]
@@ -104,8 +104,8 @@
             var order    = new Order();
             var handler  = new Stash();
             var handler2 = new Stash() + handler;
-            handler.Proxy<IStash>().Put(order);
-            Assert.AreSame(order, handler2.Proxy<IStash>().Get<Order>());
+            handler.StashPut(order);
+            Assert.AreSame(order, handler2.StashGet<Order>());
         }
 
         [TestMethod]
@@ -114,9 +114,9 @@
             var order    = new Order();
             var handler  = new Stash();
             var handler2 = new Stash() + handler;
-            handler.Proxy<IStash>().Put(order);
-            handler2.Proxy<IStash>().Put<Order>(null);
-            Assert.IsNull(handler2.Proxy<IStash>().Get<Order>());
+            handler.StashPut(order);
+            handler2.StashPut<Order>(null);
+            Assert.IsNull(handler2.StashGet<Order>());
         }
 
         [TestMethod]

@@ -2,7 +2,6 @@ namespace Miruken.Callback
 {
     using System;
     using Policy;
-    using Policy.Bindings;
 
     public interface ICallback
     {
