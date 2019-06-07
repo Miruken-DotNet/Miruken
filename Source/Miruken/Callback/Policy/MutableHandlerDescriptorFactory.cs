@@ -202,7 +202,7 @@
                     if (constructor != null)
                     {
                         constructorDispatch = constructorDispatch
-                                            ?? new ConstructorDispatch(constructor, attributes);
+                            ?? new ConstructorDispatch(constructor, attributes);
                         memberBinding = new PolicyMemberBinding(policy,
                             new PolicyMemberBindingInfo(null, constructorDispatch, category)
                             {
