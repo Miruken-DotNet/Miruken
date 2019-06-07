@@ -1244,13 +1244,13 @@
         private class CustomHandler : Handler
         {
             [Handles]
-            public void HandleFooImplict(Foo foo)
+            public void HandleFooImplicit(Foo foo)
             {
                 ++foo.Handled;
             }
 
             [Handles]
-            public bool? HandleSpecialFooImplict(SpecialFoo foo, IHandler composer)
+            public bool? HandleSpecialFooImplicit(SpecialFoo foo, IHandler composer)
             {
                 ++foo.Handled;
                 foo.HasComposer = true;
@@ -1285,7 +1285,7 @@
             }
 
             [Handles]
-            public static void StaticHandleFooImplict(Foo foo)
+            public static void StaticHandleFooImplicit(Foo foo)
             {
                 ++foo.Handled;
             }
