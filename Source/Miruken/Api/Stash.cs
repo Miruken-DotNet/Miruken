@@ -16,7 +16,7 @@
             _data = new Dictionary<Type, object>();
         }
 
-        [Provides]
+        [Provides(Strict = true)]
         public T Provides<T>() where T : class
         {
             return _data.TryGetValue(typeof(T), out var data)
