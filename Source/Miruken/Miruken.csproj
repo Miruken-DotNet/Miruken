@@ -122,6 +122,7 @@
     <Compile Include="Callback\ResolvingAttribute.cs" />
     <Compile Include="Callback\SingletonLifestyle.cs" />
     <Compile Include="Callback\StaticHandler.cs" />
+    <Compile Include="Callback\StrictAttribute.cs" />
     <Compile Include="Callback\StringKey.cs" />
     <Compile Include="Callback\SkipFiltersAttribute.cs" />
     <Compile Include="Callback\TargetAction.cs" />
