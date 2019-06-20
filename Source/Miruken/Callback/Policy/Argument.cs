@@ -1,7 +1,6 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
     using Bindings;
@@ -18,17 +17,18 @@
             Lazy     = 1 << 0,
             Array    = 1 << 1,
             Simple   = 1 << 2,
-            Promise  = 1 << 3,
-            Task     = 1 << 4,
-            Optional = 1 << 5,
-            Maybe    = 1 << 6
+            Strict   = 1 << 3,
+            Promise  = 1 << 4,
+            Task     = 1 << 5,
+            Optional = 1 << 6,
+            Maybe    = 1 << 7
         }
 
         public Argument(ParameterInfo parameter)
         {
-            Parameter     = parameter;
-            ArgumentFlags = ExtractFlags(ParameterType);
-            Attributes    = Attribute.GetCustomAttributes(parameter, false);
+            var flags = Flags.None;
+            Parameter = parameter;
+            Attributes = Attribute.GetCustomAttributes(parameter, false);
 
             if (Attributes.Length == 0)
                 Attributes = Array.Empty<Attribute>();
@@ -44,11 +44,18 @@
                                     $"Only one KeyAttribute allowed for {parameter.Member}");
                             Key = key.Key;
                             break;
+                        case StrictAttribute _:
+                            flags |= Flags.Strict;
+                            break;
+                        case OptionalAttribute _:
+                            flags |= Flags.Optional;
+                            break;
                         case IArgumentResolver resolver:
                             if (Resolver != null)
                                 throw new InvalidOperationException(
                                     $"Only one IArgumentResolver allowed for {parameter.Member}");
                             Resolver = resolver;
+                            if (resolver.IsOptional) flags |= Flags.Optional;
                             break;
                         case ConstraintAttribute constraint:
                             Constraints += b => b.Require(constraint);
@@ -56,9 +63,8 @@
                     }        
                 }
             }
-            if (Resolver?.IsOptional == true ||
-                Attributes.OfType<OptionalAttribute>().Any())
-                ArgumentFlags |= Flags.Optional;
+
+            ArgumentFlags = ExtractFlags(ParameterType, flags);
 
             if (Resolver == null && ParameterType.IsInterface &&
                 (ParameterType.Is<IProtocol>() || ParameterType.Is<IResolving>()))
@@ -83,6 +89,7 @@
         public bool IsLazy        => ArgumentFlags.HasFlag(Flags.Lazy);
         public bool IsArray       => ArgumentFlags.HasFlag(Flags.Array);
         public bool IsSimple      => ArgumentFlags.HasFlag(Flags.Simple);
+        public bool IsStrict      => ArgumentFlags.HasFlag(Flags.Strict);
         public bool IsPromise     => ArgumentFlags.HasFlag(Flags.Promise);
         public bool IsTask        => ArgumentFlags.HasFlag(Flags.Task);
         public bool IsOptional    => ArgumentFlags.HasFlag(Flags.Optional);
@@ -91,9 +98,8 @@
         public bool IsInstanceOf(object argument) =>
             ParameterType.IsInstanceOfType(argument);
 
-        private Flags ExtractFlags(Type parameterType)
+        private Flags ExtractFlags(Type parameterType, Flags flags)
         {
-            var flags = Flags.None;
             var type  = parameterType;
             if (ExtractMaybe(ref type))
                 flags |= Flags.Maybe;
@@ -104,7 +110,7 @@
                 flags |= Flags.Promise;
             if (ExtractTask(ref type))
                 flags |= Flags.Task;
-            if (ExtractArray(ref type))
+            if (!flags.HasFlag(Flags.Strict) && ExtractArray(ref type))
                 flags |= Flags.Array;
             if (type.IsSimpleType())
                 flags |= Flags.Simple;

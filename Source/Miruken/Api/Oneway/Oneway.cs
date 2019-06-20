@@ -1,21 +1,20 @@
 ﻿namespace Miruken.Api.Oneway
 {
     using System;
-    using Api;
 
-    public class Oneway<TResp> : IDecorator
+    public class Oneway : IDecorator
     {
         public Oneway()
         {
         }
 
-        public Oneway(IRequest<TResp> request)
+        public Oneway(object request)
         {
             Request = request
-                   ?? throw new ArgumentNullException(nameof(request));
+                      ?? throw new ArgumentNullException(nameof(request));
         }
 
-        public IRequest<TResp> Request { get; set; }
+        public object Request { get; set; }
 
         object IDecorator.Decoratee => Request;
 
@@ -24,7 +23,7 @@
             if (ReferenceEquals(this, other))
                 return true;
 
-            return other is Oneway<TResp> otherOneway
+            return other is Oneway otherOneway
                    && Equals(Request, otherOneway.Request);
         }
 
