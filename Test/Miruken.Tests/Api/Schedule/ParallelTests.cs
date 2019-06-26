@@ -62,7 +62,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Propogate_Single_Exception()
+        public async Task Should_Propagate_Single_Exception()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();

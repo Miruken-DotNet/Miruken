@@ -1,12 +1,13 @@
 namespace Miruken.Tests.Api
 {
     using System;
+    using System.Threading;
     using Miruken.Callback;
     using Miruken.Concurrency;
 
     public class StockQuoteHandler : Handler
     {
-        public static int Called;
+        public static volatile int Called;
 
         private readonly Random random = new Random();
 
@@ -28,7 +29,7 @@ namespace Miruken.Tests.Api
         [Handles]
         public Promise SellStock(SellStock sell)
         {
-            ++Called;
+            Interlocked.Increment(ref Called);
 
             if (sell.Symbol == "EX")
                 throw new Exception("Stock Exchange is down");
