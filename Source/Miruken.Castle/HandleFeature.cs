@@ -52,6 +52,7 @@
         {
             yield return Types.From(
                 typeof(Provider),
+                typeof(ServiceProvider),
                 typeof(ErrorsHandler),
                 typeof(CachedHandler),
                 typeof(OnewayHandler),

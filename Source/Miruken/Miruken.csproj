@@ -120,6 +120,7 @@
     <Compile Include="Callback\ProxyAttribute.cs" />
     <Compile Include="Callback\NotHandledException.cs" />
     <Compile Include="Callback\ResolvingAttribute.cs" />
+    <Compile Include="Callback\ServiceProvider.cs" />
     <Compile Include="Callback\SingletonLifestyle.cs" />
     <Compile Include="Callback\StaticHandler.cs" />
     <Compile Include="Callback\StrictAttribute.cs" />
