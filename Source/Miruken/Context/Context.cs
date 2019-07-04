@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Miruken.Callback;
-using Miruken.Graph;
-
-namespace Miruken.Context
+﻿namespace Miruken.Context
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Threading;
+    using Callback;
+    using Graph;
+    using Microsoft.Extensions.DependencyInjection;
 
     public enum ContextState
     {
@@ -16,7 +16,7 @@ namespace Miruken.Context
     }
 
     public class Context : CompositeHandler,
-        IHandlerAxis, ITraversing, IDisposable
+        IHandlerAxis, ITraversing, IServiceScope
 	{
 	    private EventHandlerList _events;
 	    private ReaderWriterLockSlim _lock;
@@ -89,6 +89,8 @@ namespace Miruken.Context
 	            }
 	        }
 	    }
+
+	    public IServiceProvider ServiceProvider => this;
 
         public Context CreateChild()
 	    {

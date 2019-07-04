@@ -4,10 +4,12 @@ namespace Miruken.Callback.Policy
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Linq;
     using Bindings;
     using Infrastructure;
-    
+
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandlerDescriptor : FilteredObject
     {
         private readonly ConcurrentDictionary<object, HandlerDescriptor> _closed;
@@ -86,5 +88,7 @@ namespace Miruken.Callback.Policy
 
             return dispatched;
         }
+
+        private string DebuggerDisplay => $"{HandlerType.FullName}";
     }
 }

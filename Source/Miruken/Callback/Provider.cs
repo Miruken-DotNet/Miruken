@@ -9,13 +9,12 @@
         private readonly object _value;
         private readonly Type _providesType;
 
-        public Provider(object value)
+        public Provider(object value, bool strict = false)
         {
-            _value = value;
-            if (value == null)
+            _value = value ??
                 throw new ArgumentNullException(nameof(value));
             _providesType = value.GetType();
-            if (_providesType.IsArray)
+            if (!strict && _providesType.IsArray)
                 _providesType = _providesType.GetElementType();
         }
 
