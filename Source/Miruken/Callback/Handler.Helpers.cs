@@ -42,6 +42,12 @@
             return new Provider(result) + handler;
         }
 
+        public static IHandler Provider(this IHandler handler, IServiceProvider provider)
+        {
+            if (provider == null) return handler;
+            return new ServiceProvider(provider) + handler;
+        }
+
         public static object[] ResolveArgs(this IHandler handler, params Argument[] args)
         {
             if (handler == null)

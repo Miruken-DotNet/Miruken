@@ -1171,7 +1171,7 @@
 
         private class Foo : Callback
         {
-            public int Handled { get; set; }
+            public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
         }
 

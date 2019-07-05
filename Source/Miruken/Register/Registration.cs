@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Register
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Api;
     using Api.Cache;
@@ -18,21 +19,20 @@
     public class Registration
     {
         private SourceSelector _from;
+        private SourceSelector _fromPublic;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
-        public delegate void TypeSelector(IImplementationTypeSelector from);
+        public delegate void TypeSelector(IImplementationTypeSelector from, bool publicOnly);
 
-        public Registration()
-            : this(new ServiceCollection())
+        public Registration() : this(null)
         {
         }
 
         public Registration(IServiceCollection services)
         {
-            Services = services
-                ?? throw new ArgumentNullException(nameof(services));
+            Services = services ?? new ServiceCollection();
         }
 
         public IServiceCollection Services { get; }
@@ -41,6 +41,13 @@
         {
             foreach (var source in from)
                 _from += source;
+            return this;
+        }
+
+        public Registration FromPublic(params SourceSelector[] from)
+        {
+            foreach (var source in from)
+                _fromPublic += source;
             return this;
         }
 
@@ -58,32 +65,32 @@
             return this;
         }
 
-        public IHandlerDescriptorFactory CreateFactory(IHandlerDescriptorFactory factory = null)
+        public IHandlerDescriptorFactory CreateFactory()
         {
-            if (factory == null)
-                factory = new MutableHandlerDescriptorFactory();
+            var factory = new MutableHandlerDescriptorFactory
+            {
+                ImplicitProvidesLifestyle = null
+            };
 
             RegisterDefaultHandlers(factory);
 
-            if (_from != null)
+            if (_from != null || _fromPublic != null)
             {
                 Services.Scan(scan =>
                 {
-                    // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
-                    foreach (SourceSelector from in _from.GetInvocationList())
+                    foreach (var source in GetSources())
                     {
-                        var source = from(scan);
-                        source.AddClasses(cls => cls.Where(type =>
-                            !ShouldExclude(type) &&
+                        var from = source.Item1(scan);
+                        from.AddClasses(cls => cls.Where(
+                            type => !ShouldExclude(type) &&
                             (type.Is<IHandler>() || type.Is<IFilter>() ||
                              type.Is<IResolving>() || type.Name.EndsWith("Handler"))
-                        )).AsSelf().WithSingletonLifetime();
+                        ), source.Item2).AsSelf().WithSingletonLifetime();
 
-                        // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop
                         if (_select != null)
                         {
-                            foreach (TypeSelector select in _select.GetInvocationList())
-                                select(source);
+                            foreach (var select in _select.GetInvocationList())
+                                ((TypeSelector)select)(from, source.Item2);
                         }
                     }
                 });
@@ -100,11 +107,11 @@
             return factory;
         }
 
-        public IHandlerDescriptorFactory Register(IHandlerDescriptorFactory factory = null)
+        public IHandlerDescriptorFactory Register()
         {
-            var f = CreateFactory(factory);
-            HandlerDescriptorFactory.UseFactory(f);
-            return f;
+            var factory = CreateFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            return factory;
         }
 
         public Registration AddFilters(params IFilterProvider[] providers)
@@ -125,6 +132,21 @@
                        .Cast<Predicate<Type>>()
                        .Any(exclude => exclude(serviceType))
                 ?? false;
+        }
+
+        private IEnumerable<Tuple<SourceSelector, bool>> GetSources()
+        {
+            if (_from != null)
+            {
+                foreach (var from in _from.GetInvocationList())
+                    yield return Tuple.Create((SourceSelector)from, false);
+            }
+
+            if (_fromPublic != null)
+            {
+                foreach (var from in _fromPublic.GetInvocationList())
+                    yield return Tuple.Create((SourceSelector)from, true);
+            }
         }
 
         private static Type GetImplementationType(ServiceDescriptor descriptor)

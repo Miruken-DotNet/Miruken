@@ -31,16 +31,17 @@ namespace Miruken.Tests.Register
             Assert.IsTrue(_handler.Handle(new Action()));
         }
 
+        [TestMethod]
+        public void Should_Register_Handlers_As_Singleton_By_Default()
+        {
+            var handler = _handler.Resolve<PrivateHandler>();
+            Assert.AreSame(handler, _handler.Resolve<PrivateHandler>());
+        }
+
         public class Action { }
 
         private class PrivateHandler : Handler
         {
-            [Singleton]
-            public PrivateHandler()
-            {
-                
-            }
-
             [Handles]
             public void Process(Action action)
             {
