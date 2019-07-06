@@ -10,11 +10,13 @@
         private Task<T> _instance;
         private bool _initialized;
 
-        protected override bool IsCompatibleWithParent(Inquiry parent) => true;
+        protected override bool IsCompatibleWithParent(
+            Inquiry parent, LifestyleAttribute attribute) => true;
 
         protected override Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer)
+            Next<T> next, IHandler composer,
+            LifestyleAttribute attribute)
         {
             if (_initialized)
                 return _instance;

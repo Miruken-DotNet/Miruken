@@ -9,33 +9,29 @@
     using Policy;
     using Policy.Bindings;
 
-    public interface ILifestyle : IFilter
-    {
-        LifestyleAttribute Attribute { get; set; }
-    }
-
-    public abstract class Lifestyle<T> : IFilter<Inquiry, T>, ILifestyle
+    public abstract class Lifestyle<T> : IFilter<Inquiry, T>
     {
         public int? Order { get; set; } = int.MaxValue - 100;
-
-        public LifestyleAttribute Attribute { get; set; }
 
         public Task<T> Next(Inquiry callback,
             object rawCallback, MemberBinding member,
             IHandler composer, Next<T> next,
             IFilterProvider provider)
         {
-            var parent = callback.Parent;
-            return parent == null || IsCompatibleWithParent(parent)
-                 ? GetInstance(callback, member, next, composer)
+            var parent    = callback.Parent;
+            var attribute = provider as LifestyleAttribute;
+            return parent == null || IsCompatibleWithParent(parent, attribute)
+                 ? GetInstance(callback, member, next, composer, attribute)
                  : null;
         }
 
-        protected abstract bool IsCompatibleWithParent(Inquiry parent);
+        protected abstract bool IsCompatibleWithParent(
+            Inquiry parent, LifestyleAttribute attribute);
 
         protected abstract Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer);
+            Next<T> next, IHandler composer,
+            LifestyleAttribute attribute);
     }
 
     [AttributeUsage(
@@ -69,12 +65,9 @@
             Type callbackType, IHandler composer)
         {
             var lifestyle = Lifestyles.GetOrAdd(dispatcher, d =>
-            {
-                var l = (ILifestyle) Activator.CreateInstance(
-                    LifestyleType.MakeGenericType(d.LogicalReturnType));
-                l.Attribute = this;
-                return l;
-            });
+                (IFilter)Activator.CreateInstance(
+                    LifestyleType.MakeGenericType(d.LogicalReturnType))
+            );
 
             var filters = new [] { lifestyle };
             return !(this is IBindingConstraintProvider provider) ? filters

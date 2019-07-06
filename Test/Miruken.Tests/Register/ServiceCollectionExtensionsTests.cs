@@ -34,7 +34,7 @@
         public class CustomHandler : Handler
         {
             [Handles]
-            public void Foo(Foo foo)
+            public void HandleFoo(Foo foo)
             {
                 ++foo.Handled;
             }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Data;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
@@ -35,6 +36,20 @@
         {
             var context = new Context();        
             Assert.AreSame(context, context.Resolve<Context>());
+        }
+
+        [TestMethod]
+        public void Should_Get_Self_For_ServiceProvider()
+        {
+            var context = new Context();
+            Assert.AreSame(context, context.Resolve<IServiceProvider>());
+        }
+
+        [TestMethod]
+        public void Should_Get_Self_For_ServiceScopeFactory()
+        {
+            var context = new Context();
+            Assert.AreSame(context, context.Resolve<IServiceScopeFactory>());
         }
 
         [TestMethod]

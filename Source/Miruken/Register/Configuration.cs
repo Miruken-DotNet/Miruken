@@ -11,24 +11,30 @@
 
     public class Configuration
     {
-        private readonly ServiceDescriptor _descriptor;
+        private readonly ServiceDescriptor _serviceDescriptor;
         
         private static readonly ContextualAttribute Scoped    = new ContextualAttribute();
         private static readonly SingletonAttribute  Singleton = new SingletonAttribute();
 
-        private Configuration(ServiceDescriptor descriptor)
+        private Configuration(ServiceDescriptor serviceDescriptor)
         {
-            _descriptor = descriptor;
+            _serviceDescriptor = serviceDescriptor;
         }
 
         private void Configure(HandlerDescriptor descriptor, PolicyMemberBinding binding)
         {
+            var instance = _serviceDescriptor.ImplementationInstance;
+            var factory  = instance != null ? p => instance
+                         : _serviceDescriptor.ImplementationFactory;
+            if (factory != null)
+                binding.AddFilters(new InstanceProviderProvider(factory));
+
             if (binding.Dispatcher.IsStatic &&
                 binding.Dispatcher.Member is ConstructorInfo)
             {
                 var lifestyle = GetLifestyle(binding);
                 if (lifestyle != null) return;
-                switch (_descriptor.Lifetime)
+                switch (_serviceDescriptor.Lifetime)
                 {
                     case ServiceLifetime.Scoped:
                         binding.AddFilters(Scoped);

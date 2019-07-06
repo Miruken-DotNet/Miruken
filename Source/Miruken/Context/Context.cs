@@ -16,7 +16,7 @@
     }
 
     public class Context : CompositeHandler,
-        IHandlerAxis, ITraversing, IServiceScope
+        IHandlerAxis, ITraversing, IServiceScope, IServiceScopeFactory
 	{
 	    private EventHandlerList _events;
 	    private ReaderWriterLockSlim _lock;
@@ -122,7 +122,12 @@
 	        return child;
 	    }
 
-	    protected virtual Context InternalCreateChild()
+	    IServiceScope IServiceScopeFactory.CreateScope()
+	    {
+	        return CreateChild();
+	    }
+
+        protected virtual Context InternalCreateChild()
 	    {
             return new Context(this);
 	    }
@@ -297,7 +302,7 @@
 			IsDisposed = true;
 		}
 
-		protected virtual void Dispose(bool managed)
+	    protected virtual void Dispose(bool managed)
 		{
             End(Disposed);
 		}

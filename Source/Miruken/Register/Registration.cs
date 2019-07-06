@@ -37,6 +37,12 @@
 
         public IServiceCollection Services { get; }
 
+        public Registration Add(Action<IServiceCollection> services)
+        {
+            services?.Invoke(Services);
+            return this;
+        }
+
         public Registration From(params SourceSelector[] from)
         {
             foreach (var source in from)
@@ -65,12 +71,15 @@
             return this;
         }
 
-        public IHandlerDescriptorFactory CreateFactory()
+        public IHandlerDescriptorFactory Build(IHandlerDescriptorFactory factory = null)
         {
-            var factory = new MutableHandlerDescriptorFactory
+            if (factory == null)
             {
-                ImplicitProvidesLifestyle = null
-            };
+                factory = new MutableHandlerDescriptorFactory
+                {
+                    ImplicitProvidesLifestyle = null
+                };
+            }
 
             RegisterDefaultHandlers(factory);
 
@@ -107,9 +116,9 @@
             return factory;
         }
 
-        public IHandlerDescriptorFactory Register()
+        public IHandlerDescriptorFactory Register(IHandlerDescriptorFactory factory = null)
         {
-            var factory = CreateFactory();
+            factory = Build(factory);
             HandlerDescriptorFactory.UseFactory(factory);
             return factory;
         }
