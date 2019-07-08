@@ -17,7 +17,7 @@
         public void TestInitialize()
         {
             _handler = new ServiceCollection().AddMiruken(scan => scan
-                    .FromPublic(sources => sources.FromCallingAssembly())
+                    .PublicSources(sources => sources.FromCallingAssembly())
                     .WithValidation()
             );
         }

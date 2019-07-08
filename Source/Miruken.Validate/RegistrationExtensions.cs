@@ -7,7 +7,7 @@
     {
         public static Registration WithValidation(this Registration registration)
         {
-            return registration.From(sources => sources.FromAssemblyOf<Validation>())
+            return registration.Sources(sources => sources.FromAssemblyOf<Validation>())
                 .Select((from, publicOnly) => 
                     from.AddClasses(x => x.AssignableTo<IValidator>(), publicOnly));
         }

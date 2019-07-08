@@ -11,8 +11,8 @@
 
     public class Registration
     {
-        private SourceSelector _from;
-        private SourceSelector _fromPublic;
+        private SourceSelector _sources;
+        private SourceSelector _publicSources;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
         private readonly IServiceCollection _services;
@@ -29,17 +29,17 @@
             _services = services ?? new ServiceCollection();
         }
 
-        public Registration From(params SourceSelector[] from)
+        public Registration Sources(params SourceSelector[] sources)
         {
-            foreach (var source in from)
-                _from += source;
+            foreach (var source in sources)
+                _sources += source;
             return this;
         }
 
-        public Registration FromPublic(params SourceSelector[] from)
+        public Registration PublicSources(params SourceSelector[] sources)
         {
-            foreach (var source in from)
-                _fromPublic += source;
+            foreach (var source in sources)
+                _publicSources += source;
             return this;
         }
 
@@ -59,7 +59,7 @@
 
         public IServiceCollection Register()
         {
-            if (_from != null || _fromPublic != null)
+            if (_sources != null || _publicSources != null)
             {
                 _services.Scan(scan =>
                 {
@@ -106,16 +106,16 @@
 
         private IEnumerable<Tuple<SourceSelector, bool>> GetSources()
         {
-            if (_from != null)
+            if (_sources != null)
             {
-                foreach (var from in _from.GetInvocationList())
-                    yield return Tuple.Create((SourceSelector)from, false);
+                foreach (var source in _sources.GetInvocationList())
+                    yield return Tuple.Create((SourceSelector)source, false);
             }
 
-            if (_fromPublic != null)
+            if (_publicSources != null)
             {
-                foreach (var from in _fromPublic.GetInvocationList())
-                    yield return Tuple.Create((SourceSelector)from, true);
+                foreach (var source in _publicSources.GetInvocationList())
+                    yield return Tuple.Create((SourceSelector)source, true);
             }
         }
     }

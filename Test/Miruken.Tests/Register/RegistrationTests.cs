@@ -15,7 +15,7 @@ namespace Miruken.Tests.Register
         public void TestInitialize()
         {
             _handler = new ServiceCollection().AddMiruken(scan =>
-                scan.FromPublic(sources => sources.FromCallingAssembly())
+                scan.PublicSources(sources => sources.FromCallingAssembly())
             );
         }
 
