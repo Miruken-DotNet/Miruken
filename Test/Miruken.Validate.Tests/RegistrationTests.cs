@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using Callback;
-    using global::FluentValidation;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
@@ -17,8 +16,9 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            _handler = new ServiceCollection().AddMiruken(registration =>
-                registration.FromPublic(scan => scan.FromCallingAssembly())
+            _handler = new ServiceCollection()
+                .AddMiruken(registration => registration
+                    .FromPublic(scan => scan.FromCallingAssembly())
                     .WithValidation()
             );
         }
