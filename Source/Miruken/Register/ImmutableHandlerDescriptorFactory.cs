@@ -37,8 +37,10 @@
                 var implementationType = GetImplementationType(descriptor);
                 if (implementationType != null)
                 {
-                    Descriptors.Add(implementationType, CreateDescriptor(
-                        implementationType, ServiceConfiguration.For(descriptor)));
+                    var handler = CreateDescriptor(
+                        implementationType, ServiceConfiguration.For(descriptor));
+                    if (handler != null)
+                        Descriptors.Add(implementationType, handler);
                 }
             }
         }
