@@ -18,7 +18,7 @@
         {
             _handler = new ServiceCollection()
                 .AddMiruken(registration => registration
-                    .FromPublic(scan => scan.FromCallingAssembly())
+                    .FromPublic(sources => sources.FromCallingAssembly())
                     .WithValidation()
             );
         }
