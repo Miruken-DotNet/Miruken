@@ -3,15 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Api;
-    using Api.Cache;
-    using Api.Oneway;
-    using Api.Route;
-    using Api.Schedule;
     using Callback;
-    using Callback.Policy;
     using Callback.Policy.Bindings;
-    using Error;
     using Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
     using Scrutor;
@@ -22,6 +15,7 @@
         private SourceSelector _fromPublic;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
+        private readonly IServiceCollection _services;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
         public delegate void TypeSelector(IImplementationTypeSelector from, bool publicOnly);
@@ -32,15 +26,7 @@
 
         public Registration(IServiceCollection services)
         {
-            Services = services ?? new ServiceCollection();
-        }
-
-        public IServiceCollection Services { get; }
-
-        public Registration Add(Action<IServiceCollection> services)
-        {
-            services?.Invoke(Services);
-            return this;
+            _services = services ?? new ServiceCollection();
         }
 
         public Registration From(params SourceSelector[] from)
@@ -71,21 +57,11 @@
             return this;
         }
 
-        public IHandlerDescriptorFactory Build(IHandlerDescriptorFactory factory = null)
+        public IServiceCollection Register()
         {
-            if (factory == null)
-            {
-                factory = new MutableHandlerDescriptorFactory
-                {
-                    ImplicitProvidesLifestyle = null
-                };
-            }
-
-            RegisterDefaultHandlers(factory);
-
             if (_from != null || _fromPublic != null)
             {
-                Services.Scan(scan =>
+                _services.Scan(scan =>
                 {
                     foreach (var source in GetSources())
                     {
@@ -105,22 +81,7 @@
                 });
             }
 
-            foreach (var descriptor in Services)
-            {
-                var implementationType = GetImplementationType(descriptor);
-                if (implementationType != null)
-                    factory.RegisterDescriptor(implementationType,
-                        Configuration.For(descriptor));
-            }
-
-            return factory;
-        }
-
-        public IHandlerDescriptorFactory Register(IHandlerDescriptorFactory factory = null)
-        {
-            factory = Build(factory);
-            HandlerDescriptorFactory.UseFactory(factory);
-            return factory;
+            return _services;
         }
 
         public Registration AddFilters(params IFilterProvider[] providers)
@@ -156,38 +117,6 @@
                 foreach (var from in _fromPublic.GetInvocationList())
                     yield return Tuple.Create((SourceSelector)from, true);
             }
-        }
-
-        private static Type GetImplementationType(ServiceDescriptor descriptor)
-        {
-            if (descriptor.ImplementationType != null)
-                return descriptor.ImplementationType;
-
-            if (descriptor.ImplementationInstance != null)
-                return descriptor.ImplementationInstance.GetType();
-
-            if (descriptor.ImplementationFactory != null)
-            {
-                var typeArguments = descriptor.ImplementationFactory
-                    .GetType().GenericTypeArguments;
-                if (typeArguments.Length == 2)
-                    return typeArguments[1];
-            }
-
-            return null;
-        }
-
-        private static void RegisterDefaultHandlers(IHandlerDescriptorFactory factory)
-        {
-            factory.RegisterDescriptor<Provider>();
-            factory.RegisterDescriptor<ServiceProvider>();
-            factory.RegisterDescriptor<ErrorsHandler>();
-            factory.RegisterDescriptor<CachedHandler>();
-            factory.RegisterDescriptor<OnewayHandler>();
-            factory.RegisterDescriptor<BatchRouter>();
-            factory.RegisterDescriptor<PassThroughRouter>();
-            factory.RegisterDescriptor<Scheduler>();
-            factory.RegisterDescriptor<Stash>();
         }
     }
 }

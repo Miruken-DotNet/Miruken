@@ -9,14 +9,14 @@
     using Context;
     using Microsoft.Extensions.DependencyInjection;
 
-    public class Configuration
+    public class ServiceConfiguration
     {
         private readonly ServiceDescriptor _serviceDescriptor;
         
         private static readonly ContextualAttribute Scoped    = new ContextualAttribute();
         private static readonly SingletonAttribute  Singleton = new SingletonAttribute();
 
-        private Configuration(ServiceDescriptor serviceDescriptor)
+        private ServiceConfiguration(ServiceDescriptor serviceDescriptor)
         {
             _serviceDescriptor = serviceDescriptor;
         }
@@ -48,10 +48,10 @@
 
         public static HandlerDescriptorVisitor For(ServiceDescriptor descriptor)
         {
-            return new Configuration(descriptor).Configure;
+            return new ServiceConfiguration(descriptor).Configure;
         }
 
-        private static Type GetLifestyle(PolicyMemberBinding binding)
+        private static Type GetLifestyle(IFiltered binding)
         {
             return binding.Filters.OfType<LifestyleAttribute>()
                 .Select(provider => provider.LifestyleType)

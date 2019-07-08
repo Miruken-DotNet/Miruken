@@ -1,69 +1,75 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Register
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Bindings;
+    using Callback;
+    using Callback.Policy;
+    using Callback.Policy.Bindings;
     using Infrastructure;
+    using Microsoft.Extensions.DependencyInjection;
 
-    public class MutableHandlerDescriptorFactory : IHandlerDescriptorFactory
+    public class ImmutableHandlerDescriptorFactory : IHandlerDescriptorFactory
     {
         private readonly HandlerDescriptorVisitor _visitor;
 
-        private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
+        private readonly IDictionary<Type, HandlerDescriptor>
+            Descriptors = new Dictionary<Type, HandlerDescriptor>();
+
+        private readonly ConcurrentDictionary<Tuple<object, CallbackPolicy, bool, bool>,
+            IEnumerable<HandlerDescriptor>> HandlerCache = 
+            new ConcurrentDictionary<Tuple<object, CallbackPolicy, bool, bool>, IEnumerable<HandlerDescriptor>>();
 
         private static readonly Provides[] ImplicitProvides = { new Provides() };
 
-        public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
-        {      
-            ImplicitProvidesLifestyle = new SingletonAttribute();
+        public ImmutableHandlerDescriptorFactory(
+            IServiceCollection services,
+            HandlerDescriptorVisitor visitor = null)
+        {
+            if (services == null)
+                throw new ArgumentNullException(nameof(services));
             _visitor = visitor;
-        }
 
-        public LifestyleAttribute ImplicitProvidesLifestyle { get; set; }
+            foreach (var descriptor in services)
+            {
+                var implementationType = GetImplementationType(descriptor);
+                if (implementationType != null)
+                {
+                    Descriptors.Add(implementationType, CreateDescriptor(
+                        implementationType, ServiceConfiguration.For(descriptor)));
+                }
+            }
+        }
 
         public HandlerDescriptor GetDescriptor(Type type)
         {
             return Descriptors.TryGetValue(type, out var descriptor)
-                 ? descriptor.Value
-                 : null;
+                ? descriptor
+                : null;
         }
 
         public HandlerDescriptor RegisterDescriptor(Type type,
             HandlerDescriptorVisitor visitor = null)
         {
-            try
-            {
-                var descriptor = Descriptors.GetOrAdd(type, t =>
-                        new Lazy<HandlerDescriptor>(() => CreateDescriptor(t, visitor)))
-                    .Value;
-                if (descriptor == null)
-                    Descriptors.TryRemove(type, out _);
-                return descriptor;
-            }
-            catch
-            {
-                Descriptors.TryRemove(type, out _);
-                throw;
-            }
+            throw new NotSupportedException(
+                "This factory is immutable and does not support ad-hoc registrations");
         }
 
         public IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback)
         {
-            return GetCallbackHandlers(policy, callback, false, true);
+            return GetCachedCallbackHandlers(policy, callback, false, true);
         }
 
         public IEnumerable<HandlerDescriptor> GetInstanceHandlers(CallbackPolicy policy, object callback)
         {
-            return GetCallbackHandlers(policy, callback, true, false);
+            return GetCachedCallbackHandlers(policy, callback, true, false);
         }
 
         public IEnumerable<HandlerDescriptor> GetCallbackHandlers(CallbackPolicy policy, object callback)
         {
-            return GetCallbackHandlers(policy, callback, true, true);
+            return GetCachedCallbackHandlers(policy, callback, true, true);
         }
 
         public IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy)
@@ -71,7 +77,7 @@
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler = descriptor.Value.Value;
+                var handler = descriptor.Value;
                 var staticMembers = handler.StaticPolicies?.TryGetValue(policy, out cpd) == true
                     ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
                 var members = handler.Policies?.TryGetValue(policy, out cpd) == true
@@ -79,6 +85,14 @@
                 if (staticMembers == null) return members;
                 return members == null ? staticMembers : staticMembers.Concat(members);
             });
+        }
+
+        private IEnumerable<HandlerDescriptor> GetCachedCallbackHandlers(
+            CallbackPolicy policy, object callback, bool instance, bool @static)
+        {
+            var key = Tuple.Create(policy.GetKey(callback), policy, instance, @static);
+            return HandlerCache.GetOrAdd(key, k =>
+                GetCallbackHandlers(policy, callback, instance, @static));
         }
 
         private IEnumerable<HandlerDescriptor> GetCallbackHandlers(
@@ -92,7 +106,7 @@
 
             foreach (var descriptor in Descriptors)
             {
-                var handler = descriptor.Value.Value;
+                var handler = descriptor.Value;
                 CallbackPolicyDescriptor instanceCallbacks = null;
                 if (instance)
                     handler.Policies?.TryGetValue(policy, out instanceCallbacks);
@@ -153,15 +167,15 @@
             HandlerDescriptorVisitor visitor = null)
         {
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;
-            IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies   = null;
+            IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies = null;
 
             var members = handlerType.FindMembers(Members, Binding, IsCategory, null);
 
             foreach (var member in members)
             {
-                MethodInfo          method              = null;
-                MethodDispatch      methodDispatch      = null;
-                ConstructorInfo     constructor         = null;
+                MethodInfo method = null;
+                MethodDispatch methodDispatch = null;
+                ConstructorInfo constructor = null;
                 ConstructorDispatch constructorDispatch = null;
 
                 switch (member)
@@ -205,10 +219,6 @@
                                 OutKey = constructor.ReflectedType
                             });
 
-                        if (provideImplicit && ImplicitProvidesLifestyle != null &&
-                            !memberBinding.Filters.OfType<LifestyleAttribute>().Any())
-                            memberBinding.AddFilters(ImplicitProvidesLifestyle);
-
                         if (handlerType.Is<IInitialize>())
                             memberBinding.AddFilters(InitializeProvider.Instance);
                     }
@@ -220,7 +230,7 @@
                                 $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
                         methodDispatch = methodDispatch ?? new MethodDispatch(method, attributes);
-                        memberBinding  = rule.Bind(methodDispatch, category);
+                        memberBinding = rule.Bind(methodDispatch, category);
                     }
 
                     var policies = constructor != null || method.IsStatic
@@ -266,6 +276,25 @@
             }
 
             return descriptor;
+        }
+
+        private static Type GetImplementationType(ServiceDescriptor descriptor)
+        {
+            if (descriptor.ImplementationType != null)
+                return descriptor.ImplementationType;
+
+            if (descriptor.ImplementationInstance != null)
+                return descriptor.ImplementationInstance.GetType();
+
+            if (descriptor.ImplementationFactory != null)
+            {
+                var typeArguments = descriptor.ImplementationFactory
+                    .GetType().GenericTypeArguments;
+                if (typeArguments.Length == 2)
+                    return typeArguments[1];
+            }
+
+            return null;
         }
 
         private static bool IsCategory(MemberInfo member, object criteria)
