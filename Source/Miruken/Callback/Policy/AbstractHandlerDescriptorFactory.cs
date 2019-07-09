@@ -166,7 +166,6 @@
         private void AddImplicitLifestyle(PolicyMemberBinding binding)
         {
             if (ImplicitLifestyle != null &&
-                binding.Dispatcher.IsConstructor &&
                 ReferenceEquals(binding.Category, ImplicitProvides[0]) &&
                 !binding.Filters.OfType<LifestyleAttribute>().Any())
             {
