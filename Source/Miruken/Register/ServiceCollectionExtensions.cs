@@ -43,7 +43,7 @@
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
-            return new ImmutableHandlerDescriptorFactory(services);
+            return new ServiceCollectionHandlerDescriptorFactory(services);
         }
 
         public static IServiceCollection AddDefaultServices(this IServiceCollection services)
