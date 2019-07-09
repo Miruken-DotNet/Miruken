@@ -16,10 +16,11 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            _handler = new ServiceCollection().AddMiruken(scan => scan
+            _handler = new ServiceCollection()
+                .AddMiruken(scan => scan
                     .PublicSources(sources => sources.FromCallingAssembly())
                     .WithValidation()
-            );
+                );
         }
 
         [TestMethod]

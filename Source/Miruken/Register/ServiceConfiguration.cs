@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-    using System.Reflection;
     using Callback;
     using Callback.Policy;
     using Callback.Policy.Bindings;
@@ -29,8 +28,7 @@
             if (factory != null)
                 binding.AddFilters(new InstanceProviderProvider(factory));
 
-            if (binding.Dispatcher.IsStatic &&
-                binding.Dispatcher.Member is ConstructorInfo)
+            if (binding.Dispatcher.IsConstructor)
             {
                 var lifestyle = GetLifestyle(binding);
                 if (lifestyle != null) return;

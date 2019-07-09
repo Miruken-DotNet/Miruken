@@ -18,7 +18,7 @@
             _visitor = visitor;
         }
 
-        public LifestyleAttribute ImplicitProvidesLifestyle { get; set; }
+        public LifestyleAttribute ImplicitLifestyle { get; set; }
 
         public abstract HandlerDescriptor GetDescriptor(Type type);
 
@@ -101,10 +101,6 @@
                                 OutKey = constructor.ReflectedType
                             });
 
-                        if (provideImplicit && ImplicitProvidesLifestyle != null &&
-                            !memberBinding.Filters.OfType<LifestyleAttribute>().Any())
-                            memberBinding.AddFilters(ImplicitProvidesLifestyle);
-
                         if (handlerType.Is<IInitialize>())
                             memberBinding.AddFilters(InitializeProvider.Instance);
                     }
@@ -157,11 +153,25 @@
                 if (staticPolicies != null)
                 {
                     foreach (var binding in staticPolicies.SelectMany(p => p.Value))
+                    {
                         visitor(descriptor, binding);
+                        AddImplicitLifestyle(binding);
+                    }
                 }
             }
 
             return descriptor;
+        }
+
+        private void AddImplicitLifestyle(PolicyMemberBinding binding)
+        {
+            if (ImplicitLifestyle != null &&
+                binding.Dispatcher.IsConstructor &&
+                ReferenceEquals(binding.Category, ImplicitProvides[0]) &&
+                !binding.Filters.OfType<LifestyleAttribute>().Any())
+            {
+                binding.AddFilters(ImplicitLifestyle);
+            }
         }
 
         private static bool IsCategory(MemberInfo member, object criteria)

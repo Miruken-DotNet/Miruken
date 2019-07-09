@@ -14,9 +14,10 @@ namespace Miruken.Tests.Register
         [TestInitialize]
         public void TestInitialize()
         {
-            _handler = new ServiceCollection().AddMiruken(scan =>
-                scan.PublicSources(sources => sources.FromCallingAssembly())
-            );
+            _handler = new ServiceCollection()
+                .AddMiruken(scan =>
+                    scan.PublicSources(sources => sources.FromCallingAssembly())
+                );
         }
 
         [TestMethod]

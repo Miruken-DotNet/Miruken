@@ -61,14 +61,15 @@
         public Type                LogicalReturnType { get; }
         protected DispatchTypeEnum DispatchType      { get; set; }
 
-        public int  Arity       => Arguments.Length;
-        public bool IsVoid      => (DispatchType & NoReturn) > 0;
-        public bool IsPromise   => (DispatchType & ReturnPromise) > 0;
-        public bool IsTask      => (DispatchType & ReturnTask) > 0;
-        public bool IsStatic    => (DispatchType & StaticCall) > 0;
-        public bool IsLateBound => (DispatchType & LateBound) > 0;
-        public bool SkipFilters => (DispatchType & NoFilters) > 0;
-        public bool IsAsync     => IsPromise || IsTask;
+        public int  Arity         => Arguments.Length;
+        public bool IsVoid        => (DispatchType & NoReturn) > 0;
+        public bool IsPromise     => (DispatchType & ReturnPromise) > 0;
+        public bool IsTask        => (DispatchType & ReturnTask) > 0;
+        public bool IsStatic      => (DispatchType & StaticCall) > 0;
+        public bool IsLateBound   => (DispatchType & LateBound) > 0;
+        public bool SkipFilters   => (DispatchType & NoFilters) > 0;
+        public bool IsAsync       => IsPromise || IsTask;
+        public bool IsConstructor => IsStatic && Member is ConstructorInfo;
 
         public HandlerDescriptor Owner =>
             HandlerDescriptorFactory.Current.GetDescriptor(Member.ReflectedType);
