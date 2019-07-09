@@ -12,6 +12,7 @@ namespace Miruken.Callback.Policy
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandlerDescriptor : FilteredObject
     {
+        private readonly HandlerDescriptorVisitor _visitor;
         private readonly ConcurrentDictionary<object, HandlerDescriptor> _closed;
 
         private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
@@ -20,7 +21,8 @@ namespace Miruken.Callback.Policy
 
         public HandlerDescriptor(Type handlerType,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> policies,
-            IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies)
+            IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies,
+            HandlerDescriptorVisitor visitor = null)
         {
             if (handlerType == null)
                 throw new ArgumentNullException(nameof(handlerType));
@@ -36,7 +38,10 @@ namespace Miruken.Callback.Policy
             AddFilters(Attributes.OfType<IFilterProvider>().ToArray());
 
             if (handlerType.IsGenericTypeDefinition)
-                _closed = new ConcurrentDictionary<object, HandlerDescriptor>();
+            {
+                _visitor = visitor;
+                _closed  = new ConcurrentDictionary<object, HandlerDescriptor>();
+            }
         }
 
         public Type HandlerType { get; }
@@ -54,7 +59,7 @@ namespace Miruken.Callback.Policy
             return _closed.GetOrAdd(key, k =>
             {
                 var closedType = binding.CloseHandlerType(HandlerType, k);
-                return closedType != null ? factory.RegisterDescriptor(closedType) : null;
+                return closedType != null ? factory.RegisterDescriptor(closedType, _visitor) : null;
             });
         }
 
