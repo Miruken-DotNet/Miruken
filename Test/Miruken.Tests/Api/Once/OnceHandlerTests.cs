@@ -49,15 +49,12 @@
             {            
             }
 
-            protected override Promise<bool> IsHandled(Once once, IHandler composer)
+            protected override Promise Handle(Once once, IHandler composer)
             {
-                return Promise.Resolved(_requests.Contains(once.RequestId));
-            }
-
-            protected override Promise Handled(Once once, IHandler composer)
-            {
-                _requests.Add(once.RequestId);
-                return Promise.Empty;
+                if (_requests.Contains(once.RequestId))
+                    return Promise.Empty;
+                return composer.Send(once).Then((result, _) =>
+                    _requests.Add(once.RequestId));
             }
         }
     }
