@@ -49,12 +49,12 @@
             {            
             }
 
-            protected override Promise Handle(Once once, IHandler composer)
+            protected override Promise Handle(
+                Once once, IHandler composer, Func<Promise> proceed)
             {
-                if (_requests.Contains(once.RequestId))
-                    return Promise.Empty;
-                return composer.Send(once).Then((result, _) =>
-                    _requests.Add(once.RequestId));
+                return _requests.Contains(once.RequestId)
+                     ? Promise.Empty
+                     : proceed().Then((result, _) => _requests.Add(once.RequestId));
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Api.Once
 {
+    using System;
     using Api;
     using Callback;
     using Concurrency;
@@ -9,10 +10,10 @@
         [Handles]
         public Promise Once(Once once, IHandler composer)
         {
-            return Handle(once, composer);
+            return Handle(once, composer, () => composer.Send(once.Request));
         }
 
-        protected abstract Promise Handle(Once once, IHandler composer);
+        protected abstract Promise Handle(Once once, IHandler composer, Func<Promise> proceed);
     }
 
     public static class OnceExtensions
