@@ -9,24 +9,26 @@
 
     public class ContextualLifestyle<T> : Lifestyle<T>
     {
-        protected override bool IsCompatibleWithParent(Inquiry parent)
+        protected override bool IsCompatibleWithParent(
+            Inquiry parent, LifestyleAttribute attribute)
         {
             var parentDispatcher = parent?.Dispatcher;
             if (parentDispatcher == null) return true;
             return parentDispatcher.Attributes.OfType<LifestyleAttribute>()
                 .All(lifestyle => lifestyle is ContextualAttribute c &&
-                    ((Attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
+                    ((attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
         }
 
         protected override async Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
-            Next<T> next, IHandler composer)
+            Next<T> next, IHandler composer,
+            LifestyleAttribute attribute)
         {
             var context = composer.Resolve<Context>();
             if (context == null)
                 return await next(proceed: false);
 
-            if ((Attribute as ContextualAttribute)?.Rooted == true)
+            if ((attribute as ContextualAttribute)?.Rooted == true)
                 context = context.Root;
 
             return await _cache.GetOrAdd(context, async ctx =>

@@ -38,6 +38,13 @@
         }
 
         [TestMethod]
+        public void Should_Get_Self_For_ServiceProvider()
+        {
+            var context = new Context();
+            Assert.AreSame(context, context.Resolve<IServiceProvider>());
+        }
+
+        [TestMethod]
         public void Should_Not_Have_Parent_If_Root()
         {
             var context = new Context();

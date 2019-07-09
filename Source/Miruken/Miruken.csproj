@@ -94,6 +94,7 @@
     <Compile Include="Callback\KeyAttribute.cs" />
     <Compile Include="Callback\Lifestyle.cs" />
     <Compile Include="Callback\OptionalAttribute.cs" />
+    <Compile Include="Callback\Policy\AbstractHandlerDescriptorFactory.cs" />
     <Compile Include="Callback\Policy\Argument.cs" />
     <Compile Include="Callback\Policy\Bindings\BindingConstraint.cs" />
     <Compile Include="Callback\Policy\Bindings\BindingMetadata.cs" />
