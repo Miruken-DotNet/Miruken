@@ -26,6 +26,7 @@
             _factory.RegisterDescriptor<SpecialHandler>();
             _factory.RegisterDescriptor<SpecialAsyncHandler>();
             _factory.RegisterDescriptor<ArrayHandler>();
+            _factory.RegisterDescriptor<CallbackContextHandler>();
             _factory.RegisterDescriptor<FilteredHandler>();
             _factory.RegisterDescriptor<SpecialFilteredHandler>();
             _factory.RegisterDescriptor<FilterHandlerTests>();
@@ -55,6 +56,37 @@
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(foo));
             Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Callbacks_With_CallbackContext()
+        {
+            var foo     = new Foo();
+            var handler = new CallbackContextHandler();
+            Assert.IsTrue(handler.Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+            Assert.IsTrue(foo.HasComposer);
+        }
+
+        [TestMethod]
+        public void Should_Mark_Callback_Not_Handled()
+        {
+            var handler = new CallbackContextHandler();
+            Assert.IsFalse(handler.Handle(new Bar()));
+        }
+
+        [TestMethod]
+        public void Should_Mark_Promise_Callback_Not_Handled()
+        {
+            var handler = new CallbackContextHandler();
+            Assert.IsFalse(handler.Handle(new Baz()));
+        }
+
+        [TestMethod]
+        public void Should_Mark_Task_Callback_Not_Handled()
+        {
+            var handler = new CallbackContextHandler();
+            Assert.IsFalse(handler.Handle(new Boo()));
         }
 
         [TestMethod]
@@ -1598,6 +1630,36 @@
             public Type[] ProvidesTypes()
             {
                 return new[] { typeof(float), typeof(object) };
+            }
+        }
+
+        private class CallbackContextHandler : Handler
+        {
+            [Handles]
+            public void HandleFoo(Foo foo, CallbackContext context)
+            {
+                ++foo.Handled;
+                foo.HasComposer = context.Composer != null;
+            }
+
+            [Handles]
+            public void HandleBar(Bar bar, CallbackContext context)
+            {
+                context.NotHandled();
+            }
+
+            [Handles]
+            public Promise HandleBaz(Baz baz, CallbackContext context)
+            {
+                context.NotHandled();
+                return Promise.Delay(10.Millis());
+            }
+
+            [Handles]
+            public async Task HandleBoo(Boo boo, CallbackContext context)
+            {
+                context.NotHandled();
+                await Task.Delay(10);
             }
         }
 

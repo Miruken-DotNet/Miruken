@@ -73,6 +73,7 @@
     <Compile Include="Api\StashOf.cs" />
     <Compile Include="Callback\Batch.cs" />
     <Compile Include="Callback\Batched.cs" />
+    <Compile Include="Callback\CallbackContext.cs" />
     <Compile Include="Callback\DynamicFilter.cs" />
     <Compile Include="Callback\FilteredObject.cs" />
     <Compile Include="Callback\FilterInstancesProvider.cs" />
