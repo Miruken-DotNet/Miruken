@@ -21,5 +21,11 @@
         {
             Unhandled = true;
         }
+
+        public TRet NotHandled<TRet>(TRet result = default)
+        {
+            Unhandled = true;
+            return result;
+        }
     }
 }

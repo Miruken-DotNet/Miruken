@@ -76,6 +76,14 @@
         }
 
         [TestMethod]
+        public void Should_Mark_Callback_With_Return_Not_Handled()
+        {
+            var handler = new CallbackContextHandler();
+            Assert.IsTrue(handler.Handle(new Baz<int>(4)));
+            Assert.IsFalse(handler.Handle(new Baz<int>(22)));
+        }
+
+        [TestMethod]
         public void Should_Mark_Promise_Callback_Not_Handled()
         {
             var handler = new CallbackContextHandler();
@@ -1660,6 +1668,15 @@
             {
                 context.NotHandled();
                 await Task.Delay(10);
+            }
+
+            [Handles]
+            public async Task<int> HandleBaz(Baz<int> baz, CallbackContext context)
+            {
+                if (baz.Stuff > 10)
+                    return context.NotHandled<int>();
+                await Task.Delay(10);
+                return baz.Stuff;
             }
         }
 
