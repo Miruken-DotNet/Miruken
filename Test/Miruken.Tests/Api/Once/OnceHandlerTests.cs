@@ -9,7 +9,6 @@
     using Miruken.Api.Once;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
-    using Miruken.Concurrency;
 
     [TestClass]
     public class OnceHandlerTests
@@ -49,12 +48,14 @@
             {            
             }
 
-            protected override Promise Handle(
-                Once once, IHandler composer, Func<Promise> proceed)
+            protected override async Task Handle(
+                Once once, IHandler composer, Func<Task> proceed)
             {
-                return _requests.Contains(once.RequestId)
-                     ? Promise.Empty
-                     : proceed().Then((result, _) => _requests.Add(once.RequestId));
+                if (!_requests.Contains(once.RequestId))
+                {
+                    await proceed();
+                    _requests.Add(once.RequestId);
+                }
             }
         }
     }
