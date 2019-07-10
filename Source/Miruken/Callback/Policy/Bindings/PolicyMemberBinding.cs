@@ -118,7 +118,9 @@
 
             bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
             {
-                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler);
+                var args = ResolveArgs(
+                    dispatcher, callback, ruleArgs, handler, out var context);
+
                 switch (args)
                 {
                     case null:
@@ -129,12 +131,12 @@
                     case object[] array:
                         isPromise = false;
                         res = dispatcher.Invoke(target, array, resultType);
-                        return true;
+                        return context?.Unhandled != true;
                     case Promise<object[]> promise:
                         isPromise = true;
                         res = promise.Then((array, _) =>
                             dispatcher.Invoke(target, array, resultType));
-                        return true;
+                        return context?.Unhandled != true;
                     default:
                         isPromise = false;
                         res = Task.FromException(new InvalidOperationException(
@@ -206,8 +208,10 @@
         }
 
         private object ResolveArgs(MemberDispatch dispatcher,
-            object callback, object[] ruleArgs, IHandler composer)
+            object callback, object[] ruleArgs, IHandler composer,
+            out CallbackContext callbackContext)
         {
+            callbackContext = null;
             var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
@@ -225,6 +229,11 @@
                     resolved[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
                     resolved[i] = this;
+                else if (argumentType == typeof(CallbackContext))
+                {
+                    resolved[i] = callbackContext =
+                        new CallbackContext(callback, composer, this);
+                }
                 else if (argumentType == typeof(object))
                     return null;
                 else
