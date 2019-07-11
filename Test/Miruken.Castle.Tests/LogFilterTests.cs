@@ -4,10 +4,12 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Api;
     using Callback;
     using Callback.Policy;
     using Callback.Policy.Bindings;
     using Castle;
+    using Concurrency;
     using global::Castle.Facilities.Logging;
     using global::Castle.MicroKernel.Registration;
     using global::Castle.Services.Logging.NLogIntegration;
@@ -63,6 +65,7 @@
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<WindsorHandler>();
             factory.RegisterDescriptor<CallbackHandler>();
+            factory.RegisterDescriptor<BazHandler>();
             factory.RegisterDescriptor<ResolvingTests.EmailHandler>();
             HandlerDescriptorFactory.UseFactory(factory);
         }
@@ -89,6 +92,23 @@
                 @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Completed Bar").Success));
             Assert.IsTrue(events.Any(x => Regex.Match(x,
                 @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Completed Foo").Success));
+        }
+
+        [TestMethod]
+        public void Should_Log_Unhandled_Callbacks()
+        {
+            _handler.Chain(new BazHandler()).Infer().Send(new Baz());
+
+            var events = _memoryTarget.Logs;
+            Assert.AreEqual(4, events.Count);
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler.*Handling Baz").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"ERROR.*System.NotSupportedException Miruken\.Castle\.Tests\.LogFilterTests\+CallbackHandler Failed Baz.*System\.NotSupportedException: Miruken\.Concurrency\.Promise Handle\(Baz\) not handled").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+BazHandler.*Handling Baz").Success));
+            Assert.IsTrue(events.Any(x => Regex.Match(x,
+                @"DEBUG.*Miruken\.Castle\.Tests\.LogFilterTests\+BazHandler.*Completed Baz").Success));
         }
 
         [TestMethod]
@@ -150,6 +170,7 @@
 
         public class Foo { }
         public class Bar { }
+        public class Baz { }
 
         public class Bad
         {
@@ -174,9 +195,24 @@
             }
 
             [Handles]
+            public Promise Handle(Baz baz)
+            {
+                return null;
+            }
+
+            [Handles]
             public void Handle(Bad bad)
             {
                 throw bad.Exception;
+            }
+        }
+
+        [Unmanaged]
+        public class BazHandler : Handler
+        {
+            [Handles]
+            public void Handle(Baz baz)
+            {
             }
         }
 

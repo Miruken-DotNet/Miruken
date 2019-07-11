@@ -231,8 +231,8 @@
                     resolved[i] = this;
                 else if (argumentType == typeof(CallbackContext))
                 {
-                    resolved[i] = callbackContext =
-                        new CallbackContext(callback, composer, this);
+                    resolved[i] = callbackContext ?? (callbackContext =
+                        new CallbackContext(callback, composer, this));
                 }
                 else if (argumentType == typeof(object))
                     return null;
