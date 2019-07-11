@@ -95,9 +95,9 @@
         }
 
         [TestMethod]
-        public void Should_Log_Unhandled_Callbacks()
+        public async Task Should_Log_Unhandled_Callbacks()
         {
-            _handler.Chain(new BazHandler()).Infer().Send(new Baz());
+            await _handler.Chain(new BazHandler()).Infer().Send(new Baz());
 
             var events = _memoryTarget.Logs;
             Assert.AreEqual(4, events.Count);
