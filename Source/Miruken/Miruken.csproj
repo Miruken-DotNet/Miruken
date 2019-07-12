@@ -52,6 +52,7 @@
     <Compile Include="Api\Handler.Api.cs" />
     <Compile Include="Api\Handler.Stash.cs" />
     <Compile Include="Api\IRequest.cs" />
+    <Compile Include="Api\Once\DelegatingOnceStrategy.cs" />
     <Compile Include="Api\Once\IOnceStrategy.cs" />
     <Compile Include="Api\Once\Once.cs" />
     <Compile Include="Api\Once\OnceHandler.cs" />

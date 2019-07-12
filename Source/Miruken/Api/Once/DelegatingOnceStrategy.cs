@@ -1,0 +1,19 @@
+﻿namespace Miruken.Api.Once
+{
+    using System.Threading.Tasks;
+    using Callback;
+
+    public sealed class DelegatingOnceStrategy : IOnceStrategy
+    {
+        public static DelegatingOnceStrategy Instance = new DelegatingOnceStrategy();
+
+        private DelegatingOnceStrategy()
+        {            
+        }
+
+        public Task Complete(Once once, IHandler composer)
+        {
+            return composer.With(once).Send(once.Request);
+        }
+    }
+}
