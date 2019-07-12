@@ -17,12 +17,4 @@
             return composer.Send(oneway.Request);
         }
     }
-
-    public static class OnewayExtensions
-    {
-        public static Oneway Oneway<TResp>(this IRequest<TResp> request)
-        {
-            return new Oneway(request);
-        }
-    }
 }

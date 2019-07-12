@@ -3,6 +3,7 @@
     using System;
     using Api;
     using Api.Cache;
+    using Api.Once;
     using Api.Oneway;
     using Api.Route;
     using Api.Schedule;
@@ -56,6 +57,7 @@
             services.AddSingleton<ErrorsHandler>();
             services.AddSingleton<CachedHandler>();
             services.AddSingleton<OnewayHandler>();
+            services.AddSingleton<OnceHandler>();
             services.AddSingleton<PassThroughRouter>();
             services.AddSingleton<Scheduler>();
 

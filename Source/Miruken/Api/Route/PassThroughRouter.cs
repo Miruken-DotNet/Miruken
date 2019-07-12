@@ -4,11 +4,12 @@
     using Callback;
     using Concurrency;
 
+    [Unmanaged]
     public class PassThroughRouter : Handler
     {
         public const string Scheme = "pass-through";
 
-        [Handles]
+        [Handles, SkipFilters]
         public Promise Route(Routed request, IHandler composer)
         {
             return request.Route == Scheme
