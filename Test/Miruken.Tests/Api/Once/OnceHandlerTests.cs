@@ -9,6 +9,7 @@
     using Miruken.Api.Once;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Map;
 
     [TestClass]
     public class OnceHandlerTests
@@ -20,7 +21,8 @@
 
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<StockQuoteHandler>();
-            factory.RegisterDescriptor<TestOnceHandler>();
+            factory.RegisterDescriptor<OnceHandler>();
+            factory.RegisterDescriptor<TestOnceStrategy>();
             HandlerDescriptorFactory.UseFactory(factory);
         }
 
@@ -28,7 +30,8 @@
         public async Task Should_Handle_Once()
         {
             var handler = new StockQuoteHandler()
-                        + new TestOnceHandler();
+                        + new OnceHandler()
+                        + new TestOnceStrategy();
             Assert.AreEqual(0, StockQuoteHandler.Called);
             var getQuote = new GetStockQuote("AAPL").Once();
             await handler.Send(getQuote);
@@ -39,21 +42,21 @@
             Assert.AreEqual(2, StockQuoteHandler.Called);
         }
 
-        public class TestOnceHandler : OnceHandler
+        public class TestOnceStrategy : Handler, IOnceStrategy
         {
             private readonly HashSet<Guid> _requests = new HashSet<Guid>();
 
-            [Provides, Singleton]
-            public TestOnceHandler()
-            {            
+            [Maps]
+            public IOnceStrategy Once(GetStockQuote request)
+            {
+                return this;
             }
 
-            protected override async Task Handle(
-                Once once, IHandler composer, Func<Task> proceed)
+            public async Task Complete(Once once, IHandler composer)
             {
                 if (!_requests.Contains(once.RequestId))
                 {
-                    await proceed();
+                    await composer.Send(once.Request);
                     _requests.Add(once.RequestId);
                 }
             }

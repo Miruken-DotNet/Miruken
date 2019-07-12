@@ -35,4 +35,15 @@
             return Request?.GetHashCode() ?? 0;
         }
     }
+
+    public static class OnceExtensions
+    {
+        public static Once Once<TResp>(this IRequest<TResp> request, Guid? requestId = null)
+        {
+            var once = new Once(request);
+            if (requestId != null)
+                once.RequestId = requestId.Value;
+            return once;
+        }
+    }
 }

@@ -32,4 +32,13 @@
             return Request?.GetHashCode() ?? 0;
         }
     }
+
+    public static class OnewayExtensions
+    {
+        public static Oneway Oneway<TResp>(this IRequest<TResp> request)
+        {
+            return new Oneway(request);
+        }
+    }
+
 }

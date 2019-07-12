@@ -59,6 +59,7 @@
         private bool LogException(TRequest request,
             MemberBinding member, double elapsedMs, Exception ex)
         {
+            if (ex is NotHandledException) return false;
             var exceptionLogger = LoggerFactory?.Create(ex.GetType());
             if (exceptionLogger?.IsErrorEnabled == true)
             {
