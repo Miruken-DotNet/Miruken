@@ -5,6 +5,7 @@
     using System.Linq;
     using Api;
     using Api.Cache;
+    using Api.Once;
     using Api.Oneway;
     using Api.Route;
     using Api.Schedule;
@@ -56,6 +57,7 @@
                 typeof(ErrorsHandler),
                 typeof(CachedHandler),
                 typeof(OnewayHandler),
+                typeof(OnceHandler),
                 typeof(BatchRouter),
                 typeof(PassThroughRouter),
                 typeof(Scheduler),
