@@ -10,7 +10,15 @@
     {
         object IServiceProvider.GetService(Type service)
         {
-            return this.Resolve(service);
+            if (service == null)
+                throw new ArgumentNullException(nameof(service));
+
+            if (service.IsGenericEnumerable())
+                return this.ResolveAll(service.GetGenericArguments().Single());
+
+            return service.IsArray
+                 ? this.ResolveAll(service.GetElementType())
+                 : this.Resolve(service);
         }
     }
 

@@ -92,9 +92,9 @@
         [TestMethod]
         public void Should_Get_Toplevel_Interfaces()
         {
-            var toplevel = typeof(Bar).GetToplevelInterfaces();
+            var toplevel = typeof(Bar).GetTopLevelInterfaces();
             CollectionAssert.AreEqual(toplevel, new [] { typeof(IBar) });
-            toplevel = typeof(Baz).GetToplevelInterfaces();
+            toplevel = typeof(Baz).GetTopLevelInterfaces();
             CollectionAssert.AreEqual(toplevel, new[] { typeof(IBaz), typeof(IBoo) });
         }
 

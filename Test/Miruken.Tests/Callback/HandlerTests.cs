@@ -614,6 +614,26 @@
         }
 
         [TestMethod]
+        public void Should_Resolve_All_Enumerable_Using_IServiceProvider()
+        {
+            var handler = (IServiceProvider)new CustomHandler();
+            var bars    = ((IEnumerable<Bar>)handler.GetService(typeof(IEnumerable<Bar>))).ToArray();
+            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Array_Using_IServiceProvider()
+        {
+            var handler = (IServiceProvider)new CustomHandler();
+            var bars    = (Bar[])handler.GetService(typeof(Bar[]));
+            Assert.AreEqual(2, bars.Length);
+            Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
         public void Should_Resolve_All()
         {
             var custom = new CustomHandler();
