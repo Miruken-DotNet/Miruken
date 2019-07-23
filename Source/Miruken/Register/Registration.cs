@@ -18,7 +18,7 @@
         private readonly IServiceCollection _services;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
-        public delegate void TypeSelector(IImplementationTypeSelector from, bool publicOnly);
+        public delegate void TypeSelector(IImplementationTypeSelector source, bool publicOnly);
 
         public Registration() : this(null)
         {

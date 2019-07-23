@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections.Generic;
 
     [Unmanaged]
     public class ServiceProvider : Handler
@@ -17,7 +18,17 @@
         public object Provide(Inquiry inquiry)
         {
             var type = inquiry.Key as Type;
-            return type != null ? _provider.GetService(type) : null;
+            if (type != null)
+            {
+                if (inquiry.Many)
+                {
+                    var manyType = typeof(IEnumerable<>).MakeGenericType(type);
+                    return _provider.GetService(manyType);
+                }
+
+                return _provider.GetService(type);
+            }
+            return null;
         }
     }
 }

@@ -42,6 +42,12 @@
                 typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
         }
 
+        public static bool IsGenericEnumerable(this Type type)
+        {
+            return type.IsGenericType &&
+                   type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+        }
+
         public static bool IsCollection(object instance)
         {
             return instance is IEnumerable && !(instance is string);
@@ -72,7 +78,7 @@
             return RemoveAssemblyDetails(fullyQualifiedTypeName);
         }
 
-        public static Type[] GetToplevelInterfaces(this Type type)
+        public static Type[] GetTopLevelInterfaces(this Type type)
         {
             if (type == null) return Array.Empty<Type>();
             var allInterfaces = type.GetInterfaces();
