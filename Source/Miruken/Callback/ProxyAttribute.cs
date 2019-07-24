@@ -15,9 +15,9 @@
                 throw new NotSupportedException(
                     "Proxy parameters must be interfaces");
 
-            if (argument.IsArray)
+            if (argument.IsEnumerable)
                 throw new NotSupportedException(
-                    "Proxy parameters cannot be arrays");
+                    "Proxy parameters cannot be collections");
 
             if (argument.IsPromise || argument.IsTask)
                 throw new NotSupportedException(

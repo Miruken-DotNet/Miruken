@@ -25,7 +25,6 @@
                     var manyType = typeof(IEnumerable<>).MakeGenericType(type);
                     return _provider.GetService(manyType);
                 }
-
                 return _provider.GetService(type);
             }
             return null;

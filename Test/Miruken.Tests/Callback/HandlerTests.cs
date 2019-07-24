@@ -31,6 +31,8 @@
             _factory.RegisterDescriptor<SpecialFilteredHandler>();
             _factory.RegisterDescriptor<FilterHandlerTests>();
             _factory.RegisterDescriptor<Controller>();
+            _factory.RegisterDescriptor<BarEnumerableHolder>();
+            _factory.RegisterDescriptor<BarArrayHolder>();
             _factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
@@ -616,8 +618,8 @@
         [TestMethod]
         public void Should_Resolve_All_Enumerable_Using_IServiceProvider()
         {
-            var handler = (IServiceProvider) new CustomHandler();
-            var bars    = ((IEnumerable<Bar>) handler.GetService(typeof(IEnumerable<Bar>))).ToArray();
+            var handler = (IServiceProvider)new CustomHandler();
+            var bars    = ((IEnumerable<Bar>)handler.GetService(typeof(IEnumerable<Bar>))).ToArray();
             Assert.AreEqual(2, bars.Length);
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
@@ -626,11 +628,30 @@
         [TestMethod]
         public void Should_Resolve_All_Array_Using_IServiceProvider()
         {
-            var handler = (IServiceProvider) new CustomHandler();
-            var bars    = (Bar[]) handler.GetService(typeof(Bar[]));
-            Assert.AreEqual(2, bars.Length);
+            var handler = (IServiceProvider)new CustomHandler();
+            var bars    = (Bar[])handler.GetService(typeof(Bar[]));
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Enumerable_Dependencies()
+        {
+            var handler = new StaticHandler() + new CustomHandler();
+            var bars    = handler.Resolve<BarEnumerableHolder>();
+            Assert.IsNotNull(bars);
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Array_Dependencies()
+        {
+            var handler = new StaticHandler() + new CustomHandler();
+            var bars = handler.Resolve<BarArrayHolder>();
+            Assert.IsNotNull(bars);
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
         }
 
         [TestMethod]
@@ -1255,6 +1276,26 @@
 
         private class SpecialBar : Bar
         {
+        }
+
+        private class BarEnumerableHolder
+        {
+            public IEnumerable<Bar> Bars { get; }
+
+            public BarEnumerableHolder(IEnumerable<Bar> bars)
+            {
+                Bars = bars;
+            }
+        }
+
+        private class BarArrayHolder
+        {
+            public Bar[] Bars { get; }
+
+            public BarArrayHolder(Bar[] bars)
+            {
+                Bars = bars;
+            }
         }
 
         private class Boo : Callback
