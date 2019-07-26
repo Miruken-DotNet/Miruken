@@ -8,17 +8,9 @@
 
     public partial class Handler
     {
-        object IServiceProvider.GetService(Type service)
+        object IServiceProvider.GetService(Type serviceType)
         {
-            if (service == null)
-                throw new ArgumentNullException(nameof(service));
-
-            if (service.IsGenericEnumerable())
-                return this.ResolveAll(service.GetGenericArguments().Single());
-
-            return service.IsArray
-                 ? this.ResolveAll(service.GetElementType())
-                 : this.Resolve(service);
+            return this.GetService(serviceType);
         }
     }
 
@@ -176,6 +168,23 @@
                  : ResolveAllAsync(handler, typeof(T), constraints)
                       .Then((r, s) => r?.Cast<T>().ToArray() 
                                    ?? Array.Empty<T>());
+        }
+
+        public static object GetService(this IHandler handler,
+            Type serviceType, Action<ConstraintBuilder> constraints = null)
+        {
+            if (serviceType == null)
+                throw new ArgumentNullException(nameof(serviceType));
+
+            if (serviceType.IsGenericEnumerable())
+            {
+                var actualType = serviceType.GetGenericArguments().Single();
+                return handler.ResolveAll(actualType, constraints);
+            }
+
+            return serviceType.IsArray
+                ? handler.ResolveAll(serviceType.GetElementType(), constraints)
+                : handler.Resolve(serviceType, constraints);
         }
 
         private static object[] CoerceArray(object[] array, object key)

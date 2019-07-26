@@ -5,7 +5,7 @@ namespace Miruken.Concurrency
 {
     public abstract class AbstractAsyncResult : IAsyncResult
     {
-        private int _completed;
+        private volatile int _completed;
         private readonly AsyncCallback _callback;
         private object _waitEvent;
         protected Exception _exception;

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Miruken.Callback;
-using Miruken.Graph;
-
-namespace Miruken.Context
+﻿namespace Miruken.Context
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Threading;
+    using Callback;
+    using Graph;
 
     public enum ContextState
     {
@@ -95,7 +94,7 @@ namespace Miruken.Context
             AssertActive();
 	        var child = InternalCreateChild();
 	        child.ContextEnding += (ctx, reason) => 
-	            Raise(ContextEvents.ChildContextEnding, ctx, reason);
+	            Raise(ChildContextEndingEvent, ctx, reason);
             child.ContextEnded += (ctx, reason) => {
                 _lock.EnterWriteLock();
                 try
@@ -106,7 +105,7 @@ namespace Miruken.Context
                 {
                     _lock.ExitWriteLock();
                 }
-                Raise(ContextEvents.ChildContextEnded, ctx, reason);
+                Raise(ChildContextEndedEvent, ctx, reason);
             };
 	        _lock.EnterWriteLock();
 	        try
@@ -120,7 +119,7 @@ namespace Miruken.Context
 	        return child;
 	    }
 
-	    protected virtual Context InternalCreateChild()
+        protected virtual Context InternalCreateChild()
 	    {
             return new Context(this);
 	    }
@@ -205,7 +204,7 @@ namespace Miruken.Context
 	            return;
 
             State = ContextState.Ending;
-            Raise(ContextEvents.ContextEnding, this, reason);
+            Raise(ContextEndingEvent, this, reason);
 
             try
             {
@@ -215,7 +214,7 @@ namespace Miruken.Context
             finally
             {
                 State = ContextState.Ended;
-                Raise(ContextEvents.ContextEnded, this, reason);
+                Raise(ContextEndedEvent, this, reason);
                 _events.Dispose();
                 _lock.Dispose();
                 _events = null;
@@ -236,15 +235,16 @@ namespace Miruken.Context
                 switch (State)
                 {
                     case ContextState.Active:
-                        _events.AddHandler(ContextEvents.ContextEnding, value);
+                        _events.AddHandler(ContextEndingEvent, value);
                         break;
                     case ContextState.Ending:
                         value(this, AlreadyEnded);
                         break;
                 }
             }
-            remove => _events.RemoveHandler(ContextEvents.ContextEnding, value);
-        } 
+            remove => _events.RemoveHandler(ContextEndingEvent, value);
+        }
+	    private static readonly object ContextEndingEvent = new object();
 
         public event Action<Context, object> ContextEnded
         {
@@ -253,27 +253,36 @@ namespace Miruken.Context
                 switch (State)
                 {
                     case ContextState.Active:
-                        _events.AddHandler(ContextEvents.ContextEnded, value);
+                        _events.AddHandler(ContextEndedEvent, value);
                         break;
                     case ContextState.Ended:
                         value(this, AlreadyEnded);
                         break;
                 }
             }
-            remove => _events.RemoveHandler(ContextEvents.ContextEnded, value);
+            remove => _events.RemoveHandler(ContextEndedEvent, value);
         }
+	    private static readonly object ContextEndedEvent = new object();
 
         public event Action<Context, object> ChildContextEnding
         {
-            add => _events?.AddHandler(ContextEvents.ChildContextEnding, value);
-            remove => _events.RemoveHandler(ContextEvents.ChildContextEnding, value);
+            add => _events?.AddHandler(ChildContextEndingEvent, value);
+            remove => _events.RemoveHandler(ChildContextEndingEvent, value);
         }
+	    private static readonly object ChildContextEndingEvent = new object();
 
         public event Action<Context, object> ChildContextEnded
         {
-            add => _events?.AddHandler(ContextEvents.ChildContextEnded, value);
-            remove => _events.RemoveHandler(ContextEvents.ChildContextEnded, value);
+            add => _events?.AddHandler(ChildContextEndedEvent, value);
+            remove => _events.RemoveHandler(ChildContextEndedEvent, value);
         }
+	    private static readonly object ChildContextEndedEvent = new object();
+
+	    private void Raise(object key, Context context, object reason)
+	    {
+	        var eventHandler = (Action<Context, object>)_events?[key];
+	        eventHandler?.Invoke(context, reason);
+	    }
 
         #endregion
 
@@ -295,31 +304,17 @@ namespace Miruken.Context
 			IsDisposed = true;
 		}
 
-		protected virtual void Dispose(bool managed)
+	    protected virtual void Dispose(bool managed)
 		{
             End(Disposed);
 		}
 
 		#endregion
 
-        private void Raise(object key, Context context, object reason)
-        {
-            var eventHandler = (Action<Context, object>) _events?[key];
-            eventHandler?.Invoke(context, reason);
-        }
-
         private void AssertActive()
         {
             if (State != ContextState.Active)
                 throw new Exception("The context has already ended");
         }
-	}
-
-    internal static class ContextEvents
-    {
-        public static readonly object ContextEnding      = new object();
-        public static readonly object ContextEnded       = new object();
-        public static readonly object ChildContextEnding = new object();
-        public static readonly object ChildContextEnded  = new object();
     }
 }

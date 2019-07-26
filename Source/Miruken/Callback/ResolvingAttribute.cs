@@ -109,7 +109,7 @@
             var argumentType = argument.ArgumentType;
             var logicalType  = argument.LogicalType;
 
-            if (argument.IsArray)
+            if (argument.IsEnumerable)
             {
                 if (argument.IsPromise)
                 {

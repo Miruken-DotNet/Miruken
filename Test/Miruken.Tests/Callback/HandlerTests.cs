@@ -25,12 +25,15 @@
             _factory.RegisterDescriptor<CustomAsyncHandler>();
             _factory.RegisterDescriptor<SpecialHandler>();
             _factory.RegisterDescriptor<SpecialAsyncHandler>();
+            _factory.RegisterDescriptor<OptionalHandler>();
             _factory.RegisterDescriptor<ArrayHandler>();
             _factory.RegisterDescriptor<CallbackContextHandler>();
             _factory.RegisterDescriptor<FilteredHandler>();
             _factory.RegisterDescriptor<SpecialFilteredHandler>();
             _factory.RegisterDescriptor<FilterHandlerTests>();
             _factory.RegisterDescriptor<Controller>();
+            _factory.RegisterDescriptor<BarEnumerableHolder>();
+            _factory.RegisterDescriptor<BarArrayHolder>();
             _factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(_factory);
         }
@@ -175,6 +178,28 @@
             var handler = new CustomHandler();
             Assert.IsTrue(handler.Handle(baz));
             Assert.AreEqual(0, baz.Stuff);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Callbacks_With_Default_Arguments()
+        {
+            var foo     = new Foo();
+            var handler = new OptionalHandler();
+            Assert.IsTrue(handler.Handle(foo));
+            Assert.AreEqual(0, foo.Handled);
+            Assert.IsTrue(handler.With(new Bar()).Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Callbacks_With_Optional_Arguments()
+        {
+            var bar     = new Bar();
+            var handler = new OptionalHandler();
+            Assert.IsTrue(handler.Handle(bar));
+            Assert.AreEqual(0, bar.Handled);
+            Assert.IsTrue(handler.With(new Foo()).Handle(bar));
+            Assert.AreEqual(1, bar.Handled);
         }
 
         [TestMethod]
@@ -628,9 +653,28 @@
         {
             var handler = (IServiceProvider)new CustomHandler();
             var bars    = (Bar[])handler.GetService(typeof(Bar[]));
-            Assert.AreEqual(2, bars.Length);
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Enumerable_Dependencies()
+        {
+            var handler = new StaticHandler() + new CustomHandler();
+            var bars    = handler.Resolve<BarEnumerableHolder>();
+            Assert.IsNotNull(bars);
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+        }
+
+        [TestMethod]
+        public void Should_Resolve_All_Array_Dependencies()
+        {
+            var handler = new StaticHandler() + new CustomHandler();
+            var bars = handler.Resolve<BarArrayHolder>();
+            Assert.IsNotNull(bars);
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
         }
 
         [TestMethod]
@@ -1231,7 +1275,7 @@
 
         private class Foo : Callback
         {
-            public int Handled { get; set; }
+            public int  Handled     { get; set; }
             public bool HasComposer { get; set; }
         }
 
@@ -1255,6 +1299,26 @@
 
         private class SpecialBar : Bar
         {
+        }
+
+        private class BarEnumerableHolder
+        {
+            public IEnumerable<Bar> Bars { get; }
+
+            public BarEnumerableHolder(IEnumerable<Bar> bars)
+            {
+                Bars = bars;
+            }
+        }
+
+        private class BarArrayHolder
+        {
+            public Bar[] Bars { get; }
+
+            public BarArrayHolder(Bar[] bars)
+            {
+                Bars = bars;
+            }
         }
 
         private class Boo : Callback
@@ -1608,6 +1672,23 @@
                     inquiry.Resolve(Promise.Resolved(new SpecialBaz()), composer);
                     inquiry.Resolve(Promise.Resolved(new Baz()), composer);
                 }
+            }
+        }
+
+        private class OptionalHandler : Handler
+        {
+            [Handles]
+            public void HandleFoo(Foo foo, Bar bar = null)
+            {
+                if (bar != null)
+                    ++foo.Handled;
+            }
+
+            [Handles]
+            public void HandleBar(Bar bar, [Optional]Foo foo)
+            {
+                if (foo != null)
+                    ++bar.Handled;
             }
         }
 
