@@ -5,11 +5,11 @@ namespace Miruken.Concurrency
 {
     public abstract class AbstractAsyncResult : IAsyncResult
     {
-        private volatile int _completed;
-        private readonly AsyncCallback _callback;
-        private object _waitEvent;
-        protected Exception _exception;
         protected object _result;
+        protected Exception _exception;
+        private readonly AsyncCallback _callback;
+        private ManualResetEvent _waitEvent;
+        private int _completed;
 
         protected AbstractAsyncResult()
         {
@@ -39,12 +39,10 @@ namespace Miruken.Concurrency
                         new ManualResetEvent(isCompleted != 0), null);
                 }
 
-                var ev = (ManualResetEvent)_waitEvent;
-
                 if ((isCompleted == 0) && (_completed != 0))
-                    ev.Set();
+                    _waitEvent.Set();
 
-                return ev;
+                return _waitEvent;
             }
         }
 
@@ -97,7 +95,7 @@ namespace Miruken.Concurrency
         {
             CompletedSynchronously = synchronously;
             action?.Invoke();
-            ((ManualResetEvent) _waitEvent)?.Set();
+            _waitEvent?.Set();
             _callback?.Invoke(this);
         }
     }
