@@ -620,31 +620,7 @@
                         reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -714,31 +690,7 @@
                         reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -819,31 +771,7 @@
                         reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -892,31 +820,7 @@
                         reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -955,31 +859,7 @@
                     resolve((T) r, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        reject(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += reject;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, reject);
             });
         }
 
@@ -1006,31 +886,7 @@
                     resolve((T) r, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        Res(_result, CompletedSynchronously);
-                    else
-                        reject(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += Res;
-                        _rejected += reject;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe(Res, reject);
             });
         }
 
@@ -1065,31 +921,7 @@
                     reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        resolve((T)_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += (r, s) => resolve((T) r, s);
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe((r, s) => resolve((T)r, s), Rej);
             });
         }
 
@@ -1116,31 +948,7 @@
                     reject(ex, s);
                 }
 
-                _lock.EnterUpgradeableReadLock();
-
-                if (IsCompleted)
-                {
-                    _lock.ExitUpgradeableReadLock();
-
-                    if (State == PromiseState.Fulfilled)
-                        resolve((T)_result, CompletedSynchronously);
-                    else
-                        Rej(_exception, CompletedSynchronously);
-                }
-                else
-                {
-                    _lock.EnterWriteLock();
-                    try
-                    {
-                        _fulfilled += (r, s) => resolve((T) r, s);
-                        _rejected += Rej;
-                    }
-                    finally
-                    {
-                        _lock.ExitWriteLock();
-                        _lock.ExitUpgradeableReadLock();
-                    }
-                }
+                Subscribe((r, s) => resolve((T)r, s), Rej);
             });
         }
 
@@ -1301,6 +1109,44 @@
         public new T Wait(int? millisecondsTimeout = null)
         {
             return (T)End(this, millisecondsTimeout);
+        }
+
+        private void Subscribe(ResolveCallback resolve, RejectCallback reject)
+        {
+            if (IsCompleted)
+            {
+                if (State == PromiseState.Fulfilled)
+                    resolve(_result, CompletedSynchronously);
+                else
+                    reject(_exception, CompletedSynchronously);
+                return;
+            }
+
+            _lock.EnterUpgradeableReadLock();
+
+            if (IsCompleted)
+            {
+                _lock.ExitUpgradeableReadLock();
+
+                if (State == PromiseState.Fulfilled)
+                    resolve(_result, CompletedSynchronously);
+                else
+                    reject(_exception, CompletedSynchronously);
+                return;
+            }
+
+            _lock.EnterWriteLock();
+
+            try
+            {
+                _fulfilled += resolve;
+                _rejected  += reject;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+                _lock.ExitUpgradeableReadLock();
+            }
         }
 
         #region Build
