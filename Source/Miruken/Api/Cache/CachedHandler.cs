@@ -42,7 +42,15 @@
 
             return (Promise<TResponse>)_cache.AddOrUpdate(
                 request.Request,   // actual request
-                req => RefreshResponse<TResponse>(req, composer),  // add first time
+                req =>             // add first time
+                {
+                    var cached   = RefreshResponse<TResponse>(req, composer);
+                    var response = cached.Response;
+                    response.Then((result, _) =>
+                        cached.Response = Promise.Resolved(result)
+                            .Coerce(response.GetType()));
+                    return cached;
+                }, 
                 (req, cached) =>   // update if stale or invalid
                     cached.Response.State == PromiseState.Rejected  ||
                     cached.Response.State == PromiseState.Cancelled ||
