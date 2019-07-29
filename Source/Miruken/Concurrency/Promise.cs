@@ -177,6 +177,13 @@
         {
             if (cancelled == null) return;
 
+            if (IsCompleted)
+            {
+                if (State == PromiseState.Cancelled)
+                    cancelled(_exception as CancelledException);
+                return;
+            }
+
             _lock.EnterUpgradeableReadLock();
 
             if (IsCompleted)
@@ -185,23 +192,23 @@
 
                 if (State == PromiseState.Cancelled)
                     cancelled(_exception as CancelledException);
+                return;
             }
-            else
+
+            _lock.EnterWriteLock();
+
+            try
             {
-                _lock.EnterWriteLock();
-                try
+                _rejected += (ex, s) =>
                 {
-                    _rejected += (ex, s) =>
-                    {
-                        if (ex is CancelledException cancel)
-                            cancelled(cancel);
-                    };
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                    _lock.ExitUpgradeableReadLock();
-                }
+                    if (ex is CancelledException cancel)
+                        cancelled(cancel);
+                };
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+                _lock.ExitUpgradeableReadLock();
             }
         }
 
@@ -1111,7 +1118,7 @@
             return new Promise<R>(mode, owner);
         }
 
-        private void Subscribe(ResolveCallback resolve, RejectCallback reject)
+        protected void Subscribe(ResolveCallback resolve, RejectCallback reject)
         {
             if (IsCompleted)
             {
