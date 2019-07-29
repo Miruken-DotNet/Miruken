@@ -45,7 +45,7 @@
     {
         protected ResolveCallback _fulfilled;
         protected RejectCallback _rejected;
-        protected readonly ReaderWriterLockSlim _lock;
+        protected readonly object _guard = new object();
 
         public PromiseState State { get; protected set; }
 
@@ -61,7 +61,6 @@
         protected Promise()
         {
             State = PromiseState.Pending;
-            _lock = new ReaderWriterLockSlim();
         }
 
         #region Then
@@ -177,39 +176,21 @@
         {
             if (cancelled == null) return;
 
-            if (IsCompleted)
+            lock (_guard)
             {
-                if (State == PromiseState.Cancelled)
-                    cancelled(_exception as CancelledException);
-                return;
-            }
-
-            _lock.EnterUpgradeableReadLock();
-
-            if (IsCompleted)
-            {
-                _lock.ExitUpgradeableReadLock();
-
-                if (State == PromiseState.Cancelled)
-                    cancelled(_exception as CancelledException);
-                return;
-            }
-
-            _lock.EnterWriteLock();
-
-            try
-            {
-                _rejected += (ex, s) =>
+                if (!IsCompleted)
                 {
-                    if (ex is CancelledException cancel)
-                        cancelled(cancel);
-                };
+                    _rejected += (ex, s) =>
+                    {
+                        if (ex is CancelledException cancel)
+                            cancelled(cancel);
+                    };
+                    return;
+                }
             }
-            finally
-            {
-                _lock.ExitWriteLock();
-                _lock.ExitUpgradeableReadLock();
-            }
+
+            if (State == PromiseState.Cancelled)
+                cancelled(_exception as CancelledException);
         }
 
         #endregion
@@ -1041,58 +1022,56 @@
 
         protected void Resolve(T result, bool synchronous)
         {
-            Complete(result, synchronous, () =>
+            ResolveCallback fulfilled = null;
+
+            lock (_guard)
             {
-                ResolveCallback fulfilled;
-                _lock.EnterWriteLock();
-                try
+                Complete(result, synchronous, () =>
                 {
                     State      = PromiseState.Fulfilled;
                     fulfilled  = _fulfilled;
                     _fulfilled = null;
                     _rejected  = null;
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-                fulfilled?.Invoke((T) _result, synchronous);
-            });
+                });
+            }
+
+            fulfilled?.Invoke((T)_result, synchronous);
         }
 
         protected void Reject(Exception exception, bool synchronous)
         {
-            Complete(exception, synchronous, () =>
-            {
-                if (_onCancel != null && exception is CancelledException)
-                {
-                    try
-                    {
-                        _onCancel();
-                    }
-                    catch
-                    {
-                        // consume errors
-                    }
-                }
+            Action         onCancel = null;
+            RejectCallback rejected = null;
 
-                RejectCallback rejected;
-                _lock.EnterWriteLock();
-                try
+            lock (_guard)
+            {
+                Complete(exception, synchronous, () =>
                 {
+                    if (_onCancel != null && exception is CancelledException)
+                        onCancel = _onCancel;
+
                     State = exception is CancelledException
                           ? PromiseState.Cancelled
                           : PromiseState.Rejected;
                     rejected   = _rejected;
                     _fulfilled = null;
                     _rejected  = null;
-                }
-                finally
+                });
+            }
+
+            if (onCancel != null)
+            {
+                try
                 {
-                    _lock.ExitWriteLock();
+                    onCancel();
                 }
-                rejected?.Invoke(exception, synchronous);
-            });
+                catch
+                {
+                    // consume errors
+                }
+            }
+
+            rejected?.Invoke(exception, synchronous);
         }
 
         protected virtual Promise<R> CreateChild<R>(Promise<R>.PromiseOwner owner)
@@ -1120,40 +1099,20 @@
 
         protected void Subscribe(ResolveCallback resolve, RejectCallback reject)
         {
-            if (IsCompleted)
+            lock (_guard)
             {
-                if (State == PromiseState.Fulfilled)
-                    resolve(_result, CompletedSynchronously);
-                else
-                    reject(_exception, CompletedSynchronously);
-                return;
+                if (!IsCompleted)
+                {
+                    _fulfilled += resolve;
+                    _rejected += reject;
+                    return;
+                }
             }
 
-            _lock.EnterUpgradeableReadLock();
-
-            if (IsCompleted)
-            {
-                _lock.ExitUpgradeableReadLock();
-
-                if (State == PromiseState.Fulfilled)
-                    resolve(_result, CompletedSynchronously);
-                else
-                    reject(_exception, CompletedSynchronously);
-                return;
-            }
-
-            _lock.EnterWriteLock();
-
-            try
-            {
-                _fulfilled += resolve;
-                _rejected  += reject;
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
-                _lock.ExitUpgradeableReadLock();
-            }
+            if (State == PromiseState.Fulfilled)
+                resolve(_result, CompletedSynchronously);
+            else
+                reject(_exception, CompletedSynchronously);
         }
 
         #region Build
