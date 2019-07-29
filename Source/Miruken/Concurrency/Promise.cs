@@ -288,7 +288,7 @@
                     resolve(null, false);
                 },
                 null, (int)delay.TotalMilliseconds, System.Threading.Timeout.Infinite)
-            ).Finally(DisposeTimer);  // cancel;
+            ).Finally(() => DisposeTimer());  // cancel;
         }
 
         public static Promise Try(Action action)
@@ -1014,7 +1014,7 @@
                 }, (ex, s) => {
                     DisposeTimer();
                     reject(ex, s);                           
-                }).Finally(DisposeTimer);  // cancel
+                }).Finally(() => DisposeTimer());  // cancel
                 if (State != PromiseState.Pending) return;
                 timer = new Timer(_ => {
                     DisposeTimer();
