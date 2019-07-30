@@ -1022,6 +1022,8 @@
 
         protected void Resolve(T result, bool synchronous)
         {
+            if (IsCompleted) return;
+
             ResolveCallback fulfilled = null;
 
             lock (_guard)
@@ -1040,6 +1042,8 @@
 
         protected void Reject(Exception exception, bool synchronous)
         {
+            if (IsCompleted) return;
+
             Action         onCancel = null;
             RejectCallback rejected = null;
 
