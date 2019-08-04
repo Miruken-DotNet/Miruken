@@ -15,6 +15,7 @@ namespace Miruken.Tests.Register
         public void TestInitialize()
         {
             _handler = new ServiceCollection()
+                .AddTransient<IService>(sp => new Service())
                 .AddMiruken(scan =>
                     scan.PublicSources(sources => sources.FromCallingAssembly())
                 );
@@ -36,6 +37,12 @@ namespace Miruken.Tests.Register
             Assert.AreSame(handler, _handler.Resolve<PrivateHandler>());
         }
 
+        [TestMethod]
+        public void Should_Register_Service_Factory()
+        {
+            var service = _handler.Resolve<IService>();
+        }
+
         public class Action
         {
             public int Handled { get; set; }
@@ -47,6 +54,18 @@ namespace Miruken.Tests.Register
             public void Process(Action action)
             {
                 ++action.Handled;
+            }
+        }
+
+        public interface IService
+        {
+            void DoSomething();
+        }
+
+        public class Service : IService
+        {
+            public void DoSomething()
+            {
             }
         }
     }

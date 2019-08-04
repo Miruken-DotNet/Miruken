@@ -30,6 +30,9 @@
         {
             var flags = Flags.None;
             Parameter = parameter;
+            if (parameter.IsOptional)
+                flags |= Flags.Optional;
+
             Attributes = Attribute.GetCustomAttributes(parameter, false);
 
             if (Attributes.Length == 0)
@@ -100,6 +103,20 @@
 
         public bool IsInstanceOf(object argument) =>
             ParameterType.IsInstanceOfType(argument);
+
+        public bool GetDefaultValue(out object value)
+        {
+            if (Parameter.HasDefaultValue)
+                value = Parameter.RawDefaultValue;
+            else if (IsOptional)
+                value = RuntimeHelper.GetDefault(ParameterType);
+            else
+            {
+                value = null;
+                return false;
+            }
+            return true;
+        }
 
         private Flags ExtractFlags(Type parameterType, Flags flags)
         {

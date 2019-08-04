@@ -21,8 +21,14 @@
             foreach (var descriptor in services)
             {
                 var implementationType = GetImplementationType(descriptor);
-                if (implementationType != null)
-                    RegisterDescriptor(implementationType, ServiceConfiguration.For(descriptor));
+
+                if (implementationType == null || implementationType == typeof(object))
+                {
+                    throw new ArgumentException(
+                        $"Unable to infer service type from {descriptor}");
+                }
+
+                RegisterDescriptor(implementationType, ServiceConfiguration.For(descriptor));
             }
         }
 

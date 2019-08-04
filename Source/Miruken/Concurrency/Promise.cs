@@ -175,21 +175,22 @@
         public void Cancelled(CancelledCallback cancelled)
         {
             if (cancelled == null) return;
+
             lock (_guard)
             {
-                if (IsCompleted)
+                if (!IsCompleted)
                 {
-                    if (State == PromiseState.Cancelled)
-                        cancelled(_exception as CancelledException);
-                }
-                else
-                {
-                    _rejected += (ex, s) => {
+                    _rejected += (ex, s) =>
+                    {
                         if (ex is CancelledException cancel)
                             cancelled(cancel);
                     };
+                    return;
                 }
             }
+
+            if (State == PromiseState.Cancelled)
+                cancelled(_exception as CancelledException);
         }
 
         #endregion
@@ -275,7 +276,7 @@
                     resolve(null, false);
                 },
                 null, (int)delay.TotalMilliseconds, System.Threading.Timeout.Infinite)
-            ).Finally(() => DisposeTimer());  // cancel;
+            ).Finally(DisposeTimer);  // cancel;
         }
 
         public static Promise Try(Action action)
@@ -607,21 +608,7 @@
                         reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -691,21 +678,7 @@
                         reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -786,21 +759,7 @@
                         reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -849,21 +808,7 @@
                         reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe(Res, Rej);
             });
         }
 
@@ -902,21 +847,7 @@
                     resolve((T) r, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            reject(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += reject;
-                    }
-                }
+                Subscribe(Res, reject);
             });
         }
 
@@ -943,21 +874,7 @@
                     resolve((T) r, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            Res(_result, CompletedSynchronously);
-                        else
-                            reject(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += Res;
-                        _rejected += reject;
-                    }
-                }
+                Subscribe(Res, reject);
             });
         }
 
@@ -992,21 +909,7 @@
                     reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            resolve((T)_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += (r,s) => resolve((T)r,s);
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe((r, s) => resolve((T)r, s), Rej);
             });
         }
 
@@ -1033,21 +936,7 @@
                     reject(ex, s);
                 }
 
-                lock (_guard)
-                {
-                    if (IsCompleted)
-                    {
-                        if (State == PromiseState.Fulfilled)
-                            resolve((T)_result, CompletedSynchronously);
-                        else
-                            Rej(_exception, CompletedSynchronously);
-                    }
-                    else
-                    {
-                        _fulfilled += (r, s) => resolve((T)r, s);
-                        _rejected += Rej;
-                    }
-                }
+                Subscribe((r, s) => resolve((T)r, s), Rej);
             });
         }
 
@@ -1113,7 +1002,7 @@
                 }, (ex, s) => {
                     DisposeTimer();
                     reject(ex, s);                           
-                }).Finally(() => DisposeTimer());  // cancel
+                }).Finally(DisposeTimer);  // cancel
                 if (State != PromiseState.Pending) return;
                 timer = new Timer(_ => {
                     DisposeTimer();
@@ -1124,49 +1013,69 @@
             });
         }
 
+        public new T Wait(int? millisecondsTimeout = null)
+        {
+            return (T)End(this, millisecondsTimeout);
+        }
+
         #endregion
 
         protected void Resolve(T result, bool synchronous)
         {
-            Complete(result, synchronous, () =>
+            if (IsCompleted) return;
+
+            ResolveCallback fulfilled = null;
+
+            lock (_guard)
             {
-                lock (_guard)
+                Complete(result, synchronous, () =>
                 {
-                    State = PromiseState.Fulfilled;
-                    var fulfilled = _fulfilled;
+                    State      = PromiseState.Fulfilled;
+                    fulfilled  = _fulfilled;
                     _fulfilled = null;
                     _rejected  = null;
-                    fulfilled?.Invoke((T) _result, synchronous);
-                }
-            });
+                });
+            }
+
+            fulfilled?.Invoke((T)_result, synchronous);
         }
 
         protected void Reject(Exception exception, bool synchronous)
         {
-            Complete(exception, synchronous, () =>
+            if (IsCompleted) return;
+
+            Action         onCancel = null;
+            RejectCallback rejected = null;
+
+            lock (_guard)
             {
-                if (_onCancel != null && exception is CancelledException)
+                Complete(exception, synchronous, () =>
                 {
-                    try
-                    {
-                        _onCancel();
-                    }
-                    catch
-                    {
-                        // consume errors
-                    }
-                }
-                lock (_guard)
-                {
+                    if (_onCancel != null && exception is CancelledException)
+                        onCancel = _onCancel;
+
                     State = exception is CancelledException
                           ? PromiseState.Cancelled
                           : PromiseState.Rejected;
-                    var rejected = _rejected;
+                    rejected   = _rejected;
                     _fulfilled = null;
                     _rejected  = null;
-                    rejected?.Invoke(exception, synchronous);
+                });
+            }
+
+            if (onCancel != null)
+            {
+                try
+                {
+                    onCancel();
                 }
-            });
+                catch
+                {
+                    // consume errors
+                }
+            }
+
+            rejected?.Invoke(exception, synchronous);
         }
 
         protected virtual Promise<R> CreateChild<R>(Promise<R>.PromiseOwner owner)
@@ -1192,9 +1101,22 @@
             return new Promise<R>(mode, owner);
         }
 
-        public new T Wait(int? millisecondsTimeout = null)
+        protected void Subscribe(ResolveCallback resolve, RejectCallback reject)
         {
-            return (T)End(this, millisecondsTimeout);
+            lock (_guard)
+            {
+                if (!IsCompleted)
+                {
+                    _fulfilled += resolve;
+                    _rejected += reject;
+                    return;
+                }
+            }
+
+            if (State == PromiseState.Fulfilled)
+                resolve(_result, CompletedSynchronously);
+            else
+                reject(_exception, CompletedSynchronously);
         }
 
         #region Build

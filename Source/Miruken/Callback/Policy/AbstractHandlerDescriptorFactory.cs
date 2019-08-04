@@ -45,7 +45,7 @@
 
         public abstract IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy);
 
-        protected HandlerDescriptor CreateDescriptor(Type handlerType,
+        protected virtual HandlerDescriptor CreateDescriptor(Type handlerType,
             HandlerDescriptorVisitor visitor = null)
         {
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;

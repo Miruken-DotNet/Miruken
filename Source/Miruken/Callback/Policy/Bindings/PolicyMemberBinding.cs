@@ -241,7 +241,7 @@
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
                     var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
-                    if (arg == null && !argument.IsOptional) return null;
+                    if (arg == null && !argument.GetDefaultValue(out arg)) return null;
 
                     switch (arg)
                     {

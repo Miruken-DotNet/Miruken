@@ -5,6 +5,7 @@
     using System.ComponentModel;
     using System.Threading;
     using Callback;
+    using Callback.Policy.Bindings;
     using Graph;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -90,14 +91,35 @@
 	        }
 	    }
 
-	    public IServiceProvider ServiceProvider => this;
+	    private class ServiceScopeProvider : IServiceProvider
+	    {
+	        private readonly Context _context;
+
+	        public ServiceScopeProvider(Context context)
+	        {
+	            _context = context;
+	        }
+
+	        public object GetService(Type serviceType)
+	        {
+	            return _context.GetService(serviceType, constraints => 
+	                constraints.Require(Qualifier.Of<ContextualAttribute>()));
+	        }
+	    }
+
+	    IServiceProvider IServiceScope.ServiceProvider => new ServiceScopeProvider(this);
+
+	    IServiceScope IServiceScopeFactory.CreateScope()
+	    {
+	        return CreateChild();
+	    }
 
         public Context CreateChild()
 	    {
             AssertActive();
 	        var child = InternalCreateChild();
 	        child.ContextEnding += (ctx, reason) => 
-	            Raise(ContextEvents.ChildContextEnding, ctx, reason);
+	            Raise(ChildContextEndingEvent, ctx, reason);
             child.ContextEnded += (ctx, reason) => {
                 _lock.EnterWriteLock();
                 try
@@ -108,7 +130,7 @@
                 {
                     _lock.ExitWriteLock();
                 }
-                Raise(ContextEvents.ChildContextEnded, ctx, reason);
+                Raise(ChildContextEndedEvent, ctx, reason);
             };
 	        _lock.EnterWriteLock();
 	        try
@@ -120,11 +142,6 @@
 	            _lock.ExitWriteLock();
 	        }
 	        return child;
-	    }
-
-	    IServiceScope IServiceScopeFactory.CreateScope()
-	    {
-	        return CreateChild();
 	    }
 
         protected virtual Context InternalCreateChild()
@@ -212,7 +229,7 @@
 	            return;
 
             State = ContextState.Ending;
-            Raise(ContextEvents.ContextEnding, this, reason);
+            Raise(ContextEndingEvent, this, reason);
 
             try
             {
@@ -222,7 +239,7 @@
             finally
             {
                 State = ContextState.Ended;
-                Raise(ContextEvents.ContextEnded, this, reason);
+                Raise(ContextEndedEvent, this, reason);
                 _events.Dispose();
                 _lock.Dispose();
                 _events = null;
@@ -243,15 +260,16 @@
                 switch (State)
                 {
                     case ContextState.Active:
-                        _events.AddHandler(ContextEvents.ContextEnding, value);
+                        _events.AddHandler(ContextEndingEvent, value);
                         break;
                     case ContextState.Ending:
                         value(this, AlreadyEnded);
                         break;
                 }
             }
-            remove => _events.RemoveHandler(ContextEvents.ContextEnding, value);
-        } 
+            remove => _events.RemoveHandler(ContextEndingEvent, value);
+        }
+	    private static readonly object ContextEndingEvent = new object();
 
         public event Action<Context, object> ContextEnded
         {
@@ -260,27 +278,36 @@
                 switch (State)
                 {
                     case ContextState.Active:
-                        _events.AddHandler(ContextEvents.ContextEnded, value);
+                        _events.AddHandler(ContextEndedEvent, value);
                         break;
                     case ContextState.Ended:
                         value(this, AlreadyEnded);
                         break;
                 }
             }
-            remove => _events.RemoveHandler(ContextEvents.ContextEnded, value);
+            remove => _events.RemoveHandler(ContextEndedEvent, value);
         }
+	    private static readonly object ContextEndedEvent = new object();
 
         public event Action<Context, object> ChildContextEnding
         {
-            add => _events?.AddHandler(ContextEvents.ChildContextEnding, value);
-            remove => _events.RemoveHandler(ContextEvents.ChildContextEnding, value);
+            add => _events?.AddHandler(ChildContextEndingEvent, value);
+            remove => _events.RemoveHandler(ChildContextEndingEvent, value);
         }
+	    private static readonly object ChildContextEndingEvent = new object();
 
         public event Action<Context, object> ChildContextEnded
         {
-            add => _events?.AddHandler(ContextEvents.ChildContextEnded, value);
-            remove => _events.RemoveHandler(ContextEvents.ChildContextEnded, value);
+            add => _events?.AddHandler(ChildContextEndedEvent, value);
+            remove => _events.RemoveHandler(ChildContextEndedEvent, value);
         }
+	    private static readonly object ChildContextEndedEvent = new object();
+
+	    private void Raise(object key, Context context, object reason)
+	    {
+	        var eventHandler = (Action<Context, object>)_events?[key];
+	        eventHandler?.Invoke(context, reason);
+	    }
 
         #endregion
 
@@ -309,24 +336,10 @@
 
 		#endregion
 
-        private void Raise(object key, Context context, object reason)
-        {
-            var eventHandler = (Action<Context, object>) _events?[key];
-            eventHandler?.Invoke(context, reason);
-        }
-
         private void AssertActive()
         {
             if (State != ContextState.Active)
                 throw new Exception("The context has already ended");
         }
-	}
-
-    internal static class ContextEvents
-    {
-        public static readonly object ContextEnding      = new object();
-        public static readonly object ContextEnded       = new object();
-        public static readonly object ChildContextEnding = new object();
-        public static readonly object ChildContextEnded  = new object();
     }
 }
