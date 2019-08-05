@@ -162,7 +162,7 @@
                 : null;
 
             var filters = composer.GetOrderedFilters(
-                this, dispatcher, callbackType, Filters,
+                this, dispatcher, callback, callbackType, Filters,
                 dispatcher.Owner.Filters, Policy.Filters, targetFilters);
 
             if (filters == null) return false;

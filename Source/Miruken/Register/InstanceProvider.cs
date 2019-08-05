@@ -36,12 +36,11 @@
 
         IEnumerable<IFilter> IFilterProvider.GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer)
+            object callback, Type callbackType, IHandler composer)
         {
             var provider = Providers.GetOrAdd(dispatcher, d =>
                 (IFilter)Activator.CreateInstance(
-                    typeof(InstanceProvider<>).MakeGenericType(d.LogicalReturnType))
-            );
+                    typeof(InstanceProvider<>).MakeGenericType(d.LogicalReturnType)));
             return new [] { provider };
         }
 

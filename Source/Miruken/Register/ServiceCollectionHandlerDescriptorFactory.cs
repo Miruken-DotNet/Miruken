@@ -20,7 +20,10 @@
 
             foreach (var descriptor in services)
             {
-                var implementationType = GetImplementationType(descriptor);
+                if (descriptor.ImplementationInstance != null ||
+                    descriptor.ImplementationFactory != null) continue;
+
+                var implementationType = descriptor.ImplementationType;
 
                 if (implementationType == null || implementationType == typeof(object))
                 {
@@ -30,25 +33,6 @@
 
                 RegisterDescriptor(implementationType, ServiceConfiguration.For(descriptor));
             }
-        }
-
-        private static Type GetImplementationType(ServiceDescriptor descriptor)
-        {
-            if (descriptor.ImplementationType != null)
-                return descriptor.ImplementationType;
-
-            if (descriptor.ImplementationInstance != null)
-                return descriptor.ImplementationInstance.GetType();
-
-            if (descriptor.ImplementationFactory != null)
-            {
-                var typeArguments = descriptor.ImplementationFactory
-                    .GetType().GenericTypeArguments;
-                if (typeArguments.Length == 2)
-                    return typeArguments[1];
-            }
-
-            return null;
         }
     }
 }

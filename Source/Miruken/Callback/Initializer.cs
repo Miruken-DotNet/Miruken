@@ -61,15 +61,11 @@
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer)
+            object callback, Type callbackType, IHandler composer)
         {
-            var initializer = Initializers.GetOrAdd(dispatcher, d =>
-            {
-                var i = (IFilter)Activator.CreateInstance(
-                    typeof(Initializer<>).MakeGenericType(d.LogicalReturnType));
-                return i;
-            });
-
+            var initializer = Initializers.GetOrAdd(dispatcher,
+                d => (IFilter)Activator.CreateInstance(
+                    typeof(Initializer<>).MakeGenericType(d.LogicalReturnType)));
             return new [] { initializer };
         }
 

@@ -22,12 +22,6 @@
 
         private void Configure(HandlerDescriptor descriptor, PolicyMemberBinding binding)
         {
-            var instance = _serviceDescriptor.ImplementationInstance;
-            var factory  = instance != null ? p => instance
-                         : _serviceDescriptor.ImplementationFactory;
-            if (factory != null)
-                binding.AddFilters(new InstanceProviderProvider(factory));
-
             if (binding.Dispatcher.IsConstructor)
             {
                 var lifestyle = GetLifestyle(binding);

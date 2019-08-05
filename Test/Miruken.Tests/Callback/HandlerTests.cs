@@ -1139,6 +1139,21 @@
         }
 
         [TestMethod]
+        public void Should_Honor_Lifestyles_For_Untyped_Providers()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.RegisterDescriptor<UntypedLifestyleProvider>();
+            var handler = new StaticHandler().Infer();
+            var foo     = handler.Resolve("Foo");
+            Assert.IsNotNull(foo);
+            Assert.AreSame(foo, handler.Resolve("Foo"));
+            var bar     = handler.Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.AreSame(bar, handler.Resolve<Bar>());
+        }
+
+        [TestMethod]
         public async Task Should_Reject_Constructor_If_Initializer_Fails()
         {
             var factory = new MutableHandlerDescriptorFactory();
@@ -2013,6 +2028,17 @@
             public void FailedInitialize(Exception exception = null)
             {
                 Assert.AreEqual("Initialization Failed", exception?.Message);
+            }
+        }
+
+        private class UntypedLifestyleProvider
+        {
+            [Provides, Singleton]
+            public object GetSingletons(Inquiry inquiry)
+            {
+                if (Equals(inquiry.Key, "Foo"))
+                    return new Foo();
+                return Equals(inquiry.Key, typeof(Bar)) ? new Bar() : null;
             }
         }
 

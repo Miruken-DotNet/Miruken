@@ -25,7 +25,7 @@
 
         IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer);
+            object callback, Type callbackType, IHandler composer);
     }
 
     public interface IFiltered

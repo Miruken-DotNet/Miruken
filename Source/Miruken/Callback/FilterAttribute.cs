@@ -26,7 +26,7 @@
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer)
+            object callback, Type callbackType, IHandler composer)
         {
             var closedFilterType = dispatcher.CloseFilterType(FilterType, callbackType);
             if (!AcceptFilterType(closedFilterType, binding))
