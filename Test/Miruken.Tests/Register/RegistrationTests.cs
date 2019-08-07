@@ -15,7 +15,6 @@ namespace Miruken.Tests.Register
         public void TestInitialize()
         {
             _handler = new ServiceCollection()
-                .AddTransient<IService>(sp => new Service())
                 .AddMiruken(scan =>
                     scan.PublicSources(sources => sources.FromCallingAssembly())
                 );
@@ -38,9 +37,54 @@ namespace Miruken.Tests.Register
         }
 
         [TestMethod]
-        public void Should_Register_Service_Factory()
+        public void Should_Register_Instances()
         {
-            var service = _handler.Resolve<IService>();
+            var service = new Service();
+            var handler = new ServiceCollection()
+                .AddSingleton(service)
+                .AddMiruken();
+            Assert.AreSame(service, handler.Resolve<IService>());
+        }
+
+        [TestMethod]
+        public void Should_Register_Transient_Service_Factory()
+        {
+            var handler = new ServiceCollection()
+                .AddTransient(sp => new Service())
+                .AddMiruken();
+            var service = handler.Resolve<IService>();
+            Assert.IsNotNull(service);
+            Assert.AreNotSame(service, handler.Resolve<IService>());
+            Assert.IsNotNull(handler.Resolve<Service>());
+        }
+
+        [TestMethod]
+        public void Should_Register_Singleton_Service_Factory()
+        {
+            var handler = new ServiceCollection()
+                .AddSingleton(sp => new Service())
+                .AddMiruken();
+            var service = handler.Resolve<IService>();
+            Assert.IsNotNull(service);
+            Assert.AreSame(service, handler.Resolve<IService>());
+            Assert.AreSame(service, handler.Resolve<Service>());
+        }
+
+        [TestMethod]
+        public void Should_Register_Scoped_Service_Factory()
+        {
+            var handler = new ServiceCollection()
+                .AddScoped(sp => new Service())
+                .AddMiruken();
+            var service = handler.Resolve<IService>();
+            Assert.IsNotNull(service);
+            Assert.AreSame(service, handler.Resolve<IService>());
+            Assert.AreSame(service, handler.GetService<IService>());
+            using (var scope = handler.CreateScope())
+            {
+                Assert.AreNotSame(service, scope.ServiceProvider.GetService<IService>());
+                Assert.AreSame(service, handler.Resolve<IService>());
+            }
         }
 
         public class Action
