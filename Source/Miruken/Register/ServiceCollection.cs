@@ -1,8 +1,8 @@
-﻿// ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+﻿namespace Miruken.Register
 {
     using System.Collections;
     using System.Collections.Generic;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class ServiceCollection : IServiceCollection
     {
