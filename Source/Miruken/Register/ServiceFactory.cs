@@ -18,7 +18,7 @@
 
         [Provides, SkipFilters]
         public T Create() => throw new NotSupportedException(
-            "This should not happen if ServiceFactoryInstanceProvider was added to filters");
+            "This should not happen if ServiceFactoryProvider was added to filters");
     }
 
     public class ServiceFactoryProvider : IFilterProvider
