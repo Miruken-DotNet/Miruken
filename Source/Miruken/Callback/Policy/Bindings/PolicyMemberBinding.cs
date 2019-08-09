@@ -126,7 +126,7 @@
                     case null:
                         isPromise = false;
                         res = Task.FromException(new InvalidOperationException(
-                            $"{dispatcher.Member} failed to resolve argument {failedArg.Parameter.Name} of type {failedArg.ParameterType.FullName}"));
+                            $"{dispatcher.Member} failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}'"));
                         return false;
                     case object[] array:
                         isPromise = false;

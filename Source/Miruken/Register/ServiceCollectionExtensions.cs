@@ -34,9 +34,6 @@
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            var context = new Context();
-            context.AddHandlers(new StaticHandler());
-
             services.AddDefaultServices().Register(configure);
 
             var factory = new MutableHandlerDescriptorFactory();
@@ -46,7 +43,7 @@
 
             HandlerDescriptorFactory.UseFactory(factory);
 
-            return (context + new Stash(true)).Infer();
+            return new Context().AddHandlers(new StaticHandler(), new Stash(true)).Infer();
         }
 
         public static HandlerDescriptor RegisterService(
