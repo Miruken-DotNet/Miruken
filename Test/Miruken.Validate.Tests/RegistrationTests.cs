@@ -3,7 +3,6 @@
     using System;
     using System.Linq;
     using Callback;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Model;
     using Register;

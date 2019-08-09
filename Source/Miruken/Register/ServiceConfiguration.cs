@@ -22,7 +22,7 @@
 
         private void Configure(HandlerDescriptor descriptor, PolicyMemberBinding binding)
         {
-            if (binding.Dispatcher.IsConstructor)
+            if (binding.Policy == Provides.Policy)
             {
                 var lifestyle = GetLifestyle(binding);
                 if (lifestyle != null) return;

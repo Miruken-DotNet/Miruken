@@ -11,7 +11,6 @@
     using Callback.Policy;
     using Context;
     using Error;
-    using Functional;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class ServiceCollectionExtensions
@@ -43,75 +42,43 @@
             var factory = new MutableHandlerDescriptorFactory();
 
             foreach (var service in services)
-            {
-                factory.RegisterService(service).Match(_ => { },
-                    handler => context.AddHandlers(handler));
-            }
+                factory.RegisterService(service);
 
             HandlerDescriptorFactory.UseFactory(factory);
 
             return (context + new Stash(true)).Infer();
         }
 
-        public static Either<HandlerDescriptor, IHandler> RegisterService(
+        public static HandlerDescriptor RegisterService(
             this MutableHandlerDescriptorFactory factory, ServiceDescriptor service,
             HandlerDescriptorVisitor visitor = null)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
 
-            if (service.ImplementationInstance != null)
+            var instance = service.ImplementationInstance;
+            if (instance != null)
             {
                 if (serviceType == null)
-                    serviceType = service.ImplementationInstance.GetType();
+                    serviceType = instance.GetType();
 
-                AssertValidServiceType(serviceType, service);
-
-                var providerType = typeof(InstanceProvider<>)
-                    .MakeGenericType(serviceType);
-
-                factory.RegisterDescriptor(providerType, visitor);
-
-                return (Handler)Activator.CreateInstance(
-                    providerType, service.ImplementationInstance);
+                return factory.RegisterServiceFactory(
+                    service, serviceType, _ => instance, visitor);
             }
 
-            if (service.ImplementationFactory != null)
+            var implementationFactory = service.ImplementationFactory;
+            if (implementationFactory != null)
             {
                 if (serviceType == null)
-                {
-                    serviceType = service.ImplementationFactory
-                        .GetType().GenericTypeArguments[1];
-                }
+                    serviceType = implementationFactory .GetType().GenericTypeArguments[1];
 
-                AssertValidServiceType(serviceType, service);
-
-                Type serviceFactoryType;
-                switch (service.Lifetime)
-                {
-                    case ServiceLifetime.Transient:
-                        serviceFactoryType = typeof(ServiceFactory<>.Transient);
-                        break;
-                    case ServiceLifetime.Singleton:
-                        serviceFactoryType = typeof(ServiceFactory<>.Singleton);
-                        break;
-                    case ServiceLifetime.Scoped:
-                        serviceFactoryType = typeof(ServiceFactory<>.Scoped);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}");
-                }
-
-                serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
-
-                factory.RegisterDescriptor(serviceFactoryType, visitor);
-
-                return (Handler)Activator.CreateInstance(
-                    serviceFactoryType, service.ImplementationFactory);
+                return factory.RegisterServiceFactory(
+                    service, serviceType, implementationFactory, visitor);
             }
 
             AssertValidServiceType(serviceType, service);
-            visitor = ServiceConfiguration.For(service) + visitor;
-            return factory.RegisterDescriptor(serviceType, visitor);
+
+            return factory.RegisterDescriptor(serviceType, 
+                ServiceConfiguration.For(service) + visitor);
         }
 
         public static IServiceCollection AddDefaultServices(this IServiceCollection services)
@@ -129,6 +96,26 @@
             services.AddSingleton<Scheduler>();
 
             return services;
+        }
+
+        private static HandlerDescriptor RegisterServiceFactory(
+            this IHandlerDescriptorFactory factory,
+            ServiceDescriptor service, Type serviceType,
+            Func<IServiceProvider, object> serviceFactory,
+            HandlerDescriptorVisitor visitor)
+        {
+            AssertValidServiceType(serviceType, service);
+
+            serviceType = typeof(ServiceFactory<>).MakeGenericType(serviceType);
+
+            visitor += (d, binding) =>
+            {
+                if (binding.Dispatcher.Member.Name == nameof(ServiceFactory<object>.Create))
+                    binding.AddFilters(new ServiceFactoryProvider(serviceFactory));
+            };
+
+            return factory.RegisterDescriptor(serviceType,
+                ServiceConfiguration.For(service) + visitor);
         }
 
         private static void AssertValidServiceType(Type serviceType, ServiceDescriptor service)
