@@ -2,6 +2,7 @@
 {
     using Callback;
 
+    [Unmanaged]
     public class InstanceProvider<T> : Handler
     {
         private readonly T _instance;
@@ -11,7 +12,7 @@
             _instance = instance;
         }
 
-        [Provides]
+        [Provides, SkipFilters]
         public T Create(IHandler composer) => _instance;
     }
 }

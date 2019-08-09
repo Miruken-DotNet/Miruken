@@ -57,15 +57,17 @@
             this MutableHandlerDescriptorFactory factory, ServiceDescriptor service,
             HandlerDescriptorVisitor visitor = null)
         {
-            var implementationType = service.ImplementationType;
+            var serviceType = service.ImplementationType ?? service.ServiceType;
 
             if (service.ImplementationInstance != null)
             {
-                if (implementationType == null)
-                    implementationType = service.ImplementationInstance.GetType();
+                if (serviceType == null)
+                    serviceType = service.ImplementationInstance.GetType();
+
+                AssertValidServiceType(serviceType, service);
 
                 var providerType = typeof(InstanceProvider<>)
-                    .MakeGenericType(implementationType);
+                    .MakeGenericType(serviceType);
 
                 factory.RegisterDescriptor(providerType, visitor);
 
@@ -75,11 +77,13 @@
 
             if (service.ImplementationFactory != null)
             {
-                if (implementationType == null)
+                if (serviceType == null)
                 {
-                    implementationType = service.ImplementationFactory
+                    serviceType = service.ImplementationFactory
                         .GetType().GenericTypeArguments[1];
                 }
+
+                AssertValidServiceType(serviceType, service);
 
                 Type serviceFactoryType;
                 switch (service.Lifetime)
@@ -97,7 +101,7 @@
                         throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}");
                 }
 
-                serviceFactoryType = serviceFactoryType.MakeGenericType(implementationType);
+                serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
 
                 factory.RegisterDescriptor(serviceFactoryType, visitor);
 
@@ -105,11 +109,9 @@
                     serviceFactoryType, service.ImplementationFactory);
             }
 
-            if (implementationType == null || implementationType == typeof(object))
-                throw new ArgumentException( $"Unable to infer service type from {service}");
-
+            AssertValidServiceType(serviceType, service);
             visitor = ServiceConfiguration.For(service) + visitor;
-            return factory.RegisterDescriptor(implementationType, visitor);
+            return factory.RegisterDescriptor(serviceType, visitor);
         }
 
         public static IServiceCollection AddDefaultServices(this IServiceCollection services)
@@ -127,6 +129,15 @@
             services.AddSingleton<Scheduler>();
 
             return services;
+        }
+
+        private static void AssertValidServiceType(Type serviceType, ServiceDescriptor service)
+        {
+            if (serviceType == null)
+                throw new ArgumentException($"Unable to infer service type from descriptor {service}");
+
+            if (serviceType == typeof(object))
+                throw new ArgumentException($"Service type object from descriptor {service} is not valid");
         }
     }
 }

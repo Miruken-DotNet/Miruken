@@ -118,15 +118,15 @@
 
             bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
             {
-                var args = ResolveArgs(
-                    dispatcher, callback, ruleArgs, handler, out var context);
+                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler, 
+                    out var context, out var failedArg);
 
                 switch (args)
                 {
                     case null:
                         isPromise = false;
                         res = Task.FromException(new InvalidOperationException(
-                            $"{dispatcher.Member} is missing one or more dependencies"));
+                            $"{dispatcher.Member} failed to resolve argument {failedArg.Parameter.Name} of type {failedArg.ParameterType.FullName}"));
                         return false;
                     case object[] array:
                         isPromise = false;
@@ -209,9 +209,11 @@
 
         private object ResolveArgs(MemberDispatch dispatcher,
             object callback, object[] ruleArgs, IHandler composer,
-            out CallbackContext callbackContext)
+            out CallbackContext callbackContext, out Argument failedArg)
         {
+            failedArg       = null;
             callbackContext = null;
+
             var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
@@ -235,13 +237,20 @@
                         new CallbackContext(callback, composer, this));
                 }
                 else if (argumentType == typeof(object))
+                {
+                    failedArg = argument;
                     return null;
+                }
                 else
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
                     var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
-                    if (arg == null && !argument.GetDefaultValue(out arg)) return null;
+                    if (arg == null && !argument.GetDefaultValue(out arg))
+                    {
+                        failedArg = argument;
+                        return null;
+                    }
 
                     switch (arg)
                     {
@@ -256,6 +265,7 @@
                                     promises.Add(promise.Then((res, _) => resolved[index] = res));
                                     break;
                                 default:
+                                    failedArg = argument;
                                     return null;
                             }
                             break;

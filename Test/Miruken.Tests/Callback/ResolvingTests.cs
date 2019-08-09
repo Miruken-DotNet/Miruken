@@ -452,8 +452,7 @@
             Assert.AreEqual(10, id);
         }
 
-        [Ignore,
-        TestMethod,
+        [Ignore, TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Filters_With_Missing_Dependencies()
         {
