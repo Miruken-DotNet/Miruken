@@ -11,6 +11,7 @@
     using Callback.Policy;
     using Context;
     using Error;
+    using Functional;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class ServiceCollectionExtensions
@@ -38,15 +39,21 @@
 
             var factory = new MutableHandlerDescriptorFactory();
 
+            var context = new Context();
+            context.AddHandlers(new StaticHandler());
+
             foreach (var service in services)
-                factory.RegisterService(service);
+            {
+                factory.RegisterService(service).Match(_ => { },
+                    handler => context.AddHandlers(handler));
+            }
 
             HandlerDescriptorFactory.UseFactory(factory);
 
-            return new Context().AddHandlers(new StaticHandler(), new Stash(true)).Infer();
+            return context.AddHandlers(new Stash(true)).Infer();
         }
 
-        public static HandlerDescriptor RegisterService(
+        public static Either<HandlerDescriptor, IHandler> RegisterService(
             this MutableHandlerDescriptorFactory factory, ServiceDescriptor service,
             HandlerDescriptorVisitor visitor = null)
         {
@@ -58,8 +65,14 @@
                 if (serviceType == null)
                     serviceType = instance.GetType();
 
-                return factory.RegisterServiceFactory(
-                    service, serviceType, _ => instance, visitor);
+                AssertValidServiceType(serviceType, service);
+
+                var providerType = typeof(ServiceFactory<>.Instance)
+                    .MakeGenericType(serviceType);
+
+                factory.RegisterDescriptor(providerType, visitor);
+
+                return (Handler)Activator.CreateInstance(providerType, instance);
             }
 
             var implementationFactory = service.ImplementationFactory;
@@ -68,8 +81,29 @@
                 if (serviceType == null)
                     serviceType = implementationFactory .GetType().GenericTypeArguments[1];
 
-                return factory.RegisterServiceFactory(
-                    service, serviceType, implementationFactory, visitor);
+                AssertValidServiceType(serviceType, service);
+
+                Type serviceFactoryType;
+                switch (service.Lifetime)
+                {
+                    case ServiceLifetime.Transient:
+                        serviceFactoryType = typeof(ServiceFactory<>.Transient);
+                        break;
+                    case ServiceLifetime.Singleton:
+                        serviceFactoryType = typeof(ServiceFactory<>.Singleton);
+                        break;
+                    case ServiceLifetime.Scoped:
+                        serviceFactoryType = typeof(ServiceFactory<>.Scoped);
+                        break;
+                    default:
+                        throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}");
+                }
+
+                serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
+
+                factory.RegisterDescriptor(serviceFactoryType, visitor);
+
+                return (Handler)Activator.CreateInstance( serviceFactoryType, implementationFactory);
             }
 
             AssertValidServiceType(serviceType, service);
@@ -95,33 +129,13 @@
             return services;
         }
 
-        private static HandlerDescriptor RegisterServiceFactory(
-            this IHandlerDescriptorFactory factory,
-            ServiceDescriptor service, Type serviceType,
-            Func<IServiceProvider, object> serviceFactory,
-            HandlerDescriptorVisitor visitor)
-        {
-            AssertValidServiceType(serviceType, service);
-
-            serviceType = typeof(ServiceFactory<>).MakeGenericType(serviceType);
-
-            visitor += (d, binding) =>
-            {
-                if (binding.Dispatcher.Member.Name == nameof(ServiceFactory<object>.Create))
-                    binding.AddFilters(new ServiceFactoryProvider(serviceFactory));
-            };
-
-            return factory.RegisterDescriptor(serviceType,
-                ServiceConfiguration.For(service) + visitor);
-        }
-
         private static void AssertValidServiceType(Type serviceType, ServiceDescriptor service)
         {
             if (serviceType == null)
                 throw new ArgumentException($"Unable to infer service type from descriptor {service}");
 
             if (serviceType == typeof(object))
-                throw new ArgumentException($"Service type object from descriptor {service} is not valid");
+                throw new ArgumentException($"Service type 'object' from descriptor {service} is not valid");
         }
     }
 }

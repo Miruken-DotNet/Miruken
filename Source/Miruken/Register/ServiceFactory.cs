@@ -1,64 +1,74 @@
 ﻿namespace Miruken.Register
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Callback;
-    using Callback.Policy;
-    using Callback.Policy.Bindings;
+    using Context;
 
     [Unmanaged]
-    public class ServiceFactory<T> : Handler
+    public abstract class ServiceFactory<T> : Handler
     {
-        [Provides, Singleton]
-        public ServiceFactory()
-        {    
+        private readonly Func<IServiceProvider, object> _factory;
+
+        protected ServiceFactory(Func<IServiceProvider, object> factory)
+        {
+            _factory = factory ??
+                throw new ArgumentNullException(nameof(factory));
         }
 
-        [Provides, SkipFilters]
-        public T Create() => throw new NotSupportedException(
-            $"This should not happen if {nameof(ServiceFactoryProvider)} was added to filters");
-    }
-
-    public class ServiceFactoryProvider : IFilterProvider
-    {
-        public ServiceFactoryProvider(Func<IServiceProvider, object> factory)
+        protected T CreateInstance(IHandler composer)
         {
-            Factory = factory
-                ?? throw new ArgumentNullException(nameof(factory));
+            return (T)_factory(composer);
         }
 
-        public bool Required { get; } = true;
+        // Singleton Instance
 
-        public Func<IServiceProvider, object> Factory { get; }
-
-        IEnumerable<IFilter> IFilterProvider.GetFilters(
-            MemberBinding binding, MemberDispatch dispatcher,
-            object callback, Type callbackType, IHandler composer)
+        [Unmanaged]
+        public class Instance : Handler
         {
-            var logicalReturnType = dispatcher.LogicalReturnType;
-            var provider = Providers.GetOrAdd(logicalReturnType, rt =>
-                (IFilter)Activator.CreateInstance(
-                    typeof(InstanceFilter<>).MakeGenericType(rt)));
-            return new[] { provider };
-        }
+            private readonly T _instance;
 
-        private class InstanceFilter<T> : IFilter<Inquiry, T>
-        {
-            public int? Order { get; set; } = int.MaxValue - 1;
-
-            public Task<T> Next(Inquiry callback,
-                object rawCallback, MemberBinding member,
-                IHandler composer, Next<T> next,
-                IFilterProvider provider)
+            public Instance(T instance)
             {
-                var factory = ((ServiceFactoryProvider)provider).Factory;
-                return Task.FromResult((T)factory(composer));
+                _instance = instance;
             }
+
+            [Provides, SkipFilters]
+            public T Get() => _instance;
         }
 
-        private static readonly ConcurrentDictionary<Type, IFilter>
-            Providers = new ConcurrentDictionary<Type, IFilter>();
+        // Lifetime factories 
+
+        public class Transient : ServiceFactory<T>
+        {
+            public Transient(Func<IServiceProvider, object> factory)
+                : base(factory)
+            {
+            }
+
+            [Provides, SkipFilters]
+            public T Create(IHandler composer) => CreateInstance(composer);
+        }
+
+        public class Singleton : ServiceFactory<T>
+        {
+            public Singleton(Func<IServiceProvider, object> factory)
+                : base(factory)
+            {
+            }
+ 
+            [Provides, Singleton, SkipFilters]
+            public T Create(IHandler composer) => CreateInstance(composer);
+        }
+
+        public class Scoped : ServiceFactory<T>
+        {
+            public Scoped(Func<IServiceProvider, object> factory)
+                : base(factory)
+            {
+            }
+ 
+            [Provides, Contextual, SkipFilters]
+            public T Create(IHandler composer) => CreateInstance(composer);
+        }
     }
 }

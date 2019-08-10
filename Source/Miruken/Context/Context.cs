@@ -102,7 +102,7 @@
 
 	        public object GetService(Type serviceType)
 	        {
-	            return _scope.Infer().GetService(serviceType, constraints => 
+	            return _scope.GetService(serviceType, constraints => 
 	                constraints.Require(Qualifier.Of<ContextualAttribute>()));
 	        }
 	    }
