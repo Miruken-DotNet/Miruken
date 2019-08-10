@@ -93,16 +93,16 @@
 
 	    private class ServiceScopeProvider : IServiceProvider
 	    {
-	        private readonly Context _context;
+	        private readonly IHandler _scope;
 
-	        public ServiceScopeProvider(Context context)
+	        public ServiceScopeProvider(IHandler scope)
 	        {
-	            _context = context;
+	            _scope = scope.Infer();
 	        }
 
 	        public object GetService(Type serviceType)
 	        {
-	            return _context.Infer().GetService(serviceType, constraints => 
+	            return _scope.Infer().GetService(serviceType, constraints => 
 	                constraints.Require(Qualifier.Of<ContextualAttribute>()));
 	        }
 	    }
