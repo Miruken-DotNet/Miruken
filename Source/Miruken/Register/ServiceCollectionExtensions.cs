@@ -65,7 +65,7 @@
                 if (serviceType == null)
                     serviceType = instance.GetType();
 
-                AssertValidServiceType(serviceType, service);
+                VerifyServiceType(serviceType, service);
 
                 var providerType = typeof(ServiceFactory<>.Instance)
                     .MakeGenericType(serviceType);
@@ -81,7 +81,7 @@
                 if (serviceType == null)
                     serviceType = implementationFactory .GetType().GenericTypeArguments[1];
 
-                AssertValidServiceType(serviceType, service);
+                VerifyServiceType(serviceType, service);
 
                 Type serviceFactoryType;
                 switch (service.Lifetime)
@@ -106,7 +106,7 @@
                 return (Handler)Activator.CreateInstance( serviceFactoryType, implementationFactory);
             }
 
-            AssertValidServiceType(serviceType, service);
+            VerifyServiceType(serviceType, service);
 
             return factory.RegisterDescriptor(serviceType, 
                 ServiceConfiguration.For(service) + visitor);
@@ -129,7 +129,7 @@
             return services;
         }
 
-        private static void AssertValidServiceType(Type serviceType, ServiceDescriptor service)
+        private static void VerifyServiceType(Type serviceType, ServiceDescriptor service)
         {
             if (serviceType == null)
                 throw new ArgumentException($"Unable to infer service type from descriptor {service}");

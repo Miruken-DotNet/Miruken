@@ -15,7 +15,6 @@
         private SourceSelector _publicSources;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
-        private readonly IServiceCollection _services;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
         public delegate void TypeSelector(IImplementationTypeSelector source, bool publicOnly);
@@ -26,8 +25,10 @@
 
         public Registration(IServiceCollection services)
         {
-            _services = services ?? new ServiceCollection();
+            Services = services ?? new ServiceCollection();
         }
+
+        public IServiceCollection Services { get; }
 
         public Registration Sources(params SourceSelector[] sources)
         {
@@ -61,7 +62,7 @@
         {
             if (_sources != null || _publicSources != null)
             {
-                _services.Scan(scan =>
+                Services.Scan(scan =>
                 {
                     foreach (var source in GetSources())
                     {
@@ -81,7 +82,7 @@
                 });
             }
 
-            return _services;
+            return Services;
         }
 
         public Registration AddFilters(params IFilterProvider[] providers)
