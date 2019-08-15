@@ -1,6 +1,8 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Local
 namespace Miruken.Tests.Register
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
@@ -39,7 +41,7 @@ namespace Miruken.Tests.Register
         [TestMethod]
         public void Should_Register_Instances()
         {
-            var service = new Service();
+            var service = new Service1();
             var handler = new ServiceCollection()
                 .AddSingleton(service)
                 .AddMiruken();
@@ -50,31 +52,31 @@ namespace Miruken.Tests.Register
         public void Should_Register_Transient_Service_Factory()
         {
             var handler = new ServiceCollection()
-                .AddTransient(sp => new Service())
+                .AddTransient(sp => new Service1())
                 .AddMiruken();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.AreNotSame(service, handler.Resolve<IService>());
-            Assert.IsNotNull(handler.Resolve<Service>());
+            Assert.IsNotNull(handler.Resolve<Service1>());
         }
 
         [TestMethod]
         public void Should_Register_Singleton_Service_Factory()
         {
             var handler = new ServiceCollection()
-                .AddSingleton(sp => new Service())
+                .AddSingleton(sp => new Service1())
                 .AddMiruken();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.AreSame(service, handler.Resolve<IService>());
-            Assert.AreSame(service, handler.Resolve<Service>());
+            Assert.AreSame(service, handler.Resolve<Service1>());
         }
 
         [TestMethod]
         public void Should_Register_Scoped_Service_Factory()
         {
             var handler = new ServiceCollection()
-                .AddScoped(sp => new Service())
+                .AddScoped(sp => new Service1())
                 .AddMiruken();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
@@ -85,6 +87,40 @@ namespace Miruken.Tests.Register
                 Assert.AreNotSame(service, scope.ServiceProvider.GetService<IService>());
                 Assert.AreSame(service, handler.Resolve<IService>());
             }
+        }
+
+        [TestMethod]
+        public void Should_Handle_Composition()
+        {
+            var service = new Service1();
+            var handler = new ServiceCollection()
+                .AddSingleton(service)
+                .AddTransient<Service2>()
+                .AddTransient<CompositeService>()
+                .AddMiruken();
+            var c = handler.Resolve<CompositeService>();
+            Assert.AreEqual(2, c.Services.Count());
+            Assert.IsTrue(c.Services.Contains(service));
+            Assert.IsTrue(c.Services.OfType<Service2>().Any());
+        }
+
+        [TestMethod]
+        public void Should_Handle_Composition_With_Factories()
+        {
+            var service = new Service1();
+            var handler = new ServiceCollection()
+                .AddSingleton(service)
+                .AddTransient<Service2>()
+                .AddTransient(sp =>
+                {
+                    var s = sp.GetService<IEnumerable<IService>>();
+                    return new CompositeService(s);
+                })
+                .AddMiruken();
+            var c = handler.Resolve<CompositeService>();
+            Assert.AreEqual(2, c.Services.Count());
+            Assert.IsTrue(c.Services.Contains(service));
+            Assert.IsTrue(c.Services.OfType<Service2>().Any());
         }
 
         public class Action
@@ -106,10 +142,33 @@ namespace Miruken.Tests.Register
             void DoSomething();
         }
 
-        public class Service : IService
+        public class Service1 : IService
         {
             public void DoSomething()
             {
+            }
+        }
+
+        public class Service2 : IService
+        {
+            public void DoSomething()
+            {
+            }
+        }
+
+        public class CompositeService : IService
+        {
+            public IEnumerable<IService> Services { get; }
+
+            public CompositeService(IEnumerable<IService> services)
+            {
+                Services = services;
+            }
+
+            public void DoSomething()
+            {
+                foreach (var service in Services)
+                    service.DoSomething();
             }
         }
     }

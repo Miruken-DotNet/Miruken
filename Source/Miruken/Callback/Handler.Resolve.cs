@@ -171,7 +171,8 @@
         }
 
         public static object GetService(this IHandler handler,
-            Type serviceType, Action<ConstraintBuilder> constraints = null)
+            Type serviceType, Inquiry parent = null, 
+            Action<ConstraintBuilder> constraints = null)
         {
             if (serviceType == null)
                 throw new ArgumentNullException(nameof(serviceType));
@@ -179,12 +180,12 @@
             if (serviceType.IsGenericEnumerable())
             {
                 var actualType = serviceType.GetGenericArguments().Single();
-                return handler.ResolveAll(actualType, constraints);
+                return handler.ResolveAll(new Inquiry(actualType, parent, true), constraints);
             }
 
             return serviceType.IsArray
-                ? handler.ResolveAll(serviceType.GetElementType(), constraints)
-                : handler.Resolve(serviceType, constraints);
+                ? handler.ResolveAll(new Inquiry(serviceType.GetElementType(), parent, true), constraints)
+                : handler.Resolve(new Inquiry(serviceType, parent), constraints);
         }
 
         private static object[] CoerceArray(object[] array, object key)

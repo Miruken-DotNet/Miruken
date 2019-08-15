@@ -15,9 +15,26 @@
                 throw new ArgumentNullException(nameof(factory));
         }
 
-        protected T CreateInstance(IHandler composer)
+        protected T CreateInstance(Inquiry parent, IHandler composer)
         {
-            return (T)_factory(composer);
+            return (T)_factory(new CompositionServiceProvider(parent, composer));
+        }
+
+        private class CompositionServiceProvider : IServiceProvider
+        {
+            private readonly Inquiry _parent;
+            private readonly IHandler _composer;
+
+            public CompositionServiceProvider(Inquiry parent, IHandler composer)
+            {
+                _parent   = parent;
+                _composer = composer;
+            }
+
+            public object GetService(Type serviceType)
+            {
+                return _composer.GetService(serviceType, _parent);
+            }
         }
 
         // Singleton Instance
@@ -46,7 +63,8 @@
             }
 
             [Provides, SkipFilters]
-            public T Create(IHandler composer) => CreateInstance(composer);
+            public T Create(Inquiry inquiry, IHandler composer) =>
+                CreateInstance(inquiry, composer);
         }
 
         public class Singleton : ServiceFactory<T>
@@ -57,7 +75,8 @@
             }
  
             [Provides, Singleton, SkipFilters]
-            public T Create(IHandler composer) => CreateInstance(composer);
+            public T Create(Inquiry inquiry, IHandler composer) =>
+                CreateInstance(inquiry, composer);
         }
 
         public class Scoped : ServiceFactory<T>
@@ -68,7 +87,8 @@
             }
  
             [Provides, Contextual, SkipFilters]
-            public T Create(IHandler composer) => CreateInstance(composer);
+            public T Create(Inquiry inquiry, IHandler composer) =>
+                CreateInstance(inquiry, composer);
         }
     }
 }
