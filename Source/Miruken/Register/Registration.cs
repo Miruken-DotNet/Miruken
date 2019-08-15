@@ -16,6 +16,7 @@
         private TypeSelector _select;
         private Predicate<Type> _exclude;
         private readonly IServiceCollection _services;
+        private readonly HashSet<object> _keys;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
         public delegate void TypeSelector(IImplementationTypeSelector source, bool publicOnly);
@@ -27,6 +28,12 @@
         public Registration(IServiceCollection services)
         {
             _services = services ?? new ServiceCollection();
+            _keys     = new HashSet<object>();
+        }
+
+        public bool CanRegister(object key)
+        {
+            return _keys.Add(key);
         }
 
         public Registration Services(Action<IServiceCollection> services)

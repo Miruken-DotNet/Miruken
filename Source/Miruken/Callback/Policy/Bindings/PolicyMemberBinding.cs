@@ -127,7 +127,7 @@
                         isPromise = false;
                         var type = target as Type ?? target.GetType();
                         res = Task.FromException(new InvalidOperationException(
-                            $"Failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}' for {dispatcher.Member} in '{type}'"));
+                            $"Failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}' for signature {dispatcher.Member} in '{type}'"));
                         return false;
                     case object[] array:
                         isPromise = false;
