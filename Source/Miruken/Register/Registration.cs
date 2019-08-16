@@ -19,7 +19,7 @@
         private readonly HashSet<object> _keys;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
-        public delegate void TypeSelector(IImplementationTypeSelector source, bool publicOnly);
+        public delegate void TypeSelector(IImplementationTypeSelector selector, bool publicOnly);
 
         public Registration() : this(null)
         {
@@ -80,7 +80,7 @@
                 {
                     foreach (var source in GetSources())
                     {
-                        var from = source.Item1(scan);
+                        var from = source.Item1(new TypeSourceSelectorWrapper(scan));
                         from.AddClasses(cls => cls.Where(
                             type => !ShouldExclude(type) &&
                             (type.Is<IHandler>() || type.Is<IFilter>() ||
@@ -95,7 +95,6 @@
                     }
                 });
             }
-
             return _services;
         }
 

@@ -6,6 +6,7 @@ namespace Miruken.Tests.Register
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
+    using Miruken.Context;
     using Miruken.Register;
 
     [TestClass]
@@ -49,6 +50,34 @@ namespace Miruken.Tests.Register
         }
 
         [TestMethod]
+        public void Should_Register_Scoped()
+        {
+            var services = new ServiceCollection();
+            var handler  = services
+                .AddScoped<Service1>()
+                .AddMiruken();
+            var service = handler.Resolve<IService>();
+            Assert.IsNotNull(service);
+            Assert.IsNotNull((service as IContextual)?.Context);
+        }
+
+        [TestMethod]
+        public void Should_Register_Scoped_Fluently()
+        {
+            var services = new ServiceCollection();
+            var handler  = services
+                .AddMiruken(scan => scan.Sources(sources => sources
+                        .AddTypes(typeof(Service1)))
+                    .Select((selector, publicOnly) => selector
+                        .AddClasses(x => x.AssignableTo<IService>(), publicOnly)
+                            .AsSelf().WithScopedLifetime()
+                ));
+            var service = handler.Resolve<IService>();
+            Assert.IsNotNull(service);
+            Assert.IsNotNull((service as IContextual)?.Context);
+        }
+
+        [TestMethod]
         public void Should_Register_Transient_Service_Factory()
         {
             var handler = new ServiceCollection()
@@ -58,6 +87,7 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(service);
             Assert.AreNotSame(service, handler.Resolve<IService>());
             Assert.IsNotNull(handler.Resolve<Service1>());
+            Assert.IsNull((service as IContextual)?.Context);
         }
 
         [TestMethod]
@@ -70,6 +100,7 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(service);
             Assert.AreSame(service, handler.Resolve<IService>());
             Assert.AreSame(service, handler.Resolve<Service1>());
+            Assert.IsNull((service as IContextual)?.Context);
         }
 
         [TestMethod]
@@ -84,7 +115,11 @@ namespace Miruken.Tests.Register
             Assert.AreSame(service, handler.GetService<IService>());
             using (var scope = handler.CreateScope())
             {
-                Assert.AreNotSame(service, scope.ServiceProvider.GetService<IService>());
+                var scopedService = scope.ServiceProvider.GetService<IService>();
+                var context = (scopedService as IContextual)?.Context;
+                Assert.IsNotNull(context);
+                Assert.IsNotNull(context.Parent);
+                Assert.AreNotSame(service, scopedService);
                 Assert.AreSame(service, handler.Resolve<IService>());
             }
         }
@@ -142,11 +177,15 @@ namespace Miruken.Tests.Register
             void DoSomething();
         }
 
-        public class Service1 : IService
+        public class Service1 : IService, IContextual
         {
             public void DoSomething()
             {
             }
+
+            public Context Context { get; set; }
+            public event ContextChangingDelegate ContextChanging;
+            public event ContextChangedDelegate ContextChanged;
         }
 
         public class Service2 : IService

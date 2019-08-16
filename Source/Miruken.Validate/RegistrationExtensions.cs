@@ -12,8 +12,8 @@
 
             return registration
                 .Sources(sources => sources.FromAssemblyOf<Validation>())
-                .Select((source, publicOnly) =>
-                    source.AddClasses(x => x.AssignableTo<IValidator>(), publicOnly));
+                .Select((selector, publicOnly) =>
+                    selector.AddClasses(x => x.AssignableTo<IValidator>(), publicOnly));
         }
     }
 }
