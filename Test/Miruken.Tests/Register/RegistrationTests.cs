@@ -18,8 +18,8 @@ namespace Miruken.Tests.Register
         public void TestInitialize()
         {
             _handler = new ServiceCollection()
-                .AddMiruken(scan =>
-                    scan.PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
+                .AddMiruken(registration => registration
+                    .PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
                 );
         }
 
@@ -66,7 +66,8 @@ namespace Miruken.Tests.Register
         {
             var services = new ServiceCollection();
             var handler  = services
-                .AddMiruken(scan => scan.Sources(sources => sources
+                .AddMiruken(registration => registration
+                    .Sources(sources => sources
                         .AddTypes(typeof(Service1)))
                     .Select((selector, publicOnly) => selector
                         .AddClasses(x => x.AssignableTo<IService>(), publicOnly)
@@ -122,6 +123,17 @@ namespace Miruken.Tests.Register
                 Assert.AreNotSame(service, scopedService);
                 Assert.AreSame(service, handler.Resolve<IService>());
             }
+        }
+
+        [TestMethod]
+        public void Should_Override_Handlers()
+        {
+            var service  = new Service1();
+            var services = new ServiceCollection();
+            var handler = services
+                .AddTransient<Service1>()
+                .AddMiruken(registration => registration.With(service));
+            Assert.AreSame(service, handler.Resolve<IService>());
         }
 
         [TestMethod]

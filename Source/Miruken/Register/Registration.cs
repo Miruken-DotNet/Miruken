@@ -31,17 +31,11 @@
             _keys     = new HashSet<object>();
         }
 
+        public IEnumerable<IHandler> Handlers { get; } = new List<IHandler>();
+
         public bool CanRegister(object key)
         {
             return _keys.Add(key);
-        }
-
-        public Registration Services(Action<IServiceCollection> services)
-        {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
-            services(_services);
-            return this;
         }
 
         public Registration Sources(params SourceSelector[] sources)
@@ -69,6 +63,27 @@
         {
             foreach (var exclude in excludes)
                 _exclude += exclude;
+            return this;
+        }
+
+
+        public Registration Services(Action<IServiceCollection> services)
+        {
+            if (services == null)
+                throw new ArgumentNullException(nameof(services));
+            services(_services);
+            return this;
+        }
+
+        public Registration AddHandlers(params IHandler[] handlers)
+        {
+            ((List<IHandler>)Handlers).AddRange(handlers);
+            return this;
+        }
+
+        public Registration InsertHandlers(int atIndex, params IHandler[] handlers)
+        {
+            ((List<IHandler>)Handlers).InsertRange(atIndex, handlers);
             return this;
         }
 

@@ -16,18 +16,6 @@
 
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection Register(
-            this IServiceCollection services,
-            Action<Registration> configure = null)
-        {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
-
-            var registration = new Registration(services);
-            configure?.Invoke(registration);
-            return registration.Register();
-        }
-
         public static IHandler AddMiruken(
             this IServiceCollection services,
             Action<Registration> configure = null)
@@ -35,12 +23,13 @@
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            services.AddDefaultServices().Register(configure);
-
-            var factory = new MutableHandlerDescriptorFactory();
+            var registration = services.AddDefaultServices().Register(configure);
 
             var context = new Context();
+            context.AddHandlers(registration.Handlers);
             context.AddHandlers(new StaticHandler());
+
+            var factory = new MutableHandlerDescriptorFactory();
 
             foreach (var service in services)
             {
@@ -51,6 +40,27 @@
             HandlerDescriptorFactory.UseFactory(factory);
 
             return context.AddHandlers(new Stash(true)).Infer();
+        }
+
+        public static IHandler AddMiruken(
+            this IServiceProvider serviceProvider,
+            Action<Registration> configure = null)
+        {
+            return new ServiceCollection().AddMiruken(
+                configure + (registration => registration
+                    .AddHandlers(new ServiceProvider(serviceProvider))));
+        }
+
+        public static Registration Register(this IServiceCollection services,
+            Action<Registration> configure = null)
+        {
+            if (services == null)
+                throw new ArgumentNullException(nameof(services));
+
+            var registration = new Registration(services);
+            configure?.Invoke(registration);
+            registration.Register();
+            return registration;
         }
 
         public static Either<HandlerDescriptor, IHandler> RegisterService(
