@@ -47,8 +47,7 @@
             Action<Registration> configure = null)
         {
             return new ServiceCollection().AddMiruken(
-                configure + (registration => registration
-                    .AddHandlers(new ServiceProvider(serviceProvider))));
+                configure + (c => c .WithServiceProvider(serviceProvider)));
         }
 
         public static Registration Register(this IServiceCollection services,

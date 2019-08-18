@@ -18,7 +18,7 @@ namespace Miruken.Tests.Register
         public void TestInitialize()
         {
             _handler = new ServiceCollection()
-                .AddMiruken(registration => registration
+                .AddMiruken(configure => configure
                     .PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
                 );
         }
@@ -66,7 +66,7 @@ namespace Miruken.Tests.Register
         {
             var services = new ServiceCollection();
             var handler  = services
-                .AddMiruken(registration => registration
+                .AddMiruken(configure => configure
                     .Sources(sources => sources
                         .AddTypes(typeof(Service1)))
                     .Select((selector, publicOnly) => selector
@@ -130,9 +130,9 @@ namespace Miruken.Tests.Register
         {
             var service  = new Service1();
             var services = new ServiceCollection();
-            var handler = services
+            var handler  = services
                 .AddTransient<Service1>()
-                .AddMiruken(registration => registration.With(service));
+                .AddMiruken(configure => configure.With(service));
             Assert.AreSame(service, handler.Resolve<IService>());
         }
 

@@ -87,6 +87,18 @@
             return this;
         }
 
+        public Registration AddFilters(params IFilterProvider[] providers)
+        {
+            Handles.AddFilters(providers);
+            return this;
+        }
+
+        public Registration AddMethodFilters(params IFilterProvider[] providers)
+        {
+            HandleMethodBinding.AddGlobalFilters(providers);
+            return this;
+        }
+
         public IServiceCollection Register()
         {
             if (_sources != null || _publicSources != null)
@@ -111,18 +123,6 @@
                 });
             }
             return _services;
-        }
-
-        public Registration AddFilters(params IFilterProvider[] providers)
-        {
-            Handles.AddFilters(providers);
-            return this;
-        }
-
-        public Registration AddMethodFilters(params IFilterProvider[] providers)
-        {
-            HandleMethodBinding.AddGlobalFilters(providers);
-            return this;
         }
 
         private bool ShouldExclude(Type serviceType)

@@ -16,7 +16,7 @@
         public void TestInitialize()
         {
             _handler = new ServiceCollection()
-                .AddMiruken(registration => registration
+                .AddMiruken(configure => configure
                     .PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
                     .WithValidation()
                 );

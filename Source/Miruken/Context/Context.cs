@@ -91,7 +91,44 @@
 	        }
 	    }
 
-	    private class ServiceScopeProvider : IServiceProvider
+	    public Context CreateChild()
+	    {
+	        AssertActive();
+	        var child = InternalCreateChild();
+	        child.ContextEnding += (ctx, reason) =>
+	            Raise(ChildContextEndingEvent, ctx, reason);
+	        child.ContextEnded += (ctx, reason) => {
+	            _lock.EnterWriteLock();
+	            try
+	            {
+	                _children.Remove(ctx);
+	            }
+	            finally
+	            {
+	                _lock.ExitWriteLock();
+	            }
+	            Raise(ChildContextEndedEvent, ctx, reason);
+	        };
+	        _lock.EnterWriteLock();
+	        try
+	        {
+	            _children.Add(child);
+	        }
+	        finally
+	        {
+	            _lock.ExitWriteLock();
+	        }
+	        return child;
+	    }
+
+	    protected virtual Context InternalCreateChild()
+	    {
+	        return new Context(this);
+	    }
+
+        #region Service Scope
+
+        private class ServiceScopeProvider : IServiceProvider
 	    {
 	        private readonly IHandler _scope;
 
@@ -107,47 +144,46 @@
 	        }
 	    }
 
+	    private class ServiceScope : IServiceScope
+	    {
+	        private readonly Context _child;
+	        private readonly List<IServiceScope> _scopes;
+
+	        public ServiceScope(Context parent)
+	        {
+	            _child  = parent.CreateChild();
+
+	            foreach (var handler in parent.Handlers)
+	            {
+	                var scopeFactory = handler.Resolve<IServiceScopeFactory>();
+	                var scope        = scopeFactory?.CreateScope();
+	                if (scope != null)
+	                {
+                        if (_scopes == null)
+                            _scopes = new List<IServiceScope>();
+	                    _child.AddHandlers(scope.ServiceProvider);
+                        _scopes.Add(scope);
+	                }
+	            }
+	        }
+
+	        public IServiceProvider ServiceProvider => _child;
+
+            public void Dispose()
+	        {
+                _scopes?.ForEach(scope => scope.Dispose());
+	            _child.End();
+	        }
+	    }
+
 	    IServiceProvider IServiceScope.ServiceProvider => new ServiceScopeProvider(this);
 
 	    IServiceScope IServiceScopeFactory.CreateScope()
 	    {
-	        return CreateChild();
+	        return new ServiceScope(this);
 	    }
 
-        public Context CreateChild()
-	    {
-            AssertActive();
-	        var child = InternalCreateChild();
-	        child.ContextEnding += (ctx, reason) => 
-	            Raise(ChildContextEndingEvent, ctx, reason);
-            child.ContextEnded += (ctx, reason) => {
-                _lock.EnterWriteLock();
-                try
-                {
-                    _children.Remove(ctx);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-                Raise(ChildContextEndedEvent, ctx, reason);
-            };
-	        _lock.EnterWriteLock();
-	        try
-	        {
-	            _children.Add(child);
-            }
-	        finally
-	        {
-	            _lock.ExitWriteLock();
-	        }
-	        return child;
-	    }
-
-        protected virtual Context InternalCreateChild()
-	    {
-            return new Context(this);
-	    }
+        #endregion
 
 	    public Context Store(object data)
 	    {
