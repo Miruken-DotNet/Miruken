@@ -161,7 +161,7 @@
 	                {
                         if (_scopes == null)
                             _scopes = new List<IServiceScope>();
-	                    _child.AddHandlers(scope.ServiceProvider);
+	                    _child.AddHandlers(new ServiceProvider(scope.ServiceProvider));
                         _scopes.Add(scope);
 	                }
 	            }
