@@ -22,7 +22,7 @@
         public object Provide(Inquiry inquiry)
         {
             var type = inquiry.Key as Type;
-            if (type == null) return null;
+            if (type == null || !inquiry.Metadata.IsEmpty) return null;
             return _providesType.Is(type) ? _value : null;
         }
     }
