@@ -93,16 +93,16 @@ namespace Miruken.Callback
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var handled = false;
-		    foreach (var handler in Handlers)
+            var handled = base.HandleCallback(callback, ref greedy, composer);
+            if (handled && !greedy) return true;
+            foreach (var handler in Handlers)
 		    {
 		        if (!handler.Handle(callback, ref greedy, composer)) continue;
 		        if (!greedy) return true;
 		        handled = true;
 		    }
-		    if (handled && !greedy) return true;
-		    return base.HandleCallback(callback, ref greedy, composer) || handled;
-		}
+            return handled;
+        }
 
 	    private IHandler FindHandler(object instance)
 	    {

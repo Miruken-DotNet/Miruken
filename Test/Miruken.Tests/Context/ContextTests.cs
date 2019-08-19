@@ -1,7 +1,9 @@
 ﻿namespace Miruken.Tests.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
@@ -21,6 +23,7 @@
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Counter>();
             factory.RegisterDescriptor<Observer>();
+            factory.RegisterDescriptor<ServiceProvider>();
             HandlerDescriptorFactory.UseFactory(factory);
         }
 
@@ -50,6 +53,35 @@
         {
             var context = new Context();
             Assert.AreSame(context, context.Resolve<IServiceScopeFactory>());
+        }
+
+        [TestMethod]
+        public void Should_Get_Self_For_ServiceScopeFactory_With_Scope()
+        {
+            var context = new Context();
+            context.AddHandlers(new ServiceProvider(new TestServiceProvider()));
+            Assert.AreSame(context, context.Resolve<IServiceScopeFactory>());
+        }
+
+        [TestMethod]
+        public void Should_Create_Service_Scope()
+        {
+            var context = new Context();
+            var scope   = context.CreateScope();
+            Assert.IsNotNull(scope);
+        }
+
+        [TestMethod]
+        public void Should_Create_Nested_Service_Scope()
+        {
+            var context = new Context();
+            context.AddHandlers(new ServiceProvider(new TestServiceProvider()));
+            using (var scope = context.CreateScope())
+            {
+                Assert.IsInstanceOfType(scope.ServiceProvider, typeof(Context));
+                var foo = scope.ServiceProvider.GetService<Foo>();
+                Assert.IsNotNull(foo);
+            }
         }
 
         [TestMethod]
@@ -460,6 +492,71 @@
                 var context = composer.Resolve<Context>();
                 Assert.AreSame(Context.Root, context);
                 counter.Increment();
+            }
+        }
+
+        private class TestServiceProvider : IServiceProvider
+        {
+            private readonly IServiceProvider _parent;
+            private readonly IDictionary<Type, object> _services;
+
+            public TestServiceProvider(params object[] services)
+            {
+                _services = services.ToDictionary(s => s.GetType());
+                _services[typeof(IServiceScopeFactory)] = new ServiceScopeFactory(this);
+            }
+
+            public TestServiceProvider(IServiceProvider parent)
+            {
+                _parent = parent;
+            }
+
+            public object GetService(Type serviceType)
+            {
+                if (_services != null &&
+                    _services.TryGetValue(serviceType, out var service))
+                        return service;
+                return _parent?.GetService(serviceType);
+            }
+        }
+
+        public class Foo { } 
+
+        private class ServiceScope : IServiceScope, IServiceProvider
+        {
+            private readonly IServiceProvider _parent;
+            private readonly Foo _foo = new Foo();
+
+            public ServiceScope(IServiceProvider parent)
+            {
+                _parent = new TestServiceProvider(parent);
+            }
+
+            public IServiceProvider ServiceProvider => this;
+
+            public object GetService(Type serviceType)
+            {
+                return serviceType == typeof(Foo) ? _foo
+                     : _parent.GetService(serviceType);
+            }
+
+            public void Dispose()
+            {              
+            }
+        }
+
+        private class ServiceScopeFactory : IServiceScopeFactory
+        {
+            private readonly IServiceProvider _parent;
+
+            public ServiceScopeFactory(IServiceProvider parent)
+            {
+                _parent = parent;
+            }
+
+            public IServiceScope CreateScope()
+            {
+                return new ServiceScope(_parent);
             }
         }
     }

@@ -172,7 +172,7 @@
             public void Dispose()
 	        {
                 _scopes?.ForEach(scope => scope.Dispose());
-	            _child.End();
+	            _child.Dispose();
 	        }
 	    }
 
@@ -351,7 +351,7 @@
 
         protected bool IsDisposed { get; private set; }
 
-	    void IDisposable.Dispose()
+	    public void Dispose()
 		{
 	        if (IsDisposed) return;
 	        Dispose(true);
