@@ -23,11 +23,14 @@
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            var registration = services.AddDefaultServices().Register(configure);
+            var registration = services.AddDefaultServices().Register(c =>
+            {
+                c.AddHandlers(new StaticHandler());
+                configure?.Invoke(c);
+            });
 
             var context = new Context();
             context.AddHandlers(registration.Handlers);
-            context.AddHandlers(new StaticHandler());
 
             var factory = new MutableHandlerDescriptorFactory();
 
@@ -47,7 +50,7 @@
             Action<Registration> configure = null)
         {
             return new ServiceCollection().AddMiruken(
-                configure + (c => c .WithServiceProvider(serviceProvider)));
+                configure + (c => c .AddHandlers(new ServiceProvider(serviceProvider))));
         }
 
         public static Registration Register(this IServiceCollection services,
