@@ -147,31 +147,32 @@
 	    private class ServiceScope : IServiceScope
 	    {
 	        private readonly Context _child;
-	        private readonly List<IServiceScope> _scopes;
+	        private readonly List<IServiceScope> _childScopes;
 
 	        public ServiceScope(Context parent)
 	        {
 	            _child  = parent.CreateChild();
+	            ServiceProvider = new ServiceScopeProvider(_child);
 
-	            foreach (var handler in parent.Handlers)
+                foreach (var handler in parent.Handlers)
 	            {
 	                var scopeFactory = handler.Resolve<IServiceScopeFactory>();
 	                var scope        = scopeFactory?.CreateScope();
 	                if (scope != null)
 	                {
-                        if (_scopes == null)
-                            _scopes = new List<IServiceScope>();
+                        if (_childScopes == null)
+                            _childScopes = new List<IServiceScope>();
 	                    _child.AddHandlers(new ServiceProvider(scope.ServiceProvider));
-                        _scopes.Add(scope);
+                        _childScopes.Add(scope);
 	                }
 	            }
 	        }
 
-	        public IServiceProvider ServiceProvider => _child;
+	        public IServiceProvider ServiceProvider { get; }
 
             public void Dispose()
 	        {
-                _scopes?.ForEach(scope => scope.Dispose());
+                _childScopes?.ForEach(scope => scope.Dispose());
 	            _child.Dispose();
 	        }
 	    }

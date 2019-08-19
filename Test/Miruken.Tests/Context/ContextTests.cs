@@ -78,9 +78,7 @@
             context.AddHandlers(new ServiceProvider(new TestServiceProvider()));
             using (var scope = context.CreateScope())
             {
-                Assert.IsInstanceOfType(scope.ServiceProvider, typeof(Context));
-                var foo = scope.ServiceProvider.GetService<Foo>();
-                Assert.IsNotNull(foo);
+                Assert.IsNotNull(scope.ServiceProvider.GetService<Foo>());
             }
         }
 
