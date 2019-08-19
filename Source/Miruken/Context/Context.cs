@@ -5,7 +5,6 @@
     using System.ComponentModel;
     using System.Threading;
     using Callback;
-    using Callback.Policy.Bindings;
     using Graph;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -128,22 +127,6 @@
 
         #region Service Scope
 
-        private class ServiceScopeProvider : IServiceProvider
-	    {
-	        private readonly IHandler _scope;
-
-	        public ServiceScopeProvider(IHandler scope)
-	        {
-	            _scope = scope.Infer();
-	        }
-
-	        public object GetService(Type serviceType)
-	        {
-	            return _scope.GetService(serviceType, null, constraints => 
-	                constraints.Require(Qualifier.Of<ContextualAttribute>()));
-	        }
-	    }
-
 	    private class ServiceScope : IServiceScope
 	    {
 	        private readonly Context _child;
@@ -151,8 +134,8 @@
 
 	        public ServiceScope(Context parent)
 	        {
-	            _child  = parent.CreateChild();
-	            ServiceProvider = new ServiceScopeProvider(_child);
+	            _child = parent.CreateChild();
+	            _child.AddHandlers(new StaticHandler());
 
                 foreach (var handler in parent.Handlers)
 	            {
@@ -166,9 +149,11 @@
                         _childScopes.Add(scope);
 	                }
 	            }
-	        }
 
-	        public IServiceProvider ServiceProvider { get; }
+	            ServiceProvider = _child.Infer();
+            }
+
+            public IServiceProvider ServiceProvider { get; }
 
             public void Dispose()
 	        {
@@ -177,7 +162,7 @@
 	        }
 	    }
 
-	    IServiceProvider IServiceScope.ServiceProvider => new ServiceScopeProvider(this);
+	    IServiceProvider IServiceScope.ServiceProvider => this.Infer();
 
 	    IServiceScope IServiceScopeFactory.CreateScope()
 	    {

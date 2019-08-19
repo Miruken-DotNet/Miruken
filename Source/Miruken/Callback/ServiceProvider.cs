@@ -18,7 +18,7 @@
         public object Provide(Inquiry inquiry)
         {
             var type = inquiry.Key as Type;
-            if (type != null || !inquiry.Metadata.IsEmpty)
+            if (type != null && inquiry.Metadata.IsEmpty)
             {
                 if (inquiry.Many)
                 {
