@@ -20,6 +20,21 @@
             this IServiceCollection services,
             Action<Registration> configure = null)
         {
+            return services.AddMiruken(null, configure);
+        }
+
+        public static IHandler AddMiruken(
+            this IServiceProvider serviceProvider,
+            Action<Registration> configure = null)
+        {
+            return new ServiceCollection().AddMiruken(serviceProvider, configure);
+        }
+
+        private static IHandler AddMiruken(
+            this IServiceCollection services,
+            IServiceProvider serviceProvider = null,
+            Action<Registration> configure = null)
+        {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
@@ -42,15 +57,10 @@
 
             HandlerDescriptorFactory.UseFactory(factory);
 
-            return context.AddHandlers(new Stash(true)).Infer();
-        }
+            if (serviceProvider != null)
+                context.AddHandlers(new ServiceProvider(serviceProvider));
 
-        public static IHandler AddMiruken(
-            this IServiceProvider serviceProvider,
-            Action<Registration> configure = null)
-        {
-            return new ServiceCollection().AddMiruken(
-                configure + (c => c .AddHandlers(new ServiceProvider(serviceProvider))));
+            return context.AddHandlers(new Stash(true)).Infer();
         }
 
         public static Registration Register(this IServiceCollection services,
@@ -65,8 +75,8 @@
             return registration;
         }
 
-        public static Either<HandlerDescriptor, IHandler> RegisterService(
-            this MutableHandlerDescriptorFactory factory, ServiceDescriptor service,
+        private static Either<HandlerDescriptor, IHandler> RegisterService(
+            this IHandlerDescriptorFactory factory, ServiceDescriptor service,
             HandlerDescriptorVisitor visitor = null)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
@@ -124,7 +134,7 @@
                 ServiceConfiguration.For(service) + visitor);
         }
 
-        public static IServiceCollection AddDefaultServices(this IServiceCollection services)
+        private static IServiceCollection AddDefaultServices(this IServiceCollection services)
         {
             services.AddTransient<Provider>();
             services.AddTransient<ServiceProvider>();

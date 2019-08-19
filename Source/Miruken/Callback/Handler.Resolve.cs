@@ -177,6 +177,8 @@
             if (serviceType == null)
                 throw new ArgumentNullException(nameof(serviceType));
 
+            handler = handler.Infer();
+
             if (serviceType.IsGenericEnumerable())
             {
                 var actualType = serviceType.GetGenericArguments().Single();

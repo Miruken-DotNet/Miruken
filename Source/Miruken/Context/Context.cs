@@ -149,11 +149,9 @@
                         _childScopes.Add(scope);
 	                }
 	            }
-
-	            ServiceProvider = _child.Infer();
             }
 
-            public IServiceProvider ServiceProvider { get; }
+	        public IServiceProvider ServiceProvider => _child;
 
             public void Dispose()
 	        {
@@ -162,7 +160,7 @@
 	        }
 	    }
 
-	    IServiceProvider IServiceScope.ServiceProvider => this.Infer();
+	    IServiceProvider IServiceScope.ServiceProvider => this;
 
 	    IServiceScope IServiceScopeFactory.CreateScope()
 	    {
