@@ -20,21 +20,6 @@
             this IServiceCollection services,
             Action<Registration> configure = null)
         {
-            return services.AddMiruken(null, configure);
-        }
-
-        public static IHandler AddMiruken(
-            this IServiceProvider serviceProvider,
-            Action<Registration> configure = null)
-        {
-            return new ServiceCollection().AddMiruken(serviceProvider, configure);
-        }
-
-        private static IHandler AddMiruken(
-            this IServiceCollection services,
-            IServiceProvider serviceProvider = null,
-            Action<Registration> configure = null)
-        {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
@@ -56,9 +41,6 @@
             }
 
             HandlerDescriptorFactory.UseFactory(factory);
-
-            if (serviceProvider != null)
-                context.AddHandlers(new ServiceProvider(serviceProvider));
 
             return context.AddHandlers(new Stash(true)).Infer();
         }

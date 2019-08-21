@@ -125,49 +125,12 @@
 	        return new Context(this);
 	    }
 
-        #region Service Scope
-
-	    private class ServiceScope : IServiceScope
-	    {
-	        private readonly Context _child;
-	        private readonly List<IServiceScope> _childScopes;
-
-	        public ServiceScope(Context parent)
-	        {
-	            _child = parent.CreateChild();
-	            _child.AddHandlers(new StaticHandler());
-
-                foreach (var handler in parent.Handlers)
-	            {
-	                var scopeFactory = handler.Resolve<IServiceScopeFactory>();
-	                var scope        = scopeFactory?.CreateScope();
-	                if (scope != null)
-	                {
-                        if (_childScopes == null)
-                            _childScopes = new List<IServiceScope>();
-	                    _child.AddHandlers(new ServiceProvider(scope.ServiceProvider));
-                        _childScopes.Add(scope);
-	                }
-	            }
-            }
-
-	        public IServiceProvider ServiceProvider => _child;
-
-            public void Dispose()
-	        {
-                _childScopes?.ForEach(scope => scope.Dispose());
-	            _child.Dispose();
-	        }
-	    }
-
 	    IServiceProvider IServiceScope.ServiceProvider => this;
 
 	    IServiceScope IServiceScopeFactory.CreateScope()
 	    {
-	        return new ServiceScope(this);
+	        return CreateChild();
 	    }
-
-        #endregion
 
 	    public Context Store(object data)
 	    {
@@ -335,7 +298,7 @@
 
         protected bool IsDisposed { get; private set; }
 
-	    public void Dispose()
+	    void IDisposable.Dispose()
 		{
 	        if (IsDisposed) return;
 	        Dispose(true);
