@@ -111,7 +111,9 @@
                             type => !ShouldExclude(type) &&
                             (type.Is<IHandler>() || type.Is<IFilter>() ||
                              type.Is<IResolving>() || type.Name.EndsWith("Handler"))
-                        ), source.Item2).AsSelf().WithSingletonLifetime();
+                        ), source.Item2)
+                            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+                            .AsSelf().WithSingletonLifetime();
 
                         if (_select != null)
                         {
