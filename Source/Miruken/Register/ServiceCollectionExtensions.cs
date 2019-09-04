@@ -25,13 +25,12 @@
             var context = new Context();
             var factory = new MutableHandlerDescriptorFactory();
 
-            context.AddHandlers(new StaticHandler());
-
             var registration = services.AddDefaultServices().Register(configure);
 
             foreach (var service in services)
                 RegisterService(context, factory, service);
 
+            context.AddHandlers(new StaticHandler());
             context.InsertHandlers(0, registration.Handlers);
 
             HandlerDescriptorFactory.UseFactory(factory);
@@ -71,7 +70,7 @@
                 factory.RegisterDescriptor(providerType, visitor);
 
                 var handler = (Handler)Activator.CreateInstance(providerType, instance);
-                context.InsertHandlers(0, handler);
+                context.AddHandlers(handler);
                 return;
             }
 
