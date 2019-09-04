@@ -831,8 +831,10 @@
         [TestMethod]
         public void Should_Create_Resolving_Implicitly()
         {
-            var foo = new Foo();
-            _factory.RegisterDescriptor<Controller>();
+            var foo     = new Foo();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            HandlerDescriptorFactory.UseFactory(factory);
             Assert.IsTrue(new StaticHandler().Infer().Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
@@ -857,8 +859,8 @@
         public void Should_Provide_Instance_Implicitly()
         {
             var factory = new MutableHandlerDescriptorFactory();
-            HandlerDescriptorFactory.UseFactory(factory);
             factory.RegisterDescriptor<Controller>();
+            HandlerDescriptorFactory.UseFactory(factory);
             var bar = new StaticHandler().Infer().Resolve<Bar>();
             Assert.IsNotNull(bar);
         }
@@ -866,7 +868,7 @@
         [TestMethod]
         public void Should_Provide_Dependencies_Implicitly()
         {
-            var view = new Screen();
+            var view    = new Screen();
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Controller>();
             factory.RegisterDescriptor(typeof(Controller<,>));

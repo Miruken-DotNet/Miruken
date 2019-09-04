@@ -81,10 +81,9 @@
             return this;
         }
 
-        public Registration InsertHandlers(int atIndex, params IHandler[] handlers)
+        public Registration With(object value)
         {
-            ((List<IHandler>)Handlers).InsertRange(atIndex, handlers);
-            return this;
+            return AddHandlers(new Provider(value));
         }
 
         public Registration AddFilters(params IFilterProvider[] providers)

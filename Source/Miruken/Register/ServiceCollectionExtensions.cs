@@ -11,7 +11,6 @@
     using Callback.Policy;
     using Context;
     using Error;
-    using Functional;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class ServiceCollectionExtensions
@@ -23,22 +22,17 @@
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
-            var registration = services.AddDefaultServices().Register(c =>
-            {
-                c.AddHandlers(new StaticHandler());
-                configure?.Invoke(c);
-            });
-
             var context = new Context();
-            context.AddHandlers(registration.Handlers);
-
             var factory = new MutableHandlerDescriptorFactory();
 
+            context.AddHandlers(new StaticHandler());
+
+            var registration = services.AddDefaultServices().Register(configure);
+
             foreach (var service in services)
-            {
-                factory.RegisterService(service).Match(_ => { },
-                    handler => context.AddHandlers(handler));
-            }
+                RegisterService(context, factory, service);
+
+            context.InsertHandlers(0, registration.Handlers);
 
             HandlerDescriptorFactory.UseFactory(factory);
 
@@ -57,8 +51,8 @@
             return registration;
         }
 
-        private static Either<HandlerDescriptor, IHandler> RegisterService(
-            this IHandlerDescriptorFactory factory, ServiceDescriptor service,
+        private static void RegisterService(Context context,
+            IHandlerDescriptorFactory factory, ServiceDescriptor service,
             HandlerDescriptorVisitor visitor = null)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
@@ -76,7 +70,9 @@
 
                 factory.RegisterDescriptor(providerType, visitor);
 
-                return (Handler)Activator.CreateInstance(providerType, instance);
+                var handler = (Handler)Activator.CreateInstance(providerType, instance);
+                context.InsertHandlers(0, handler);
+                return;
             }
 
             var implementationFactory = service.ImplementationFactory;
@@ -107,13 +103,14 @@
 
                 factory.RegisterDescriptor(serviceFactoryType, visitor);
 
-                return (Handler)Activator.CreateInstance( serviceFactoryType, implementationFactory);
+                var handler = (Handler)Activator.CreateInstance(serviceFactoryType, implementationFactory);
+                context.AddHandlers(handler);
+                return;
             }
 
             VerifyServiceType(serviceType, service);
 
-            return factory.RegisterDescriptor(serviceType, 
-                ServiceConfiguration.For(service) + visitor);
+            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service) + visitor);
         }
 
         private static IServiceCollection AddDefaultServices(this IServiceCollection services)
