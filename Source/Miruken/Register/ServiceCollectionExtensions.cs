@@ -26,16 +26,16 @@
             var factory = new MutableHandlerDescriptorFactory();
 
             var registration = services.AddDefaultServices().Register(configure);
+            context.AddHandlers(registration.Handlers);
 
             foreach (var service in services)
                 RegisterService(context, factory, service);
 
-            context.AddHandlers(new StaticHandler());
-            context.InsertHandlers(0, registration.Handlers);
+            context.AddHandlers(new StaticHandler(), new Stash(true));
 
             HandlerDescriptorFactory.UseFactory(factory);
 
-            return context.AddHandlers(new Stash(true)).Infer();
+            return context.Infer();
         }
 
         public static Registration Register(this IServiceCollection services,
