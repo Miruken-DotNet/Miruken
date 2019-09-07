@@ -126,6 +126,11 @@
             services.AddSingleton<PassThroughRouter>();
             services.AddSingleton<Scheduler>();
 
+            services.AddSingleton(typeof(ServiceFactory<>.Instance));
+            services.AddSingleton(typeof(ServiceFactory<>.Transient));
+            services.AddSingleton(typeof(ServiceFactory<>.Singleton));
+            services.AddSingleton(typeof(ServiceFactory<>.Scoped));
+
             return services;
         }
 
