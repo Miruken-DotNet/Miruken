@@ -11,7 +11,7 @@ namespace Miruken.Callback.Policy
     public class CallbackPolicyDescriptor
     {
         private readonly Dictionary<Type, List<PolicyMemberBinding>> _typed;
-        private readonly ConcurrentDictionary<object, List<PolicyMemberBinding>> _compatible;
+        private readonly ConcurrentDictionary<object, IEnumerable<PolicyMemberBinding>> _compatible;
         private Dictionary<object, List<PolicyMemberBinding>> _indexed;
         private List<PolicyMemberBinding> _unknown;
         private IEnumerable<PolicyMemberBinding> _invariant;
@@ -21,7 +21,7 @@ namespace Miruken.Callback.Policy
         {
             Policy      = policy;
             _typed      = new Dictionary<Type, List<PolicyMemberBinding>>();
-            _compatible = new ConcurrentDictionary <object, List<PolicyMemberBinding>>();
+            _compatible = new ConcurrentDictionary <object, IEnumerable<PolicyMemberBinding>>();
 
             foreach (var binding in bindings) AddBinding(binding);
         }
@@ -63,7 +63,7 @@ namespace Miruken.Callback.Policy
                 .Where(member => member.Approves(callback));
         }
 
-        private List<PolicyMemberBinding> InferCompatibleMembers(object key)
+        private IEnumerable<PolicyMemberBinding> InferCompatibleMembers(object key)
         {
             var compatible = new List<PolicyMemberBinding>();
 
@@ -91,7 +91,9 @@ namespace Miruken.Callback.Policy
             if (_unknown != null)
                 compatible.AddRange(_unknown);
 
-            return compatible;
+            return compatible.Count > 0 
+                 ? (IEnumerable<PolicyMemberBinding>)compatible
+                 : Array.Empty<PolicyMemberBinding>();
         }
 
         private void AddBinding(PolicyMemberBinding member)
@@ -100,7 +102,7 @@ namespace Miruken.Callback.Policy
             if (key == null)
             {
                 var unknown = _unknown ??
-                              (_unknown = new List<PolicyMemberBinding>());
+                    (_unknown = new List<PolicyMemberBinding>());
                 unknown.AddSorted(member,
                     PolicyMemberBinding.OrderByArity);
                 return;
@@ -119,7 +121,7 @@ namespace Miruken.Callback.Policy
             else
             {
                 var indexed = _indexed ??
-                              (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
+                    (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
                 if (!indexed.TryGetValue(key, out members))
                 {
                     members = new List<PolicyMemberBinding>();
