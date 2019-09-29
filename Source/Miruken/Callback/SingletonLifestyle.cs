@@ -7,8 +7,7 @@
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class
     {
-        private Task<T> _instance;
-        private bool _initialized;
+        private T _instance;
 
         protected override bool IsCompatibleWithParent(
             Inquiry parent, LifestyleAttribute attribute) => true;
@@ -18,13 +17,15 @@
             Next<T> next, IHandler composer,
             LifestyleAttribute attribute)
         {
-            if (_initialized)
-                return _instance;
-
-            object guard = this;
-            return LazyInitializer.EnsureInitialized(
-                ref _instance, ref _initialized, ref guard,
-                () => _instance = next());
+            if (_instance == null)
+            {
+                lock (this)
+                {
+                    if (_instance == null)
+                        _instance = next().GetAwaiter().GetResult();
+                }
+            }
+            return Task.FromResult(_instance);
         }
     }
 

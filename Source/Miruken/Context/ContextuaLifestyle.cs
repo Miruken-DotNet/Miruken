@@ -19,21 +19,21 @@
                     ((attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
         }
 
-        protected override async Task<T> GetInstance(
+        protected override Task<T> GetInstance(
             Inquiry inquiry, MemberBinding member,
             Next<T> next, IHandler composer,
             LifestyleAttribute attribute)
         {
             var context = composer.Resolve<Context>();
             if (context == null)
-                return await next(proceed: false);
+                return next(proceed: false);
 
             if ((attribute as ContextualAttribute)?.Rooted == true)
                 context = context.Root;
 
-            return await _cache.GetOrAdd(context, async ctx =>
+            return Task.FromResult(_cache.GetOrAdd(context, ctx =>
             {
-                var result = await next();
+                var result = next().GetAwaiter().GetResult();
                 if (result is IContextual contextual)
                 {
                     contextual.Context = ctx;
@@ -55,7 +55,7 @@
                     };
                 }
                 return result;
-            });
+            }));
         }
 
         private void ChangeContext(IContextual contextual,
@@ -68,15 +68,15 @@
                     "Managed instances cannot change context");
             }
             if (_cache.TryGetValue(oldContext, out var instance) &&
-                ReferenceEquals(contextual, instance.Result))
+                ReferenceEquals(contextual, instance))
             {
                 _cache.TryRemove(oldContext, out _);
                 (contextual as IDisposable)?.Dispose();
             }
         }
 
-        private readonly ConcurrentDictionary<Context, Task<T>>
-            _cache = new ConcurrentDictionary<Context, Task<T>>();
+        private readonly ConcurrentDictionary<Context, T>
+            _cache = new ConcurrentDictionary<Context, T>();
     }
 
     public class ContextualAttribute : LifestyleAttribute, IBindingConstraintProvider

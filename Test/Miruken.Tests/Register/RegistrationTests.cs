@@ -1,6 +1,7 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Local
 namespace Miruken.Tests.Register
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
@@ -170,6 +171,18 @@ namespace Miruken.Tests.Register
             Assert.IsTrue(c.Services.OfType<Service2>().Any());
         }
 
+        [TestMethod]
+        public void Should_Register_Ctor_With_Func()
+        {
+            var handler = new ServiceCollection()
+                .AddSingleton<ServiceWithFuncCtor>()
+                .AddSingleton<Func<IService>>(() => new Service1())
+                .AddMiruken();
+            var s = handler.Resolve<ServiceWithFuncCtor>();
+            Assert.IsNotNull(s);
+            Assert.IsNotNull(s.Service);
+        }
+
         public class Action
         {
             public int Handled { get; set; }
@@ -221,6 +234,16 @@ namespace Miruken.Tests.Register
                 foreach (var service in Services)
                     service.DoSomething();
             }
+        }
+
+        public class ServiceWithFuncCtor
+        {
+            public ServiceWithFuncCtor(Func<IService> service)
+            {
+                Service = service();
+            }
+
+            public IService Service { get; }
         }
     }
 }

@@ -15,15 +15,14 @@
         public enum Flags
         {
             None       = 0,
-            Lazy       = 1 << 0,
-            Array      = 1 << 1,
-            Enumerable = 1 << 2,
-            Simple     = 1 << 3,
-            Strict     = 1 << 4,
-            Promise    = 1 << 5,
-            Task       = 1 << 6,
-            Optional   = 1 << 7,
-            Maybe      = 1 << 8
+            Array      = 1 << 0,
+            Enumerable = 1 << 1,
+            Simple     = 1 << 2,
+            Strict     = 1 << 3,
+            Promise    = 1 << 4,
+            Task       = 1 << 5,
+            Optional   = 1 << 6,
+            Maybe      = 1 << 7
         }
 
         public Argument(ParameterInfo parameter)
@@ -91,7 +90,6 @@
         public Action<ConstraintBuilder> Constraints   { get; }
 
         public Type ParameterType => Parameter.ParameterType;
-        public bool IsLazy        => ArgumentFlags.HasFlag(Flags.Lazy);
         public bool IsArray       => ArgumentFlags.HasFlag(Flags.Array);
         public bool IsEnumerable  => ArgumentFlags.HasFlag(Flags.Enumerable);
         public bool IsSimple      => ArgumentFlags.HasFlag(Flags.Simple);
@@ -123,8 +121,6 @@
             var type = parameterType;
             if (ExtractMaybe(ref type))
                 flags |= Flags.Maybe;
-            if (ExtractLazy(ref type))
-                flags |= Flags.Lazy;
             ArgumentType = type;
             if (ExtractPromise(ref type))
                 flags |= Flags.Promise;
@@ -179,15 +175,6 @@
             if (type == typeof(string) ||
                 !type.IsGenericEnumerable()) return false;
             type = type.GetGenericArguments().Single();
-            return true;
-        }
-
-        private static bool ExtractLazy(ref Type type)
-        {
-            if (!type.IsGenericType ||
-                type.GetGenericTypeDefinition() != typeof(Func<>))
-                return false;
-            type = type.GetGenericArguments()[0];
             return true;
         }
     }

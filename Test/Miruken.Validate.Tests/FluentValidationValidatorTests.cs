@@ -178,7 +178,7 @@
             };
             try
             {
-                await handler.CommandAsync<Bar>(foo);
+                var x = await handler.CommandAsync<Bar>(foo);
                 Assert.Fail("Expected an exception");
             }
             catch (InvalidOperationException)

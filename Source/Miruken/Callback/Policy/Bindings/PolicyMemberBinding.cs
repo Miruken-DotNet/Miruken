@@ -135,8 +135,7 @@
                         return context?.Unhandled != true;
                     case Promise<object[]> promise:
                         isPromise = true;
-                        res = promise.Then((array, _) =>
-                            dispatcher.Invoke(target, array, resultType));
+                        res = promise.Then((array, _) => dispatcher.Invoke(target, array, resultType));
                         return context?.Unhandled != true;
                     default:
                         isPromise = false;

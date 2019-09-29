@@ -20,9 +20,18 @@
         {
             var parent    = callback.Parent;
             var attribute = provider as LifestyleAttribute;
-            return parent == null || IsCompatibleWithParent(parent, attribute)
-                 ? GetInstance(callback, member, next, composer, attribute)
-                 : null;
+            if (parent == null || IsCompatibleWithParent(parent, attribute))
+            {
+                try
+                {
+                    return GetInstance(callback, member, next, composer, attribute);
+                }
+                catch (Exception exception)
+                {
+                    return Task.FromException<T>(exception);
+                }
+            }
+            return null;
         }
 
         protected abstract bool IsCompatibleWithParent(
