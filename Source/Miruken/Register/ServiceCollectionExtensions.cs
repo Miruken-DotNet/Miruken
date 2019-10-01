@@ -16,14 +16,19 @@
     public static class ServiceCollectionExtensions
     {
         public static IHandler AddMiruken(
-            this IServiceCollection services,
+            this IServiceCollection services, Action<Registration> configure = null)
+        {
+            return AddMiruken(services, new MutableHandlerDescriptorFactory(), configure);
+        }
+
+        public static IHandler AddMiruken(
+            this IServiceCollection services, IHandlerDescriptorFactory factory,
             Action<Registration> configure = null)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
 
             var context = new Context();
-            var factory = new MutableHandlerDescriptorFactory();
 
             var registration = services.AddDefaultServices().Register(configure);
             context.AddHandlers(registration.Handlers);
