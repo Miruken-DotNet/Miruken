@@ -69,7 +69,7 @@
                 {
                     Team = new Team()
                 });
-                Assert.Fail("Should not succeed");
+                Assert.Fail("must not succeed");
             }
             catch (Validate.ValidationException vex)
             {
@@ -94,7 +94,7 @@
                 var outcome = vex.Outcome;
                 Assert.IsNotNull(outcome);
                 CollectionAssert.AreEqual(new[] { "Team" }, outcome.Culprits);
-                Assert.AreEqual("'Team' should not be empty.", outcome["Team"]);
+                Assert.AreEqual("'Team' must not be empty.", outcome["Team"]);
             }
         }
 
@@ -115,7 +115,7 @@
                         }
                     }
                 });
-                Assert.Fail("Should not succeed");
+                Assert.Fail("must not succeed");
             }
             catch (Validate.ValidationException vex)
             {
@@ -124,7 +124,7 @@
                 var team = outcome.GetOutcome("Team");
                 Assert.IsNotNull(team);
                 CollectionAssert.AreEqual(new[] { "Name" }, team.Culprits);
-                Assert.AreEqual("The Name field is required.\r\n'Name' should not be empty.", team["Name"]);
+                Assert.AreEqual("The Name field is required.\r\n'Name' must not be empty.", team["Name"]);
             }
         }
 

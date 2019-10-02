@@ -39,7 +39,7 @@
                 {
                     "First name is required",
                     "The FirstName field is required.",
-                    "'First Name' should not be empty."
+                    "'First Name' must not be empty."
                 });
             CollectionAssert.AreEquivalent(
                 outcome.GetErrors("LastName").Cast<string>().ToArray(),
@@ -47,7 +47,7 @@
                 {
                     "Last name is required",
                     "The LastName field is required.",
-                    "'Last Name' should not be empty."
+                    "'Last Name' must not be empty."
                 });
         }
     }

@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="8.0.100" />
-    <PackageReference Include="Scrutor" Version="3.0.2" />
+    <PackageReference Include="FluentValidation" Version="8.5.0" />
+    <PackageReference Include="Scrutor" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
