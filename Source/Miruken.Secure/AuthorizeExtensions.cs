@@ -7,17 +7,17 @@
 
     public static class AuthorizeExtensions
     {
-        public static bool CanAccess(
+        public static bool Authorize(
             this IHandler handler, object target,
             IPrincipal principal, object policy = null)
         {
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
-            return handler.CanAccessAsync(target, principal, policy)
+            return handler.AuthorizeAsync(target, principal, policy)
                 .GetAwaiter().GetResult();
         }
 
-        public static Promise<bool> CanAccessAsync(
+        public static Promise<bool> AuthorizeAsync(
             this IHandler handler, object target,
             IPrincipal principal, object policy = null)
         {
@@ -34,20 +34,20 @@
             return authorization.Result;
         }
 
-        public static IHandler RequireAuthenticatedUser(
+        public static IHandler RequireAuthentication(
             this IHandler handler, bool required = true)
         {
             return handler == null ? null
-                : new AuthorizationOptions { RequireAuthenticatedUser = required }
-                    .Decorate(handler);
+                 : new AuthorizationOptions { RequireAuthenticatedUser = required }
+                      .Decorate(handler);
         }
 
-        public static IHandler RequireAccessPolicy(
+        public static IHandler RequireAccess(
             this IHandler handler, bool required = true)
         {
             return handler == null ? null
-                : new AuthorizationOptions { RequirePolicy = required }
-                    .Decorate(handler);
+                 : new AuthorizationOptions { RequirePolicy = required }
+                      .Decorate(handler);
         }
     }
 }

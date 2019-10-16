@@ -24,7 +24,7 @@
         {
             var principal = new GenericPrincipal(
                 new GenericIdentity(""), Array.Empty<string>());
-            var grant     = new Handler().CanAccess(new TransferFunds(1000M), principal);
+            var grant     = new Handler().Authorize(new TransferFunds(1000M), principal);
             Assert.IsTrue(grant);
         }
 
@@ -34,8 +34,8 @@
             var principal = new GenericPrincipal(
                 new GenericIdentity(""), Array.Empty<string>());
             var grant     = new Handler()
-                .RequireAuthenticatedUser()
-                .CanAccess(new TransferFunds(1000M), principal);
+                .RequireAuthentication()
+                .Authorize(new TransferFunds(1000M), principal);
             Assert.IsFalse(grant);
         }
 
@@ -44,7 +44,7 @@
         {
             var principal = new GenericPrincipal(
                 new GenericIdentity("test"), Array.Empty<string>());
-            var grant     = new Handler().CanAccess(new TransferFunds(1000M), principal);
+            var grant     = new Handler().Authorize(new TransferFunds(1000M), principal);
             Assert.IsTrue(grant);
         }
 
@@ -54,8 +54,8 @@
             var principal = new GenericPrincipal(
                 new GenericIdentity("test"), Array.Empty<string>());
             var grant     = new Handler()
-                .RequireAccessPolicy()
-                .CanAccess(new TransferFunds(1000M), principal);
+                .RequireAccess()
+                .Authorize(new TransferFunds(1000M), principal);
             Assert.IsFalse(grant);
         }
 
@@ -65,8 +65,8 @@
             var principal = new GenericPrincipal(
                 new GenericIdentity("test"), Array.Empty<string>());
             var grant     = new TransferFundsAccessPolicy()
-                .RequireAccessPolicy()
-                .CanAccess(new TransferFunds(1000M), principal);
+                .RequireAccess()
+                .Authorize(new TransferFunds(1000M), principal);
             Assert.IsTrue(grant);
         }
 
@@ -77,8 +77,8 @@
             identity.AddClaim(new Claim(ClaimTypes.Role, "manager"));
             var principal = new GenericPrincipal(identity, Array.Empty<string>());
             var grant     = new TransferFundsAccessPolicy()
-                .RequireAccessPolicy()
-                .CanAccess(new TransferFunds(1000000M), principal);
+                .RequireAccess()
+                .Authorize(new TransferFunds(1000000M), principal);
             Assert.IsTrue(grant);
         }
 
@@ -88,8 +88,8 @@
             var principal = new GenericPrincipal(
                 new GenericIdentity("test"), Array.Empty<string>());
             var grant     = new TransferFundsAccessPolicy()
-                .RequireAccessPolicy()
-                .CanAccess(new TransferFunds(1000000M), principal);
+                .RequireAccess()
+                .Authorize(new TransferFunds(1000000M), principal);
             Assert.IsFalse(grant);
         }
 

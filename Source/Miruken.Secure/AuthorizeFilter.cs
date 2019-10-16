@@ -28,9 +28,9 @@
             var policy = GetPolicy(callback, member);
             var authorization = new Authorization(callback, principal, policy);
             if (!composer.Handle(authorization)) AccessDenied();
-            return authorization.Result.Then((canAccess, s) =>
+            return authorization.Result.Then((authorized, s) =>
             {
-                if (!canAccess) AccessDenied();
+                if (!authorized) AccessDenied();
                 return next();
             });
         }
