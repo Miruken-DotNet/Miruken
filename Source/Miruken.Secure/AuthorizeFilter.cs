@@ -41,18 +41,17 @@
                 .OfType<AccessPolicyAttribute>().FirstOrDefault();
             if (policy == null && callback is HandleMethod)
             {
-                var m     = member.Dispatcher.Member;
-                var owner = m.ReflectedType ?? m.DeclaringType;
-                var delim = owner != null ? ":" : "";
-                return $"{owner?.FullName ?? ""}{delim}{m.Name}";
+                var m         = member.Dispatcher.Member;
+                var owner     = m.ReflectedType ?? m.DeclaringType;
+                var delimiter = owner != null ? ":" : "";
+                return $"{owner?.FullName ?? ""}{delimiter}{m.Name}";
             }
             return policy?.Policy;
         }
 
         private static void AccessDenied()
         {
-            throw new UnauthorizedAccessException(
-                "Authorization has been denied");
+            throw new UnauthorizedAccessException("Authorization has been denied");
         }
     }
 }

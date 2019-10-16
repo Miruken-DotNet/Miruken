@@ -23,9 +23,31 @@
         {
             if (handler == null)
                 throw new ArgumentNullException(nameof(handler));
+            var options = handler.GetOptions<AuthorizationOptions>();
+            if (options?.RequireAuthenticatedUser == true &&
+                principal.Identity?.IsAuthenticated != true)
+                return Promise.False;
             var authorization = new Authorization(target, principal, policy);
-            handler.Handle(authorization);
+            if (!handler.Provide(principal).Handle(authorization) && 
+                options?.RequirePolicy == true)
+                return Promise.False;
             return authorization.Result;
+        }
+
+        public static IHandler RequireAuthenticatedUser(
+            this IHandler handler, bool required = true)
+        {
+            return handler == null ? null
+                : new AuthorizationOptions { RequireAuthenticatedUser = required }
+                    .Decorate(handler);
+        }
+
+        public static IHandler RequireAccessPolicy(
+            this IHandler handler, bool required = true)
+        {
+            return handler == null ? null
+                : new AuthorizationOptions { RequirePolicy = required }
+                    .Decorate(handler);
         }
     }
 }

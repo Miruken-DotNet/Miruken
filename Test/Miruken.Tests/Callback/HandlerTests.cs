@@ -1246,6 +1246,16 @@
             }
         }
 
+        [TestMethod, Ignore]
+        public void TestName()
+        {
+            var handler = new CustomHandler().Filter((cb, c, proceed) =>
+                cb is Inquiry && proceed());
+            var bar     = handler.Infer().Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(handler.Handle(new Foo()));
+        }
+
         public class RequestFilterCb<T> : IFilter<T, object>
         {
             public int? Order { get; set; }
