@@ -12,7 +12,7 @@
         {
         }
 
-        public object InferCallback()
+        object IInferCallback.InferCallback()
         {
             return this;
         }

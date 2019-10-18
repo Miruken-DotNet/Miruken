@@ -47,7 +47,7 @@
 
         bool IBatchCallback.CanBatch => false;
 
-        public object InferCallback()
+        object IInferCallback.InferCallback()
         {
             return this;
         }
