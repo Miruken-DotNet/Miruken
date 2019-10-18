@@ -20,9 +20,15 @@
 
         public override HandlerDescriptor GetDescriptor(Type type)
         {
-            return Descriptors.TryGetValue(type, out var descriptor)
-                 ? descriptor.Value
-                 : null;
+            if (Descriptors.TryGetValue(type, out var descriptor))
+                return descriptor.Value;
+            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            {
+                var definition = type.GetGenericTypeDefinition();
+                if (Descriptors.TryGetValue(definition, out descriptor))
+                    return descriptor.Value.CloseDescriptor(type, this);
+            }
+            return null;
         }
 
         public override HandlerDescriptor RegisterDescriptor(Type type,

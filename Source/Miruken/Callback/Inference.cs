@@ -22,9 +22,10 @@
         {
             var handled = base.Dispatch(handler, ref greedy, composer);
             if (handled) return true;
-            LazyInitializer.EnsureInitialized(ref _inferred, CreateInferred);
+            LazyInitializer.EnsureInitialized(ref _inferred, GetInferred);
             foreach (var infer in _inferred)
             {
+                if (ReferenceEquals(infer.Key, handler.GetType())) continue;
                 if (!infer.Dispatch(handler, ref greedy, composer)) continue;
                 if (!greedy) return true;
                 handled = true;
@@ -32,32 +33,16 @@
             return handled;
         }
 
-        private Resolving[] CreateInferred() =>
-            CallbackPolicy.GetCallbackHandlers(Callback)
+        private Resolving[] GetInferred() =>
+            CallbackPolicy.GetInstanceHandlers(Callback)
                 .Select(handler => new Resolving(handler.HandlerType, Callback))
                 .ToArray();
 
-        public static object Get(object callback) => new Inference(callback);
-    }
-
-    public sealed class InferDecorator : DecoratedHandler
-    {
-        public InferDecorator(IHandler handler) : base(handler)
-        {
-        }
-
-        protected override bool HandleCallback(
-            object callback, ref bool greedy, IHandler composer)
-        {
-            var inference = GetInference(callback);
-            return Decoratee.Handle(inference, greedy, composer);
-        }
-
-        private static object GetInference(object callback)
+        public static object Get(object callback)
         {
             return callback is IInferCallback infer
-                 ? infer.InferCallback()
-                 : Inference.Get(callback);
+                ? infer.InferCallback()
+                : new Inference(callback);
         }
     }
 }

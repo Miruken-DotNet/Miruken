@@ -331,7 +331,7 @@
             var handler = new EmailHandler();
             var results = await handler.Batch(batch =>
             {
-                Assert.AreEqual("Hello", batch.Infer().NoBatch()
+                Assert.AreEqual("Hello", batch.NoBatch()
                     .Proxy<IEmailing>().Send("Hello"));
                 called = true;
             });

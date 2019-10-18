@@ -63,6 +63,17 @@ namespace Miruken.Callback.Policy
             });
         }
 
+        public HandlerDescriptor CloseDescriptor(Type closedType, IHandlerDescriptorFactory factory)
+        {
+            if (!IsOpenGeneric)
+                throw new InvalidOperationException($"{HandlerType.FullName} does not represent an open type");
+
+            if (!closedType.IsGenericType || closedType.GetGenericTypeDefinition() != HandlerType)
+                throw new InvalidOperationException($"{closedType.FullName} is not closed on {HandlerType.FullName}");
+
+            return factory.RegisterDescriptor(closedType, _visitor);
+        }
+
         internal bool Dispatch(
             CallbackPolicy policy, object target, 
             object callback, bool greedy, IHandler composer,

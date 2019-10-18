@@ -71,16 +71,9 @@
             }, argument.Constraints);
         }
 
-        private Func<T> ResolveLazy<T>(
-            Inquiry parent, Argument argument, IHandler handler)
-        {
-            return () => (T)Resolve(parent, argument, handler, false);
-        }
-
         private object Resolve(Inquiry parent, Argument argument,
             IHandler handler, bool wantsAsync)
-        {
-       
+        {      
             object dependency;
             var key          = argument.Key;
             var argumentType = argument.ArgumentType;

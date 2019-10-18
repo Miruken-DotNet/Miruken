@@ -16,19 +16,6 @@
 
     public static class HandlerResolveExtensions
     {
-        public static IHandler Infer(this IHandler handler)
-        {
-            return handler == null ? null : new InferDecorator(handler);
-        }
-
-        public static IHandler InferAll(this IHandler handler)
-        {
-            return handler == null ? null
-                 : new CallbackSemanticsDecorator(
-                       new InferDecorator(handler),
-                       CallbackOptions.Broadcast);
-        }
-
         public static object Resolve(this IHandler handler, object key,
             Action<ConstraintBuilder> constraints = null)
         {
@@ -176,8 +163,6 @@
         {
             if (serviceType == null)
                 throw new ArgumentNullException(nameof(serviceType));
-
-            handler = handler.Infer();
 
             if (serviceType.IsGenericEnumerable())
             {

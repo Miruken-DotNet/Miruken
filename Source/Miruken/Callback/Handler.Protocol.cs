@@ -2,7 +2,6 @@
 {
     using System;
     using Infrastructure;
-    using Policy;
     using Policy.Bindings;
 
     public interface IResolving {}
@@ -27,7 +26,6 @@
             {
                 if (semantics.IsSpecified(CallbackOptions.Broadcast))
                     options |= CallbackOptions.Broadcast;
-                handler = handler.Infer();
             }
 
             if (options != CallbackOptions.None)

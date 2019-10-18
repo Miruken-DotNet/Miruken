@@ -3,7 +3,7 @@
     using System;
     using Policy;
 
-    public class Trampoline :
+    public class Trampoline : ICallback,
         IDispatchCallback, IDispatchCallbackGuard
     {
         public Trampoline(object callback)
@@ -17,6 +17,30 @@
         }
 
         public object Callback { get; }
+
+        public Type ResultType
+        {
+            get
+            {
+                var cb = Callback as ICallback;
+                return cb?.ResultType;
+            }
+        }
+
+        public object Result
+        {
+            get
+            {
+                var cb = Callback as ICallback;
+                return cb?.Result;
+            }
+
+            set
+            {
+                if (Callback is ICallback cb)
+                    cb.Result = value;
+            }
+        }
 
         CallbackPolicy IDispatchCallback.Policy =>
             (Callback as IDispatchCallback)?.Policy;

@@ -1,11 +1,7 @@
 ﻿namespace Miruken.Callback
 {
-    using System;
-
-    public class Composition
-        : Trampoline, ICallback, IInferCallback,
-          IFilterCallback, IBatchCallback,
-          ICallbackKey
+    public class Composition : Trampoline, IInferCallback,
+          IFilterCallback, IBatchCallback, ICallbackKey
     {
         public Composition(object callback)
             : base(callback)
@@ -14,30 +10,6 @@
 
         protected Composition()
         {
-        }
-
-        public Type ResultType
-        {
-            get
-            {
-                var cb = Callback as ICallback;
-                return cb?.ResultType;
-            }
-        }
-
-        public object Result
-        {
-            get
-            {
-                var cb = Callback as ICallback;
-                return cb?.Result;
-            }
-
-            set
-            {
-                if (Callback is ICallback cb)
-                    cb.Result = value;
-            }
         }
 
         object ICallbackKey.Key =>
@@ -51,9 +23,9 @@
 
         object IInferCallback.InferCallback()
         {
-            var infer = (Callback as IInferCallback)?.InferCallback();
+            var infer = Inference.Get(Callback);
             return ReferenceEquals(infer, Callback) ? this
-                 : new Composition(infer ?? Inference.Get(Callback));
+                 : new Composition(infer);
         }
 
         public static bool IsComposed<T>(object callback)

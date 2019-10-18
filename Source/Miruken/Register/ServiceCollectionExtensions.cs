@@ -40,7 +40,7 @@
 
             HandlerDescriptorFactory.UseFactory(factory);
 
-            return context.Infer();
+            return context;
         }
 
         public static Registration Register(this IServiceCollection services,

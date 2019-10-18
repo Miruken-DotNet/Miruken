@@ -9,8 +9,8 @@
             CallbackPolicy policy, object callback, bool greedy,
             IHandler composer, ResultsDelegate results)
         {
-            var handled = false;
-            var factory = HandlerDescriptorFactory.Current;
+            var handled        = false;
+            var factory        = HandlerDescriptorFactory.Current;
             var staticHandlers = factory.GetStaticHandlers(policy, callback);
             foreach (var descriptor in staticHandlers)
             {

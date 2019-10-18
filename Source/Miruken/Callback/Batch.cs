@@ -38,7 +38,7 @@
         }
     }
 
-    public sealed class NoBatch : Trampoline, IBatchCallback
+    public sealed class NoBatch : Trampoline, IBatchCallback, IInferCallback
     {
         public NoBatch(object callback)
             : base(callback)
@@ -46,5 +46,10 @@
         }
 
         bool IBatchCallback.CanBatch => false;
+
+        public object InferCallback()
+        {
+            return this;
+        }
     }
 }
