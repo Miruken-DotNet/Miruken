@@ -33,8 +33,13 @@
             var registration = services.AddDefaultServices().Register(configure);
             context.AddHandlers(registration.Handlers);
 
+            var serviceFacade = new ServiceFactoryFacade();
+
             foreach (var service in services)
-                RegisterService(context, factory, service);
+                serviceFacade.RegisterService(factory, service);
+
+            if (serviceFacade.HasServices)
+                context.AddHandlers(serviceFacade);
 
             context.AddHandlers(new StaticHandler(), new Stash(true));
 
@@ -55,72 +60,11 @@
             return registration;
         }
 
-        private static void RegisterService(Context context,
-            IHandlerDescriptorFactory factory, ServiceDescriptor service,
-            HandlerDescriptorVisitor visitor = null)
-        {
-            var serviceType = service.ImplementationType ?? service.ServiceType;
-
-            var instance = service.ImplementationInstance;
-            if (instance != null)
-            {
-                if (serviceType == null)
-                    serviceType = instance.GetType();
-
-                VerifyServiceType(serviceType, service);
-
-                var providerType = typeof(ServiceFactory<>.Instance)
-                    .MakeGenericType(serviceType);
-
-                factory.RegisterDescriptor(providerType, visitor);
-
-                var handler = (Handler)Activator.CreateInstance(providerType, instance);
-                context.AddHandlers(handler);
-                return;
-            }
-
-            var implementationFactory = service.ImplementationFactory;
-            if (implementationFactory != null)
-            {
-                if (serviceType == null)
-                    serviceType = implementationFactory .GetType().GenericTypeArguments[1];
-
-                VerifyServiceType(serviceType, service);
-
-                Type serviceFactoryType;
-                switch (service.Lifetime)
-                {
-                    case ServiceLifetime.Transient:
-                        serviceFactoryType = typeof(ServiceFactory<>.Transient);
-                        break;
-                    case ServiceLifetime.Singleton:
-                        serviceFactoryType = typeof(ServiceFactory<>.Singleton);
-                        break;
-                    case ServiceLifetime.Scoped:
-                        serviceFactoryType = typeof(ServiceFactory<>.Scoped);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}");
-                }
-
-                serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
-
-                factory.RegisterDescriptor(serviceFactoryType, visitor);
-
-                var handler = (Handler)Activator.CreateInstance(serviceFactoryType, implementationFactory);
-                context.AddHandlers(handler);
-                return;
-            }
-
-            VerifyServiceType(serviceType, service);
-
-            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service) + visitor);
-        }
-
         private static IServiceCollection AddDefaultServices(this IServiceCollection services)
         {
             services.AddTransient<Provider>();
             services.AddTransient<ServiceProvider>();
+            services.AddTransient<ServiceFactoryFacade>();
             services.AddTransient<BatchRouter>();
             services.AddTransient<Stash>();
 
@@ -132,15 +76,6 @@
             services.AddSingleton<Scheduler>();
 
             return services;
-        }
-
-        private static void VerifyServiceType(Type serviceType, ServiceDescriptor service)
-        {
-            if (serviceType == null)
-                throw new ArgumentException($"Unable to infer service type from descriptor {service}");
-
-            if (serviceType == typeof(object))
-                throw new ArgumentException($"Service type 'object' from descriptor {service} is not valid");
         }
     }
 }

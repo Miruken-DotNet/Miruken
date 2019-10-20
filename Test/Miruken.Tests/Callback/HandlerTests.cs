@@ -598,7 +598,7 @@
         public void Should_Resolve_Self_Implicitly()
         {
             var handler = new CustomHandler();
-            var result = handler.Resolve<CustomHandler>();
+            var result  = handler.Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -606,7 +606,7 @@
         public void Should_Resolve_Self_Implicitly_Decorated()
         {
             var handler = new CustomHandler();
-            var result = handler.Broadcast().Resolve<CustomHandler>();
+            var result  = handler.Broadcast().Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -614,8 +614,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly()
         {
             var controller = new Controller();
-            var handler = new HandlerAdapter(controller);
-            var result = handler.Resolve<Controller>();
+            var handler    = new HandlerAdapter(controller);
+            var result     = handler.Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -623,8 +623,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly_Decorated()
         {
             var controller = new Controller();
-            var handler = new HandlerAdapter(controller);
-            var result = handler.Broadcast().Resolve<Controller>();
+            var handler    = new HandlerAdapter(controller);
+            var result     = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -632,7 +632,7 @@
         public void Should_Resolve_Using_IServiceProvider()
         {
             var handler = (IServiceProvider)new CustomHandler();
-            var bar = (Bar)handler.GetService(typeof(Bar));
+            var bar     = (Bar)handler.GetService(typeof(Bar));
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -692,7 +692,7 @@
         [TestMethod]
         public void Should_Broadcast_Callbacks()
         {
-            var foo = new Foo();
+            var foo   = new Foo();
             var group = new CustomHandler()
                       + new CustomHandler()
                       + new CustomHandler();
@@ -719,17 +719,17 @@
         public void Should_Override_Providers()
         {
             var handler = new Handler();
-            var foo = handler.Provide(new Foo()).Resolve<Foo>();
+            var foo     = handler.Provide(new Foo()).Resolve<Foo>();
             Assert.IsNotNull(foo);
         }
 
         [TestMethod]
         public void Should_Override_Providers_Many()
         {
-            var foo1 = new Foo();
-            var foo2 = new Foo();
+            var foo1    = new Foo();
+            var foo2    = new Foo();
             var handler = new Handler();
-            var foos = handler.Provide(new[] { foo1, foo2 }).ResolveAll<Foo>();
+            var foos    = handler.Provide(new[] { foo1, foo2 }).ResolveAll<Foo>();
             CollectionAssert.AreEqual(new[] { foo1, foo2 }, foos);
         }
 
@@ -757,7 +757,7 @@
         [TestMethod]
         public void Should_Skip_Filters()
         {
-            var bee = new Bee();
+            var bee     = new Bee();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bee));
             Assert.AreEqual(0, bee.Filters.Count);
@@ -806,7 +806,7 @@
         [TestMethod]
         public void Should_Create_Implicitly()
         {
-            var handler = new StaticHandler();
+            var handler  = new StaticHandler();
             _factory.RegisterDescriptor<Controller>();
             var instance = handler.Resolve<Controller>();
             Assert.IsNotNull(instance);
@@ -845,6 +845,18 @@
             var foo     = new Foo();
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<StaticController>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            Assert.IsTrue(new StaticHandler().Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Static_Implicitly()
+        {
+            var foo     = new Foo();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<ControllerBase>();
+            factory.RegisterDescriptor<StaticControllerProvider>();
             HandlerDescriptorFactory.UseFactory(factory);
             Assert.IsTrue(new StaticHandler().Handle(foo));
             Assert.AreEqual(1, foo.Handled);
@@ -1859,13 +1871,8 @@
             }
         }
 
-        private class Controller
+        private class ControllerBase
         {
-            [Provides]
-            public Controller()
-            {
-            }
-
             [Handles]
             public void HandleFooImplicit(Foo foo)
             {
@@ -1879,12 +1886,29 @@
             }
         }
 
+        private class Controller : ControllerBase
+        {
+            [Provides]
+            public Controller()
+            {
+            }
+        }
+
         private class StaticController
         {
             [Handles]
             public static void HandleFooImplicit(Foo foo)
             {
                 ++foo.Handled;
+            }
+        }
+
+        private class StaticControllerProvider
+        {
+            [Provides]
+            public static ControllerBase ProvideController()
+            {
+                return new ControllerBase();
             }
         }
 
