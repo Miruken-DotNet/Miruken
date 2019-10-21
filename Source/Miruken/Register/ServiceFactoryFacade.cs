@@ -13,6 +13,13 @@
 
         public bool HasServices => _services.Count > 0;
 
+        public ServiceFactoryFacade(IServiceCollection services,
+            IHandlerDescriptorFactory factory)
+        {
+            foreach (var service in services)
+                RegisterService(factory, service);
+        }
+
         [Provides]
         public object Provide(Inquiry inquiry, IHandler composer)
         {
@@ -41,9 +48,8 @@
             return null;
         }
 
-        public void RegisterService(
-            IHandlerDescriptorFactory factory, ServiceDescriptor service,
-            HandlerDescriptorVisitor visitor = null)
+        private void RegisterService(
+            IHandlerDescriptorFactory factory, ServiceDescriptor service)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
 
@@ -58,7 +64,7 @@
                 var providerType = typeof(ServiceFactory<>.Instance)
                     .MakeGenericType(serviceType);
 
-                factory.RegisterDescriptor(providerType, visitor);
+                factory.RegisterDescriptor(providerType);
 
                 var handler = (Handler)Activator.CreateInstance(providerType, instance);
                 AddService(serviceType, handler);
@@ -91,7 +97,7 @@
 
                 serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
 
-                factory.RegisterDescriptor(serviceFactoryType, visitor);
+                factory.RegisterDescriptor(serviceFactoryType);
 
                 var handler = (Handler)Activator.CreateInstance(serviceFactoryType, implementationFactory);
                 AddService(serviceType, handler);   
@@ -100,7 +106,7 @@
 
             CheckServiceType(serviceType, service);
 
-            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service) + visitor);
+            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service));
         }
 
         private void AddService(Type serviceType, Handler service)

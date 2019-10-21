@@ -33,11 +33,7 @@
             var registration = services.AddDefaultServices().Register(configure);
             context.AddHandlers(registration.Handlers);
 
-            var serviceFacade = new ServiceFactoryFacade();
-
-            foreach (var service in services)
-                serviceFacade.RegisterService(factory, service);
-
+            var serviceFacade = new ServiceFactoryFacade(services, factory);
             if (serviceFacade.HasServices)
                 context.AddHandlers(serviceFacade);
 
