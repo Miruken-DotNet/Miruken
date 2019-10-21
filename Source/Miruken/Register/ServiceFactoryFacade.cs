@@ -8,19 +8,36 @@
 
     public class ServiceFactoryFacade : Handler
     {
-        private readonly List<Handler> _services = new List<Handler>();
+        private readonly Dictionary<Type, HashSet<Handler>> _services 
+            = new Dictionary<Type, HashSet<Handler>>();
 
         public bool HasServices => _services.Count > 0;
 
         [Provides]
         public object Provide(Inquiry inquiry, IHandler composer)
         {
+            if (!(inquiry.Key is Type serviceType)) return null;
+
             var many = inquiry.Many;
-            foreach (var service in _services)
+
+            HashSet<Handler> services = null;
+            if (!many && _services.TryGetValue(serviceType, out services))
             {
-                if (!service.Handle(inquiry, many, composer)) continue;
-                if (!many) return null;
+                foreach (var service in services)
+                    if (service.Handle(inquiry, false, composer)) return null;
             }
+
+            foreach (var serviceGroup in _services)
+            foreach (var service in serviceGroup.Value)
+            {
+                if (serviceType.IsAssignableFrom(serviceGroup.Key) &&
+                    services?.Contains(service) != true)
+                {
+                    if (!service.Handle(inquiry, many, composer)) continue;
+                    if (!many) return null;
+                }
+            }
+
             return null;
         }
 
@@ -36,7 +53,7 @@
                 if (serviceType == null)
                     serviceType = instance.GetType();
 
-                VerifyServiceType(serviceType, service);
+                CheckServiceType(serviceType, service);
 
                 var providerType = typeof(ServiceFactory<>.Instance)
                     .MakeGenericType(serviceType);
@@ -44,7 +61,7 @@
                 factory.RegisterDescriptor(providerType, visitor);
 
                 var handler = (Handler)Activator.CreateInstance(providerType, instance);
-                _services.Add(handler);
+                AddService(serviceType, handler);
                 return;
             }
 
@@ -54,7 +71,7 @@
                 if (serviceType == null)
                     serviceType = implementationFactory.GetType().GenericTypeArguments[1];
 
-                VerifyServiceType(serviceType, service);
+                CheckServiceType(serviceType, service);
 
                 Type serviceFactoryType;
                 switch (service.Lifetime)
@@ -77,16 +94,26 @@
                 factory.RegisterDescriptor(serviceFactoryType, visitor);
 
                 var handler = (Handler)Activator.CreateInstance(serviceFactoryType, implementationFactory);
-                _services.Add(handler);
+                AddService(serviceType, handler);   
                 return;
             }
 
-            VerifyServiceType(serviceType, service);
+            CheckServiceType(serviceType, service);
 
             factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service) + visitor);
         }
 
-        private static void VerifyServiceType(Type serviceType, ServiceDescriptor service)
+        private void AddService(Type serviceType, Handler service)
+        {
+            if (!_services.TryGetValue(serviceType, out var services))
+            {
+                services = new HashSet<Handler>();
+                _services.Add(serviceType, services);
+            }
+            services.Add(service);
+        }
+
+        private static void CheckServiceType(Type serviceType, ServiceDescriptor service)
         {
             if (serviceType == null)
                 throw new ArgumentException($"Unable to infer service type from descriptor {service}");
