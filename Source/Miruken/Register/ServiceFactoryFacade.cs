@@ -17,7 +17,7 @@
             IHandlerDescriptorFactory factory)
         {
             foreach (var service in services)
-                RegisterService(factory, service);
+                RegisterService(service, factory);
         }
 
         [Provides]
@@ -48,8 +48,8 @@
             return null;
         }
 
-        private void RegisterService(
-            IHandlerDescriptorFactory factory, ServiceDescriptor service)
+        private void RegisterService(ServiceDescriptor service,
+            IHandlerDescriptorFactory factory)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
 
