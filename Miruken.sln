@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miruken.Validate.Tests", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Castle", "Source\Miruken.Castle\Miruken.Castle.csproj", "{CB9B9CD4-642B-474E-AAED-F3C957FA2D28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Validate.Castle", "Source\Miruken.Validate.Castle\Miruken.Validate.Castle.csproj", "{511FA590-E44F-4EFC-8AE8-01213143E362}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Castle.Tests", "Test\Miruken.Castle.Tests\Miruken.Castle.Tests.csproj", "{BD01AE54-9AC5-48FB-BE2C-D782831029EB}"
 EndProject
 Global
@@ -57,10 +55,6 @@ Global
 		{CB9B9CD4-642B-474E-AAED-F3C957FA2D28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB9B9CD4-642B-474E-AAED-F3C957FA2D28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB9B9CD4-642B-474E-AAED-F3C957FA2D28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{511FA590-E44F-4EFC-8AE8-01213143E362}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{511FA590-E44F-4EFC-8AE8-01213143E362}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{511FA590-E44F-4EFC-8AE8-01213143E362}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{511FA590-E44F-4EFC-8AE8-01213143E362}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD01AE54-9AC5-48FB-BE2C-D782831029EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD01AE54-9AC5-48FB-BE2C-D782831029EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD01AE54-9AC5-48FB-BE2C-D782831029EB}.Release|Any CPU.ActiveCfg = Release|Any CPU

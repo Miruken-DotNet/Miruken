@@ -1,36 +1,47 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>Miruken</PackageId>
-    <Version>1.0.0</Version>
-    <Authors>cneuwirt,provenstyle</Authors>
-    <Product>Miruken</Product>
-    <Description>Miruken handles your application</Description>
-    <Copyright>Copyright 2018</Copyright>
-    <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
-    <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
-    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    <Company>Miruken</Company>
-    <PackageTags>Miruken</PackageTags>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net48;netstandard2.0;net461</TargetFrameworks>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <PackageId>Miruken</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>cneuwirt,provenstyle</Authors>
+        <Product>Miruken</Product>
+        <Description>Miruken handles your application</Description>
+        <Copyright>Copyright 2018</Copyright>
+        <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
+        <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
+        <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
+        <Company>Miruken</Company>
+        <PackageTags>Miruken</PackageTags>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-    <OutputPath>bin\</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+        <OutputPath>bin\</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FastExpressionCompiler" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Scrutor" Version="3.1.0" />
-    <PackageReference Include="System.Reflection.DispatchProxy" Version="4.6.0" />
-  </ItemGroup>
+    <!-- compilation flags -->
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+        <DefineConstants>NETSTANDARD</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
+        <DefineConstants>NETFULL</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net48'">
+        <DefineConstants>NETFULL</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FastExpressionCompiler" Version="2.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+        <PackageReference Include="Scrutor" Version="3.1.0" />
+        <PackageReference Include="System.Reflection.DispatchProxy" Version="4.6.0" />
+    </ItemGroup>
 
 </Project>

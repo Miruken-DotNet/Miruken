@@ -88,10 +88,6 @@
       <Project>{31b658c0-2a41-40bb-bd3a-4e87f37b986b}</Project>
       <Name>Miruken.Castle</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Miruken.Validate.Castle\Miruken.Validate.Castle.csproj">
-      <Project>{a7124572-6b7e-4af3-bb5d-0953e66a13df}</Project>
-      <Name>Miruken.Validate.Castle</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken.Validate\Miruken.Validate.csproj">
       <Project>{9aa29653-c40f-4f9a-9e1c-df5b72489a3a}</Project>
       <Name>Miruken.Validate</Name>

@@ -69,10 +69,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Miruken.Castle\Miruken.Castle.csproj">
-      <Project>{cb9b9cd4-642b-474e-aaed-f3c957fa2d28}</Project>
-      <Name>Miruken.Castle</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Miruken.Validate\Miruken.Validate.csproj">
       <Project>{627fb60e-f11d-48bf-8847-78ec6e01fdab}</Project>
       <Name>Miruken.Validate</Name>
