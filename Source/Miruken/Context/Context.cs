@@ -6,7 +6,10 @@
     using System.Threading;
     using Callback;
     using Graph;
+
+#if NETSTANDARD
     using Microsoft.Extensions.DependencyInjection;
+#endif
 
     public enum ContextState
     {
@@ -16,8 +19,13 @@
     }
 
     public class Context : CompositeHandler,
-        IHandlerAxis, ITraversing, IServiceScope, IServiceScopeFactory
-	{
+        IHandlerAxis, ITraversing
+#if NETSTANDARD
+        ,IServiceScope, IServiceScopeFactory
+#else
+        ,IDisposable
+#endif
+    {
 	    private EventHandlerList _events;
 	    private ReaderWriterLockSlim _lock;
 	    private readonly List<Context> _children;
@@ -68,7 +76,7 @@
                 var root = this;
                 while (root?.Parent != null)
                     root = root.Parent;
-                return root;                  
+                return root;
             }
         }
 
@@ -125,12 +133,14 @@
 	        return new Context(this);
 	    }
 
+#if NETSTANDARD
 	    IServiceProvider IServiceScope.ServiceProvider => this;
 
 	    IServiceScope IServiceScopeFactory.CreateScope()
 	    {
 	        return CreateChild();
 	    }
+#endif
 
 	    public Context Store(object data)
 	    {
@@ -161,14 +171,14 @@
 	            return base.HandleCallback(callback, ref greedy, composer);
 
 	        var g = greedy;
-	        var handled = false;                                                                                    
+	        var handled = false;
             Traverse(axis, node =>
-            {                                                                                                           
-                handled = handled | (node == this                                                                                                   
-                        ? BaseHandle(callback, ref g, composer)                                                                                             
+            {
+                handled = handled | (node == this
+                        ? BaseHandle(callback, ref g, composer)
                         : ((Context)node).Handle(
-                            TraversingAxis.Self, callback, ref g, composer));                                                                
-                return handled && !g;                                                                                                                  
+                            TraversingAxis.Self, callback, ref g, composer));
+                return handled && !g;
             });
 	        greedy = g;
 	        return handled;
@@ -227,14 +237,14 @@
                 _lock.Dispose();
                 _events = null;
                 _lock   = null;
-            }	        
+            }
 	    }
 
 	    protected virtual void InternalEnd(object reason)
 	    {
 	    }
 
-        #region Events
+#region Events
 
         public event Action<Context, object> ContextEnding
         {
@@ -292,9 +302,9 @@
 	        eventHandler?.Invoke(context, reason);
 	    }
 
-        #endregion
+#endregion
 
-        #region IDisposable
+#region IDisposable
 
         protected bool IsDisposed { get; private set; }
 
@@ -317,7 +327,7 @@
             End(Disposed);
 		}
 
-		#endregion
+#endregion
 
         private void AssertActive()
         {

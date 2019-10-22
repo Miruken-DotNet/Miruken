@@ -79,7 +79,7 @@
         [TestMethod]
         public void Should_Log_Callbacks()
         {
-            var handled = _handler.Infer().Handle(new Foo());
+            var handled = _handler.Handle(new Foo());
             Assert.IsTrue(handled);
 
             var events = _memoryTarget.Logs;
@@ -97,7 +97,7 @@
         [TestMethod]
         public async Task Should_Log_Unhandled_Callbacks()
         {
-            await _handler.Chain(new BazHandler()).Infer().Send(new Baz());
+            await _handler.Chain(new BazHandler()).Send(new Baz());
 
             var events = _memoryTarget.Logs;
             Assert.AreEqual(4, events.Count);
@@ -132,7 +132,7 @@
         {
             try
             {
-                _handler.Infer().Handle(new Bad(new ArgumentException("Bad")));
+                _handler.Handle(new Bad(new ArgumentException("Bad")));
                 Assert.Fail("Should not get here");
             }
             catch
@@ -155,7 +155,7 @@
 
             try
             {
-                _handler.Infer().Handle(new Bad(
+                _handler.Handle(new Bad(
                     new ValidationException(new ValidationOutcome())));
                 Assert.Fail("Should not get here");
             }
@@ -221,7 +221,7 @@
             public int? Order { get; set; }
 
             public Task<object> Next(Foo callback,
-                object rawCallback, MemberBinding member, 
+                object rawCallback, MemberBinding member,
                 IHandler composer, Next<object> next,
                 IFilterProvider provider = null)
             {

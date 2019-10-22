@@ -105,6 +105,7 @@ namespace Miruken.Tests.Register
             Assert.IsNull((service as IContextual)?.Context);
         }
 
+#if NETSTANDARD
         [TestMethod]
         public void Should_Register_Scoped_Service_Factory()
         {
@@ -125,6 +126,7 @@ namespace Miruken.Tests.Register
                 Assert.AreSame(service, handler.Resolve<IService>());
             }
         }
+#endif
 
         [TestMethod]
         public void Should_Override_Handlers()

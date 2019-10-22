@@ -35,7 +35,7 @@
         [TestMethod]
         public void Should_Get_Self()
         {
-            var context = new Context();        
+            var context = new Context();
             Assert.AreSame(context, context.Resolve<Context>());
         }
 
@@ -46,13 +46,16 @@
             Assert.AreSame(context, context.Resolve<IServiceProvider>());
         }
 
+#if NETSTANDARD
         [TestMethod]
         public void Should_Get_Self_For_ServiceScopeFactory()
         {
             var context = new Context();
             Assert.AreSame(context, context.Resolve<IServiceScopeFactory>());
         }
+#endif
 
+#if NETSTANDARD
         [TestMethod]
         public void Should_Create_Service_Scope()
         {
@@ -60,6 +63,7 @@
             var scope   = context.CreateScope();
             Assert.IsNotNull(scope);
         }
+#endif
 
         [TestMethod]
         public void Should_Not_Have_Parent_If_Root()
@@ -157,7 +161,7 @@
         [TestMethod]
         public void Should_Store_Object()
         {
-            var data    = new DataTable(); 
+            var data    = new DataTable();
             var context = new Context();
             context.Store(data);
             Assert.AreSame(data, context.Resolve<DataTable>());
@@ -166,7 +170,7 @@
         [TestMethod]
         public void Should_Traverse_Ancestors_By_Default()
         {
-            var data       = new DataTable(); 
+            var data       = new DataTable();
             var context    = new Context();
             var child      = context.CreateChild();
             var grandChild = child.CreateChild();

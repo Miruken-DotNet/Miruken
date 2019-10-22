@@ -66,7 +66,7 @@
             // Miruken.Validate.Tests.ValidatorProvider in FluentValidationValidatorTests.cs
 
             var player  = new Player();
-            var outcome = await _handler.Infer().ValidateAsync(player);
+            var outcome = await _handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             var firstName = outcome.GetErrors("FirstName").Cast<string>().ToArray();

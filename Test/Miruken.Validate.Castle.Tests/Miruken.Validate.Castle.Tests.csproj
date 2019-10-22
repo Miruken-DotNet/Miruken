@@ -46,13 +46,12 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="FluentValidation, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FluentValidation.8.0.100\lib\net45\FluentValidation.dll</HintPath>
+      <HintPath>..\..\packages\FluentValidation.8.5.0\lib\net45\FluentValidation.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\System.ComponentModel.Annotations.4.5.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    <Reference Include="System.ComponentModel.Annotations">
+      <HintPath>..\..\packages\System.ComponentModel.Annotations.4.6.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
     </Reference>
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.ComponentModel.Primitives, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.ComponentModel.Primitives.4.3.0\lib\net45\System.ComponentModel.Primitives.dll</HintPath>
       <Private>True</Private>
@@ -88,16 +87,20 @@
       <Project>{31b658c0-2a41-40bb-bd3a-4e87f37b986b}</Project>
       <Name>Miruken.Castle</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Source\Miruken.Validate.Castle\Miruken.Validate.Castle.csproj">
+      <Project>{511fa590-e44f-4efc-8ae8-01213143e362}</Project>
+      <Name>Miruken.Validate.Castle</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken.Validate\Miruken.Validate.csproj">
       <Project>{9aa29653-c40f-4f9a-9e1c-df5b72489a3a}</Project>
       <Name>Miruken.Validate</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Miruken\Miruken.csproj">
-      <Project>{82c1e9de-d611-47ce-a091-2bed66df5ac6}</Project>
+      <Project>{fea64421-2e84-4172-8fe8-67b0649b4368}</Project>
       <Name>Miruken</Name>
     </ProjectReference>
     <ProjectReference Include="..\Miruken.Validate.Tests\Miruken.Validate.Tests.csproj">
-      <Project>{bb9461d8-b913-4aae-92d7-98b85f28fe32}</Project>
+      <Project>{6f259d1d-f015-42f4-98e0-408cda406d11}</Project>
       <Name>Miruken.Validate.Tests</Name>
     </ProjectReference>
   </ItemGroup>
