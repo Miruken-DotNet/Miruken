@@ -1,4 +1,5 @@
-﻿namespace Miruken.Register
+﻿#if NETSTANDARD
+namespace Miruken.Register
 {
     using System;
     using System.Collections;
@@ -137,3 +138,4 @@
 #endregion
     }
 }
+#endif

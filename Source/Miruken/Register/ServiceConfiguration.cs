@@ -1,4 +1,5 @@
-﻿namespace Miruken.Register
+﻿#if NETSTANDARD
+namespace Miruken.Register
 {
     using System;
     using System.Linq;
@@ -51,3 +52,4 @@
         }
     }
 }
+#endif

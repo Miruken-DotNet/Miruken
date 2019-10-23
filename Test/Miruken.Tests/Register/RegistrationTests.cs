@@ -1,4 +1,5 @@
-﻿// ReSharper disable ClassNeverInstantiated.Local
+﻿#if NETSTANDARD
+// ReSharper disable ClassNeverInstantiated.Local
 namespace Miruken.Tests.Register
 {
     using System;
@@ -105,7 +106,6 @@ namespace Miruken.Tests.Register
             Assert.IsNull((service as IContextual)?.Context);
         }
 
-#if NETSTANDARD
         [TestMethod]
         public void Should_Register_Scoped_Service_Factory()
         {
@@ -126,7 +126,6 @@ namespace Miruken.Tests.Register
                 Assert.AreSame(service, handler.Resolve<IService>());
             }
         }
-#endif
 
         [TestMethod]
         public void Should_Override_Handlers()
@@ -249,3 +248,4 @@ namespace Miruken.Tests.Register
         }
     }
 }
+#endif

@@ -15,7 +15,7 @@
     </PropertyGroup>
 
     <!-- compilation flags -->
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
         <DefineConstants>NETSTANDARD</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
