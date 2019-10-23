@@ -23,7 +23,7 @@
         Any
     }
 
-    #region Delegates
+#region Delegates
 
     public delegate void ResolveCallback(object result, bool synchronous);
     public delegate R    ResolveCallback<out R>(object result, bool synchronous);
@@ -39,7 +39,7 @@
     public delegate object FinallyCallbackR();
     public delegate void   CancelledCallback(CancelledException exception);
 
-    #endregion
+#endregion
 
     public abstract partial class Promise : AbstractAsyncResult
     {
@@ -63,7 +63,7 @@
             State = PromiseState.Pending;
         }
 
-        #region Then
+#region Then
 
         public Promise Then(ResolveCallback<Promise> then)
         {
@@ -75,9 +75,9 @@
             return Then(then, null).Unwrap();
         }
 
-        #endregion
+#endregion
 
-        #region Catch
+#region Catch
 
         public Promise Catch(RejectCallback fail)
         {
@@ -116,9 +116,9 @@
             } : (RejectCallback<R>)null);
         }
 
-        #endregion
+#endregion
 
-        #region Finally
+#region Finally
 
         public Promise Finally(FinallyCallback final)
         {
@@ -134,9 +134,9 @@
 
         protected abstract Promise FinallyT(FinallyCallbackR final);
 
-        #endregion
+#endregion
 
-        #region Tap
+#region Tap
 
         public Promise Tap(ResolveCallback tap)
         {
@@ -166,9 +166,9 @@
 
         public abstract Promise TapCatchT(RejectCallback<Promise> tap);
 
-        #endregion
+#endregion
 
-        #region Cancel
+#region Cancel
 
         public abstract void Cancel();
 
@@ -193,9 +193,9 @@
                 cancelled(_exception as CancelledException);
         }
 
-        #endregion
+#endregion
 
-        #region Misc
+#region Misc
 
         public Promise Decorate(ResolveDecorator resolve)
         {
@@ -348,9 +348,9 @@
             });
         }
 
-        #endregion
+#endregion
 
-        #region Build
+#region Build
 
         public static readonly Promise<bool> True  = new Promise<bool>(true);
         public static readonly Promise<bool> False = new Promise<bool>(false);
@@ -406,9 +406,9 @@
             return Promise<object>.Rejected(exception, synchronous);
         }
 
-        #endregion
+#endregion
 
-        #region Cast
+#region Cast
 
         public Promise<T> Cast<T>()
         {
@@ -438,12 +438,12 @@
         private static readonly ConcurrentDictionary<Type, Func<Promise, Promise>>
             CoercePromise = new ConcurrentDictionary<Type, Func<Promise, Promise>>();
 
-        #endregion
+#endregion
     }
 
     public partial class Promise<T> : Promise
     {
-        #region Delegates
+#region Delegates
 
         public delegate void ResolveCallbackT(T result, bool synchronous);
         public delegate R    ResolveCallbackT<out R>(T result, bool synchronous);
@@ -452,7 +452,7 @@
         public delegate void CancellingPromiseOwner(ResolveCallbackT resolve, 
             RejectCallback reject, Action<Action> onCancel);
 
-        #endregion
+#endregion
 
         private readonly ChildCancelMode _mode;
         private int _childCount;
@@ -522,7 +522,7 @@
 
         public override ChildCancelMode CancelMode => _mode;
 
-        #region Then
+#region Then
 
         public override Promise Then(ResolveCallback then)
         {
@@ -682,9 +682,9 @@
             });
         }
 
-        #endregion
+#endregion
 
-        #region Catch
+#region Catch
 
         public new Promise<T> Catch<E>(RejectCallbackE<E> fail)
             where E : Exception
@@ -715,9 +715,9 @@
             } : (RejectCallback<Promise<R>>)null);
         }
 
-        #endregion
+#endregion
 
-        #region Finally
+#region Finally
 
         public new Promise<T> Finally(FinallyCallback final)
         {
@@ -822,9 +822,9 @@
             return Finally(final);
         }
 
-        #endregion
+#endregion
 
-        #region Tap
+#region Tap
 
         public new Promise Tap(ResolveCallback tap)
         {
@@ -950,18 +950,18 @@
             return TapCatch(tap);
         }
 
-        #endregion
+#endregion
 
-        #region Cancel
+#region Cancel
 
         public override void Cancel()
         {
             Reject(new CancelledException(), true);
         }
 
-        #endregion
+#endregion
 
-        #region Misc
+#region Misc
 
         public override Promise Decorate(ResolveDecorator resolve, RejectDecorator reject)
         {
@@ -1018,7 +1018,7 @@
             return (T)End(this, millisecondsTimeout);
         }
 
-        #endregion
+#endregion
 
         protected void Resolve(T result, bool synchronous)
         {
@@ -1119,7 +1119,7 @@
                 reject(_exception, CompletedSynchronously);
         }
 
-        #region Build
+#region Build
 
         public new static Promise<T> Rejected(Exception exception)
         {
@@ -1133,7 +1133,7 @@
 
         public new static readonly Promise<T> Empty = new Promise<T>(default(T));
 
-        #endregion
+#endregion
     }
 
     public static class PromiseUnwrapExtensions

@@ -111,7 +111,7 @@
         }
     }
 
-    #region Formatting
+#region Formatting
 
     public abstract class LogFilter
     {
@@ -183,5 +183,5 @@
         }
     }
 
-    #endregion
+#endregion
 }

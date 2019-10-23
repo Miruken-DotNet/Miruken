@@ -141,7 +141,7 @@ namespace Miruken.Callback
                  : new CallbackSemanticsDecorator(handler, options);
         }
 
-        #region Semantics
+#region Semantics
 
         public static IHandler Duck(this IHandler handler)
         {
@@ -168,6 +168,6 @@ namespace Miruken.Callback
             return Semantics(handler, CallbackOptions.Notify);
         }
 
-        #endregion
+#endregion
     }
 }

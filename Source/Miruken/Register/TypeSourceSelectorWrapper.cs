@@ -24,7 +24,7 @@
             _selector = selector;
         }
 
-        #region ITypeSelector
+#region ITypeSelector
 
         public IServiceTypeSelector AddTypes(params Type[] types)
         {
@@ -36,9 +36,9 @@
             return _selector.AddTypes(new DelayedEnumerable(types));
         }
 
-        #endregion
+#endregion
 
-        #region IAssemblySelector
+#region IAssemblySelector
 
         public IImplementationTypeSelector FromCallingAssembly()
         {
@@ -106,9 +106,9 @@
 
         }
 
-        #endregion
+#endregion
 
-        #region DelayedEnumerable
+#region DelayedEnumerable
 
         private class DelayedEnumerable : IEnumerable<Type>
         {
@@ -134,6 +134,6 @@
             }
         }
 
-        #endregion
+#endregion
     }
 }
