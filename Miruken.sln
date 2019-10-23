@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Castle.Tests", "Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Validate.Castle.Tests", "Test\Miruken.Validate.Castle.Tests\Miruken.Validate.Castle.Tests.csproj", "{12F27A7E-1320-416F-8943-5094A3EAA797}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Http", "Source\Miruken.Http\Miruken.Http.csproj", "{F0864426-A357-472E-95DB-4C028F9F8B16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Miruken.Http.Tests", "Test\Miruken.Http.Tests\Miruken.Http.Tests.csproj", "{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +75,14 @@ Global
 		{12F27A7E-1320-416F-8943-5094A3EAA797}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12F27A7E-1320-416F-8943-5094A3EAA797}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12F27A7E-1320-416F-8943-5094A3EAA797}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0864426-A357-472E-95DB-4C028F9F8B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0864426-A357-472E-95DB-4C028F9F8B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0864426-A357-472E-95DB-4C028F9F8B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0864426-A357-472E-95DB-4C028F9F8B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +93,7 @@ Global
 		{6F259D1D-F015-42F4-98E0-408CDA406D11} = {35E1E9F5-E005-4E62-A077-0BC135CDB2E0}
 		{C3D662B4-4012-4A7B-BCC7-810FD6EE6DE8} = {35E1E9F5-E005-4E62-A077-0BC135CDB2E0}
 		{12F27A7E-1320-416F-8943-5094A3EAA797} = {35E1E9F5-E005-4E62-A077-0BC135CDB2E0}
+		{435F2C1F-1C3F-45E6-9783-1B8A5A3C71E7} = {35E1E9F5-E005-4E62-A077-0BC135CDB2E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D8E45288-65AC-4F5C-B118-A265FC0CBBDF}
