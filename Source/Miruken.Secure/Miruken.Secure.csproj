@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net48;net461</TargetFrameworks>
     <Company>Miruken</Company>
     <Product>Miruken.Secure</Product>
     <Description>Miruken abstractions for security</Description>
@@ -12,11 +12,27 @@
     <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
     <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-  </PropertyGroup>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>bin\</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+        <OutputPath>bin\</OutputPath>
+    </PropertyGroup>
+
+    <!-- compilation flags -->
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <DefineConstants>NETSTANDARD</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+        <DefineConstants>NETFULL</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+        <DefineConstants>NETFULL</DefineConstants>
+    </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Miruken\Miruken.csproj" />

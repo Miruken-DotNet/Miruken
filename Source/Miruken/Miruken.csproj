@@ -27,13 +27,13 @@
     </PropertyGroup>
 
     <!-- compilation flags -->
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <DefineConstants>NETSTANDARD</DefineConstants>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net48'">
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
 
