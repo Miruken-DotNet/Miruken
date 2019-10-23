@@ -7,7 +7,7 @@
     <Company>Miruken</Company>
     <Product>Miruken.Validate</Product>
     <Description>Miruken validation including DataAnnotations and FluentValidation</Description>
-    <Copyright>Copyright 2018</Copyright>
+    <Copyright>Copyright 2019</Copyright>
     <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>

@@ -5,7 +5,7 @@
     <Company>Miruken</Company>
     <Product>Miruken.Secure</Product>
     <Description>Miruken abstractions for security</Description>
-    <Copyright>Copyright 2018</Copyright>
+    <Copyright>Copyright 2019</Copyright>
     <PackageTags>Miruken Security</PackageTags>
     <Authors>cneuwirt</Authors>
     <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
