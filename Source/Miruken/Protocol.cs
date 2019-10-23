@@ -21,14 +21,23 @@ namespace Miruken
         {
             if (!protocol.IsInterface)
                 throw new NotSupportedException("Only protocol interfaces are supported");
+
+#if NETSTANDARD
             return Interceptor.Create(adapter, protocol);
+#else
+            return new Interceptor(adapter, protocol).GetTransparentProxy();
+#endif
         }
 
         public static TProto Proxy<TProto>(IProtocolAdapter adapter)
         {
+#if NETSTANDARD
             if (!typeof(TProto).IsInterface)
                 throw new NotSupportedException("Only protocol interfaces are supported");
             return Interceptor.Create<TProto>(adapter);
+#else
+            return (TProto)Proxy(adapter, typeof(TProto));
+#endif
         }
     }
 

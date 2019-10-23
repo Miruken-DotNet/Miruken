@@ -2,12 +2,15 @@
 {
     using System;
     using System.Data;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Context;
     using static Protocol;
+
+#if NETSTANDARD
+    using Microsoft.Extensions.DependencyInjection;
+#endif
 
     /// <summary>
     /// Summary description for ContextTests
