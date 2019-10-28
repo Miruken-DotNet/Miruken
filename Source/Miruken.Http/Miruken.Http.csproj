@@ -36,16 +36,20 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.6" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-      <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
     <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD'))">
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
     <ItemGroup Condition="$(DefineConstants.Contains('NETFULL'))">
         <Reference Include="System.Data.Entity" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(DefineConstants.Contains('NETFULL'))">
+        <PackageReference Include="System.Net.Http" Version="4.0.0" />
     </ItemGroup>
 
     <ItemGroup>
