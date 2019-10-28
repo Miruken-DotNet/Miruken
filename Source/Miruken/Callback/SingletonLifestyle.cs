@@ -6,7 +6,7 @@
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class
     {
-        private T _instance;
+        private volatile T _instance;
 
         protected override bool IsCompatibleWithParent(
             Inquiry parent, LifestyleAttribute attribute) => true;
@@ -24,7 +24,7 @@
                         _instance = next().GetAwaiter().GetResult();
                 }
             }
-            return Task.FromResult(_instance);
+            return _instance != null ? Task.FromResult(_instance) : null;
         }
     }
 
