@@ -1,26 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net48;net461</TargetFrameworks>
-    <PackageId>Miruken.Validate</PackageId>
-    <Authors>cneuwirt</Authors>
-    <Company>Miruken</Company>
-    <Product>Miruken.Validate</Product>
-    <Description>Miruken validation including DataAnnotations and FluentValidation</Description>
-    <Copyright>Copyright 2019</Copyright>
-    <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
-    <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
-    <PackageTags>Miruken Validate DataAnnotations FluentValidation</PackageTags>
-    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <TargetFrameworks>netstandard2.0;net48;net461</TargetFrameworks>
         <LangVersion>latest</LangVersion>
+        <PackageId>Miruken.Validate</PackageId>
+        <Authors>cneuwirt</Authors>
+        <Company>Miruken</Company>
+        <Product>Miruken.Validate</Product>
+        <Description>Miruken validation including DataAnnotations and FluentValidation</Description>
+        <Copyright>Copyright 2019</Copyright>
+        <PackageLicenseUrl>https://github.com/Miruken-DotNet/Miruken/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
+        <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
+        <PackageTags>Miruken Validate DataAnnotations FluentValidation</PackageTags>
+        <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <LangVersion>latest</LangVersion>
         <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
