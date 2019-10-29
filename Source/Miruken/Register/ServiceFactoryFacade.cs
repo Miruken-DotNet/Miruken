@@ -7,6 +7,7 @@ namespace Miruken.Register
     using Callback.Policy;
     using Microsoft.Extensions.DependencyInjection;
 
+    [Unmanaged]
     public class ServiceFactoryFacade : Handler
     {
         private readonly Dictionary<Type, HashSet<Handler>> _services 
