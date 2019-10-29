@@ -43,14 +43,11 @@
             {
                 WantsAsync = true
             }, argument.Constraints).Then((result, _) =>
-            {
-                if (result == null && !argument.IsOptional)
-                {
-                    throw new InvalidOperationException(
-                        $"Unable to resolve key '{key}'");
-                }
-                return result;
-            });
+                result == null && !argument.IsOptional
+                    ? Promise.Rejected(new InvalidOperationException(
+                         $"Unable to resolve key '{key}'"))
+                    : Promise.Resolved(result)
+            );
         }
 
         protected virtual object[] ResolveAll(
