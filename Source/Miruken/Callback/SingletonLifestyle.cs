@@ -21,7 +21,21 @@
                 lock (this)
                 {
                     if (_instance == null)
-                        _instance = next().GetAwaiter().GetResult();
+                    {
+                        var result = next();
+                        switch (result.Status)
+                        {
+                            case TaskStatus.RanToCompletion:
+                                _instance = result.Result;
+                                return result;
+                            case TaskStatus.Faulted:
+                            case TaskStatus.Canceled:
+                                return result;
+                            default:
+                                _instance = next().GetAwaiter().GetResult();
+                                break;
+                        }
+                    }
                 }
             }
             return _instance != null ? Task.FromResult(_instance) : null;
