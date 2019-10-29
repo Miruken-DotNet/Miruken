@@ -33,8 +33,8 @@
 
             return Task.FromResult(_cache.GetOrAdd(context, ctx =>
             {
-                var result = next().GetAwaiter().GetResult();
-                if (result is IContextual contextual)
+                var instance = next().GetAwaiter().GetResult();
+                if (instance is IContextual contextual)
                 {
                     contextual.Context = ctx;
                     contextual.ContextChanging += ChangeContext;
@@ -42,7 +42,7 @@
                     {
                         _cache.TryRemove(ctx, out _);
                         contextual.ContextChanging -= ChangeContext;
-                        (result as IDisposable)?.Dispose();
+                        (instance as IDisposable)?.Dispose();
                         contextual.Context = null;
                     };
                 }
@@ -51,10 +51,10 @@
                     context.ContextEnded += (c, r)  =>
                     {
                         _cache.TryRemove(ctx, out _);
-                        (result as IDisposable)?.Dispose();
+                        (instance as IDisposable)?.Dispose();
                     };
                 }
-                return result;
+                return instance;
             }));
         }
 
