@@ -12,6 +12,7 @@ namespace Miruken.Register
     using Callback.Policy;
     using Context;
     using Error;
+    using Log;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class ServiceCollectionExtensions
@@ -71,6 +72,7 @@ namespace Miruken.Register
             services.AddSingleton<OnceHandler>();
             services.AddSingleton<PassThroughRouter>();
             services.AddSingleton<Scheduler>();
+            services.AddSingleton(typeof(LogFilter<,>));
 
             return services;
         }
