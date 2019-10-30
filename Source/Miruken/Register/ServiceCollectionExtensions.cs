@@ -39,7 +39,7 @@ namespace Miruken.Register
             if (serviceFacade.HasServices)
                 context.AddHandlers(serviceFacade);
 
-            context.AddHandlers(new StaticHandler(), new Stash(true));
+            context.AddHandlers(new StaticHandler().Break(), new Stash(true));
 
             HandlerDescriptorFactory.UseFactory(factory);
 
