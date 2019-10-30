@@ -72,6 +72,8 @@ namespace Miruken.Register
             services.AddSingleton<OnceHandler>();
             services.AddSingleton<PassThroughRouter>();
             services.AddSingleton<Scheduler>();
+
+            services.AddSingleton<LoggerProvider>();
             services.AddSingleton(typeof(LogFilter<,>));
 
             return services;

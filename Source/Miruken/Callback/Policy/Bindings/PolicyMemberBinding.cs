@@ -231,6 +231,8 @@
                     resolved[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
                     resolved[i] = this;
+                else if (argumentType.Is<MemberDispatch>())
+                    resolved[i] = dispatcher;
                 else if (argumentType == typeof(CallbackContext))
                 {
                     resolved[i] = callbackContext ?? (callbackContext =
