@@ -10,8 +10,8 @@ namespace Miruken.Register
     [Unmanaged]
     public class ServiceFactoryFacade : Handler
     {
-        private readonly Dictionary<Type, HashSet<Handler>> _services 
-            = new Dictionary<Type, HashSet<Handler>>();
+        private readonly Dictionary<Type, List<Handler>> _services 
+            = new Dictionary<Type, List<Handler>>();
 
         public bool HasServices => _services.Count > 0;
 
@@ -29,7 +29,7 @@ namespace Miruken.Register
 
             var many = inquiry.Many;
 
-            HashSet<Handler> services = null;
+            List<Handler> services = null;
             if (!many && _services.TryGetValue(serviceType, out services))
             {
                 foreach (var service in services)
@@ -115,7 +115,7 @@ namespace Miruken.Register
         {
             if (!_services.TryGetValue(serviceType, out var services))
             {
-                services = new HashSet<Handler>();
+                services = new List<Handler>();
                 _services.Add(serviceType, services);
             }
             services.Add(service);
