@@ -20,7 +20,7 @@ namespace Miruken.Register
         public static IHandler AddMiruken(
             this IServiceCollection services, Action<Registration> configure = null)
         {
-            return AddMiruken(services, new MutableHandlerDescriptorFactory(), configure);
+            return AddMiruken(services, null, configure);
         }
 
         public static IHandler AddMiruken(
@@ -29,6 +29,8 @@ namespace Miruken.Register
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
+
+            factory = factory ?? new MutableHandlerDescriptorFactory();
 
             var context = new Context();
 
@@ -39,7 +41,7 @@ namespace Miruken.Register
             if (serviceFacade.HasServices)
                 context.AddHandlers(serviceFacade);
 
-            context.AddHandlers(new StaticHandler().Break(), new Stash(true));
+            context.AddHandlers((new StaticHandler() + new Stash(true)).Break());
 
             HandlerDescriptorFactory.UseFactory(factory);
 
