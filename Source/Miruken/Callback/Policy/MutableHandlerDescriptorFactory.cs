@@ -31,16 +31,18 @@
                     return descriptor;
                 if (type.IsGenericType && !type.IsGenericTypeDefinition)
                 {
-                    var cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
-                    try
+                    var definition = type.GetGenericTypeDefinition();
+                    if (_descriptors.TryGetValue(definition, out descriptor))
                     {
-                        var definition = type.GetGenericTypeDefinition();
-                        if (_descriptors.TryGetValue(definition, out descriptor))
+                        var cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
+                        try
+                        {
                             return descriptor.CloseDescriptor(type, CreateAndRegisterDescriptor);
-                    }
-                    finally
-                    {
-                        _lock.DowngradeFromWriterLock(ref cookie);
+                        }
+                        finally
+                        {
+                            _lock.DowngradeFromWriterLock(ref cookie);
+                        }
                     }
                 }
             }
