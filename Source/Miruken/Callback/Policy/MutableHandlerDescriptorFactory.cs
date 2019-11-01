@@ -11,12 +11,12 @@
     {
         private readonly List<HandlerDescriptor> _orderedDescriptors;
         private readonly Dictionary<Type, HandlerDescriptor> _descriptors;
-        private readonly ReaderWriterLockSlim _lock;
+        private readonly ReaderWriterLock _lock;
 
         public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
             : base(visitor)
         {
-            _lock               = new ReaderWriterLockSlim();
+            _lock               = new ReaderWriterLock();
             _orderedDescriptors = new List<HandlerDescriptor>();
             _descriptors        = new Dictionary<Type, HandlerDescriptor>();
             ImplicitLifestyle   = new SingletonAttribute();
@@ -24,14 +24,14 @@
 
         public override HandlerDescriptor GetDescriptor(Type type)
         {
-            _lock.EnterUpgradeableReadLock();
+            _lock.AcquireReaderLock(Timeout.Infinite);
             try
             {
                 if (_descriptors.TryGetValue(type, out var descriptor))
                     return descriptor;
                 if (type.IsGenericType && !type.IsGenericTypeDefinition)
                 {
-                    _lock.EnterWriteLock();
+                    var cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
                     try
                     {
                         var definition = type.GetGenericTypeDefinition();
@@ -40,13 +40,13 @@
                     }
                     finally
                     {
-                        _lock.ExitWriteLock();
+                        _lock.DowngradeFromWriterLock(ref cookie);
                     }
                 }
             }
             finally
             {
-                _lock.ExitUpgradeableReadLock();
+                _lock.ReleaseReaderLock();
             }
             return null;
         }
@@ -54,30 +54,21 @@
         public override HandlerDescriptor RegisterDescriptor(Type type,
             HandlerDescriptorVisitor visitor = null)
         {
-            _lock.EnterUpgradeableReadLock();
+            _lock.AcquireWriterLock(Timeout.Infinite);
             try
             {
-                if (_descriptors.TryGetValue(type, out var descriptor))
-                    return descriptor;
-                _lock.EnterWriteLock();
-                try
-                {
-                    return CreateAndRegisterDescriptor(type, visitor);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
+                return _descriptors.TryGetValue(type, out var descriptor)
+                     ? descriptor : CreateAndRegisterDescriptor(type, visitor);
             }
             finally
             {
-                _lock.ExitUpgradeableReadLock();
+                _lock.ReleaseWriterLock();
             }
         }
 
         public override IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy)
         {
-            _lock.EnterReadLock();
+            _lock.AcquireReaderLock(Timeout.Infinite);
             try
             {
                 return _orderedDescriptors.SelectMany(descriptor =>
@@ -93,14 +84,14 @@
             }
             finally
             {
-                _lock.ExitReadLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
         protected override IEnumerable<HandlerDescriptor> GetCallbackHandlers(
             CallbackPolicy policy, object callback, bool instance, bool @static)
         {
-            _lock.EnterUpgradeableReadLock();
+            _lock.AcquireReaderLock(Timeout.Infinite);
             try
             {
                 if (_orderedDescriptors.Count == 0)
@@ -163,14 +154,14 @@
                         {
                             if (_descriptors.TryGetValue(t, out var descriptor))
                                 return descriptor;
-                            _lock.EnterWriteLock();
+                            var cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
                             try
                             {
                                 return CreateAndRegisterDescriptor(t, v);
                             }
                             finally
                             {
-                                _lock.ExitWriteLock();
+                                _lock.DowngradeFromWriterLock(ref cookie);
                             }
                         });
                     }
@@ -181,7 +172,7 @@
             }
             finally
             {
-                _lock.ExitUpgradeableReadLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
