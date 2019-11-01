@@ -23,6 +23,7 @@
             var handled = base.Dispatch(handler, ref greedy, composer);
             if (handled) return true;
             LazyInitializer.EnsureInitialized(ref _inferred, GetInferred);
+            var inferred = greedy ? _inferred : _inferred.Reverse();
             foreach (var infer in _inferred)
             {
                 if (ReferenceEquals(infer.Key, handler.GetType())) continue;

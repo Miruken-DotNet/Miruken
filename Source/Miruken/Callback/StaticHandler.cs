@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Callback
 {
+    using System.Linq;
     using Policy;
     using Policy.Bindings;
 
@@ -9,10 +10,11 @@
             CallbackPolicy policy, object callback, bool greedy,
             IHandler composer, ResultsDelegate results)
         {
-            var handled        = false;
-            var factory        = HandlerDescriptorFactory.Current;
-            var staticHandlers = factory.GetStaticHandlers(policy, callback);
-            foreach (var descriptor in staticHandlers)
+            var handled  = false;
+            var factory  = HandlerDescriptorFactory.Current;
+            var handlers = factory.GetStaticHandlers(policy, callback);
+            if (!greedy) handlers = handlers.Reverse();
+            foreach (var descriptor in handlers)
             {
                 if (descriptor.Dispatch(
                         policy, descriptor.HandlerType, callback, greedy,

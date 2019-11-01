@@ -54,16 +54,17 @@ namespace Miruken.Callback.Policy
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> StaticPolicies { get; }
 
         public HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding,
-            IHandlerDescriptorFactory factory)
+            Func<Type, HandlerDescriptorVisitor, HandlerDescriptor> register)
         {
             return _closed.GetOrAdd(key, k =>
             {
                 var closedType = binding.CloseHandlerType(HandlerType, k);
-                return closedType != null ? factory.RegisterDescriptor(closedType, _visitor) : null;
+                return closedType != null ? register(closedType, _visitor) : null;
             });
         }
 
-        public HandlerDescriptor CloseDescriptor(Type closedType, IHandlerDescriptorFactory factory)
+        public HandlerDescriptor CloseDescriptor(Type closedType,
+            Func<Type, HandlerDescriptorVisitor, HandlerDescriptor> register)
         {
             if (!IsOpenGeneric)
                 throw new InvalidOperationException($"{HandlerType.FullName} does not represent an open type");
@@ -71,7 +72,7 @@ namespace Miruken.Callback.Policy
             if (!closedType.IsGenericType || closedType.GetGenericTypeDefinition() != HandlerType)
                 throw new InvalidOperationException($"{closedType.FullName} is not closed on {HandlerType.FullName}");
 
-            return factory.RegisterDescriptor(closedType, _visitor);
+            return register(closedType, _visitor);
         }
 
         internal bool Dispatch(
