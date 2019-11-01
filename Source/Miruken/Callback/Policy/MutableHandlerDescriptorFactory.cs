@@ -135,7 +135,7 @@
                     {
                         if (compatible == null)
                             compatible = new List<PolicyMemberBinding>();
-                        compatible.AddSorted(binding, policy);
+                        compatible.Add(binding);
                     }
                 }
 
