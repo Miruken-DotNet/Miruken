@@ -1102,7 +1102,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Controller>();
-            factory.RegisterDescriptor<ScreenProvider>();
+            factory.RegisterDescriptor<ScreenModelProvider>();
             factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
             using (var context = new Context())
@@ -1114,6 +1114,29 @@
                 Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
+                Assert.IsNull(context.Resolve<Screen<Boo>>());
+            }
+        }
+
+        [TestMethod]
+        public void Should_Ignore_Contextual_Errors()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor<ContextualErrorProvider>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
+                Assert.IsNotNull(screen1);
+                var screen2 = context.Resolve<Screen<Bar>>();
+                Assert.IsNull(screen2);
+                var screen3 = context.Resolve<Screen<Bar>>();
+                Assert.IsNotNull(screen3);
+                Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
+                Assert.AreSame(screen3, context.Resolve<Screen<Bar>>());
                 Assert.IsNull(context.Resolve<Screen<Boo>>());
             }
         }
@@ -1956,12 +1979,25 @@
             public TModel Model { get; }
         }
 
-        private class ScreenProvider
+        private class ScreenModelProvider
         {
             [Provides, Contextual]
             public static Promise<Screen<TModel>> GetScreen<TModel>(TModel model)
             {
                 return Promise.Resolved(new Screen<TModel>(model));
+            }
+        }
+
+        private class ContextualErrorProvider
+        {
+            private static int _count;
+
+            [Provides, Contextual]
+            public static Promise<Screen<TModel>> GetScreen<TModel>(TModel model)
+            {
+                return ++_count % 2 == 0
+                     ? throw new InvalidOperationException("Something bad")
+                     : Promise.Resolved(new Screen<TModel>(model));
             }
         }
 

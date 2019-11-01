@@ -3,6 +3,7 @@ namespace Miruken.Register
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Callback;
     using Callback.Policy;
     using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +33,9 @@ namespace Miruken.Register
             List<Handler> services = null;
             if (!many && _services.TryGetValue(serviceType, out services))
             {
-                foreach (var service in services)
-                    if (service.Handle(inquiry, false, composer)) return null;
+                if (services.Cast<Handler>().Reverse()
+                    .Any(service => service.Handle(inquiry, false, composer)))
+                    return null;
             }
 
             foreach (var serviceGroup in _services)

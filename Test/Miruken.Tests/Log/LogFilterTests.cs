@@ -42,7 +42,7 @@ namespace Miruken.Tests.Log
                 .AddLogging(logging =>
                 {
                     logging.ClearProviders();
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
                     logging.AddNLog();
                 })
                 .AddMiruken(configure => configure
