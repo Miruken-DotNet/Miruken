@@ -112,7 +112,7 @@ namespace Miruken.Register
 
             CheckServiceType(serviceType, service);
 
-            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service));
+            factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service), priority);
         }
 
         private void AddService(Type serviceType, Handler service)
