@@ -97,12 +97,12 @@
             if (invariants == null)
                 invariants = invariantsOrdered;
             else if (invariantsOrdered != null)
-                invariants = invariantsOrdered.Concat(invariants);
+                invariants = invariants.Concat(invariantsOrdered);
 
             if (compatible == null)
                 compatible = compatibleOrdered;
             else if (compatibleOrdered != null)
-                compatible = compatibleOrdered.Concat(compatible);
+                compatible = compatible.Concat(compatibleOrdered);
 
             if (invariants == null && compatible == null)
                 return Enumerable.Empty<HandlerDescriptor>();
