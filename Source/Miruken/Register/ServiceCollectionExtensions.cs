@@ -32,32 +32,27 @@ namespace Miruken.Register
 
             factory = factory ?? new MutableHandlerDescriptorFactory();
 
-            var context = new Context();
+            var registration = new Registration(services);
+            configure?.Invoke(registration);
+            var (@explicit, @implicit) = registration.Register();
 
-            var registration = services.AddDefaultServices().Register(configure);
+            foreach (var service in @implicit.AddDefaultServices())
+            {
+                var serviceType = service.ImplementationType ?? service.ServiceType;
+                factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service));
+            }
+
+            var context = new Context();
             context.AddHandlers(registration.Handlers);
 
-            var serviceFacade = new ServiceFactoryFacade(services, factory);
-            if (serviceFacade.HasServices)
-                context.AddHandlers(serviceFacade);
+            var serviceFacade = new ServiceFactoryFacade(@explicit, factory);
+            if (serviceFacade.HasServices) context.AddHandlers(serviceFacade);
 
             context.AddHandlers((new StaticHandler() + new Stash(true)).Break());
 
             HandlerDescriptorFactory.UseFactory(factory);
 
             return context;
-        }
-
-        public static Registration Register(this IServiceCollection services,
-            Action<Registration> configure = null)
-        {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
-
-            var registration = new Registration(services);
-            configure?.Invoke(registration);
-            registration.Register();
-            return registration;
         }
 
         private static IServiceCollection AddDefaultServices(this IServiceCollection services)

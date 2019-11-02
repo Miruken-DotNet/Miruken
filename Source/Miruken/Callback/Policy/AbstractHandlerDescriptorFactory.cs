@@ -23,7 +23,7 @@
         public abstract HandlerDescriptor GetDescriptor(Type type);
 
         public abstract HandlerDescriptor RegisterDescriptor(Type type,
-            HandlerDescriptorVisitor visitor = null);
+            HandlerDescriptorVisitor visitor = null, int? priority = null);
 
         public IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback)
         {
@@ -46,7 +46,7 @@
         public abstract IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy);
 
         protected virtual HandlerDescriptor CreateDescriptor(Type handlerType,
-            HandlerDescriptorVisitor visitor = null)
+            HandlerDescriptorVisitor visitor = null, int? priority = null)
         {
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies   = null;
@@ -139,7 +139,10 @@
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)),
                 staticPolicies?.ToDictionary(p => p.Key,
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)),
-                visitor);
+                visitor)
+            {
+                Priority = priority
+            };
 
             visitor = _visitor + visitor;
 

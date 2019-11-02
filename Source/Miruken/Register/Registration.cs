@@ -16,7 +16,8 @@ namespace Miruken.Register
         private SourceSelector _publicSources;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
-        private readonly IServiceCollection _services;
+        private readonly IServiceCollection _explicitServices;
+        private readonly IServiceCollection _implicitServices;
         private readonly HashSet<object> _keys;
 
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
@@ -28,8 +29,9 @@ namespace Miruken.Register
 
         public Registration(IServiceCollection services)
         {
-            _services = services ?? new ServiceCollection();
-            _keys     = new HashSet<object>();
+            _explicitServices = services ?? new ServiceCollection();
+            _implicitServices = new ServiceCollection();
+            _keys             = new HashSet<object>();
         }
 
         public IEnumerable<IHandler> Handlers { get; } = new List<IHandler>();
@@ -67,12 +69,11 @@ namespace Miruken.Register
             return this;
         }
 
-
         public Registration Services(Action<IServiceCollection> services)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
-            services(_services);
+            services(_explicitServices);
             return this;
         }
 
@@ -99,11 +100,11 @@ namespace Miruken.Register
             return this;
         }
 
-        public IServiceCollection Register()
+        public (IServiceCollection Explicit, IServiceCollection Implicit) Register()
         {
             if (_sources != null || _publicSources != null)
             {
-                _services.Scan(scan =>
+                _implicitServices.Scan(scan =>
                 {
                     foreach (var source in GetSources())
                     {
@@ -124,7 +125,7 @@ namespace Miruken.Register
                     }
                 });
             }
-            return _services;
+            return (_explicitServices, _implicitServices);
         }
 
         private bool ShouldExclude(Type serviceType)

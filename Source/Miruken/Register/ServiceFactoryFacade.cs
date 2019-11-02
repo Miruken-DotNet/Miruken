@@ -16,11 +16,13 @@ namespace Miruken.Register
 
         public bool HasServices => _services.Count > 0;
 
-        public ServiceFactoryFacade(IServiceCollection services,
+        public ServiceFactoryFacade(
+            IServiceCollection services,
             IHandlerDescriptorFactory factory)
         {
+            var index = 0;
             foreach (var service in services)
-                RegisterService(service, factory);
+                RegisterService(service, factory, ++index);
         }
 
         [Provides]
@@ -53,7 +55,7 @@ namespace Miruken.Register
         }
 
         private void RegisterService(ServiceDescriptor service,
-            IHandlerDescriptorFactory factory)
+            IHandlerDescriptorFactory factory, int priority)
         {
             var serviceType = service.ImplementationType ?? service.ServiceType;
 
@@ -68,7 +70,7 @@ namespace Miruken.Register
                 var providerType = typeof(ServiceFactory<>.Instance)
                     .MakeGenericType(serviceType);
 
-                factory.RegisterDescriptor(providerType);
+                factory.RegisterDescriptor(providerType, priority: priority);
 
                 var handler = (Handler)Activator.CreateInstance(providerType, instance);
                 AddService(serviceType, handler);
@@ -101,7 +103,7 @@ namespace Miruken.Register
 
                 serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
 
-                factory.RegisterDescriptor(serviceFactoryType);
+                factory.RegisterDescriptor(serviceFactoryType, priority: priority);
 
                 var handler = (Handler)Activator.CreateInstance(serviceFactoryType, implementationFactory);
                 AddService(serviceType, handler);   
