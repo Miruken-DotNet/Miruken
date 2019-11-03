@@ -1243,14 +1243,14 @@
                 Assert.IsNull(ctor.Bar);
                 using (var child = context.CreateChild())
                 {
-                    ctor = child.Provide(new Foo()).Resolve<OverloadedConstructors>();
+                    ctor = child.With(new Foo()).Resolve<OverloadedConstructors>();
                     Assert.IsNotNull(ctor);
                     Assert.IsNotNull(ctor.Foo);
                     Assert.IsNull(ctor.Bar);
                 }
                 using (var child = context.CreateChild())
                 {
-                    ctor = child.Provide(new Foo()).Provide(new Bar())
+                    ctor = child.With(new Foo()).With(new Bar())
                         .Resolve<OverloadedConstructors>();
                     Assert.IsNotNull(ctor);
                     Assert.IsNotNull(ctor.Foo);
@@ -1289,6 +1289,46 @@
                     Assert.IsNotNull(provider.Foo);
                     Assert.IsNotNull(provider.Bar);
                 }
+            }
+        }
+
+        [TestMethod]
+        public void Should_Select_Greediest_Constructor_When_Resolving_All()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<OverloadedConstructors>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNull(instance.Foo);
+                Assert.IsNull(instance.Bar);
+            }
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.Provide(new Foo())
+                    .ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNotNull(instance.Foo);
+                Assert.IsNull(instance.Bar);
+            }
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.With(new Foo()).With(new Bar())
+                    .ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNotNull(instance.Foo);
+                Assert.IsNotNull(instance.Bar);
             }
         }
 

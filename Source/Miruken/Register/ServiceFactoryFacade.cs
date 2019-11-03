@@ -14,8 +14,6 @@ namespace Miruken.Register
         private readonly Dictionary<Type, List<Handler>> _services 
             = new Dictionary<Type, List<Handler>>();
 
-        public bool HasServices => _services.Count > 0;
-
         public ServiceFactoryFacade(
             IServiceCollection services,
             IHandlerDescriptorFactory factory)
@@ -24,6 +22,8 @@ namespace Miruken.Register
             foreach (var service in services)
                 RegisterService(service, factory, ++index);
         }
+
+        public bool HasServices => _services.Count > 0;
 
         [Provides]
         public object Provide(Inquiry inquiry, IHandler composer)

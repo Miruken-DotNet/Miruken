@@ -90,19 +90,30 @@ namespace Miruken.Callback.Policy
             if (policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
-            var dispatched = false;
+            var dispatched     = false;
+            var hasConstructor = false;
             foreach (var member in descriptor.GetInvariantMembers(callback))
             {
-                dispatched = member.Dispatch(
-                    target, callback, composer, results) || dispatched;
-                if (dispatched && !greedy) return true;
+                var isConstructor = member.Dispatcher.IsConstructor;
+                if (isConstructor && hasConstructor) continue;
+                dispatched = member.Dispatch(target, callback, composer, results) || dispatched;
+                if (dispatched)
+                {
+                    if (!greedy) return true;
+                    hasConstructor |= isConstructor;
+                }
             }
 
             foreach (var member in descriptor.GetCompatibleMembers(callback))
             {
-                dispatched = member.Dispatch(
-                    target, callback, composer, results) || dispatched;
-                if (dispatched && !greedy) return true;
+                var isConstructor = member.Dispatcher.IsConstructor;
+                if (isConstructor && hasConstructor) continue;
+                dispatched = member.Dispatch( target, callback, composer, results) || dispatched;
+                if (dispatched)
+                {
+                    if (!greedy) return true;
+                    hasConstructor |= isConstructor;
+                }
             }
 
             return dispatched;

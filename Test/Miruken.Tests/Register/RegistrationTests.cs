@@ -54,8 +54,7 @@ namespace Miruken.Tests.Register
         [TestMethod]
         public void Should_Register_Scoped()
         {
-            var services = new ServiceCollection();
-            var handler  = services
+            var handler  = new ServiceCollection()
                 .AddScoped<Service1>()
                 .AddMiruken();
             var service = handler.Resolve<IService>();
@@ -66,8 +65,7 @@ namespace Miruken.Tests.Register
         [TestMethod]
         public void Should_Register_Scoped_Fluently()
         {
-            var services = new ServiceCollection();
-            var handler  = services
+            var handler  = new ServiceCollection()
                 .AddMiruken(configure => configure
                     .Sources(sources => sources
                         .AddTypes(typeof(Service1)))
@@ -78,6 +76,24 @@ namespace Miruken.Tests.Register
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.IsNotNull((service as IContextual)?.Context);
+        }
+
+        [TestMethod]
+        public void Should_Use_Last_Explicitly_Registered_Service()
+        {
+            var handler = new ServiceCollection()
+                .AddSingleton<Service1>()
+                .AddSingleton<Service2>()
+                .AddMiruken();
+            var service = handler.Resolve<IService>();
+            Assert.IsInstanceOfType(service, typeof(Service2));
+
+            handler = new ServiceCollection()
+                .AddSingleton<Service2>()
+                .AddSingleton<Service1>()
+                .AddMiruken();
+            service = handler.Resolve<IService>();
+            Assert.IsInstanceOfType(service, typeof(Service1));
         }
 
         [TestMethod]
