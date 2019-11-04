@@ -118,9 +118,9 @@
         }
 
         [Maps, Format(typeof(Exception))]
-        public string MapNotFoundException( NotFoundException exception)
+        public string MapNotFoundException(NotFoundException exception)
         {
-            return exception.ToString();
+            return exception.Message;
         }
 
         [Maps, Format(typeof(Exception))]
