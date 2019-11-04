@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Security;
     using System.Security.Authentication;
+    using Api;
     using Callback;
     using Map;
     using Validate;
@@ -87,6 +88,16 @@
 #endif
 
         [Maps]
+        public int MapStatusCode(NotFoundException exception)
+        {
+#if NETSTANDARD
+            return StatusCodes.Status404NotFound;
+#else
+            return (int)HttpStatusCode.NotFound;
+#endif
+        }
+
+        [Maps]
         public int MapStatusCode(ValidationException exception)
         {
 #if NETSTANDARD
@@ -104,6 +115,12 @@
 #else
             return HttpStatusCodeEx.UnprocessableEntityCode;
 #endif
+        }
+
+        [Maps, Format(typeof(Exception))]
+        public string MapNotFoundException( NotFoundException exception)
+        {
+            return exception.ToString();
         }
 
         [Maps, Format(typeof(Exception))]

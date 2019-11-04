@@ -118,14 +118,14 @@
         {
             if (requestType.IsGenericTypeDefinition)
                 return null;
-            var path = requestType.FullName;
+            var path = requestType.ToString();
             if (typeof(IDecorator).IsAssignableFrom(requestType))
             {
                 var name  = requestType.Name;
                 var index = name.IndexOf('`');
                 path = index < 0 ? name : name.Substring(0, index);
             }
-            var parts = path?.Split('.') ?? Array.Empty<string>();
+            var parts = path.Split('.');
             return string.Join("/", parts.Select(part =>
                 char.ToLower(part[0]) + part.Substring(1))
                 .ToArray());
