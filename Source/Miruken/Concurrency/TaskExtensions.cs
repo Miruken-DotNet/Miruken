@@ -75,7 +75,7 @@
         private static readonly ConcurrentDictionary<Type, Func<Task, Task>>
             CoerceTask = new ConcurrentDictionary<Type, Func<Task, Task>>();
 
-        #region Helper
+#region Helper
 
         internal class Helper
         {
@@ -114,6 +114,6 @@
                 TaskResultGetters = new ConcurrentDictionary<Type, Func<object, object>>();
         }
 
-        #endregion
+#endregion
     }
 }

@@ -17,7 +17,7 @@
         public override bool Approve(object callback, PolicyMemberBinding binding)
         {
             var mapping = (Mapping)callback;
-            var format = mapping.Format;
+            var format  = mapping.Format;
             if (format == null) return true;
             var dispatch = binding.Dispatcher;
             return dispatch.Attributes.OfType<IFormatMatching>()

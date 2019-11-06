@@ -1,14 +1,12 @@
 ﻿namespace Miruken.Callback
 {
-    using System.Threading;
     using System.Threading.Tasks;
     using Policy.Bindings;
 
     public class SingletonLifestyle<T> : Lifestyle<T>
         where T : class
     {
-        private Task<T> _instance;
-        private bool _initialized;
+        private volatile T _instance;
 
         protected override bool IsCompatibleWithParent(
             Inquiry parent, LifestyleAttribute attribute) => true;
@@ -18,13 +16,29 @@
             Next<T> next, IHandler composer,
             LifestyleAttribute attribute)
         {
-            if (_initialized)
-                return _instance;
-
-            object guard = this;
-            return LazyInitializer.EnsureInitialized(
-                ref _instance, ref _initialized, ref guard,
-                () => _instance = next());
+            if (_instance == null)
+            {
+                lock (this)
+                {
+                    if (_instance == null)
+                    {
+                        var result = next();
+                        switch (result.Status)
+                        {
+                            case TaskStatus.RanToCompletion:
+                                _instance = result.Result;
+                                return result;
+                            case TaskStatus.Faulted:
+                            case TaskStatus.Canceled:
+                                return result;
+                            default:
+                                _instance = next().GetAwaiter().GetResult();
+                                break;
+                        }
+                    }
+                }
+            }
+            return _instance != null ? Task.FromResult(_instance) : null;
         }
     }
 

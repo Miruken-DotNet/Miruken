@@ -46,41 +46,38 @@
         }
 
         [TestMethod]
-        public async Task Should_Validate_Target()
+        public async Task Should_Validate_Fluent_Target()
         {
             var handler = new FluentValidationValidator()
-                        + _handler;
-            var player  = new Player();
+                        + new ValidatorProvider();
+            var player = new Player();
             var outcome = await handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
-            Assert.AreEqual("'First Name' should not be empty.", outcome["FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", outcome["LastName"]);
+            Assert.AreEqual("'First Name' must not be empty.", outcome["FirstName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", outcome["LastName"]);
             Assert.AreEqual("'DOB' must not be empty.", outcome["DOB"]);
         }
 
         [TestMethod]
-        public async Task Should_Validate_Target_Resolving()
+        public async Task Should_Validate_All_Target()
         {
-            // Duplicate Person/Player errors come from
-            // Miruken.Validate.Tests.ValidatorProvider in FluentValidationValidatorTests.cs
-
             var player  = new Player();
-            var outcome = await _handler.Infer().ValidateAsync(player);
+            var outcome = await _handler.ValidateAsync(player);
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, player.ValidationOutcome);
             var firstName = outcome.GetErrors("FirstName").Cast<string>().ToArray();
-            CollectionAssert.AreEquivalent(new []
+            CollectionAssert.AreEquivalent(new[]
             {
                 "First name is required",
-                "'First Name' should not be empty.",
+                "'First Name' must not be empty.",
                 "The FirstName field is required."
             }, firstName);
             var lastName = outcome.GetErrors("LastName").Cast<string>().ToArray();
             CollectionAssert.AreEquivalent(new[]
             {
                 "Last name is required",
-                "'Last Name' should not be empty.",
+                "'Last Name' must not be empty.",
                 "The LastName field is required."
             }, lastName);
             var dob = outcome.GetErrors("DOB").Cast<string>().ToArray();
@@ -96,11 +93,11 @@
         public async Task Should_Compose_Validation()
         {
             var handler = new FluentValidationValidator()
-                        + _handler;
+                        + new ValidatorProvider();
             var team = new Team
             {
-                Name = "Arsenal",
-                Coach = new Coach(),
+                Name    = "Arsenal",
+                Coach   = new Coach(),
                 Players = new[]
                 {
                     new Player(),
@@ -122,32 +119,32 @@
             Assert.IsFalse(outcome.IsValid);
             Assert.AreSame(outcome, team.ValidationOutcome);
             CollectionAssert.AreEquivalent(new[] { "Coach", "Players" }, outcome.Culprits);
-            Assert.AreEqual("'First Name' should not be empty.", outcome["Coach.FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", outcome["Coach.LastName"]);
-            Assert.AreEqual("'First Name' should not be empty.", outcome["Players[0].FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", outcome["Players[0].LastName"]);
+            Assert.AreEqual("'First Name' must not be empty.", outcome["Coach.FirstName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", outcome["Coach.LastName"]);
+            Assert.AreEqual("'First Name' must not be empty.", outcome["Players[0].FirstName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", outcome["Players[0].LastName"]);
             Assert.AreEqual("'DOB' must not be empty.", outcome["Players[0].DOB"]);
-            Assert.AreEqual("'Last Name' should not be empty.", outcome["Players[2].LastName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", outcome["Players[2].LastName"]);
             Assert.AreEqual("", outcome["Players[1].LastName"]);
             var coach = outcome.GetOutcome("Coach");
             Assert.IsFalse(coach.IsValid);
             Assert.AreSame(coach, team.Coach.ValidationOutcome);
-            Assert.AreEqual("'First Name' should not be empty.", coach["FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", coach["LastName"]);
+            Assert.AreEqual("'First Name' must not be empty.", coach["FirstName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", coach["LastName"]);
             var players = outcome.GetOutcome("Players");
             Assert.IsFalse(players.IsValid);
             var player0 = players.GetOutcome("0");
             Assert.IsFalse(player0.IsValid);
             Assert.AreSame(player0, team.Players[0].ValidationOutcome);
-            Assert.AreEqual("'First Name' should not be empty.", player0["FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", player0["LastName"]);
+            Assert.AreEqual("'First Name' must not be empty.", player0["FirstName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", player0["LastName"]);
             Assert.AreEqual("'DOB' must not be empty.", player0["DOB"]);
             Assert.IsNull(players.GetOutcome("1"));
             var player2 = players.GetOutcome("2");
             Assert.IsFalse(player2.IsValid);
             Assert.AreSame(player2, team.Players[2].ValidationOutcome);
             Assert.AreEqual("", player2["FirstName"]);
-            Assert.AreEqual("'Last Name' should not be empty.", player2["LastName"]);
+            Assert.AreEqual("'Last Name' must not be empty.", player2["LastName"]);
             Assert.AreEqual("", player2["DOB"]);
         }
     }

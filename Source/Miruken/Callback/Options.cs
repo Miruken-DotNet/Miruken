@@ -3,8 +3,7 @@
     using System;
 
     public abstract class Options<T> : Composition,
-        IBoundCallback, IInferCallback,
-        IFilterCallback, IBatchCallback
+        IBoundCallback, IInferCallback, IFilterCallback, IBatchCallback
         where T : Options<T>
     {
         public object Bounds { get; set; }

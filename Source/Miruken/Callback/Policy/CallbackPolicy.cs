@@ -77,8 +77,7 @@
                 return dispatcher.Dispatch(this, callback, greedy, composer, results);
             var type = handler as Type ?? handler.GetType();
             var descriptor = HandlerDescriptorFactory.Current.GetDescriptor(type);
-            return descriptor?.Dispatch(this, handler, callback, greedy, 
-                                       composer, results) == true;
+            return descriptor?.Dispatch(this, handler, callback, greedy, composer, results) == true;
         }
 
         public IEnumerable<PolicyMemberBinding> GetMethods()

@@ -7,13 +7,13 @@
 
     public class ValidateFilter<TCb, TRes> : IFilter<TCb, TRes>
     {
-        public int? Order { get; set; } = Stage.Validation;
-
         [Provides, Singleton]
         public ValidateFilter()
-        {   
+        {
         }
-            
+
+        public int? Order { get; set; } = Stage.Validation;
+
         public Task<TRes> Next(TCb callback,
             object rawCallback, MemberBinding member,
             IHandler composer, Next<TRes> next,

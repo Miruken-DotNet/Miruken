@@ -2,7 +2,7 @@
 {
     public interface IArgumentResolver
     {
-        bool IsOptional { get;  }
+        bool IsOptional { get; }
 
         void ValidateArgument(Argument argument);
 

@@ -12,7 +12,7 @@
 
     public static class RuntimeHelper
     {
-        private static readonly ConcurrentDictionary<Type, object> 
+        private static readonly ConcurrentDictionary<Type, object>
             DefaultValues = new ConcurrentDictionary<Type, object>();
 
         public static object GetDefault(Type type)
@@ -129,7 +129,7 @@
         public static bool SatisfiesGenericParameterConstraints(
             this Type genericArgType, Type proposedType)
         {
-            var gpa         = genericArgType.GenericParameterAttributes;
+            var gpa = genericArgType.GenericParameterAttributes;
             var constraints = gpa & GenericParameterAttributes.SpecialConstraintMask;
 
             if (constraints != GenericParameterAttributes.None)
@@ -221,7 +221,7 @@
             if (sourceMethod.IsGenericMethod)
             {
                 genericArguments = sourceMethod.GetGenericArguments();
-                sourceMethod     = sourceMethod.GetGenericMethodDefinition();
+                sourceMethod = sourceMethod.GetGenericMethodDefinition();
             }
             var declaringType = sourceMethod.DeclaringType;
             MethodInfo methodOnTarget = null;
@@ -229,7 +229,7 @@
                 declaringType?.IsAssignableFrom(type) == true)
             {
                 var mapping = type.GetTypeInfo().GetRuntimeInterfaceMap(declaringType);
-                var index   = Array.IndexOf(mapping.InterfaceMethods, sourceMethod);
+                var index = Array.IndexOf(mapping.InterfaceMethods, sourceMethod);
                 methodOnTarget = mapping.TargetMethods[index];
             }
             else
@@ -248,23 +248,23 @@
             if (methodOnTarget == null) return null;
 
             return genericArguments == null
-                 ? methodOnTarget 
+                 ? methodOnTarget
                  : methodOnTarget.MakeGenericMethod(genericArguments);
         }
 
-        private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo> 
+        private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>
             MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
 
         public static Delegate CompileMethod(MethodInfo method, Type delegateType)
         {
             if (method == null)
                 throw new ArgumentNullException(nameof(method));
-            var isStatic   = method.IsStatic;
-            var target     = method.ReflectedType;
+            var isStatic = method.IsStatic;
+            var target = method.ReflectedType;
             if (!isStatic && target == null)
                 throw new ArgumentException("Instance method requires a target");
             var parameters = method.GetParameters();
-            var arguments  = CreateArguments(parameters.Length + (isStatic ? 0 : 1));
+            var arguments = CreateArguments(parameters.Length + (isStatic ? 0 : 1));
             var methodCall = isStatic ?
                  Expression.Call(method, arguments.Select((arg, index) =>
                  Expression.Convert(arg, parameters[index].ParameterType)).ToArray())
@@ -285,7 +285,7 @@
             if (constructor == null)
                 throw new ArgumentNullException(nameof(constructor));
             var parameters = constructor.GetParameters();
-            var arguments  = CreateArguments(parameters.Length);
+            var arguments = CreateArguments(parameters.Length);
             var constructorCall = Expression.New(
                 constructor,
                 arguments.Select((arg, index) =>
@@ -300,7 +300,7 @@
         public static Func<T, TRet> CreateGenericFuncNoArgs<T, TRet>(
             string methodName, params Type[] genericParams)
         {
-            var instance   = Expression.Parameter(typeof(T), "instance");
+            var instance = Expression.Parameter(typeof(T), "instance");
             var methodCall = Expression.Call(instance, methodName, genericParams);
             return Expression.Lambda<Func<T, TRet>>(
                methodCall, instance).TryCompileWithoutClosure<Func<T, TRet>>();
@@ -309,7 +309,7 @@
         public static Func<TArg, TRet> CreateStaticFuncOneArg<T, TArg, TRet>(
              string methodName, params Type[] genericParams)
         {
-            var arg        = Expression.Parameter(typeof(TArg), "arg");
+            var arg = Expression.Parameter(typeof(TArg), "arg");
             var methodCall = Expression.Call(typeof(T), methodName, genericParams, arg);
             return Expression.Lambda<Func<TArg, TRet>>(methodCall, arg)
                 .TryCompileWithoutClosure<Func<TArg, TRet>>();
@@ -322,7 +322,7 @@
             if (owner == null)
                 throw new ArgumentNullException(nameof(owner));
             var instance = Expression.Parameter(typeof(object), "instance");
-            var target   = Expression.Convert(instance, owner);
+            var target = Expression.Convert(instance, owner);
             return Expression.Lambda<Func<object, object>>(
                 Expression.Convert(
                     Expression.Property(target, name),
@@ -348,7 +348,7 @@
         {
             var builder = new StringBuilder();
 
-            var writingAssemblyName     = false;
+            var writingAssemblyName = false;
             var skippingAssemblyDetails = false;
 
             foreach (var current in fullyQualifiedTypeName)

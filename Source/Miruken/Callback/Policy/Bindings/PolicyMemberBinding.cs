@@ -118,15 +118,16 @@
 
             bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
             {
-                var args = ResolveArgs(
-                    dispatcher, callback, ruleArgs, handler, out var context);
+                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler, 
+                    out var context, out var failedArg);
 
                 switch (args)
                 {
                     case null:
                         isPromise = false;
+                        var type = target as Type ?? target.GetType();
                         res = Task.FromException(new InvalidOperationException(
-                            $"{dispatcher.Member} is missing one or more dependencies"));
+                            $"Failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}' for signature {dispatcher.Member} in '{type}'"));
                         return false;
                     case object[] array:
                         isPromise = false;
@@ -134,8 +135,7 @@
                         return context?.Unhandled != true;
                     case Promise<object[]> promise:
                         isPromise = true;
-                        res = promise.Then((array, _) =>
-                            dispatcher.Invoke(target, array, resultType));
+                        res = promise.Then((array, _) => dispatcher.Invoke(target, array, resultType));
                         return context?.Unhandled != true;
                     default:
                         isPromise = false;
@@ -162,7 +162,7 @@
                 : null;
 
             var filters = composer.GetOrderedFilters(
-                this, dispatcher, callbackType, Filters,
+                this, dispatcher, callback, callbackType, Filters,
                 dispatcher.Owner.Filters, Policy.Filters, targetFilters);
 
             if (filters == null) return false;
@@ -209,9 +209,11 @@
 
         private object ResolveArgs(MemberDispatch dispatcher,
             object callback, object[] ruleArgs, IHandler composer,
-            out CallbackContext callbackContext)
+            out CallbackContext callbackContext, out Argument failedArg)
         {
+            failedArg       = null;
             callbackContext = null;
+
             var arguments = dispatcher.Arguments;
             if (arguments.Length == ruleArgs.Length)
                 return ruleArgs;
@@ -229,19 +231,28 @@
                     resolved[i] = composer;
                 else if (argumentType.Is<MemberBinding>())
                     resolved[i] = this;
+                else if (argumentType.Is<MemberDispatch>())
+                    resolved[i] = dispatcher;
                 else if (argumentType == typeof(CallbackContext))
                 {
                     resolved[i] = callbackContext ?? (callbackContext =
                         new CallbackContext(callback, composer, this));
                 }
                 else if (argumentType == typeof(object))
+                {
+                    failedArg = argument;
                     return null;
+                }
                 else
                 {
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
                     var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
-                    if (arg == null && !argument.GetDefaultValue(out arg)) return null;
+                    if (arg == null && !argument.GetDefaultValue(out arg))
+                    {
+                        failedArg = argument;
+                        return null;
+                    }
 
                     switch (arg)
                     {
@@ -256,6 +267,7 @@
                                     promises.Add(promise.Then((res, _) => resolved[index] = res));
                                     break;
                                 default:
+                                    failedArg = argument;
                                     return null;
                             }
                             break;

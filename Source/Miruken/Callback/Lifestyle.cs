@@ -20,9 +20,18 @@
         {
             var parent    = callback.Parent;
             var attribute = provider as LifestyleAttribute;
-            return parent == null || IsCompatibleWithParent(parent, attribute)
-                 ? GetInstance(callback, member, next, composer, attribute)
-                 : null;
+            if (parent == null || IsCompatibleWithParent(parent, attribute))
+            {
+                try
+                {
+                    return GetInstance(callback, member, next, composer, attribute);
+                }
+                catch (Exception exception)
+                {
+                    return Task.FromException<T>(exception);
+                }
+            }
+            return null;
         }
 
         protected abstract bool IsCompatibleWithParent(
@@ -38,8 +47,7 @@
         AttributeTargets.Method | AttributeTargets.Property |
         AttributeTargets.Constructor,
         Inherited = false)]
-    public abstract class LifestyleAttribute
-        : Attribute, IFilterProvider
+    public abstract class LifestyleAttribute : Attribute, IFilterProvider
     {
         protected LifestyleAttribute(Type lifestyleType)
         {
@@ -62,17 +70,22 @@
 
         IEnumerable<IFilter> IFilterProvider.GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer)
+            object callback, Type callbackType, IHandler composer)
         {
-            var lifestyle = Lifestyles.GetOrAdd(dispatcher, d =>
-                (IFilter) Activator.CreateInstance(
-                    LifestyleType.MakeGenericType(d.LogicalReturnType))
+            if (!(callback is Inquiry inquiry))
+                return Enumerable.Empty<IFilter>();
+
+            var logicalType  = dispatcher.LogicalReturnType;
+            var key          = logicalType == typeof(object) ? inquiry.Key : null;
+            var lifestyleKey = Tuple.Create(dispatcher, key);
+            var lifestyle    = Lifestyles.GetOrAdd(lifestyleKey, k =>
+                (IFilter)Activator.CreateInstance(LifestyleType.MakeGenericType(logicalType))
             );
 
             var filters = new [] { lifestyle };
             return !(this is IBindingConstraintProvider provider) ? filters
                 : filters.Concat(new ConstraintAttribute(provider.Constraint)
-                    .GetFilters(binding, dispatcher, callbackType, composer));
+                    .GetFilters(binding, dispatcher, callback, callbackType, composer));
         }
 
         public override bool Equals(object obj)
@@ -85,7 +98,7 @@
             return LifestyleType.GetHashCode();
         }
 
-        private static readonly ConcurrentDictionary<MemberDispatch, IFilter>
-            Lifestyles = new ConcurrentDictionary<MemberDispatch, IFilter>();
+        private static readonly ConcurrentDictionary<Tuple<MemberDispatch, object>, IFilter>
+            Lifestyles = new ConcurrentDictionary<Tuple<MemberDispatch, object>, IFilter>();
     }
 }

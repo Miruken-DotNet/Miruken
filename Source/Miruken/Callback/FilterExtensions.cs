@@ -51,7 +51,7 @@
 
         public static ICollection<(IFilter, IFilterProvider)>
             GetOrderedFilters(this IHandler handler, MemberBinding binding,
-                MemberDispatch dispatcher, Type callbackType,
+                MemberDispatch dispatcher, object callback, Type callbackType,
                 params IEnumerable<IFilterProvider>[] providers)
         {
             var options = handler.GetOptions<FilterOptions>();
@@ -83,7 +83,7 @@
             {
                 var found   = false;
                 var filters = provider.GetFilters(
-                    binding, dispatcher, callbackType, handler);
+                    binding, dispatcher, callback, callbackType, handler);
                 if (filters == null) return null;
                 foreach (var filter in filters)
                 {

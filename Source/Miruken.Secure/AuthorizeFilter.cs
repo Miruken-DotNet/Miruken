@@ -28,9 +28,9 @@
             var policy = GetPolicy(callback, member);
             var authorization = new Authorization(callback, principal, policy);
             if (!composer.Handle(authorization)) AccessDenied();
-            return authorization.Result.Then((canAccess, s) =>
+            return authorization.Result.Then((authorized, s) =>
             {
-                if (!canAccess) AccessDenied();
+                if (!authorized) AccessDenied();
                 return next();
             });
         }
@@ -41,18 +41,17 @@
                 .OfType<AccessPolicyAttribute>().FirstOrDefault();
             if (policy == null && callback is HandleMethod)
             {
-                var m     = member.Dispatcher.Member;
-                var owner = m.ReflectedType ?? m.DeclaringType;
-                var delim = owner != null ? ":" : "";
-                return $"{owner?.FullName ?? ""}{delim}{m.Name}";
+                var m         = member.Dispatcher.Member;
+                var owner     = m.ReflectedType ?? m.DeclaringType;
+                var delimiter = owner != null ? ":" : "";
+                return $"{owner?.FullName ?? ""}{delimiter}{m.Name}";
             }
             return policy?.Policy;
         }
 
         private static void AccessDenied()
         {
-            throw new UnauthorizedAccessException(
-                "Authorization has been denied");
+            throw new UnauthorizedAccessException("Authorization has been denied");
         }
     }
 }

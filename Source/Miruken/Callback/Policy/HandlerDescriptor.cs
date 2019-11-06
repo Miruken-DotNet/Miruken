@@ -48,19 +48,33 @@ namespace Miruken.Callback.Policy
 
         public Attribute[] Attributes { get; }
 
+        public int? Priority { get; set; }
+
         public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
 
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Policies { get; }
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> StaticPolicies { get; }
 
         public HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding,
-            IHandlerDescriptorFactory factory)
+            Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> register)
         {
             return _closed.GetOrAdd(key, k =>
             {
                 var closedType = binding.CloseHandlerType(HandlerType, k);
-                return closedType != null ? factory.RegisterDescriptor(closedType, _visitor) : null;
+                return closedType != null ? register(closedType, _visitor, Priority) : null;
             });
+        }
+
+        public HandlerDescriptor CloseDescriptor(Type closedType,
+            Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> register)
+        {
+            if (!IsOpenGeneric)
+                throw new InvalidOperationException($"{HandlerType.FullName} does not represent an open type");
+
+            if (!closedType.IsGenericType || closedType.GetGenericTypeDefinition() != HandlerType)
+                throw new InvalidOperationException($"{closedType.FullName} is not closed on {HandlerType.FullName}");
+
+            return register(closedType, _visitor, Priority);
         }
 
         internal bool Dispatch(
@@ -76,19 +90,30 @@ namespace Miruken.Callback.Policy
             if (policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
-            var dispatched = false;
+            var dispatched     = false;
+            var hasConstructor = false;
             foreach (var member in descriptor.GetInvariantMembers(callback))
             {
-                dispatched = member.Dispatch(
-                    target, callback, composer, results) || dispatched;
-                if (dispatched && !greedy) return true;
+                var isConstructor = member.Dispatcher.IsConstructor;
+                if (isConstructor && hasConstructor) continue;
+                dispatched = member.Dispatch(target, callback, composer, results) || dispatched;
+                if (dispatched)
+                {
+                    if (!greedy) return true;
+                    hasConstructor |= isConstructor;
+                }
             }
 
             foreach (var member in descriptor.GetCompatibleMembers(callback))
             {
-                dispatched = member.Dispatch(
-                    target, callback, composer, results) || dispatched;
-                if (dispatched && !greedy) return true;
+                var isConstructor = member.Dispatcher.IsConstructor;
+                if (isConstructor && hasConstructor) continue;
+                dispatched = member.Dispatch( target, callback, composer, results) || dispatched;
+                if (dispatched)
+                {
+                    if (!greedy) return true;
+                    hasConstructor |= isConstructor;
+                }
             }
 
             return dispatched;

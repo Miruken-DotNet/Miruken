@@ -25,8 +25,10 @@
             IFilterProvider provider)
         {
             var logger = GetLogger(member);
-            var debug  = logger.IsDebugEnabled;
-            var start  = Stopwatch.GetTimestamp();
+            if (logger == null) return await next();
+
+            var debug = logger.IsDebugEnabled;
+            var start = Stopwatch.GetTimestamp();
 
             if (debug)
                 logger.DebugFormat("Handling {0}", Describe(request));
@@ -107,11 +109,11 @@
         private ILogger GetLogger(MemberBinding member)
         {
             var type = member.Dispatcher.Member.ReflectedType;
-            return LoggerFactory?.Create(type) ?? NullLogger.Instance;
+            return LoggerFactory?.Create(type);
         }
     }
 
-    #region Formatting
+#region Formatting
 
     public abstract class LogFilter
     {
@@ -183,5 +185,5 @@
         }
     }
 
-    #endregion
+#endregion
 }

@@ -346,7 +346,7 @@
         {
             var demo    = new DemoHandler();
             var handler = new Handler();
-            var resolve = handler.Infer().Provide(demo).Resolve<DemoHandler>();
+            var resolve = handler.Provide(demo).Resolve<DemoHandler>();
             Assert.AreSame(demo, resolve);
         }
 
@@ -355,7 +355,7 @@
         {
             var email   = new EmailHandler();
             var handler = new Handler();
-            var resolve = handler.Infer().Provide(email).Resolve<IEmailFeature>();
+            var resolve = handler.Provide(email).Resolve<IEmailFeature>();
             Assert.AreSame(email, resolve);
         }
 
@@ -365,7 +365,7 @@
             _factory.RegisterDescriptor<DemoProvider>();
             var demo    = new DemoHandler();
             var handler = new Handler();
-            var resolve = handler.Provide(demo).Infer().Resolve<DemoHandler>();
+            var resolve = handler.Provide(demo).Resolve<DemoHandler>();
             Assert.AreSame(demo, resolve);
         }
 
@@ -377,7 +377,7 @@
                         + new Billing()
                         + new RepositoryProvider()
                         + new FilterProvider();
-            var id      = handler.Infer()
+            var id      = handler
                 .Command<int>(new SendEmail {Body = "Hello"});
             Assert.AreEqual(10, id);
         }
@@ -389,7 +389,7 @@
                         + new Billing()
                         + new RepositoryProvider()
                         + new FilterProvider(); ;
-            var id      = handler.Infer()
+            var id      = handler
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(10, id);
         }
@@ -401,7 +401,7 @@
             var handler = new EmailProvider()
                         + new RepositoryProvider()
                         + new FilterProvider(); ;
-            var id      = handler.Infer()
+            var id      = handler
                 .Command<int>(new SendEmail<int> { Body = 22 });
             Assert.AreEqual(1, id);
         }
@@ -413,8 +413,7 @@
             _factory.RegisterDescriptor<OfflineHandler>();
             var handler = new EmailProvider()
                         + new OfflineProvider();
-            var id      = handler.InferAll()
-                .Command<int>(new SendEmail { Body = "Hello" });
+            var id      = handler.Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(1, id);
         }
 
@@ -423,7 +422,7 @@
         {
             var handler = new Repository<Message>();
             var message = new Message();
-            var handled = handler.Infer().Handle(new Create<Message>(message));
+            var handled = handler.Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
         }
@@ -434,7 +433,7 @@
             _factory.RegisterDescriptor(typeof(Repository<>));
             var handler = new RepositoryProvider();
             var message = new Message();
-            var handled = handler.Infer().Handle(new Create<Message>(message));
+            var handled = handler.Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
         }
@@ -447,19 +446,18 @@
                         + new Billing()
                         + new RepositoryProvider()
                         + new FilterProvider();
-            var id = handler.Infer()
+            var id = handler
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(10, id);
         }
 
-        [Ignore,
-        TestMethod,
+        [Ignore, TestMethod,
          ExpectedException(typeof(InvalidOperationException))]
         public void Should_Reject_Filters_With_Missing_Dependencies()
         {
             var handler = new Accountant()
                         + new FilterProvider();
-            handler.Infer().Command<decimal>(
+            handler.Command<decimal>(
                 new Create<Deposit>(new Deposit { Amount = 10.0M }));
         }
 
@@ -468,7 +466,7 @@
         public void Should_Fail_If_No_Resolve_Handlers()
         {
             var handler = new HandlerAdapter(new Billing());
-            handler.Infer().Command<int>(new SendEmail { Body = "Hello" });
+            handler.Command<int>(new SendEmail { Body = "Hello" });
         }
 
         [TestMethod]
@@ -630,7 +628,7 @@
             var provider = new EmailProvider()
                          + new RepositoryProvider()
                          + new FilterProvider(); ;
-            var id       = Proxy<IEmailFeature>(provider.Infer()).Email("Hello");
+            var id       = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
         }
 

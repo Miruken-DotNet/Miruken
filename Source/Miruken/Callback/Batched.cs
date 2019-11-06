@@ -8,7 +8,7 @@
             RawCallback = rawCallback;
         }
 
-        public T      Callback    { get; }
+        public T      Callback   { get; }
         public object RawCallback { get; }
     }
 }

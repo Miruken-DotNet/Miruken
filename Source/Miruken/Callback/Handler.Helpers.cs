@@ -12,8 +12,7 @@
             return handler.Handle(callback, ref greedy, composer);
         }
 
-        public static IHandler Chain(
-            this IHandler handler, params object[] chain)
+        public static IHandler Chain( this IHandler handler, params object[] chain)
         {
             if (handler == null) return null;
             switch (chain.Length)
@@ -32,14 +31,14 @@
             }
         }
 
-        public static IHandler Provide<T>(this IHandler handler, T result)
+        public static IHandler Provide(this IHandler handler, object value)
         {
-            return new Provider(result) + handler;
+            return new Provider(value) + handler;
         }
 
-        public static IHandler With<T>(this IHandler handler, T result)
+        public static IHandler With(this IHandler handler, object value)
         {
-            return new Provider(result) + handler;
+            return new Provider(value) + handler;
         }
 
         public static IHandler Provider(this IHandler handler, IServiceProvider provider)

@@ -16,7 +16,7 @@
             };
             try
             {
-                return (new Stash() + handler.Infer()).Handle(command)
+                return (new Stash() + handler).Handle(command)
                      ? (Promise)command.Result
                      : Promise.Rejected(new NotSupportedException(
                           $"{request.GetType()} not handled"));
@@ -37,7 +37,7 @@
             };
             try
             {
-                return (new Stash() + handler.Infer()).Handle(command)
+                return (new Stash() + handler).Handle(command)
                      ? (Promise<TResp>)((Promise)command.Result)
                            .Coerce(typeof(Promise<TResp>))
                      : Promise<TResp>.Rejected(new NotSupportedException(
@@ -59,7 +59,7 @@
             };
             try
             {
-                if (!(new Stash() + handler.Infer()).Handle(command))
+                if (!(new Stash() + handler).Handle(command))
                     return Promise<TResp>.Rejected(new NotSupportedException(
                         $"{request.GetType()} not handled"));
                 var promise = (Promise)command.Result;
@@ -81,7 +81,7 @@
             };
             try
             {
-                return (new Stash() + handler.Infer()).Handle(command, true)
+                return (new Stash() + handler).Handle(command, true)
                      ? (Promise)command.Result
                      : Promise.Empty;
             }

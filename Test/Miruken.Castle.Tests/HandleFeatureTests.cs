@@ -40,7 +40,7 @@
                     .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             Assert.IsNotNull(handler.Resolve<MyHandler>());
-            Assert.IsTrue(handler.Infer().Handle(new A()));
+            Assert.IsTrue(handler.Handle(new A()));
         }
 
         [TestMethod]
@@ -52,7 +52,7 @@
                     .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             Assert.IsNull(handler.Resolve<MyHandler>());
-            Assert.IsFalse(handler.Infer().Handle(new A()));
+            Assert.IsFalse(handler.Handle(new A()));
         }
 
         [TestMethod]
@@ -65,8 +65,8 @@
                         .Use(Classes.FromThisAssembly()));
             }))
             {
-                Assert.IsTrue(handler.Infer().Handle(new A()));
-            } 
+                Assert.IsTrue(handler.Handle(new A()));
+            }
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@
                 new FeaturesInstaller(new HandleFeature())
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
-            handler.Infer().Command(new GetResults());
+            handler.Command(new GetResults());
         }
 
         [TestMethod]
@@ -87,7 +87,7 @@
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             var clear   = new ClearResults();
-            handler.Infer().Command(clear);
+            handler.Command(clear);
             Assert.AreEqual(9, clear.Running);
         }
 
@@ -99,7 +99,7 @@
                    .Use(Classes.FromThisAssembly()));
             var handler = new WindsorHandler(_container);
             var publish = new PublishResults();
-            handler.Infer().Command(publish);
+            handler.Command(publish);
             Assert.AreEqual(8, publish.Running);
         }
 
@@ -110,7 +110,7 @@
         {
             [Handles]
             public void HandlesA(A a)
-            {                
+            {
             }
 
             [Provides]

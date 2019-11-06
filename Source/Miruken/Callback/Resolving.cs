@@ -13,7 +13,7 @@
         public Resolving(object key, object callback)
             : base(key, callback as Inquiry, true)
         {
-            _callback = callback 
+            _callback = callback
                 ?? throw new ArgumentNullException(nameof(callback));
         }
 

@@ -3,13 +3,21 @@ using System.Linq;
 
 namespace Miruken.Callback
 {
+    using System.Collections;
+
     public interface ICompositeHandler : IHandler
     {
         T FindHandler<T>();
 
+        ICompositeHandler AddHandlers(IEnumerable handlers);
+
         ICompositeHandler AddHandlers(params object[] handlers);
 
+        ICompositeHandler InsertHandlers(int atIndex, IEnumerable handlers);
+
         ICompositeHandler InsertHandlers(int atIndex, params object[] handlers);
+
+        ICompositeHandler RemoveHandlers(IEnumerable handlers);
 
         ICompositeHandler RemoveHandlers(params object[] handlers);
     }
@@ -27,33 +35,48 @@ namespace Miruken.Callback
 
 	    public IHandler[] Handlers => _handlers.ToArray();
 
-	    public ICompositeHandler AddHandlers(params object[] handlers)
+	    public ICompositeHandler AddHandlers(IEnumerable handlers)
         {
-            foreach (var handler in handlers
+            foreach (var handler in handlers.Cast<object>()
                 .Where(h => h != null && FindHandler(h) == null))
                 _handlers.Add(ToHandler(handler));
             return this;
         }
 
-	    public ICompositeHandler InsertHandlers(int atIndex, params object[] handlers)
+	    public ICompositeHandler AddHandlers(params object[] handlers)
+	    {
+	        return AddHandlers((IEnumerable)handlers);
+	    }
+
+        public ICompositeHandler InsertHandlers(int atIndex, IEnumerable handlers)
 	    {
 	        var index = 0;
-            foreach (var handler in handlers
+            foreach (var handler in handlers.Cast<object>()
                 .Where(h => h != null && FindHandler(h) == null))
                 _handlers.Insert(atIndex + index++, ToHandler(handler));
 	        return this;
 	    }
 
-        public ICompositeHandler RemoveHandlers(params object[] handlers)
+	    public ICompositeHandler InsertHandlers(int atIndex, params object[] handlers)
+	    {
+	        return InsertHandlers(atIndex, (IEnumerable)handlers);
+	    }
+
+        public ICompositeHandler RemoveHandlers(IEnumerable handlers)
         {
-            foreach (var match in handlers
+            foreach (var match in handlers.Cast<object>()
                 .Select(FindHandler)
                 .Where(match => match != null))
                 _handlers.Remove(match);
             return this;
         }
 
-	    public T FindHandler<T>()
+	    public ICompositeHandler RemoveHandlers(params object[] handlers)
+	    {
+            return RemoveHandlers((IEnumerable)handlers);
+	    }
+
+        public T FindHandler<T>()
 	    {
 	        foreach (var handler in _handlers)
 	        {
@@ -69,17 +92,17 @@ namespace Miruken.Callback
 
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
-		{
+        {
             var handled = base.HandleCallback(callback, ref greedy, composer);
             if (handled && !greedy) return true;
-		    foreach (var handler in Handlers)
+            foreach (var handler in Handlers)
 		    {
 		        if (!handler.Handle(callback, ref greedy, composer)) continue;
 		        if (!greedy) return true;
 		        handled = true;
 		    }
-            return handled;                                                                                     
-		}
+            return handled;
+        }
 
 	    private IHandler FindHandler(object instance)
 	    {
@@ -91,6 +114,5 @@ namespace Miruken.Callback
 	        }
 	        return null;
 	    }
-
     }
 }

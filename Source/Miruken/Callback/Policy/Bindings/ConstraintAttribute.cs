@@ -38,12 +38,12 @@
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
-            Type callbackType, IHandler composer)
+            object callback, Type callbackType, IHandler composer)
         {
             return new[]
             {
                 Constraints.GetOrAdd(dispatcher.LogicalReturnType, r =>
-                    (IFilter) Activator.CreateInstance(
+                    (IFilter)Activator.CreateInstance(
                         typeof(ConstraintFilter<>).MakeGenericType(r)))
             };
         }

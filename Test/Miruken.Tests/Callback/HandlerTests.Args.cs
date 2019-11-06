@@ -234,26 +234,23 @@
             public Order[] Orders => _orders.ToArray();
 
             [Handles]
-            public Guid PlaceOrder(NewOrder place, IRepository<Order> repository,
-                                   Func<Order[]> getOrders)
+            public Guid PlaceOrder(NewOrder place, IRepository<Order> repository)
             {
                 var order = place.Order;
                 order.Status = OrderStatus.Pending;
                 repository.Save(order);
                 _orders.Add(order);
-                var orders = getOrders();
-                CollectionAssert.Contains(orders, order);
                 return Guid.NewGuid();
             }
 
             [Handles]
             public async Task<Guid> ChangeOrder(
                 ChangeOrder change, Task<IRepository<Order>> repository,
-                Func<Promise<Order[]>> getOrders)
+                Promise<Order[]> ordersPromise)
             {
                 change.Order.Status = OrderStatus.Pending;
                 await (await repository).Save(change.Order);
-                var orders = await getOrders();
+                var orders = await ordersPromise;
                 Assert.AreEqual(0, orders.Length);
                 return Guid.NewGuid();
             }
@@ -261,11 +258,10 @@
             [Handles]
             public Promise CancelOrder(
                 CancelOrder cancel, Promise<IRepository<Order>> repository,
-                Func<Task<Order[]>> getOrders)
+                Task<Order[]> ordersTask)
             {
                 cancel.Order.Status = OrderStatus.Cancelled;
-                var orders = getOrders();
-                Assert.AreEqual(0, orders.Result.Length);
+                Assert.AreEqual(0, ordersTask.Result.Length);
                 return repository.Then((r, s) =>
                 {
                     r.Save(cancel.Order);
@@ -277,13 +273,13 @@
         {
             [Handles]
             public Order RefundOrder(RefundOrder refund, Order[] orders,
-                Func<IRepository<Order>> getRepository)
+                IRepository<Order> repository)
             {
                 var order = orders.FirstOrDefault(o => o.Id == refund.OrderId);
                 if (order != null)
                 {
                     order.Status = OrderStatus.Refunded;
-                    getRepository().Save(order);
+                    repository.Save(order);
                 }
                 return order;
             }

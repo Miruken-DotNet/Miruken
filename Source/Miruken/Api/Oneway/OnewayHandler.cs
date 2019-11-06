@@ -8,7 +8,7 @@
     {
         [Provides, Singleton]
         public OnewayHandler()
-        {           
+        {
         }
 
         [Handles]

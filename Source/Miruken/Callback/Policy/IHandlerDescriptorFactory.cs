@@ -11,7 +11,8 @@
     {
         HandlerDescriptor GetDescriptor(Type type);
 
-        HandlerDescriptor RegisterDescriptor(Type type, HandlerDescriptorVisitor visitor = null);
+        HandlerDescriptor RegisterDescriptor(Type type,
+            HandlerDescriptorVisitor visitor = null, int? priority = null);
 
         IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback);
 

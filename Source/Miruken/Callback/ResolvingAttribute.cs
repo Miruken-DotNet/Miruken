@@ -1,8 +1,6 @@
 ﻿namespace Miruken.Callback
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Reflection;
     using System.Threading.Tasks;
     using Concurrency;
     using Functional;
@@ -14,27 +12,18 @@
     {
         public static readonly ResolvingAttribute Default = new ResolvingAttribute();
 
-        private static readonly MethodInfo CreateLazy =
-            typeof(ResolvingAttribute).GetMethod(nameof(ResolveLazy),
-                BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private static readonly ConcurrentDictionary<Type, 
-                Func<object, object, object, object, object>>
-            Lazy = new ConcurrentDictionary<Type,
-                Func<object, object, object, object, object>>();
-
         public bool IsOptional => false;
 
         public virtual object ResolveArgument(Inquiry parent,
             Argument argument, IHandler handler)
         {
-            return Resolve(parent, argument, handler, argument.IsLazy, false);
+            return Resolve(parent, argument, handler, false);
         }
 
         public object ResolveArgumentAsync(Inquiry parent,
             Argument argument, IHandler handler)
         {
-            return Resolve(parent, argument, handler, argument.IsLazy, true);
+            return Resolve(parent, argument, handler, true);
         }
 
         public virtual void ValidateArgument(Argument argument)
@@ -54,14 +43,11 @@
             {
                 WantsAsync = true
             }, argument.Constraints).Then((result, _) =>
-            {
-                if (result == null && !argument.IsOptional)
-                {
-                    throw new InvalidOperationException(
-                        $"Unable to resolve key '{key}'");
-                }
-                return result;
-            });
+                result == null && !argument.IsOptional
+                    ? Promise.Rejected(new InvalidOperationException(
+                         $"Unable to resolve key '{key}'"))
+                    : Promise.Resolved(result)
+            );
         }
 
         protected virtual object[] ResolveAll(
@@ -82,28 +68,9 @@
             }, argument.Constraints);
         }
 
-        private Func<T> ResolveLazy<T>(
-            Inquiry parent, Argument argument, IHandler handler)
-        {
-            return () => (T)Resolve(parent, argument, handler, false, false);
-        }
-
         private object Resolve(Inquiry parent, Argument argument,
-            IHandler handler, bool lazy, bool wantsAsync)
-        {
-            if (lazy)
-            {
-                var lazyFunc = Lazy.GetOrAdd(argument.ParameterType, l =>
-                {
-                    var func = l.GenericTypeArguments[0];
-                    var method = CreateLazy.MakeGenericMethod(func);
-                    return (Func<object, object, object, object, object>)
-                        RuntimeHelper.CompileMethod(method,
-                            typeof(Func<object, object, object, object, object>));
-                });
-                return lazyFunc(this, parent, argument, handler);
-            }
-
+            IHandler handler, bool wantsAsync)
+        {      
             object dependency;
             var key          = argument.Key;
             var argumentType = argument.ArgumentType;

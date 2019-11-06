@@ -52,7 +52,7 @@ namespace Miruken.Callback
             return handler.SelfOrDescendant().Notify();
         }
 
-        #region Axis
+#region Axis
 
         public static IHandlerAxis Self(this IHandlerAxis handler)
         {
@@ -132,6 +132,6 @@ namespace Miruken.Callback
                  : new HandlerAxis(handler, TraversingAxis.SelfSiblingOrAncestor);
         }
 
-        #endregion    
+#endregion    
     }   
 }

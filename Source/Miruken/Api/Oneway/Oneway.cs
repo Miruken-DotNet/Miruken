@@ -11,7 +11,7 @@
         public Oneway(object request)
         {
             Request = request
-                   ?? throw new ArgumentNullException(nameof(request));
+                      ?? throw new ArgumentNullException(nameof(request));
         }
 
         public object Request { get; set; }
@@ -40,5 +40,4 @@
             return new Oneway(request);
         }
     }
-
 }

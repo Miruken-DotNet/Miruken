@@ -105,7 +105,7 @@
         {
             var foo     = new Foo();
             var handler = new CustomHandler();
-            Assert.IsTrue(handler.Infer().Handle(foo, true));
+            Assert.IsTrue(handler.Handle(foo, true));
             Assert.AreEqual(1, foo.Handled);
         }
 
@@ -598,7 +598,7 @@
         public void Should_Resolve_Self_Implicitly()
         {
             var handler = new CustomHandler();
-            var result = handler.Resolve<CustomHandler>();
+            var result  = handler.Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -606,7 +606,7 @@
         public void Should_Resolve_Self_Implicitly_Decorated()
         {
             var handler = new CustomHandler();
-            var result = handler.Broadcast().Resolve<CustomHandler>();
+            var result  = handler.Broadcast().Resolve<CustomHandler>();
             Assert.AreSame(handler, result);
         }
 
@@ -614,8 +614,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly()
         {
             var controller = new Controller();
-            var handler = new HandlerAdapter(controller);
-            var result = handler.Resolve<Controller>();
+            var handler    = new HandlerAdapter(controller);
+            var result     = handler.Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -623,8 +623,8 @@
         public void Should_Resolve_Self_Adapter_Implicitly_Decorated()
         {
             var controller = new Controller();
-            var handler = new HandlerAdapter(controller);
-            var result = handler.Broadcast().Resolve<Controller>();
+            var handler    = new HandlerAdapter(controller);
+            var result     = handler.Broadcast().Resolve<Controller>();
             Assert.AreSame(controller, result);
         }
 
@@ -632,7 +632,7 @@
         public void Should_Resolve_Using_IServiceProvider()
         {
             var handler = (IServiceProvider)new CustomHandler();
-            var bar = (Bar)handler.GetService(typeof(Bar));
+            var bar     = (Bar)handler.GetService(typeof(Bar));
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -660,27 +660,27 @@
         [TestMethod]
         public void Should_Resolve_All_Enumerable_Dependencies()
         {
-            var handler = new StaticHandler() + new CustomHandler();
+            var handler = new StaticHandler();
             var bars    = handler.Resolve<BarEnumerableHolder>();
             Assert.IsNotNull(bars);
-            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
-            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+            Assert.AreEqual(9, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(2, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
         }
 
         [TestMethod]
         public void Should_Resolve_All_Array_Dependencies()
         {
-            var handler = new StaticHandler() + new CustomHandler();
-            var bars = handler.Resolve<BarArrayHolder>();
+            var handler = new StaticHandler();
+            var bars    = handler.Resolve<BarArrayHolder>();
             Assert.IsNotNull(bars);
-            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
-            Assert.AreEqual(1, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
+            Assert.AreEqual(9, bars.Bars.Count(bar => bar.GetType() == typeof(Bar)));
+            Assert.AreEqual(2, bars.Bars.Count(bar => bar.GetType() == typeof(SpecialBar)));
         }
 
         [TestMethod]
         public void Should_Resolve_All()
         {
-            var custom = new CustomHandler();
+            var custom  = new CustomHandler();
             var special = new SpecialHandler();
             var handler = custom + special;
             var objects = handler.ResolveAll<object>();
@@ -692,7 +692,7 @@
         [TestMethod]
         public void Should_Broadcast_Callbacks()
         {
-            var foo = new Foo();
+            var foo   = new Foo();
             var group = new CustomHandler()
                       + new CustomHandler()
                       + new CustomHandler();
@@ -719,17 +719,17 @@
         public void Should_Override_Providers()
         {
             var handler = new Handler();
-            var foo = handler.Provide(new Foo()).Resolve<Foo>();
+            var foo     = handler.Provide(new Foo()).Resolve<Foo>();
             Assert.IsNotNull(foo);
         }
 
         [TestMethod]
         public void Should_Override_Providers_Many()
         {
-            var foo1 = new Foo();
-            var foo2 = new Foo();
+            var foo1    = new Foo();
+            var foo2    = new Foo();
             var handler = new Handler();
-            var foos = handler.Provide(new[] { foo1, foo2 }).ResolveAll<Foo>();
+            var foos    = handler.Provide(new[] { foo1, foo2 }).ResolveAll<Foo>();
             CollectionAssert.AreEqual(new[] { foo1, foo2 }, foos);
         }
 
@@ -757,7 +757,7 @@
         [TestMethod]
         public void Should_Skip_Filters()
         {
-            var bee = new Bee();
+            var bee     = new Bee();
             var handler = new FilteredHandler();
             Assert.IsTrue(handler.Handle(bee));
             Assert.AreEqual(0, bee.Filters.Count);
@@ -806,7 +806,7 @@
         [TestMethod]
         public void Should_Create_Implicitly()
         {
-            var handler = new StaticHandler();
+            var handler  = new StaticHandler();
             _factory.RegisterDescriptor<Controller>();
             var instance = handler.Resolve<Controller>();
             Assert.IsNotNull(instance);
@@ -831,9 +831,34 @@
         [TestMethod]
         public void Should_Create_Resolving_Implicitly()
         {
-            var foo = new Foo();
-            _factory.RegisterDescriptor<Controller>();
-            Assert.IsTrue(new StaticHandler().Infer().Handle(foo));
+            var foo     = new Foo();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            Assert.IsTrue(new StaticHandler().Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Handle_Static_Implicitly()
+        {
+            var foo     = new Foo();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<StaticController>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            Assert.IsTrue(new StaticHandler().Handle(foo));
+            Assert.AreEqual(1, foo.Handled);
+        }
+
+        [TestMethod]
+        public void Should_Provide_Static_Implicitly()
+        {
+            var foo     = new Foo();
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<ControllerBase>();
+            factory.RegisterDescriptor<StaticControllerProvider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            Assert.IsTrue(new StaticHandler().Handle(foo));
             Assert.AreEqual(1, foo.Handled);
         }
 
@@ -845,7 +870,7 @@
             _factory.RegisterDescriptor<Controller>();
             _factory.RegisterDescriptor(typeof(Controller<,>));
             _factory.RegisterDescriptor<Provider>();
-            var instance = new StaticHandler().Infer()
+            var instance = new StaticHandler()
                 .Provide(boo).Provide(baz)
                 .Resolve<Controller<Boo, Baz>>();
             Assert.IsNotNull(instance);
@@ -857,22 +882,22 @@
         public void Should_Provide_Instance_Implicitly()
         {
             var factory = new MutableHandlerDescriptorFactory();
-            HandlerDescriptorFactory.UseFactory(factory);
             factory.RegisterDescriptor<Controller>();
-            var bar = new StaticHandler().Infer().Resolve<Bar>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            var bar = new StaticHandler().Resolve<Bar>();
             Assert.IsNotNull(bar);
         }
 
         [TestMethod]
         public void Should_Provide_Dependencies_Implicitly()
         {
-            var view = new Screen();
+            var view    = new Screen();
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Controller>();
             factory.RegisterDescriptor(typeof(Controller<,>));
             factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
-            var instance = new StaticHandler().Infer()
+            var instance = new StaticHandler()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNotNull(instance);
             Assert.AreSame(view, instance.View);
@@ -886,7 +911,7 @@
             factory.RegisterDescriptor<Provider>();
             factory.RegisterDescriptor(typeof(Controller<,>));
             HandlerDescriptorFactory.UseFactory(factory);
-            var instance = new StaticHandler().Infer()
+            var instance = new StaticHandler()
                 .Provide(view).Resolve<Controller<Screen, Bar>>();
             Assert.IsNull(instance);
         }
@@ -918,7 +943,7 @@
         public void Should_Create_Generic_Singletons_Implicitly()
         {
             var view    = new Screen();
-            var handler = new StaticHandler().Infer();
+            var handler = new StaticHandler();
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Controller>();
             factory.RegisterDescriptor(typeof(Controller<,>));
@@ -1046,7 +1071,7 @@
             using (var context = new Context())
             {
                 context.AddHandlers(new StaticHandler());
-                var view = context.Infer().Resolve<IView<Bar>>();
+                var view = context.Resolve<IView<Bar>>();
                 Assert.IsNotNull(view);
                 Assert.AreSame(view, context.Resolve<IView<Bar>>());
             }
@@ -1065,7 +1090,7 @@
                 context.AddHandlers(new StaticHandler());
                 var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
                 Assert.IsNotNull(screen1);
-                var screen2 = context.Infer().Resolve<Screen<Bar>>();
+                var screen2 = context.Resolve<Screen<Bar>>();
                 Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
@@ -1077,7 +1102,7 @@
         {
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Controller>();
-            factory.RegisterDescriptor<ScreenProvider>();
+            factory.RegisterDescriptor<ScreenModelProvider>();
             factory.RegisterDescriptor<Provider>();
             HandlerDescriptorFactory.UseFactory(factory);
             using (var context = new Context())
@@ -1085,10 +1110,33 @@
                 context.AddHandlers(new StaticHandler());
                 var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
                 Assert.IsNotNull(screen1);
-                var screen2 = context.Infer().Resolve<Screen<Bar>>();
+                var screen2 = context.Resolve<Screen<Bar>>();
                 Assert.IsNotNull(screen2);
                 Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
                 Assert.AreSame(screen2, context.Resolve<Screen<Bar>>());
+                Assert.IsNull(context.Resolve<Screen<Boo>>());
+            }
+        }
+
+        [TestMethod]
+        public void Should_Ignore_Contextual_Errors()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor<ContextualErrorProvider>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var screen1 = context.Provide(new Foo()).Resolve<Screen<Foo>>();
+                Assert.IsNotNull(screen1);
+                var screen2 = context.Resolve<Screen<Bar>>();
+                Assert.IsNull(screen2);
+                var screen3 = context.Resolve<Screen<Bar>>();
+                Assert.IsNotNull(screen3);
+                Assert.AreSame(screen1, context.Resolve<Screen<Foo>>());
+                Assert.AreSame(screen3, context.Resolve<Screen<Bar>>());
                 Assert.IsNull(context.Resolve<Screen<Boo>>());
             }
         }
@@ -1139,12 +1187,27 @@
         }
 
         [TestMethod]
+        public void Should_Honor_Lifestyles_For_Untyped_Providers()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.RegisterDescriptor<UntypedLifestyleProvider>();
+            var handler = new StaticHandler();
+            var foo     = handler.Resolve("Foo");
+            Assert.IsNotNull(foo);
+            Assert.AreSame(foo, handler.Resolve("Foo"));
+            var bar     = handler.Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.AreSame(bar, handler.Resolve<Bar>());
+        }
+
+        [TestMethod]
         public async Task Should_Reject_Constructor_If_Initializer_Fails()
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
             factory.RegisterDescriptor<FailedInitialization>();
-            var result = await (new StaticHandler()).ResolveAsync<FailedInitialization>();
+            var result = await new StaticHandler().ResolveAsync<FailedInitialization>();
             Assert.IsNull(result);
         }
 
@@ -1180,14 +1243,14 @@
                 Assert.IsNull(ctor.Bar);
                 using (var child = context.CreateChild())
                 {
-                    ctor = child.Provide(new Foo()).Resolve<OverloadedConstructors>();
+                    ctor = child.With(new Foo()).Resolve<OverloadedConstructors>();
                     Assert.IsNotNull(ctor);
                     Assert.IsNotNull(ctor.Foo);
                     Assert.IsNull(ctor.Bar);
                 }
                 using (var child = context.CreateChild())
                 {
-                    ctor = child.Provide(new Foo()).Provide(new Bar())
+                    ctor = child.With(new Foo()).With(new Bar())
                         .Resolve<OverloadedConstructors>();
                     Assert.IsNotNull(ctor);
                     Assert.IsNotNull(ctor.Foo);
@@ -1227,6 +1290,56 @@
                     Assert.IsNotNull(provider.Bar);
                 }
             }
+        }
+
+        [TestMethod]
+        public void Should_Select_Greediest_Constructor_When_Resolving_All()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<OverloadedConstructors>();
+            factory.RegisterDescriptor<Provider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNull(instance.Foo);
+                Assert.IsNull(instance.Bar);
+            }
+
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.Provide(new Foo())
+                    .ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNotNull(instance.Foo);
+                Assert.IsNull(instance.Bar);
+            }
+            using (var context = new Context())
+            {
+                context.AddHandlers(new StaticHandler());
+                var instances = context.With(new Foo()).With(new Bar())
+                    .ResolveAll<OverloadedConstructors>();
+                Assert.AreEqual(1, instances.Length);
+                var instance = instances[0];
+                Assert.IsNotNull(instance.Foo);
+                Assert.IsNotNull(instance.Bar);
+            }
+        }
+
+        [TestMethod, Ignore]
+        public void TestName()
+        {
+            var handler = new CustomHandler().Filter((cb, c, proceed) =>
+                cb is Inquiry && proceed());
+            var bar     = handler.Resolve<Bar>();
+            Assert.IsNotNull(bar);
+            Assert.IsFalse(handler.Handle(new Foo()));
         }
 
         public class RequestFilterCb<T> : IFilter<T, object>
@@ -1821,13 +1934,8 @@
             }
         }
 
-        private class Controller
+        private class ControllerBase
         {
-            [Provides]
-            public Controller()
-            {
-            }
-
             [Handles]
             public void HandleFooImplicit(Foo foo)
             {
@@ -1838,6 +1946,32 @@
             public Bar ProvideBarImplicitly()
             {
                 return new Bar { Handled = 1 };
+            }
+        }
+
+        private class Controller : ControllerBase
+        {
+            [Provides]
+            public Controller()
+            {
+            }
+        }
+
+        private class StaticController
+        {
+            [Handles]
+            public static void HandleFooImplicit(Foo foo)
+            {
+                ++foo.Handled;
+            }
+        }
+
+        private class StaticControllerProvider
+        {
+            [Provides]
+            public static ControllerBase ProvideController()
+            {
+                return new ControllerBase();
             }
         }
 
@@ -1885,12 +2019,25 @@
             public TModel Model { get; }
         }
 
-        private class ScreenProvider
+        private class ScreenModelProvider
         {
             [Provides, Contextual]
             public static Promise<Screen<TModel>> GetScreen<TModel>(TModel model)
             {
                 return Promise.Resolved(new Screen<TModel>(model));
+            }
+        }
+
+        private class ContextualErrorProvider
+        {
+            private static int _count;
+
+            [Provides, Contextual]
+            public static Promise<Screen<TModel>> GetScreen<TModel>(TModel model)
+            {
+                return ++_count % 2 == 0
+                     ? throw new InvalidOperationException("Something bad")
+                     : Promise.Resolved(new Screen<TModel>(model));
             }
         }
 
@@ -2013,6 +2160,17 @@
             public void FailedInitialize(Exception exception = null)
             {
                 Assert.AreEqual("Initialization Failed", exception?.Message);
+            }
+        }
+
+        private class UntypedLifestyleProvider
+        {
+            [Provides, Singleton]
+            public object GetSingletons(Inquiry inquiry)
+            {
+                if (Equals(inquiry.Key, "Foo"))
+                    return new Foo();
+                return Equals(inquiry.Key, typeof(Bar)) ? new Bar() : null;
             }
         }
 
@@ -2171,7 +2329,7 @@
              Filter(typeof(LogFilter<,>), Required = true),
              Filter(typeof(ContravariantFilter), Required = true),
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
-            public Task<SpecialBar> HandleBaz(Bar bar)
+            public Task<SpecialBar> HandleBar(Bar bar)
             {
                 return Task.FromResult(new SpecialBar());
             }

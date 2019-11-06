@@ -17,11 +17,9 @@
 
         public bool NoAccessPolicy { get; set; }
 
-        protected override bool AcceptFilterType(
-            Type filterType, MemberBinding binding)
+        protected override bool AcceptFilterType(Type filterType, MemberBinding binding)
         {
-            return !binding.Dispatcher.Attributes
-                .OfType<AllowAttribute>().Any();
+            return !binding.Dispatcher.Attributes.OfType<AllowAttribute>().Any();
         }
     }
 }

@@ -8,7 +8,7 @@
     public class Validates : CategoryAttribute
     {
         public Validates()
-        {
+        {          
         }
 
         public Validates(Type key)
@@ -25,7 +25,7 @@
         public override bool Approve(object callback, PolicyMemberBinding binding)
         {
             var validation = (Validation)callback;
-            return (validation.Outcome.IsValid ||
+            return (validation.Outcome.IsValid || 
                    !(validation.StopOnFailure || SkipIfInvalid))
                 && validation.ScopeMatcher.Matches(Scope);
         }

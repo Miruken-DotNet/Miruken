@@ -11,7 +11,7 @@
 
     public abstract class MemberDispatch
     {
-        #region DispatchTypeEnum
+#region DispatchTypeEnum
 
         [Flags]
         public enum DispatchTypeEnum
@@ -38,7 +38,7 @@
                           | StaticCall
         }
 
-        #endregion
+#endregion
 
         protected MemberDispatch(MethodBase member, Type returnType,
             Attribute[] attributes = null)
@@ -188,7 +188,7 @@
                                              | BindingFlags.Public
                                              | BindingFlags.NonPublic;
 
-        #region MemberDelegates
+#region MemberDelegates
 
         protected delegate object InvokeDelegate(
             Delegate member, object target, object[] args);
@@ -277,6 +277,6 @@
                     (member, target, args) => { ((Action<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
             };
 
-        #endregion
+#endregion
     }
 }

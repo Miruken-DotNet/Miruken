@@ -296,7 +296,7 @@
         public void Should_Resolve_Methods_Inferred()
         {
             var handler = new EmailHandler();
-            var id      = Proxy<IEmailFeature>(handler.Infer()).Email("Hello");
+            var id      = Proxy<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
         }
 
@@ -304,7 +304,7 @@
         public void Should_Resolve_Methods_Explicitly()
         {
             var handler = new EmailHandler();
-            var id      = Proxy<IEmailFeature>(handler.Infer()).Email("Hello");
+            var id      = Proxy<IEmailFeature>(handler).Email("Hello");
             Assert.AreEqual(1, id);
         }
 

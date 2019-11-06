@@ -26,7 +26,7 @@
 
         public bool ShouldBatch(object tag)
         {
-            return _tags == null || _tags.Count == 0 
+            return _tags == null || _tags.Count == 0
                 || _tags.Contains(tag);
         }
 
@@ -38,7 +38,7 @@
         }
     }
 
-    public sealed class NoBatch : Trampoline, IBatchCallback
+    public sealed class NoBatch : Trampoline, IBatchCallback, IInferCallback
     {
         public NoBatch(object callback)
             : base(callback)
@@ -46,5 +46,10 @@
         }
 
         bool IBatchCallback.CanBatch => false;
+
+        object IInferCallback.InferCallback()
+        {
+            return this;
+        }
     }
 }

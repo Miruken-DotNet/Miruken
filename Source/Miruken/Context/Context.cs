@@ -7,6 +7,10 @@
     using Callback;
     using Graph;
 
+#if NETSTANDARD
+    using Microsoft.Extensions.DependencyInjection;
+#endif
+
     public enum ContextState
     {
         Active = 0,
@@ -15,8 +19,13 @@
     }
 
     public class Context : CompositeHandler,
-        IHandlerAxis, ITraversing, IDisposable
-	{
+        IHandlerAxis, ITraversing
+#if NETSTANDARD
+        ,IServiceScope, IServiceScopeFactory
+#else
+        ,IDisposable
+#endif
+    {
 	    private EventHandlerList _events;
 	    private ReaderWriterLockSlim _lock;
 	    private readonly List<Context> _children;
@@ -67,7 +76,7 @@
                 var root = this;
                 while (root?.Parent != null)
                     root = root.Parent;
-                return root;                  
+                return root;
             }
         }
 
@@ -89,29 +98,29 @@
 	        }
 	    }
 
-        public Context CreateChild()
+	    public Context CreateChild()
 	    {
-            AssertActive();
+	        AssertActive();
 	        var child = InternalCreateChild();
-	        child.ContextEnding += (ctx, reason) => 
+	        child.ContextEnding += (ctx, reason) =>
 	            Raise(ChildContextEndingEvent, ctx, reason);
-            child.ContextEnded += (ctx, reason) => {
-                _lock.EnterWriteLock();
-                try
-                {
-                    _children.Remove(ctx);
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
-                }
-                Raise(ChildContextEndedEvent, ctx, reason);
-            };
+	        child.ContextEnded += (ctx, reason) => {
+	            _lock.EnterWriteLock();
+	            try
+	            {
+	                _children.Remove(ctx);
+	            }
+	            finally
+	            {
+	                _lock.ExitWriteLock();
+	            }
+	            Raise(ChildContextEndedEvent, ctx, reason);
+	        };
 	        _lock.EnterWriteLock();
 	        try
 	        {
 	            _children.Add(child);
-            }
+	        }
 	        finally
 	        {
 	            _lock.ExitWriteLock();
@@ -119,10 +128,19 @@
 	        return child;
 	    }
 
-        protected virtual Context InternalCreateChild()
+	    protected virtual Context InternalCreateChild()
 	    {
-            return new Context(this);
+	        return new Context(this);
 	    }
+
+#if NETSTANDARD
+	    IServiceProvider IServiceScope.ServiceProvider => this;
+
+	    IServiceScope IServiceScopeFactory.CreateScope()
+	    {
+	        return CreateChild();
+	    }
+#endif
 
 	    public Context Store(object data)
 	    {
@@ -153,14 +171,14 @@
 	            return base.HandleCallback(callback, ref greedy, composer);
 
 	        var g = greedy;
-	        var handled = false;                                                                                    
+	        var handled = false;
             Traverse(axis, node =>
-            {                                                                                                           
-                handled = handled | (node == this                                                                                                   
-                        ? BaseHandle(callback, ref g, composer)                                                                                             
+            {
+                handled = handled | (node == this
+                        ? BaseHandle(callback, ref g, composer)
                         : ((Context)node).Handle(
-                            TraversingAxis.Self, callback, ref g, composer));                                                                
-                return handled && !g;                                                                                                                  
+                            TraversingAxis.Self, callback, ref g, composer));
+                return handled && !g;
             });
 	        greedy = g;
 	        return handled;
@@ -219,14 +237,14 @@
                 _lock.Dispose();
                 _events = null;
                 _lock   = null;
-            }	        
+            }
 	    }
 
 	    protected virtual void InternalEnd(object reason)
 	    {
 	    }
 
-        #region Events
+#region Events
 
         public event Action<Context, object> ContextEnding
         {
@@ -284,9 +302,9 @@
 	        eventHandler?.Invoke(context, reason);
 	    }
 
-        #endregion
+#endregion
 
-        #region IDisposable
+#region IDisposable
 
         protected bool IsDisposed { get; private set; }
 
@@ -309,7 +327,7 @@
             End(Disposed);
 		}
 
-		#endregion
+#endregion
 
         private void AssertActive()
         {

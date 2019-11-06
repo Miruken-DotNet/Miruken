@@ -13,8 +13,8 @@
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var composition = callback as Composition;
-            return (!((composition?.Callback ?? callback) is IBoundCallback bounded) 
+            var trampoline = callback as Trampoline;
+            return (!((trampoline?.Callback ?? callback) is IBoundCallback bounded) 
                 || bounded.Bounds != _bounds) &&
                 base.HandleCallback(callback, ref greedy, composer);
         }

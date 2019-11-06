@@ -13,7 +13,7 @@
             if (callback == null) return false;
 	        if (composer == null)
 	            composer = this as CompositionScope ?? new CompositionScope(this);
-	        return HandleCallback(callback, ref greedy, composer);
+	        return HandleCallback(Inference.Get(callback), ref greedy, composer);
 	    }
 
         protected virtual bool HandleCallback(

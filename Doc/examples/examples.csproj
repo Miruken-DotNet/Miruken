@@ -32,7 +32,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Castle.Core.4.3.1\lib\net45\Castle.Core.dll</HintPath>
+      <HintPath>..\..\packages\Castle.Core.4.2.1\lib\net45\Castle.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Castle.Windsor, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Castle.Windsor.4.1.0\lib\net45\Castle.Windsor.dll</HintPath>
@@ -57,6 +58,7 @@
     <Compile Include="mirukenCastleExamples\featuresFromAssemblies.cs" />
     <Compile Include="mirukenExamples\context\aContextWithHandlerInstances.cs" />
     <Compile Include="mirukenExamples\context\creatingAChildContext.cs" />
+    <Compile Include="mirukenExamples\context\relyingOnAContainerToResolveHandlers.cs" />
     <Compile Include="mirukenExamples\context\anotherHandler.cs" />
     <Compile Include="mirukenExamples\context\creatingAContext.cs" />
     <Compile Include="mirukenExamples\context\someHandler.cs" />

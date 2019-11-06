@@ -7,7 +7,7 @@
     public class Authorizes : CategoryAttribute
     {
         public Authorizes()
-        {
+        {          
         }
 
         public Authorizes(object policy)
