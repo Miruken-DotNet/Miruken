@@ -16,9 +16,7 @@
         <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
         <Company>Miruken</Company>
         <PackageTags>Miruken</PackageTags>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <LangVersion>latest</LangVersion>
         <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
@@ -31,9 +29,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-      <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>

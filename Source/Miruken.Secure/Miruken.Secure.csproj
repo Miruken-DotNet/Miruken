@@ -12,16 +12,9 @@
     <PackageProjectUrl>https://github.com/Miruken-DotNet/Miruken</PackageProjectUrl>
     <PackageIconUrl>https://avatars0.githubusercontent.com/u/20844317</PackageIconUrl>
     <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-        <OutputPath>bin\</OutputPath>
-    </PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <OutputPath>bin\</OutputPath>
+  </PropertyGroup>
 
     <!-- compilation flags -->
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
@@ -32,9 +25,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-      <OutputPath>bin\</OutputPath>
     </PropertyGroup>
 
   <ItemGroup>
