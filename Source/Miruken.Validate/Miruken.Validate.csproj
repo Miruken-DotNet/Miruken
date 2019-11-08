@@ -30,6 +30,9 @@
     <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+      <OutputPath>bin\</OutputPath>
+    </PropertyGroup>
 
     <ItemGroup>
     <PackageReference Include="FluentValidation" Version="8.5.0" />

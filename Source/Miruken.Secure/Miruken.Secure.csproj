@@ -33,6 +33,9 @@
     <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+      <OutputPath>bin\</OutputPath>
+    </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Miruken\Miruken.csproj" />
