@@ -1207,7 +1207,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<string>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => Promise.Delay(.2.Sec())
                     .Then((r, s) => reject(new Exception("Something went wrong"), false))))
-                .Timeout(.4.Sec())
+                .Timeout(1.Sec())
                 .Catch((ex, s) =>
                 {
                     Assert.AreEqual("Something went wrong", ex.Message);

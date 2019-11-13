@@ -32,6 +32,11 @@ namespace Miruken.Register
             return registration.AddMiruken(factory);
         }
 
+        public static IHandler AddMiruken(this Registration registration)
+        {
+            return AddMiruken(registration, null);
+        }
+
         public static IHandler AddMiruken(
             this Registration registration, IHandlerDescriptorFactory factory)
         {
