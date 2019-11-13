@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using Bindings;
-    using Infrastructure;
 
     public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
     {
@@ -71,24 +70,24 @@
             if (Descriptors.Count == 0)
                 return Enumerable.Empty<HandlerDescriptor>();
 
-            var descriptors = Descriptors.ToLookup(
+            var lookup = Descriptors.ToLookup(
                 descriptor => descriptor.Value.Value.Priority != null);
 
-            IEnumerable<PolicyMemberBinding> invariants        = null;
-            IEnumerable<PolicyMemberBinding> compatible        = null;
-            IEnumerable<PolicyMemberBinding> invariantsOrdered = null;
-            IEnumerable<PolicyMemberBinding> compatibleOrdered = null;
+            IEnumerable<HandlerDescriptor> invariants        = null;
+            IEnumerable<HandlerDescriptor> compatible        = null;
+            IEnumerable<HandlerDescriptor> invariantsOrdered = null;
+            IEnumerable<HandlerDescriptor> compatibleOrdered = null;
 
-            if (descriptors.Contains(false))
+            if (lookup.Contains(false))
             {
-                GetBindings(policy, descriptors[false],
+                GetDescriptors(policy, lookup[false],
                     callback, instance, @static, policy,
                     out invariants, out compatible);
             }
 
-            if (descriptors.Contains(true))
+            if (lookup.Contains(true))
             {
-                GetBindings(policy, descriptors[true]
+                GetDescriptors(policy, lookup[true]
                         .OrderBy(d => d.Value.Value.Priority),
                     callback, instance, @static, null,
                     out invariantsOrdered, out compatibleOrdered);
@@ -107,35 +106,24 @@
             if (invariants == null && compatible == null)
                 return Enumerable.Empty<HandlerDescriptor>();
 
-            var bindings = invariants == null ? compatible
+            return invariants == null ? compatible
                 : compatible == null ? invariants
                 : invariants.Concat(compatible);
-
-            return bindings.Select(binding =>
-            {
-                var handler = binding.Dispatcher.Owner;
-                if (handler.IsOpenGeneric)
-                {
-                    var key = policy.GetKey(callback);
-                    return handler.CloseDescriptor(key, binding, RegisterDescriptor);
-                }
-                return handler;
-            })
-            .Where(descriptor => descriptor != null)
-            .Distinct();
         }
 
-        private static void GetBindings(CallbackPolicy policy, 
+        private static void GetDescriptors(CallbackPolicy policy, 
             IEnumerable<KeyValuePair<Type, Lazy<HandlerDescriptor>>> descriptors,
             object callback, bool instance, bool @static, 
-            IComparer<PolicyMemberBinding> comparer, 
-            out IEnumerable<PolicyMemberBinding> invariants,
-            out IEnumerable<PolicyMemberBinding> compatible)
+            IComparer<PolicyMemberBinding> orderBy, 
+            out IEnumerable<HandlerDescriptor> invariants,
+            out IEnumerable<HandlerDescriptor> compatible)
         {
             invariants = compatible = null;
 
-            List<PolicyMemberBinding> invariantsList = null;
-            List<PolicyMemberBinding> compatibleList = null;
+            List<HandlerDescriptor> invariantsList = null;
+            List<HandlerDescriptor> compatibleList = null;
+            SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>
+                sortedCompatibleList = null;
 
             foreach (var descriptor in descriptors)
             {
@@ -144,39 +132,53 @@
                 if (instance)
                     handler.Policies?.TryGetValue(policy, out instanceCallbacks);
 
-                var binding = instanceCallbacks?.GetInvariantMembers(callback).FirstOrDefault();
-                if (binding != null)
+                if (instanceCallbacks?.GetInvariantMembers(callback).Any() == true)
                 {
                     if (invariantsList == null)
-                        invariants = invariantsList = new List<PolicyMemberBinding>();
-                    invariantsList.Add(binding);
+                        invariants = invariantsList = new List<HandlerDescriptor>();
+                    invariantsList.Add(handler);
                     continue;
                 }
 
                 CallbackPolicyDescriptor staticCallbacks = null;
                 if (@static)
                     handler.StaticPolicies?.TryGetValue(policy, out staticCallbacks);
-                binding = staticCallbacks?.GetInvariantMembers(callback).FirstOrDefault();
-                if (binding != null)
+                if (staticCallbacks?.GetInvariantMembers(callback).Any() == true)
                 {
                     if (invariantsList == null)
-                        invariants = invariantsList = new List<PolicyMemberBinding>();
-                    invariantsList.Add(binding);
+                        invariants = invariantsList = new List<HandlerDescriptor>();
+                    invariantsList.Add(handler);
                     continue;
                 }
 
-                binding = instanceCallbacks?.GetCompatibleMembers(callback).FirstOrDefault()
-                       ?? staticCallbacks?.GetCompatibleMembers(callback).FirstOrDefault();
+                var binding =
+                    instanceCallbacks?.GetCompatibleMembers(callback).FirstOrDefault()
+                    ?? staticCallbacks?.GetCompatibleMembers(callback).FirstOrDefault();
+
                 if (binding != null)
                 {
-                    if (compatibleList == null)
-                        compatible = compatibleList = new List<PolicyMemberBinding>();
-                    if (comparer != null)
-                        compatibleList.AddSorted(binding, comparer);
+                    if (orderBy != null)
+                    {
+                        if (sortedCompatibleList == null)
+                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>(orderBy);
+                        if (!sortedCompatibleList.TryGetValue(binding, out var sorted))
+                        {
+                            sorted = new List<HandlerDescriptor>();
+                            sortedCompatibleList.Add(binding, sorted);
+                        }
+                        sorted.Add(handler);
+                    }
                     else
-                        compatibleList.Add(binding);
+                    {
+                        if (compatibleList == null)
+                            compatible = compatibleList = new List<HandlerDescriptor>();
+                        compatibleList.Add(handler);
+                    }
                 }
             }
+
+            if (sortedCompatibleList != null)
+                compatible = sortedCompatibleList.Values.SelectMany(h => h);
         }
     }
 }
