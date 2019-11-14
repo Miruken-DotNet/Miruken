@@ -27,13 +27,24 @@ namespace Miruken.Register
             this IServiceCollection services, IHandlerDescriptorFactory factory,
             Action<Registration> configure = null)
         {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
+            var registration = new Registration(services);
+            configure?.Invoke(registration);
+            return registration.AddMiruken(factory);
+        }
+
+        public static IHandler AddMiruken(this Registration registration)
+        {
+            return AddMiruken(registration, null);
+        }
+
+        public static IHandler AddMiruken(
+            this Registration registration, IHandlerDescriptorFactory factory)
+        {
+            if (registration == null)
+                throw new ArgumentNullException(nameof(registration));
 
             factory = factory ?? new MutableHandlerDescriptorFactory();
 
-            var registration = new Registration(services);
-            configure?.Invoke(registration);
             var (@explicit, @implicit) = registration.Register();
 
             foreach (var service in @implicit.AddDefaultServices())
