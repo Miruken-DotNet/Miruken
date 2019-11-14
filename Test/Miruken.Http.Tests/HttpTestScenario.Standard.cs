@@ -42,7 +42,8 @@ namespace Miruken.Http.Tests
                     .PublicSources(sources => sources.FromAssemblyOf<HttpTestScenario>())
                     .WithHttp(http => http.AddHttpMessageHandler<TestServerClientHandler>())
                     .WithValidation()
-                ).BaseUrl(_server.BaseAddress.AbsoluteUri);
+                ).Build()
+                .BaseUrl(_server.BaseAddress.AbsoluteUri);
         }
 
         [TestCleanup]

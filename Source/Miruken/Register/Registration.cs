@@ -4,10 +4,21 @@ namespace Miruken.Register
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Api;
+    using Api.Cache;
+    using Api.Once;
+    using Api.Oneway;
+    using Api.Route;
+    using Api.Schedule;
     using Callback;
+    using Callback.Policy;
     using Callback.Policy.Bindings;
+    using Context;
+    using Error;
     using Infrastructure;
+    using Log;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Scrutor;
 
     public class Registration
@@ -32,6 +43,8 @@ namespace Miruken.Register
             _explicitServices = services ?? new ServiceCollection();
             _implicitServices = new ServiceCollection();
             _keys             = new HashSet<object>();
+
+            _explicitServices.AddSingleton(this);
         }
 
         public IEnumerable<IHandler> Handlers { get; } = new List<IHandler>();
@@ -100,8 +113,12 @@ namespace Miruken.Register
             return this;
         }
 
-        public (IServiceCollection Explicit, IServiceCollection Implicit) Register()
+        public Context Build(IHandlerDescriptorFactory factory = null)
         {
+            _explicitServices.RemoveAll<Registration>();
+
+            factory = factory ?? new MutableHandlerDescriptorFactory();
+
             if (_sources != null || _publicSources != null)
             {
                 _implicitServices.Scan(scan =>
@@ -125,7 +142,24 @@ namespace Miruken.Register
                     }
                 });
             }
-            return (_explicitServices, _implicitServices);
+
+            foreach (var service in AddDefaultServices(_implicitServices))
+            {
+                var serviceType = service.ImplementationType ?? service.ServiceType;
+                factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service));
+            }
+
+            var context = new Context();
+            context.AddHandlers(Handlers);
+
+            var serviceFacade = new ServiceFactoryFacade(_explicitServices, factory);
+            if (serviceFacade.HasServices) context.AddHandlers(serviceFacade);
+
+            context.AddHandlers((new StaticHandler() + new Stash(true)).Break());
+
+            HandlerDescriptorFactory.UseFactory(factory);
+
+            return context;
         }
 
         private bool ShouldExclude(Type serviceType)
@@ -149,6 +183,27 @@ namespace Miruken.Register
                 foreach (var source in _publicSources.GetInvocationList())
                     yield return Tuple.Create((SourceSelector)source, true);
             }
+        }
+
+        private static IServiceCollection AddDefaultServices(IServiceCollection services)
+        {
+            services.AddTransient<Provider>();
+            services.AddTransient<ServiceProvider>();
+            services.AddTransient<ServiceFactoryFacade>();
+            services.AddTransient<BatchRouter>();
+            services.AddTransient<Stash>();
+
+            services.AddSingleton<ErrorsHandler>();
+            services.AddSingleton<CachedHandler>();
+            services.AddSingleton<OnewayHandler>();
+            services.AddSingleton<OnceHandler>();
+            services.AddSingleton<PassThroughRouter>();
+            services.AddSingleton<Scheduler>();
+
+            services.AddSingleton<LoggerProvider>();
+            services.AddSingleton(typeof(LogFilter<,>));
+
+            return services;
         }
     }
 }

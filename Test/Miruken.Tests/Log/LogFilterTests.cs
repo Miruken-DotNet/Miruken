@@ -49,7 +49,7 @@ namespace Miruken.Tests.Log
                     .PublicSources(sources => sources.AddTypes(
                         typeof(CallbackHandler), typeof(BazHandler), 
                         typeof(StockMarket), typeof(ConsoleFilter)))
-                );
+                ).Build();
         }
 
         [TestMethod]

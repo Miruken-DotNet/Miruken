@@ -49,7 +49,8 @@ namespace Miruken.Tests.Log
                 .AddMiruken(configure => configure
                     .PublicSources(sources => sources.AddTypes(
                         typeof(Inventory), typeof(Billing)))
-                );
+                )
+                .Build();
         }
 
         [TestMethod]

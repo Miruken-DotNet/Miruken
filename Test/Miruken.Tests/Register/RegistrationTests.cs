@@ -22,7 +22,7 @@ namespace Miruken.Tests.Register
             _handler = new ServiceCollection()
                 .AddMiruken(configure => configure
                     .PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
-                );
+                ).Build();
         }
 
         [TestMethod]
@@ -47,7 +47,8 @@ namespace Miruken.Tests.Register
             var service = new Service1();
             var handler = new ServiceCollection()
                 .AddSingleton(service)
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             Assert.AreSame(service, handler.Resolve<IService>());
         }
 
@@ -56,7 +57,8 @@ namespace Miruken.Tests.Register
         {
             var handler  = new ServiceCollection()
                 .AddScoped<Service1>()
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.IsNotNull((service as IContextual)?.Context);
@@ -72,7 +74,7 @@ namespace Miruken.Tests.Register
                     .Select((selector, publicOnly) => selector
                         .AddClasses(x => x.AssignableTo<IService>(), publicOnly)
                             .AsSelf().WithScopedLifetime()
-                ));
+                )).Build();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.IsNotNull((service as IContextual)?.Context);
@@ -84,14 +86,16 @@ namespace Miruken.Tests.Register
             var handler = new ServiceCollection()
                 .AddSingleton<Service1>()
                 .AddSingleton<Service2>()
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var service = handler.Resolve<IService>();
             Assert.IsInstanceOfType(service, typeof(Service2));
 
             handler = new ServiceCollection()
                 .AddSingleton<Service2>()
                 .AddSingleton<Service1>()
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             service = handler.Resolve<IService>();
             Assert.IsInstanceOfType(service, typeof(Service1));
         }
@@ -101,7 +105,8 @@ namespace Miruken.Tests.Register
         {
             var handler = new ServiceCollection()
                 .AddTransient(sp => new Service1())
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.AreNotSame(service, handler.Resolve<IService>());
@@ -114,7 +119,8 @@ namespace Miruken.Tests.Register
         {
             var handler = new ServiceCollection()
                 .AddSingleton(sp => new Service1())
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.AreSame(service, handler.Resolve<IService>());
@@ -127,7 +133,8 @@ namespace Miruken.Tests.Register
         {
             var handler = new ServiceCollection()
                 .AddScoped(sp => new Service1())
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var service = handler.Resolve<IService>();
             Assert.IsNotNull(service);
             Assert.AreSame(service, handler.Resolve<IService>());
@@ -150,7 +157,8 @@ namespace Miruken.Tests.Register
             var services = new ServiceCollection();
             var handler  = services
                 .AddTransient<Service1>()
-                .AddMiruken(configure => configure.With(service));
+                .AddMiruken(configure => configure.With(service))
+                .Build();
             Assert.AreSame(service, handler.Resolve<IService>());
         }
 
@@ -162,7 +170,8 @@ namespace Miruken.Tests.Register
                 .AddSingleton(service)
                 .AddTransient<Service2>()
                 .AddTransient<CompositeService>()
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var c = handler.Resolve<CompositeService>();
             Assert.AreEqual(2, c.Services.Count());
             Assert.IsTrue(c.Services.Contains(service));
@@ -181,7 +190,8 @@ namespace Miruken.Tests.Register
                     var s = sp.GetService<IEnumerable<IService>>();
                     return new CompositeService(s);
                 })
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var c = handler.Resolve<CompositeService>();
             Assert.AreEqual(2, c.Services.Count());
             Assert.IsTrue(c.Services.Contains(service));
@@ -194,7 +204,8 @@ namespace Miruken.Tests.Register
             var handler = new ServiceCollection()
                 .AddSingleton<ServiceWithFuncCtor>()
                 .AddSingleton<Func<IService>>(() => new Service1())
-                .AddMiruken();
+                .AddMiruken()
+                .Build();
             var s = handler.Resolve<ServiceWithFuncCtor>();
             Assert.IsNotNull(s);
             Assert.IsNotNull(s.Service);
