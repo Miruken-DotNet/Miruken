@@ -16,6 +16,10 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Castle.Core" Version="4.3.1" />
         <PackageReference Include="Castle.Windsor" Version="4.1.0" />
