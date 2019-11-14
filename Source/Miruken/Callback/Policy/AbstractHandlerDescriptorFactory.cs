@@ -139,6 +139,7 @@
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)),
                 staticPolicies?.ToDictionary(p => p.Key,
                     p => new CallbackPolicyDescriptor(p.Key, p.Value)),
+                CreateDescriptor,
                 visitor)
             {
                 Priority = priority

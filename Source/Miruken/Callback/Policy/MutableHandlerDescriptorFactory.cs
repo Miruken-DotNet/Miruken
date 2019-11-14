@@ -25,7 +25,7 @@
             {
                 var definition = type.GetGenericTypeDefinition();
                 if (Descriptors.TryGetValue(definition, out descriptor))
-                    return descriptor.Value.CloseDescriptor(type, RegisterDescriptor);
+                    return descriptor.Value.CloseDescriptor(type);
             }
             return null;
         }
