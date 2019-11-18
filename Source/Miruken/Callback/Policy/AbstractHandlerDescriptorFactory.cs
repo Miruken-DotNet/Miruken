@@ -18,8 +18,6 @@
             _visitor = visitor;
         }
 
-        public LifestyleAttribute ImplicitLifestyle { get; set; }
-
         public abstract HandlerDescriptor GetDescriptor(Type type);
 
         public abstract HandlerDescriptor RegisterDescriptor(Type type,
@@ -159,22 +157,11 @@
                     foreach (var binding in staticPolicies.SelectMany(p => p.Value))
                     {
                         visitor(descriptor, binding);
-                        AddImplicitLifestyle(binding);
                     }
                 }
             }
 
             return descriptor;
-        }
-
-        private void AddImplicitLifestyle(PolicyMemberBinding binding)
-        {
-            if (ImplicitLifestyle != null &&
-                ReferenceEquals(binding.Category, ImplicitProvides[0]) &&
-                !binding.Filters.OfType<LifestyleAttribute>().Any())
-            {
-                binding.AddFilters(ImplicitLifestyle);
-            }
         }
 
         private static bool IsCategory(MemberInfo member, object criteria)

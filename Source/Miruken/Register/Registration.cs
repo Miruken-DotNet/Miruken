@@ -146,7 +146,10 @@ namespace Miruken.Register
             foreach (var service in AddDefaultServices(_implicitServices))
             {
                 var serviceType = service.ImplementationType ?? service.ServiceType;
-                factory.RegisterDescriptor(serviceType, ServiceConfiguration.For(service));
+                var visitor     = !serviceType.IsDefined(typeof(UnmanagedAttribute), true)
+                                ? ServiceConfiguration.For(service)
+                                : null;
+                factory.RegisterDescriptor(serviceType, visitor);
             }
 
             var context = new Context();

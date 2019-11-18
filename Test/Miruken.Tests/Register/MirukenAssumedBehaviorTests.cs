@@ -6,7 +6,7 @@ namespace Miruken.Tests.Register
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Register;
 
-    [TestClass]
+    [TestClass, Ignore]
     public class MirukenAssumedBehaviorTests : AssumedBehaviorTests
     {
         protected override IServiceProvider CreateServiceProvider(

@@ -15,7 +15,6 @@
         public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
             : base(visitor)
         {      
-            ImplicitLifestyle = new SingletonAttribute();
         }
 
         public override HandlerDescriptor GetDescriptor(Type type)
