@@ -10,6 +10,7 @@ namespace Miruken.Tests.Register
     using Miruken.Callback;
     using Miruken.Context;
     using Miruken.Register;
+    using ServiceCollection = Miruken.Register.ServiceCollection;
 
     [TestClass]
     public class RegistrationTests

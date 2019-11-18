@@ -32,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD'))">
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
         <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
     </ItemGroup>
 

@@ -7,6 +7,7 @@
     using Miruken.Callback.Policy;
     using Miruken.Context;
     using static Protocol;
+    using ServiceProvider = Miruken.Callback.ServiceProvider;
 
 #if NETSTANDARD
     using Microsoft.Extensions.DependencyInjection;
