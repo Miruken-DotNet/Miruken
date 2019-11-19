@@ -18,6 +18,7 @@ namespace Miruken.Tests.Log
     using NLog.Config;
     using NLog.Extensions.Logging;
     using NLog.Targets;
+    using ServiceCollection = Miruken.Register.ServiceCollection;
 
     [TestClass]
     public class LogFilterTests
@@ -49,7 +50,7 @@ namespace Miruken.Tests.Log
                     .PublicSources(sources => sources.AddTypes(
                         typeof(CallbackHandler), typeof(BazHandler), 
                         typeof(StockMarket), typeof(ConsoleFilter)))
-                );
+                ).Build();
         }
 
         [TestMethod]

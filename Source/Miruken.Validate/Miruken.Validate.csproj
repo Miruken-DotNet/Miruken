@@ -19,6 +19,10 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+
     <!-- compilation flags -->
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <DefineConstants>NETSTANDARD</DefineConstants>

@@ -21,9 +21,10 @@
 
         public static HandlerDescriptor RegisterDescriptor<T>(
             this IHandlerDescriptorFactory factory,
-            HandlerDescriptorVisitor visitor = null)
+            HandlerDescriptorVisitor visitor = null,
+            int? priority = null)
         {
-            return factory.RegisterDescriptor(typeof(T), visitor);
+            return factory.RegisterDescriptor(typeof(T), visitor, priority);
         }
 
         public static IEnumerable<PolicyMemberBinding> GetPolicyMembers<T>(

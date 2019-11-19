@@ -19,6 +19,7 @@ namespace Miruken.Tests.Log
     using NLog.Extensions.Logging;
     using NLog.Targets;
     using ILogger = Microsoft.Extensions.Logging.ILogger;
+    using ServiceCollection = Miruken.Register.ServiceCollection;
 
     [TestClass]
     public class LoggerProviderTests
@@ -49,7 +50,8 @@ namespace Miruken.Tests.Log
                 .AddMiruken(configure => configure
                     .PublicSources(sources => sources.AddTypes(
                         typeof(Inventory), typeof(Billing)))
-                );
+                )
+                .Build();
         }
 
         [TestMethod]
