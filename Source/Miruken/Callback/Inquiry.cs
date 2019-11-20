@@ -14,7 +14,7 @@
     public class Inquiry : ICallback, IAsyncCallback,
         IDispatchCallback, IDispatchCallbackGuard, IBindingScope
     {
-        private readonly List<object> _resolutions;
+        private readonly SortedList<int, object> _resolutions;
         private readonly List<object> _promises;
         private object _result;
 
@@ -23,7 +23,7 @@
             Key          = key ?? throw new ArgumentNullException(nameof(key));
             Many         = many;
             Metadata     = new BindingMetadata();
-            _resolutions = new List<object>();
+            _resolutions = new SortedList<int, object>(Comparer.Instance);
             _promises    = new List<object>();
         }
 
@@ -45,7 +45,7 @@
 
         public CallbackPolicy Policy => Provides.Policy;
 
-        public ICollection<object> Resolutions => _resolutions.AsReadOnly();
+        public ICollection<object> Resolutions => _resolutions.Values;
 
         public Type ResultType =>
             WantsAsync || IsAsync ? typeof(Promise) : null;
@@ -60,14 +60,14 @@
                     {
                         _result = Many
                             ? Promise.All(_promises)
-                                .Then((_, s) => _resolutions.ToArray())
+                                .Then((_, s) => _resolutions.Values.ToArray())
                             : (object)Promise.All(_promises)
-                                .Then((_, s) => _resolutions.FirstOrDefault());
+                                .Then((_, s) => _resolutions.Values.FirstOrDefault());
                     }
                     else
                     {
-                        _result = Many ? _resolutions.ToArray()
-                            : _resolutions.FirstOrDefault();
+                        _result = Many ? _resolutions.Values.ToArray()
+                            : _resolutions.Values.FirstOrDefault();
                     }
                 }
 
@@ -93,38 +93,40 @@
             }
         }
 
-        public bool Resolve(object resolution, IHandler composer)
+        public bool Resolve(object resolution, IHandler composer, int? priority = null)
         {
-            return Resolve(resolution, false, false, composer);
+            return Resolve(resolution, false, false, composer, priority);
         }
 
         public bool Resolve(object resolution, bool strict,
-            bool greedy, IHandler composer)
+            bool greedy, IHandler composer, int? priority = null)
         {
             bool resolved;
             if (resolution == null) return false;
             if (!strict && resolution is object[] array)
             {
                 resolved = array.Aggregate(false,
-                    (s, res) => Include(res, false, greedy, composer) || s);
+                    (s, res) => Include(res, priority, false, greedy, composer) || s);
             }
             else if (!strict && resolution is ICollection collection)
             {
                 resolved = collection.Cast<object>().Aggregate(false,
-                    (s, res) => Include(res, false, greedy, composer) || s);
+                    (s, res) => Include(res, priority, false, greedy, composer) || s);
             }
             else
             {
-                resolved = Include(resolution, strict, greedy, composer);
+                resolved = Include(resolution, priority, strict, greedy, composer);
             }
             if (resolved) _result = null;
             return resolved;
         }
 
-        private bool Include(object resolution, bool strict,
+        private bool Include(object resolution, int? priority, bool strict, 
             bool greedy, IHandler composer)
         {
             if (resolution == null) return false;
+
+            var key = priority ?? int.MaxValue;
 
             var promise = resolution as Promise
                        ?? (resolution as Task)?.ToPromise();
@@ -143,16 +145,22 @@
                     switch (result)
                     {
                         case object[] array:
-                            _resolutions.AddRange(array.Where(res =>
-                                res != null && IsSatisfied(res, greedy, composer)));
+                            foreach (var r in array.Where(res =>
+                                res != null && IsSatisfied(res, greedy, composer)))
+                            {
+                                _resolutions.Add(key, r);
+                            }
                             break;
                         case ICollection collection:
-                            _resolutions.AddRange(collection.Cast<object>().Where(res =>
-                                res != null && IsSatisfied(res, greedy, composer)));
+                            foreach (var r in collection.Cast<object>().Where(res =>
+                                res != null && IsSatisfied(res, greedy, composer)))
+                            {
+                                _resolutions.Add(key, r);
+                            }
                             break;
                         default:
                             if (result != null)
-                                _resolutions.Add(result);
+                                _resolutions.Add(key, result);
                             break;
                     }
                 }).Catch((_, s) => (object)null));
@@ -161,27 +169,32 @@
                 return false;
             else if (strict)
             {
-                _resolutions.Add(resolution);
+                _resolutions.Add(key, resolution);
             }
             else switch (resolution)
             {
                 case object[] array:
-                    _resolutions.AddRange(array.Where(res =>
-                        res != null && IsSatisfied(res, greedy, composer)));
+                    foreach (var r in array.Where(res =>
+                        res != null && IsSatisfied(res, greedy, composer)))
+                    {
+                        _resolutions.Add(key, r);
+                    }
                     break;
                 case ICollection collection:
-                    _resolutions.AddRange(collection.Cast<object>().Where(res =>
-                        res != null && IsSatisfied(res, greedy, composer)));
+                    foreach (var r in collection.Cast<object>().Where(res =>
+                        res != null && IsSatisfied(res, greedy, composer)))
+                    {
+                        _resolutions.Add(key, r);
+                    }
                     break;
                 default:
-                    _resolutions.Add(resolution);
+                    _resolutions.Add(key, resolution);
                     break;
             }
             return true;
         }
 
-        protected virtual bool IsSatisfied(
-            object resolution, bool greedy, IHandler composer)
+        protected virtual bool IsSatisfied(object resolution, bool greedy, IHandler composer)
         {
             return true;
         }
@@ -199,14 +212,14 @@
             object handler, ref bool greedy, IHandler composer)
         {
             try
-            {
+            {  
                 var isGreedy = greedy;
                 var handled  = Implied(handler, isGreedy, composer);
                 if (handled && !greedy) return true;
 
                 var count = _resolutions.Count + _promises.Count;
                 handled = Policy.Dispatch(handler, this, greedy, composer,
-                    (r, strict) => Resolve(r, strict, isGreedy, composer)) || handled;
+                    (r, strict, p) => Resolve(r, strict, isGreedy, composer, p)) || handled;
                 return handled || (_resolutions.Count + _promises.Count> count);
             }
             finally
@@ -237,6 +250,17 @@
             {
                 var many = Many ? "many " : "";
                 return $"Inquiry {many}| {Key}";
+            }
+        }
+
+        private class Comparer : IComparer<int>
+        {
+            public static readonly Comparer Instance = new Comparer();
+
+            public int Compare(int x, int y)
+            {
+                var result = x.CompareTo(y);
+                return result == 0 ? -1 : result;
             }
         }
     }

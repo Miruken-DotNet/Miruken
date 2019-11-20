@@ -6,7 +6,7 @@
     using Concurrency;
     using Infrastructure;
 
-    public delegate bool ResultsDelegate(object result, bool strict);
+    public delegate bool ResultsDelegate(object result, bool strict, int? priority = null);
 
     public abstract class MemberBinding : FilteredObject
     {
@@ -20,7 +20,7 @@
         public MemberDispatch Dispatcher { get; }
 
         public abstract bool Dispatch(object target, object callback,
-            IHandler composer, ResultsDelegate results = null);
+            IHandler composer, int? priority = null, ResultsDelegate results = null);
 
         internal object CoerceResult(object result, Type resultType, bool? wantsAsync = null)
         {

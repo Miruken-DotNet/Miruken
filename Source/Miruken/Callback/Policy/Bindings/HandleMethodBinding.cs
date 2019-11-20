@@ -27,7 +27,7 @@
         }
 
         public override bool Dispatch(object target, object callback,
-            IHandler composer, ResultsDelegate results = null)
+            IHandler composer, int? priority = null, ResultsDelegate results = null)
         {
             var oldComposer = Composer;
             var oldUnhandled = Unhandled;

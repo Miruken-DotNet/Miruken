@@ -60,10 +60,10 @@
         }
 
         public override bool Dispatch(object target, object callback, 
-            IHandler composer, ResultsDelegate results = null)
+            IHandler composer, int? priority = null, ResultsDelegate results = null)
         {
             var resultType = Policy.GetResultType?.Invoke(callback);
-            return Invoke(target, callback, composer, resultType, results);
+            return Invoke(target, callback, composer, resultType, priority, results);
         }
 
         public Type CloseHandlerType(Type handlerType, object key)
@@ -98,7 +98,7 @@
         }
 
         private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, ResultsDelegate results)
+            IHandler composer, Type resultType, int? priority, ResultsDelegate results)
         {
             var ruleArgs   = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher.CloseDispatch(ruleArgs, resultType);
@@ -151,7 +151,7 @@
             if ((callback as IFilterCallback)?.CanFilter == false)
             {             
                 return ResolveArgsAndDispatch(composer, out result, out isAsync) && 
-                    Accept(callback, result, returnType, results, isAsync);
+                    Accept(callback, result, returnType, priority, results, isAsync);
             }
 
             var filterCallback = GetCallbackInfo(
@@ -188,11 +188,11 @@
                 }, composer, filters, out result))
                 return false;
 
-            return Accept(callback, result, returnType, results, isAsync);
+            return Accept(callback, result, returnType, priority, results, isAsync);
         }
 
         private bool Accept(object callback, object result,
-            Type returnType, ResultsDelegate results, bool isAsync)
+            Type returnType, int? priority, ResultsDelegate results, bool isAsync)
         {
             var accepted = Policy.AcceptResult?.Invoke(result, this)
                          ?? result != null;
@@ -202,7 +202,7 @@
                 result = CoerceResult(result, returnType,
                     isAsync || asyncCallback?.WantsAsync == true);
                 if (result != null)
-                    return results?.Invoke(result, Category.Strict) != false;
+                    return results?.Invoke(result, Category.Strict, priority) != false;
             }
             return accepted;
         }

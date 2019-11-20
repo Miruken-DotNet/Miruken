@@ -40,15 +40,13 @@ namespace Miruken.Register
                     return null;
             }
 
-            foreach (var serviceGroup in _services)
-            foreach (var service in serviceGroup.Value)
+            if (_services.Any(serviceGroup => serviceGroup.Value
+                .Where(service => serviceType.IsAssignableFrom(serviceGroup.Key) && 
+                                  services?.Contains(service) != true)
+                .Where(service => service.Handle(inquiry, many, composer))
+                .Any(service => !many)))
             {
-                if (serviceType.IsAssignableFrom(serviceGroup.Key) &&
-                    services?.Contains(service) != true)
-                {
-                    if (!service.Handle(inquiry, many, composer)) continue;
-                    if (!many) return null;
-                }
+                return null;
             }
 
             return null;

@@ -92,7 +92,7 @@
             }
         }
 
-        public bool Respond(object response, bool strict)
+        public bool Respond(object response, bool strict, int? priority = null)
         {
             if (response == null) return false;
             var accepted = Include(response);

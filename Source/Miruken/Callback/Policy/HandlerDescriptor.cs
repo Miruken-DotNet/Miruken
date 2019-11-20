@@ -96,7 +96,8 @@ namespace Miruken.Callback.Policy
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                dispatched = member.Dispatch(target, callback, composer, results) || dispatched;
+                dispatched = member.Dispatch(target, callback, composer, Priority, results)
+                          || dispatched;
                 if (dispatched)
                 {
                     if (!greedy) return true;
@@ -108,7 +109,8 @@ namespace Miruken.Callback.Policy
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                dispatched = member.Dispatch( target, callback, composer, results) || dispatched;
+                dispatched = member.Dispatch( target, callback, composer, Priority, results)
+                          || dispatched;
                 if (dispatched)
                 {
                     if (!greedy) return true;

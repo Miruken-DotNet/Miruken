@@ -56,7 +56,7 @@ namespace Miruken.Tests.Register
         [TestMethod]
         public void Should_Register_Scoped()
         {
-            var handler  = new ServiceCollection()
+            var handler = new ServiceCollection()
                 .AddScoped<Service1>()
                 .AddMiruken()
                 .Build();
@@ -68,7 +68,7 @@ namespace Miruken.Tests.Register
         [TestMethod]
         public void Should_Register_Scoped_Fluently()
         {
-            var handler  = new ServiceCollection()
+            var handler = new ServiceCollection()
                 .AddMiruken(configure => configure
                     .Sources(sources => sources
                         .AddTypes(typeof(Service1)))

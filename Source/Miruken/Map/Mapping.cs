@@ -71,7 +71,7 @@
                 || _result != null;
         }
 
-        private bool SetMapping(object mapping, bool strict)
+        private bool SetMapping(object mapping, bool strict, int? priority = null)
         {
             var mapped = mapping != null;
             if (mapped) Result = mapping;

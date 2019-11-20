@@ -38,7 +38,7 @@
                 handler, this, greedy, composer, SetResult);
         }
 
-        private bool SetResult(object result, bool strict)
+        private bool SetResult(object result, bool strict, int? priority = null)
         {
             if (_result != null) return false;
             switch (result)

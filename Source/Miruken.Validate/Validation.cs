@@ -66,7 +66,7 @@
             }
         }
 
-        public bool AddResult(object result, bool strict)
+        public bool AddResult(object result, bool strict, int? priority = null)
         {
             if (result == null) return false;
 
