@@ -117,7 +117,10 @@ namespace Miruken.Register
         {
             _explicitServices.RemoveAll<Registration>();
 
-            factory = factory ?? new MutableHandlerDescriptorFactory();
+            factory = factory ?? new MutableHandlerDescriptorFactory
+            {
+                ImplicitLifestyle = null
+            };
 
             if (_sources != null || _publicSources != null)
             {

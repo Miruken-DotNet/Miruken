@@ -13,7 +13,8 @@
 
         public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
             : base(visitor)
-        {      
+        {
+            ImplicitLifestyle = new SingletonAttribute();
         }
 
         public override HandlerDescriptor GetDescriptor(Type type)
@@ -156,6 +157,14 @@
 
                 if (binding != null)
                 {
+                    if (handler.IsOpenGeneric)
+                    {
+                        var key = policy.GetKey(callback);
+                        handler = handler.CloseDescriptor(key, binding)
+                            ?? throw new InvalidOperationException(
+                                $"Unable to close descriptor {handler.HandlerType.FullName}");
+                    }
+
                     if (orderBy != null)
                     {
                         if (sortedCompatibleList == null)

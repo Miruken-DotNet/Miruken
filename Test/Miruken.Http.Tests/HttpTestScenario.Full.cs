@@ -35,8 +35,10 @@ namespace Miruken.Http.Tests
 
             _server = WebApp.Start("http://localhost:9000/", Configuration);
 
-            _handler = (_container + new FluentValidationValidator())
+            _handler = (_container + new StaticHandler() + new FluentValidationValidator())
                 .BaseUrl("http://localhost:9000");
+
+            var x = _handler.Resolve<HttpService>();
         }
 
         [TestCleanup]

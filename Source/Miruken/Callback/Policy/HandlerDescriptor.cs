@@ -12,10 +12,10 @@ namespace Miruken.Callback.Policy
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandlerDescriptor : FilteredObject
     {
-        private readonly Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> _factory;
-        private readonly HandlerDescriptorVisitor _visitor;
         private readonly ConcurrentDictionary<Type, HandlerDescriptor> _closed;
         private readonly ConcurrentDictionary<object, Type> _keyTypes;
+        private readonly Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> _factory;
+        private readonly HandlerDescriptorVisitor _visitor;
 
         private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
             new ReadOnlyDictionary<CallbackPolicy, CallbackPolicyDescriptor>(
@@ -71,7 +71,7 @@ namespace Miruken.Callback.Policy
             return _closed.GetOrAdd(closedType, k => _factory(closedType, _visitor, Priority));
         }
 
-        private HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding)
+        public HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding)
         {
             var closedType = _keyTypes.GetOrAdd(key, k => binding.CloseHandlerType(HandlerType, k));
             return closedType != null ? CloseDescriptor(closedType) : null;
@@ -96,8 +96,6 @@ namespace Miruken.Callback.Policy
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                if (_factory != null)
-                    return ClosedDispatch(member, policy, target, callback, greedy, composer, results);
                 dispatched = member.Dispatch(target, callback, composer, results) || dispatched;
                 if (dispatched)
                 {
@@ -110,8 +108,6 @@ namespace Miruken.Callback.Policy
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                if (_factory != null)
-                    return ClosedDispatch(member, policy, target, callback, greedy, composer, results);
                 dispatched = member.Dispatch( target, callback, composer, results) || dispatched;
                 if (dispatched)
                 {
@@ -121,17 +117,6 @@ namespace Miruken.Callback.Policy
             }
 
             return dispatched;
-        }
-
-        private bool ClosedDispatch(
-            PolicyMemberBinding member,
-            CallbackPolicy policy, object target,
-            object callback, bool greedy, IHandler composer,
-            ResultsDelegate results = null)
-        {
-            var closed = CloseDescriptor(policy.GetKey(callback), member);
-            return closed?.Dispatch(policy, target, callback, greedy, composer, results)
-                   ?? false;
         }
 
         private string DebuggerDisplay => $"{HandlerType.FullName}";

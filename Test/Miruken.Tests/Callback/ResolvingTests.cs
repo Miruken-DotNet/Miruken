@@ -430,7 +430,6 @@
         [TestMethod]
         public void Should_Resolve_Open_Generic_Handlers()
         {
-            _factory.RegisterDescriptor(typeof(Repository<>));
             var handler = new RepositoryProvider();
             var message = new Message();
             var handled = handler.Handle(new Create<Message>(message));
