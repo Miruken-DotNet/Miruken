@@ -24,8 +24,9 @@
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
                 var definition = type.GetGenericTypeDefinition();
-                if (Descriptors.TryGetValue(definition, out descriptor))
-                    return descriptor.Value.CloseDescriptor(type);
+                if (Descriptors.TryGetValue(definition, out descriptor) &&
+                    descriptor.Value is GenericHandlerDescriptor genericDescriptor)
+                    return genericDescriptor.CloseDescriptor(type, CreateDescriptor);
             }
             return null;
         }
@@ -54,10 +55,10 @@
             return Descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
-                var handler = descriptor.Value.Value;
+                var handler       = descriptor.Value.Value;
                 var staticMembers = handler.StaticPolicies?.TryGetValue(policy, out cpd) == true
                     ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
-                var members = handler.Policies?.TryGetValue(policy, out cpd) == true
+                var members       = handler.Policies?.TryGetValue(policy, out cpd) == true
                     ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
                 if (staticMembers == null) return members;
                 return members == null ? staticMembers : staticMembers.Concat(members);
@@ -111,7 +112,7 @@
                 : invariants.Concat(compatible);
         }
 
-        private static void GetDescriptors(CallbackPolicy policy, 
+        private void GetDescriptors(CallbackPolicy policy, 
             IEnumerable<KeyValuePair<Type, Lazy<HandlerDescriptor>>> descriptors,
             object callback, bool instance, bool @static, 
             IComparer<PolicyMemberBinding> orderBy, 
@@ -157,10 +158,10 @@
 
                 if (binding != null)
                 {
-                    if (handler.IsOpenGeneric)
+                    if (handler is GenericHandlerDescriptor genericHandler)
                     {
                         var key = policy.GetKey(callback);
-                        handler = handler.CloseDescriptor(key, binding)
+                        handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor)
                             ?? throw new InvalidOperationException(
                                 $"Unable to close descriptor {handler.HandlerType.FullName}");
                     }

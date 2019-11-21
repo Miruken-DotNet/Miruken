@@ -1,7 +1,6 @@
 namespace Miruken.Callback.Policy
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics;
@@ -12,20 +11,13 @@ namespace Miruken.Callback.Policy
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandlerDescriptor : FilteredObject
     {
-        private readonly ConcurrentDictionary<Type, HandlerDescriptor> _closed;
-        private readonly ConcurrentDictionary<object, Type> _keyTypes;
-        private readonly Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> _factory;
-        private readonly HandlerDescriptorVisitor _visitor;
-
         private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
             new ReadOnlyDictionary<CallbackPolicy, CallbackPolicyDescriptor>(
                 new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>());
 
         public HandlerDescriptor(Type handlerType,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> policies,
-            IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies,
-            Func<Type, HandlerDescriptorVisitor, int?, HandlerDescriptor> factory = null,
-            HandlerDescriptorVisitor visitor = null)
+            IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies)
         {
             if (handlerType == null)
                 throw new ArgumentNullException(nameof(handlerType));
@@ -39,14 +31,6 @@ namespace Miruken.Callback.Policy
             Attributes     = Attribute.GetCustomAttributes(handlerType, true).Normalize();
 
             AddFilters(Attributes.OfType<IFilterProvider>().ToArray());
-
-            if (IsOpenGeneric)
-            {
-                _factory  = factory;
-                _visitor  = visitor;
-                _closed   = new ConcurrentDictionary<Type, HandlerDescriptor>();
-                _keyTypes = new ConcurrentDictionary<object, Type>();
-            }
         }
 
         public Type HandlerType { get; }
@@ -55,27 +39,8 @@ namespace Miruken.Callback.Policy
 
         public int? Priority { get; set; }
 
-        public bool IsOpenGeneric => HandlerType.IsGenericTypeDefinition;
-
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Policies       { get; }
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> StaticPolicies { get; }
-
-        public HandlerDescriptor CloseDescriptor(Type closedType)
-        {
-            if (_factory == null)
-                throw new InvalidOperationException($"{HandlerType.FullName} does not represent an open type");
-
-            if (!closedType.IsGenericType || closedType.GetGenericTypeDefinition() != HandlerType)
-                throw new InvalidOperationException($"{closedType.FullName} is not closed on {HandlerType.FullName}");
-
-            return _closed.GetOrAdd(closedType, k => _factory(closedType, _visitor, Priority));
-        }
-
-        public HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding)
-        {
-            var closedType = _keyTypes.GetOrAdd(key, k => binding.CloseHandlerType(HandlerType, k));
-            return closedType != null ? CloseDescriptor(closedType) : null;
-        }
 
         internal bool Dispatch(
             CallbackPolicy policy, object target, 

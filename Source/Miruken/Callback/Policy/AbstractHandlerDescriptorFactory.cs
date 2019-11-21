@@ -134,16 +134,16 @@
             if (instancePolicies == null && staticPolicies == null)
                 return null;
 
-            var descriptor = new HandlerDescriptor(handlerType,
-                instancePolicies?.ToDictionary(p => p.Key,
-                    p => new CallbackPolicyDescriptor(p.Key, p.Value)),
-                staticPolicies?.ToDictionary(p => p.Key,
-                    p => new CallbackPolicyDescriptor(p.Key, p.Value)),
-                CreateDescriptor,
-                visitor)
-            {
-                Priority = priority
-            };
+            var callbacks = instancePolicies?.ToDictionary(p => p.Key,
+                p => new CallbackPolicyDescriptor(p.Key, p.Value));
+            var staticCallbacks = staticPolicies?.ToDictionary(p => p.Key,
+                p => new CallbackPolicyDescriptor(p.Key, p.Value));
+
+            var descriptor = handlerType.IsGenericTypeDefinition
+                ? new GenericHandlerDescriptor(handlerType, callbacks, staticCallbacks, visitor)
+                : new HandlerDescriptor(handlerType, callbacks, staticCallbacks);
+
+            descriptor.Priority = priority;
 
             visitor = _visitor + visitor;
 
