@@ -117,7 +117,7 @@ namespace Miruken.Register
         {
             _explicitServices.RemoveAll<Registration>();
 
-            factory = factory ?? new MutableHandlerDescriptorFactory
+            var actualFactory = factory ?? new MutableHandlerDescriptorFactory
             {
                 ImplicitLifestyle = null
             };
@@ -152,18 +152,21 @@ namespace Miruken.Register
                 var visitor     = !serviceType.IsDefined(typeof(UnmanagedAttribute), true)
                                 ? ServiceConfiguration.For(service)
                                 : null;
-                factory.RegisterDescriptor(serviceType, visitor);
+                actualFactory.RegisterDescriptor(serviceType, visitor);
             }
 
             var context = new Context();
             context.AddHandlers(Handlers);
 
-            var serviceFacade = new ServiceFactoryFacade(_explicitServices, factory);
+            var serviceFacade = new ServiceFactoryFacade(_explicitServices, actualFactory);
             if (serviceFacade.HasServices) context.AddHandlers(serviceFacade);
 
             context.AddHandlers((new StaticHandler() + new Stash(true)).Break());
 
-            HandlerDescriptorFactory.UseFactory(factory);
+            if (factory == null)
+                actualFactory = new CachedHandlerDescriptorFactory(actualFactory);
+
+            HandlerDescriptorFactory.UseFactory(actualFactory);
 
             return context;
         }
