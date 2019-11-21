@@ -126,6 +126,8 @@
             SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>
                 sortedCompatibleList = null;
 
+            var key = policy.GetKey(callback);
+
             foreach (var descriptor in descriptors)
             {
                 var handler = descriptor.Value.Value;
@@ -133,7 +135,7 @@
                 if (instance)
                     handler.Policies?.TryGetValue(policy, out instanceCallbacks);
 
-                if (instanceCallbacks?.GetInvariantMembers(callback).Any() == true)
+                if (instanceCallbacks?.GetInvariantMembers(key).Any() == true)
                 {
                     if (invariantsList == null)
                         invariants = invariantsList = new List<HandlerDescriptor>();
@@ -144,7 +146,7 @@
                 CallbackPolicyDescriptor staticCallbacks = null;
                 if (@static)
                     handler.StaticPolicies?.TryGetValue(policy, out staticCallbacks);
-                if (staticCallbacks?.GetInvariantMembers(callback).Any() == true)
+                if (staticCallbacks?.GetInvariantMembers(key).Any() == true)
                 {
                     if (invariantsList == null)
                         invariants = invariantsList = new List<HandlerDescriptor>();
@@ -153,14 +155,13 @@
                 }
 
                 var binding =
-                    instanceCallbacks?.GetCompatibleMembers(callback).FirstOrDefault()
-                    ?? staticCallbacks?.GetCompatibleMembers(callback).FirstOrDefault();
+                    instanceCallbacks?.GetCompatibleMembers(key).FirstOrDefault()
+                    ?? staticCallbacks?.GetCompatibleMembers(key).FirstOrDefault();
 
                 if (binding != null)
                 {
                     if (handler is GenericHandlerDescriptor genericHandler)
                     {
-                        var key = policy.GetKey(callback);
                         handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor)
                             ?? throw new InvalidOperationException(
                                 $"Unable to close descriptor {handler.HandlerType.FullName}");

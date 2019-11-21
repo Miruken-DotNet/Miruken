@@ -57,8 +57,11 @@ namespace Miruken.Callback.Policy
 
             var dispatched     = false;
             var hasConstructor = false;
-            foreach (var member in descriptor.GetInvariantMembers(callback))
+            var key            = policy.GetKey(callback);
+
+            foreach (var member in descriptor.GetInvariantMembers(key))
             {
+                if (!member.Approves(callback)) continue;
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
                 dispatched = member.Dispatch(target, callback, composer, Priority, results)
@@ -70,8 +73,9 @@ namespace Miruken.Callback.Policy
                 }
             }
 
-            foreach (var member in descriptor.GetCompatibleMembers(callback))
+            foreach (var member in descriptor.GetCompatibleMembers(key))
             {
+                if (!member.Approves(callback)) continue;
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
                 dispatched = member.Dispatch( target, callback, composer, Priority, results)
