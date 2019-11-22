@@ -72,7 +72,7 @@ namespace Miruken.Http.Tests
                         o.ContractResolver  = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
-#else
+#elif NETSTANDARD2_1
                     .AddNewtonsoftJson(jo =>
                     {
                         var o = jo.SerializerSettings;
@@ -90,7 +90,7 @@ namespace Miruken.Http.Tests
             {
 #if NETSTANDARD2_0
                 app.UseMvc();
-#else
+#elif NETSTANDARD2_1
                 app.UseRouting()
                    .UseEndpoints(endpoints => endpoints.MapControllers());
 #endif
@@ -130,7 +130,7 @@ namespace Miruken.Http.Tests
                         o.ContractResolver = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
-#else
+#elif NETSTANDARD2_1
                     .AddNewtonsoftJson(jo =>
                     {
                         var o = jo.SerializerSettings;
@@ -155,7 +155,7 @@ namespace Miruken.Http.Tests
 
 #if NETSTANDARD2_0
                 app.UseMvc();
-#else
+#elif NETSTANDARD2_1
                 app.UseRouting()
                    .UseAuthorization()
                    .UseEndpoints(endpoints => endpoints.MapControllers());
