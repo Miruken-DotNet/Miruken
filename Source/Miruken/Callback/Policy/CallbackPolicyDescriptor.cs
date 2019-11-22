@@ -33,28 +33,34 @@ namespace Miruken.Callback.Policy
 
         private IEnumerable<PolicyMemberBinding> GetInvariantMembers()
         {
-            foreach (var member in _typed.SelectMany(typed => typed.Value))
+            foreach (var typed in _typed)
+            foreach (var member in typed.Value)
                 yield return member;
             if (_indexed != null)
             {
-                foreach (var member in _indexed.SelectMany(indexed => indexed.Value))
-                    yield return member;
+                foreach (var indexed in _indexed)
+                    foreach (var member in indexed.Value)
+                        yield return member;
             }
         }
 
-        public IEnumerable<PolicyMemberBinding> GetInvariantMembers(object key)
+        public IEnumerable<PolicyMemberBinding> GetInvariantMembers(object callback)
         {
+            var key = Policy.GetKey(callback);
             List<PolicyMemberBinding> members = null;
             if (key is Type type)
                 _typed.TryGetValue(type, out members);
             else
                 _indexed?.TryGetValue(key, out members);
-            return members.AsEnumerable() ?? Array.Empty<PolicyMemberBinding>();
+            return members?.Where(member => member.Approves(callback))
+                ?? Array.Empty<PolicyMemberBinding>();
         }
 
-        public IEnumerable<PolicyMemberBinding> GetCompatibleMembers(object key)
+        public IEnumerable<PolicyMemberBinding> GetCompatibleMembers(object callback)
         {
-            return _compatible.GetOrAdd(key, InferCompatibleMembers);
+            var key = Policy.GetKey(callback);
+            return _compatible.GetOrAdd(key, InferCompatibleMembers)
+                .Where(member => member.Approves(callback));
         }
 
         private IEnumerable<PolicyMemberBinding> InferCompatibleMembers(object key)
