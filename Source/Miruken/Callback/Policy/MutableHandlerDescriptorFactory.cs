@@ -121,12 +121,13 @@
         {
             invariants = compatible = null;
 
+            object key = null;
             List<HandlerDescriptor> invariantsList = null;
             List<HandlerDescriptor> compatibleList = null;
-            SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>
-                sortedCompatibleList = null;
+            SortedDictionary<PolicyMemberBinding, HandlerDescriptor> sortedCompatibleList = null;
 
-            object key = null;
+            if (orderBy != null)
+                orderBy = new DuplicateComparer(orderBy);
 
             foreach (var descriptor in descriptors)
             {
@@ -172,13 +173,8 @@
                     if (orderBy != null)
                     {
                         if (sortedCompatibleList == null)
-                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>(orderBy);
-                        if (!sortedCompatibleList.TryGetValue(binding, out var sorted))
-                        {
-                            sorted = new List<HandlerDescriptor>();
-                            sortedCompatibleList.Add(binding, sorted);
-                        }
-                        sorted.Add(handler);
+                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, HandlerDescriptor>(orderBy);
+                        sortedCompatibleList.Add(binding, handler);
                     }
                     else
                     {
@@ -190,7 +186,23 @@
             }
 
             if (sortedCompatibleList != null)
-                compatible = sortedCompatibleList.Values.SelectMany(h => h).Reverse();
+                compatible = sortedCompatibleList.Values.Reverse();
+        }
+
+        private class DuplicateComparer : IComparer<PolicyMemberBinding>
+        {
+            private readonly IComparer<PolicyMemberBinding> _comparer;
+
+            public DuplicateComparer(IComparer<PolicyMemberBinding> comparer)
+            {
+                _comparer = comparer;
+            }
+
+            public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
+            {
+                var result = _comparer.Compare(x, y);
+                return result == 0 ? -1 : result;
+            }
         }
     }
 }
