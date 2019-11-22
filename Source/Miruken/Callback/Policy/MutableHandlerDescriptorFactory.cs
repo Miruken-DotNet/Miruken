@@ -190,7 +190,7 @@
             }
 
             if (sortedCompatibleList != null)
-                compatible = sortedCompatibleList.Values.SelectMany(h => h);
+                compatible = sortedCompatibleList.Values.SelectMany(h => h).Reverse();
         }
     }
 }
