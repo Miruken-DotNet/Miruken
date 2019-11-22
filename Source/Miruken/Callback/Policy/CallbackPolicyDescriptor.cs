@@ -33,14 +33,12 @@ namespace Miruken.Callback.Policy
 
         private IEnumerable<PolicyMemberBinding> GetInvariantMembers()
         {
-            foreach (var typed in _typed)
-            foreach (var member in typed.Value)
+            foreach (var member in _typed.SelectMany(typed => typed.Value))
                 yield return member;
             if (_indexed != null)
             {
-                foreach (var indexed in _indexed)
-                    foreach (var member in indexed.Value)
-                        yield return member;
+                foreach (var member in _indexed.SelectMany(indexed => indexed.Value))
+                    yield return member;
             }
         }
 

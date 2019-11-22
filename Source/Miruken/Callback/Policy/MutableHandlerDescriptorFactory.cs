@@ -126,6 +126,8 @@
             SortedDictionary<PolicyMemberBinding, List<HandlerDescriptor>>
                 sortedCompatibleList = null;
 
+            object key = null;
+
             foreach (var descriptor in descriptors)
             {
                 var handler = descriptor.Value.Value;
@@ -160,7 +162,8 @@
                 {
                     if (handler is GenericHandlerDescriptor genericHandler)
                     {
-                        var key = policy.GetKey(callback);
+                        if (key == null)
+                            key = policy.GetKey(callback);
                         handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor)
                             ?? throw new InvalidOperationException(
                                 $"Unable to close descriptor {handler.HandlerType.FullName}");
