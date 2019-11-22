@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <TargetFrameworks>netcoreapp2.2;net48;net461</TargetFrameworks>
+      <TargetFrameworks>netcoreapp3.0;netcoreapp2.2;net48;net461</TargetFrameworks>
 
       <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -16,11 +16,17 @@
 
     <!-- compilation flags -->
     <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
-        <DefineConstants>NETSTANDARD</DefineConstants>
+        <DefineConstants>NETSTANDARD;NETSTANDARD2_0</DefineConstants>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+      <DefineConstants>NETSTANDARD;NETSTANDARD2_1</DefineConstants>
+    </PropertyGroup>
+
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
+
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
@@ -38,19 +44,35 @@
         <PackageReference Include="Microsoft.AspNetCore.HostFiltering" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Server.IIS" Version="2.2.6" />
         <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="2.2.1" />
         <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="2.2.0" />
+    </ItemGroup>
+
+    <ItemGroup  Condition="$(DefineConstants.Contains('NETSTANDARD2_0'))">
+      <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
+      <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="2.2.0" />
+    </ItemGroup>
+
+    <ItemGroup  Condition="$(DefineConstants.Contains('NETSTANDARD2_1'))">
+      <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.1" />
+      <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="3.0.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     </ItemGroup>
 
     <ItemGroup Condition="$(DefineConstants.Contains('NETFULL'))">

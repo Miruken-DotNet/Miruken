@@ -126,9 +126,6 @@
             List<HandlerDescriptor> compatibleList = null;
             SortedDictionary<PolicyMemberBinding, HandlerDescriptor> sortedCompatibleList = null;
 
-            if (orderBy != null)
-                orderBy = new DuplicateComparer(orderBy);
-
             foreach (var descriptor in descriptors)
             {
                 var handler = descriptor.Value.Value;
@@ -173,7 +170,8 @@
                     if (orderBy != null)
                     {
                         if (sortedCompatibleList == null)
-                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, HandlerDescriptor>(orderBy);
+                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, HandlerDescriptor>(
+                                new DuplicateComparer(orderBy));
                         sortedCompatibleList.Add(binding, handler);
                     }
                     else

@@ -63,6 +63,7 @@ namespace Miruken.Http.Tests
             public void ConfigureServices(IServiceCollection services)
             {
                 services.AddMvcCore()
+#if NETSTANDARD2_0
                     .AddJsonFormatters(o =>
                     {
                         o.NullValueHandling = NullValueHandling.Ignore;
@@ -71,12 +72,28 @@ namespace Miruken.Http.Tests
                         o.ContractResolver  = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
+#else
+                    .AddNewtonsoftJson(jo =>
+                    {
+                        var o = jo.SerializerSettings;
+                        o.NullValueHandling = NullValueHandling.Ignore;
+                        o.TypeNameHandling = TypeNameHandling.Auto;
+                        o.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+                        o.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                        o.Converters.Add(EitherJsonConverter.Instance);
+                    })
+#endif
                     .AddFormatterMappings();
             }
 
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            public void Configure(IApplicationBuilder app)
             {
+#if NETSTANDARD2_0
                 app.UseMvc();
+#else
+                app.UseRouting()
+                   .UseEndpoints(endpoints => endpoints.MapControllers());
+#endif
             }
         }
     }
@@ -104,6 +121,7 @@ namespace Miruken.Http.Tests
                 });
 
                 services.AddMvcCore()
+#if NETSTANDARD2_0
                     .AddJsonFormatters(o =>
                     {
                         o.NullValueHandling = NullValueHandling.Ignore;
@@ -112,6 +130,17 @@ namespace Miruken.Http.Tests
                         o.ContractResolver = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
+#else
+                    .AddNewtonsoftJson(jo =>
+                    {
+                        var o = jo.SerializerSettings;
+                        o.NullValueHandling = NullValueHandling.Ignore;
+                        o.TypeNameHandling = TypeNameHandling.Auto;
+                        o.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+                        o.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                        o.Converters.Add(EitherJsonConverter.Instance);
+                    })
+#endif
                     .AddFormatterMappings();
             }
 
@@ -123,7 +152,14 @@ namespace Miruken.Http.Tests
                 }
 
                 app.UseAuthentication();
+
+#if NETSTANDARD2_0
                 app.UseMvc();
+#else
+                app.UseRouting()
+                   .UseAuthorization()
+                   .UseEndpoints(endpoints => endpoints.MapControllers());
+#endif
             }
         }
 
