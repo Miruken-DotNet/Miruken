@@ -49,7 +49,8 @@
         public override object GetKey(object callback)
         {
             return (callback as ICallbackKey)?.Key
-                ?? Tuple.Create(Output.GetKey(callback), Input.GetKey(callback));
+                ?? Tuple.Create( Output.GetKey(callback),
+                    Input.GetKey(callback));
         }
 
         public override IEnumerable<object> GetCompatibleKeys(
