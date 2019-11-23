@@ -3,6 +3,7 @@ namespace Miruken.Register
 {
     using System;
     using System.Linq;
+    using Callback.Policy;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class ServiceCollectionExtensions
@@ -20,6 +21,20 @@ namespace Miruken.Register
             return services
                 .Select(s => s.ImplementationInstance).OfType<Registration>()
                 .FirstOrDefault();
+        }
+
+        public static IServiceCollection AddMirukenProviderFactory(
+            this IServiceCollection services, IHandlerDescriptorFactory factory = null)
+        {
+            return AddMirukenProviderFactory(services, null, factory);
+        }
+
+        public static IServiceCollection AddMirukenProviderFactory(
+            this IServiceCollection services, Action<Registration> configure, 
+            IHandlerDescriptorFactory factory = null)
+        {
+            return services.AddSingleton<IServiceProviderFactory<Registration>>(
+                new MirukenServiceProviderFactory(configure, factory));
         }
     }
 }
