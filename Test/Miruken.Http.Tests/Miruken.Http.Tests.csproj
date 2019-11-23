@@ -53,6 +53,7 @@
     <ItemGroup  Condition="$(DefineConstants.Contains('NETSTANDARD2_0'))">
       <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
       <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.2.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.2.0" />

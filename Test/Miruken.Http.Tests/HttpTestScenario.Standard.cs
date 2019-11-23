@@ -25,6 +25,10 @@ namespace Miruken.Http.Tests
     using Register;
     using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
+#if NETSTANDARD2_1
+    using Microsoft.Extensions.Hosting;
+#endif
+
     public class HttpTestScenario
     {
         private TestServer _server;
@@ -73,13 +77,13 @@ namespace Miruken.Http.Tests
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
 #elif NETSTANDARD2_1
-                    .AddNewtonsoftJson(jo =>
+                    .AddNewtonsoftJson(ns =>
                     {
-                        var o = jo.SerializerSettings;
+                        var o = ns.SerializerSettings;
                         o.NullValueHandling = NullValueHandling.Ignore;
-                        o.TypeNameHandling = TypeNameHandling.Auto;
+                        o.TypeNameHandling  = TypeNameHandling.Auto;
                         o.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-                        o.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                        o.ContractResolver  = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
 #endif
@@ -144,19 +148,23 @@ namespace Miruken.Http.Tests
                     .AddFormatterMappings();
             }
 
+#if NETSTANDARD2_0
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+#elif NETSTANDARD2_1
+            public void Configure(IApplicationBuilder app, IHostEnvironment env)
+#endif
             {
                 if (env.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();
                 }
 
-                app.UseAuthentication();
-
 #if NETSTANDARD2_0
-                app.UseMvc();
+                app.UseAuthentication()
+                   .UseMvc();
 #elif NETSTANDARD2_1
                 app.UseRouting()
+                   .UseAuthentication()
                    .UseAuthorization()
                    .UseEndpoints(endpoints => endpoints.MapControllers());
 #endif
