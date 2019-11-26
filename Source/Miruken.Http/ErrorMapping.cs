@@ -118,12 +118,6 @@
         }
 
         [Maps, Format(typeof(Exception))]
-        public string MapNotFoundException(NotFoundException exception)
-        {
-            return exception.Message;
-        }
-
-        [Maps, Format(typeof(Exception))]
         public MultipleErrors MapAggregateException(
             AggregateException exception, IHandler composer)
         {

@@ -14,7 +14,6 @@ namespace Miruken.Register
             IHandlerDescriptorFactory factory = null)
             : this(null, factory)
         {
-            
         }
 
         public MirukenServiceProviderFactory(
