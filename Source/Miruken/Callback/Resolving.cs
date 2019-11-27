@@ -25,7 +25,8 @@
         public override bool CanDispatch(
             object target, MemberDispatch dispatcher)
         {
-            return (_callback as IDispatchCallbackGuard)
+            return base.CanDispatch(target, dispatcher) &&
+                (_callback as IDispatchCallbackGuard)
                    ?.CanDispatch(target, dispatcher) != false;
         }
 
