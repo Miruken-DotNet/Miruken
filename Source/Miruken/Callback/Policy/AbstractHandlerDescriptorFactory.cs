@@ -93,8 +93,7 @@
 
                     if (constructor != null)
                     {
-                        constructorDispatch = constructorDispatch
-                            ?? new ConstructorDispatch(constructor, attributes);
+                        constructorDispatch ??= new ConstructorDispatch(constructor, attributes);
                         memberBinding = new PolicyMemberBinding(policy,
                             new PolicyMemberBindingInfo(null, constructorDispatch, category)
                             {
@@ -111,7 +110,7 @@
                             throw new InvalidOperationException(
                                 $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                        methodDispatch = methodDispatch ?? new MethodDispatch(method, attributes);
+                        methodDispatch ??= new MethodDispatch(method, attributes);
                         memberBinding  = rule.Bind(methodDispatch, category);
                     }
 

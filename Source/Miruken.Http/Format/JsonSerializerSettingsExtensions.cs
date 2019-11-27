@@ -7,7 +7,7 @@
         public static JsonSerializerSettings Copy(
             this JsonSerializerSettings from, JsonSerializerSettings to = null)
         {
-            to = to ?? new JsonSerializerSettings();
+            to ??= new JsonSerializerSettings();
             to.Context                        = from.Context;
             to.Culture                        = from.Culture;
             to.ContractResolver               = from.ContractResolver;

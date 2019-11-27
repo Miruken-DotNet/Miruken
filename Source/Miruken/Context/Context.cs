@@ -157,7 +157,7 @@
 	            return true;
 	        var parent = Parent;
 	        if (parent != null)
-	            handled = handled | parent.Handle(callback, ref greedy, composer);
+	            handled |= parent.Handle(callback, ref greedy, composer);
 	        return handled;
 	    }
 
@@ -174,10 +174,10 @@
 	        var handled = false;
             Traverse(axis, node =>
             {
-                handled = handled | (node == this
-                        ? BaseHandle(callback, ref g, composer)
-                        : ((Context)node).Handle(
-                            TraversingAxis.Self, callback, ref g, composer));
+                handled |= (node == this
+                    ? BaseHandle(callback, ref g, composer)
+                    : ((Context)node).Handle(
+                        TraversingAxis.Self, callback, ref g, composer));
                 return handled && !g;
             });
 	        greedy = g;

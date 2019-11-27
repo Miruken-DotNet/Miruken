@@ -12,9 +12,9 @@
         protected override bool IsCompatibleWithParent(
             Inquiry parent, LifestyleAttribute attribute)
         {
-            var parentDispatcher = parent?.Dispatcher;
-            if (parentDispatcher == null) return true;
-            return parentDispatcher.Attributes.OfType<LifestyleAttribute>()
+            var parentBinding = parent?.Binding;
+            if (parentBinding == null) return true;
+            return parentBinding.Filters.OfType<LifestyleAttribute>()
                 .All(lifestyle => lifestyle is ContextualAttribute c &&
                     ((attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
         }

@@ -74,7 +74,7 @@
         }
         private static IDictionary CreateArgs(IHandler composer, Inquiry inquiry)
         {
-            composer = composer ?? Composer;
+            composer ??= Composer;
             return composer == null ? null : new Hashtable
             {
                 [ResolutionKey] = inquiry,

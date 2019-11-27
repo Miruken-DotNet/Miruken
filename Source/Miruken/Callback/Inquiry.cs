@@ -39,9 +39,10 @@
         public bool    WantsAsync { get; set; }
         public bool    IsAsync    { get; private set; }
 
-        public object          Target     { get; private set; }
-        public MemberDispatch  Dispatcher { get; private set; }
-        public BindingMetadata Metadata   { get; }
+        public object              Target     { get; private set; }
+        public MemberDispatch      Dispatcher { get; private set; }
+        public PolicyMemberBinding Binding    { get; private set; }
+        public BindingMetadata     Metadata   { get; }
 
         public CallbackPolicy Policy => Provides.Policy;
 
@@ -199,17 +200,17 @@
             return true;
         }
 
-        public virtual bool CanDispatch(
-            object target, MemberDispatch dispatcher)
+        public virtual bool CanDispatch(object target,
+            PolicyMemberBinding binding, MemberDispatch dispatcher)
         {
             if (InProgress(target, dispatcher)) return false;
             Target     = target;
+            Binding    = binding;
             Dispatcher = dispatcher;
             return true;
         }
 
-        public virtual bool Dispatch(
-            object handler, ref bool greedy, IHandler composer)
+        public virtual bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
             try
             {  
@@ -225,6 +226,7 @@
             finally
             {
                 Dispatcher = null;
+                Binding    = null;
                 Target     = null;
             }
         }

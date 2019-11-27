@@ -2,6 +2,7 @@
 {
     using System;
     using Policy;
+    using Policy.Bindings;
 
     public class Trampoline : ICallback,
         IDispatchCallback, IDispatchCallbackGuard
@@ -45,11 +46,11 @@
         CallbackPolicy IDispatchCallback.Policy =>
             (Callback as IDispatchCallback)?.Policy;
 
-        public bool CanDispatch(
-            object target, MemberDispatch dispatcher)
+        public bool CanDispatch(object target,
+            PolicyMemberBinding binding, MemberDispatch dispatcher)
         {
             return (Callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(target, dispatcher) != false;
+                   ?.CanDispatch(target, binding, dispatcher) != false;
         }
 
         public virtual bool Dispatch(object handler,

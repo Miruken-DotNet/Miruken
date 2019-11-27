@@ -104,7 +104,7 @@
             var dispatcher = Dispatcher.CloseDispatch(ruleArgs, resultType);
 
             if (callback is IDispatchCallbackGuard guard &&
-                !guard.CanDispatch(target, dispatcher))
+                !guard.CanDispatch(target, this, dispatcher))
                 return false;
 
             if (CallbackIndex.HasValue)

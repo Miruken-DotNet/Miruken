@@ -43,7 +43,7 @@ namespace Miruken.Callback
             _options = enabled
                      ? _options | options
                      : _options & ~options;
-            _specified = _specified | options;
+            _specified |= options;
         }
 
         public bool IsSpecified(CallbackOptions options)

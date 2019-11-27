@@ -2,6 +2,7 @@ namespace Miruken.Callback
 {
     using System;
     using Policy;
+    using Policy.Bindings;
 
     public interface ICallback
     {
@@ -42,7 +43,8 @@ namespace Miruken.Callback
 
     public interface IDispatchCallbackGuard
     {
-        bool CanDispatch(object target, MemberDispatch dispatcher);
+        bool CanDispatch(object target, 
+            PolicyMemberBinding binding, MemberDispatch dispatcher);
     }
 
     public interface IDispatchCallback

@@ -3,6 +3,7 @@
     using System;
     using System.Diagnostics;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry, IInferCallback
@@ -22,12 +23,12 @@
             return this;
         }
 
-        public override bool CanDispatch(
-            object target, MemberDispatch dispatcher)
+        public override bool CanDispatch(object target,
+            PolicyMemberBinding binding, MemberDispatch dispatcher)
         {
-            return base.CanDispatch(target, dispatcher) &&
+            return base.CanDispatch(target, binding, dispatcher) &&
                 (_callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(target, dispatcher) != false;
+                   ?.CanDispatch(target, binding, dispatcher) != false;
         }
 
         protected override bool IsSatisfied(

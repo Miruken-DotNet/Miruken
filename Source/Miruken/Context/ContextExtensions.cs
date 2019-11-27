@@ -80,7 +80,7 @@ namespace Miruken.Context
                 if (context == null || howMany < 0) return null;
                 if (howMany == 0) return context;
                 context = context.Parent;
-                howMany = howMany - 1;
+                howMany -= 1;
             }
         }
 
