@@ -203,7 +203,8 @@
         public virtual bool CanDispatch(object target,
             PolicyMemberBinding binding, MemberDispatch dispatcher)
         {
-            if (InProgress(target, dispatcher)) return false;
+            if (InProgress(target, binding, dispatcher))
+                return false;
             Target     = target;
             Binding    = binding;
             Dispatcher = dispatcher;
@@ -239,11 +240,13 @@
             return compatible && Resolve(item, false, greedy, composer);
         }
 
-        private bool InProgress(object target, MemberDispatch dispatcher)
+        private bool InProgress(object target,
+            PolicyMemberBinding binding, MemberDispatch dispatcher)
         {
             return ReferenceEquals(target, Target) &&
+                   ReferenceEquals(binding, Binding) &&
                    ReferenceEquals(dispatcher, Dispatcher) ||
-                   Parent?.InProgress(target, dispatcher) == true;
+                   Parent?.InProgress(target, binding, dispatcher) == true;
         }
 
         private string DebuggerDisplay
