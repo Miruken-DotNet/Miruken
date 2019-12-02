@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netcoreapp2.2;net48;net461</TargetFrameworks>
+        <TargetFrameworks>netcoreapp3.0;netcoreapp2.2;net48;net461</TargetFrameworks>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -16,14 +16,30 @@
 
     <!-- compilation flags -->
     <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2'">
-        <DefineConstants>NETSTANDARD</DefineConstants>
+      <DefineConstants>NETSTANDARD;NETSTANDARD2_0</DefineConstants>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+      <DefineConstants>NETSTANDARD;NETSTANDARD2_1</DefineConstants>
+    </PropertyGroup>
+
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
+
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net48'">
         <DefineConstants>NETFULL</DefineConstants>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="appsettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
@@ -32,8 +48,17 @@
     </ItemGroup>
 
     <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD'))">
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
         <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD2_0'))">
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+
+    </ItemGroup>
+
+    <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD2_1'))">
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.1" />
     </ItemGroup>
 
     <ItemGroup>
