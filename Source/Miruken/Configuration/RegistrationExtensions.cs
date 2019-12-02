@@ -29,7 +29,7 @@ namespace Miruken.Configuration
                             var ctor = type.GetConstructor(Type.EmptyTypes);
                             if (ctor == null) return false;
                             var instance = ctor.Invoke(new object[0]);
-                            var key      = attribute.Key ?? type.Name;
+                            var key      = GetConfigurationKey(attribute, type);
                             services.AddSingleton(type, provider =>
                             {
                                 configuration.GetSection(key).Bind(instance);
@@ -40,6 +40,20 @@ namespace Miruken.Configuration
                     }), publicOnly)));
 
             return registration;
+        }
+
+        private static string GetConfigurationKey(ConfigurationAttribute attribute, Type type)
+        {
+            var key = attribute.Key;
+            if (string.IsNullOrEmpty(key))
+            {
+                key = type.Name;
+                if (key.EndsWith("Config"))
+                    key = key.Remove(key.Length - 6);
+                else if (key.EndsWith("Configuration"))
+                    key = key.Remove(key.Length - 13);
+            }
+            return key;
         }
     }
 }
