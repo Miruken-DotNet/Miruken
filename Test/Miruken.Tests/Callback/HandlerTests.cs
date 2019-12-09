@@ -1576,30 +1576,21 @@
 
             [Provides("Foo"),
              Provides("Bar")]
-            public object ProvidesByName(Inquiry inquiry)
-            {
-                switch (inquiry.Key as string)
+            public object ProvidesByName(Inquiry inquiry) =>
+                (inquiry.Key as string) switch
                 {
-                    case "Foo":
-                        return new Foo();
-                    case "Bar":
-                        return new Bar();
-                    default:
-                        return null;
-                }
-            }
+                    "Foo" => (object) new Foo(),
+                    "Bar" => new Bar(),
+                    _ => null
+                };
 
             [Provides("Boo", StringComparison.OrdinalIgnoreCase)]
-            public object ProvidesByNameCaseInsensitive(Inquiry inquiry)
-            {
-                switch ((inquiry.Key as string)?.ToUpper())
+            public object ProvidesByNameCaseInsensitive(Inquiry inquiry) =>
+                (inquiry.Key as string)?.ToUpper() switch
                 {
-                    case "BOO":
-                        return new Boo();
-                    default:
-                        return null;
-                }
-            }
+                    "BOO" => new Boo(),
+                    _ => null
+                };
         }
 
         private class CustomAsyncHandler : Handler
@@ -1655,15 +1646,12 @@
              Provides("Bar")]
             public Promise ProvidesByName(Inquiry inquiry)
             {
-                switch (inquiry.Key as string)
+                return inquiry.Key as string switch
                 {
-                    case "Foo":
-                        return Promise.Resolved(new Foo());
-                    case "Bar":
-                        return Promise.Resolved(new Bar());
-                    default:
-                        return Promise.Empty;
-                }
+                    "Foo" => Promise.Resolved(new Foo()),
+                    "Bar" => Promise.Resolved(new Bar()),
+                    _ => Promise.Empty
+                };
             }
         }
 

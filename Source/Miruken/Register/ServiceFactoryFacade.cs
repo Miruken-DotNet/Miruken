@@ -83,21 +83,13 @@ namespace Miruken.Register
 
                 CheckServiceType(serviceType, service);
 
-                Type serviceFactoryType;
-                switch (service.Lifetime)
+                var serviceFactoryType = service.Lifetime switch
                 {
-                    case ServiceLifetime.Transient:
-                        serviceFactoryType = typeof(ServiceFactory<>.Transient);
-                        break;
-                    case ServiceLifetime.Singleton:
-                        serviceFactoryType = typeof(ServiceFactory<>.Singleton);
-                        break;
-                    case ServiceLifetime.Scoped:
-                        serviceFactoryType = typeof(ServiceFactory<>.Scoped);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}");
-                }
+                    ServiceLifetime.Transient => typeof(ServiceFactory<>.Transient),
+                    ServiceLifetime.Singleton => typeof(ServiceFactory<>.Singleton),
+                    ServiceLifetime.Scoped => typeof(ServiceFactory<>.Scoped),
+                    _ => throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}")
+                };
 
                 serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
 

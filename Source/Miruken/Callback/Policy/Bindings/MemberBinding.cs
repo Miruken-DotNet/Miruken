@@ -33,15 +33,12 @@
             {
                 if (resultType.Is<Task>())
                 {
-                    switch (result)
+                    return result switch
                     {
-                        case Task task:
-                            return task.Coerce(resultType);
-                        case Promise promise:
-                            return promise.ToTask().Coerce(resultType);
-                        default:
-                            return Task.FromResult(result).Coerce(resultType);
-                    }
+                        Task task => task.Coerce(resultType),
+                        Promise promise => promise.ToTask().Coerce(resultType),
+                        _ => Task.FromResult(result).Coerce(resultType)
+                    };
                 }
                 if (resultType.Is<Promise>())
                     return Promise.Resolved(result).Coerce(resultType);

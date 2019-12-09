@@ -20,7 +20,7 @@ namespace Miruken.Validate.Tests
                 .AddMiruken(configure => configure
                     .PublicSources(sources => sources.FromAssemblyOf<RegistrationTests>())
                     .WithValidation()
-                );
+                ).Build();
         }
 
         [TestMethod]

@@ -14,7 +14,8 @@ namespace Miruken.Validate
             return registration
                 .Sources(sources => sources.FromAssemblyOf<Validation>())
                 .Select((selector, publicOnly) =>
-                    selector.AddClasses(x => x.AssignableTo<IValidator>(), publicOnly));
+                    selector.AddClasses(x => x.AssignableTo<IValidator>(), publicOnly)
+                        .AsSelf().WithSingletonLifetime());
         }
     }
 }

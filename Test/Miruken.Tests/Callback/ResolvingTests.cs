@@ -268,6 +268,42 @@
             }
         }
 
+        public interface IDomain { }
+
+        public class DomainContext<T> where T : IDomain
+        {
+            public T Domain { get; }
+
+            public DomainContext(T domain)
+            {
+                Domain = domain;
+            }
+        }
+
+        public class DomainRepository<T> where T : IDomain
+        {
+            public T Domain { get; }
+            public DomainContext<T> Context { get; }
+
+            public DomainRepository(DomainContext<T> context, T domain)
+            {
+                Context = context;
+                Domain  = domain;
+            }
+        }
+
+        public class DomainRepositoryProvider : Handler
+        {
+            [Provides]
+            public DomainRepository<T> GetRepository<T>(
+                DomainContext<T> context, T domain) where T : IDomain
+            {
+                return new DomainRepository<T>(context, domain);
+            }
+        }
+
+        public class MyDomain : IDomain {}
+
         public interface IEntity
         {
             int Id { get; set; }
@@ -388,7 +424,7 @@
             var handler = new EmailHandler()
                         + new Billing()
                         + new RepositoryProvider()
-                        + new FilterProvider(); ;
+                        + new FilterProvider();
             var id      = handler
                 .Command<int>(new SendEmail { Body = "Hello" });
             Assert.AreEqual(10, id);
@@ -400,7 +436,7 @@
             _factory.RegisterDescriptor<EmailHandler>();
             var handler = new EmailProvider()
                         + new RepositoryProvider()
-                        + new FilterProvider(); ;
+                        + new FilterProvider();
             var id      = handler
                 .Command<int>(new SendEmail<int> { Body = 22 });
             Assert.AreEqual(1, id);
@@ -435,6 +471,19 @@
             var handled = handler.Handle(new Create<Message>(message));
             Assert.IsTrue(handled);
             Assert.AreEqual(1, message.Id);
+        }
+
+        [TestMethod]
+        public void Should_Resolve_Open_Generic_Methods()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            factory.RegisterDescriptor<MyDomain>();
+            factory.RegisterDescriptor(typeof(DomainContext<>));
+            factory.RegisterDescriptor<DomainRepositoryProvider>();
+            HandlerDescriptorFactory.UseFactory(factory);
+            var handler    = new StaticHandler();
+            var repository = handler.Resolve<DomainRepository<MyDomain>>();
+            Assert.IsNotNull(repository);
         }
 
         [TestMethod]
@@ -473,7 +522,7 @@
         {
             var provider = new EmailProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             var id       = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
             id = provider.Proxy<IEmailFeature>().Email("Hello");
@@ -485,7 +534,7 @@
         {
             var provider = new EmailProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             var count    = Proxy<IEmailFeature>(provider).Count;
             Assert.AreEqual(0, count);
         }
@@ -560,7 +609,7 @@
         {
             var provider = new ManyProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             Proxy<IEmailFeature>(provider).CancelEmail(13);
         }
 
@@ -594,7 +643,7 @@
         {
             var provider = new EmailProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             Proxy<IEmailFeature>(provider.BestEffort()).CancelEmail(1);
         }
 
@@ -626,7 +675,7 @@
         {
             var provider = new EmailProvider()
                          + new RepositoryProvider()
-                         + new FilterProvider(); ;
+                         + new FilterProvider();
             var id       = Proxy<IEmailFeature>(provider).Email("Hello");
             Assert.AreEqual(1, id);
         }

@@ -32,17 +32,13 @@
             if (dispatch == null) return next();
             var args = ResolveArgs(dispatch, callback, rawCallback,
                                    member, composer, next, provider);
-            switch (args)
+            return args switch
             {
-                case null:
-                    return next(proceed: false);
-                case Promise promise:
-                    return promise.Then((res, _) =>
-                        (Task<TRes>)dispatch.Invoke(this, res as object[]))
-                        .ToTask();
-                default:
-                    return (Task<TRes>)dispatch.Invoke(this, args as object[]);
-            }
+                null => next(proceed: false),
+                Promise promise => promise.Then((res, _) => (Task<TRes>) dispatch.Invoke(this, res as object[]))
+                    .ToTask(),
+                _ => (Task<TRes>) dispatch.Invoke(this, args as object[])
+            };
         }
 
         private static object ResolveArgs(MemberDispatch dispatch,

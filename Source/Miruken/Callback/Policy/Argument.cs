@@ -15,7 +15,7 @@
         public enum Flags
         {
             None       = 0,
-            Array      = 1 << 0,
+            Array      = 1,
             Enumerable = 1 << 1,
             Simple     = 1 << 2,
             Strict     = 1 << 3,

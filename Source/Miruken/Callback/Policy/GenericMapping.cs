@@ -24,21 +24,20 @@
             if (returnType?.ContainsGenericParameters == true)
                 argSources.Add(Tuple.Create(UseReturn, returnType));
 
-            foreach (var source in argSources)
+            foreach (var (idx, argType) in argSources)
             {
-                var sourceArg = source.Item2;
-                if (sourceArg.IsGenericParameter)
+                if (argType.IsGenericParameter)
                 {
-                    if (open.Length == 1 && open[0] == sourceArg)
-                        _mapping[0] = Tuple.Create(source.Item1, UseArgument);
+                    if (open.Length == 1 && open[0] == argType)
+                        _mapping[0] = Tuple.Create(idx, UseArgument);
                     continue;
                 }
-                var sourceGenericArgs = sourceArg.GetGenericArguments();
+                var sourceGenericArgs = argType.GetGenericArguments();
                 for (var i = 0; i < open.Length; ++i)
                 {
                     var index = Array.IndexOf(sourceGenericArgs, open[i]);
                     if (index >= 0)
-                        _mapping[i] = Tuple.Create(source.Item1, index);
+                        _mapping[i] = Tuple.Create(idx, index);
                 }
                 if (!_mapping.Contains(null)) break;
             }

@@ -16,7 +16,7 @@
         [Flags]
         public enum DispatchTypeEnum
         {
-            FastNone      = 1 << 0,
+            FastNone      = 1,
             FastOne       = 1 << 1,
             FastTwo       = 1 << 2,
             FastThree     = 1 << 3,
@@ -125,36 +125,18 @@
             else
             {
                 var arguments = Arguments;
-                switch (arguments.Length)
+                DispatchType |= arguments.Length switch
                 {
-                    case 0:
-                        DispatchType |= FastNone;
-                        break;
-                    case 1:
-                        DispatchType |= FastOne;
-                        break;
-                    case 2:
-                        DispatchType |= FastTwo;
-                        break;
-                    case 3:
-                        DispatchType |= FastThree;
-                        break;
-                    case 4:
-                        DispatchType |= FastFour;
-                        break;
-                    case 5:
-                        DispatchType |= FastFive;
-                        break;
-                    case 6:
-                        DispatchType |= FastSix;
-                        break;
-                    case 7:
-                        DispatchType |= FastSeven;
-                        break;
-                    default:
-                        DispatchType |= LateBound;
-                        break;
-                }
+                    0 => FastNone,
+                    1 => FastOne,
+                    2 => FastTwo,
+                    3 => FastThree,
+                    4 => FastFour,
+                    5 => FastFive,
+                    6 => FastSix,
+                    7 => FastSeven,
+                    _ => LateBound
+                };
             }
 
             var returnType = ReturnType;

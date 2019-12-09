@@ -115,10 +115,8 @@
                     }
 
                     var policies = constructor != null || method.IsStatic
-                        ? staticPolicies ?? (staticPolicies =
-                              new Dictionary<CallbackPolicy, List<PolicyMemberBinding>>())
-                        : instancePolicies ?? (instancePolicies =
-                              new Dictionary<CallbackPolicy, List<PolicyMemberBinding>>());
+                        ? staticPolicies ??= new Dictionary<CallbackPolicy, List<PolicyMemberBinding>>()
+                        : instancePolicies ??= new Dictionary<CallbackPolicy, List<PolicyMemberBinding>>();
 
                     if (!policies.TryGetValue(policy, out var bindings))
                     {
@@ -182,18 +180,13 @@
             if (member.DeclaringType == typeof(object) ||
                 member.DeclaringType == typeof(MarshalByRefObject))
                 return false;
-            switch (member)
+            return member switch
             {
-                case ConstructorInfo _:
-                    return true;
-                case MethodInfo method when
-                    method.IsSpecialName || method.IsFamily:
-                    return false;
-                case PropertyInfo property when !property.CanRead:
-                    return false;
-
-            }
-            return member.IsDefined(typeof(CategoryAttribute));
+                ConstructorInfo _ => true,
+                MethodInfo method when method.IsSpecialName || method.IsFamily => false,
+                PropertyInfo property when !property.CanRead => false,
+                _ => member.IsDefined(typeof(CategoryAttribute))
+            };
         }
 
         private const MemberTypes Members = MemberTypes.Method

@@ -6,7 +6,7 @@ namespace Miruken.Callback
     public enum CallbackOptions
     {
         None       = 0,
-        Duck       = 1 << 0,
+        Duck       = 1,
         Strict     = 1 << 1,
         Broadcast  = 1 << 2,
         BestEffort = 1 << 3,
