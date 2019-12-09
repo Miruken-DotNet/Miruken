@@ -24,8 +24,10 @@
             object target, object[] args, Type returnType = null)
         {
             if (IsLateBound)
+            {
                 return Constructor.Invoke(
                     Binding, null, args, CultureInfo.InvariantCulture);
+            }
 
             if (!_initialized)
             {

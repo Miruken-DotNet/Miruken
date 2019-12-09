@@ -40,12 +40,11 @@ namespace Miruken.Callback.Policy.Rules
                     .All(m => m);
         }
 
-        public PolicyMemberBinding Bind(
-            MethodDispatch dispatch, CategoryAttribute category)
+        public PolicyMemberBinding Bind(MemberDispatch dispatch, CategoryAttribute category)
         {
             var policyBindingInfo = new PolicyMemberBindingInfo(this, dispatch, category);
             ReturnValue?.Configure(policyBindingInfo);
-            var parameters = dispatch.Method.GetParameters();
+            var parameters = dispatch.Member.GetParameters();
             for (var i = 0; i < Args.Length; ++i)
                 Args[i].Configure(parameters[i], policyBindingInfo);
             return _binder(policyBindingInfo);

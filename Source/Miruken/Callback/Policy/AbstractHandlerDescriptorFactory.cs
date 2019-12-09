@@ -56,7 +56,7 @@
             foreach (var member in members)
             {
                 MethodInfo          method              = null;
-                MethodDispatch      methodDispatch      = null;
+                MemberDispatch      methodDispatch      = null;
                 ConstructorInfo     constructor         = null;
                 ConstructorDispatch constructorDispatch = null;
 
@@ -110,8 +110,10 @@
                             throw new InvalidOperationException(
                                 $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
 
-                        methodDispatch ??= new MethodDispatch(method, attributes);
-                        memberBinding  = rule.Bind(methodDispatch, category);
+                        methodDispatch ??= method.ContainsGenericParameters
+                            ? new GenericMethodDispatch(method, rule.Args.Length, attributes)
+                            : (MemberDispatch)new MethodDispatch(method, attributes);
+                        memberBinding = rule.Bind(methodDispatch, category);
                     }
 
                     var policies = constructor != null || method.IsStatic

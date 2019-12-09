@@ -1,6 +1,7 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     public class GenericMapping
@@ -10,8 +11,7 @@
         private const int UseReturn   = -1;
         private const int UseArgument = -2;
 
-        public GenericMapping(Type[] open, Argument[] args,
-                              Type returnType = null)
+        public GenericMapping(Type[] open, IEnumerable<Argument> args, Type returnType = null)
         {
             _mapping = new Tuple<int, int>[open.Length];
 
@@ -51,22 +51,22 @@
         {
             return _mapping.Select(mapping =>
             {
-                switch (mapping.Item1)
+                var (idx, use) = mapping;
+                switch (idx)
                 {
                     case UseReturn when returnType == null:
                         throw new ArgumentException(
                             "Return type is unknown and cannot infer types");
                     case UseReturn:
-                        return mapping.Item2 != UseArgument
-                            ? returnType.GetGenericArguments()[mapping.Item2]
+                        return use != UseArgument
+                            ? returnType.GetGenericArguments()[use]
                             : returnType;
                 }
-                if (mapping.Item2 == UseArgument)
-                    return types[mapping.Item1];
-                var arg = types[mapping.Item1];
+                if (use == UseArgument) return types[idx];
+                var arg = types[idx];
                 if (arg == null)
-                    throw new ArgumentException($"Argument {mapping.Item1} is null and cannot infer types");
-                return arg.GetGenericArguments()[mapping.Item2];
+                    throw new ArgumentException($"Argument {idx} is null and cannot infer types");
+                return arg.GetGenericArguments()[use];
             }).ToArray();
         }
     }

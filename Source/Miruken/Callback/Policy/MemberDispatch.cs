@@ -77,12 +77,6 @@
         public abstract object Invoke(
             object target, object[] args, Type returnType = null);
 
-        public virtual MemberDispatch CloseDispatch(
-            object[] args, Type returnType = null)
-        {
-            return this;
-        }
-
         public MemberPipeline GetPipeline(Type callbackType)
         {
             return MemberPipeline.GetPipeline(callbackType, LogicalReturnType);

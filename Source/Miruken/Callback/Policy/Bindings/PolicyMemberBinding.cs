@@ -101,7 +101,9 @@
             IHandler composer, Type resultType, int? priority, ResultsDelegate results)
         {
             var ruleArgs   = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
-            var dispatcher = Dispatcher.CloseDispatch(ruleArgs, resultType);
+            var dispatcher = Dispatcher is GenericMethodDispatch genericDispatch
+                ? genericDispatch.CloseDispatch(ruleArgs, resultType)
+                : Dispatcher;
 
             if (callback is IDispatchCallbackGuard guard &&
                 !guard.CanDispatch(target, this, dispatcher))
@@ -235,8 +237,8 @@
                     resolved[i] = dispatcher;
                 else if (argumentType == typeof(CallbackContext))
                 {
-                    resolved[i] = callbackContext ?? (callbackContext =
-                        new CallbackContext(callback, composer, this));
+                    resolved[i] = callbackContext ??=
+                        new CallbackContext(callback, composer, this);
                 }
                 else if (argumentType == typeof(object))
                 {
