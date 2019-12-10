@@ -43,8 +43,8 @@ namespace Miruken.Callback
 
     public interface IDispatchCallbackGuard
     {
-        bool CanDispatch(object target, 
-            PolicyMemberBinding binding, MemberDispatch dispatcher);
+        bool CanDispatch(object target, PolicyMemberBinding binding,
+            MemberDispatch dispatcher, out IDisposable reset);
     }
 
     public interface IDispatchCallback

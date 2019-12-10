@@ -47,10 +47,12 @@
             (Callback as IDispatchCallback)?.Policy;
 
         public bool CanDispatch(object target,
-            PolicyMemberBinding binding, MemberDispatch dispatcher)
+            PolicyMemberBinding binding, MemberDispatch dispatcher,
+            out IDisposable reset)
         {
+            reset = null;
             return (Callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(target, binding, dispatcher) != false;
+                   ?.CanDispatch(target, binding, dispatcher, out reset) != false;
         }
 
         public virtual bool Dispatch(object handler,

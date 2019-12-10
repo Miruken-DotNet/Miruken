@@ -201,13 +201,15 @@
         }
 
         public virtual bool CanDispatch(object target,
-            PolicyMemberBinding binding, MemberDispatch dispatcher)
+            PolicyMemberBinding binding, MemberDispatch dispatcher,
+            out IDisposable reset)
         {
             if (InProgress(target, binding, dispatcher))
+            {
+                reset = null;
                 return false;
-            Target     = target;
-            Binding    = binding;
-            Dispatcher = dispatcher;
+            }
+            reset = new Guard(this, target, binding, dispatcher);
             return true;
         }
 
@@ -266,6 +268,34 @@
             {
                 var result = x.CompareTo(y);
                 return result == 0 ? -1 : result;
+            }
+        }
+
+        private class Guard : IDisposable
+        {
+            private readonly Inquiry _inquiry;
+            private readonly object _target;
+            private readonly MemberDispatch _dispatcher;
+            private readonly PolicyMemberBinding _binding;
+
+            public Guard(Inquiry inquiry, object target,
+                PolicyMemberBinding binding, MemberDispatch dispatcher)
+            {
+                _inquiry    = inquiry;
+                _target     = inquiry.Target;
+                _dispatcher = inquiry.Dispatcher;
+                _binding    = inquiry.Binding;
+
+                inquiry.Target     = target;
+                inquiry.Dispatcher = dispatcher;
+                inquiry.Binding    = binding;
+            }
+
+            public void Dispose()
+            {
+                _inquiry.Target     = _target;
+                _inquiry.Dispatcher = _dispatcher;
+                _inquiry.Binding    = _binding;
             }
         }
     }

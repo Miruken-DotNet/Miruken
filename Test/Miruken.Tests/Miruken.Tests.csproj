@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netcoreapp2.2;net48;net461</TargetFrameworks>
+        <TargetFrameworks>netcoreapp3.1;netcoreapp2.2;net48;net461</TargetFrameworks>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -19,7 +19,7 @@
       <DefineConstants>NETSTANDARD;NETSTANDARD2_0</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
       <DefineConstants>NETSTANDARD;NETSTANDARD2_1</DefineConstants>
     </PropertyGroup>
 

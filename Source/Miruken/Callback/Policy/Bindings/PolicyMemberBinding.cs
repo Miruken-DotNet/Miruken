@@ -105,92 +105,98 @@
                 ? genericDispatch.CloseDispatch(ruleArgs, resultType)
                 : Dispatcher;
 
+            IDisposable guardScope = null;
             if (callback is IDispatchCallbackGuard guard &&
-                !guard.CanDispatch(target, this, dispatcher))
+                !guard.CanDispatch(target, this, dispatcher, out guardScope))
                 return false;
 
-            if (CallbackIndex.HasValue)
+            using (guardScope)
             {
-                var index = CallbackIndex.Value;
-                if (!dispatcher.Arguments[index].IsInstanceOf(ruleArgs[index]))
-                    return false;
-            }
-
-            var returnType = dispatcher.ReturnType;
-
-            bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
-            {
-                var args = ResolveArgs(dispatcher, callback, ruleArgs, handler, 
-                    out var context, out var failedArg);
-
-                switch (args)
+                if (CallbackIndex.HasValue)
                 {
-                    case null:
-                        isPromise = false;
-                        var type = target as Type ?? target.GetType();
-                        res = Task.FromException(new InvalidOperationException(
-                            $"Failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}' for signature {dispatcher.Member} in '{type}'"));
-                        return false;
-                    case object[] array:
-                        isPromise = false;
-                        res = dispatcher.Invoke(target, array, resultType);
-                        return context?.Unhandled != true;
-                    case Promise<object[]> promise:
-                        isPromise = true;
-                        res = promise.Then((array, _) => dispatcher.Invoke(target, array, resultType));
-                        return context?.Unhandled != true;
-                    default:
-                        isPromise = false;
-                        res = Task.FromException(new InvalidOperationException(
-                            $"Unable to resolve arguments for {dispatcher.Member}"));
+                    var index = CallbackIndex.Value;
+                    if (!dispatcher.Arguments[index].IsInstanceOf(ruleArgs[index]))
                         return false;
                 }
-            }
 
-            object result;
-            var isAsync = false;
+                var returnType = dispatcher.ReturnType;
 
-            if ((callback as IFilterCallback)?.CanFilter == false)
-            {             
-                return ResolveArgsAndDispatch(composer, out result, out isAsync) && 
-                    Accept(callback, result, returnType, priority, results, isAsync);
-            }
-
-            var filterCallback = GetCallbackInfo(
-                callback, ruleArgs, dispatcher, out var callbackType);
-
-            var targetFilters  = target is IFilter targetFilter
-                ? new [] {new FilterInstancesProvider(true, targetFilter)}
-                : null;
-
-            var filters = composer.GetOrderedFilters(
-                this, dispatcher, callback, callbackType, Filters,
-                dispatcher.Owner.Filters, Policy.Filters, targetFilters);
-
-            if (filters == null) return false;
-
-            if (filters.Count == 0)
-            {
-                if (!ResolveArgsAndDispatch(composer, out result, out isAsync))
-                    return false;
-            }
-            else if (!dispatcher.GetPipeline(callbackType).Invoke(
-                this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
+                bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
                 {
-                    if (!ResolveArgsAndDispatch(comp, out var baseResult, out isAsync))
-                    {
-                        completed = false;
-                        return baseResult;
-                    }
-                    completed = Policy.AcceptResult?.Invoke(baseResult, this)
-                              ?? baseResult != null;
-                    return completed ? baseResult
-                         : Task.FromException(new NotSupportedException(
-                                $"{dispatcher.Member} not handled"));
-                }, composer, filters, out result))
-                return false;
+                    var args = ResolveArgs(dispatcher, callback, ruleArgs, handler,
+                        out var context, out var failedArg);
 
-            return Accept(callback, result, returnType, priority, results, isAsync);
+                    switch (args)
+                    {
+                        case null:
+                            isPromise = false;
+                            var type = target as Type ?? target.GetType();
+                            res = Task.FromException(new InvalidOperationException(
+                                $"Failed to resolve argument '{failedArg.Parameter.Name}' of type '{failedArg.ParameterType.FullName}' for signature {dispatcher.Member} in '{type}'"));
+                            return false;
+                        case object[] array:
+                            isPromise = false;
+                            res = dispatcher.Invoke(target, array, resultType);
+                            return context?.Unhandled != true;
+                        case Promise<object[]> promise:
+                            isPromise = true;
+                            res = promise.Then((array, _) => dispatcher.Invoke(target, array, resultType));
+                            return context?.Unhandled != true;
+                        default:
+                            isPromise = false;
+                            res = Task.FromException(new InvalidOperationException(
+                                $"Unable to resolve arguments for {dispatcher.Member}"));
+                            return false;
+                    }
+                }
+
+                object result;
+                var isAsync = false;
+
+                if ((callback as IFilterCallback)?.CanFilter == false)
+                {
+                    return ResolveArgsAndDispatch(composer, out result, out isAsync) &&
+                           Accept(callback, result, returnType, priority, results, isAsync);
+                }
+
+                var filterCallback = GetCallbackInfo(
+                    callback, ruleArgs, dispatcher, out var callbackType);
+
+                var targetFilters = target is IFilter targetFilter
+                    ? new[] { new FilterInstancesProvider(true, targetFilter) }
+                    : null;
+
+                var filters = composer.GetOrderedFilters(
+                    this, dispatcher, callback, callbackType, Filters,
+                    dispatcher.Owner.Filters, Policy.Filters, targetFilters);
+
+                if (filters == null) return false;
+
+                if (filters.Count == 0)
+                {
+                    if (!ResolveArgsAndDispatch(composer, out result, out isAsync))
+                        return false;
+                }
+                else if (!dispatcher.GetPipeline(callbackType).Invoke(
+                    this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
+                    {
+                        if (!ResolveArgsAndDispatch(comp, out var baseResult, out isAsync))
+                        {
+                            completed = false;
+                            return baseResult;
+                        }
+
+                        completed = Policy.AcceptResult?.Invoke(baseResult, this) 
+                                    ?? baseResult != null;
+
+                        return completed ? baseResult
+                             : Task.FromException(new NotSupportedException(
+                                 $"{dispatcher.Member} not handled"));
+                    }, composer, filters, out result))
+                    return false;
+
+                return Accept(callback, result, returnType, priority, results, isAsync);
+            }
         }
 
         private bool Accept(object callback, object result,

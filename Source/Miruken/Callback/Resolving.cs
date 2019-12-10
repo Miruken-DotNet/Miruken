@@ -2,6 +2,7 @@
 {
     using System;
     using System.Diagnostics;
+    using Infrastructure;
     using Policy;
     using Policy.Bindings;
 
@@ -24,11 +25,32 @@
         }
 
         public override bool CanDispatch(object target,
-            PolicyMemberBinding binding, MemberDispatch dispatcher)
+            PolicyMemberBinding binding, MemberDispatch dispatcher,
+            out IDisposable reset)
         {
-            return base.CanDispatch(target, binding, dispatcher) &&
-                (_callback as IDispatchCallbackGuard)
-                   ?.CanDispatch(target, binding, dispatcher) != false;
+            reset = null;
+            if (!base.CanDispatch(target, binding, dispatcher, out var outer))
+                return false;
+
+            IDisposable inner = null;
+            var innerCheck = (_callback as IDispatchCallbackGuard)
+                ?.CanDispatch(target, binding, dispatcher, out inner);
+            switch (innerCheck)
+            {
+                case null:
+                    reset = outer;
+                    return true;
+                case false:
+                    outer.Dispose();
+                    return false;
+                default:
+                    reset = new DisposableAction(() =>
+                    {
+                        inner?.Dispose();
+                        outer?.Dispose();
+                    });
+                    return true;
+            }
         }
 
         protected override bool IsSatisfied(
