@@ -32,10 +32,8 @@
         public static void Initialize(TestContext context)
         {
             Handles.Policy.AddFilters(
-                new FilterAttribute(typeof(LogFilter<,>)),
-                new FilterAttribute(typeof(ConsoleFilter)));
-            HandleMethodBinding.AddGlobalFilters(
-                new FilterAttribute(typeof(LogFilter<,>)));
+                new LogAttribute(), new FilterAttribute(typeof(ConsoleFilter)));
+            HandleMethodBinding.AddGlobalFilters(new LogAttribute());
         }
 
         private IHandlerDescriptorFactory _factory;

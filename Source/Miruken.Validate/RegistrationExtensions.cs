@@ -11,6 +11,8 @@ namespace Miruken.Validate
             if (!registration.CanRegister(typeof(RegistrationExtensions)))
                 return registration;
 
+            registration.AddFilters(new ValidateAttribute());
+
             return registration
                 .Sources(sources => sources.FromAssemblyOf<Validation>())
                 .Select((selector, publicOnly) =>
