@@ -1228,7 +1228,7 @@ namespace Miruken.Tests.Concurrency
             var promise = new Promise<string>((resolve, reject) =>
                 ThreadPool.QueueUserWorkItem(_ => Promise.Delay(.2.Sec())
                     .Then((r, s) => resolve("Hello", false))))
-                .Timeout(.4.Sec())
+                .Timeout(1.Sec())
                 .Then((r, s) =>
                 {
                     Assert.AreEqual("Hello", r);
