@@ -33,7 +33,7 @@ namespace Miruken.Register
 
         public IServiceProvider CreateServiceProvider(Registration registration)
         {
-            return registration.Build(_factory);
+            return registration.TrackSingletons().Build(_factory);
         }
     }
 }

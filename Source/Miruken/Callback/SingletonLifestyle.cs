@@ -1,6 +1,9 @@
 ﻿namespace Miruken.Callback
 {
+    using System;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
+    using Infrastructure;
     using Policy.Bindings;
 
     public class SingletonLifestyle<T> : Lifestyle<T>
@@ -27,7 +30,7 @@
                         {
                             case TaskStatus.RanToCompletion:
                                 _instance = result.Result;
-                                return result;
+                                break;
                             case TaskStatus.Faulted:
                             case TaskStatus.Canceled:
                                 return result;
@@ -36,6 +39,8 @@
                                 break;
                         }
                     }
+                    if (_instance is IDisposable disposable)
+                        SingletonTracker.Add(disposable);
                 }
             }
             return _instance != null ? Task.FromResult(_instance) : null;
@@ -47,6 +52,37 @@
         public SingletonAttribute()
             : base(typeof(SingletonLifestyle<>))
         {          
+        }
+    }
+    
+    internal static class SingletonTracker
+    {
+        private static ConcurrentBag<IDisposable> _disposables = new ConcurrentBag<IDisposable>();
+
+        public static IDisposable Disposable => new DisposableAction(Dispose);
+
+        internal static bool Track { get; set; }
+
+        internal static void Add(IDisposable disposable)
+        {
+            if (Track)
+                _disposables.Add(disposable);
+        }
+
+        internal static void Dispose()
+        {
+            foreach (var disposable in _disposables)
+            {
+                try
+                {
+                   disposable.Dispose();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+            _disposables = new ConcurrentBag<IDisposable>();
         }
     }
 }

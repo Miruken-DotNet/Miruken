@@ -113,6 +113,12 @@ namespace Miruken.Register
             return this;
         }
 
+        public Registration TrackSingletons()
+        {
+            SingletonTracker.Track = true;
+            return this;
+        }
+
         public Context Build(IHandlerDescriptorFactory factory = null)
         {
             _explicitServices.RemoveAll<Registration>();
@@ -164,6 +170,9 @@ namespace Miruken.Register
             context.AddHandlers((new StaticHandler() + new Stash(true)).Break());
 
             HandlerDescriptorFactory.UseFactory(factory);
+
+            if (SingletonTracker.Track)
+                context.ContextEnded += (ctx, _) => SingletonTracker.Dispose();
 
             return context;
         }
