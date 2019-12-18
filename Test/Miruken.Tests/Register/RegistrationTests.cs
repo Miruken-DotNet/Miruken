@@ -214,18 +214,6 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(s.Service);
         }
 
-        [TestMethod]
-        public void Should_Track_Singletons()
-        {
-            using var handler = new ServiceCollection()
-                .AddSingleton<Service2>()
-                .AddMiruken()
-                .TrackSingletons()
-                .Build();
-            var service2 = handler.Resolve<Service2>();
-            Assert.IsFalse(service2.Disposed);
-        }
-
         public class Action
         {
             public int Handled { get; set; }
@@ -256,17 +244,10 @@ namespace Miruken.Tests.Register
             public event ContextChangedDelegate ContextChanged;
         }
 
-        public class Service2 : IService, IDisposable
+        public class Service2 : IService
         {
-            public bool Disposed { get; private set; }
-
             public void DoSomething()
             {
-            }
-
-            public void Dispose()
-            {
-                Disposed = true;
             }
         }
 
