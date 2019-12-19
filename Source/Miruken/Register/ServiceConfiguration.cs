@@ -13,8 +13,8 @@ namespace Miruken.Register
     {
         private readonly ServiceDescriptor _serviceDescriptor;
         
-        private static readonly ContextualAttribute Scoped    = new ContextualAttribute();
-        private static readonly SingletonAttribute  Singleton = new SingletonAttribute();
+        private static readonly LifestyleAttribute Scoped    = new ContextualAttribute();
+        private static readonly LifestyleAttribute Singleton = new ContextualAttribute { Rooted = true };
 
         private ServiceConfiguration(ServiceDescriptor serviceDescriptor)
         {
@@ -23,10 +23,17 @@ namespace Miruken.Register
 
         private void Configure(HandlerDescriptor descriptor, PolicyMemberBinding binding)
         {
-            if (binding.Dispatcher.IsConstructor)
+            var lifestyle = GetLifestyle(binding);
+            if (lifestyle != null)
             {
-                var lifestyle = GetLifestyle(binding);
-                if (lifestyle != null) return;
+                if (lifestyle is SingletonAttribute)
+                {
+                    binding.RemoveFilters(lifestyle);
+                    binding.AddFilters(Singleton);
+                }
+            }
+            else if (binding.Dispatcher.IsConstructor)
+            {
                 switch (_serviceDescriptor.Lifetime)
                 {
                     case ServiceLifetime.Scoped:
@@ -44,10 +51,9 @@ namespace Miruken.Register
             return new ServiceConfiguration(descriptor).Configure;
         }
 
-        private static Type GetLifestyle(IFiltered binding)
+        private static LifestyleAttribute GetLifestyle(IFiltered binding)
         {
             return binding.Filters.OfType<LifestyleAttribute>()
-                .Select(provider => provider.LifestyleType)
                 .FirstOrDefault();
         }
     }

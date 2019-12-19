@@ -75,7 +75,7 @@ namespace Miruken.Register
             {
             }
  
-            [Provides, Singleton, SkipFilters]
+            [Provides, Contextual(Rooted = true), SkipFilters]
             public T Create(Inquiry inquiry, IHandler composer) =>
                 CreateInstance(inquiry, composer);
         }

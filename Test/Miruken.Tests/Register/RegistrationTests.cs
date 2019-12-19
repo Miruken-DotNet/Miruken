@@ -54,6 +54,20 @@ namespace Miruken.Tests.Register
         }
 
         [TestMethod]
+        public void Should_Register_Singleton()
+        {
+            using var handler = new ServiceCollection()
+                .AddSingleton<Service1>()
+                .AddMiruken()
+                .Build();
+            var service = handler.Resolve<IService>();
+            Assert.AreSame(service, handler.Resolve<IService>());
+            var contextual = service as IContextual;
+            Assert.IsNotNull(contextual?.Context);
+            Assert.IsNull(contextual.Context.Parent);
+        }
+
+        [TestMethod]
         public void Should_Register_Scoped()
         {
             using var handler = new ServiceCollection()
@@ -130,7 +144,9 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(service);
             Assert.AreSame(service, handler.Resolve<IService>());
             Assert.AreSame(service, handler.Resolve<Service1>());
-            Assert.IsNull((service as IContextual)?.Context);
+            var contextual = service as IContextual;
+            Assert.IsNotNull(contextual?.Context);
+            Assert.IsNull(contextual.Context.Parent);
         }
 
         [TestMethod]
@@ -151,6 +167,38 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(context.Parent);
             Assert.AreNotSame(service, scopedService);
             Assert.AreSame(service, handler.Resolve<IService>());
+        }
+
+        [TestMethod]
+        public void Should_Dispose_Singletons()
+        {
+            Service2 service;
+            using (var handler = new ServiceCollection()
+                .AddSingleton<Service2>()
+                .AddMiruken()
+                .Build())
+            {
+                service = handler.Resolve<Service2>();
+                Assert.AreSame(service, handler.Resolve<Service2>());
+            }
+
+            Assert.IsTrue(service.Disposed);
+        }
+
+        [TestMethod]
+        public void Should_Dispose_Scoped()
+        {
+            Service2 service;
+            using (var handler = new ServiceCollection()
+                .AddScoped<Service2>()
+                .AddMiruken()
+                .Build())
+            {
+                service = handler.Resolve<Service2>();
+                Assert.AreSame(service, handler.Resolve<Service2>());
+            }
+
+            Assert.IsTrue(service.Disposed);
         }
 
         [TestMethod]
@@ -244,10 +292,17 @@ namespace Miruken.Tests.Register
             public event ContextChangedDelegate ContextChanged;
         }
 
-        public class Service2 : IService
+        public class Service2 : IService, IDisposable
         {
+            public bool Disposed { get; set; }
+
             public void DoSomething()
             {
+            }
+
+            public void Dispose()
+            {
+                Disposed = true;
             }
         }
 
