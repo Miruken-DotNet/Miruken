@@ -128,11 +128,11 @@
                 var returnType = dispatcher.ReturnType;
 
                 bool ResolveArgsAndDispatch(
-                    IHandler handler, bool singleton,
+                    IHandler handler, ICollection<(IFilter, IFilterProvider)> f,
                     out object res, out bool isPromise)
                 {
                     var args = ResolveArgs(dispatcher, callback, ruleArgs,
-                        singleton, handler, out var context, out var failedArg);
+                        f, handler, out var context, out var failedArg);
 
                     switch (args)
                     {
@@ -163,7 +163,7 @@
 
                 if ((callback as IFilterCallback)?.CanFilter == false)
                 {
-                    return ResolveArgsAndDispatch(composer, false, out result, out isAsync) &&
+                    return ResolveArgsAndDispatch(composer, null, out result, out isAsync) &&
                            Accept(callback, result, returnType, priority, results, isAsync);
                 }
 
@@ -182,7 +182,7 @@
 
                 if (filters.Count == 0)
                 {
-                    if (!ResolveArgsAndDispatch(composer, false, out result, out isAsync))
+                    if (!ResolveArgsAndDispatch(composer, null, out result, out isAsync))
                         return false;
                 }
                 else if (!dispatcher.GetPipeline(callbackType).Invoke(
@@ -192,7 +192,7 @@
                             f.Item2 is SingletonAttribute ||
                             f.Item2 is ContextualAttribute ctx && ctx.Rooted);
 
-                        if (!ResolveArgsAndDispatch(comp, singleton, out var baseResult, out isAsync))
+                        if (!ResolveArgsAndDispatch(comp, filters, out var baseResult, out isAsync))
                         {
                             completed = false;
                             return baseResult;
@@ -227,9 +227,9 @@
             return accepted;
         }
 
-        private object ResolveArgs(MemberDispatch dispatcher,
-            object callback, object[] ruleArgs, bool singleton, IHandler composer,
-            out CallbackContext callbackContext, out Argument failedArg)
+        private object ResolveArgs(MemberDispatch dispatcher, object callback,
+            object[] ruleArgs, ICollection<(IFilter, IFilterProvider)> filters,
+            IHandler composer, out CallbackContext callbackContext, out Argument failedArg)
         {
             failedArg       = null;
             callbackContext = null;
@@ -266,11 +266,11 @@
                 }
                 else
                 {
-                    if (singleton && (argumentType == typeof(IServiceProvider)
+                    if (argumentType == typeof(IServiceProvider)
 #if NETSTANDARD
-                            || argumentType == typeof(IServiceScopeFactory)
+                        || argumentType == typeof(IServiceScopeFactory)
 #endif
-                        ))
+                        )
                     {
                         var context = composer.Resolve<Context>();
                         if (context != null)
