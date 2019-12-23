@@ -46,7 +46,7 @@
             public T Body { get; set; }
         }
 
-        private interface IEmailFeature : IResolving
+        private interface IEmailFeature : IProtocol
         {
             int Count { get; }
 
@@ -88,7 +88,7 @@
             }
         }
 
-        private interface IBilling : IResolving
+        private interface IBilling : IProtocol
         {
             decimal Bill(decimal amount);
         }

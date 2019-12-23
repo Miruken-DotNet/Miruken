@@ -70,8 +70,9 @@
 
             ArgumentFlags = ExtractFlags(ParameterType, flags);
 
-            if (Resolver == null && ParameterType.IsInterface &&
-                (ParameterType.Is<IProtocol>() || ParameterType.Is<IResolving>()))
+            if (Resolver == null && 
+                ParameterType.IsInterface &&
+                ParameterType.Is<IProtocol>())
                 Resolver = ProxyAttribute.Instance;
 
             if (Key == null)

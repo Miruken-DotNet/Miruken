@@ -3,10 +3,16 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
+    using Context;
     using Infrastructure;
     using Rules;
+
+#if NETSTANDARD
+    using Microsoft.Extensions.DependencyInjection;
+#endif
 
     public delegate PolicyMemberBinding BindMemberDelegate(
         CallbackPolicy policy,
@@ -121,10 +127,12 @@
 
                 var returnType = dispatcher.ReturnType;
 
-                bool ResolveArgsAndDispatch(IHandler handler, out object res, out bool isPromise)
+                bool ResolveArgsAndDispatch(
+                    IHandler handler, bool singleton,
+                    out object res, out bool isPromise)
                 {
-                    var args = ResolveArgs(dispatcher, callback, ruleArgs, handler,
-                        out var context, out var failedArg);
+                    var args = ResolveArgs(dispatcher, callback, ruleArgs,
+                        singleton, handler, out var context, out var failedArg);
 
                     switch (args)
                     {
@@ -155,7 +163,7 @@
 
                 if ((callback as IFilterCallback)?.CanFilter == false)
                 {
-                    return ResolveArgsAndDispatch(composer, out result, out isAsync) &&
+                    return ResolveArgsAndDispatch(composer, false, out result, out isAsync) &&
                            Accept(callback, result, returnType, priority, results, isAsync);
                 }
 
@@ -174,13 +182,17 @@
 
                 if (filters.Count == 0)
                 {
-                    if (!ResolveArgsAndDispatch(composer, out result, out isAsync))
+                    if (!ResolveArgsAndDispatch(composer, false, out result, out isAsync))
                         return false;
                 }
                 else if (!dispatcher.GetPipeline(callbackType).Invoke(
                     this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                     {
-                        if (!ResolveArgsAndDispatch(comp, out var baseResult, out isAsync))
+                        var singleton = filters.Any(f =>
+                            f.Item2 is SingletonAttribute ||
+                            f.Item2 is ContextualAttribute ctx && ctx.Rooted);
+
+                        if (!ResolveArgsAndDispatch(comp, singleton, out var baseResult, out isAsync))
                         {
                             completed = false;
                             return baseResult;
@@ -216,7 +228,7 @@
         }
 
         private object ResolveArgs(MemberDispatch dispatcher,
-            object callback, object[] ruleArgs, IHandler composer,
+            object callback, object[] ruleArgs, bool singleton, IHandler composer,
             out CallbackContext callbackContext, out Argument failedArg)
         {
             failedArg       = null;
@@ -235,8 +247,24 @@
                 var index        = i;
                 var argument     = arguments[i];
                 var argumentType = argument.ArgumentType;
+
                 if (argumentType == typeof(IHandler))
                     resolved[i] = composer;
+                else if (singleton && 
+                    (argumentType == typeof(IServiceProvider)
+#if NETSTANDARD
+                     || argumentType == typeof(IServiceScopeFactory)
+#endif
+                ))
+                {
+                    var context = composer.Resolve<Context>();
+                    if (context == null)
+                    {
+                        failedArg = argument;
+                        return null;
+                    }
+                    resolved[i] = context.Root;
+                }
                 else if (argumentType.Is<MemberBinding>())
                     resolved[i] = this;
                 else if (argumentType.Is<MemberDispatch>())

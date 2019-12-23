@@ -262,6 +262,20 @@ namespace Miruken.Tests.Register
             Assert.IsNotNull(s.Service);
         }
 
+        [TestMethod]
+        public void Should_Use_Root_Context_For_Singleton_ServiceProvider_And_ScopeFactory()
+        {
+            using var context = new ServiceCollection()
+                .AddSingleton<ServiceWithServiceProvider>()
+                .AddMiruken()
+                .Build();
+            using var child = context.CreateChild();
+            var service = child.Resolve<ServiceWithServiceProvider>();
+            Assert.IsNotNull(service);
+            Assert.AreSame(context, service.Services);
+            Assert.AreSame(context, service.ScopeFactory);
+        }
+
         public class Action
         {
             public int Handled { get; set; }
@@ -330,6 +344,19 @@ namespace Miruken.Tests.Register
             }
 
             public IService Service { get; }
+        }
+
+        public class ServiceWithServiceProvider
+        {
+            public ServiceWithServiceProvider(
+                IServiceProvider services, IServiceScopeFactory scopeFactory)
+            {
+                Services = services;
+                ScopeFactory = scopeFactory;
+            }
+
+            public IServiceProvider     Services     { get; }
+            public IServiceScopeFactory ScopeFactory { get; }
         }
     }
 }
