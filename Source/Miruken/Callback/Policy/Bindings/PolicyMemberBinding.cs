@@ -188,10 +188,6 @@
                 else if (!dispatcher.GetPipeline(callbackType).Invoke(
                     this, target, filterCallback, callback, (IHandler comp, out bool completed) =>
                     {
-                        var singleton = filters.Any(f =>
-                            f.Item2 is SingletonAttribute ||
-                            f.Item2 is ContextualAttribute ctx && ctx.Rooted);
-
                         if (!ResolveArgsAndDispatch(comp, filters, out var baseResult, out isAsync))
                         {
                             completed = false;
@@ -272,11 +268,18 @@
 #endif
                         )
                     {
-                        var context = composer.Resolve<Context>();
-                        if (context != null)
+                        var singletonLike = filters.Any(f =>
+                            f.Item2 is SingletonAttribute ||
+                            f.Item2 is ContextualAttribute ctx && ctx.Rooted);
+
+                        if (singletonLike)
                         {
-                            resolved[i] = context.Root;
-                            continue;
+                            var context = composer.Resolve<Context>();
+                            if (context != null)
+                            {
+                                resolved[i] = context.Root;
+                                continue;
+                            }
                         }
                     }
 
