@@ -250,21 +250,6 @@
 
                 if (argumentType == typeof(IHandler))
                     resolved[i] = composer;
-                else if (singleton && 
-                    (argumentType == typeof(IServiceProvider)
-#if NETSTANDARD
-                     || argumentType == typeof(IServiceScopeFactory)
-#endif
-                ))
-                {
-                    var context = composer.Resolve<Context>();
-                    if (context == null)
-                    {
-                        failedArg = argument;
-                        return null;
-                    }
-                    resolved[i] = context.Root;
-                }
                 else if (argumentType.Is<MemberBinding>())
                     resolved[i] = this;
                 else if (argumentType.Is<MemberDispatch>())
@@ -281,6 +266,20 @@
                 }
                 else
                 {
+                    if (singleton && (argumentType == typeof(IServiceProvider)
+#if NETSTANDARD
+                            || argumentType == typeof(IServiceScopeFactory)
+#endif
+                        ))
+                    {
+                        var context = composer.Resolve<Context>();
+                        if (context != null)
+                        {
+                            resolved[i] = context.Root;
+                            continue;
+                        }
+                    }
+
                     var resolver = argument.Resolver ?? ResolvingAttribute.Default;
                     resolver.ValidateArgument(argument);
                     var arg = resolver.ResolveArgumentAsync(parent, argument, composer);
