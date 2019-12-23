@@ -268,9 +268,9 @@
 #endif
                         )
                     {
-                        var singletonLike = filters.Any(f =>
+                        var singletonLike = filters?.Any(f =>
                             f.Item2 is SingletonAttribute ||
-                            f.Item2 is ContextualAttribute ctx && ctx.Rooted);
+                            f.Item2 is ContextualAttribute ctx && ctx.Rooted) == true;
 
                         if (singletonLike)
                         {
