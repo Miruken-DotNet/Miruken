@@ -23,30 +23,28 @@
             var options  = request.GetOptions();
             var composer = request.GetComposer();
 
-            using (var cts = GetCancellationTokenSource(
-                request, options, cancellationToken))
+            using var cts = GetCancellationTokenSource(
+                request, options, cancellationToken);
+            var cancel = cts?.Token ?? cancellationToken;
+
+            Task<HttpResponseMessage> Send() => base.SendAsync(request, cancel);
+
+            var pipeline = options?.Pipeline != null
+                ? options.Pipeline.GetInvocationList()
+                    .Cast<HttpRequestPipeline>().Reverse()
+                    .Aggregate((Func<Task<HttpResponseMessage>>) Send,
+                        (next, pipe) => () => pipe(
+                            request, cancel, composer, next))
+                : Send;
+
+            try
             {
-                var cancel = cts?.Token ?? cancellationToken;
-
-                Task<HttpResponseMessage> Send() => base.SendAsync(request, cancel);
-
-                var pipeline = options?.Pipeline != null
-                             ? options.Pipeline.GetInvocationList()
-                                 .Cast<HttpRequestPipeline>().Reverse()
-                                 .Aggregate((Func<Task<HttpResponseMessage>>) Send,
-                                    (next, pipe) => () => pipe(
-                                        request, cancel, composer, next))
-                             : Send;
-
-                try
-                {
-                    return await pipeline().ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                    when (!cancellationToken.IsCancellationRequested)
-                {
-                    throw new TimeoutException();
-                }
+                return await pipeline().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+                when (!cancellationToken.IsCancellationRequested)
+            {
+                throw new TimeoutException();
             }
         }
 

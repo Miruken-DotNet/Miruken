@@ -41,33 +41,32 @@
             out object result)
         {
             var completed = true;
-            using (var pipeline = filters.GetEnumerator())
+            using var pipeline = filters.GetEnumerator();
+
+            Task<TRes> Next(IHandler comp, bool proceed)
             {
-                Task<TRes> Next(IHandler comp, bool proceed)
+                if (!proceed)
                 {
-                    if (!proceed)
-                    {
-                        completed = false;
-                        return Task.FromResult(default(TRes));
-                    }
-
-                    composer = comp ?? composer;
-                    while (pipeline.MoveNext())
-                    {
-                        var (filter, provider) = pipeline.Current;
-                        if (filter is IFilter<TCb, TRes> typedFilter)
-                            return typedFilter.Next((TCb)callback, rawCallback,
-                                binding, composer, Next, provider);
-                    }
-
-                    return (Task<TRes>) binding.CoerceResult(
-                        complete(composer, out completed),
-                        typeof(Task<TRes>));
+                    completed = false;
+                    return Task.FromResult(default(TRes));
                 }
 
-                result = Next(composer, true);
-                return completed;
+                composer = comp ?? composer;
+                while (pipeline.MoveNext())
+                {
+                    var (filter, provider) = pipeline.Current;
+                    if (filter is IFilter<TCb, TRes> typedFilter)
+                        return typedFilter.Next((TCb)callback, rawCallback,
+                            binding, composer, Next, provider);
+                }
+
+                return (Task<TRes>) binding.CoerceResult(
+                    complete(composer, out completed),
+                    typeof(Task<TRes>));
             }
+
+            result = Next(composer, true);
+            return completed;
         }
     }
 }

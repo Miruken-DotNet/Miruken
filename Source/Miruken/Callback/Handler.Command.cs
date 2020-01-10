@@ -13,7 +13,6 @@
             var command = new Command(callback);
             if (!handler.Handle(command))
                 throw new NotSupportedException($"{callback.GetType()} not handled");
-            var unused = command.Result;
         }
 
         public static Promise CommandAsync(this IHandler handler, object callback)
@@ -52,7 +51,8 @@
             try
             {
                 if (!handler.Handle(command))
-                    throw new NotSupportedException($"{callback.GetType()} not handled");
+                    return Promise<TRes>.Rejected(
+                        new NotSupportedException($"{callback.GetType()} not handled"));
                 var promise = (Promise)command.Result;
                 return (Promise<TRes>)promise.Coerce(typeof(Promise<TRes>));
             }

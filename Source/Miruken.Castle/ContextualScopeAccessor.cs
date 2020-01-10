@@ -61,17 +61,15 @@
 
             public void Dispose()
             {
-                using (var token = _lock.ForReadingUpgradeable())
+                using var token = _lock.ForReadingUpgradeable();
+                if (_cache == null) return;
+                token.Upgrade();
+                var localCache = Interlocked.Exchange(ref _cache, null);
+                var burdens    = localCache?.Values.Reverse();
+                if (burdens != null)
                 {
-                    if (_cache == null) return;
-                    token.Upgrade();
-                    var localCache = Interlocked.Exchange(ref _cache, null);
-                    var burdens    = localCache?.Values.Reverse();
-                    if (burdens != null)
-                    {
-                        foreach (var burden in burdens)
-                            burden.Release();
-                    }
+                    foreach (var burden in burdens)
+                        burden.Release();
                 }
             }
 
@@ -79,14 +77,12 @@
                 ComponentModel model, ScopedInstanceActivationCallback createInstance)
             {
                 AssertNotDisposed();
-                using (var token = _lock.ForReadingUpgradeable())
-                {
-                    if (_cache.TryGetValue(model, out var burden)) return burden;
-                    token.Upgrade();
-                    burden = createInstance(OnCreated);
-                    _cache[model] = burden;
-                    return burden;
-                }
+                using var token = _lock.ForReadingUpgradeable();
+                if (_cache.TryGetValue(model, out var burden)) return burden;
+                token.Upgrade();
+                burden = createInstance(OnCreated);
+                _cache[model] = burden;
+                return burden;
             }
 
             private void OnCreated(Burden burden)

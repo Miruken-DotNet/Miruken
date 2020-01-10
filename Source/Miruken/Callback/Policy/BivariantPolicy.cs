@@ -68,21 +68,17 @@
                 if (inEqual && outEqual) return null;
                 if (!outEqual)
                 {
-                    using (var k = Output.GetCompatibleKeys(output,
-                        new[] { outKey }).GetEnumerator())
-                    {
-                        if (!k.MoveNext() || k.Current == null)
-                            return null;
-                    }
+                    using var k = Output.GetCompatibleKeys(output,
+                        new[] { outKey }).GetEnumerator();
+                    if (!k.MoveNext() || k.Current == null)
+                        return null;
                 }
                 if (!inEqual)
                 {
-                    using (var k = Input.GetCompatibleKeys(input,
-                        new[] { inKey }).GetEnumerator())
-                    {
-                        if (!k.MoveNext() || k.Current == null)
-                            return null;
-                    }
+                    using var k = Input.GetCompatibleKeys(input,
+                        new[] { inKey }).GetEnumerator();
+                    if (!k.MoveNext() || k.Current == null)
+                        return null;
                 }
                 return testKey;
             }).Where(k => k != null);
