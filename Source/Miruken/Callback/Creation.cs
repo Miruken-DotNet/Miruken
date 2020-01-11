@@ -113,9 +113,7 @@
 
         public bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
-            var count   = _instances.Count + _promises.Count;
-            var handled = Policy.Dispatch(handler, this, greedy, composer, AddInstance);
-            return handled || _instances.Count + _promises.Count > count;
+            return Policy.Dispatch(handler, this, greedy, composer, AddInstance);
         }
 
         private string DebuggerDisplay => $"Create | {Type}";
