@@ -81,6 +81,8 @@
 
             foreach (var provider in allProviders)
             {
+                if (!provider.AppliesTo(callback, callbackType))
+                    continue;
                 var found   = false;
                 var filters = provider.GetFilters(
                     binding, dispatcher, callback, callbackType, handler);

@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Context;
 
     [TestClass]
     public class HandlerCreateTests
@@ -87,7 +88,7 @@
 
         private class Controller : IController
         {
-            [Creates]
+            [Creates, Contextual]
             public Controller(ViewFactory viewFactory)
             {
                 ViewFactory = viewFactory;

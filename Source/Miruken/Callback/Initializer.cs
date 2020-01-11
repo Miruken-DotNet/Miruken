@@ -24,7 +24,7 @@
                     return result;
                 try
                 {
-                    if (initialize.Initialize() is Promise promise)
+                    if (initialize.Initialize() is { } promise)
                     {
                         await promise.Then((res, _) =>
                         {
@@ -51,12 +51,17 @@
 
     public class InitializeProvider : IFilterProvider
     {
-        public bool Required { get; } = true;
-
         public static readonly InitializeProvider Instance = new InitializeProvider();
 
         private InitializeProvider()
         {          
+        }
+
+        public bool Required { get; } = true;
+
+        public bool AppliesTo(object callback, Type callbackType)
+        {
+            return callback is Inquiry;
         }
 
         public IEnumerable<IFilter> GetFilters(

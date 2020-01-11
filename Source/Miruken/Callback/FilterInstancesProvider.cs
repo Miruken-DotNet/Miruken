@@ -25,6 +25,8 @@
 
         public bool Required { get; }
 
+        public bool AppliesTo(object callback, Type callbackType) => true;
+
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             object callback, Type callbackType, IHandler composer)

@@ -11,7 +11,7 @@
             if (handler == null) return null;
             var creation = new Creation(type);
             return handler.Handle(creation) ? creation.Result
-                 : throw new NotSupportedException($"Unable to create instance of {type.FullName}.  Did you forget to add a [Creates] attribute to the constructors?");
+                 : throw new NotSupportedException($"Unable to create an instance of {type.FullName}.  Did you forget to add a [Creates] attribute to the constructors?");
         }
 
         public static Promise CreateAsync(this IHandler handler, Type type)
@@ -23,7 +23,7 @@
                 return handler.Handle(creation)
                      ? (Promise)creation.Result
                      : Promise.Rejected(new NotSupportedException(
-                         $"Unable to create instance of {type.FullName}.  Did you forget to add a [Creates] attribute to the constructors?"));
+                         $"Unable to create an instance of {type.FullName}.  Did you forget to add a [Creates] attribute to the constructors?"));
             }
             catch (Exception ex)
             {

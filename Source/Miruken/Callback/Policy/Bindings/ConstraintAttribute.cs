@@ -36,6 +36,11 @@
 
         public IBindingConstraint Constraint { get; protected set; }
 
+        public bool AppliesTo(object callback, Type callbackType)
+        {
+            return callback is IBindingScope;
+        }
+
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             object callback, Type callbackType, IHandler composer)

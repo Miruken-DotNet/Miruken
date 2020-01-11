@@ -68,6 +68,11 @@
 
         public Type LifestyleType { get; }
 
+        public bool AppliesTo(object callback, Type callbackType)
+        {
+            return callback is Inquiry;
+        }
+
         IEnumerable<IFilter> IFilterProvider.GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
             object callback, Type callbackType, IHandler composer)
