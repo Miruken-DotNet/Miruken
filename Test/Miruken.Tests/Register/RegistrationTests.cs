@@ -276,6 +276,19 @@ namespace Miruken.Tests.Register
             Assert.AreSame(context, service.ScopeFactory);
         }
 
+        [TestMethod]
+        public void Should_Work_With_Creates()
+        {
+            using var handler = new ServiceCollection()
+                .AddSingleton<Service1>()
+                .AddMiruken()
+                .Build();
+            var service1 = handler.Resolve<Service1>();
+            Assert.IsNotNull(service1);
+            Assert.AreSame(service1, handler.Resolve<Service1>());
+            Assert.AreNotSame(service1, handler.Create<Service1>());
+        }
+
         public class Action
         {
             public int Handled { get; set; }
@@ -297,6 +310,12 @@ namespace Miruken.Tests.Register
 
         public class Service1 : IService, IContextual
         {
+            [Creates]
+            public Service1()
+            {
+                
+            }
+
             public void DoSomething()
             {
             }
@@ -351,7 +370,7 @@ namespace Miruken.Tests.Register
             public ServiceWithServiceProvider(
                 IServiceProvider services, IServiceScopeFactory scopeFactory)
             {
-                Services = services;
+                Services     = services;
                 ScopeFactory = scopeFactory;
             }
 

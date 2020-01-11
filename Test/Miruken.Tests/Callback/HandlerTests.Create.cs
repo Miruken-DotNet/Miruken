@@ -5,7 +5,6 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
-    using Miruken.Context;
 
     [TestClass]
     public class HandlerCreateTests
@@ -61,6 +60,14 @@
             Assert.IsNotNull(controllers[0]);
         }
 
+        [TestMethod]
+        public void Should_Resolve_Instance()
+        {
+            var controller = new StaticHandler().Resolve<Controller>();
+            Assert.IsNotNull(controller);
+            Assert.IsNotNull(controller.ViewFactory);
+        }
+
         [TestMethod,
          ExpectedException(typeof(NotSupportedException))]
         public void Should_Reject_Unhandled_Creation()
@@ -88,7 +95,7 @@
 
         private class Controller : IController
         {
-            [Creates, Contextual]
+            [Creates, Provides, Singleton]
             public Controller(ViewFactory viewFactory)
             {
                 ViewFactory = viewFactory;

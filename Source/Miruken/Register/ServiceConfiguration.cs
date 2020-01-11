@@ -23,6 +23,8 @@ namespace Miruken.Register
 
         private void Configure(HandlerDescriptor descriptor, PolicyMemberBinding binding)
         {
+            if (binding.Policy != Provides.Policy) return;
+
             var lifestyle = GetLifestyle(binding);
             if (lifestyle != null)
             {

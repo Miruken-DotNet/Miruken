@@ -11,7 +11,7 @@
     {
         private readonly HandlerDescriptorVisitor _visitor;
 
-        private static readonly Provides[] ImplicitProvides = { new Provides() };
+        private static readonly Provides ImplicitProvides = new Provides();
 
         protected AbstractHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
         {
@@ -78,13 +78,16 @@
                 var attributes = Attribute.GetCustomAttributes(member, false);
                 var categories = attributes.OfType<CategoryAttribute>().ToArray();
 
-                var provideImplicit = categories.Length == 0
+                var provideImplicit = !categories.OfType<Provides>().Any()
                                    && constructor?.IsPublic == true
                                    && !handlerType.IsAbstract
                                    && !handlerType.IsDefined(typeof(UnmanagedAttribute), true);
 
                 if (provideImplicit)
-                    categories = ImplicitProvides;
+                {
+                    Array.Resize(ref categories, categories.Length + 1);
+                    categories[categories.Length - 1] = ImplicitProvides;
+                }
 
                 foreach (var category in categories)
                 {
@@ -160,7 +163,8 @@
                 foreach (var binding in staticPolicies.SelectMany(p => p.Value))
                 {
                     visitor?.Invoke(descriptor, binding);
-                    AddImplicitLifestyle(binding);
+                    if (binding.Policy == Provides.Policy)
+                        AddImplicitLifestyle(binding);
                 }
             }
 
@@ -170,7 +174,7 @@
         private void AddImplicitLifestyle(PolicyMemberBinding binding)
         {
             if (ImplicitLifestyle != null &&
-                ReferenceEquals(binding.Category, ImplicitProvides[0]) &&
+                ReferenceEquals(binding.Category, ImplicitProvides) &&
                 !binding.Filters.OfType<LifestyleAttribute>().Any())
             {
                 binding.AddFilters(ImplicitLifestyle);
