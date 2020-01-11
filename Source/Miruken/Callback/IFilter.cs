@@ -23,7 +23,7 @@
     {
         bool Required { get; }
 
-        bool AppliesTo(object callback, Type callbackType);
+        bool? AppliesTo(object callback, Type callbackType);
 
         IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,

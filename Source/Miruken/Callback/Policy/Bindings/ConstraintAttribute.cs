@@ -36,7 +36,7 @@
 
         public IBindingConstraint Constraint { get; protected set; }
 
-        public bool AppliesTo(object callback, Type callbackType)
+        public bool? AppliesTo(object callback, Type callbackType)
         {
             return callback is IBindingScope;
         }

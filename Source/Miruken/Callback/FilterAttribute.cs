@@ -24,7 +24,7 @@
         public int? Order      { get; set; }
         public bool Required   { get; set; }
 
-        public bool AppliesTo(object callback, Type callbackType) => true;
+        public bool? AppliesTo(object callback, Type callbackType) => null;
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,

@@ -54,11 +54,10 @@
                 MemberDispatch dispatcher, object callback, Type callbackType,
                 params IEnumerable<IFilterProvider>[] providers)
         {
-            var options = handler.GetOptions<FilterOptions>();
+            var options      = handler.GetOptions<FilterOptions>();
             var allProviders = providers
-                .Where(pa => pa != null)
-                .SelectMany(pa => pa)
-                .Where(p => p != null)
+                .Where(pa => pa != null).SelectMany(pa => pa)
+                .Where(p => p?.AppliesTo(callback, callbackType) != false)
                 .Concat(options?.ExtraFilters ??
                         Enumerable.Empty<IFilterProvider>());
 
@@ -81,8 +80,6 @@
 
             foreach (var provider in allProviders)
             {
-                if (!provider.AppliesTo(callback, callbackType))
-                    continue;
                 var found   = false;
                 var filters = provider.GetFilters(
                     binding, dispatcher, callback, callbackType, handler);

@@ -68,7 +68,7 @@
 
         public Type LifestyleType { get; }
 
-        public bool AppliesTo(object callback, Type callbackType)
+        public bool? AppliesTo(object callback, Type callbackType)
         {
             return callback is Inquiry;
         }

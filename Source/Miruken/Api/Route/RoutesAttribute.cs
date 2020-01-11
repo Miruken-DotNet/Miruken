@@ -22,7 +22,7 @@
 
         public bool Required => true;
 
-        public bool AppliesTo(object callback, Type callbackType) => true;
+        public bool? AppliesTo(object callback, Type callbackType) => null;
 
         public IEnumerable<IFilter> GetFilters(
             MemberBinding binding, MemberDispatch dispatcher,
