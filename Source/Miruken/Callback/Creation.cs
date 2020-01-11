@@ -1,31 +1,37 @@
 ﻿namespace Miruken.Callback
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class Creation :
-        ICallback, IAsyncCallback, IDispatchCallback
+    public class Creation : ICallback, IAsyncCallback, IDispatchCallback
     {
-        private Promise _asyncResult;
+        private readonly List<object> _instances;
+        private readonly List<object> _promises;
         private object _result;
 
-        public Creation(Type type)
+        public Creation(Type type, bool many = false)
         {
             Type = type ?? throw new ArgumentNullException(nameof(type));
+            Many = many;
 
-            if (!type.IsClass || type.IsAbstract)
-                throw new ArgumentException("Only concrete classes can be created");
+            _instances = new List<object>();
+            _promises  = new List<object>();
         }
 
         public Type Type       { get; }
+        public bool Many       { get; }
         public bool WantsAsync { get; set; }
         public bool IsAsync    { get; private set; }
 
         public CallbackPolicy Policy => Creates.Policy;
+
+        public ICollection<object> Instances => _instances.AsReadOnly();
 
         public Type ResultType => WantsAsync
                                || IsAsync ? typeof(Promise) : null;
@@ -35,7 +41,21 @@
             get
             {
                 if (_result == null)
-                    _result = _asyncResult;
+                {
+                    if (IsAsync)
+                    {
+                        _result = Many
+                            ? Promise.All(_promises)
+                                .Then((_, s) => _instances.ToArray())
+                            : (object)Promise.All(_promises)
+                                .Then((_, s) => _instances.FirstOrDefault());
+                    }
+                    else
+                    {
+                        _result = Many ? _instances.ToArray()
+                                : _instances.FirstOrDefault();
+                    }
+                }
 
                 if (IsAsync)
                 {
@@ -43,7 +63,12 @@
                         _result = (_result as Promise)?.Wait();
                 }
                 else if (WantsAsync)
-                    _result = Promise.Resolved(_result);
+                {
+                    if (Many)
+                        _result = Promise.Resolved(_result as object[]);
+                    else
+                        _result = Promise.Resolved(_result);
+                }
 
                 return _result;
             }
@@ -54,39 +79,43 @@
             }
         }
 
-        public bool AddResult(object result, bool strict, int? priority = null)
+        public bool AddInstance(object instance, bool strict, int? priority = null)
         {
-            if (result == null || _result != null || _asyncResult != null)
+            if (instance == null)
                 return false;
 
-            _asyncResult = result as Promise
-                       ?? (result as Task)?.ToPromise();
+            var promise = instance as Promise
+                       ?? (instance as Task)?.ToPromise();
 
-            if (_asyncResult != null)
+            if (promise?.State == PromiseState.Fulfilled)
             {
-                if (_asyncResult?.State == PromiseState.Fulfilled)
-                {
-                    _result      = _asyncResult.Wait();
-                    _asyncResult = null;
-                }
-                else
-                {
+                instance = promise.Wait();
+                promise  = null;
+            }
 
-                    IsAsync = true;
-                    _result = null;
-                }
+            if (promise != null)
+            {
+                IsAsync = true;
+                _promises.Add(promise.Then((result, s) =>
+                {
+                    _instances.Add(result);
+                }).Catch((_, s) => (object)null));
             }
             else
             {
-                _result = result;
+                _instances.Add(instance);
             }
+
+            _result = null;
 
             return true;
         }
 
-        public bool Dispatch(object handler, ref bool _, IHandler composer)
+        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
-            return Policy.Dispatch(handler, this, false, composer, AddResult);
+            var count   = _instances.Count + _promises.Count;
+            var handled = Policy.Dispatch(handler, this, greedy, composer, AddInstance);
+            return handled || _instances.Count + _promises.Count > count;
         }
 
         private string DebuggerDisplay => $"Create | {Type}";

@@ -15,6 +15,7 @@
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<ViewFactory>();
             factory.RegisterDescriptor<Controller>();
+            factory.RegisterDescriptor<Warehouse>();
             HandlerDescriptorFactory.UseFactory(factory);
         }
 
@@ -27,11 +28,36 @@
         }
 
         [TestMethod]
+        public void Should_Create_Instance_From_Interface()
+        {
+            var controller = new StaticHandler().Create<IController>();
+            Assert.IsNotNull(controller);
+            Assert.IsInstanceOfType(controller, typeof(Controller));
+            Assert.IsNotNull((controller as Controller)?.ViewFactory);
+        }
+
+        [TestMethod]
         public async Task Should_Create_Instance_Asynchronously()
         {
             var controller = await new StaticHandler().CreateAsync<Controller>();
             Assert.IsNotNull(controller);
             Assert.IsNotNull(controller.ViewFactory);
+        }
+
+        [TestMethod]
+        public void Should_Create_All_Instances()
+        {
+            var controllers = new StaticHandler().CreateAll<Controller>();
+            Assert.AreEqual(1, controllers.Length);
+            Assert.IsNotNull(controllers[0]);
+        }
+
+        [TestMethod]
+        public async Task Should_Create_All_Instances_Asynchronously()
+        {
+            var controllers = await new StaticHandler().CreateAllAsync<Controller>();
+            Assert.AreEqual(1, controllers.Length);
+            Assert.IsNotNull(controllers[0]);
         }
 
         [TestMethod,
@@ -49,22 +75,17 @@
         }
 
         [TestMethod,
-         ExpectedException(typeof(ArgumentException))]
-        public void Should_Reject_Interface_Creation()
+         ExpectedException(typeof(NotSupportedException))]
+        public void Should_Reject_Creation_If_Missing_Dependencies()
         {
-            new StaticHandler().Create<IInventory>();
-        }
-
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException))]
-        public void Should_Reject_Abstract_Class_Creation()
-        {
-            new StaticHandler().Create<RepositoryBase>();
+            new StaticHandler().Create<Warehouse>();
         }
 
         private class ViewFactory { }
 
-        private class Controller
+        private interface IController { }
+
+        private class Controller : IController
         {
             [Creates]
             public Controller(ViewFactory viewFactory)
@@ -75,8 +96,17 @@
             public ViewFactory ViewFactory { get; }
         }
 
-        private interface IInventory { }
+        private interface IDelivery { }
 
-        private abstract class RepositoryBase { }
+        private class Warehouse
+        {
+            [Creates]
+            public Warehouse(IDelivery delivery)
+            {
+                Delivery = delivery;
+            }
+
+            public IDelivery Delivery { get; }
+        }
     }
 }

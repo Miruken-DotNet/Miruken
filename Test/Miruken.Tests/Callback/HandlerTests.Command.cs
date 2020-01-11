@@ -70,7 +70,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Command_All_Asycnhronously()
+        public async Task Should_Command_All_Asynchronously()
         {
             var handler   = new OrderHandler();
             var fulfill   = new FulfillOrder { OrderId = 1 };

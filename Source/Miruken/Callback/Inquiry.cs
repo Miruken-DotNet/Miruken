@@ -224,7 +224,7 @@
                 var count = _resolutions.Count + _promises.Count;
                 handled = Policy.Dispatch(handler, this, greedy, composer,
                     (r, strict, p) => Resolve(r, strict, isGreedy, composer, p)) || handled;
-                return handled || (_resolutions.Count + _promises.Count> count);
+                return handled || _resolutions.Count + _promises.Count> count;
             }
             finally
             {
