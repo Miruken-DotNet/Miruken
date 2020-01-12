@@ -22,8 +22,8 @@ namespace Miruken.Callback.Policy
             if (handlerType == null)
                 throw new ArgumentNullException(nameof(handlerType));
 
-            if (!handlerType.IsClass)
-                throw new ArgumentException("Only classes can be handlers");
+            if (!handlerType.IsClass || handlerType.IsAbstract)
+                throw new ArgumentException("Only concrete classes can be handlers");
 
             HandlerType    = handlerType;
             Policies       = policies ?? Empty;

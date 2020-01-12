@@ -19,9 +19,11 @@
             IHandler composer, Next<TRes> next,
             IFilterProvider provider)
         {
-            return Validate(callback, composer)
-                .Then((req, s) => next())
-                .Then((resp, s) => Validate(resp, composer));
+            var result = Validate(callback, composer)
+                .Then((req, s) => next());
+            return provider is ValidateAttribute attr && attr.ValidateResult
+                 ? result.Then((resp, s) => Validate(resp, composer))
+                 : result;
         }
 
         private static Promise<T> Validate<T>(T target, IHandler handler)

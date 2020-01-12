@@ -7,5 +7,7 @@
         public ValidateAttribute() : base(typeof(ValidateFilter<,>))
         {         
         }
+
+        public bool ValidateResult { get; set; }
     }
 }

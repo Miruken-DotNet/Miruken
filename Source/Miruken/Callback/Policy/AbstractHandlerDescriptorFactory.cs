@@ -48,6 +48,9 @@
         protected virtual HandlerDescriptor CreateDescriptor(Type handlerType,
             HandlerDescriptorVisitor visitor = null, int? priority = null)
         {
+            if (!handlerType.IsClass || handlerType.IsAbstract)
+                throw new ArgumentException("Only concrete classes can be handlers");
+
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies   = null;
 
@@ -80,7 +83,6 @@
 
                 var provideImplicit = !categories.OfType<Provides>().Any()
                                    && constructor?.IsPublic == true
-                                   && !handlerType.IsAbstract
                                    && !handlerType.IsDefined(typeof(UnmanagedAttribute), true);
 
                 if (provideImplicit)

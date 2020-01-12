@@ -20,7 +20,7 @@
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
-            Handles.Policy.AddFilters(new FilterAttribute(typeof(ValidateFilter<,>)));
+            Handles.Policy.AddFilters(new ValidateAttribute());
         }
 
         [TestInitialize]

@@ -95,7 +95,7 @@
 
         private class Controller : IController
         {
-            [Creates, Provides, Singleton]
+            [Creates]
             public Controller(ViewFactory viewFactory)
             {
                 ViewFactory = viewFactory;
