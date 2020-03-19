@@ -44,7 +44,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Execute_Concurrently_Shortcut()
+        public async Task Should_Execute_Concurrently_Params()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();
@@ -61,7 +61,26 @@
         }
 
         [TestMethod]
-        public async Task Should_Propogate_Single_Exception()
+        public async Task Should_Execute_Concurrently_Enumerable()
+        {
+            var handler = new StockQuoteHandler()
+                        + new Scheduler();
+            var result  = await handler.Concurrent(new [] 
+                {
+                    new GetStockQuote("APPL"),
+                    new GetStockQuote("MSFT"),
+                    new GetStockQuote("GOOGL")
+                }.ToList());
+            CollectionAssert.AreEqual(
+                new[] { "APPL", "MSFT", "GOOGL" },
+                result.Responses.Select(r => r.Match(
+                        error => error.Message,
+                        quote => ((StockQuote)quote).Symbol))
+                    .ToArray());
+        }
+
+        [TestMethod]
+        public async Task Should_Propagate_Single_Exception()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();
@@ -82,7 +101,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Propogate_Multiple_Exceptions()
+        public async Task Should_Propagate_Multiple_Exceptions()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();

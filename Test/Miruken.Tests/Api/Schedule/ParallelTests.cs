@@ -45,7 +45,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Execute_In_Parallel_Shortcut()
+        public async Task Should_Execute_In_Parallel_Params()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();
@@ -53,6 +53,25 @@
                 new GetStockQuote("APPL"),
                 new GetStockQuote("MSFT"),
                 new GetStockQuote("GOOGL"));
+            CollectionAssert.AreEqual(
+                new[] { "APPL", "MSFT", "GOOGL" },
+                result.Responses.Select(r => r.Match(
+                        error => error.Message,
+                        quote => ((StockQuote)quote).Symbol))
+                    .ToArray());
+        }
+
+        [TestMethod]
+        public async Task Should_Execute_In_Parallel_Enumerable()
+        {
+            var handler = new StockQuoteHandler()
+                        + new Scheduler();
+            var result  = await handler.Parallel(new []
+                {
+                    new GetStockQuote("APPL"),
+                    new GetStockQuote("MSFT"),
+                    new GetStockQuote("GOOGL")
+                }.ToList());
             CollectionAssert.AreEqual(
                 new[] { "APPL", "MSFT", "GOOGL" },
                 result.Responses.Select(r => r.Match(
@@ -83,7 +102,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Propogate_Multiple_Exceptions()
+        public async Task Should_Propagate_Multiple_Exceptions()
         {
             var handler = new StockQuoteHandler()
                         + new Scheduler();

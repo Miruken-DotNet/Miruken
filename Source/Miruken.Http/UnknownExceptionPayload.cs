@@ -5,9 +5,9 @@
     public class UnknownExceptionPayload : Exception
     {
         public UnknownExceptionPayload(object payload)
-            : base($"Unable to map the exception payload '{payload.GetType()}'")
+            : base($"Unable to map the exception payload '{payload?.GetType()}'")
         {
-            Payload = payload;
+            Payload = payload ?? throw new ArgumentNullException(nameof(payload));
         }
 
         public object Payload { get; }
