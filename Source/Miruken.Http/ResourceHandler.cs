@@ -161,7 +161,15 @@
                 {
                     try
                     {
-                        return await ReadResponse<TE>(response, options, false);
+                        var l = ReadResponse<TE>(response, options, false);
+                        if (l != null)
+                        {
+                            var message = await l;
+                            if (message == null)
+                                response.EnsureSuccessStatusCode();
+                            return message;
+                        }
+                        return null;
                     }
                     catch (Exception ex)
                     {
