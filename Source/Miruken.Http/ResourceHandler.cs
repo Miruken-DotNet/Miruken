@@ -144,15 +144,38 @@
                 return await ReadResponse<TR>(response, options, true);
             }
 
-            if (!response.IsSuccessStatusCode && typeof(TE) == typeof(Exception))
+            if (!response.IsSuccessStatusCode)
             {
-                try
+                if (typeof(TE) == typeof(Exception))
                 {
-                    response.EnsureSuccessStatusCode();
+                    try
+                    {
+                        response.EnsureSuccessStatusCode();
+                    }
+                    catch (Exception ex)
+                    {
+                        return new Try<Exception, TR>(ex) as Try<TE, TR>;
+                    }
                 }
-                catch (Exception ex)
+                else if (typeof(TE) == typeof(Message))
                 {
-                    return new Try<Exception, TR>(ex) as Try<TE, TR>;
+                    try
+                    {
+                        var l = ReadResponse<TE>(response, options, false);
+                        if (l != null)
+                        {
+                            var message = await l;
+                            if (message == null)
+                                response.EnsureSuccessStatusCode();
+                            return message;
+                        }
+                        return null;
+                    }
+                    catch (Exception ex)
+                    {
+                        var wrapper = new ExceptionData(ex);
+                        return new Try<Message, TR>(new Message(wrapper)) as Try<TE, TR>;
+                    }
                 }
             }
 
