@@ -117,7 +117,32 @@
             HttpResponseMessage response, HttpOptions options, bool success)
         {
             if (response.IsSuccessStatusCode)
+            {
+                if (typeof(TE) == typeof(Exception))
+                {
+                    try
+                    {
+                        return await ReadResponse<TR>(response, options, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new Try<Exception, TR>(ex) as Try<TE, TR>;
+                    }
+                }
+                if (typeof(TE) == typeof(Message))
+                {
+                    try
+                    {
+                        return await ReadResponse<TR>(response, options, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        var wrapper = new ExceptionData(ex);
+                        return new Try<Message, TR>(new Message(wrapper)) as Try<TE, TR>;
+                    }
+                }
                 return await ReadResponse<TR>(response, options, true);
+            }
 
             if (!response.IsSuccessStatusCode && typeof(TE) == typeof(Exception))
             {
