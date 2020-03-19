@@ -40,7 +40,10 @@
                         var payload = failure.Payload;
                         if (payload == null)
                             throw new Exception("An unexpected error has occurred");
-                        throw composer.Map<Exception>(failure.Payload, typeof(Exception));
+                        throw composer
+                            .BestEffort()
+                            .Map<Exception>(failure.Payload, typeof(Exception))
+                            ?? new UnknownExceptionPayload(failure.Payload);
                     },
                     success => success.Payload));
         }
