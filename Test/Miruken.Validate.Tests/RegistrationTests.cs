@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Validate.Tests
+﻿namespace Miruken.Validate.Tests
 {
     using System;
     using System.Linq;
@@ -53,4 +52,3 @@ namespace Miruken.Validate.Tests
         }
     }
 }
-#endif

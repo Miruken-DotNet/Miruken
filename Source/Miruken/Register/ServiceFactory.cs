@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Register
+﻿namespace Miruken.Register
 {
     using System;
     using Callback;
@@ -10,13 +9,13 @@ namespace Miruken.Register
     {
         private readonly Func<IServiceProvider, object> _factory;
 
-        protected ServiceFactory(Func<IServiceProvider, object> factory)
+        private ServiceFactory(Func<IServiceProvider, object> factory)
         {
             _factory = factory ??
                 throw new ArgumentNullException(nameof(factory));
         }
 
-        protected T CreateInstance(Inquiry parent, IHandler composer)
+        private T CreateInstance(Inquiry parent, IHandler composer)
         {
             return (T)_factory(new CompositionServiceProvider(parent, composer));
         }
@@ -93,4 +92,3 @@ namespace Miruken.Register
         }
     }
 }
-#endif

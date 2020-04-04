@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Register
+﻿namespace Miruken.Register
 {
     using System;
     using System.Collections.Generic;
@@ -213,4 +212,3 @@ namespace Miruken.Register
         }
     }
 }
-#endif

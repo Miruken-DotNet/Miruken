@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Http.Tests
+﻿namespace Miruken.Http.Tests
 {
     using System.Net.Http;
     using System.Reflection;
@@ -33,4 +32,3 @@ namespace Miruken.Http.Tests
         }
     }
 }
-#endif

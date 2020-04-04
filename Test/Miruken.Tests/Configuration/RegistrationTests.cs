@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Tests.Configuration
+﻿namespace Miruken.Tests.Configuration
 {
     using System;
     using System.IO;
@@ -74,4 +73,4 @@ namespace Miruken.Tests.Configuration
         }
     }
 }
-#endif
+

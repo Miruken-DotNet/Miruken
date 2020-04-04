@@ -1,7 +1,5 @@
-﻿#if NETSTANDARD
-namespace Miruken.Register
+﻿namespace Miruken.Register
 {
-    using System;
     using System.Linq;
     using Callback;
     using Callback.Policy;
@@ -60,4 +58,4 @@ namespace Miruken.Register
         }
     }
 }
-#endif
+

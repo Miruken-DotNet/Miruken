@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Configuration
+﻿namespace Miruken.Configuration
 {
     using System;
     using System.Linq;
@@ -45,16 +44,13 @@ namespace Miruken.Configuration
         private static string GetConfigurationKey(ConfigurationAttribute attribute, Type type)
         {
             var key = attribute.Key;
-            if (string.IsNullOrEmpty(key))
-            {
-                key = type.Name;
-                if (key.EndsWith("Config"))
-                    key = key.Remove(key.Length - 6);
-                else if (key.EndsWith("Configuration"))
-                    key = key.Remove(key.Length - 13);
-            }
+            if (!string.IsNullOrEmpty(key)) return key;
+            key = type.Name;
+            if (key.EndsWith("Config"))
+                key = key.Remove(key.Length - 6);
+            else if (key.EndsWith("Configuration"))
+                key = key.Remove(key.Length - 13);
             return key;
         }
     }
 }
-#endif

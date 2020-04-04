@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Log
+﻿namespace Miruken.Log
 {
     using Register;
 
@@ -16,4 +15,4 @@ namespace Miruken.Log
         }
     }
 }
-#endif
+

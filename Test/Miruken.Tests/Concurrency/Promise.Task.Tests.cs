@@ -1,16 +1,15 @@
-﻿using System;
-using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Miruken.Concurrency;
-using Miruken.Infrastructure;
-
-namespace Miruken.Tests.Concurrency
+﻿namespace Miruken.Tests.Concurrency
 {
+    using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Concurrency;
+    using Miruken.Infrastructure;
 
     /// <summary>
-    /// Summary description for PromiseTaskTests
+    ///     Summary description for PromiseTaskTests
     /// </summary>
     [TestClass]
     public class PromiseTaskTests
@@ -18,8 +17,8 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Convert_Pending_Promise_To_Task()
         {
-            var promise = new Promise<int>((resolve, reject) => {});
-            var task    = promise.ToTask();
+            var promise = new Promise<int>((resolve, reject) => { });
+            var task = promise.ToTask();
             Assert.AreEqual(TaskStatus.WaitingForActivation, task.Status);
         }
 
@@ -27,7 +26,7 @@ namespace Miruken.Tests.Concurrency
         public void Should_Convert_Fulfilled_Promise_To_Task()
         {
             var promise = Promise.Resolved("Hello");
-            var task    = promise.ToTask();
+            var task = promise.ToTask();
             Assert.AreEqual(TaskStatus.RanToCompletion, task.Status);
             Assert.AreEqual("Hello", task.Result);
         }
@@ -36,8 +35,8 @@ namespace Miruken.Tests.Concurrency
         public void Should_Convert_Rejected_Promise_To_Task()
         {
             var exception = new InvalidOperationException("Can't do that");
-            var promise   = Promise.Rejected(exception);
-            var task      = promise.ToTask();
+            var promise = Promise.Rejected(exception);
+            var task = promise.ToTask();
             Assert.AreEqual(TaskStatus.Faulted, task.Status);
             Assert.IsNotNull(task.Exception);
             Assert.AreSame(exception, task.Exception.InnerExceptions.First());
@@ -46,8 +45,8 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Convert_Cancelled_Promise_To_Task()
         {
-            var promise   = new Promise<int>((resolve, reject) => {});
-            var task      = promise.ToTask();
+            var promise = new Promise<int>((resolve, reject) => { });
+            var task = promise.ToTask();
             promise.Cancel();
             Assert.AreEqual(TaskStatus.Canceled, task.Status);
         }
@@ -57,10 +56,10 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called   = 0;
-                var promise  = new Promise<object>((resolve, reject) =>
+                var called = 0;
+                var promise = new Promise<object>((resolve, reject) =>
                     ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
-                var task     = promise.ToTask();
+                var task = promise.ToTask();
                 var fulfill1 = task.ContinueWith(t =>
                 {
                     Assert.AreEqual("Hello", task.Result);
@@ -71,10 +70,8 @@ namespace Miruken.Tests.Concurrency
                     Assert.AreEqual("Hello", t.Result);
                     ++called;
                 });
-                if (Task.WaitAll(new[] { fulfill1, fulfill2 }, 5.Sec()))
-                {
+                if (Task.WaitAll(new[] {fulfill1, fulfill2}, 5.Sec()))
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -85,27 +82,25 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called  = 0;
+                var called = 0;
                 var promise = new Promise<object>((resolve, reject) =>
                     ThreadPool.QueueUserWorkItem(_ =>
                         reject(new Exception("Rejected"), false)));
-                var task    = promise.ToTask();
-                var catch1  = task.ContinueWith(t =>
-                {
-                    Assert.AreEqual("Rejected", 
-                        t.Exception?.InnerExceptions.First().Message);
-                    ++called;
-                });
-                var catch2  = task.ContinueWith(t =>
+                var task = promise.ToTask();
+                var catch1 = task.ContinueWith(t =>
                 {
                     Assert.AreEqual("Rejected",
                         t.Exception?.InnerExceptions.First().Message);
                     ++called;
                 });
-                if (Task.WaitAll(new[] { catch1, catch2 }, 5.Sec()))
+                var catch2 = task.ContinueWith(t =>
                 {
+                    Assert.AreEqual("Rejected",
+                        t.Exception?.InnerExceptions.First().Message);
+                    ++called;
+                });
+                if (Task.WaitAll(new[] {catch1, catch2}, 5.Sec()))
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -118,7 +113,8 @@ namespace Miruken.Tests.Concurrency
             Assert.AreEqual("Hello", await promise);
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentException))]
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public async Task Should_Await_Rejected_Promise()
         {
             var exception = new ArgumentException("Bad parameter");
@@ -131,7 +127,7 @@ namespace Miruken.Tests.Concurrency
             TestRunner.MTA(async () =>
             {
                 var promise = new Promise<object>((resolve, reject) =>
-                   ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
+                    ThreadPool.QueueUserWorkItem(_ => resolve("Hello", false)));
                 Assert.AreEqual("Hello", await promise);
                 Assert.AreEqual("Hello", await promise);
             });
@@ -159,18 +155,19 @@ namespace Miruken.Tests.Concurrency
         [TestMethod]
         public void Should_Convert_Competed_Task_To_Promise()
         {
-            var task    = Task.FromResult("Hello");
+            var task = Task.FromResult("Hello");
             var promise = task.ToPromise();
             Assert.AreEqual(PromiseState.Fulfilled, promise.State);
             Assert.AreEqual("Hello", promise.Wait());
         }
 
-        [TestMethod, ExpectedException(typeof(NotSupportedException))]
+        [TestMethod]
+        [ExpectedException(typeof(NotSupportedException))]
         public void Should_Convert_Failed_Task_To_Promise()
         {
             var exception = new NotSupportedException("No Scanner Found");
-            var task      = Task.FromException<string>(exception);
-            var promise   = task.ToPromise();
+            var task = Task.FromException<string>(exception);
+            var promise = task.ToPromise();
             Assert.AreEqual(PromiseState.Rejected, promise.State);
             promise.Wait();
         }
@@ -180,9 +177,9 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called   = 0;
-                var task     = Task.Run(() => "Hello");
-                var promise  = task.ToPromise();
+                var called = 0;
+                var task = Task.Run(() => "Hello");
+                var promise = task.ToPromise();
                 var fulfill1 = promise.Then((r, s) =>
                 {
                     Assert.AreEqual("Hello", r);
@@ -195,9 +192,7 @@ namespace Miruken.Tests.Concurrency
                 });
                 if (WaitHandle.WaitAll(
                     new[] {fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle}, 5.Sec()))
-                {
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -208,24 +203,22 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called  = 0;
-                var task    = Task.Run(() => throw new Exception("Rejected"));
+                var called = 0;
+                var task = Task.Run(() => throw new Exception("Rejected"));
                 var promise = task.ToPromise();
-                var catch1  = promise.Catch((ex, s) =>
+                var catch1 = promise.Catch((ex, s) =>
                 {
                     Assert.AreEqual("Rejected", ex.Message);
                     ++called;
                 });
-                var catch2  = promise.Catch((ex, s) =>
+                var catch2 = promise.Catch((ex, s) =>
                 {
                     Assert.AreEqual("Rejected", ex.Message);
                     ++called;
                 });
                 if (WaitHandle.WaitAll(
-                    new[] { catch1.AsyncWaitHandle, catch2.AsyncWaitHandle }, 5.Sec()))
-                {
+                    new[] {catch1.AsyncWaitHandle, catch2.AsyncWaitHandle}, 5.Sec()))
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -235,10 +228,10 @@ namespace Miruken.Tests.Concurrency
         public void Should_Cancel_Tasks_As_Promises_Sync()
         {
             var cancellation = new CancellationTokenSource();
-            var token        = cancellation.Token;
+            var token = cancellation.Token;
             cancellation.Cancel();
-            var task         = new Task<string>(() => null, token);
-            var promise      = task.ToPromise();
+            var task = new Task<string>(() => null, token);
+            var promise = task.ToPromise();
             Assert.AreEqual(PromiseState.Cancelled, promise.State);
         }
 
@@ -248,7 +241,7 @@ namespace Miruken.Tests.Concurrency
             Exception cancelException = null;
             var cancellation = new CancellationTokenSource();
             cancellation.Cancel();
-            var task    = new Task<string>(() => null);
+            var task = new Task<string>(() => null);
             var promise = task.ToPromise(cancellation);
             promise.Cancelled(ex => cancelException = ex);
             Assert.AreEqual(PromiseState.Cancelled, promise.State);
@@ -259,7 +252,7 @@ namespace Miruken.Tests.Concurrency
         public void Should_Cancel_Tasks_As_Promises_Async()
         {
             var cancellation = new CancellationTokenSource();
-            var token        = cancellation.Token;
+            var token = cancellation.Token;
 
             TestRunner.MTA(() =>
             {
@@ -286,9 +279,9 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called   = 0;
-                var task     = Task.Run(() => "Hello");
-                var promise  = Promise.Resolved(task);
+                var called = 0;
+                var task = Task.Run(() => "Hello");
+                var promise = Promise.Resolved(task);
                 var fulfill1 = promise.Then((r, s) =>
                 {
                     Assert.AreEqual("Hello", r);
@@ -300,10 +293,8 @@ namespace Miruken.Tests.Concurrency
                     ++called;
                 });
                 if (WaitHandle.WaitAll(
-                    new[] { fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle }, 5.Sec()))
-                {
+                    new[] {fulfill1.AsyncWaitHandle, fulfill2.AsyncWaitHandle}, 5.Sec()))
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -314,10 +305,10 @@ namespace Miruken.Tests.Concurrency
         {
             TestRunner.MTA(() =>
             {
-                var called  = 0;
-                var task    = Task.Run(() => throw new Exception("Rejected"));
+                var called = 0;
+                var task = Task.Run(() => throw new Exception("Rejected"));
                 var promise = Promise.Resolved(task);
-                var catch1  = promise.Catch((ex, s) =>
+                var catch1 = promise.Catch((ex, s) =>
                 {
                     Assert.AreEqual("Rejected", ex.Message);
                     ++called;
@@ -328,10 +319,8 @@ namespace Miruken.Tests.Concurrency
                     ++called;
                 });
                 if (WaitHandle.WaitAll(
-                    new[] { catch1.AsyncWaitHandle, catch2.AsyncWaitHandle }, 5.Sec()))
-                {
+                    new[] {catch1.AsyncWaitHandle, catch2.AsyncWaitHandle}, 5.Sec()))
                     Assert.AreEqual(2, called);
-                }
                 else
                     Assert.Fail("Operation timed out");
             });
@@ -346,8 +335,8 @@ namespace Miruken.Tests.Concurrency
             Assert.IsFalse(promise.CompletedSynchronously);
         }
 
-        [TestMethod,
-         ExpectedException(typeof(ArgumentException))]
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Should_Unwrap_Rejected_Task_Synchronously()
         {
             var promise = Promise.Resolved(1)

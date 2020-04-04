@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Http
+﻿namespace Miruken.Http
 {
     using System;
     using Microsoft.Extensions.DependencyInjection;
@@ -24,4 +23,4 @@ namespace Miruken.Http
         }
     }
 }
-#endif
+

@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Register
+﻿namespace Miruken.Register
 {
     using System;
     using Callback.Policy;
@@ -37,4 +36,3 @@ namespace Miruken.Register
         }
     }
 }
-#endif

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.1;netstandard2.0;net48;net461</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <PackageId>Miruken</PackageId>
@@ -33,20 +33,10 @@
     <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
       <DefineConstants>NETSTANDARD;NETSTANDARD2_1</DefineConstants>
     </PropertyGroup>
-
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
-        <DefineConstants>NETFULL</DefineConstants>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
-        <DefineConstants>NETFULL</DefineConstants>
-    </PropertyGroup>
-
+    
     <ItemGroup>
         <PackageReference Include="FastExpressionCompiler" Version="2.0.0" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19554-01" PrivateAssets="All" />
-    </ItemGroup>
-
-    <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD'))">
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
         <PackageReference Include="Scrutor" Version="3.1.0" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
@@ -60,9 +50,5 @@
     <ItemGroup Condition="$(DefineConstants.Contains('NETSTANDARD2_1'))">
       <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.0.1" />
     </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-        <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    </ItemGroup>
-
+    
 </Project>

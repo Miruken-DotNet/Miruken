@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Validate
+﻿namespace Miruken.Validate
 {
     using System;
     using global::FluentValidation;
@@ -25,4 +24,4 @@ namespace Miruken.Validate
         }
     }
 }
-#endif
+

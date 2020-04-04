@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Tests.Register
+﻿namespace Miruken.Tests.Register
 {
     using System;
     using Microsoft.Extensions.DependencyInjection;
@@ -16,4 +15,4 @@ namespace Miruken.Tests.Register
         }
     }
 }
-#endif
+

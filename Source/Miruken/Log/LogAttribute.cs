@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Log
+﻿namespace Miruken.Log
 {
     using Callback;
 
@@ -10,4 +9,3 @@ namespace Miruken.Log
         }
     }
 }
-#endif

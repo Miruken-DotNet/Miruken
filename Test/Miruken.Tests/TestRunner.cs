@@ -19,9 +19,7 @@ namespace Miruken.Tests
         {
             // Setup a worker thread
             var workerThread = new Thread(ExecuteInternal);
-            // Set apartment
-            workerThread.SetApartmentState(_apartmentState);
-
+            
             workerThread.Start();
             // Wait until work on the worker thread is done
             workerThread.Join();

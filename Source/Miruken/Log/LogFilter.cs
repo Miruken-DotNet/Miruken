@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Log
+﻿namespace Miruken.Log
 {
     using System;
     using System.Collections.Generic;
@@ -152,7 +151,7 @@ namespace Miruken.Log
             return SimpleNames.TryGetValue(type, out var name) ? name : type.Name;
         }
 
-        protected static readonly Dictionary<Type, string>
+        private static readonly Dictionary<Type, string>
             SimpleNames = new Dictionary<Type, string>
             {
                 { typeof (bool),    "bool" },
@@ -171,7 +170,7 @@ namespace Miruken.Log
                 { typeof (ushort),  "ushort" }
             };
 
-        protected class ByteArrayFormatter : JsonConverter
+        private class ByteArrayFormatter : JsonConverter
         {
             public override bool CanRead => false;
 
@@ -192,7 +191,7 @@ namespace Miruken.Log
             }
         }
 
-        protected class TypeFormatter : JsonConverter
+        private class TypeFormatter : JsonConverter
         {
             public override bool CanRead => false;
 
@@ -213,7 +212,7 @@ namespace Miruken.Log
             }
         }
 
-        protected class MethodFormatter : JsonConverter
+        private class MethodFormatter : JsonConverter
         {
             public override bool CanRead => false;
 
@@ -236,4 +235,3 @@ namespace Miruken.Log
     }
 #endregion
 }
-#endif

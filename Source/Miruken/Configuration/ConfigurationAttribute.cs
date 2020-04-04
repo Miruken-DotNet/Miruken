@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Configuration
+﻿namespace Miruken.Configuration
 {
     using System;
 
@@ -18,4 +17,4 @@ namespace Miruken.Configuration
         public string Key { get; }
     }
 }
-#endif
+

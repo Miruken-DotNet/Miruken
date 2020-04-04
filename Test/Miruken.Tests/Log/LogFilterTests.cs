@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Tests.Log
+﻿namespace Miruken.Tests.Log
 {
     using System;
     using System.Linq;
@@ -23,8 +22,8 @@ namespace Miruken.Tests.Log
     [TestClass]
     public class LogFilterTests
     {
-        protected LoggingConfiguration _loggingConfig;
-        protected MemoryTarget _memoryTarget;
+        private LoggingConfiguration _loggingConfig;
+        private MemoryTarget _memoryTarget;
         private IHandler _handler;
 
         [TestInitialize]
@@ -169,16 +168,10 @@ namespace Miruken.Tests.Log
             }
 
             [Handles, Log, Filter(typeof(ConsoleFilter))]
-            public Promise Handle(Baz baz)
-            {
-                return null;
-            }
+            public Promise Handle(Baz baz) => null;
 
             [Handles, Log, Filter(typeof(ConsoleFilter))]
-            public void Handle(Bad bad)
-            {
-                throw bad.Exception;
-            }
+            public void Handle(Bad bad) => throw bad.Exception;
         }
 
         [Unmanaged]
@@ -198,10 +191,7 @@ namespace Miruken.Tests.Log
         public class StockMarket : Handler, IStockMarket
         {
             [Log]
-            public decimal Buy(string symbol, int quantity)
-            {
-                return 142 * quantity;
-            }
+            public decimal Buy(string symbol, int quantity) => 142 * quantity;
         }
 
         public class ConsoleFilter : IFilter<Foo, object>
@@ -220,4 +210,3 @@ namespace Miruken.Tests.Log
         }
     }
 }
-#endif

@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-// ReSharper disable ClassNeverInstantiated.Local
+﻿// ReSharper disable ClassNeverInstantiated.Local
 namespace Miruken.Tests.Register
 {
     using System;
@@ -310,24 +309,37 @@ namespace Miruken.Tests.Register
 
         public class Service1 : IService, IContextual
         {
+            private Context _context;
+
             [Creates]
             public Service1()
             {
-                
             }
-
+            public event ContextChangingDelegate ContextChanging;
+            public event ContextChangedDelegate  ContextChanged;
+            
             public void DoSomething()
             {
             }
 
-            public Context Context { get; set; }
-            public event ContextChangingDelegate ContextChanging;
-            public event ContextChangedDelegate ContextChanged;
+            public Context Context
+            {
+                get => _context;
+                set
+                {
+                    if (_context == value) return;
+                    var newContext = value;
+                    ContextChanging?.Invoke(this, _context, ref newContext);
+                    var oldContext = _context;
+                    _context = newContext;
+                    ContextChanged?.Invoke(this, oldContext, _context);
+                }
+            }
         }
 
         public class Service2 : IService, IDisposable
         {
-            public bool Disposed { get; set; }
+            public bool Disposed { get; private set; }
 
             public void DoSomething()
             {
@@ -379,4 +391,3 @@ namespace Miruken.Tests.Register
         }
     }
 }
-#endif

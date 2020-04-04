@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Tests.Register
+﻿namespace Miruken.Tests.Register
 {
     using System;
     using System.Collections.Generic;
@@ -137,4 +136,3 @@ namespace Miruken.Tests.Register
         }
     }
 }
-#endif

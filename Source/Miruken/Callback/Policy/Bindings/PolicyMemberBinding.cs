@@ -8,11 +8,8 @@
     using Concurrency;
     using Context;
     using Infrastructure;
-    using Rules;
-
-#if NETSTANDARD
     using Microsoft.Extensions.DependencyInjection;
-#endif
+    using Rules;
 
     public delegate PolicyMemberBinding BindMemberDelegate(
         CallbackPolicy policy,
@@ -262,11 +259,7 @@
                 }
                 else
                 {
-                    if (argumentType == typeof(IServiceProvider)
-#if NETSTANDARD
-                        || argumentType == typeof(IServiceScopeFactory)
-#endif
-                        )
+                    if (argumentType == typeof(IServiceProvider) || argumentType == typeof(IServiceScopeFactory))
                     {
                         var singletonLike = filters?.Any(f =>
                             f.Item2 is SingletonAttribute ||
@@ -342,6 +335,7 @@
 
         private string DebuggerDisplay
         {
+            // ReSharper disable once UnusedMember.Local
             get
             {
                 var category = Category.GetType().Name.Replace("Attribute", "");

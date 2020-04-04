@@ -377,8 +377,7 @@
             }
         }
     }
-
-#if NETSTANDARD
+    
     [TestClass]
     public class SecureGetHandlerTests : SecureHttpTestScenario
     {
@@ -392,5 +391,4 @@
             Assert.AreEqual("Messi", player.Name);
         }
     }
-#endif
 }

@@ -1,17 +1,14 @@
 ﻿namespace Miruken.Context
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Threading;
-    using Callback;
-    using Graph;
+	using System;
+	using System.Collections.Generic;
+	using System.ComponentModel;
+	using System.Threading;
+	using Callback;
+	using Graph;
+	using Microsoft.Extensions.DependencyInjection;
 
-#if NETSTANDARD
-    using Microsoft.Extensions.DependencyInjection;
-#endif
-
-    public enum ContextState
+	public enum ContextState
     {
         Active = 0,
         Ending,
@@ -19,12 +16,7 @@
     }
 
     public class Context : CompositeHandler,
-        IHandlerAxis, ITraversing
-#if NETSTANDARD
-        ,IServiceScope, IServiceScopeFactory
-#else
-        ,IDisposable
-#endif
+        IHandlerAxis, ITraversing, IServiceScope, IServiceScopeFactory
     {
 	    private EventHandlerList _events;
 	    private ReaderWriterLockSlim _lock;
@@ -132,15 +124,10 @@
 	    {
 	        return new Context(this);
 	    }
-
-#if NETSTANDARD
+	    
 	    IServiceProvider IServiceScope.ServiceProvider => this;
 
-	    IServiceScope IServiceScopeFactory.CreateScope()
-	    {
-	        return CreateChild();
-	    }
-#endif
+	    IServiceScope IServiceScopeFactory.CreateScope() => CreateChild();
 
 	    public Context Store(object data)
 	    {
@@ -184,15 +171,11 @@
 	        return handled;
 	    }
 
-        private bool BaseHandle(object callback, ref bool greedy, IHandler composer)
-        {
-            return base.HandleCallback(callback, ref greedy, composer);
-        }
+        private bool BaseHandle(object callback, ref bool greedy, IHandler composer) =>
+	        base.HandleCallback(callback, ref greedy, composer);
 
-        public void Traverse(TraversingAxis axis, Visitor visitor)
-        {
-            TraversingHelper.Traverse(this, axis, visitor);
-        }
+        public void Traverse(TraversingAxis axis, Visitor visitor) =>
+	        TraversingHelper.Traverse(this, axis, visitor);
 
 	    public Context UnwindToRoot(object reason = null)
 	    {

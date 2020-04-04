@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Http.Tests
+﻿namespace Miruken.Http.Tests
 {
     using System;
     using System.Net.Http.Headers;
@@ -171,7 +170,7 @@ namespace Miruken.Http.Tests
             }
         }
 
-        public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+        private class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
             public BasicAuthenticationHandler(
                 IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -197,4 +196,4 @@ namespace Miruken.Http.Tests
         }
     }
 }
-#endif
+

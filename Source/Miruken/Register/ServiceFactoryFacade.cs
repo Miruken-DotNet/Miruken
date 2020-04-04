@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-namespace Miruken.Register
+﻿namespace Miruken.Register
 {
     using System;
     using System.Collections.Generic;
@@ -115,6 +114,7 @@ namespace Miruken.Register
             services.Add(service);
         }
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private static void CheckServiceType(Type serviceType, ServiceDescriptor service)
         {
             if (serviceType == null)
@@ -125,4 +125,3 @@ namespace Miruken.Register
         }
     }
 }
-#endif

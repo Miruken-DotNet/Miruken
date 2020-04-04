@@ -2,16 +2,13 @@
 {
     using System;
     using System.Data;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
     using Miruken.Context;
     using static Protocol;
     using ServiceProvider = Miruken.Callback.ServiceProvider;
-
-#if NETSTANDARD
-    using Microsoft.Extensions.DependencyInjection;
-#endif
 
     /// <summary>
     /// Summary description for ContextTests
@@ -49,17 +46,14 @@
             var context = new Context();
             Assert.AreSame(context, context.Resolve<IServiceProvider>());
         }
-
-#if NETSTANDARD
+        
         [TestMethod]
         public void Should_Get_Self_For_ServiceScopeFactory()
         {
             var context = new Context();
             Assert.AreSame(context, context.Resolve<IServiceScopeFactory>());
         }
-#endif
-
-#if NETSTANDARD
+        
         [TestMethod]
         public void Should_Create_Service_Scope()
         {
@@ -67,7 +61,6 @@
             var scope   = context.CreateScope();
             Assert.IsNotNull(scope);
         }
-#endif
 
         [TestMethod]
         public void Should_Not_Have_Parent_If_Root()
