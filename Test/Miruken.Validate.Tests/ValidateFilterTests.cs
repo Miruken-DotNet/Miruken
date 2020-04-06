@@ -1,5 +1,6 @@
 ﻿namespace Miruken.Validate.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
@@ -124,7 +125,7 @@
                 var team = outcome.GetOutcome("Team");
                 Assert.IsNotNull(team);
                 CollectionAssert.AreEqual(new[] { "Name" }, team.Culprits);
-                Assert.AreEqual("The Name field is required.\r\n'Name' must not be empty.", team["Name"]);
+                Assert.AreEqual($"The Name field is required.{Environment.NewLine}'Name' must not be empty.", team["Name"]);
             }
         }
 
