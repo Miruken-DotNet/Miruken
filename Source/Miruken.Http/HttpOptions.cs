@@ -134,11 +134,11 @@
         public static string GetRequestPath(object request)
         {
             var decorators = "";
-            while (request is IDecorator)
+            while (request is IDecorator d)
             {
-                var decorator = GetRequestPath(request.GetType());
+                var decorator = GetRequestPath(d.GetType());
                 decorators = $"{decorators}/{decorator}";
-                request    = ((IDecorator)request).Decoratee;
+                request    = d.Decoratee;
             }
             var basePath = GetRequestPath(request.GetType());
             return basePath == null ? null : $"{basePath}{decorators}";

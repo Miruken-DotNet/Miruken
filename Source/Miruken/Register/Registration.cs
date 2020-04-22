@@ -148,7 +148,7 @@
             foreach (var service in AddDefaultServices(_implicitServices))
             {
                 var serviceType = service.ImplementationType ?? service.ServiceType;
-                var visitor     = !serviceType.IsDefined(typeof(UnmanagedAttribute), true)
+                var visitor     = !serviceType.IsDefined(typeof(UnmanagedAttribute), false)
                                 ? ServiceConfiguration.For(service)
                                 : null;
                 factory.RegisterDescriptor(serviceType, visitor);
