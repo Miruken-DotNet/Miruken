@@ -83,7 +83,7 @@
 
                 var provideImplicit = !categories.OfType<Provides>().Any()
                                    && constructor?.IsPublic == true
-                                   && !handlerType.IsDefined(typeof(UnmanagedAttribute), true);
+                                   && !handlerType.IsDefined(typeof(UnmanagedAttribute), false);
 
                 if (provideImplicit)
                 {
