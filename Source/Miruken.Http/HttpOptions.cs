@@ -52,6 +52,12 @@
 
     public static class HttpOptionsExtensions
     {
+        public static IHandler HttpOptions(
+            this IHandler handler, HttpOptions httpOptions)
+        {
+            return httpOptions.Decorate(handler);
+        }
+
         public static IHandler BaseUrl(
             this IHandler handler, string baseUrl)
         {
