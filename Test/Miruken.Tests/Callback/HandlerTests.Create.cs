@@ -5,6 +5,8 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
+    using Miruken.Concurrency;
+    using Miruken.Infrastructure;
 
     [TestClass]
     public class HandlerCreateTests
@@ -25,6 +27,7 @@
             var controller = new StaticHandler().Create<Controller>();
             Assert.IsNotNull(controller);
             Assert.IsNotNull(controller.ViewFactory);
+            Assert.IsTrue(controller.Initialized);
         }
 
         [TestMethod]
@@ -93,8 +96,20 @@
 
         private interface IController { }
 
-        private class Controller : IController
+        private class Controller : IController, IInitialize
         {
+            public bool Initialized { get; set; }
+
+            public Promise Initialize()
+            {
+                Initialized = true;
+                return null;
+            }
+
+            public void FailedInitialize(Exception exception = null)
+            {
+            }
+
             [Creates]
             public Controller(ViewFactory viewFactory)
             {

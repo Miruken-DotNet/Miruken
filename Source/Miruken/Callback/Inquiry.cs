@@ -135,7 +135,8 @@
             if (promise?.State == PromiseState.Fulfilled)
             {
                 resolution = promise.Wait();
-                promise    = null;
+                if (resolution == null) return false;
+                promise = null;
             }
 
             if (promise != null)
@@ -160,7 +161,7 @@
                             }
                             break;
                         default:
-                            if (result != null)
+                            if (result != null && IsSatisfied(result, greedy, composer))
                                 _resolutions.Add(key, result);
                             break;
                     }
@@ -215,23 +216,14 @@
 
         public virtual bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
-            try
-            {  
-                var isGreedy = greedy;
-                var handled  = Implied(handler, isGreedy, composer);
-                if (handled && !greedy) return true;
+            var isGreedy = greedy;
+            var handled  = Implied(handler, isGreedy, composer);
+            if (handled && !greedy) return true;
 
-                var count = _resolutions.Count + _promises.Count;
-                handled = Policy.Dispatch(handler, this, greedy, composer,
-                    (r, strict, p) => Resolve(r, strict, isGreedy, composer, p)) || handled;
-                return handled || _resolutions.Count + _promises.Count> count;
-            }
-            finally
-            {
-                Dispatcher = null;
-                Binding    = null;
-                Target     = null;
-            }
+            var count = _resolutions.Count + _promises.Count;
+            handled = Policy.Dispatch(handler, this, greedy, composer,
+                (r, strict, p) => Resolve(r, strict, isGreedy, composer, p)) || handled;
+            return handled || _resolutions.Count + _promises.Count > count;
         }
 
         private bool Implied(object item, bool greedy, IHandler composer)

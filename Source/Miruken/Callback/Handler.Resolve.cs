@@ -22,6 +22,10 @@
             if (handler == null) return null;
             if (key is Inquiry inquiry)
             {
+                if (inquiry.Many)
+                    throw new InvalidOperationException(
+                        "Requested Inquiry expects multiple results");
+
                 if (inquiry.WantsAsync)
                     throw new InvalidOperationException(
                         "Requested Inquiry is asynchronous");
@@ -44,6 +48,10 @@
             if (handler == null) return null;
             if (key is Inquiry inquiry)
             {
+                if (inquiry.Many)
+                    throw new InvalidOperationException(
+                        "Requested Inquiry expects multiple results");
+
                 if (!inquiry.WantsAsync)
                     throw new InvalidOperationException(
                         "Requested Inquiry is synchronous");

@@ -64,18 +64,18 @@
             }
         }
 
-        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
-        {
-            return Policy.Dispatch(
-                handler, this, greedy, composer, SetMapping)
-                || _result != null;
-        }
-
         private bool SetMapping(object mapping, bool strict, int? priority = null)
         {
             var mapped = mapping != null;
             if (mapped) Result = mapping;
             return mapped;
+        }
+
+        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
+        {
+            return Policy.Dispatch(
+                handler, this, greedy, composer, SetMapping)
+                || _result != null;
         }
 
         private string DebuggerDisplay

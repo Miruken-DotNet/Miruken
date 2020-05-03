@@ -11,8 +11,8 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public sealed class Command 
         : ICallback, IAsyncCallback,
-            IFilterCallback, IBatchCallback,
-            IDispatchCallback
+          IFilterCallback, IBatchCallback,
+          IDispatchCallback
     {
         private CallbackPolicy _policy;
         private readonly List<object> _results;
@@ -65,8 +65,7 @@
                     }
                     else
                     {
-                        _result = Many ? _results.ToArray()
-                                : _results.FirstOrDefault();
+                        _result = Many ? _results.ToArray() : _results.FirstOrDefault();
                     }
                 }
 
@@ -95,17 +94,8 @@
         public bool Respond(object response, bool strict, int? priority = null)
         {
             if (response == null) return false;
-            var accepted = Include(response);
-            if (accepted) _result = null;
-            return accepted;
-        }
-
-        private bool Include(object response)
-        {
-            if (response == null) return false;
-
             var promise = response as Promise
-                       ?? (response as Task)?.ToPromise();
+                          ?? (response as Task)?.ToPromise();
 
             if (promise?.State == PromiseState.Fulfilled)
             {
@@ -124,6 +114,7 @@
             else
                 _results.Add(response);
 
+            _result = null;
             return true;
         }
 

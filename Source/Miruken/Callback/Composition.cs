@@ -23,6 +23,7 @@
 
         object IInferCallback.InferCallback()
         {
+            if (Callback == null) return this;
             var infer = Inference.Get(Callback);
             return ReferenceEquals(infer, Callback) ? this
                  : new Composition(infer);

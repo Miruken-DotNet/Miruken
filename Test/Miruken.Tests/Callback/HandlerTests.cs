@@ -529,6 +529,22 @@
         }
 
         [TestMethod]
+        public void Should_Handle_Callback_With_Side_Effect()
+        {
+            var foo     = new Foo();
+            var handler = new CustomHandler();
+            var handled = handler
+                .Aspect((_, c) => true, (cb, c, s) =>
+                {
+                    if (cb is Inference inf &&
+                        inf.Callback is Foo f)
+                        f.Handled++;
+                }).Handle(foo);
+            Assert.IsTrue(handled);
+            Assert.AreEqual(2, foo.Handled);
+        }
+
+        [TestMethod]
         public async Task Should_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();

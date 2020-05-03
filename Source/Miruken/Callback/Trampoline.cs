@@ -55,8 +55,7 @@
                    ?.CanDispatch(target, binding, dispatcher, out reset) != false;
         }
 
-        public virtual bool Dispatch(object handler,
-            ref bool greedy, IHandler composer)
+        public virtual bool Dispatch(object handler, ref bool greedy, IHandler composer)
         {
             return Callback != null
                   ? Handler.Dispatch(handler, Callback, ref greedy, composer)

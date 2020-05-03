@@ -9,15 +9,15 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class Resolving : Inquiry, IInferCallback
     {
-        private readonly object _callback;
-        private bool _handled;
-
         public Resolving(object key, object callback)
             : base(key, callback as Inquiry, true)
         {
-            _callback = callback
+            Callback = callback
                 ?? throw new ArgumentNullException(nameof(callback));
         }
+
+        public object Callback  { get; }
+        public bool   Succeeded { get; private set; }
 
         object IInferCallback.InferCallback()
         {
@@ -33,7 +33,7 @@
                 return false;
 
             IDisposable inner = null;
-            var innerCheck = (_callback as IDispatchCallbackGuard)
+            var innerCheck = (Callback as IDispatchCallbackGuard)
                 ?.CanDispatch(target, binding, dispatcher, out inner);
             switch (innerCheck)
             {
@@ -56,12 +56,12 @@
         protected override bool IsSatisfied(
             object resolution, bool greedy, IHandler composer)
         {
-            if (_handled && !greedy) return true;
-            return _handled = Handler.Dispatch(
-                resolution, _callback, ref greedy, composer)
-                || _handled;
+            if (Succeeded && !greedy) return true;
+            var handled = Handler.Dispatch(resolution, Callback, ref greedy, composer);
+            if (handled) Succeeded = true;
+            return handled;
         }
 
-        private string DebuggerDisplay => $"Resolving | {Key} => {_callback}";
+        private string DebuggerDisplay => $"Resolving | {Key} => {Callback}";
     }
 }

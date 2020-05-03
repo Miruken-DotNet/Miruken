@@ -7,13 +7,13 @@
     using Policy;
     using Policy.Bindings;
 
-    public class Initializer<T> : IFilter<Inquiry, T>
+    public class Initializer<TCb, TRes> : IFilter<TCb, TRes>
     {
         public int? Order { get; set; } = int.MaxValue - 1000;
 
-        public async Task<T> Next(Inquiry callback,
+        public async Task<TRes> Next(TCb callback,
             object rawCallback, MemberBinding member,
-            IHandler composer, Next<T> next,
+            IHandler composer, Next<TRes> next,
             IFilterProvider provider)
         {
             var result = await next();
@@ -60,7 +60,7 @@
 
         public bool? AppliesTo(object callback, Type callbackType)
         {
-            return callback is Inquiry;
+            return callback is Inquiry || callback is Creation;
         }
 
         public IEnumerable<IFilter> GetFilters(
@@ -69,7 +69,8 @@
         {
             var initializer = Initializers.GetOrAdd(dispatcher,
                 d => (IFilter)Activator.CreateInstance(
-                    typeof(Initializer<>).MakeGenericType(d.LogicalReturnType)));
+                    typeof(Initializer<,>).MakeGenericType(
+                        callbackType, d.LogicalReturnType)));
             return new [] { initializer };
         }
 

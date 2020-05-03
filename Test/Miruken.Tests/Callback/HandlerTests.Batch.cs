@@ -325,21 +325,6 @@
         }
 
         [TestMethod]
-        public async Task Should_Suppress_Batching_When_Resolving()
-        {
-            var called  = false;
-            var handler = new EmailHandler();
-            var results = await handler.Batch(batch =>
-            {
-                Assert.AreEqual("Hello", batch.NoBatch()
-                    .Proxy<IEmailing>().Send("Hello"));
-                called = true;
-            });
-            Assert.IsTrue(called);
-            Assert.AreEqual(0, results.Length);
-        }
-
-        [TestMethod]
         public void Should_Filter_Batches()
         {
             var count   = 0;

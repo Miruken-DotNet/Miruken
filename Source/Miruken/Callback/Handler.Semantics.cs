@@ -116,6 +116,10 @@ namespace Miruken.Callback
                     _handler.Handle(callback, ref greedy, composer);
                     return true;
                 }
+                catch (NotHandledException)
+                {
+                    return true;
+                }
                 catch (RejectedException)
                 {
                     return true;

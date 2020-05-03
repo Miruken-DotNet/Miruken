@@ -78,11 +78,14 @@
                 || Protocol.IsInstanceOfType(target);
         }
 
-        private class Inference : Trampoline, IInferCallback
+        public class Inference : Trampoline, IInferCallback
         {
+            private readonly Resolving _resolving;
+
             public Inference(HandleMethod handleMethod)
                 : base(handleMethod)
             {
+                _resolving = new Resolving(handleMethod.Protocol, Callback);
             }
 
             public object InferCallback()
@@ -93,11 +96,8 @@
             public override bool Dispatch(object handler,
                 ref bool greedy, IHandler composer)
             {
-                var handled = base.Dispatch(handler, ref greedy, composer);
-                if (handled) return true;
-                var handleMethod = (HandleMethod)Callback;
-                var infer = new Resolving(handleMethod.Protocol, Callback);
-                return infer.Dispatch(handler, ref greedy, composer);
+                return base.Dispatch(handler, ref greedy, composer) ||
+                       _resolving.Dispatch(handler, ref greedy, composer);
             }
         }
 
