@@ -191,8 +191,8 @@
                             return baseResult;
                         }
 
-                        completed = Policy.AcceptResult?.Invoke(baseResult, this) 
-                                    ?? baseResult != null;
+                        completed = Policy.AcceptResult?.Invoke(baseResult, this)
+                                 ?? baseResult != null;
 
                         return completed ? baseResult
                              : Task.FromException(new NotSupportedException(

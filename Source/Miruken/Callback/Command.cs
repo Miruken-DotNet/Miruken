@@ -7,12 +7,13 @@
     using System.Threading.Tasks;
     using Concurrency;
     using Policy;
+    using Policy.Bindings;
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public sealed class Command 
         : ICallback, IAsyncCallback,
           IFilterCallback, IBatchCallback,
-          IDispatchCallback
+          IDispatchCallback, IDispatchCallbackGuard
     {
         private CallbackPolicy _policy;
         private readonly List<object> _results;
@@ -116,6 +117,16 @@
 
             _result = null;
             return true;
+        }
+
+
+        public bool CanDispatch(object target,
+            PolicyMemberBinding binding, MemberDispatch dispatcher,
+            out IDisposable reset)
+        {
+            reset = null;
+            return (Callback as IDispatchCallbackGuard)
+                   ?.CanDispatch(target, binding, dispatcher, out reset) != false;
         }
 
         public bool Dispatch(object handler, ref bool greedy, IHandler composer)

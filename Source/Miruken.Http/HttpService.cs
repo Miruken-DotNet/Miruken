@@ -62,6 +62,10 @@
 
             if (requestUri != null)
                 httpRequest.RequestUri = requestUri;
+
+            var version = options.Version;
+            if (version != null)
+                httpRequest.Version = version;
         }
     }
 }

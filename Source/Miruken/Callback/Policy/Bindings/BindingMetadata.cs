@@ -30,8 +30,6 @@
                 value = (V)v;
                 return true;
             }
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
 
             value = default;
             return false;

@@ -945,14 +945,31 @@
         }
 
         [TestMethod]
+        public void Should_Initialize_Component()
+        {
+            var factory = new MutableHandlerDescriptorFactory();
+            HandlerDescriptorFactory.UseFactory(factory);
+            factory.RegisterDescriptor(typeof(InitializedComponent1));
+            var handler = new StaticHandler();
+            var component1 = handler.Resolve<InitializedComponent1>();
+            Assert.IsNotNull(component1);
+            var component2 = handler.Resolve<InitializedComponent1>();
+            Assert.AreSame(component1, component2);
+            Assert.AreEqual(1, component1.Initialized);
+        }
+
+        [TestMethod]
         public async Task Should_Initialize_Asynchronously()
         {
             var factory = new MutableHandlerDescriptorFactory();
             HandlerDescriptorFactory.UseFactory(factory);
             factory.RegisterDescriptor(typeof(InitializedComponent1));
-            var component = await new StaticHandler().ResolveAsync<InitializedComponent1>();
-            Assert.IsNotNull(component);
-            Assert.IsTrue(component.Initialized);
+            var handler = new StaticHandler();
+            var component1 = await handler.ResolveAsync<InitializedComponent1>();
+            Assert.IsNotNull(component1);
+            var component2 = await handler.ResolveAsync<InitializedComponent1>();
+            Assert.AreSame(component1, component2);
+            Assert.AreEqual(1, component1.Initialized);
         }
 
         [TestMethod]
@@ -2049,7 +2066,7 @@
                 InitializedComponent1 component1, InitializedComponent2 component2)
             {
                 RootController = rootController;
-                MainScreen = screen;
+                MainScreen     = screen;
             }
 
             public C      RootController   { get; }
@@ -2064,10 +2081,6 @@
                     Initialized = true;
                     ++InitializedCount;
                 });
-            }
-
-            public void FailedInitialize(Exception exception = null)
-            {
             }
         }
 
@@ -2094,16 +2107,12 @@
             {             
             }
 
-            public bool Initialized { get; set; }
+            public int Initialized { get; private set; }
 
             public Promise Initialize()
             {
                 return Promise.Delay(100.Millis())
-                    .Then((res, _) => Initialized = true);
-            }
-
-            public void FailedInitialize(Exception exception = null)
-            {
+                    .Then((res, _) => ++Initialized);
             }
         }
 
@@ -2114,16 +2123,9 @@
             {
             }
 
-            public bool Initialized { get; set; }
-
             public Promise Initialize()
             {
-                return Promise.Delay(200.Millis())
-                    .Then((res, _) => Initialized = true);
-            }
-
-            public void FailedInitialize(Exception exception = null)
-            {
+                return Promise.Delay(200.Millis());
             }
         }
 
@@ -2134,17 +2136,10 @@
             {
             }
 
-            public bool Initialized { get; set; }
-
             public Promise Initialize()
             {
                 return Promise.Rejected(new InvalidOperationException(
                     "Initialization Failed"));
-            }
-
-            public void FailedInitialize(Exception exception = null)
-            {
-                Assert.AreEqual("Initialization Failed", exception?.Message);
             }
         }
 

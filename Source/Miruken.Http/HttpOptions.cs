@@ -20,6 +20,7 @@
     public class HttpOptions : Options<HttpOptions>
     {
         public string                       BaseUrl    { get; set; }
+        public Version                      Version    { get; set; }
         public TimeSpan?                    Timeout    { get; set; }
         public UriBuilderDelegate           UriBuilder { get; set; }
         public HttpRequestPipeline          Pipeline   { get; set; }
@@ -29,6 +30,9 @@
         {
             if (BaseUrl != null && other.BaseUrl == null)
                 other.BaseUrl = BaseUrl;
+
+            if (Version != null && other.Version == null)
+                other.Version = Version;
 
             if (Timeout.HasValue && !other.Timeout.HasValue)
                 other.Timeout = Timeout;
@@ -70,6 +74,12 @@
             if (baseUrl == null)
                 throw new ArgumentNullException(nameof(baseUrl));
             return handler.BaseUrl(baseUrl(handler));
+        }
+
+        public static IHandler HttpVersion(
+            this IHandler handler, Version version)
+        {
+            return new HttpOptions { Version = version }.Decorate(handler);
         }
 
         public static IHandler Timeout(

@@ -106,10 +106,6 @@
                 return null;
             }
 
-            public void FailedInitialize(Exception exception = null)
-            {
-            }
-
             [Creates]
             public Controller(ViewFactory viewFactory)
             {

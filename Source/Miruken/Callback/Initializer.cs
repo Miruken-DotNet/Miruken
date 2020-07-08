@@ -9,7 +9,7 @@
 
     public class Initializer<TCb, TRes> : IFilter<TCb, TRes>
     {
-        public int? Order { get; set; } = int.MaxValue - 1000;
+        public int? Order { get; set; } = int.MaxValue - 100;
 
         public async Task<TRes> Next(TCb callback,
             object rawCallback, MemberBinding member,
@@ -19,30 +19,8 @@
             var result = await next();
             if (result is IInitialize initialize)
             {
-                if (initialize.Initialized)
-                    return result;
-                try
-                {
-                    if (initialize.Initialize() is { } promise)
-                    {
-                        await promise.Then((res, _) =>
-                        {
-                            initialize.Initialized = true;
-                            return result;
-                        }, (ex, _) =>
-                        {
-                            initialize.Initialized = false;
-                            initialize.FailedInitialize(ex);
-                            throw ex;
-                        });
-                    }
-                }
-                catch (Exception exception)
-                {
-                    initialize.Initialized = false;
-                    initialize.FailedInitialize(exception);
-                    throw;
-                }
+                if (initialize.Initialize() is { } promise)
+                    await promise;
             }
             return result;
         }

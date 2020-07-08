@@ -14,9 +14,10 @@
         {
             var parentBinding = parent?.Binding;
             if (parentBinding == null) return true;
+            var rooted = (attribute as ContextualAttribute)?.Rooted;
             return parentBinding.Filters.OfType<LifestyleAttribute>()
                 .All(lifestyle => lifestyle is ContextualAttribute c &&
-                    ((attribute as ContextualAttribute)?.Rooted == true || !c.Rooted));
+                    (rooted == true || !c.Rooted));
         }
 
         protected override Task<T> GetInstance(

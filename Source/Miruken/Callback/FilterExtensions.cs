@@ -105,8 +105,8 @@
                 (IFilter, IFilterProvider) y)
             {
                 if (x.Item1 == y.Item1) return 0;
-                if (y.Item1?.Order == null) return -1;
-                if (x.Item1?.Order == null) return 1;
+                if (x.Item1.Order == y.Item1.Order || y.Item1.Order == null) return -1;
+                if (x.Item1.Order == null) return 1;
                 return x.Item1.Order.Value - y.Item1.Order.Value;
             }
         }

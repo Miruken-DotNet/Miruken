@@ -11,7 +11,7 @@
 
     public abstract class Lifestyle<T> : IFilter<Inquiry, T>
     {
-        public int? Order { get; set; } = int.MaxValue - 100;
+        public int? Order { get; set; } = int.MaxValue - 1000;
 
         public Task<T> Next(Inquiry callback,
             object rawCallback, MemberBinding member,

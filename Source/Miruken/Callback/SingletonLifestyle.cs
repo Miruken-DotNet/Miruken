@@ -32,7 +32,7 @@
                             case TaskStatus.Canceled:
                                 return result;
                             default:
-                                _instance = next().GetAwaiter().GetResult();
+                                _instance = result.GetAwaiter().GetResult();
                                 break;
                         }
                     }
