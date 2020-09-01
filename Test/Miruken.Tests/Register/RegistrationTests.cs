@@ -288,6 +288,22 @@ namespace Miruken.Tests.Register
             Assert.AreNotSame(service1, handler.Create<Service1>());
         }
 
+        [TestMethod]
+        public void Should_Work_With_Constrained_Open_Generics()
+        {
+            using var handler = new ServiceCollection()
+                .AddSingleton(typeof(UserInfoValidator<>))
+                .AddSingleton<UserDataValidator>()
+                .AddMiruken()
+                .Build();
+            var validators = handler.ResolveAll<IValidator<UserData>>();
+            Assert.AreEqual(2, validators.Length);
+            Assert.IsTrue(validators.OfType<UserInfoValidator<UserData>>().Any());
+            Assert.IsTrue(validators.OfType<UserDataValidator>().Any());
+            Assert.IsNull(handler.Resolve<IValidator<PersonData>>());
+        }
+
+
         public class Action
         {
             public int Handled { get; set; }
@@ -388,6 +404,40 @@ namespace Miruken.Tests.Register
 
             public IServiceProvider     Services     { get; }
             public IServiceScopeFactory ScopeFactory { get; }
+        }
+
+        public interface IValidator<in T>
+        {
+            bool Validate(T instance);
+        }
+
+        public interface IContainUserInfo
+        {
+        }
+
+        public class UserInfoValidator<T> : IValidator<T>
+            where T : IContainUserInfo
+        {
+            public bool Validate(T instance)
+            {
+                return true;
+            }
+        }
+
+        public class UserDataValidator : IValidator<UserData>
+        {
+            public bool Validate(UserData instance)
+            {
+                return true;
+            }
+        }
+
+        public class UserData : IContainUserInfo
+        {
+        }
+
+        public class PersonData
+        {
         }
     }
 }

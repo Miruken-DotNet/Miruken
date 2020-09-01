@@ -11,6 +11,10 @@
             _metadata = metadata ?? new BindingMetadata();
         }
 
+        public ConstraintBuilder(IBindingScope scope) : this(scope.Metadata)
+        {
+        }
+
         public ConstraintBuilder Named(string name)
         {
             return Require(new Named(name));

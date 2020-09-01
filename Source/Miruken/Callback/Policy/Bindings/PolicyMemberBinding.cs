@@ -82,8 +82,16 @@
                     handlerType.GetGenericArguments(), new[] { callback });
                 if (mapping.Complete)
                 {
-                    var closed = mapping.MapTypes(new[] { type });
-                    return handlerType.MakeGenericType(closed);
+                    try
+                    {
+                        var closed = mapping.MapTypes(new[] { type });
+                        return handlerType.MakeGenericType(closed);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Most likely a constraint violation
+                        return null;
+                    }
                 }
             }
             else if (!Dispatcher.IsVoid)
@@ -93,8 +101,16 @@
                     Array.Empty<Argument>(), Dispatcher.ReturnType);
                 if (mapping.Complete)
                 {
-                    var closed = mapping.MapTypes(Array.Empty<Type>(), type);
-                    return handlerType.MakeGenericType(closed);
+                    try
+                    {
+                        var closed = mapping.MapTypes(Array.Empty<Type>(), type);
+                        return handlerType.MakeGenericType(closed);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Most likely a constraint violation
+                        return null;
+                    }
                 }
             }
             return null;

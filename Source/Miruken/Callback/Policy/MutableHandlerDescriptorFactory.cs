@@ -162,9 +162,8 @@
                     {
                         if (key == null)
                             key = policy.GetKey(callback);
-                        handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor)
-                            ?? throw new InvalidOperationException(
-                                $"Unable to close descriptor {handler.HandlerType.FullName}");
+                        handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor);
+                        if (handler == null) continue;
                     }
 
                     if (orderBy != null)
