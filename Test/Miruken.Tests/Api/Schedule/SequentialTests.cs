@@ -102,7 +102,7 @@
         }
 
         [TestMethod]
-        public async Task Should_Publish_Concurrently()
+        public async Task Should_Publish_Sequentially()
         {
             var handler = new StockQuoteHandler()
                         + new StockQuoteHandler()

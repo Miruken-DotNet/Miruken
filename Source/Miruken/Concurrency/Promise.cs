@@ -506,7 +506,7 @@
             });
         }
 
-        protected internal Promise(Exception rejected, bool synchronous = true)
+        private Promise(Exception rejected, bool synchronous = true)
         {
             _mode = ChildCancelMode.Any;
 

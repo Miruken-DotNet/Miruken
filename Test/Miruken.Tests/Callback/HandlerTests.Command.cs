@@ -26,7 +26,9 @@
         {
             var handler = new OrderHandler();
             var order   = new PlaceOrder();
-            var orderId = handler.Command<int>(order);
+            var orderId = handler
+                .WithOptions(new OrderOptions { RushDelivery = true })
+                .Command<int>(order);
             Assert.AreEqual(1, orderId);
         }
 
@@ -43,7 +45,7 @@
         public async Task Should_Command_Asynchronously()
         {
             var handler = new OrderHandler();
-            var fulfill = new FulfillOrder {OrderId = 1};
+            var fulfill = new FulfillOrder { OrderId = 1 };
             await handler.CommandAsync(fulfill);
             Assert.AreEqual(1, fulfill.OrderId);
         }
@@ -133,29 +135,40 @@
             public int OrderId { get; set; }
         }
 
+        private class OrderOptions : Options<OrderOptions>
+        {
+            public bool? RushDelivery { get; set; }
+            
+            public override void MergeInto(OrderOptions other)
+            {
+                if (RushDelivery != null && other.RushDelivery == null)
+                    other.RushDelivery = RushDelivery;
+            }
+        }
+        
         private class OrderHandler : Handler
         {
             private int _nextOrderId;
 
             [Handles]
-            public int Place(PlaceOrder order)
+            public int Place(PlaceOrder order, OrderOptions options)
             {
                 return ++_nextOrderId;
             }
 
             [Handles]
-            public void Cancel(CancelOrder cancel)
+            public void Cancel(CancelOrder cancel, OrderOptions options)
             {
             }
 
             [Handles]
-            public Promise Fulfill(FulfillOrder fulfill)
+            public Promise Fulfill(FulfillOrder fulfill, OrderOptions options)
             {
                 return new Promise<bool>((resolve, reject) => resolve(true, true));
             }
 
             [Handles]
-            public Promise<Guid> Deliver(DeliverOrder deliver)
+            public Promise<Guid> Deliver(DeliverOrder deliver, [Options] OrderOptions options)
             {
                 return new Promise<Guid>((resolve, reject) => 
                     resolve(Guid.NewGuid(), true));

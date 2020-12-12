@@ -12,7 +12,7 @@
     {
         public static readonly ResolvingAttribute Default = new ResolvingAttribute();
 
-        public bool IsOptional => false;
+        public virtual bool IsOptional => false;
 
         public virtual object ResolveArgument(Inquiry parent,
             Argument argument, IHandler handler)

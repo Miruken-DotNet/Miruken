@@ -48,12 +48,12 @@
                     success => success.Payload));
         }
 
-        private static string GetResourceUri(Routed route,
+        private static string GetResourceUri(Routed routed,
             Command command, object message, IHandler composer)
         {
             var options = new HttpOptions();
             if (composer.Handle(options, true) && options.UriBuilder != null)
-                return options.UriBuilder(route, command, message, composer);
+                return options.UriBuilder(routed, command, message, composer);
             return command.Many ? "Publish" : "Process";
         }
     }

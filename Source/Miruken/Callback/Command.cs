@@ -133,7 +133,7 @@
         {
             var count = _results.Count;
             return Policy.Dispatch(handler, this, greedy, composer, Respond)
-                || (_results.Count > count);
+                || _results.Count > count;
         }
 
         private string DebuggerDisplay

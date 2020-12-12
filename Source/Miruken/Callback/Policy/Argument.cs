@@ -67,16 +67,25 @@
                     }        
                 }
             }
+            
+            if (Resolver == null)
+            {
+                if (ParameterType.IsInterface && ParameterType.Is<IProtocol>())
+                    Resolver = ProxyAttribute.Instance;
+                else
+                {
+                    var optionsType = ParameterType.GetOpenTypeConformance(typeof(Options<>));
+                    if (optionsType != null && ParameterType.HasDefaultConstructor())
+                    {
+                        Resolver = OptionsAttribute.Instance;
+                        flags |= Flags.Optional;
+                    }
+                }
+            }
 
             ArgumentFlags = ExtractFlags(ParameterType, flags);
 
-            if (Resolver == null && 
-                ParameterType.IsInterface &&
-                ParameterType.Is<IProtocol>())
-                Resolver = ProxyAttribute.Instance;
-
-            if (Key == null)
-                Key = IsSimple ? Parameter.Name : (object)LogicalType;
+            Key ??= IsSimple ? Parameter.Name : (object) LogicalType;
 
             Resolver?.ValidateArgument(this);
         }

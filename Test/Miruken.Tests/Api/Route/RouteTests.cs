@@ -74,18 +74,5 @@
                 return request.Route == Scheme ? Promise.Empty : null;
             }
         }
-
-        private class PassThroughRouter : Handler
-        {
-            public const string Scheme = "pass-through";
-
-            [Handles]
-            public Promise Route(Routed request, IHandler composer)
-            {
-                return request.Route == Scheme
-                    ? composer.Send(request.Message)
-                    : null;
-            }
-        }
     }
 }

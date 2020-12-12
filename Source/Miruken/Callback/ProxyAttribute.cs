@@ -12,16 +12,22 @@
         public override void ValidateArgument(Argument argument)
         {
             if (!argument.ParameterType.IsInterface)
-                throw new NotSupportedException(
-                    "Proxy parameters must be interfaces");
+            {
+                throw new ArgumentException(
+                    "Proxy parameters must be interfaces.");
+            }
 
             if (argument.IsEnumerable)
-                throw new NotSupportedException(
-                    "Proxy parameters cannot be collections");
+            {
+                throw new ArgumentException(
+                    "Proxy parameters cannot be collections.");
+            }
 
             if (argument.IsPromise || argument.IsTask)
-                throw new NotSupportedException(
-                    "Proxy parameters cannot be tasks or promises");
+            {
+                throw new ArgumentException(
+                    "Proxy parameters cannot be tasks or promises.");
+            }
         }
 
         protected override object Resolve(

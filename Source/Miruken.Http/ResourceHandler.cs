@@ -207,9 +207,9 @@
             var readerMethod = GetReaderMethod(typeof(TResponse));
             if (readerMethod != null)
             {
-                var read = Readers.GetOrAdd(typeof(TResponse), either =>
+                var read = Readers.GetOrAdd(typeof(TResponse), reader =>
                 {
-                    var args   = either.GetGenericArguments();
+                    var args   = reader.GetGenericArguments();
                     var method = readerMethod.MakeGenericMethod(args);
                     return (Func<object, object, object, object, object>)
                         RuntimeHelper.CompileMethod(method,

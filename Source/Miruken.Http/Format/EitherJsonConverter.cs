@@ -36,8 +36,10 @@
             Type objectType, object existingValue, JsonSerializer serializer)
         {
             var json   = JObject.Load(reader);
-            var isLeft = json["isLeft"].Value<bool>();
-            var either = json["value"].CreateReader();
+            var isLeft = json["isLeft"]?.Value<bool>() ??
+                throw new JsonReaderException("Expected 'isLeft' property for Either.");
+            var either = json["value"]?.CreateReader() ??
+                throw new JsonReaderException("Expected 'value' property for Either.");
             var args   = objectType.GetGenericArguments();
             var type   = isLeft ? args[0] : args[1];
             var value  = serializer.Deserialize(either, type);

@@ -1660,12 +1660,16 @@
              Provides("Bar")]
             public Promise ProvidesByName(Inquiry inquiry)
             {
-                return inquiry.Key as string switch
+                // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+                switch (inquiry.Key as string)
                 {
-                    "Foo" => Promise.Resolved(new Foo()),
-                    "Bar" => Promise.Resolved(new Bar()),
-                    _ => Promise.Empty
-                };
+                    case "Foo":
+                        return Promise.Resolved(new Foo());
+                    case "Bar":
+                        return Promise.Resolved(new Bar());
+                    default:
+                        return Promise.Empty;
+                }
             }
         }
 
