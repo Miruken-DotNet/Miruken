@@ -35,7 +35,7 @@
         }
 
         private static ValidationResult CreateResult(
-             ValidationOutcome outcome, ValidationContext context)
+             ValidationOutcome outcome, IValidationContext context)
         {
             if (context.InstanceToValidate is IValidationAware validationAware)
                 validationAware.ValidationOutcome = outcome;

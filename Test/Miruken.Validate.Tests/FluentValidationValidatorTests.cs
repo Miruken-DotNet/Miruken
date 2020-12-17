@@ -235,7 +235,7 @@
         public FooValidator()
         {
             RuleFor(x => x.Id)
-                .Cascade(CascadeMode.StopOnFirstFailure)
+                .Cascade(CascadeMode.Stop)
                 .NotNull()
                 .NotEqual(Guid.Empty);
 
@@ -246,7 +246,7 @@
                 });
 
             RuleFor(p => p.Name)
-                .Cascade(CascadeMode.StopOnFirstFailure)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .MustAsync((name, ct) => Task.FromResult(name.Length > 3))
                 .CustomAsync((name, ctx, ct) =>

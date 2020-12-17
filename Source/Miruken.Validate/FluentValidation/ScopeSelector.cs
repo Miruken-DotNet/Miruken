@@ -14,7 +14,7 @@
         }
 
         public bool CanExecute(IValidationRule rule,
-            string propertyPath, ValidationContext context)
+            string propertyPath, IValidationContext context)
         {
             var ruleSets = rule.RuleSets;
             if (ruleSets.Length == 0)

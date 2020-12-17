@@ -25,8 +25,8 @@
             var outcome = validation.Outcome;
             var scope   = validation.ScopeMatcher;
             var context = scope != null && scope != EqualsScopeMatcher.Default
-                ? new ValidationContext(target, null, new ScopeSelector(scope))
-                : new ValidationContext(target);
+                ? new ValidationContext<T>(target, null, new ScopeSelector(scope))
+                : new ValidationContext<T>(target);
             context.SetValidation(validation);
             context.SetComposer(composer);
 
@@ -62,24 +62,24 @@
         private const string ValidationKey = "Miruken.Validation";
 
         public static void SetValidation(
-            this ValidationContext context, Validation validation)
+            this IValidationContext context, Validation validation)
         {
             context.RootContextData[ValidationKey] = validation;
         }
 
-        public static Validation GetValidation(this ValidationContext context)
+        public static Validation GetValidation(this IValidationContext context)
         {
             return context.RootContextData.TryGetValue(ValidationKey, out var validation)
                 ? (Validation)validation
                 : null;
         }
 
-        public static void SetComposer(this ValidationContext context, IHandler composer)
+        public static void SetComposer(this IValidationContext context, IHandler composer)
         {
             context.RootContextData[ComposerKey] = composer;
         }
 
-        public static IHandler GetComposer(this ValidationContext context)
+        public static IHandler GetComposer(this IValidationContext context)
         {
             return context.RootContextData.TryGetValue(ComposerKey, out var composer)
                 ? (IHandler)composer
