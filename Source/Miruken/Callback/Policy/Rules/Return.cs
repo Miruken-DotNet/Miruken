@@ -62,7 +62,8 @@
     {
         private readonly ReturnTestDelegate _test;
 
-        public static readonly TestReturn True = Return.Is((_, _, _) => true);
+        public static readonly TestReturn True = 
+            Return.Is((returnType, p, ctx) => true);
 
         public TestReturn(ReturnTestDelegate test)
         {
