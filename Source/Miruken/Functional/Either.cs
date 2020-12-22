@@ -58,8 +58,8 @@
             return IsLeft ? matchLeft(Left) : matchRight(Right);
         }
 
-        public TL LeftOrDefault() => Match(l => l, r => default);
-        public TR RightOrDefault() => Match(l => default, r => r);
+        public TL LeftOrDefault() => Match(l => l, _ => default);
+        public TR RightOrDefault() => Match(_ => default, r => r);
 
         public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
         public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);

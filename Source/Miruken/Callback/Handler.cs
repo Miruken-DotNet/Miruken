@@ -11,8 +11,7 @@
             object callback, ref bool greedy, IHandler composer = null)
 	    {
             if (callback == null) return false;
-	        if (composer == null)
-	            composer = this as CompositionScope ?? new CompositionScope(this);
+	        composer ??= this as CompositionScope ?? new CompositionScope(this);
 	        return HandleCallback(Inference.Get(callback), ref greedy, composer);
 	    }
 

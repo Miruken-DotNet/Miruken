@@ -43,7 +43,7 @@
                 .Where(service => serviceType.IsAssignableFrom(serviceGroup.Key) && 
                                   services?.Contains(service) != true)
                 .Where(service => service.Handle(inquiry, many, composer))
-                .Any(service => !many)))
+                .Any(_ => !many)))
             {
                 return null;
             }

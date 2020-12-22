@@ -151,8 +151,7 @@
 	    public bool Handle(TraversingAxis axis, object callback,
 	        ref bool greedy, IHandler composer)
 	    {
-	        if (composer == null)
-	            composer = new CompositionScope(this);
+	        composer ??= new CompositionScope(this);
 
             if (axis == TraversingAxis.Self)
 	            return base.HandleCallback(callback, ref greedy, composer);

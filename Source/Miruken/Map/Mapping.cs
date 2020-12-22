@@ -44,8 +44,7 @@
         {
             get
             {
-                if (_result == null)
-                    _result = RuntimeHelper.GetDefault(Type);
+                _result ??= RuntimeHelper.GetDefault(Type);
 
                 if (IsAsync)
                 {

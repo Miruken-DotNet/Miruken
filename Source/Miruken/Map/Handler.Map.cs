@@ -70,7 +70,7 @@
         {
             return Promise.All(source.Cast<object>()
                     .Select(s => handler.MapAsync<T>(s, format)))
-                .Then((r, s) => r.Cast<T>().ToArray());
+                .Then((r, _) => r.Cast<T>().ToArray());
         }
 
         public static T MapInto<T>(this IHandler handler,

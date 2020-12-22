@@ -174,83 +174,83 @@
             {
                 // No args
                 { FastNone, (typeof(Func<object, object>), 
-                    (member, target, args) => ((Func<object, object>)member)(target)) },
+                    (member, target, _) => ((Func<object, object>)member)(target)) },
                 { FastNone | StaticCall, (typeof(Func<object>),
-                    (member, target, args) => ((Func<object>)member)()) },
+                    (member, _, _) => ((Func<object>)member)()) },
                 { FastNone | NoReturn, (typeof(Action<object>),
-                    (member, target, args) => { ((Action<object>)member)(target); return null; }) },
+                    (member, target, _) => { ((Action<object>)member)(target); return null; }) },
                 { FastNone | NoReturn | StaticCall, (typeof(Action),
-                    (member, target, args) => { ((Action)member)(); return null; }) },
+                    (member, _, _) => { ((Action)member)(); return null; }) },
 
                 // One arg
                 { FastOne, (typeof(Func<object, object, object>),
                     (member, target, args) => ((Func<object, object, object>)member)(target, args[0])) },
                 { FastOne | StaticCall, (typeof(Func<object, object>),
-                    (member, target, args) => ((Func<object, object>)member)(args[0])) },
+                    (member, _, args) => ((Func<object, object>)member)(args[0])) },
                 { FastOne | NoReturn, (typeof(Action<object, object>),
                     (member, target, args) => { ((Action<object, object>) member)(target, args[0]); return null; }) },
                 { FastOne | NoReturn | StaticCall, (typeof(Action<object>),
-                    (member, target, args) => { ((Action<object>)member)(args[0]); return null; }) },
+                    (member, _, args) => { ((Action<object>)member)(args[0]); return null; }) },
 
                 // Two args
                 { FastTwo, (typeof(Func<object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object>)member)(target, args[0], args[1])) },
                 { FastTwo | StaticCall, (typeof(Func<object, object, object>),
-                    (member, target, args) => ((Func<object, object, object>)member)(args[0], args[1])) },
+                    (member, _, args) => ((Func<object, object, object>)member)(args[0], args[1])) },
                 { FastTwo | NoReturn, (typeof(Action<object, object, object>),
                     (member, target, args) => { ((Action<object, object, object>) member)(target, args[0], args[1]); return null; }) },
                 { FastTwo | NoReturn | StaticCall, (typeof(Action<object, object>),
-                    (member, target, args) => { ((Action<object, object>)member)(args[0], args[1]); return null; }) },
+                    (member, _, args) => { ((Action<object, object>)member)(args[0], args[1]); return null; }) },
 
                 // Three args
                 { FastThree, (typeof(Func<object, object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object, object>)member)(target, args[0], args[1], args[2])) },
                 { FastThree | StaticCall, (typeof(Func<object, object, object, object>),
-                    (member, target, args) => ((Func<object, object, object, object>)member)(args[0], args[1], args[2])) },
+                    (member, _, args) => ((Func<object, object, object, object>)member)(args[0], args[1], args[2])) },
                 { FastThree | NoReturn, (typeof(Action<object, object, object, object>),
                     (member, target, args) => { ((Action<object, object, object, object>) member)(target, args[0], args[1], args[2]); return null; }) },
                 { FastThree | NoReturn | StaticCall, (typeof(Action<object, object, object>),
-                    (member, target, args) => { ((Action<object, object, object>)member)(args[0], args[1], args[2]); return null; }) },
+                    (member, _, args) => { ((Action<object, object, object>)member)(args[0], args[1], args[2]); return null; }) },
 
                 // Four args
                 { FastFour, (typeof(Func<object, object, object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object, object, object>)member)(target, args[0], args[1], args[2], args[3])) },
                 { FastFour | StaticCall, (typeof(Func<object, object, object, object, object>),
-                    (member, target, args) => ((Func<object, object, object, object, object>)member)(args[0], args[1], args[2], args[3])) },
+                    (member, _, args) => ((Func<object, object, object, object, object>)member)(args[0], args[1], args[2], args[3])) },
                 { FastFour | NoReturn, (typeof(Action<object, object, object, object, object>),
                     (member, target, args) => { ((Action<object, object, object, object, object>) member)(target, args[0], args[1], args[2], args[3]); return null; }) },
                 { FastFour | NoReturn | StaticCall, (typeof(Action<object, object, object, object>),
-                    (member, target, args) => { ((Action<object, object, object, object>)member)(args[0], args[1], args[2], args[3]); return null; }) },
+                    (member, _, args) => { ((Action<object, object, object, object>)member)(args[0], args[1], args[2], args[3]); return null; }) },
 
                 // Five args
                 { FastFive, (typeof(Func<object, object, object, object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object, object, object, object>)member)(target, args[0], args[1], args[2], args[3], args[4])) },
                 { FastFive | StaticCall, (typeof(Func<object, object, object, object, object, object>),
-                    (member, target, args) => ((Func<object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4])) },
+                    (member, _, args) => ((Func<object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4])) },
                 { FastFive | NoReturn, (typeof(Action<object, object, object, object, object, object>),
                     (member, target, args) => { ((Action<object, object, object, object, object, object>) member)(target, args[0], args[1], args[2], args[3], args[4]); return null; }) },
                 { FastFive | NoReturn | StaticCall, (typeof(Action<object, object, object, object, object>),
-                    (member, target, args) => { ((Action<object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4]); return null; }) },
+                    (member, _, args) => { ((Action<object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4]); return null; }) },
 
                 // Six args
                 { FastSix, (typeof(Func<object, object, object, object, object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object, object, object, object, object>)member)(target, args[0], args[1], args[2], args[3], args[4], args[5])) },
                 { FastSix | StaticCall, (typeof(Func<object, object, object, object, object, object, object>),
-                    (member, target, args) => ((Func<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5])) },
+                    (member, _, args) => ((Func<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5])) },
                 { FastSix | NoReturn, (typeof(Action<object, object, object, object, object, object, object>),
                     (member, target, args) => { ((Action<object, object, object, object, object, object, object>) member)(target, args[0], args[1], args[2], args[3], args[4], args[5]); return null; }) },
                 { FastSix | NoReturn | StaticCall, (typeof(Action<object, object, object, object, object, object>),
-                    (member, target, args) => { ((Action<object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5]); return null; }) },
+                    (member, _, args) => { ((Action<object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5]); return null; }) },
 
                 // Seven args
                 { FastSeven, (typeof(Func<object, object, object, object, object, object, object, object, object>),
                     (member, target, args) => ((Func<object, object, object, object, object, object, object, object, object>)member)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6])) },
                 { FastSeven | StaticCall, (typeof(Func<object, object, object, object, object, object, object, object>),
-                    (member, target, args) => ((Func<object, object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6])) },
+                    (member, _, args) => ((Func<object, object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6])) },
                 { FastSeven | NoReturn, (typeof(Action<object, object, object, object, object, object, object, object>),
                     (member, target, args) => { ((Action<object, object, object, object, object, object, object, object>) member)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
                 { FastSeven | NoReturn | StaticCall, (typeof(Action<object, object, object, object, object, object, object>),
-                    (member, target, args) => { ((Action<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
+                    (member, _, args) => { ((Action<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
             };
 
 #endregion

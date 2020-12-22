@@ -111,10 +111,10 @@
             }
 
             if (promises.Count == 1)
-                return promises[0].Then((r, _) => resolved);
+                return promises[0].Then((_, _) => resolved);
 
             if (promises.Count > 1)
-                return Promise.All(promises).Then((r, _) => resolved);
+                return Promise.All(promises).Then((_, _) => resolved);
 
             return resolved;
         }

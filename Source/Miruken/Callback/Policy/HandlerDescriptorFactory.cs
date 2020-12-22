@@ -11,7 +11,7 @@
         private static IHandlerDescriptorFactory _factory;
 
         private static readonly MutableHandlerDescriptorFactory
-            _default = new MutableHandlerDescriptorFactory();
+            DefaultFactory = new MutableHandlerDescriptorFactory();
 
         public static HandlerDescriptor GetDescriptor<T>(
             this IHandlerDescriptorFactory factory)
@@ -34,7 +34,7 @@
                 .Where(m => (m.Key as Type)?.Is<T>() == true);
         }
 
-        public static IHandlerDescriptorFactory Current => _factory ?? _default;
+        public static IHandlerDescriptorFactory Current => _factory ?? DefaultFactory;
 
         public static void UseFactory(IHandlerDescriptorFactory factory)
         {

@@ -76,8 +76,8 @@
             return (request is Publish publish
                  ? composer.Publish(publish.Message)
                  : composer.Send(request))
-                 .Then((res, s) => new Try<Exception, object>(res))
-                 .Catch((ex, s) => new Try<Exception, object>(ex));
+                 .Then((res, _) => new Try<Exception, object>(res))
+                 .Catch((ex, _) => new Try<Exception, object>(ex));
         }
     }
 }

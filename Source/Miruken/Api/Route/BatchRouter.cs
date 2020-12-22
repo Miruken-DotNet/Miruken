@@ -65,7 +65,7 @@
                                 requests[i].Resolve(success, s);
                                 return success;
                             })).ToArray());
-                }).Catch((ex, s) =>
+                }).Catch((ex, _) =>
                 {
                     requests.ForEach(r => r.Promise.Cancel());
                     return Promise.Rejected(ex);

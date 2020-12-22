@@ -84,6 +84,8 @@ namespace Miruken.Graph
                 case TraversingAxis.SelfSiblingOrAncestor:
                     node.TraverseSelfSiblingOrAncestor(visitor, true, true);   
                     break;
+                default:
+                    throw new NotImplementedException();
             }
         }
 

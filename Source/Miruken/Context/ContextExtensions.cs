@@ -20,7 +20,7 @@ namespace Miruken.Context
         public static IHandler TrackPromise(this IHandler handler, Context context)
         {
             if (handler == null || context == null) return handler;
-            return handler.Filter((callback, composer, proceed) =>
+            return handler.Filter((callback, _, proceed) =>
             {
                 var handled = proceed();
                 if (!handled) return false;
@@ -39,7 +39,7 @@ namespace Miruken.Context
                 ?? throw new InvalidOperationException(
                               "Tracking support requires a Context");
             if (context.State == ContextState.Active)
-                promise.Finally(() => context.ContextEnded += (ctx, _) => promise.Cancel());
+                promise.Finally(() => context.ContextEnded += (_, _) => promise.Cancel());
             else
                 promise.Cancel();
             return handler;
@@ -51,7 +51,7 @@ namespace Miruken.Context
             var context = handler as Context ?? handler.Resolve<Context>()
                         ?? throw new InvalidOperationException(
                                "Disposal support requires a Context");
-            context.ContextEnded += (ctx, _) =>
+            context.ContextEnded += (_, _) =>
             {
                 try
                 {

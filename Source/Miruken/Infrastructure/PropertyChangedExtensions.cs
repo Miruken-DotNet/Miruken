@@ -12,8 +12,7 @@
             ref T field, T value, object sender, IEqualityComparer<T> comparer = null, 
             [CallerMemberName] string propertyName = null)
         {
-            if (comparer == null)
-                comparer = EqualityComparer<T>.Default;
+            comparer ??= EqualityComparer<T>.Default;
 
             if (comparer.Equals(field, value))
                 return false;
@@ -28,8 +27,7 @@
              ref T field, T value, object sender = null, IEqualityComparer<T> comparer = null,
              [CallerMemberName] string propertyName = null)
         {
-            if (comparer == null)
-                comparer = EqualityComparer<T>.Default;
+            comparer ??= EqualityComparer<T>.Default;
 
             if (comparer.Equals(field, value))
                 return false;

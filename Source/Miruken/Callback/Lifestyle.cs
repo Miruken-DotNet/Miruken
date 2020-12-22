@@ -83,7 +83,7 @@
             var logicalType  = dispatcher.LogicalReturnType;
             var key          = logicalType == typeof(object) ? inquiry.Key : null;
             var lifestyleKey = Tuple.Create(dispatcher, key);
-            var lifestyle    = Lifestyles.GetOrAdd(lifestyleKey, k =>
+            var lifestyle    = Lifestyles.GetOrAdd(lifestyleKey, _ =>
                 (IFilter)Activator.CreateInstance(LifestyleType.MakeGenericType(logicalType))
             );
 

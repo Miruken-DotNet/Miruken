@@ -69,7 +69,7 @@
                 {
                     var result = creation.Result;
                     return ((Promise<object[]>)result)
-                        .Then((arr, s) => CoerceArray(arr, type));
+                        .Then((arr, _) => CoerceArray(arr, type));
                 }
             }
             var empty = CoerceArray(Array.Empty<object>(), type);
@@ -88,7 +88,7 @@
         {
             return handler == null ? Promise.Resolved(Array.Empty<T>())
                 : CreateAllAsync(handler, typeof(T))
-                    .Then((r, s) => r?.Cast<T>().ToArray() ?? Array.Empty<T>());
+                    .Then((r, _) => r?.Cast<T>().ToArray() ?? Array.Empty<T>());
         }
 
         private static object[] CoerceArray(object[] array, Type type)

@@ -56,7 +56,7 @@
                 throw new InvalidOperationException("The batch has already completed");
             var results = this.Proxy<IBatchingComplete>().Complete(this);
             return complete != null
-                 ? results.Then((r, s) => complete.Then((_, ss) => r))
+                 ? results.Then((r, _) => complete.Then((_, _) => r))
                  : results;
         }
     }

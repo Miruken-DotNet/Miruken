@@ -61,9 +61,9 @@
                     {
                         _result = Many
                             ? Promise.All(_promises)
-                                .Then((_, s) => _resolutions.Values.ToArray())
+                                .Then((_, _) => _resolutions.Values.ToArray())
                             : (object)Promise.All(_promises)
-                                .Then((_, s) => _resolutions.Values.FirstOrDefault());
+                                .Then((_, _) => _resolutions.Values.FirstOrDefault());
                     }
                     else
                     {
@@ -142,7 +142,7 @@
             if (promise != null)
             {
                 IsAsync = true;
-                _promises.Add(promise.Then((result, s) =>
+                _promises.Add(promise.Then((result, _) =>
                 {
                     switch (result)
                     {
@@ -165,7 +165,7 @@
                                 _resolutions.Add(key, result);
                             break;
                     }
-                }).Catch((_, s) => (object)null));
+                }).Catch((_, _) => (object)null));
             }
             else if (!IsSatisfied(resolution, greedy, composer))
                 return false;

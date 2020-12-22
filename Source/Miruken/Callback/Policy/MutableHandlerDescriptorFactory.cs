@@ -9,7 +9,7 @@
     public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
     {
         private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            Descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
+            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
 
         public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
             : base(visitor)
@@ -19,15 +19,13 @@
 
         public override HandlerDescriptor GetDescriptor(Type type)
         {
-            if (Descriptors.TryGetValue(type, out var descriptor))
+            if (_descriptors.TryGetValue(type, out var descriptor))
                 return descriptor.Value;
-            if (type.IsGenericType && !type.IsGenericTypeDefinition)
-            {
-                var definition = type.GetGenericTypeDefinition();
-                if (Descriptors.TryGetValue(definition, out descriptor) &&
-                    descriptor.Value is GenericHandlerDescriptor genericDescriptor)
-                    return genericDescriptor.CloseDescriptor(type, CreateDescriptor);
-            }
+            if (!type.IsGenericType || type.IsGenericTypeDefinition) return null;
+            var definition = type.GetGenericTypeDefinition();
+            if (_descriptors.TryGetValue(definition, out descriptor) &&
+                descriptor.Value is GenericHandlerDescriptor genericDescriptor)
+                return genericDescriptor.CloseDescriptor(type, CreateDescriptor);
             return null;
         }
 
@@ -36,23 +34,23 @@
         {
             try
             {
-                var descriptor = Descriptors.GetOrAdd(type,
+                var descriptor = _descriptors.GetOrAdd(type,
                         t => new Lazy<HandlerDescriptor>(
                             () => CreateDescriptor(t, visitor, priority))).Value;
                 if (descriptor == null)
-                    Descriptors.TryRemove(type, out _);
+                    _descriptors.TryRemove(type, out _);
                 return descriptor;
             }
             catch
             {
-                Descriptors.TryRemove(type, out _);
+                _descriptors.TryRemove(type, out _);
                 throw;
             }
         }
 
         public override IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy)
         {
-            return Descriptors.SelectMany(descriptor =>
+            return _descriptors.SelectMany(descriptor =>
             {
                 CallbackPolicyDescriptor cpd = null;
                 var handler       = descriptor.Value.Value;
@@ -68,10 +66,10 @@
         protected override IEnumerable<HandlerDescriptor> GetCallbackHandlers(
             CallbackPolicy policy, object callback, bool instance, bool @static)
         {
-            if (Descriptors.Count == 0)
+            if (_descriptors.Count == 0)
                 return Enumerable.Empty<HandlerDescriptor>();
 
-            var lookup = Descriptors.ToLookup(
+            var lookup = _descriptors.ToLookup(
                 descriptor => descriptor.Value.Value.Priority != null);
 
             IEnumerable<HandlerDescriptor> invariants        = null;
@@ -160,16 +158,15 @@
                 {
                     if (handler is GenericHandlerDescriptor genericHandler)
                     {
-                        if (key == null)
-                            key = policy.GetKey(callback);
+                        key ??= policy.GetKey(callback);
                         handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor);
                         if (handler == null) continue;
                     }
 
                     if (orderBy != null)
                     {
-                        if (sortedCompatibleList == null)
-                            sortedCompatibleList = new SortedDictionary<PolicyMemberBinding, HandlerDescriptor>(
+                        sortedCompatibleList ??= new SortedDictionary<
+                            PolicyMemberBinding, HandlerDescriptor>(
                                 new DuplicateComparer(orderBy));
                         sortedCompatibleList.Add(binding, handler);
                     }

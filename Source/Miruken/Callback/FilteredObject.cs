@@ -6,11 +6,7 @@
     public abstract class FilteredObject : IFiltered
     {
         private HashSet<IFilterProvider> _filters;
-
-        protected FilteredObject()
-        {
-        }
-
+        
         public IEnumerable<IFilterProvider> Filters
         {
             get

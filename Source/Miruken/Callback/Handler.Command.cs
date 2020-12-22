@@ -110,7 +110,7 @@
                     return Promise<TRes[]>.Rejected(new NotSupportedException(
                         $"{callback.GetType()} not handled"));
                 var promise = (Promise)command.Result;
-                return promise.Then((results, s) => ((object[])results)
+                return promise.Then((results, _) => ((object[])results)
                     .Cast<TRes>().ToArray());
             }
             catch (Exception ex)

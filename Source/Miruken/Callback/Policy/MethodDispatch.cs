@@ -37,7 +37,7 @@
             }
         }
 
-        private object Dispatch(object target, object[] args, Type returnType)
+        private object Dispatch(object target, object[] args, Type _)
         {
             if (IsLateBound)
             {

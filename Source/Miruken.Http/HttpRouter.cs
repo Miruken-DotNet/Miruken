@@ -34,7 +34,7 @@
                         post.ResourceUri = uri;
                         post.Formatter   = formatter;
                     }).ToPromise()
-                .Then((response, s) => response.Match(
+                .Then((response, _) => response.Match(
                     failure =>
                     {
                         var payload = failure.Payload;
@@ -43,7 +43,7 @@
                         throw composer
                             .BestEffort()
                             .Map<Exception>(failure.Payload, typeof(Exception))
-                            ?? new UnknownExceptionPayload(failure.Payload);
+                                ?? new UnknownExceptionPayload(failure.Payload);
                     },
                     success => success.Payload));
         }

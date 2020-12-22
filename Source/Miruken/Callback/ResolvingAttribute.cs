@@ -82,7 +82,7 @@
                 {
                     var array = ResolveAllAsync(parent, argument, key, handler);
                     dependency = argument.IsSimple
-                               ? array.Then((arr, s) =>
+                               ? array.Then((arr, _) =>
                                     RuntimeHelper.ChangeArrayType(arr, logicalType))
                                      .Coerce(argumentType)
                                : array.Coerce(argumentType);
@@ -113,7 +113,7 @@
                 var promise = ResolveAsync(parent, argument, key, handler);
                 if (argument.IsSimple)
                 {
-                    promise = promise.Then((r, s) =>
+                    promise = promise.Then((r, _) =>
                         RuntimeHelper.ChangeType(r, logicalType));
                 }
                 dependency = promise.Coerce(argumentType);

@@ -46,9 +46,9 @@
                     {
                         _result = Many
                             ? Promise.All(_promises)
-                                .Then((_, s) => _instances.ToArray())
+                                .Then((_, _) => _instances.ToArray())
                             : (object)Promise.All(_promises)
-                                .Then((_, s) => _instances.FirstOrDefault());
+                                .Then((_, _) => _instances.FirstOrDefault());
                     }
                     else
                     {
@@ -96,10 +96,10 @@
             if (promise != null)
             {
                 IsAsync = true;
-                _promises.Add(promise.Then((result, s) =>
+                _promises.Add(promise.Then((result, _) =>
                 {
                     _instances.Add(result);
-                }).Catch((_, s) => (object)null));
+                }).Catch((_, _) => (object)null));
             }
             else
             {

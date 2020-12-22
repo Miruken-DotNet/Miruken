@@ -11,11 +11,7 @@ namespace Miruken.Callback.Policy
         private readonly ConcurrentDictionary<Type, HandlerDescriptor> _closed;
         private readonly ConcurrentDictionary<object, Type> _keyTypes;
         private readonly HandlerDescriptorVisitor _visitor;
-
-        private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
-            new ReadOnlyDictionary<CallbackPolicy, CallbackPolicyDescriptor>(
-                new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>());
-
+        
         public GenericHandlerDescriptor(Type handlerType,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> policies,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies,
@@ -39,7 +35,7 @@ namespace Miruken.Callback.Policy
             if (!closedType.IsGenericType || closedType.GetGenericTypeDefinition() != HandlerType)
                 throw new InvalidOperationException($"{closedType.FullName} is not closed on {HandlerType.FullName}");
 
-            return _closed.GetOrAdd(closedType, k => factory(closedType, _visitor, Priority));
+            return _closed.GetOrAdd(closedType, _ => factory(closedType, _visitor, Priority));
         }
 
         public HandlerDescriptor CloseDescriptor(object key, PolicyMemberBinding binding,

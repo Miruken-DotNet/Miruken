@@ -38,8 +38,8 @@
             return type.IsPrimitive || type.IsEnum ||
                 Array.IndexOf(SimpleTypes, type) >= 0 ||
                 Convert.GetTypeCode(type) != TypeCode.Object ||
-                (type.IsGenericType && type.GetGenericTypeDefinition() ==
-                typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
+                type.IsGenericType && type.GetGenericTypeDefinition() ==
+                typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]);
         }
 
         public static bool IsGenericEnumerable(this Type type)
@@ -57,7 +57,7 @@
         {
             try
             {
-                decimal.Parse(e.ToString());
+                var _ = decimal.Parse(e.ToString());
                 return false;
             }
             catch
@@ -188,7 +188,7 @@
             return Convert.ChangeType(value, conversionType);
         }
 
-        public static T[] ChangeArrayType<T>(Array array, Type conversionType)
+        public static T[] ChangeArrayType<T>(Array array)
         {
             return (T[])ChangeArrayType(array, typeof(T));
         }

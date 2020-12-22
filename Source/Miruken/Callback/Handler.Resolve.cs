@@ -140,7 +140,7 @@
                 {
                     var result = inquiry.Result;
                     return ((Promise<object[]>) result)
-                        .Then((arr, s) => CoerceArray(arr, key));
+                        .Then((arr, _) => CoerceArray(arr, key));
                 }
             }
             var empty = CoerceArray(Array.Empty<object>(), key);
@@ -161,7 +161,7 @@
         {
             return handler == null ? Promise.Resolved(Array.Empty<T>())
                  : ResolveAllAsync(handler, typeof(T), constraints)
-                      .Then((r, s) => r?.Cast<T>().ToArray() 
+                      .Then((r, _) => r?.Cast<T>().ToArray() 
                                    ?? Array.Empty<T>());
         }
 

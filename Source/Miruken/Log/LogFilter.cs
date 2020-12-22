@@ -89,9 +89,9 @@
         private static string FormatElapsedMilliseconds(double elapsedMs)
         {
             if (elapsedMs > 60000)
-                return $"{(elapsedMs / 60000):0.00} min";
+                return $"{elapsedMs / 60000:0.00} min";
             return elapsedMs > 1000
-                ? $"{(elapsedMs / 1000):0.00} sec"
+                ? $"{elapsedMs / 1000:0.00} sec"
                 : $"{elapsedMs:0.00} ms";
         }
 
@@ -141,7 +141,7 @@
         {
             if (type.IsGenericType)
             {
-                return (type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                return type.GetGenericTypeDefinition() == typeof(Nullable<>)
                     ? $"{PrettyName(Nullable.GetUnderlyingType(type))}?"
                     : $"{type.Name.Split('`')[0]}<{string.Join(", ", type.GenericTypeArguments.Select(PrettyName).ToArray())}>";
             }

@@ -7,12 +7,7 @@
 
     public static class HandlerErrorExtensions
     {
-        public static IHandler Recover(this IHandler handler)
-        {
-            return Recover(handler, null);
-        }
-
-        public static IHandler Recover(this IHandler handler, object context)
+        public static IHandler Recover(this IHandler handler, object context = null)
         {
             return handler.Filter((callback, composer, proceed) => {
                 if (callback is Composition)
@@ -26,7 +21,7 @@
                     if (!handled) return false;
                     if (cb?.Result is Promise promise)
                     {
-                        cb.Result = promise.Catch((ex, s) => 
+                        cb.Result = promise.Catch((ex, _) => 
                                 ex is CancelledException
                                     ? Promise.Rejected(ex)
                                     : composer.Proxy<IErrors>().HandleException(

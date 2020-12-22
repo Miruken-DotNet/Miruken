@@ -3,6 +3,8 @@
     using System;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Callback;
 
     public static class TokenExtensions
@@ -32,8 +34,20 @@
             });
         }
 
-        private static void Token(
-            HttpRequestMessage request, string scheme, string token)
+        public static IHandler Token(this IHandler handler,
+            Func<CancellationToken, IHandler, Task<string>> token,
+            string scheme = "Bearer")
+        {
+            if (token == null)
+                throw new ArgumentNullException(nameof(token));
+            return handler.Pipeline(async (request, cancel, composer, next) =>
+            {
+                Token(request, scheme, await token(cancel, composer));
+                return await next();
+            });
+        }
+        
+        private static void Token(HttpRequestMessage request, string scheme, string token)
         {
             var oauth = new AuthenticationHeaderValue(scheme, token);
             request.Headers.Authorization = oauth;

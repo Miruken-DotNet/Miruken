@@ -39,14 +39,13 @@
                 }
                 return true;
             }
-           _aliases.Add(alias, type);
+            _aliases.Add(alias, type);
             return true;
         }
 
         public void AddError(string error)
         {
-            if (_errors == null)
-                _errors = new List<string>();
+            _errors ??= new List<string>();
             _errors.Add(error);
         }
     }
