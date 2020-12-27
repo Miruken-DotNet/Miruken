@@ -1,4 +1,5 @@
-﻿namespace Miruken.Callback
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Miruken.Callback
 {
     using System;
     using System.Threading;
@@ -131,13 +132,13 @@
         public static Promise<object[]> Batch<TTag>(this IHandler handler,
             Action<IHandler> configure)
         {
-            return handler.Batch(new [] { typeof(TTag) }, configure);
+            return handler.Batch(new object [] { typeof(TTag) }, configure);
         }
 
         public static Promise<object[]> Batch<TTag>(this IHandler handler,
             Func<IHandler, Task> configure)
         {
-            return handler.Batch(new [] { typeof(TTag) }, configure);
+            return handler.Batch(new object[] { typeof(TTag) }, configure);
         }
 
         public static IHandler NoBatch(this IHandler handler)
@@ -146,8 +147,7 @@
                  : new NoBatchDecorator(handler);    
         }
 
-        public static Batch GetBatch(
-            this IHandler handler, object tag = null)
+        public static Batch GetBatch(this IHandler handler, object tag = null)
         {
             var batch = handler?.Resolve<Batch>();
             if (batch == null) return null;

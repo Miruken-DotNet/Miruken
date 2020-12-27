@@ -29,6 +29,7 @@
             var json     = JsonConvert.SerializeObject(tryValue, _settings);
             Assert.AreEqual("{\"isLeft\":false,\"value\":null}", json);
             tryValue = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
+            Assert.IsNotNull(tryValue);
             Assert.IsFalse(tryValue.IsError);
         }
 
@@ -39,6 +40,7 @@
             var json = JsonConvert.SerializeObject(tryValue, _settings);
             Assert.AreEqual("{\"isLeft\":true,\"value\":null}", json);
             tryValue = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
+            Assert.IsNotNull(tryValue);
             Assert.IsTrue(tryValue.IsError);
         }
 
@@ -56,6 +58,7 @@
             var json = JsonConvert.SerializeObject(response, _settings);
             Assert.AreEqual("{\"Responses\":[{\"isLeft\":false,\"value\":\"Hello\"},{\"isLeft\":false,\"value\":{}}]}", json);
             response = JsonConvert.DeserializeObject<ScheduledResult>(json, _settings);
+            Assert.IsNotNull(response);
             Assert.AreEqual(2, response.Responses.Length);
         }
     }
