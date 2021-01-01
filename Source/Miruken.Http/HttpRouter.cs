@@ -42,9 +42,9 @@
                         {
                             null => new Exception("An unexpected error has occurred."),
                             Exception exception => exception,
-                            _ => throw composer.BestEffort()
-                                      .Map<Exception>(payload, typeof(Exception)) 
-                                       ?? new UnknownExceptionPayload(payload)
+                            _ => composer.BestEffort()
+                                     .Map<Exception>(payload, typeof(Exception)) 
+                                 ?? new UnknownExceptionPayload(payload)
                         };
                     },
                     success => success.Payload));
