@@ -6,6 +6,7 @@
     using Concurrency;
     using Format;
     using Functional;
+    using Map;
 
     [Routes("http", "https")]
     public class HttpRouter : Handler
@@ -41,7 +42,9 @@
                         {
                             null => new Exception("An unexpected error has occurred."),
                             Exception exception => exception,
-                            _ => new UnknownExceptionPayload(payload)
+                            _ => throw composer.BestEffort()
+                                      .Map<Exception>(payload, typeof(Exception)) 
+                                       ?? new UnknownExceptionPayload(payload)
                         };
                     },
                     success => success.Payload));
