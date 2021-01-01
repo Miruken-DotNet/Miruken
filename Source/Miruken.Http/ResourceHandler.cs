@@ -146,27 +146,13 @@
                     return error;
                 }
             }
-            catch (Exception) when (typeof(TE) == typeof(Exception))
+            catch (Exception ex) when (typeof(TE) == typeof(Exception))
             {
-                try
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                catch (Exception ex)
-                {
-                    return (TE) (object) ex;
-                }
+                return (TE) (object) ex;
             }
-            catch (Exception) when (typeof(TE) == typeof(Message))
+            catch (Exception ex) when (typeof(TE) == typeof(Message))
             {
-                try
-                {
-                    response.EnsureSuccessStatusCode();
-                }
-                catch (Exception ex)
-                {
-                    return (TE) (object) new Message(ex);
-                }
+                return (TE) (object) new Message(ex);
             }
             
             return null;
