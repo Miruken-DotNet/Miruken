@@ -118,75 +118,54 @@
         {
             if (response.IsSuccessStatusCode)
             {
-                if (typeof(TE) == typeof(Exception))
+                try
                 {
-                    try
-                    {
-                        return await ReadResponse<TR>(response, options, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        return new Try<Exception, TR>(ex) as Try<TE, TR>;
-                    }
+                    return await ReadResponse<TR>(response, options, true);
                 }
-                if (typeof(TE) == typeof(Message))
+                catch (Exception ex) when (typeof(TE) == typeof(Exception))
                 {
-                    try
-                    {
-                        return await ReadResponse<TR>(response, options, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        var wrapper = new ExceptionData(ex);
-                        return new Try<Message, TR>(new Message(wrapper)) as Try<TE, TR>;
-                    }
+                    return (TE) (object) ex;
                 }
-                return await ReadResponse<TR>(response, options, true);
+                catch (Exception ex) when (typeof(TE) == typeof(Message))
+                {
+                    return (TE) (object) new Message(ex);
+                }
             }
 
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                if (typeof(TE) == typeof(Exception))
+                var left = ReadResponse<TE>(response, options, false);
+                if (left != null)
                 {
-                    try
-                    {
+                    var error = await left;
+                    if (error == null)
                         response.EnsureSuccessStatusCode();
-                    }
-                    catch (Exception ex)
-                    {
-                        return new Try<Exception, TR>(ex) as Try<TE, TR>;
-                    }
-                }
-                else if (typeof(TE) == typeof(Message))
-                {
-                    try
-                    {
-                        var l = ReadResponse<TE>(response, options, false);
-                        if (l != null)
-                        {
-                            var message = await l;
-                            if (message == null)
-                                response.EnsureSuccessStatusCode();
-                            return message;
-                        }
-                        return null;
-                    }
-                    catch (Exception ex)
-                    {
-                        var wrapper = new ExceptionData(ex);
-                        return new Try<Message, TR>(new Message(wrapper)) as Try<TE, TR>;
-                    }
+                    return error;
                 }
             }
-
-            var left = ReadResponse<TE>(response, options, false);
-            if (left != null)
+            catch (Exception) when (typeof(TE) == typeof(Exception))
             {
-                var error = await left;
-                if (error == null)
+                try
+                {
                     response.EnsureSuccessStatusCode();
-                return error;
+                }
+                catch (Exception ex)
+                {
+                    return (TE) (object) ex;
+                }
             }
+            catch (Exception) when (typeof(TE) == typeof(Message))
+            {
+                try
+                {
+                    response.EnsureSuccessStatusCode();
+                }
+                catch (Exception ex)
+                {
+                    return (TE) (object) new Message(ex);
+                }
+            }
+            
             return null;
         }
 
@@ -195,12 +174,9 @@
         {
             if (typeof(TResponse) == typeof(HttpResponseMessage))
             {
-                if (response.IsSuccessStatusCode == success)
-                {
-                    response.RequestMessage.Properties[KeepResponseOpen] = true;
-                    return Task.FromResult(response) as Task<TResponse>;
-                }
-                return null;
+                if (response.IsSuccessStatusCode != success) return null;
+                response.RequestMessage.Properties[KeepResponseOpen] = true;
+                return Task.FromResult(response) as Task<TResponse>;
             }
 
             var content      = response.Content;
@@ -218,8 +194,7 @@
                 return (Task<TResponse>)read(this, response, options, success);
             }
 
-            if (response.IsSuccessStatusCode != success)
-                return null;
+            if (response.IsSuccessStatusCode != success) return null;
 
             var responseType = typeof(TResponse);
 
