@@ -232,7 +232,7 @@
                 .HttpGet<Try<Exception, Player>>(
                     "/try/player/12");
             @try.Match(
-                ex => Assert.IsInstanceOfType(ex, typeof(HttpRequestException)),
+                ex => Assert.IsInstanceOfType(ex, typeof(UnsupportedMediaTypeException)),
                 _ => Assert.Fail("Should not get here"));
         }
 
