@@ -87,7 +87,8 @@
             try
             {
                 var left = ReadResponse<TL>(response, options, success);
-                if (left != null) return await left;
+                if (left != null) 
+                    return new Either<TL, TR>.Left(await left);
             }
             catch
             {
@@ -95,7 +96,9 @@
             }
 
             var right = ReadResponse<TR>(response, options, success);
-            return right != null ? await right : (Either<TL, TR>)null;
+            return right != null 
+                 ? new Either<TL, TR>.Right(await right)
+                 : (Either<TL, TR>)null;
         }
 
         protected async Task<Tuple<T1, T2>> ReadTuple<T1, T2>(

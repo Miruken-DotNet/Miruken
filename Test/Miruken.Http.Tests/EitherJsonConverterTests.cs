@@ -25,23 +25,23 @@
         [TestMethod]
         public void Should_Handle_Null_Left_Try()
         {
-            var tryValue = new Try<Exception, string>((string)null);
-            var json     = JsonConvert.SerializeObject(tryValue, _settings);
+            var tryWrite = new Try<Exception, string>.Success(null);
+            var json     = JsonConvert.SerializeObject(tryWrite, _settings);
             Assert.AreEqual("{\"isLeft\":false,\"value\":null}", json);
-            tryValue = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
-            Assert.IsNotNull(tryValue);
-            Assert.IsFalse(tryValue.IsError);
+            var tryRead = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
+            Assert.IsNotNull(tryRead);
+            Assert.IsTrue(tryRead is IEither.IRight);
         }
 
         [TestMethod]
         public void Should_Handle_Null_Right_Try()
         {
-            var tryValue = new Try<Exception, string>((Exception)null);
-            var json = JsonConvert.SerializeObject(tryValue, _settings);
+            var tryWrite = new Try<Exception, string>.Failure(null);
+            var json = JsonConvert.SerializeObject(tryWrite, _settings);
             Assert.AreEqual("{\"isLeft\":true,\"value\":null}", json);
-            tryValue = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
-            Assert.IsNotNull(tryValue);
-            Assert.IsTrue(tryValue.IsError);
+            var tryRead = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
+            Assert.IsNotNull(tryRead);
+            Assert.IsTrue(tryRead is IEither.ILeft);
         }
 
         [TestMethod]
@@ -49,10 +49,10 @@
         {
             var response = new ScheduledResult
             {
-                Responses = new[]
+                Responses = new Try<Exception, object>[]
                 {
-                    new Try<Exception, object>("Hello"),
-                    new Try<Exception, object>(new ScheduledResult()) 
+                    new Try<Exception, object>.Success("Hello"),
+                    new Try<Exception, object>.Success(new ScheduledResult()) 
                 }
             };
             var json = JsonConvert.SerializeObject(response, _settings);

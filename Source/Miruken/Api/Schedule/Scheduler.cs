@@ -40,7 +40,7 @@
                 {
                     var response = await Process(req, composer);
                     responses.Add(response);
-                    if (response.IsError) break;
+                    if (response is IEither.ILeft) break;
                 }
             }
             return new ScheduledResult
@@ -76,8 +76,10 @@
             return (request is Publish publish
                  ? composer.Publish(publish.Message)
                  : composer.Send(request))
-                 .Then((res, _) => new Try<Exception, object>(res))
-                 .Catch((ex, _) => new Try<Exception, object>(ex));
+                 .Then((res, _) => (Try<Exception, object>)
+                     new Try<Exception, object>.Success(res))
+                 .Catch((ex, _) => (Try<Exception, object>)
+                     new Try<Exception, object>.Failure(ex));
         }
     }
 }

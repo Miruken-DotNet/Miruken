@@ -4,92 +4,107 @@
 
     public interface IEither
     {
-        bool   IsLeft { get; }
         object Value  { get; }
+        
+        public interface ILeft  : IEither { }
+        public interface IRight : IEither { }
     }
 
-    public class Either<TL, TR> : IEither
+    public abstract class Either<TL, TR> : IEither
     {
-        public Either(TL left)
-        {
-            Left   = left;
-            IsLeft = true;
-        }
+        public abstract object Value  { get; }
 
-        public Either(TR right)
-        {
-            Right  = right;
-            IsLeft = false;
-        }
-
-        protected Either()
-        {
-        }
-
-        public TL Left  { get; }
-        public TR Right { get; }
-
-        public bool IsLeft { get; }
-
-        object IEither.Value => IsLeft ? Left : (object)Right;
-
-        public void Match(Action<TL> matchLeft, Action<TR> matchRight)
-        {
-            if (matchLeft == null)
-                throw new ArgumentNullException(nameof(matchLeft));
-
-            if (matchRight == null)
-                throw new ArgumentNullException(nameof(matchRight));
-
-            if (IsLeft)
-                matchLeft(Left);
-            else
-                matchRight(Right);
-        }
-
-        public T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight)
-        {
-            if (matchLeft == null)
-                throw new ArgumentNullException(nameof(matchLeft));
-
-            if (matchRight == null)
-                throw new ArgumentNullException(nameof(matchRight));
-
-            return IsLeft ? matchLeft(Left) : matchRight(Right);
-        }
+        public abstract void Match(Action<TL> matchLeft, Action<TR> matchRight);
+        public abstract T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight);
 
         public TL LeftOrDefault() => Match(l => l, _ => default);
         public TR RightOrDefault() => Match(_ => default, r => r);
 
-        public static implicit operator Either<TL, TR>(TL left) => new Either<TL, TR>(left);
-        public static implicit operator Either<TL, TR>(TR right) => new Either<TL, TR>(right);
+        public static implicit operator Either<TL, TR>(TL left) => new Left(left);
+        public static implicit operator Either<TL, TR>(TR right) => new Right(right);
 
-        public Either<TL, UR> Select<UR>(Func<TR, UR> selector)
+        public sealed class Left : Either<TL, TR>, IEither.ILeft
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            private readonly TL _left;
 
-            return IsLeft
-                 ?  new Either<TL, UR>(Left)
-                 :  new Either<TL, UR>(selector(Right));
+            public Left(TL left)
+            {
+                _left = left;
+            }
+            
+            public override object Value => _left;
+
+            public override void Match(Action<TL> matchLeft, Action<TR> matchRight)
+            {
+                if (matchLeft == null)
+                    throw new ArgumentNullException(nameof(matchLeft));
+                matchLeft(_left);
+            }
+
+            public override T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight)
+            {
+                if (matchLeft == null)
+                    throw new ArgumentNullException(nameof(matchLeft));
+                return matchLeft(_left);
+            }
+
+            public Either<TL, TUr> Select<TUr>(Func<TR, TUr> selector) =>
+                new Either<TL, TUr>.Left(_left);
+
+            public Either<TL, TVr> SelectMany<TUr, TVr>(
+                Func<TR, Either<TL, TUr>> selector,
+                Func<TR, TUr, TVr>        projector) =>
+                    new Either<TL, TVr>.Left(_left);
         }
-
-        public Either<TL, VR> SelectMany<UR, VR>(
-            Func<TR, Either<TL, UR>> selector,
-            Func<TR, UR, VR> projector)
+        
+        public sealed class Right : Either<TL, TR>, IEither.IRight
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-            if (projector == null)
-                throw new ArgumentNullException(nameof(projector));
+            private readonly TR _right;
 
-            if (IsLeft)
-                return new Either<TL, VR>(Left);
+            public Right(TR right)
+            {
+                _right = right;
+            }
+            
+            public override object Value  => _right;
 
-            var result = selector(Right);
-            return result.IsLeft
-                 ? new Either<TL, VR>(result.Left)
-                 : new Either<TL, VR>(projector(Right, result.Right));
+            public override void Match(Action<TL> matchLeft, Action<TR> matchRight)
+            {
+                if (matchRight == null)
+                    throw new ArgumentNullException(nameof(matchLeft));
+                matchRight(_right);
+            }
+
+            public override T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight)
+            {
+                if (matchRight == null)
+                    throw new ArgumentNullException(nameof(matchLeft));
+                return matchRight(_right);
+            }
+
+            public Either<TL, TUr> Select<TUr>(Func<TR, TUr> selector)
+            {
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
+                return new Either<TL, TUr>.Right(selector(_right));
+            }
+
+            public Either<TL, TVr> SelectMany<TUr, TVr>(
+                Func<TR, Either<TL, TUr>> selector,
+                Func<TR, TUr, TVr>        projector)
+            {
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
+                
+                if (projector == null)
+                    throw new ArgumentNullException(nameof(projector));
+                
+                var result = selector(_right);
+
+                return result.Match(
+                    left => (Either<TL, TVr>) new Either<TL, TVr>.Left(left),
+                    right => new Either<TL, TVr>.Right(projector(_right, right)));
+            }
         }
     }
 }

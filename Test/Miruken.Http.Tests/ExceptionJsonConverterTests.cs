@@ -37,13 +37,14 @@
         [TestMethod]
         public void Should_Add_Exception_Type_Information()
         {
-            var tryWrite = new Try<Exception, string>(new NotSupportedException("Not handled"));
+            var tryWrite = new Try<Exception, string>.Failure(
+                new NotSupportedException("Not handled"));
             var json     = JsonConvert.SerializeObject(tryWrite, _settings);
             Assert.AreEqual("{\"isLeft\":true,\"value\":{\"$type\":\"Miruken.Http.ExceptionData, Miruken.Http\",\"ExceptionType\":\"System.NotSupportedException, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\"Message\":\"Not handled\"}}"
                 ,json);
             var tryRead = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
             Assert.IsNotNull(tryRead);
-            Assert.IsTrue(tryRead.IsError);
+            Assert.IsTrue(tryRead is IEither.ILeft);
         }
 
         [TestMethod]
@@ -51,7 +52,7 @@
         {
             var outcome = new ValidationOutcome();
             outcome.AddError("Name", "Name can't be empty");
-            var tryWrite = new Try<Message, string>(
+            var tryWrite = new Try<Message, string>.Failure(
                 new Message(new ValidationException(outcome)));
             var json = JsonConvert.SerializeObject(tryWrite, _settings);
             Assert.AreEqual(
