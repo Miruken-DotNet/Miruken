@@ -12,14 +12,8 @@ namespace Miruken.Callback
         private readonly bool _reentrant;
 
         public FilteredHandler(
-            IHandler handler, HandlerFilterDelegate filter
-            ) : this(handler, filter, false)
-        {           
-        }
-
-        public FilteredHandler(
             IHandler handler, HandlerFilterDelegate filter, 
-            bool reentrant) : base(handler)
+            bool reentrant = false) : base(handler)
         {
             _filter    = filter ?? throw new ArgumentNullException(nameof(filter));
             _reentrant = reentrant;

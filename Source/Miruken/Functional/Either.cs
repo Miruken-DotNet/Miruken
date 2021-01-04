@@ -5,18 +5,22 @@
     public interface IEither
     {
         object Value  { get; }
+        bool   IsLeft { get; }
         
         public interface ILeft  : IEither { }
         public interface IRight : IEither { }
     }
 
-    public abstract class Either<TL, TR> : IEither
+    public abstract class EitherCore<TL, TR> : IEither
     {
         public abstract object Value  { get; }
-
+        public abstract bool   IsLeft { get; }
         public abstract void Match(Action<TL> matchLeft, Action<TR> matchRight);
         public abstract T Match<T>(Func<TL, T> matchLeft, Func<TR, T> matchRight);
+    }
 
+    public abstract class Either<TL, TR> : EitherCore<TL, TR>
+    {
         public TL LeftOrDefault() => Match(l => l, _ => default);
         public TR RightOrDefault() => Match(_ => default, r => r);
 
@@ -32,7 +36,8 @@
                 _left = left;
             }
             
-            public override object Value => _left;
+            public override object Value  => _left;
+            public override bool   IsLeft => true;
 
             public override void Match(Action<TL> matchLeft, Action<TR> matchRight)
             {
@@ -67,7 +72,8 @@
             }
             
             public override object Value  => _right;
-
+            public override bool   IsLeft => false;
+            
             public override void Match(Action<TL> matchLeft, Action<TR> matchRight)
             {
                 if (matchRight == null)

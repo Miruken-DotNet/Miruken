@@ -2,13 +2,8 @@
 {
     using System;
 
-    public abstract class Try<TF, TS> : IEither
+    public abstract class Try<TF, TS> : EitherCore<TF, TS>
     {
-        public abstract object Value  { get; }
-
-        public abstract void Match(Action<TF> matchFailure, Action<TS> matchSuccess);
-        public abstract T Match<T>(Func<TF, T> matchFailure, Func<TS, T> matchSuccess);
-
         public TF FailureOrDefault() => Match(l => l, _ => default);
         public TS SuccessOrDefault() => Match(_ => default, r => r);
 
@@ -24,8 +19,9 @@
                 _failure = failure;
             }
             
-            public override object Value => _failure;
-
+            public override object Value  => _failure;
+            public override bool   IsLeft => true;
+            
             public override void Match(Action<TF> matchFailure, Action<TS> matchSuccess)
             {
                 if (matchFailure == null)
@@ -59,7 +55,8 @@
             }
             
             public override object Value  => _success;
-
+            public override bool   IsLeft => false;
+            
             public override void Match(Action<TF> matchFailure, Action<TS> matchSuccess)
             {
                 if (matchSuccess == null)
