@@ -41,10 +41,10 @@
         public int MapStatusCode(FluentValidationException exception) =>  StatusCodes.Status422UnprocessableEntity;
         
         [Maps, Format(typeof(Exception))]
-        public MultipleErrors MapAggregateException(
+        public MultipleErrorsData MapAggregateException(
             AggregateException exception, IHandler composer)
         {
-            return new MultipleErrors
+            return new MultipleErrorsData
             {
                 Errors = exception.InnerExceptions
                     .Select(ex => composer.Map<object>(ex, typeof(Exception)))
@@ -53,8 +53,8 @@
         }
 
         [Maps, Format(typeof(Exception))]
-        public AggregateException MapMultipleErrors(
-            MultipleErrors errors, IHandler composer)
+        public AggregateException MapMultipleErrorsData(
+            MultipleErrorsData errors, IHandler composer)
         {
             return new AggregateException(errors?.Errors
                 .Select(error => composer.Map<Exception>(error, typeof(Exception)))
