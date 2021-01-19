@@ -26,7 +26,7 @@
 
         public static implicit operator Either<TL, TR>(TL left) => new Left(left);
         public static implicit operator Either<TL, TR>(TR right) => new Right(right);
-
+        
         public sealed class Left : Either<TL, TR>, IEither.ILeft
         {
             private readonly TL _left;
@@ -60,6 +60,11 @@
                 Func<TR, Either<TL, TUr>> selector,
                 Func<TR, TUr, TVr>        projector) =>
                     new Either<TL, TVr>.Left(_left);
+
+            public static implicit operator TL(Left left)
+            {
+                return left != null ? left._left : default;
+            }
         }
         
         public sealed class Right : Either<TL, TR>, IEither.IRight
@@ -110,6 +115,11 @@
                 return result.Match(
                     left => (Either<TL, TVr>) new Either<TL, TVr>.Left(left),
                     right => new Either<TL, TVr>.Right(projector(_right, right)));
+            }
+            
+            public static implicit operator TR(Right right)
+            {
+                return right != null ? right._right : default;
             }
         }
     }

@@ -43,6 +43,11 @@
                 Func<TS, Try<TF, TUs>> selector,
                 Func<TS, TUs, TVs>     projector) =>
                     new Try<TF, TVs>.Failure(_failure);
+            
+            public static implicit operator TF(Failure failure)
+            {
+                return failure != null ? failure._failure : default;
+            }
         }
         
         public sealed class Success : Try<TF, TS>, IEither.IRight
@@ -93,6 +98,11 @@
                 return result.Match(
                     failure => (Try<TF, TVs>)new Try<TF, TVs>.Failure(failure),
                     success => new Try<TF, TVs>.Success(projector(_success, success)));
+            }
+            
+            public static implicit operator TS(Success success)
+            {
+                return success != null ? success._success : default;
             }
         }
     }

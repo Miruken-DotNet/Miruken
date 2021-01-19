@@ -31,14 +31,15 @@
     public class HttpTestScenario
     {
         private TestServer _server;
-        protected IHandler _handler;
+        
+        protected IHandler Handler;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _server = CreateTestServer();
 
-            _handler = new ServiceCollection()
+            Handler = new ServiceCollection()
                 .AddSingleton(_server)
                 .AddTransient<TestServerClientHandler>()
                 .AddMiruken(registration => registration
@@ -170,6 +171,7 @@
             }
         }
 
+        // ReSharper disable once ClassNeverInstantiated.Local
         private class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
             public BasicAuthenticationHandler(

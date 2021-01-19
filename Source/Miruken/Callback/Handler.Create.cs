@@ -1,4 +1,5 @@
-﻿namespace Miruken.Callback
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace Miruken.Callback
 {
     using System;
     using System.Linq;

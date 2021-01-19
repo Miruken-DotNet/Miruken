@@ -11,7 +11,7 @@
         [TestMethod]
         public async Task Should_Perform_Rest_Put()
         {
-            var player = await _handler
+            var player = await Handler
                 .HttpPut<Player, Player>(new Player
                 {
                     Id   = 2,

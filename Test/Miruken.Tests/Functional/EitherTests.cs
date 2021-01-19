@@ -1,8 +1,8 @@
-﻿namespace Miruken.Tests
+﻿namespace Miruken.Tests.Functional
 {
     using System;
-    using Functional;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Miruken.Functional;
 
     [TestClass]
     public class EitherTests

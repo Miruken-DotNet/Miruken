@@ -180,6 +180,8 @@
             {
                 if (value == null) return null;
                 conversionType = Nullable.GetUnderlyingType(conversionType);
+                if (conversionType == null)
+                    throw new InvalidOperationException("Could not get underlying nullable type.");
             }
 
             if (conversionType == typeof(Guid))
@@ -267,10 +269,10 @@
             var arguments = CreateArguments(parameters.Length + (isStatic ? 0 : 1));
             var methodCall = isStatic ?
                  Expression.Call(method, arguments.Select((arg, index) =>
-                 Expression.Convert(arg, parameters[index].ParameterType)).ToArray())
+                 (Expression)Expression.Convert(arg, parameters[index].ParameterType)).ToArray())
                : Expression.Call(Expression.Convert(arguments[0], target), method,
                     arguments.Skip(1).Select((arg, index) =>
-                        Expression.Convert(arg, parameters[index].ParameterType))
+                        (Expression)Expression.Convert(arg, parameters[index].ParameterType))
                     .ToArray());
             var lambda = method.ReturnType == typeof(void)
                        ? Expression.Lambda(delegateType, methodCall, arguments)
@@ -288,8 +290,8 @@
             var arguments = CreateArguments(parameters.Length);
             var constructorCall = Expression.New(
                 constructor,
-                arguments.Select((arg, index) =>
-                        Expression.Convert(arg, parameters[index].ParameterType))
+                arguments.Select((arg, index) => 
+                        (Expression)Expression.Convert(arg, parameters[index].ParameterType))
                     .ToArray());
             return Expression.Lambda(delegateType,
                 Expression.Convert(constructorCall, typeof(object)),

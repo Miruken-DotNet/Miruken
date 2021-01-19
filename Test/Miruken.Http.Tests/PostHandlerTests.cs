@@ -13,7 +13,7 @@
         [TestMethod]
         public async Task Should_Perform_Http_Post()
         {
-            var player = await _handler
+            var player = await Handler
                 .HttpPost<Player, Player>(new Player
                 {
                     Name = "Craig"
@@ -30,7 +30,7 @@
             {
                 Name = "Craig"
             }).RouteTo("http://localhost:9000/coach");
-            await _handler.Send(post);
+            await Handler.Send(post);
         }
 
         [TestMethod]

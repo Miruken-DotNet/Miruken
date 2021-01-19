@@ -10,7 +10,7 @@
         [TestMethod]
         public async Task Should_Perform_Http_Patch()
         {
-            var player = await _handler
+            var player = await Handler
                 .HttpPatch<Player, Player>(new Player
                 {
                     Id   = 2,

@@ -21,7 +21,7 @@
         [TestMethod]
         public async Task Should_Perform_Http_Get()
         {
-            var player = await _handler.HttpGet<Player>("player/1");
+            var player = await Handler.HttpGet<Player>("player/1");
             Assert.AreEqual(1, player.Id);
             Assert.AreEqual("Ronaldo", player.Name);
         }
@@ -29,7 +29,7 @@
         [TestMethod]
         public async Task Should_Return_Ownership_Of_HttpResponse()
         {
-            var response = await _handler.HttpGet<HttpResponseMessage>("/player/1");
+            var response = await Handler.HttpGet<HttpResponseMessage>("/player/1");
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             using (response)
             {
@@ -55,7 +55,7 @@
         public async Task Should_Perform_Http_Get_With_Pipeline()
         {
             var pipeline = new TestPipeline();
-            var player   = await _handler
+            var player   = await Handler
                 .Pipeline(pipeline.Pipeline).HttpGet<Player>(
                     "http://localhost:9000/player/1");
             Assert.AreEqual(1, player.Id);
@@ -66,7 +66,7 @@
         [TestMethod]
         public async Task Should_Support_Either_Properties()
         {
-            var team = await _handler
+            var team = await Handler
                 .Formatters(HttpFormatters.Route)
                 .HttpGet<Team>("/either/team/2");
             Assert.AreEqual(2, team.Id);
@@ -79,7 +79,7 @@
                 },
                 multiple => Assert.Fail("Should not get here"));
 
-            team = await _handler
+            team = await Handler
                 .Formatters(HttpFormatters.Route)
                 .HttpGet<Team>("/either/team/22");
             Assert.AreEqual(22, team.Id);
@@ -96,14 +96,14 @@
         [TestMethod]
         public async Task Should_Support_Either()
         {
-            var either = await _handler
+            var either = await Handler
                 .HttpGet<Either<Player, string>>(
                     "/either/player/5");
             either.Match(
                 player => Assert.AreEqual("Messi", player.Name),
                 _ => Assert.Fail("Should not get here"));
 
-            either = await _handler
+            either = await Handler
                 .HttpGet<Either<Player, string>>(
                     "/either/player/15");
             either.Match(
@@ -114,7 +114,7 @@
         [TestMethod]
         public async Task Should_Support_Either_Of_HttpResponse()
         {
-            var either = await _handler
+            var either = await Handler
                 .HttpGet<Either<HttpResponseMessage, string>>(
                     "/either/player/5");
             either.Match(async response =>
@@ -127,7 +127,7 @@
                 },
                 _ => Assert.Fail("Should not get here"));
 
-            either = await _handler
+            either = await Handler
                 .HttpGet<Either<HttpResponseMessage, string>>(
                     "/either/player/15");
             either.Match(async response =>
@@ -144,7 +144,7 @@
         [TestMethod]
         public async Task Should_Support_Nested_Either()
         {
-            var either = await _handler
+            var either = await Handler
                 .HttpGet<Either<Either<int, Player>, string>>(
                     "/either/player/5");
             either.Match(
@@ -153,7 +153,7 @@
                     player => Assert.AreEqual("Messi", player.Name)),
                 _ => Assert.Fail("Should not get here"));
 
-            either = await _handler
+            either = await Handler
                 .HttpGet<Either<Either<int, Player>, string>>(
                     "/either/player/15");
             either.Match(
@@ -165,13 +165,13 @@
          ExpectedException(typeof(JsonReaderException))]
         public async Task Should_Fail_Either_Not_Mapped()
         {
-            await _handler.HttpGet<Either<Player, int>>( "/either/player/15");
+            await Handler.HttpGet<Either<Player, int>>( "/either/player/15");
         }
 
         [TestMethod]
         public async Task Should_Support_Tuple()
         {
-            var tuple = await _handler
+            var tuple = await Handler
                 .HttpGet<Tuple<Player, Team>>(
                     "/player/7");
 
@@ -185,7 +185,7 @@
         [TestMethod]
         public async Task Should_Support_Tuple_Of_HttpResponse()
         {
-            var tuple = await _handler
+            var tuple = await Handler
                 .HttpGet<Tuple<Player, HttpResponseMessage>>(
                     "/player/8");
 
@@ -203,14 +203,14 @@
         [TestMethod]
         public async Task Should_Support_Try()
         {
-            var @try = await _handler
+            var @try = await Handler
                 .HttpGet<Try<string, Player>>(
                     "/try/player/5");
             @try.Match(
                 _ => Assert.Fail("Should not get here"),
                 player => Assert.AreEqual("Lukakoo", player.Name));
 
-            @try = await _handler
+            @try = await Handler
                 .HttpGet<Try<string, Player>>(
                     "/try/player/12");
             @try.Match(
@@ -221,14 +221,14 @@
         [TestMethod]
         public async Task Should_Support_Try_With_Exception()
         {
-            var @try = await _handler
+            var @try = await Handler
                 .HttpGet<Try<Exception, Player>>(
                     "/try/player/5");
             @try.Match(
                 _ => Assert.Fail("Should not get here"),
                 player => Assert.AreEqual("Lukakoo", player.Name));
 
-            @try = await _handler
+            @try = await Handler
                 .HttpGet<Try<Exception, Player>>(
                     "/try/player/12");
             @try.Match(
@@ -239,7 +239,7 @@
         [TestMethod]
         public async Task Should_Support_Try_Of_HttpResponse()
         {
-            var @try = await _handler
+            var @try = await Handler
                 .HttpGet<Try<string, HttpResponseMessage>>(
                     "/try/player/5");
             @try.Match(
@@ -253,7 +253,7 @@
                     }
                 });
 
-            @try = await _handler
+            @try = await Handler
                 .HttpGet<Try<string, HttpResponseMessage>>(
                     "/try/player/12");
             @try.Match(
@@ -264,14 +264,14 @@
         [TestMethod]
         public async Task Should_Support_Try_Of_Failed_HttpResponse()
         {
-            var @try = await _handler
+            var @try = await Handler
                 .HttpGet<Try<HttpResponseMessage, Player>>(
                     "/try/player/5");
             @try.Match(
                 _ => Assert.Fail("Should not get here"),
                 player => Assert.AreEqual("Lukakoo", player.Name));
 
-            @try = await _handler
+            @try = await Handler
                 .HttpGet<Try<HttpResponseMessage, Player>>(
                     "/try/player/12");
             @try.Match(
@@ -289,7 +289,7 @@
         [TestMethod]
         public async Task Should_Support_Nested_Try()
         {
-            var @try = await _handler
+            var @try = await Handler
                 .HttpGet<Try<string, Try<int, Player>>>(
                     "/try/player/5");
             @try.Match(
@@ -297,7 +297,7 @@
                 x => x.Match(_ => Assert.Fail("Should not get int"),
                     player => Assert.AreEqual("Lukakoo", player.Name)));
 
-            @try = await _handler
+            @try = await Handler
                 .HttpGet<Try<string, Try<int, Player>>>(
                     "/try/player/12");
             @try.Match(
@@ -309,19 +309,19 @@
          ExpectedException(typeof(JsonReaderException))]
         public async Task Should_Fail_Try_Not_Mapped()
         {
-            await _handler.HttpGet<Try<int, Player>>("/try/player/12");
+            await Handler.HttpGet<Try<int, Player>>("/try/player/12");
         }
 
         [TestMethod]
         public async Task Should_Cache_Http_Get()
         {
-            var response = await _handler.Send(new GetRequest<object, Player>
+            var response = await Handler.Send(new GetRequest<object, Player>
             {
                 ResourceUri = "/player/1"
             }.Cached());
             Assert.AreEqual("Ronaldo", response.Resource.Name);
 
-            var cached = await _handler.Send(new GetRequest<object, Player>()
+            var cached = await Handler.Send(new GetRequest<object, Player>()
             {
                 ResourceUri = "/player/1"
             }.Cached());
@@ -332,7 +332,7 @@
         public async Task Should_Override_Get_Handler()
         {
             HandlerDescriptorFactory.Current.RegisterDescriptor<CachedPlayerHandler>();
-            var player = await (new CachedPlayerHandler() + _handler)
+            var player = await (new CachedPlayerHandler() + Handler)
                 .HttpGet<Player>("/player/1");
             Assert.AreEqual("Matthew", player.Name);
         }
@@ -384,7 +384,7 @@
         [TestMethod]
         public async Task Should_Secure_Http_Get()
         {
-            var player = await _handler
+            var player = await Handler
                 .Basic("evalverde", "1234")
                 .HttpGet<Player>(
                     "/secure_player/1");

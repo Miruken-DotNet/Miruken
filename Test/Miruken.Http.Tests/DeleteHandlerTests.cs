@@ -10,7 +10,7 @@
         [TestMethod]
         public async Task Should_Perform_Http_Delete()
         {
-            await _handler.HttpDelete<string>(
+            await Handler.HttpDelete<string>(
                 "http://localhost:9000/player/2");
         }
 
