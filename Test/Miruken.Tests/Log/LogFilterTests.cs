@@ -17,7 +17,6 @@
     using NLog.Config;
     using NLog.Extensions.Logging;
     using NLog.Targets;
-    using ServiceCollection = Miruken.Register.ServiceCollection;
 
     [TestClass]
     public class LogFilterTests

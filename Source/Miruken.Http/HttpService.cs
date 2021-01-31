@@ -26,12 +26,12 @@
 
         public Task<HttpResponseMessage> SendRequest(
             ResourceRequest request, HttpRequestMessage httpRequest,
-            HttpService http, IHandler composer, out HttpOptions options)
+            IHandler composer, out HttpOptions options)
         {
             options = new HttpOptions();
             composer.Handle(options, true);
             ConfigureHttpRequest(request, httpRequest, options, composer);
-            return http._client.SendAsync(httpRequest);
+            return _client.SendAsync(httpRequest);
         }
 
         private static void ConfigureHttpRequest(

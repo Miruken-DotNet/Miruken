@@ -44,7 +44,7 @@
         public static IHandler Provider(this IHandler handler, IServiceProvider provider)
         {
             if (provider == null) return handler;
-            return new ServiceProvider(provider) + handler;
+            return new ServiceProviderWrapper(provider) + handler;
         }
 
         public static object[] ResolveArgs(this IHandler handler, params Argument[] args)

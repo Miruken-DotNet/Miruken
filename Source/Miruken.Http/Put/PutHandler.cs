@@ -16,7 +16,7 @@
                    {
                        Content = GetContent(put.Request, put)
                    };
-            var response    = await http.SendRequest(put, request, http, composer,
+            var response    = await http.SendRequest(put, request, composer,
                     out var options).ConfigureAwait(false);
             var resource    = await ExtractResource<TResource>(response, options);
             var putResponse = new PutResponse<TResource>(resource);

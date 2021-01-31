@@ -13,7 +13,7 @@
         {
             var request  = GetRequest(get.Request, HttpMethod.Get)
                 ?? new HttpRequestMessage(HttpMethod.Get, get.ResourceUri);
-            var response = await http.SendRequest(get, request, http, composer,
+            var response = await http.SendRequest(get, request, composer,
                 out var options).ConfigureAwait(false);
             var resource = await ExtractResource<TResource>(response, options);
             return new GetResponse<TResource>(resource);

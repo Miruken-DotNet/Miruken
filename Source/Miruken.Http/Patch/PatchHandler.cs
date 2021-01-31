@@ -16,7 +16,7 @@
                    {
                        Content = GetContent(patch.Request, patch)
                    };
-            var response      = await http.SendRequest(patch, request, http, composer,
+            var response      = await http.SendRequest(patch, request, composer,
                     out var options).ConfigureAwait(false);
             var resource      = await ExtractResource<TResource>(response, options);
             var patchResponse = new PatchResponse<TResource>(resource);

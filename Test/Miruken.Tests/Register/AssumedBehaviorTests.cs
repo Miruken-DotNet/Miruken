@@ -5,7 +5,6 @@
     using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using ServiceCollection = Miruken.Register.ServiceCollection;
 
     public abstract class AssumedBehaviorTests
     {

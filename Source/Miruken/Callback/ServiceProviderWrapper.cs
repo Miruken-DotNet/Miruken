@@ -4,11 +4,11 @@
     using System.Collections.Generic;
 
     [Unmanaged]
-    public class ServiceProvider : Handler
+    public class ServiceProviderWrapper : Handler
     {
         private readonly IServiceProvider _provider;
 
-        public ServiceProvider(IServiceProvider provider)
+        public ServiceProviderWrapper(IServiceProvider provider)
         {
             _provider = provider ??
                 throw new ArgumentNullException(nameof(provider));

@@ -8,7 +8,6 @@
     using Miruken.Callback.Policy;
     using Miruken.Context;
     using static Protocol;
-    using ServiceProvider = Miruken.Callback.ServiceProvider;
 
     /// <summary>
     /// Summary description for ContextTests
@@ -22,7 +21,7 @@
             var factory = new MutableHandlerDescriptorFactory();
             factory.RegisterDescriptor<Counter>();
             factory.RegisterDescriptor<Observer>();
-            factory.RegisterDescriptor<ServiceProvider>();
+            factory.RegisterDescriptor<ServiceProviderWrapper>();
             HandlerDescriptorFactory.UseFactory(factory);
         }
 

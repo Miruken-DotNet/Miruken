@@ -193,7 +193,7 @@
         private static IServiceCollection AddDefaultServices(IServiceCollection services)
         {
             services.AddTransient<Provider>();
-            services.AddTransient<ServiceProvider>();
+            services.AddTransient<ServiceProviderWrapper>();
             services.AddTransient<ServiceFactoryFacade>();
             services.AddTransient<BatchRouter>();
             services.AddTransient<Stash>();

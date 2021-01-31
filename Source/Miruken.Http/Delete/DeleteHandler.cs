@@ -13,7 +13,7 @@
         {
             var request  = GetRequest(delete.Request, HttpMethod.Delete)
                 ?? new HttpRequestMessage(HttpMethod.Delete, delete.ResourceUri);
-            var response = await http.SendRequest(delete, request, http, composer,
+            var response = await http.SendRequest(delete, request, composer,
                 out var options).ConfigureAwait(false);
             var resource = await ExtractResource<TResource>(response, options);
             return new DeleteResponse<TResource>(resource);
