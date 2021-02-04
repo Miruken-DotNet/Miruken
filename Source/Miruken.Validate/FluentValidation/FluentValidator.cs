@@ -30,7 +30,8 @@
             if (composer == null) return new ValidationResult();
             var target  = context.InstanceToValidate;
             var scope   = context.GetValidation()?.ScopeMatcher;
-            var outcome = await composer.ValidateAsync(target, scope);
+            var outcome = await composer.ValidateAsync(target, scope)
+                .ConfigureAwait(false);
             return CreateResult(outcome, context);
         }
 

@@ -21,6 +21,7 @@
             var requests  = concurrent.Requests;
             var responses = requests != null && requests.Length > 0
                 ? await Task.WhenAll(requests.Select(req => Process(req, composer)))
+                    .ConfigureAwait(false)
                 : Array.Empty<Try<Exception, object>>();
             return new ScheduledResult
             {
@@ -38,7 +39,7 @@
             {
                 foreach (var req in sequential.Requests)
                 {
-                    var response = await Process(req, composer);
+                    var response = await Process(req, composer).ConfigureAwait(false);;
                     responses.Add(response);
                     if (response is IEither.ILeft) break;
                 }
@@ -57,6 +58,7 @@
                 ? await Task.WhenAll(requests.AsParallel()
                     .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                     .Select(req => Process(req, composer)).ToArray())
+                    .ConfigureAwait(false)
                 : Array.Empty<Try<Exception, object>>();
             return new ScheduledResult
             {

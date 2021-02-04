@@ -77,7 +77,7 @@
             var data = handler.StashTryGet<T>();
             if (data == null)
             {
-                data = await put();
+                data = await put().ConfigureAwait(false);;
                 handler.StashPut(data);
             }
             return data;

@@ -18,8 +18,7 @@
                    };
             var response = await http.SendRequest(post, request, composer,
                     out var options).ConfigureAwait(false);
-            var resource = await ExtractResource<TResource>(response, options)
-                .ConfigureAwait(false);
+            var resource = await ExtractResource<TResource>(response, options);
             var postResponse = new PostResponse<TResource>(resource);
             SetResponseUri(postResponse, response);
             return postResponse;

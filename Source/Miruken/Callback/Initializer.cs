@@ -16,12 +16,10 @@
             IHandler composer, Next<TRes> next,
             IFilterProvider provider)
         {
-            var result = await next();
-            if (result is IInitialize initialize)
-            {
-                if (initialize.Initialize() is { } promise)
-                    await promise;
-            }
+            var result = await next().ConfigureAwait(false);
+            if (result is not IInitialize initialize) return result;
+            if (initialize.Initialize() is { } promise)
+                await promise;
             return result;
         }
     }
