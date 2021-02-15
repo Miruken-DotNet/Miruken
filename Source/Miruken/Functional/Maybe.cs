@@ -11,7 +11,7 @@
 
     public class Maybe<T> : IMaybe
     {
-        public static readonly Maybe<T> Nothing = new Maybe<T>();
+        public static readonly Maybe<T> Nothing = new();
 
         private Maybe()
         {

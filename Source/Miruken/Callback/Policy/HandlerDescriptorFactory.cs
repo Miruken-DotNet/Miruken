@@ -11,7 +11,7 @@
         private static IHandlerDescriptorFactory _factory;
 
         private static readonly MutableHandlerDescriptorFactory
-            DefaultFactory = new MutableHandlerDescriptorFactory();
+            DefaultFactory = new();
 
         public static HandlerDescriptor GetDescriptor<T>(
             this IHandlerDescriptorFactory factory)

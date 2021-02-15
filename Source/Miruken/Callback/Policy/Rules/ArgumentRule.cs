@@ -23,7 +23,7 @@
 
         public TypedArgument OfType(Type argType, params string[] aliases)
         {
-            return new TypedArgument(this, argType, aliases);
+            return new(this, argType, aliases);
         }
 
         public abstract bool Matches(

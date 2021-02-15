@@ -15,9 +15,9 @@
 
     public abstract class ResourceHandler : Handler
     {
-        private const string KeepResponseOpen = "Miruken.Http.KeepOpen";
+        private static readonly HttpRequestOptionsKey<bool> KeepResponseOpen = new("Miruken.Http.KeepOpen");
 
-        protected HttpContent GetContent<TRequest>(
+        protected static HttpContent GetContent<TRequest>(
             TRequest content, ResourceRequest request)
         {
             var formatter = request.Formatter;
@@ -70,11 +70,11 @@
             }
             finally
             {
-                var properties = response.RequestMessage.Properties;
-                if (properties.TryGetValue(KeepResponseOpen, out var dispose))
-                    properties.Remove(KeepResponseOpen);
-                if (!Equals(dispose, true))
-                    response.Dispose();
+                var keepOpen = true;
+                var props    = response.RequestMessage?.Options;
+                if (props?.TryGetValue(KeepResponseOpen, out  keepOpen) == true)
+                    props.Set(KeepResponseOpen, false);
+                if (!keepOpen) response.Dispose();
             }
         }
 
@@ -164,7 +164,7 @@
             if (typeof(TResponse) == typeof(HttpResponseMessage))
             {
                 if (response.IsSuccessStatusCode != success) return null;
-                response.RequestMessage.Properties[KeepResponseOpen] = true;
+                response.RequestMessage?.Options.Set(KeepResponseOpen, true);
                 return Task.FromResult(response) as Task<TResponse>;
             }
 
@@ -232,8 +232,7 @@
      
         private static readonly ConcurrentDictionary<Type,
             Func<object, object, object, object, object>> Readers
-            = new ConcurrentDictionary<Type,
-                Func<object, object, object, object, object>>();
+            = new();
 
         private static readonly MethodInfo ReadEitherMethod =
             typeof(ResourceHandler).GetMethod(nameof(ReadEither),

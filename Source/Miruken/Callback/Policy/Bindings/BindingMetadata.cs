@@ -6,7 +6,7 @@
     public class BindingMetadata
     {
         private readonly Dictionary<object, object> 
-            _values = new Dictionary<object, object>();
+            _values = new();
 
         public string Name { get; set; }
 

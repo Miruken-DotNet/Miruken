@@ -21,7 +21,7 @@ namespace Miruken.Callback
         private CallbackOptions _specified;
 
         public static readonly CallbackSemantics None =
-            new CallbackSemantics(CallbackOptions.None);
+            new(CallbackOptions.None);
 
         public CallbackSemantics()
             : this(CallbackOptions.None)

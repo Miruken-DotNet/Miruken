@@ -10,13 +10,12 @@
     {
         private readonly HttpClient _client;
 
-        private static readonly HttpClient SharedHttpClient
-            = new HttpClient(new HttpOptionsHandler
+        private static readonly HttpClient SharedHttpClient = new(new HttpOptionsHandler
             {
                 InnerHandler = new HttpClientHandler()
             });
 
-        public static readonly HttpService Shared = new HttpService(SharedHttpClient);
+        public static readonly HttpService Shared = new(SharedHttpClient);
 
         public HttpService(HttpClient client)
         {

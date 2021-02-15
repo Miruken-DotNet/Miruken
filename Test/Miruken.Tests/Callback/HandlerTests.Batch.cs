@@ -60,9 +60,9 @@
 
         private class EmailBatch : IEmailing, IBatching
         {
-            private readonly List<object> _messages  = new List<object>();
-            private readonly List<Promise> _promises = new List<Promise>();
-            private readonly List<Action> _resolves  = new List<Action>();
+            private readonly List<object> _messages  = new();
+            private readonly List<Promise> _promises = new();
+            private readonly List<Action> _resolves  = new();
 
             object IEmailing.Send(object message)
             {

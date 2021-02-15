@@ -47,7 +47,7 @@
         [HttpGet, Route("{id}")]
         public Player GetPlayer(int id)
         {
-            return new Player { Id = id, Name = "Ronaldo" };
+            return new() { Id = id, Name = "Ronaldo" };
         }
 
         [HttpPost, Route("")]

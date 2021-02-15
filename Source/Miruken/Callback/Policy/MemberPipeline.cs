@@ -29,7 +29,7 @@
         }
 
         private static readonly ConcurrentDictionary<(Type, Type), MemberPipeline>
-            Pipelines = new ConcurrentDictionary<(Type, Type), MemberPipeline>();
+            Pipelines = new();
     }
 
     public class MemberPipeline<TCb, TRes> : MemberPipeline

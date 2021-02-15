@@ -10,7 +10,7 @@
     {
         private readonly
             ConcurrentDictionary<object, CacheResponse> _cache
-                = new ConcurrentDictionary<object, CacheResponse>();
+                = new();
 
         private struct CacheResponse
         {

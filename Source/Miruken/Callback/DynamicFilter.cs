@@ -15,7 +15,7 @@
         public int? Order { get; set; }
 
         protected static readonly ConcurrentDictionary<Type, MethodDispatch>
-            DynamicNext = new ConcurrentDictionary<Type, MethodDispatch>();
+            DynamicNext = new();
 
         protected const BindingFlags Binding = BindingFlags.Instance
                                              | BindingFlags.Public;

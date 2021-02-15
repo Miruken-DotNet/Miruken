@@ -1390,7 +1390,7 @@
 
         internal class Callback
         {
-            public List<object> Filters = new List<object>();
+            public List<object> Filters = new();
         }
 
         private class Foo : Callback
@@ -1544,19 +1544,19 @@
             [Provides]
             public Bar ProvideBarImplicitly()
             {
-                return new Bar { Handled = 1 };
+                return new() { Handled = 1 };
             }
 
             [Provides]
             public Boo ProvideBooImplicitly(IHandler composer)
             {
-                return new Boo { HasComposer = true };
+                return new() { HasComposer = true };
             }
 
             [Provides]
             public SpecialBar ProvideSpecialBarImplicitly(IHandler composer)
             {
-                return new SpecialBar
+                return new()
                 {
                     Handled = 1,
                     HasComposer = true
@@ -1572,13 +1572,13 @@
             [Provides]
             public Baz<T> ProvidesBazGenerically<T>()
             {
-                return new Baz<T>(default);
+                return new(default);
             }
 
             [Provides]
             public Baz<T, R> ProvidesBazMapped<R, T>()
             {
-                return new Baz<T, R>(default, default);
+                return new(default, default);
             }
 
             [Provides]
@@ -1699,7 +1699,7 @@
             }
 
             [Provides]
-            public Bar ProvideBar { get; } = new Bar { Handled = 3 };
+            public Bar ProvideBar { get; } = new() { Handled = 3 };
 
             [Provides(typeof(Bee))]
             public object ProvideManyBeeWithKey()
@@ -1736,7 +1736,7 @@
             public TFoo ProvidesNewFoo<TFoo>()
                 where TFoo : Foo, new()
             {
-                return new TFoo();
+                return new();
             }
         }
 
@@ -1951,7 +1951,7 @@
             [Provides]
             public Bar ProvideBarImplicitly()
             {
-                return new Bar { Handled = 1 };
+                return new() { Handled = 1 };
             }
         }
 
@@ -1977,7 +1977,7 @@
             [Provides]
             public static ControllerBase ProvideController()
             {
-                return new ControllerBase();
+                return new();
             }
         }
 
@@ -2202,19 +2202,19 @@
             [Provides, Contextual]
             public static OverloadedProviders Provide()
             {
-                return new OverloadedProviders();
+                return new();
             }
 
             [Provides, Contextual]
             public static OverloadedProviders Provide(Foo foo)
             {
-                return new OverloadedProviders { Foo = foo };
+                return new() { Foo = foo };
             }
 
             [Provides, Contextual]
             public static OverloadedProviders Provide(Foo foo, Bar bar)
             {
-                return new OverloadedProviders
+                return new()
                 {
                     Foo = foo,
                     Bar = bar
@@ -2249,7 +2249,7 @@
             [Provides]
             public ContravariantFilter CreateFilter()
             {
-                return new ContravariantFilter();
+                return new();
             }
 
             [Provides(typeof(LogFilter<,>))]
@@ -2297,7 +2297,7 @@
              Filter(typeof(ExceptionBehavior<,>), Required = true)]
             public SpecialFoo HandleFoo(Foo foo)
             {
-                return new SpecialFoo();
+                return new();
             }
 
             [Handles,

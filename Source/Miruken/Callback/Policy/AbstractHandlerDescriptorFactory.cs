@@ -11,7 +11,7 @@
     {
         private readonly HandlerDescriptorVisitor _visitor;
 
-        private static readonly Provides ImplicitProvides = new Provides();
+        private static readonly Provides ImplicitProvides = new();
 
         protected AbstractHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
         {

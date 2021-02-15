@@ -6,7 +6,7 @@ namespace Miruken.Infrastructure
 {
     public class MethodSignatureComparer : IEqualityComparer<MethodInfo>
     {
-        public static readonly MethodSignatureComparer Instance = new MethodSignatureComparer();
+        public static readonly MethodSignatureComparer Instance = new();
 
         public bool EqualGenericParameters(MethodInfo x, MethodInfo y)
         {

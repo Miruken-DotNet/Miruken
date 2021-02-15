@@ -25,7 +25,7 @@ namespace Miruken.Callback
     [Unmanaged]
 	public class CompositeHandler : Handler, ICompositeHandler
 	{
-        private readonly List<IHandler> _handlers = new List<IHandler>();
+        private readonly List<IHandler> _handlers = new();
 
         public CompositeHandler(params object[] handlers)
         {

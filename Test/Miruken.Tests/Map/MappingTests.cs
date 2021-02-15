@@ -392,7 +392,7 @@
             [Maps]
             public PlayerEntity MapFromPlayerDictionary(IDictionary<string, object> keyValues)
             {
-                return new PlayerEntity
+                return new()
                 {
                     Id   = (int)keyValues["Id"],
                     Name = (string)keyValues["Name"]

@@ -53,7 +53,7 @@
             CancellationToken cancellationToken = default,
             ChildCancelMode mode = ChildCancelMode.All)
         {
-            return new Promise<T>(task, cancellationToken, mode);
+            return new(task, cancellationToken, mode);
         }
 
         public static Promise<T> ToPromise<T>(
@@ -61,7 +61,7 @@
             CancellationTokenSource cancellationTokenSource,
             ChildCancelMode mode = ChildCancelMode.All)
         {
-            return new Promise<T>(task, cancellationTokenSource, mode);
+            return new(task, cancellationTokenSource, mode);
         }
 
         public static Exception FlattenException(this Task task)
@@ -73,7 +73,7 @@
         }
 
         private static readonly ConcurrentDictionary<Type, Func<Task, Task>>
-            CoerceTask = new ConcurrentDictionary<Type, Func<Task, Task>>();
+            CoerceTask = new();
 
 #region Helper
 
@@ -111,7 +111,7 @@
             }
 
             private static readonly ConcurrentDictionary<Type, Func<object, object>>
-                TaskResultGetters = new ConcurrentDictionary<Type, Func<object, object>>();
+                TaskResultGetters = new();
         }
 
 #endregion

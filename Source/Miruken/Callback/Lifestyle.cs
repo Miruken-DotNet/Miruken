@@ -104,6 +104,6 @@
         }
 
         private static readonly ConcurrentDictionary<Tuple<MemberDispatch, object>, IFilter>
-            Lifestyles = new ConcurrentDictionary<Tuple<MemberDispatch, object>, IFilter>();
+            Lifestyles = new();
     }
 }

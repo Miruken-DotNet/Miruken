@@ -6,8 +6,8 @@
 
     public abstract class ReturnRule
     {
-        public ReturnVoid  OrVoid => new ReturnVoid(this);
-        public ReturnAsync Async  => new ReturnAsync(this);
+        public ReturnVoid  OrVoid => new(this);
+        public ReturnAsync Async  => new(this);
 
         public abstract bool Matches(
             Type returnType, ParameterInfo[] parameters,

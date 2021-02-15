@@ -33,7 +33,7 @@
 
 	    public static CascadeHandler operator +(Handler h1, object h2)
         {
-            return new CascadeHandler(h1, h2);
+            return new(h1, h2);
         }
 
 	    public static CompositeHandler operator +(Handler h1, IEnumerable handlers)
@@ -51,7 +51,7 @@
             return instance as IHandler ?? new HandlerAdapter(instance);
         }
 
-        private static readonly HashSet<Type> SkipTypes = new HashSet<Type>
+        private static readonly HashSet<Type> SkipTypes = new()
         {
             typeof(Handler), typeof(FilteredHandler), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)

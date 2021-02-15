@@ -7,7 +7,7 @@
 
     internal class FluentValidator<T> : AbstractValidator<T>
     {
-        public static readonly FluentValidator<T> Instance = new FluentValidator<T>();
+        public static readonly FluentValidator<T> Instance = new();
 
         private FluentValidator()
         {      
@@ -24,7 +24,7 @@
         }
 
         public override async Task<ValidationResult> ValidateAsync(
-            ValidationContext<T> context, CancellationToken cancellation = new CancellationToken())
+            ValidationContext<T> context, CancellationToken cancellation = new())
         {
             var composer = context.GetComposer();
             if (composer == null) return new ValidationResult();

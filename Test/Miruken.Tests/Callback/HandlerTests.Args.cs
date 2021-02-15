@@ -228,7 +228,7 @@
 
         private class InventoryHandler : Handler
         {
-            private readonly List<Order> _orders = new List<Order>();
+            private readonly List<Order> _orders = new();
 
             [Provides]
             public Order[] Orders => _orders.ToArray();

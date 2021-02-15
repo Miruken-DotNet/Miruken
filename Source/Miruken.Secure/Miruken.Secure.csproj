@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <Company>Miruken</Company>
     <Product>Miruken.Secure</Product>
     <Description>Miruken abstractions for security</Description>
@@ -21,11 +21,6 @@
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     </PropertyGroup>
 
-    <!-- compilation flags -->
-    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-        <DefineConstants>NETSTANDARD</DefineConstants>
-    </PropertyGroup>
-  
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
     </ItemGroup>

@@ -32,7 +32,7 @@
 
         public static Qualifier Of<T>() where T : Attribute
         {
-            return new Qualifier(typeof(T));
+            return new(typeof(T));
         }
     }
 

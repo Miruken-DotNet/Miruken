@@ -14,52 +14,40 @@
 
     public static class HttpExtensions
     {
-        private const string TimeoutPropertyKey  = "Miruken.Timeout";
-        private const string OptionsPropertyKey  = "Miruken.HttpOption";
-        private const string ComposerPropertyKey = "Miruken.Composer";
+        private static readonly HttpRequestOptionsKey<TimeSpan?>   TimeoutPropertyKey  = new("Miruken.Timeout");
+        private static readonly HttpRequestOptionsKey<HttpOptions> OptionsPropertyKey  = new("Miruken.HttpOption");
+        private static readonly HttpRequestOptionsKey<IHandler>    ComposerPropertyKey = new("Miruken.Composer");
 
-        public static readonly HttpMethod PatchMethod = new HttpMethod("PATCH");
+        public static readonly HttpMethod PatchMethod = new("PATCH");
 
         public static void SetTimeout(
             this HttpRequestMessage request, TimeSpan? timeout)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            if (timeout == null)
-                request.Properties.Remove(TimeoutPropertyKey);
-            else
-                request.Properties[TimeoutPropertyKey] = timeout;
+            request.Options.Set(TimeoutPropertyKey, timeout);
         }
 
         public static TimeSpan? GetTimeout(this HttpRequestMessage request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            return request.Properties.TryGetValue(
-                        TimeoutPropertyKey, out var value)
-                 ? (TimeSpan?)value
-                 : null;
-        }
+            return request == null
+                ? throw new ArgumentNullException(nameof(request))
+                 : request.GetOption(TimeoutPropertyKey);
+         }
 
         public static void SetOptions(
             this HttpRequestMessage request, HttpOptions options)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            if (options == null)
-                request.Properties.Remove(OptionsPropertyKey);
-            else
-                request.Properties[OptionsPropertyKey] = options;
+            request.Options.Set(OptionsPropertyKey, options);
         }
 
         public static HttpOptions GetOptions(this HttpRequestMessage request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            return request.Properties.TryGetValue(
-                        OptionsPropertyKey, out var value)
-                 ? (HttpOptions) value
-                 : null;
+            return request == null
+                 ? throw new ArgumentNullException(nameof(request))
+                 : request.GetOption(OptionsPropertyKey);
         }
 
         public static void SetComposer(
@@ -67,20 +55,14 @@
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
-            if (composer == null)
-                request.Properties.Remove(ComposerPropertyKey);
-            else
-                request.Properties[ComposerPropertyKey] = composer;
+            request.Options.Set(ComposerPropertyKey, composer);
         }
 
         public static IHandler GetComposer(this HttpRequestMessage request)
         {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            return request.Properties.TryGetValue(
-                        ComposerPropertyKey, out var value)
-                 ? (IHandler)value
-                 : null;
+            return request == null
+                 ? throw new ArgumentNullException(nameof(request))
+                 : request.GetOption(ComposerPropertyKey);
         }
 
         public static Task<TResponse> HttpGet<TResponse>(
@@ -92,7 +74,7 @@
                 ResourceUri = resourceUri,
                 Formatter   = formatter
             };
-            return handler.Send(get).Then((r,s) => r.Resource);
+            return handler.Send(get).Then((r, _) => r.Resource);
         }
 
         public static Task<TResource> HttpGet<TResource>(
@@ -101,7 +83,7 @@
         {
             var get = new GetRequest<object, TResource>();
             configure?.Invoke(get);
-            return handler.Send(get).Then((r, s) => r.Resource);
+            return handler.Send(get).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpGet<TRequest, TResponse>(
@@ -110,7 +92,7 @@
         {
             var get = new GetRequest<TRequest, TResponse>(request);
             configure?.Invoke(get);
-            return handler.Send(get).Then((r, s) => r.Resource);
+            return handler.Send(get).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPost<TRequest, TResponse>(
@@ -122,7 +104,7 @@
                 ResourceUri = resourceUri,
                 Formatter   = formatter
             };
-            return handler.Send(post).Then((r, s) => r.Resource);
+            return handler.Send(post).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPost<TRequest, TResponse>(
@@ -131,7 +113,7 @@
         {
             var post = new PostRequest<TRequest, TResponse>(request);
             configure?.Invoke(post);
-            return handler.Send(post).Then((r, s) => r.Resource);
+            return handler.Send(post).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPut<TRequest, TResponse>(
@@ -143,7 +125,7 @@
                 ResourceUri = resourceUri,
                 Formatter   = formatter
             };
-            return handler.Send(put).Then((r, s) => r.Resource);
+            return handler.Send(put).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPut<TRequest, TResponse>(
@@ -152,7 +134,7 @@
         {
             var put = new PutRequest<TRequest, TResponse>(request);
             configure?.Invoke(put);
-            return handler.Send(put).Then((r, s) => r.Resource);
+            return handler.Send(put).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPatch<TRequest, TResponse>(
@@ -164,7 +146,7 @@
                 ResourceUri = resourceUri,
                 Formatter   = formatter
             };
-            return handler.Send(patch).Then((r, s) => r.Resource);
+            return handler.Send(patch).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpPatch<TRequest, TResponse>(
@@ -173,7 +155,7 @@
         {
             var patch = new PatchRequest<TRequest, TResponse>(request);
             configure?.Invoke(patch);
-            return handler.Send(patch).Then((r, s) => r.Resource);
+            return handler.Send(patch).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpDelete<TResponse>(
@@ -185,7 +167,7 @@
                 ResourceUri = resourceUri,
                 Formatter   = formatter
             };
-            return handler.Send(delete).Then((r, s) => r.Resource);
+            return handler.Send(delete).Then((r, _) => r.Resource);
         }
 
         public static Task<TResource> HttpDelete<TResource>(
@@ -194,7 +176,7 @@
         {
             var delete = new DeleteRequest<object, TResource>();
             configure?.Invoke(delete);
-            return handler.Send(delete).Then((r, s) => r.Resource);
+            return handler.Send(delete).Then((r, _) => r.Resource);
         }
 
         public static Task<TResponse> HttpDelete<TRequest, TResponse>(
@@ -203,7 +185,11 @@
         {
             var delete = new DeleteRequest<TRequest, TResponse>(request);
             configure?.Invoke(delete);
-            return handler.Send(delete).Then((r, s) => r.Resource);
+            return handler.Send(delete).Then((r, _) => r.Resource);
         }
+
+        private static T GetOption<T>(
+            this HttpRequestMessage request, HttpRequestOptionsKey<T> key) =>
+            request.Options.TryGetValue(key, out var value) ? value : default;
     }
 }

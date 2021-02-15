@@ -7,7 +7,7 @@
 
     public class ReturnsKey : ReturnRule
     {
-        public static readonly ReturnsKey Instance = new ReturnsKey();
+        public static readonly ReturnsKey Instance = new();
 
         private ReturnsKey()
         {        

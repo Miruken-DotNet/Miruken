@@ -170,7 +170,7 @@
             [Handles]
             public Promise<Guid> Deliver(DeliverOrder deliver, [Options] OrderOptions options)
             {
-                return new Promise<Guid>((resolve, reject) => 
+                return new((resolve, reject) => 
                     resolve(Guid.NewGuid(), true));
             }
 

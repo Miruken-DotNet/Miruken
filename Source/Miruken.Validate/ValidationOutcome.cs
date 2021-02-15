@@ -11,7 +11,7 @@
     public class ValidationOutcome : IDataErrorInfo, INotifyDataErrorInfo
     {
         private readonly ConcurrentDictionary<string, List<object>> 
-            _errors = new ConcurrentDictionary<string, List<object>>();
+            _errors = new();
         private bool _initialized;
         private object _lock;
 

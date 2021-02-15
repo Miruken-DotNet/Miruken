@@ -5,7 +5,7 @@
 
     public sealed class DelegatingOnceStrategy : IOnceStrategy
     {
-        public static DelegatingOnceStrategy Instance = new DelegatingOnceStrategy();
+        public static DelegatingOnceStrategy Instance = new();
 
         private DelegatingOnceStrategy()
         {            

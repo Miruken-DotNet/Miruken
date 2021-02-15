@@ -44,7 +44,7 @@
         public MultipleErrorsData MapAggregateException(
             AggregateException exception, IHandler composer)
         {
-            return new MultipleErrorsData
+            return new()
             {
                 Errors = exception.InnerExceptions
                     .Select(ex => composer.Map<object>(ex, typeof(Exception)))
@@ -56,13 +56,13 @@
         public AggregateException MapMultipleErrorsData(
             MultipleErrorsData errors, IHandler composer)
         {
-            return new AggregateException(errors?.Errors
-                .Select(error => composer.Map<Exception>(error, typeof(Exception)))
-                ?? Array.Empty<Exception>());
+            return new(errors?.Errors
+                           .Select(error => composer.Map<Exception>(error, typeof(Exception)))
+                       ?? Array.Empty<Exception>());
         }
 
         [Maps, Format(typeof(Exception))]
-        public ExceptionData MapException(Exception exception) => new ExceptionData(exception);
+        public ExceptionData MapException(Exception exception) => new(exception);
 
         [Maps, Format(typeof(Exception))]
         public Exception MapExceptionData(ExceptionData data)

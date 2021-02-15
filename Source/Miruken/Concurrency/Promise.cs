@@ -45,7 +45,7 @@
     {
         protected ResolveCallback _fulfilled;
         protected RejectCallback _rejected;
-        protected readonly object _guard = new object();
+        protected readonly object _guard = new();
 
         public PromiseState State { get; protected set; }
 
@@ -254,7 +254,7 @@
 
         public static Promise<T> Race<T>(params Promise<T>[] promises)
         {
-            return new Promise<T>((resolve, reject) =>
+            return new((resolve, reject) =>
             {
                 foreach (var t in promises) t.Then(resolve, reject);
             });
@@ -296,7 +296,7 @@
 
         public static Promise<T> Try<T>(Func<T> func)
         {
-            return new Promise<T>((resolve, reject) =>
+            return new((resolve, reject) =>
             {
                 try
                 {
@@ -331,7 +331,7 @@
 
         public static Promise<T> Try<T>(Func<Promise<T>> func)
         {
-            return new Promise<T>((resolve, reject) =>
+            return new((resolve, reject) =>
             {
                 try
                 {
@@ -352,8 +352,8 @@
 
 #region Build
 
-        public static readonly Promise<bool> True  = new Promise<bool>(true);
-        public static readonly Promise<bool> False = new Promise<bool>(false);
+        public static readonly Promise<bool> True  = new(true);
+        public static readonly Promise<bool> False = new(false);
         public static readonly Promise       Empty = new Promise<object>((object)null);
 
         public static Promise<object> Resolved(object value)
@@ -367,7 +367,7 @@
 
         public static Promise<object> Resolved(Promise promise)
         {
-            return new Promise<object>((resolve, reject) =>
+            return new((resolve, reject) =>
                 promise.Then((r, s) => resolve(r, s), reject)
                     .Cancelled(ex => reject(ex, true)));
         }
@@ -381,12 +381,12 @@
 
         public static Promise<T> Resolved<T>(T value, bool synchronous = true)
         {
-            return new Promise<T>(value, synchronous);
+            return new(value, synchronous);
         }
 
         public static Promise<T> Resolved<T>(Promise<T> promise)
         {
-            return new Promise<T>((resolve, reject) => promise.Then(resolve, reject));
+            return new((resolve, reject) => promise.Then(resolve, reject));
         }
 
         public static Promise<T> Resolved<T>(Task<T> task)
@@ -436,7 +436,7 @@
         }
 
         private static readonly ConcurrentDictionary<Type, Func<Promise, Promise>>
-            CoercePromise = new ConcurrentDictionary<Type, Func<Promise, Promise>>();
+            CoercePromise = new();
 
 #endregion
     }
@@ -1098,7 +1098,7 @@
         protected virtual Promise<R> CreateChild<R>(
             ChildCancelMode mode, Promise<R>.CancellingPromiseOwner owner)
         {
-            return new Promise<R>(mode, owner);
+            return new(mode, owner);
         }
 
         protected void Subscribe(ResolveCallback resolve, RejectCallback reject)
@@ -1123,15 +1123,15 @@
 
         public new static Promise<T> Rejected(Exception exception)
         {
-            return new Promise<T>(exception);
+            return new(exception);
         }
 
         public new static Promise<T> Rejected(Exception exception, bool synchronous)
         {
-            return new Promise<T>(exception, synchronous);
+            return new(exception, synchronous);
         }
 
-        public new static readonly Promise<T> Empty = new Promise<T>(default(T));
+        public new static readonly Promise<T> Empty = new(default(T));
 
 #endregion
     }

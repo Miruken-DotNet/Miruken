@@ -26,7 +26,7 @@
         [Provides]
         public StashOf<T> Wraps<T>(IHandler composer) where T : class
         {
-            return new StashOf<T>(composer);
+            return new(composer);
         }
 
         [Handles]

@@ -160,7 +160,7 @@
 
         private class EmailProvider : Handler
         {
-            private readonly EmailHandler _email = new EmailHandler();
+            private readonly EmailHandler _email = new();
 
             [Provides]
             public EmailHandler ProvideEmail()
@@ -187,7 +187,7 @@
 
         private class DemoProvider : Handler
         {
-            private readonly DemoHandler _demo = new DemoHandler();
+            private readonly DemoHandler _demo = new();
 
             [Provides]
             public DemoHandler ProvideDemo()
@@ -198,7 +198,7 @@
 
         private class OfflineProvider : Handler
         {
-            private readonly OfflineHandler _offline = new OfflineHandler();
+            private readonly OfflineHandler _offline = new();
 
             [Provides]
             public OfflineHandler ProvideOffline()
@@ -257,14 +257,14 @@
             [Provides]
             public AuditFilter<Cb, Res> ProviderAudit<Cb, Res>()
             {
-                return new AuditFilter<Cb, Res>();
+                return new();
             }
 
             [Provides]
             public BalanceFilter<T, Res> ProviderBalance<T, Res>()
                 where T: IEntity
             {
-                return new BalanceFilter<T, Res>();
+                return new();
             }
         }
 
@@ -298,7 +298,7 @@
             public DomainRepository<T> GetRepository<T>(
                 DomainContext<T> context, T domain) where T : IDomain
             {
-                return new DomainRepository<T>(context, domain);
+                return new(context, domain);
             }
         }
 
@@ -373,7 +373,7 @@
             public Repository<T> CreateRepository<T>()
                 where T : class, IEntity
             {
-                return new Repository<T>();
+                return new();
             }
         }
 

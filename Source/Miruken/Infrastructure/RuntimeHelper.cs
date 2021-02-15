@@ -13,7 +13,7 @@
     public static class RuntimeHelper
     {
         private static readonly ConcurrentDictionary<Type, object>
-            DefaultValues = new ConcurrentDictionary<Type, object>();
+            DefaultValues = new();
 
         public static object GetDefault(Type type)
         {
@@ -255,7 +255,7 @@
         }
 
         private static readonly ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>
-            MethodMapping = new ConcurrentDictionary<KeyValuePair<MethodInfo, Type>, MethodInfo>();
+            MethodMapping = new();
 
         public static Delegate CompileMethod(MethodInfo method, Type delegateType)
         {

@@ -26,7 +26,7 @@
 
     public class InitializeProvider : IFilterProvider
     {
-        public static readonly InitializeProvider Instance = new InitializeProvider();
+        public static readonly InitializeProvider Instance = new();
 
         private InitializeProvider()
         {          
@@ -51,6 +51,6 @@
         }
 
         private static readonly ConcurrentDictionary<MemberDispatch, IFilter>
-            Initializers = new ConcurrentDictionary<MemberDispatch, IFilter>();
+            Initializers = new();
     }
 }

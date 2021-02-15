@@ -203,7 +203,7 @@
             [Provides]
             public ValidateFilter<TCb, TRes> Create<TCb, TRes>()
             {
-                return new ValidateFilter<TCb, TRes>();
+                return new();
             }
 
             [Provides]

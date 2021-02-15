@@ -119,7 +119,7 @@
         public class TeamHandler : Handler
         {
             public int _teamId;
-            private readonly List<object> _notifications = new List<object>();
+            private readonly List<object> _notifications = new();
 
             public ICollection<object> Notifications => _notifications;
 

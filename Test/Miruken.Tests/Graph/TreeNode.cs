@@ -31,6 +31,6 @@ namespace Miruken.Tests.Graph
             return this;
         }
 
-        private readonly List<TreeNode> _children = new List<TreeNode>();
+        private readonly List<TreeNode> _children = new();
     }
 }

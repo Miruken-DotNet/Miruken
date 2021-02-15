@@ -43,8 +43,8 @@
 
     public static class DataAnnotationsExtensions
     {
-        private static readonly object ComposerKey   = new object();
-        private static readonly object ValidationKey = new object();
+        private static readonly object ComposerKey   = new();
+        private static readonly object ValidationKey = new();
 
         public static void SetValidation(
             this ValidationContext context, Validation validation)

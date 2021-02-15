@@ -18,7 +18,7 @@
     {
         public static Publish Publish(this object message)
         {
-            return new Publish(message);
+            return new(message);
         }
     }
 }

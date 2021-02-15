@@ -40,7 +40,7 @@
             var tryWrite = new Try<Exception, string>.Failure(
                 new NotSupportedException("Not handled"));
             var json     = JsonConvert.SerializeObject(tryWrite, _settings);
-            Assert.AreEqual("{\"isLeft\":true,\"value\":{\"$type\":\"Miruken.Http.ExceptionData, Miruken.Http\",\"ExceptionType\":\"System.NotSupportedException, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\"Message\":\"Not handled\"}}"
+            Assert.AreEqual("{\"isLeft\":true,\"value\":{\"$type\":\"Miruken.Http.ExceptionData, Miruken.Http\",\"ExceptionType\":\"System.NotSupportedException, System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\"Message\":\"Not handled\"}}"
                 ,json);
             var tryRead = JsonConvert.DeserializeObject<Try<Exception, string>>(json, _settings);
             Assert.IsNotNull(tryRead);

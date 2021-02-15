@@ -22,9 +22,9 @@
 	    private ReaderWriterLockSlim _lock;
 	    private readonly List<Context> _children;
 
-        public static readonly object AlreadyEnded = new object();
-	    public static readonly object Unwinded     = new object();
-	    public static readonly object Disposed     = new object();
+        public static readonly object AlreadyEnded = new();
+	    public static readonly object Unwinded     = new();
+	    public static readonly object Disposed     = new();
 
         public Context()
 		{
@@ -122,7 +122,7 @@
 
 	    protected virtual Context InternalCreateChild()
 	    {
-	        return new Context(this);
+	        return new(this);
 	    }
 	    
 	    IServiceProvider IServiceScope.ServiceProvider => this;
@@ -244,7 +244,7 @@
             }
             remove => _events.RemoveHandler(ContextEndingEvent, value);
         }
-	    private static readonly object ContextEndingEvent = new object();
+	    private static readonly object ContextEndingEvent = new();
 
         public event Action<Context, object> ContextEnded
         {
@@ -262,21 +262,21 @@
             }
             remove => _events.RemoveHandler(ContextEndedEvent, value);
         }
-	    private static readonly object ContextEndedEvent = new object();
+	    private static readonly object ContextEndedEvent = new();
 
         public event Action<Context, object> ChildContextEnding
         {
             add => _events?.AddHandler(ChildContextEndingEvent, value);
             remove => _events.RemoveHandler(ChildContextEndingEvent, value);
         }
-	    private static readonly object ChildContextEndingEvent = new object();
+	    private static readonly object ChildContextEndingEvent = new();
 
         public event Action<Context, object> ChildContextEnded
         {
             add => _events?.AddHandler(ChildContextEndedEvent, value);
             remove => _events.RemoveHandler(ChildContextEndedEvent, value);
         }
-	    private static readonly object ChildContextEndedEvent = new object();
+	    private static readonly object ChildContextEndedEvent = new();
 
 	    private void Raise(object key, Context context, object reason)
 	    {

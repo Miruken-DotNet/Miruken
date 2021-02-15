@@ -11,7 +11,7 @@
         : ICallback, IInferCallback, IDispatchCallback
     {
         private static readonly ConcurrentDictionary<MethodInfo, HandleMethodBinding>
-            Bindings = new ConcurrentDictionary<MethodInfo, HandleMethodBinding>();
+            Bindings = new();
 
         public HandleMethod(Type protocol, MethodInfo method, object[] args)
         {

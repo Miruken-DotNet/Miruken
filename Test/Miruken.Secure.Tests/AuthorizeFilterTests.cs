@@ -240,13 +240,13 @@
             [Handles]
             public MissileReport Test(TestMissile test)
             {
-                return new MissileReport(test.Missile, true);
+                return new(test.Missile, true);
             }
 
             [Handles]
             public LaunchConfirmation Launch(LaunchMissile launch)
             {
-                return new LaunchConfirmation(launch.Missile);
+                return new(launch.Missile);
             }
 
             [Handles]
@@ -320,7 +320,7 @@
             [Provides]
             public AuthorizeFilter<TCb, TRes> Create<TCb, TRes>()
             {
-                return new AuthorizeFilter<TCb, TRes>();
+                return new();
             }
         }
     }

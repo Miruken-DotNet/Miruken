@@ -7,7 +7,7 @@
     public class ProxyAttribute : ResolvingAttribute
     {
         public static readonly ProxyAttribute
-            Instance = new ProxyAttribute();
+            Instance = new();
 
         public override void ValidateArgument(Argument argument)
         {

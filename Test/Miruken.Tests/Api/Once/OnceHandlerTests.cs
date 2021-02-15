@@ -44,7 +44,7 @@
 
         public class TestOnceStrategy : Handler, IOnceStrategy
         {
-            private readonly HashSet<Guid> _requests = new HashSet<Guid>();
+            private readonly HashSet<Guid> _requests = new();
 
             [Maps]
             public IOnceStrategy Once(GetStockQuote request)

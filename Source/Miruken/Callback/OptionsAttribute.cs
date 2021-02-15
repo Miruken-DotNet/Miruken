@@ -8,7 +8,7 @@ namespace Miruken.Callback
     public class OptionsAttribute : ResolvingAttribute
     {
         public static readonly OptionsAttribute
-            Instance = new OptionsAttribute();
+            Instance = new();
         
         public override bool IsOptional => true;
         

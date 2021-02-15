@@ -155,7 +155,7 @@
         }
 
         public CallbackArgument<TCb> Callback => CallbackArgument<TCb>.Instance;
-        public TargetArgument<TCb>   Target   => new TargetArgument<TCb>(Policy.Target);
+        public TargetArgument<TCb>   Target   => new(Policy.Target);
 
         public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
         {

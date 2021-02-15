@@ -7,7 +7,7 @@
         public static Routed RouteTo(
             this object request, string route, string tag = null)
         {
-            return new Routed(request)
+            return new(request)
             {
                 Route = route,
                 Tag   = tag
@@ -17,7 +17,7 @@
         public static RoutedRequest<TResponse> RouteTo<TResponse>(
             this IRequest<TResponse> request, string route, string tag = null)
         {
-            return new RoutedRequest<TResponse>(request)
+            return new(request)
             {
                 Route = route,
                 Tag   = tag

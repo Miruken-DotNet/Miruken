@@ -125,7 +125,7 @@
     public abstract class LogFilter
     {
         protected static readonly JsonSerializerSettings JsonSettings =
-            new JsonSerializerSettings
+            new()
             {
                 Formatting            = Formatting.Indented,
                 DateFormatString      = "MM-dd-yyyy hh:mm:ss",
@@ -152,7 +152,7 @@
         }
 
         private static readonly Dictionary<Type, string>
-            SimpleNames = new Dictionary<Type, string>
+            SimpleNames = new()
             {
                 { typeof (bool),    "bool" },
                 { typeof (byte),    "byte" },

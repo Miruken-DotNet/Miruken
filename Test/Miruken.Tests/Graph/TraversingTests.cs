@@ -28,10 +28,10 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Root()
         {
-            TreeNode root   = new TreeNode("root"),
-                     child1 = new TreeNode("child1"),
-                     child2 = new TreeNode("child2"),
-                     child3 = new TreeNode("child3");
+            TreeNode root   = new("root"),
+                     child1 = new("child1"),
+                     child2 = new("child2"),
+                     child3 = new("child3");
             root.AddChild(child1, child2, child3);
             root.Traverse(TraversingAxis.Root, Visit);
             CollectionAssert.AreEqual(_visited, new[] { root });
@@ -40,9 +40,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Children()
         {
-            TreeNode root   = new TreeNode("root"),
-                     child1 = new TreeNode("child1"),
-                     child2 = new TreeNode("child2"),
+            TreeNode root   = new("root"),
+                     child1 = new("child1"),
+                     child2 = new("child2"),
                      child3 = new TreeNode("child3")
                         .AddChild(new TreeNode("child3 1"));
             root.AddChild(child1, child2, child3);
@@ -53,9 +53,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Siblings()
         {
-            TreeNode root   = new TreeNode("root"),
-                     child1 = new TreeNode("child1"),
-                     child2 = new TreeNode("child2"),
+            TreeNode root   = new("root"),
+                     child1 = new("child1"),
+                     child2 = new("child2"),
                      child3 = new TreeNode("child3")
                         .AddChild(new TreeNode("child3 1"));
             root.AddChild(child1, child2, child3);
@@ -66,9 +66,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Children_And_Self()
         {
-            TreeNode root   = new TreeNode("root"),
-                     child1 = new TreeNode("child1"),
-                     child2 = new TreeNode("child2"),
+            TreeNode root   = new("root"),
+                     child1 = new("child1"),
+                     child2 = new("child2"),
                      child3 = new TreeNode("child3")
                         .AddChild(new TreeNode("child3 1"));
             root.AddChild(child1, child2, child3);
@@ -79,9 +79,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Siblings_And_Self()
         {
-            TreeNode root   = new TreeNode("root"),
-                     child1 = new TreeNode("child1"),
-                     child2 = new TreeNode("child2"),
+            TreeNode root   = new("root"),
+                     child1 = new("child1"),
+                     child2 = new("child2"),
                      child3 = new TreeNode("child3")
                         .AddChild(new TreeNode("child3 1"));
             root.AddChild(child1, child2, child3);
@@ -92,9 +92,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Ancestors()
         {
-            TreeNode root       = new TreeNode("root"),
-                     child      = new TreeNode("child"),
-                     grandChild = new TreeNode("grandChild");
+            TreeNode root       = new("root"),
+                     child      = new("child"),
+                     grandChild = new("grandChild");
             root.AddChild(child);
             child.AddChild(grandChild);
             grandChild.Traverse(TraversingAxis.Ancestor, Visit);
@@ -104,9 +104,9 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Ancestors_Or_Self()
         {
-            TreeNode root       = new TreeNode("root"),
-                     child      = new TreeNode("child"),
-                     grandChild = new TreeNode("grandChild");
+            TreeNode root       = new("root"),
+                     child      = new("child"),
+                     grandChild = new("grandChild");
             child.AddChild(grandChild);
             root.AddChild(child);
             grandChild.Traverse(TraversingAxis.SelfOrAncestor, Visit);
@@ -116,11 +116,11 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Descendants()
         {
-            TreeNode root     = new TreeNode("root"),
-                     child1   = new TreeNode("child1"),
-                     child2   = new TreeNode("child2"),
-                     child3   = new TreeNode("child3"),
-                     child3_1 = new TreeNode("child3 1");
+            TreeNode root     = new("root"),
+                     child1   = new("child1"),
+                     child2   = new("child2"),
+                     child3   = new("child3"),
+                     child3_1 = new("child3 1");
             child3.AddChild(child3_1);
             root.AddChild(child1, child2, child3);
             root.Traverse(TraversingAxis.Descendant, Visit);
@@ -130,11 +130,11 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Descendants_Reverse()
         {
-            TreeNode root     = new TreeNode("root"),
-                     child1   = new TreeNode("child1"),
-                     child2   = new TreeNode("child2"),
-                     child3   = new TreeNode("child3"),
-                     child3_1 = new TreeNode("child3 1");
+            TreeNode root     = new("root"),
+                     child1   = new("child1"),
+                     child2   = new("child2"),
+                     child3   = new("child3"),
+                     child3_1 = new("child3 1");
             child3.AddChild(child3_1);
             root.AddChild(child1, child2, child3);
             root.Traverse(TraversingAxis.DescendantReverse, Visit);
@@ -144,11 +144,11 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Descendants_Or_Self()
         {
-            TreeNode root     = new TreeNode("root"),
-                     child1   = new TreeNode("child1"),
-                     child2   = new TreeNode("child2"),
-                     child3   = new TreeNode("child3"),
-                     child3_1 = new TreeNode("child3 1");
+            TreeNode root     = new("root"),
+                     child1   = new("child1"),
+                     child2   = new("child2"),
+                     child3   = new("child3"),
+                     child3_1 = new("child3 1");
             child3.AddChild(child3_1);
             root.AddChild(child1, child2, child3);
             root.Traverse(TraversingAxis.SelfOrDescendant, Visit);
@@ -158,11 +158,11 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Descendants_Or_Self_Reverse()
         {
-            TreeNode root     = new TreeNode("root"),
-                     child1   = new TreeNode("child1"),
-                     child2   = new TreeNode("child2"),
-                     child3   = new TreeNode("child3"),
-                     child3_1 = new TreeNode("child3 1");
+            TreeNode root     = new("root"),
+                     child1   = new("child1"),
+                     child2   = new("child2"),
+                     child3   = new("child3"),
+                     child3_1 = new("child3 1");
             child3.AddChild(child3_1);
             root.AddChild(child1, child2, child3);
             root.Traverse(TraversingAxis.SelfOrDescendantReverse, Visit);
@@ -172,12 +172,12 @@ namespace Miruken.Tests.Graph
         [TestMethod]
         public void Should_Traverse_Ancestor_Sibling_Or_Self()
         {
-            TreeNode root     = new TreeNode("root"),
-                     parent   = new TreeNode("parent"),
-                     child1   = new TreeNode("child1"),
-                     child2   = new TreeNode("child2"),
-                     child3   = new TreeNode("child3"),
-                     child3_1 = new TreeNode("child3 1");
+            TreeNode root     = new("root"),
+                     parent   = new("parent"),
+                     child1   = new("child1"),
+                     child2   = new("child2"),
+                     child3   = new("child3"),
+                     child3_1 = new("child3 1");
             child3.AddChild(child3_1);
             parent.AddChild(child1, child2, child3);
             root.AddChild(parent);

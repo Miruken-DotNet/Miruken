@@ -77,7 +77,7 @@
         }
 
         private readonly ConcurrentDictionary<Context, T>
-            _cache = new ConcurrentDictionary<Context, T>();
+            _cache = new();
     }
 
     public class ContextualAttribute : LifestyleAttribute, IBindingConstraintProvider

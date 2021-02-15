@@ -24,11 +24,11 @@
             return returnType.IsClassOf(_type);
         }
 
-        public static readonly Return Void = new Return(typeof(void));
+        public static readonly Return Void = new(typeof(void));
 
         public static Return Of(Type type)
         {
-            return new Return(type);
+            return new(type);
         }
 
         public static Return Of<T>()
@@ -43,7 +43,7 @@
 
         public static TestReturn Is(ReturnTestDelegate test)
         {
-            return new TestReturn(test);
+            return new(test);
         }
     }
 

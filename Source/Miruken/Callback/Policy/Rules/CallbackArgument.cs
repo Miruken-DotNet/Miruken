@@ -8,7 +8,7 @@ namespace Miruken.Callback.Policy.Rules
     public class CallbackArgument : ArgumentRule
     {
         public static readonly CallbackArgument
-            Instance = new CallbackArgument();
+            Instance = new();
 
         public override bool Matches(
             ParameterInfo parameter, RuleContext context)
@@ -67,7 +67,7 @@ namespace Miruken.Callback.Policy.Rules
     public class CallbackArgument<TCb> : ArgumentRule
     {
         public static readonly CallbackArgument<TCb>
-             Instance = new CallbackArgument<TCb>();
+             Instance = new();
 
         private CallbackArgument()
         {         

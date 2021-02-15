@@ -170,7 +170,7 @@
             Delegate member, object target, object[] args);
 
         protected static readonly Dictionary<DispatchTypeEnum, (Type, InvokeDelegate)>
-            MemberDelegates = new Dictionary<DispatchTypeEnum, (Type, InvokeDelegate)>
+            MemberDelegates = new()
             {
                 // No args
                 { FastNone, (typeof(Func<object, object>), 

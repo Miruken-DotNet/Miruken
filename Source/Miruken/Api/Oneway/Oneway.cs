@@ -37,7 +37,7 @@
     {
         public static Oneway Oneway<TResp>(this IRequest<TResp> request)
         {
-            return new Oneway(request);
+            return new(request);
         }
     }
 }

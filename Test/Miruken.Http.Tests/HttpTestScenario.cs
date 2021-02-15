@@ -18,15 +18,12 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Callback;
     using Format;
+    using Microsoft.Extensions.Hosting;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Validate;
     using Register;
     using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
-
-#if NETSTANDARD2_1
-    using Microsoft.Extensions.Hosting;
-#endif
 
     public class HttpTestScenario
     {
@@ -67,16 +64,6 @@
             public void ConfigureServices(IServiceCollection services)
             {
                 services.AddMvcCore()
-#if NETSTANDARD2_0
-                    .AddJsonFormatters(o =>
-                    {
-                        o.NullValueHandling = NullValueHandling.Ignore;
-                        o.TypeNameHandling  = TypeNameHandling.Auto;
-                        o.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-                        o.ContractResolver  = new CamelCasePropertyNamesContractResolver();
-                        o.Converters.Add(EitherJsonConverter.Instance);
-                    })
-#elif NETSTANDARD2_1
                     .AddNewtonsoftJson(ns =>
                     {
                         var o = ns.SerializerSettings;
@@ -86,18 +73,13 @@
                         o.ContractResolver  = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
-#endif
                     .AddFormatterMappings();
             }
 
             public void Configure(IApplicationBuilder app)
             {
-#if NETSTANDARD2_0
-                app.UseMvc();
-#elif NETSTANDARD2_1
                 app.UseRouting()
                    .UseEndpoints(endpoints => endpoints.MapControllers());
-#endif
             }
         }
     }
@@ -125,16 +107,6 @@
                 });
 
                 services.AddMvcCore()
-#if NETSTANDARD2_0
-                    .AddJsonFormatters(o =>
-                    {
-                        o.NullValueHandling = NullValueHandling.Ignore;
-                        o.TypeNameHandling = TypeNameHandling.Auto;
-                        o.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-                        o.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                        o.Converters.Add(EitherJsonConverter.Instance);
-                    })
-#elif NETSTANDARD2_1
                     .AddNewtonsoftJson(jo =>
                     {
                         var o = jo.SerializerSettings;
@@ -144,30 +116,20 @@
                         o.ContractResolver = new CamelCasePropertyNamesContractResolver();
                         o.Converters.Add(EitherJsonConverter.Instance);
                     })
-#endif
                     .AddFormatterMappings();
             }
-
-#if NETSTANDARD2_0
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-#elif NETSTANDARD2_1
+            
             public void Configure(IApplicationBuilder app, IHostEnvironment env)
-#endif
             {
                 if (env.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();
                 }
-
-#if NETSTANDARD2_0
-                app.UseAuthentication()
-                   .UseMvc();
-#elif NETSTANDARD2_1
+                
                 app.UseRouting()
                    .UseAuthentication()
                    .UseAuthorization()
                    .UseEndpoints(endpoints => endpoints.MapControllers());
-#endif
             }
         }
 
@@ -186,7 +148,7 @@
             protected override Task<AuthenticateResult> HandleAuthenticateAsync()
             {
                 var authHeader      = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
-                var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
+                var credentialBytes = Convert.FromBase64String(authHeader.Parameter ?? "");
                 var credentials     = Encoding.UTF8.GetString(credentialBytes).Split(':');
                 var username        = credentials[0];
                 var claims          = new[] { new Claim(ClaimTypes.Name, username),  };

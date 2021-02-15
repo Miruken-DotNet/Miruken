@@ -9,7 +9,7 @@
     public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
     {
         private readonly ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>
-            _descriptors = new ConcurrentDictionary<Type, Lazy<HandlerDescriptor>>();
+            _descriptors = new();
 
         public MutableHandlerDescriptorFactory(HandlerDescriptorVisitor visitor = null)
             : base(visitor)

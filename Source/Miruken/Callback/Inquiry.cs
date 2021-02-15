@@ -254,7 +254,7 @@
 
         private class Comparer : IComparer<int>
         {
-            public static readonly Comparer Instance = new Comparer();
+            public static readonly Comparer Instance = new();
 
             public int Compare(int x, int y)
             {

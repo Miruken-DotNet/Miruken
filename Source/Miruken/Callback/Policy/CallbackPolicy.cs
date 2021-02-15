@@ -13,7 +13,7 @@
     public abstract class CallbackPolicy 
         : FilteredObject, IComparer<PolicyMemberBinding>, IComparer<object>
     {
-        private readonly List<MethodRule> _rules = new List<MethodRule>();
+        private readonly List<MethodRule> _rules = new();
 
         public AcceptResultDelegate AcceptResult  { get; set; }
         public Func<object, Type>   GetResultType { get; set; }

@@ -10,7 +10,7 @@
     [AttributeUsage(AttributeTargets.Parameter)]
     public class ResolvingAttribute : Attribute, IArgumentResolver
     {
-        public static readonly ResolvingAttribute Default = new ResolvingAttribute();
+        public static readonly ResolvingAttribute Default = new();
 
         public virtual bool IsOptional => false;
 

@@ -11,7 +11,7 @@
     public class HandleMethodBinding : MemberBinding
     {
         private static readonly List<IFilterProvider>
-            _globalFilters = new List<IFilterProvider>();
+            _globalFilters = new();
 
         public HandleMethodBinding(MethodDispatch dispatch)
              : base(dispatch)

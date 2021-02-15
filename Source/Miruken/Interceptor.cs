@@ -52,6 +52,6 @@
         }
 
         private static readonly ConcurrentDictionary<Type, Func<object, object>> 
-            Factories = new ConcurrentDictionary<Type, Func<object, object>>();
+            Factories = new();
     }
 }

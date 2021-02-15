@@ -9,7 +9,7 @@
 
     public class EitherJsonConverter : JsonConverter
     {
-        public static readonly EitherJsonConverter Instance = new EitherJsonConverter();
+        public static readonly EitherJsonConverter Instance = new();
 
         private EitherJsonConverter()
         {          

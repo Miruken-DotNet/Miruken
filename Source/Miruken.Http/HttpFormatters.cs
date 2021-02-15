@@ -7,8 +7,8 @@
 
     public static class HttpFormatters
     {
-        public static readonly XmlMediaTypeFormatter  Xml  = new XmlMediaTypeFormatter();
-        public static readonly JsonMediaTypeFormatter Json = new JsonMediaTypeFormatter
+        public static readonly XmlMediaTypeFormatter  Xml  = new();
+        public static readonly JsonMediaTypeFormatter Json = new()
         {
             SerializerSettings =
             {
@@ -17,7 +17,7 @@
             }
         };
 
-        public static readonly JsonMediaTypeFormatter JsonTyped = new JsonMediaTypeFormatter
+        public static readonly JsonMediaTypeFormatter JsonTyped = new()
         {
             SerializerSettings =
             {
@@ -29,12 +29,12 @@
         };
 
         public static readonly ReadWriteFormUrlEncodedMediaTypeFormatter FormUrl =
-            new ReadWriteFormUrlEncodedMediaTypeFormatter();
+            new();
 
-        public static readonly HttpRouteMediaTypeFormatter Route = new HttpRouteMediaTypeFormatter();
+        public static readonly HttpRouteMediaTypeFormatter Route = new();
 
         public static readonly MediaTypeFormatterCollection Default =
-            new MediaTypeFormatterCollection(new MediaTypeFormatter[]
+            new(new MediaTypeFormatter[]
             {
                 Json, Xml, FormUrl
             });

@@ -54,6 +54,6 @@
         }
 
         private static readonly ConcurrentDictionary<Type, IFilter>
-            Constraints = new ConcurrentDictionary<Type, IFilter>();
+            Constraints = new();
     }
 }

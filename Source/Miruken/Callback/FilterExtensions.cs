@@ -98,7 +98,7 @@
 
         private class FilterComparer : IComparer<(IFilter, IFilterProvider)>
         {
-            public static readonly FilterComparer Instance = new FilterComparer();
+            public static readonly FilterComparer Instance = new();
 
             public int Compare(
                 (IFilter, IFilterProvider) x,

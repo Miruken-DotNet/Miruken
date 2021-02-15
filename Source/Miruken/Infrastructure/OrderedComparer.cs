@@ -4,7 +4,7 @@
 
     public class OrderedComparer<T> : IComparer<T>
     {
-        public static readonly OrderedComparer<T> Instance = new OrderedComparer<T>();
+        public static readonly OrderedComparer<T> Instance = new();
 
         private OrderedComparer()
         {

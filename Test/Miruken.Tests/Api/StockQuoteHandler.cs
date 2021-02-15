@@ -9,7 +9,7 @@ namespace Miruken.Tests.Api
     {
         public static volatile int Called;
 
-        private readonly Random random = new Random();
+        private readonly Random random = new();
 
         [Handles]
         public Promise<StockQuote> GetQuote(GetStockQuote quote)

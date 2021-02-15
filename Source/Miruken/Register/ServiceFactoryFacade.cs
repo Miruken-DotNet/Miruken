@@ -11,7 +11,7 @@
     public class ServiceFactoryFacade : Handler
     {
         private readonly Dictionary<Type, List<Handler>> _services 
-            = new Dictionary<Type, List<Handler>>();
+            = new();
 
         public ServiceFactoryFacade(
             IServiceCollection services,

@@ -13,7 +13,7 @@
         private readonly object _scope;
 
         public static readonly EqualsScopeMatcher
-            Default = new EqualsScopeMatcher(Scopes.Default);
+            Default = new(Scopes.Default);
 
         public EqualsScopeMatcher(object scope)
         {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <TargetFramework>net5.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <PackageId>Miruken.Validate</PackageId>
         <Authors>cneuwirt</Authors>
@@ -29,7 +29,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="9.3.0" />
+        <PackageReference Include="FluentValidation" Version="9.5.1" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
     </ItemGroup>
