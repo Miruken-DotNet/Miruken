@@ -1,4 +1,5 @@
-﻿namespace Miruken.Concurrency
+﻿// ReSharper disable All
+namespace Miruken.Concurrency
 {
     using System;
     using System.Collections.Concurrent;
@@ -87,7 +88,7 @@
         public Promise Catch<E>(RejectCallbackE<E> fail)
             where E : Exception
         {
-            return Then(null, fail != null ? (ex, s) => {
+            return Then(null, fail != null ? (Exception ex, bool s) => {
                 var tex = ex as E;
                 if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
@@ -108,7 +109,7 @@
         public Promise<R> Catch<E,R>(RejectCallbackE<E,R> fail)
             where E : Exception
         {
-            return Then(null, fail != null ? (ex, s) => {
+            return Then(null, fail != null ? (Exception ex, bool s) => {
                 var tex = ex as E;
                 if (tex == null && ex != null)
                     ExceptionDispatchInfo.Capture(ex).Throw();
@@ -526,28 +527,28 @@
 
         public override Promise Then(ResolveCallback then)
         {
-            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT)null);
+            return Then(then != null ? (T r, bool s) => then(r, s) : (ResolveCallbackT)null);
         }
 
         public override Promise Then(ResolveCallback then, RejectCallback fail)
         {
-            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT)null, fail);
+            return Then(then != null ? (T t, bool s) => then(t, s) : (ResolveCallbackT)null, fail);
         }
 
         public override Promise<R> Then<R>(ResolveCallback<R> then)
         {
-            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null);
+            return Then(then != null ? (T r, bool s) => then(r, s) : (ResolveCallbackT<R>)null);
         }
 
         public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback fail)
         {
-            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null,
+            return Then(then != null ? (T t, bool s) => then(t, s) : (ResolveCallbackT<R>)null,
                 (ex, s) => { fail(ex, s); return default; });
         }
 
         public override Promise<R> Then<R>(ResolveCallback<R> then, RejectCallback<R> fail)
         {
-            return Then(then != null ? (r, s) => then(r, s) : (ResolveCallbackT<R>)null, fail);
+            return Then(then != null ? (T t, bool s) => then(t, s) : (ResolveCallbackT<R>)null, fail);
         }
 
         public Promise Then(ResolveCallbackT<Promise> then)
@@ -689,7 +690,7 @@
         public new Promise<T> Catch<E>(RejectCallbackE<E> fail)
             where E : Exception
         {
-            return Then(null, fail != null ? (ex, s) =>
+            return Then(null, fail != null ? (Exception ex, bool s) =>
             {
                 var tex = ex as E;
                 if (tex == null && ex != null)
@@ -706,7 +707,7 @@
         public Promise<R> Catch<E, R>(RejectCallbackE<E, Promise<R>> fail)
             where E : Exception
         {
-            return Then(null, fail != null ? (ex, s) =>
+            return Then(null, fail != null ? (Exception ex, bool s) =>
             {
                 var tex = ex as E;
                 if (tex == null && ex != null)

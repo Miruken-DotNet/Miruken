@@ -6,7 +6,7 @@
     using Policy;
     using Policy.Bindings;
 
-    public delegate Task<Res> Next<Res>(
+    public delegate Task<TRes> Next<TRes>(
         IHandler composer = null, bool proceed = true);
 
     public interface IFilter : IOrdered { }

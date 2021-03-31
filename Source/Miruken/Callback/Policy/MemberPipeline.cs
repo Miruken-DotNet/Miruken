@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Bindings;
 
@@ -34,6 +35,7 @@
 
     public class MemberPipeline<TCb, TRes> : MemberPipeline
     {
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
         public override bool Invoke(
             MemberBinding binding, object target, object callback,
             object rawCallback, CompletePipelineDelegate complete,

@@ -27,15 +27,15 @@
                 request, options, cancellationToken);
             var cancel = cts?.Token ?? cancellationToken;
 
-            Task<HttpResponseMessage> Send() => base.SendAsync(request, cancel);
+            Task<HttpResponseMessage> SendRequest() => base.SendAsync(request, cancel);
 
             var pipeline = options?.Pipeline != null
                 ? options.Pipeline.GetInvocationList()
                     .Cast<HttpRequestPipeline>().Reverse()
-                    .Aggregate((Func<Task<HttpResponseMessage>>) Send,
+                    .Aggregate((Func<Task<HttpResponseMessage>>) SendRequest,
                         (next, pipe) => () => pipe(
                             request, cancel, composer, next))
-                : Send;
+                : SendRequest;
 
             try
             {

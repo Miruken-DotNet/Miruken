@@ -20,16 +20,16 @@
             IFilterProvider provider)
         {
             var result = Validate(callback, composer)
-                .Then((req, s) => next());
-            return provider is ValidateAttribute attr && attr.ValidateResult
-                 ? result.Then((resp, s) => Validate(resp, composer))
+                .Then((_, _) => next());
+            return provider is ValidateAttribute { ValidateResult: true }
+                 ? result.Then((resp, _) => Validate(resp, composer))
                  : result;
         }
 
         private static Promise<T> Validate<T>(T target, IHandler handler)
         {
             return target == null ? Promise<T>.Empty
-                : handler.ValidateAsync(target).Then((outcome, s) =>
+                : handler.ValidateAsync(target).Then((outcome, _) =>
                 {
                     if (!outcome.IsValid)
                         throw new ValidationException(outcome);

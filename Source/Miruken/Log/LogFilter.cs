@@ -32,7 +32,7 @@
             IFilterProvider provider)
         {
             var logger = GetLogger(member);
-            if (logger == null) return await next().ConfigureAwait(false);;
+            if (logger == null) return await next().ConfigureAwait(false);
 
             var debug = logger.IsEnabled(LogLevel.Debug);
             var start = Stopwatch.GetTimestamp();
@@ -42,7 +42,7 @@
 
             try
             {
-                var response = await next().ConfigureAwait(false);;
+                var response = await next().ConfigureAwait(false);
 
                 if (debug)
                 {
