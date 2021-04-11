@@ -1,12 +1,10 @@
 ﻿namespace Miruken.Validate.FluentValidation
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Callback;
     using global::FluentValidation;
     using global::FluentValidation.Results;
-    using global::FluentValidation.Validators;
     using Infrastructure;
 
     public class FluentValidationValidator : Handler
@@ -32,25 +30,24 @@
 
             Array.Sort(validators, OrderedComparer<IValidator<T>>.Instance);
 
+            ValidationResult result = null;
             foreach (var validator in validators)
             {
-                var result = await validator.ValidateAsync(context)
+                result = await validator.ValidateAsync(context)
                     .ConfigureAwait(false);
-                if (!result.IsValid)
-                {
-                    AddErrors(result, outcome);
-                    if (validation.StopOnFailure)
-                        break;
-                }
+                if (!result.IsValid && validation.StopOnFailure)
+                    break;
             }
+            
+            AddErrors(result, outcome);
         }
 
         private static void AddErrors(ValidationResult result, ValidationOutcome outcome)
         {
             foreach (var error in result.Errors)
             {
-                var child   = error as OutcomeFailure;
-                var failure = child?.FailedOutcome ?? (object)error.ErrorMessage;
+                var failure = error.CustomState as ValidationOutcome ??
+                              (object)error.ErrorMessage;
                 outcome.AddError(error.PropertyName, failure);
             }
         }
@@ -90,123 +87,6 @@
             this IRuleBuilder<T, TProp> builder)
         {
             return builder.SetValidator(FluentValidator<TProp>.Instance);
-        }
-
-        public static IRuleBuilderOptions<T, TProperty> WithComposer<T, TProperty>(
-            this IRuleBuilder<T, TProperty> ruleBuilder,
-            Func<T, TProperty, IHandler, bool> predicate)
-        {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-            return ruleBuilder.Must((target, prop, ctx) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer == null || predicate(target, prop, composer);
-            });
-        }
-
-        public static IRuleBuilderOptions<T, TProperty> WithComposerAsync<T, TProperty>(
-            this IRuleBuilder<T, TProperty> ruleBuilder,
-            Func<T, TProperty, IHandler, CancellationToken, Task<bool>> predicate)
-        {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-            return ruleBuilder.MustAsync((target, prop, ctx, token) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer == null
-                    ? Task.FromResult(true)
-                    : predicate(target, prop, composer, token);
-            });
-        }
-
-        public static IRuleBuilderOptions<T, TProperty> WithoutComposer<T, TProperty>(
-            this IRuleBuilder<T, TProperty> ruleBuilder,
-            Func<T, TProperty, bool> predicate)
-        {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-            return ruleBuilder.Must((target, prop, ctx) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer != null || predicate(target, prop);
-            });
-        }
-
-        public static IRuleBuilderOptions<T, TProperty> WithoutComposerAsync<T, TProperty>(
-            this IRuleBuilder<T, TProperty> ruleBuilder,
-            Func<T, TProperty, CancellationToken, Task<bool>> predicate)
-        {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-            return ruleBuilder.MustAsync((target, prop, ctx, token) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer != null
-                     ? Task.FromResult(true)
-                     : predicate(target, prop, token);
-            });
-        }
-
-        public static IRuleBuilderInitial<T, TProperty>
-            WithComposerCustom<T, TProperty>(
-            this IRuleBuilder<T, TProperty> ruleBuilder,
-            Action<TProperty, CustomContext, IHandler> action)
-        {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return ruleBuilder.Custom((prop, ctx) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                if (composer != null)
-                    action(prop, ctx, composer);
-            });
-        }
-
-        public static IRuleBuilderInitial<T, TProperty>
-            WithComposerCustomAsync<T, TProperty>(
-                this IRuleBuilder<T, TProperty> ruleBuilder,
-                Func<TProperty, CustomContext, CancellationToken, IHandler, Task> action)
-        {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer != null
-                     ? action(prop, ctx, cancel, composer)
-                     : Task.CompletedTask;
-            });
-        }
-
-        public static IRuleBuilderInitial<T, TProperty>
-            WithoutComposerCustom<T, TProperty>(
-                this IRuleBuilder<T, TProperty> ruleBuilder,
-                Action<TProperty, CustomContext> action)
-        {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return ruleBuilder.Custom((prop, ctx) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                if (composer == null) action(prop, ctx);
-            });
-        }
-
-        public static IRuleBuilderInitial<T, TProperty>
-            WithoutComposerCustomAsync<T, TProperty>(
-                this IRuleBuilder<T, TProperty> ruleBuilder,
-                Func<TProperty, CustomContext, CancellationToken, Task> action)
-        {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-            return ruleBuilder.CustomAsync((prop, ctx, cancel) =>
-            {
-                var composer = ctx.ParentContext?.GetComposer();
-                return composer == null
-                     ? action(prop, ctx, cancel)
-                     : Task.CompletedTask;
-            });
         }
     }
 }

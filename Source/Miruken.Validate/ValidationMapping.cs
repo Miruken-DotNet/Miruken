@@ -1,11 +1,11 @@
-﻿namespace Miruken.Validate
+﻿// ReSharper disable UnusedMember.Global
+namespace Miruken.Validate
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Callback;
     using Map;
-    using FluentValidation;
     using FluentValidationException = global::FluentValidation.ValidationException;
 
     public class ValidationErrors
@@ -29,8 +29,8 @@
             var outcome = new ValidationOutcome();
             foreach (var error in exception.Errors)
             {
-                var child   = error as OutcomeFailure;
-                var failure = child?.FailedOutcome ?? (object)error.ErrorMessage;
+                var failure = error.CustomState as ValidationOutcome 
+                           ?? (object)error.ErrorMessage;
                 outcome.AddError(error.PropertyName, failure);
             }
             return CreateErrors(outcome);

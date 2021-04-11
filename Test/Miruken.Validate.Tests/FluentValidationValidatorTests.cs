@@ -178,7 +178,7 @@
             };
             try
             {
-                var x = await handler.CommandAsync<Bar>(foo);
+                await handler.CommandAsync<Bar>(foo);
                 Assert.Fail("Expected an exception");
             }
             catch (InvalidOperationException)
@@ -223,7 +223,7 @@
         public Promise Handle(Baz baz)
         {
              return Promise.Delay(10.Millis())
-                      .Then((res, _) =>
+                      .Then((_, _) =>
                  {
                      if (!NoBar) Bar = new Bar();
                  });
@@ -240,16 +240,16 @@
                 .NotEqual(Guid.Empty);
 
             RuleFor(x => x)
-                .WithComposerCustomAsync(async (foo, ctx, ct, c) =>
+                .CustomAsync(async (_, ctx, _) =>
                 {
-                    await c.CommandAsync(new Baz());
+                    await ctx.GetComposer().CommandAsync(new Baz());
                 });
 
             RuleFor(p => p.Name)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .MustAsync((name, ct) => Task.FromResult(name.Length > 3))
-                .CustomAsync((name, ctx, ct) =>
+                .MustAsync((name, _) => Task.FromResult(name.Length > 3))
+                .CustomAsync((name, ctx, _) =>
                 {
                     if (name.StartsWith("z"))
                         ctx.AddFailure("Name cannot start with z");
@@ -263,7 +263,7 @@
         [Provides]
         public IValidator<Foo>[] GetFooValidators()
         {
-            return new[] { new FooValidator() };
+            return new IValidator<Foo>[] { new FooValidator() };
         }
 
         [Provides]
@@ -327,25 +327,25 @@
         [Provides]
         public IValidator<Person>[] GetPersonValidators()
         {
-            return new[] { new PersonValidator() };
+            return new IValidator<Person>[] { new PersonValidator() };
         }
 
         [Provides]
         public IValidator<Team>[] GetTeamValidators()
         {
-            return new[] { new TeamValidator() };
+            return new IValidator<Team>[] { new TeamValidator() };
         }
 
         [Provides]
         public IValidator<Coach>[] GetCoachValidators()
         {
-            return new[] { new CoachValidator() };
+            return new IValidator<Coach>[] { new CoachValidator() };
         }
 
         [Provides]
         public IValidator<Player>[] GetPlayerValidators()
         {
-            return new[] { new PlayerValidator() };
+            return new IValidator<Player>[] { new PlayerValidator() };
         }
     }
 }

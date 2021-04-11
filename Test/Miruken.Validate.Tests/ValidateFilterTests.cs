@@ -1,6 +1,8 @@
-﻿namespace Miruken.Validate.Tests
+﻿// ReSharper disable UnusedMember.Local
+namespace Miruken.Validate.Tests
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Callback;
     using Callback.Policy;
@@ -13,6 +15,7 @@
     using Validate;
 
     [TestClass]
+    [SuppressMessage("ReSharper", "CA1822")]
     public class ValidateFilterTests
     {
         private IHandler _handler;
@@ -79,7 +82,7 @@
                 var team = outcome.GetOutcome("Team");
                 Assert.IsNotNull(team);
                 CollectionAssert.AreEqual(new[] { "Id" }, team.Culprits);
-                Assert.AreEqual("'Team. Id' must be greater than '0'.", team["Id"]);
+                Assert.AreEqual("'Team Id' must be greater than '0'.", team["Id"]);
             }
         }
 
@@ -176,7 +179,7 @@
 
         public class TeamHandler : Handler
         {
-            public int _teamId;
+            private int _teamId;
 
             [Handles]
             public Promise<Team> Create(CreateTeam create, IHandler composer)
@@ -201,28 +204,19 @@
         private class FilterProvider : Handler
         {
             [Provides]
-            public ValidateFilter<TCb, TRes> Create<TCb, TRes>()
-            {
-                return new();
-            }
+            public ValidateFilter<TCb, TRes> Create<TCb, TRes>() => new();
 
             [Provides]
-            public IValidator<Team>[] TeamValidators()
-            {
-                return new[] { new TeamIntegrity() };
-            }
+            public IValidator<Team>[] TeamValidators() =>
+                new IValidator<Team>[] { new TeamIntegrity() };
 
             [Provides]
-            public IValidator<TeamAction>[] TeamActionValidators()
-            {
-                return new [] { new TeamActionIntegrity() };
-            }
+            public IValidator<TeamAction>[] TeamActionValidators() =>
+                new IValidator<TeamAction>[] { new TeamActionIntegrity() };
 
             [Provides]
-            public IValidator<RemoveTeam>[] RemoveTeamValidators()
-            {
-                return new IValidator<RemoveTeam>[] { new RemoveTeamIntegrity() };
-            }
+            public IValidator<RemoveTeam>[] RemoveTeamValidators() =>
+                new IValidator<RemoveTeam>[] { new RemoveTeamIntegrity() };
         }
     }
 }

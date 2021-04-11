@@ -1,6 +1,10 @@
-﻿namespace Miruken.Tests.Api
+﻿// ReSharper disable UnusedMember.Local
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedParameter.Local
+namespace Miruken.Tests.Api
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,6 +14,7 @@
     using Miruken.Concurrency;
 
     [TestClass]
+    [SuppressMessage("ReSharper", "CA1822")]
     public class HandlerApiTests
     {
         private IHandler _handler;
@@ -88,15 +93,15 @@
         }
         public class Team
         {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public bool Active { get; set; }
+            public int    Id       { get; set; }
+            public string Name     { get; set; }
+            public bool   Active   { get; set; }
             public string Division { get; set; }
         }
 
         public class TeamAction
         {
-            public Team Team { get; set; }
+            public Team Team { get; init; }
         }
 
         public class CreateTeam : TeamAction, IRequest<Team>
@@ -116,9 +121,9 @@
         }
 
         [Filter(typeof(MetricsFilter<,>))]
-        public class TeamHandler : Handler
+        private class TeamHandler : Handler
         {
-            public int _teamId;
+            private int _teamId;
             private readonly List<object> _notifications = new();
 
             public ICollection<object> Notifications => _notifications;
@@ -155,7 +160,7 @@
             }
         }
 
-        public class MetricsFilter<TReq, TResp> : DynamicFilter<TReq, TResp>
+        private class MetricsFilter<TReq, TResp> : DynamicFilter<TReq, TResp>
         {
             public Task<TResp> Next(TReq request, Next<TResp> next, IHandler composer)
             {
@@ -167,13 +172,8 @@
         private class FilterProvider : Handler
         {
             [Provides]
-            public MetricsFilter<TReq, TResp>[] GetMetricsFilter<TReq, TResp>()
-            {
-                return new[]
-                {
-                    new MetricsFilter<TReq, TResp>()
-                };
-            }
+            public MetricsFilter<TReq, TResp>[] GetMetricsFilter<TReq, TResp>() =>
+                new[] { new MetricsFilter<TReq, TResp>() };
         }
     }
 }

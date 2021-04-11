@@ -17,7 +17,7 @@
             string propertyPath, IValidationContext context)
         {
             var ruleSets = rule.RuleSets;
-            if (ruleSets.Length == 0)
+            if (ruleSets == null || ruleSets.Length == 0)
                 return _scope.Matches(Scopes.Default);
             var scopes = ruleSets.Select(
                 scope => scope != "default" ? scope : Scopes.Default);

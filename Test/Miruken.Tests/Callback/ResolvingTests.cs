@@ -1,6 +1,9 @@
-﻿namespace Miruken.Tests.Callback
+﻿// ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedParameter.Local
+namespace Miruken.Tests.Callback
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
@@ -12,6 +15,7 @@
     /// Summary description for ResolvingTests
     /// </summary>
     [TestClass]
+    [SuppressMessage("ReSharper", "CA1822")]
     public class ResolvingTests
     {
         private IHandlerDescriptorFactory _factory;
@@ -36,14 +40,14 @@
             HandlerDescriptorFactory.UseFactory(_factory);
         }
 
-        public class SendEmail
+        private class SendEmail
         {
             public string Body { get; set; }
         }
 
-        public class SendEmail<T>
+        private class SendEmail<T>
         {
-            public T Body { get; set; }
+            public T Body { get; init; }
         }
 
         private interface IEmailFeature : IProtocol
@@ -219,9 +223,9 @@
             }
         }
 
-        private class AuditFilter<Cb, Res> : DynamicFilter<Cb, Res>
+        private class AuditFilter<TCb, TRes> : DynamicFilter<TCb, TRes>
         {
-            public Task<Res> Next(Cb callback, Next<Res> next,
+            public Task<TRes> Next(TCb callback, Next<TRes> next,
                 MemberBinding member,
                 Repository<Message> repository,
                 IBilling billing)
@@ -231,41 +235,29 @@
                     var message = new Message { Content = send.Body };
                     repository.Create(new Create<Message>(message));
                     send.Body = member.Dispatcher.Member.Name;
-                    if (typeof(Res) == typeof(int))
-                    {
-                        billing.Bill(message.Id);
-                        return Task.FromResult(
-                            (Res)(object)(message.Id * 10));
-                    }
+                    if (typeof(TRes) != typeof(int)) return next();
+                    billing.Bill(message.Id);
+                    return Task.FromResult((TRes)(object)(message.Id * 10));
                 }
                 return next();
             }
         }
 
-        private class BalanceFilter<T, Res> : DynamicFilter<Create<T>, Res>
+        private class BalanceFilter<T, TRes> : DynamicFilter<Create<T>, TRes>
             where T : IEntity
         {
-            public Task<Res> Next(Create<T> callback, Next<Res> next,
-                Repository<Message> repository, IBilling billing)
-            {
-                return next();
-            }
+            public Task<TRes> Next(Create<T> callback, Next<TRes> next,
+                Repository<Message> repository, IBilling billing) => next();
         }
 
         private class FilterProvider : Handler
         {
             [Provides]
-            public AuditFilter<Cb, Res> ProviderAudit<Cb, Res>()
-            {
-                return new();
-            }
+            public AuditFilter<TCb, TRes> ProviderAudit<TCb, TRes>() => new();
 
             [Provides]
-            public BalanceFilter<T, Res> ProviderBalance<T, Res>()
-                where T: IEntity
-            {
-                return new();
-            }
+            public BalanceFilter<T, TRes> ProviderBalance<T, TRes>()
+                where T: IEntity => new();
         }
 
         public interface IDomain { }

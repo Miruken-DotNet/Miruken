@@ -10,7 +10,7 @@
         public static readonly FluentValidator<T> Instance = new();
 
         private FluentValidator()
-        {      
+        {
         }
 
         public override ValidationResult Validate(ValidationContext<T> context)
@@ -36,15 +36,21 @@
         }
 
         private static ValidationResult CreateResult(
-             ValidationOutcome outcome, IValidationContext context)
+             ValidationOutcome outcome, ValidationContext<T> context)
         {
             if (context.InstanceToValidate is IValidationAware validationAware)
                 validationAware.ValidationOutcome = outcome;
-            return outcome.IsValid ? new ValidationResult()
-                 : new ValidationResult(new[]
-                 {
-                     new OutcomeFailure(context.PropertyChain.ToString(), outcome)
-                 });
+            if (outcome.IsValid) return new ValidationResult();
+            
+            var failure = new ValidationFailure(
+                context.PropertyChain.ToString(),
+                outcome.Error)
+            {
+                CustomState = outcome
+            };
+            context.AddFailure(failure);
+            
+            return  new ValidationResult(new[] { failure });
         }
     }
 }

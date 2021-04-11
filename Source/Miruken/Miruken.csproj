@@ -26,11 +26,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FastExpressionCompiler" Version="2.0.0" />
+        <PackageReference Include="FastExpressionCompiler" Version="3.0.4" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
         <PackageReference Include="Scrutor" Version="3.3.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     </ItemGroup>
