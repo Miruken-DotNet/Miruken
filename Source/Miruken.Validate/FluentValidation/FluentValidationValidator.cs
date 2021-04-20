@@ -33,8 +33,7 @@
             ValidationResult result = null;
             foreach (var validator in validators)
             {
-                result = await validator.ValidateAsync(context)
-                    .ConfigureAwait(false);
+                result = await validator.ValidateAsync(context).ConfigureAwait(false);
                 if (!result.IsValid && validation.StopOnFailure)
                     break;
             }
@@ -67,8 +66,8 @@
         public static Validation GetValidation(this IValidationContext context)
         {
             return context.RootContextData.TryGetValue(ValidationKey, out var validation)
-                ? (Validation)validation
-                : null;
+                 ? (Validation)validation
+                 : null;
         }
 
         public static void SetComposer(this IValidationContext context, IHandler composer)
@@ -79,8 +78,8 @@
         public static IHandler GetComposer(this IValidationContext context)
         {
             return context.RootContextData.TryGetValue(ComposerKey, out var composer)
-                ? (IHandler)composer
-                : null;
+                 ? (IHandler)composer
+                 : null;
         }
 
         public static IRuleBuilderOptions<T, TProp> Valid<T, TProp>(
