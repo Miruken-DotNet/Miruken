@@ -43,7 +43,7 @@
                     {
                         _cache.TryRemove(ctx, out _);
                         contextual.ContextChanging -= ChangeContext;
-                        (instance as IDisposable)?.Dispose();
+                        TryDispose(instance);
                         contextual.Context = null;
                     };
                 }
@@ -52,7 +52,7 @@
                     context.ContextEnded += (c, r)  =>
                     {
                         _cache.TryRemove(ctx, out _);
-                        (instance as IDisposable)?.Dispose();
+                        TryDispose(instance);
                     };
                 }
                 return instance;
@@ -68,14 +68,30 @@
                 throw new InvalidOperationException(
                     "Managed instances cannot change context");
             }
-            if (_cache.TryGetValue(oldContext, out var instance) &&
-                ReferenceEquals(contextual, instance))
-            {
-                _cache.TryRemove(oldContext, out _);
-                (contextual as IDisposable)?.Dispose();
-            }
+
+            if (!(_cache.TryGetValue(oldContext, out var instance) &&
+                ReferenceEquals(contextual, instance)))
+                return;
+            
+            _cache.TryRemove(oldContext, out _);
+            TryDispose(contextual);
         }
 
+        private static void TryDispose(object instance)
+        {
+            switch (instance)
+            {
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+                case IAsyncDisposable asyncDisposable:
+                    var task = asyncDisposable.DisposeAsync();
+                    if (!task.IsCompleted)
+                        task.AsTask().GetAwaiter().GetResult();
+                    break;
+            }
+        }
+        
         private readonly ConcurrentDictionary<Context, T>
             _cache = new();
     }
