@@ -155,19 +155,11 @@
                             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
                             .AsSelf().WithSingletonLifetime();
 
-                        if (_select != null)
-                        {
-                            foreach (var select in _select.GetInvocationList())
-                                ((TypeSelector)select)(from, source.Item2);
-                        }
+                        if (_select == null) continue;
+                        foreach (var select in _select.GetInvocationList())
+                            ((TypeSelector)select)(from, source.Item2);
                     }
                 });
-                
-                if (_implied != null)
-                {
-                    foreach (var implied in _implied.GetInvocationList())
-                        ((Action<Registration, IServiceCollection>)implied)(this, _implicitServices);
-                }
             }
 
             foreach (var service in AddDefaultServices(_implicitServices))
@@ -178,7 +170,13 @@
                                 : null;
                 factory.RegisterDescriptor(serviceType, visitor);
             }
-
+            
+            if (_implied != null)
+            {
+                foreach (var implied in _implied.GetInvocationList())
+                    ((Action<Registration, IServiceCollection>)implied)(this, _implicitServices);
+            }
+            
             var context = new Context();
             context.AddHandlers(Handlers);
 

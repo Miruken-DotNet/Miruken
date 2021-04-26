@@ -46,16 +46,11 @@
             }
         }
 
-        public static HandlerDescriptorVisitor For(ServiceDescriptor descriptor)
-        {
-            return new ServiceConfiguration(descriptor).Configure;
-        }
+        public static HandlerDescriptorVisitor For(ServiceDescriptor descriptor) =>
+            new ServiceConfiguration(descriptor).Configure;
 
-        private static LifestyleAttribute GetLifestyle(IFiltered binding)
-        {
-            return binding.Filters.OfType<LifestyleAttribute>()
-                .FirstOrDefault();
-        }
+        private static LifestyleAttribute GetLifestyle(IFiltered binding) =>
+            binding.Filters.OfType<LifestyleAttribute>().FirstOrDefault();
     }
 }
 
