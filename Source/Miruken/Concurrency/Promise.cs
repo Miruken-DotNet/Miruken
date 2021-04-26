@@ -361,7 +361,7 @@ namespace Miruken.Concurrency
         {
             if (value is Promise promise)
                 return Resolved(promise);
-            return !(value is Task task)  
+            return value is not Task task  
                  ? new Promise<object>(value)
                  : task.ToPromise(); // 2.3.2
         }
@@ -426,7 +426,7 @@ namespace Miruken.Concurrency
 
             if (!promiseType.IsGenericType ||
                 promiseType.GetGenericTypeDefinition() != typeof(Promise<>))
-                throw new ArgumentException($"{promiseType.FullName} is not a Promise<>");
+                throw new ArgumentException($"{promiseType.FullName} is not a Promise<>.");
 
             var resultType = promiseType.GetGenericArguments()[0];
             var cast       = CoercePromise.GetOrAdd(resultType, rt =>
@@ -592,7 +592,7 @@ namespace Miruken.Concurrency
 
                 void Rej(Exception ex, bool s)
                 {
-                    if (fail != null && !(ex is CancelledException))
+                    if (fail != null && ex is not CancelledException)
                     {
                         try
                         {
@@ -662,7 +662,7 @@ namespace Miruken.Concurrency
 
                 void Rej(Exception ex, bool s)
                 {
-                    if (fail != null && !(ex is CancelledException))
+                    if (fail != null && ex is not CancelledException)
                     {
                         try
                         {

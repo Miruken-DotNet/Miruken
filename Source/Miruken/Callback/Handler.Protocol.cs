@@ -37,7 +37,7 @@
             handleMethod.Semantics = semantics;
             if (!handler.Handle(handleMethod))
                 throw new MissingMethodException(
-                    $"Method '{handleMethod.Method.Name}' on {protocol.FullName} not handled");
+                    $"Method '{handleMethod.Method.Name}' on {protocol.FullName} not handled.");
 
             return handleMethod.Result 
                 ?? RuntimeHelper.GetDefault(handleMethod.ResultType);

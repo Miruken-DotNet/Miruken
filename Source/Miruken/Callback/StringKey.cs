@@ -23,7 +23,7 @@
             if (rawString != null || obj == null)
                 return ReferenceEquals(rawString, Key) ||
                        string.Compare(Key, rawString, Comparison) == 0;
-            if (!(obj is StringKey stringKey)) return false;
+            if (obj is not StringKey stringKey) return false;
             rawString = stringKey.Key;
 
             return ReferenceEquals(rawString, Key) ||

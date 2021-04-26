@@ -41,7 +41,7 @@
                 if (metaToken == null)
                     return null;
 
-                if (!(metaToken is JToken token))
+                if (metaToken is not JToken token)
                 {
                     metaToken = JObject.FromObject(metaToken);
                     continue;

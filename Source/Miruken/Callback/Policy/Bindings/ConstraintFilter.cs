@@ -11,7 +11,7 @@
             IHandler composer, Next<TRes> next,
             IFilterProvider provider = null)
         {
-            if (!(provider is IBindingConstraintProvider constraintProvider))
+            if (provider is not IBindingConstraintProvider constraintProvider)
                 return next(proceed: false);
             var metadata = callback.Metadata;
             return !(metadata == null ||

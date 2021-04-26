@@ -27,7 +27,7 @@ namespace Miruken.Validate.DataAnnotations
             var outcome = new ValidationOutcome();
             foreach (var result in results)
             {
-                if (!(result is CompositeResult compositeResult))
+                if (result is not CompositeResult compositeResult)
                 {
                     var error = result.ErrorMessage;
                     foreach (var memberName in result.MemberNames)

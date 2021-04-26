@@ -27,7 +27,7 @@
         [Provides]
         public object Provide(Inquiry inquiry, IHandler composer)
         {
-            if (!(inquiry.Key is Type serviceType)) return null;
+            if (inquiry.Key is not Type serviceType) return null;
 
             var many = inquiry.Many;
 
@@ -59,8 +59,8 @@
             var instance = service.ImplementationInstance;
             if (instance != null)
             {
-                if (serviceType == null)
-                    serviceType = instance.GetType();
+                // ReSharper disable once ConstantNullCoalescingCondition
+                serviceType ??= instance.GetType();
 
                 CheckServiceType(serviceType, service);
 
@@ -77,8 +77,8 @@
             var implementationFactory = service.ImplementationFactory;
             if (implementationFactory != null)
             {
-                if (serviceType == null)
-                    serviceType = implementationFactory.GetType().GenericTypeArguments[1];
+                // ReSharper disable once ConstantNullCoalescingCondition
+                serviceType ??= implementationFactory.GetType().GenericTypeArguments[1];
 
                 CheckServiceType(serviceType, service);
 
@@ -86,8 +86,8 @@
                 {
                     ServiceLifetime.Transient => typeof(ServiceFactory<>.Transient),
                     ServiceLifetime.Singleton => typeof(ServiceFactory<>.Singleton),
-                    ServiceLifetime.Scoped => typeof(ServiceFactory<>.Scoped),
-                    _ => throw new NotSupportedException($"Unsupported lifetime {service.Lifetime}")
+                    ServiceLifetime.Scoped    => typeof(ServiceFactory<>.Scoped),
+                    _ => throw new NotSupportedException($"Unsupported Lifetime {service.Lifetime}.")
                 };
 
                 serviceFactoryType = serviceFactoryType.MakeGenericType(serviceType);
@@ -118,10 +118,10 @@
         private static void CheckServiceType(Type serviceType, ServiceDescriptor service)
         {
             if (serviceType == null)
-                throw new ArgumentException($"Unable to infer service type from descriptor {service}");
+                throw new ArgumentException($"Unable to infer service type from descriptor {service}.");
 
             if (serviceType == typeof(object))
-                throw new ArgumentException($"Service type 'object' from descriptor {service} is not valid");
+                throw new ArgumentException($"Service type 'object' from descriptor {service} is not valid.");
         }
     }
 }

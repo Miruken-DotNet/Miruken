@@ -12,7 +12,7 @@
         public FilterInstancesProvider(params IFilter[] filters)
         {
             if (filters.Length == 0)
-                throw new ArgumentException("At least one filter must be provided");
+                throw new ArgumentException("At least one filter must be provided.");
             _filters = new HashSet<IFilter>(filters);
         }
 

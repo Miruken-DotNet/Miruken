@@ -354,7 +354,7 @@
             [Maps]
             public PlayerData MapToPlayerData(PlayerEntity entity, Mapping mapping)
             {
-                if (!(mapping.Target is PlayerData instance))
+                if (mapping.Target is not PlayerData instance)
                     return new PlayerData
                     {
                         Id = entity.Id,

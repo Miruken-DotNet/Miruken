@@ -14,7 +14,7 @@
             object callback, ref bool greedy, IHandler composer)
         {
             var trampoline = callback as Trampoline;
-            return (!((trampoline?.Callback ?? callback) is IBoundCallback bounded) 
+            return ((trampoline?.Callback ?? callback) is not IBoundCallback bounded 
                 || bounded.Bounds != _bounds) &&
                 base.HandleCallback(callback, ref greedy, composer);
         }

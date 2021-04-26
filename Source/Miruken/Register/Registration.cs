@@ -26,6 +26,7 @@
         private SourceSelector _publicSources;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
+        private Action<Registration, IServiceCollection> _implied;
         private readonly IServiceCollection _explicitServices;
         private readonly IServiceCollection _implicitServices;
         private readonly HashSet<object> _keys;
@@ -81,6 +82,18 @@
             return this;
         }
 
+        public Registration Observe(Action<Registration, Type> observer)
+        {
+            return observer == null ? this
+                : Select((from, publicOnly) =>
+                    from.AddClasses(cls => cls.Where(type =>
+                    {
+                        observer(this, type);
+                        return false;
+                    }), publicOnly)
+                );
+        }
+        
         public Registration Services(Action<IServiceCollection> services)
         {
             if (services == null)
@@ -89,6 +102,12 @@
             return this;
         }
 
+        public Registration ImpliedServices(Action<Registration, IServiceCollection> services)
+        {
+            _implied += services ?? throw new ArgumentNullException(nameof(services));
+            return this;
+        }
+        
         public Registration AddHandlers(params IHandler[] handlers)
         {
             ((List<IHandler>)Handlers).AddRange(handlers);
@@ -143,6 +162,12 @@
                         }
                     }
                 });
+                
+                if (_implied != null)
+                {
+                    foreach (var implied in _implied.GetInvocationList())
+                        ((Action<Registration, IServiceCollection>)implied)(this, _implicitServices);
+                }
             }
 
             foreach (var service in AddDefaultServices(_implicitServices))

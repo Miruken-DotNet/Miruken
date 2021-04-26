@@ -22,7 +22,7 @@
         {
             if (validators.Length > 0 && validators.Any(v => !v.Is<ValidationAttribute>()))
                 throw new ArgumentException(
-                    @"All validators must extend ValidationAttribute", nameof(validators));
+                    @"All validators must extend ValidationAttribute.", nameof(validators));
             _validators = validators;
         }
 
@@ -93,8 +93,8 @@
             if (value == null)
                 return ValidationResult.Success;
 
-            if (!(value is IEnumerable enumerable))
-                throw new ArgumentException("Target is not a collection");
+            if (value is not IEnumerable enumerable)
+                throw new ArgumentException("Target is not a collection.");
 
             var memberName = validationContext.MemberName;
             var composer   = validationContext.GetComposer();

@@ -49,7 +49,7 @@
             HandlerDescriptorVisitor visitor = null, int? priority = null)
         {
             if (!handlerType.IsClass || handlerType.IsAbstract)
-                throw new ArgumentException("Only concrete classes can be handlers");
+                throw new ArgumentException("Only concrete classes can be handlers.");
 
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> instancePolicies = null;
             IDictionary<CallbackPolicy, List<PolicyMemberBinding>> staticPolicies   = null;
@@ -113,7 +113,7 @@
                         var rule = policy.MatchMethod(method, category);
                         if (rule == null)
                             throw new InvalidOperationException(
-                                $"The policy for {category.GetType().FullName} rejected method '{method.GetDescription()}'");
+                                $"The policy for {category.GetType()} rejected method '{method.GetDescription()}'.");
 
                         methodDispatch ??= method.ContainsGenericParameters
                             ? new GenericMethodDispatch(method, rule.Args.Length, attributes)

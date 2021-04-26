@@ -46,7 +46,7 @@
                     if (method.IsSpecialName)
                     {
                         var _ = methodName.IndexOf('_');
-                        if (_ >= 0) methodName = methodName.Substring(_ + 1);
+                        if (_ >= 0) methodName = methodName[(_ + 1)..];
                     }
                     policyMemberBindingInfo.OutKey = new StringKey(
                         methodName, StringComparison.OrdinalIgnoreCase);

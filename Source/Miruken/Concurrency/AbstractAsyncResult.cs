@@ -51,7 +51,7 @@ namespace Miruken.Concurrency
             if (asyncResult == null)
                 throw new ArgumentNullException(nameof(asyncResult));
 
-            if (!(asyncResult is AbstractAsyncResult result))
+            if (asyncResult is not AbstractAsyncResult result)
                 throw new ArgumentException(@"Unrecognized IAsyncResult", nameof(asyncResult));
 
             if (result._completed == 0)

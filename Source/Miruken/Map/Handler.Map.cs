@@ -19,7 +19,7 @@
                 throw new ArgumentNullException(nameof(typeOrInstance));
             var mapping = new Mapping(source, typeOrInstance, format);
             if (!handler.Handle(mapping))
-                throw new NotSupportedException($"Mapping {mapping} not handled");
+                throw new NotSupportedException($"Mapping {mapping} not handled.");
             return mapping.Result;
         }
 

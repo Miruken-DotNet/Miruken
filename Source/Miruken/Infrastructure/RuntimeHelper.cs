@@ -50,7 +50,7 @@
 
         public static bool IsCollection(object instance)
         {
-            return instance is IEnumerable && !(instance is string);
+            return instance is IEnumerable && instance is not string;
         }
 
         public static bool IsEnumDefined(object e)

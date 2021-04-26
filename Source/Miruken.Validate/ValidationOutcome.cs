@@ -10,15 +10,14 @@
 
     public class ValidationOutcome : IDataErrorInfo, INotifyDataErrorInfo
     {
-        private readonly ConcurrentDictionary<string, List<object>> 
-            _errors = new();
+        private readonly ConcurrentDictionary<string, List<object>> _errors = new();
         private bool _initialized;
         private object _lock;
 
         private string _errorDetails;
 
         public bool     IsValid   => !HasErrors;
-        public bool     HasErrors => _errors.Count > 0;
+        public bool     HasErrors => !_errors.IsEmpty;
         public string   Error     => GetErrorDetails();
         public string[] Culprits  => _errors.Keys.ToArray();
 
@@ -49,10 +48,7 @@
                  ? errors.AsReadOnly() : Enumerable.Empty<object>();
         }
 
-        public ValidationOutcome GetOutcome(string propertyName)
-        {
-            return GetOrCreateOutcome(propertyName);
-        }
+        public ValidationOutcome GetOutcome(string propertyName) => GetOrCreateOutcome(propertyName);
 
         public ValidationOutcome AddError(string propertyName, object error)
         {
@@ -74,21 +70,17 @@
             lock (errors)
             {
                 var outcome = errors.OfType<ValidationOutcome>().FirstOrDefault();
-                if (outcome == null && create)
-                {
-                    outcome = new ValidationOutcome();
-                    errors.Add(outcome);
-                    outcome.ErrorsChanged += (s, e) =>
-                        RaiseErrorsChanged($"{propertyName}.{e.PropertyName}");
-                }
+                if (outcome != null || !create) return outcome;
+                outcome = new ValidationOutcome();
+                errors.Add(outcome);
+                outcome.ErrorsChanged += (_, e) =>
+                    RaiseErrorsChanged($"{propertyName}.{e.PropertyName}");
                 return outcome;
             }
         }
 
-        private void RaiseErrorsChanged(string propertyName)
-        {
+        private void RaiseErrorsChanged(string propertyName) =>
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-        }
 
         private ValidationOutcome ParsePath(ref string propertyName, bool create = false)
         {
@@ -114,13 +106,13 @@
                         string rest;
                         if (dot > 0 && (open < 0 || dot < open))
                         {
-                            rest = propertyName.Substring(dot + 1);
-                            propertyName = propertyName.Substring(0, dot);
+                            rest = propertyName[(dot + 1)..];
+                            propertyName = propertyName[..dot];
                         }
                         else
                         {
-                            rest = propertyName.Substring(open);
-                            propertyName = propertyName.Substring(0, open);
+                            rest = propertyName[open..];
+                            propertyName = propertyName[..open];
                         }
                         if (string.IsNullOrEmpty(rest)) return outcome;
                         outcome = outcome.GetOrCreateOutcome(propertyName, create);
@@ -137,13 +129,13 @@
         {
             var start = propertyName.IndexOf('[');
             if (start != 0) return null;
-            var end = propertyName.IndexOf(']', start + 1);
+            var end = propertyName.IndexOf(']', 1);
             if (end <= start)
-                throw new ArgumentException("Invalid property indexer");
-            var index = propertyName.Substring(start + 1, end - start - 1);
+                throw new ArgumentException("Invalid property indexer.");
+            var index = propertyName.Substring(1, end - 1);
             if (string.IsNullOrEmpty(index))
-                throw new ArgumentException("Missing property index");
-            propertyName = propertyName.Substring(end + 1).Trim('.');
+                throw new ArgumentException("Missing property index.");
+            propertyName = propertyName[(end + 1)..].Trim('.');
             return index;
         }
 
@@ -160,9 +152,6 @@
                 }).ToArray()));
         }
 
-        public override string ToString()
-        {
-            return GetErrorDetails();
-        }
+        public override string ToString() => GetErrorDetails();
     }
 }

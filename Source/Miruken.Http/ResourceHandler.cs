@@ -51,7 +51,7 @@
             var httpRequest = request as HttpRequestMessage;
             if (httpRequest != null && httpRequest.Method != method)
                 throw new ArgumentException(
-                    $"Expected HttpRequestMessage with {method} method but got {httpRequest.Method}");
+                    $"Expected HttpRequestMessage with {method} method but got {httpRequest.Method}.");
             return httpRequest;
         }
 

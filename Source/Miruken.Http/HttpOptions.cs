@@ -139,11 +139,11 @@
             {
                 var name  = requestType.Name;
                 var index = name.IndexOf('`');
-                path = index < 0 ? name : name.Substring(0, index);
+                path = index < 0 ? name : name[..index];
             }
             var parts = path.Split('.');
             return string.Join("/", parts.Select(part =>
-                char.ToLower(part[0]) + part.Substring(1))
+                char.ToLower(part[0]) + part[1..])
                 .ToArray());
         }
 

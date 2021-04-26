@@ -55,7 +55,7 @@
         public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable available)
         {
-            if (!(key is Tuple<object, object> tuple))
+            if (key is not Tuple<object, object> tuple)
                 return Enumerable.Empty<object>();
             var input  = tuple.Item2;
             var output = tuple.Item1;

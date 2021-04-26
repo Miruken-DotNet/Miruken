@@ -228,7 +228,7 @@
 
         private bool Implied(object item, bool greedy, IHandler composer)
         {
-            if (item == null || !(Key is Type type) || !Metadata.IsEmpty)
+            if (item == null || Key is not Type type || !Metadata.IsEmpty)
                 return false;
             var compatible =  type.IsInstanceOfType(item);
             return compatible && Resolve(item, false, greedy, composer);

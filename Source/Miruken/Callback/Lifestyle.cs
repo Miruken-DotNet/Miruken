@@ -77,7 +77,7 @@
             MemberBinding binding, MemberDispatch dispatcher,
             object callback, Type callbackType, IHandler composer)
         {
-            if (!(callback is Inquiry inquiry))
+            if (callback is not Inquiry inquiry)
                 return Enumerable.Empty<IFilter>();
 
             var logicalType  = dispatcher.LogicalReturnType;
@@ -88,7 +88,7 @@
             );
 
             var filters = new [] { lifestyle };
-            return !(this is IBindingConstraintProvider provider) ? filters
+            return this is not IBindingConstraintProvider provider ? filters
                 : filters.Concat(new ConstraintAttribute(provider.Constraint)
                     .GetFilters(binding, dispatcher, callback, callbackType, composer));
         }

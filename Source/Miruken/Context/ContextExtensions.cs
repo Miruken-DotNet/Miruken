@@ -25,7 +25,7 @@ namespace Miruken.Context
                 var handled = proceed();
                 if (!handled) return false;
                 var cb = callback as ICallback;
-                if (!(cb?.Result is Promise promise)) return true;
+                if (cb?.Result is not Promise promise) return true;
                 context.Track(promise);
                 return true;
             });

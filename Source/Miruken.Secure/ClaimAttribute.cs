@@ -32,7 +32,7 @@
             Argument argument, IHandler handler)
         {
             var principal = handler.Resolve<IPrincipal>();
-            if (!(principal?.Identity is ClaimsIdentity identity))
+            if (principal?.Identity is not ClaimsIdentity identity)
                 throw new RejectedException();
             var claim = identity.FindFirst(ClaimType);
             if (claim == null) return null;

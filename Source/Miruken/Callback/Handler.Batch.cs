@@ -42,7 +42,7 @@ namespace Miruken.Callback
                 (callback as IBatchCallback)?.CanBatch != false)
             {
                 var batch = Batch;
-                if (_completed > 0 && !(callback is Composition)) {
+                if (_completed > 0 && callback is not Composition) {
                     Batch = null;
                 }
                 if (batch.Handle(callback, ref greedy, composer))
@@ -54,7 +54,7 @@ namespace Miruken.Callback
         public Promise<object[]> Complete(Promise complete = null)
         {
             if (Interlocked.CompareExchange(ref _completed, 1, 0) == 1)
-                throw new InvalidOperationException("The batch has already completed");
+                throw new InvalidOperationException("The batch has already completed.");
             var results = this.Proxy<IBatchingComplete>().Complete(this);
             return complete != null
                  ? results.Then((r, _) => complete.Then((_, _) => r))

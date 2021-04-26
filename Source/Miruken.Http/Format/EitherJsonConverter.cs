@@ -23,7 +23,7 @@
         public override void WriteJson(
             JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (!(value is IEither either)) return;
+            if (value is not IEither either) return;
             var isLeft = either is IEither.ILeft;
             var args = either.GetType().GetGenericArguments();
             writer.WriteStartObject();

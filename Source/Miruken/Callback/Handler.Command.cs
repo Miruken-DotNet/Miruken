@@ -12,7 +12,7 @@
             if (handler == null) return;
             var command = new Command(callback);
             if (!handler.Handle(command))
-                throw new NotSupportedException($"{callback.GetType()} not handled");
+                throw new NotSupportedException($"{callback.GetType()} not handled.");
         }
 
         public static Promise CommandAsync(this IHandler handler, object callback)
@@ -37,7 +37,7 @@
             if (handler == null) return default;
             var command = new Command(callback);
             if (!handler.Handle(command))
-                throw new NotSupportedException($"{callback.GetType()} not handled");
+                throw new NotSupportedException($"{callback.GetType()} not handled.");
             var result = command.Result ?? RuntimeHelper.GetDefault(typeof(TRes));
             return (TRes) result;
         }
@@ -66,7 +66,7 @@
         {
             if (handler == null) return;
             if (!handler.Handle(new Command(callback, true), true))
-                throw new NotSupportedException($"{callback.GetType()} not handled");
+                throw new NotSupportedException($"{callback.GetType()} not handled.");
         }
 
         public static Promise CommandAllAsync(this IHandler handler, object callback)

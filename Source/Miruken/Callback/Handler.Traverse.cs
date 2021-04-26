@@ -25,7 +25,7 @@ namespace Miruken.Callback
         protected override bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
         {
-            var handled = !(callback is Composition)
+            var handled = callback is not Composition
                  ? _handler.Handle(_axis, callback, ref greedy, composer)
                  : _handler.Handle(callback, greedy, composer);
             return handled || base.HandleCallback(callback, ref greedy, composer);

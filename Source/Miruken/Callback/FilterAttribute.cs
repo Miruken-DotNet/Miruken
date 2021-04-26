@@ -76,14 +76,14 @@
             if (filterType == null)
                 throw new ArgumentNullException(nameof(filterType));
             if (filterType == null)
-                throw new ArgumentException("Filter types cannot be null");
+                throw new ArgumentException("Filter types cannot be null.");
             if (filterType == typeof(IFilter<,>)) 
-                throw new ArgumentException("Filter type cannot be unspecified");
+                throw new ArgumentException("Filter type cannot be unspecified.");
             var conformance = filterType.GetOpenTypeConformance(typeof(IFilter<,>));
             if (conformance == null)
-                throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>");
+                throw new ArgumentException($"{filterType.FullName} does not conform to IFilter<,>.");
             if (filterType.IsGenericTypeDefinition && !conformance.ContainsGenericParameters)
-                throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred");
+                throw new ArgumentException($"{filterType.FullName} generic args cannot be inferred.");
             ValidateFilterType(filterType);
         }
 

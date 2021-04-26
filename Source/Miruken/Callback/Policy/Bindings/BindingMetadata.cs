@@ -20,14 +20,14 @@
             return _values.ContainsKey(key);
         }
 
-        public bool Get<V>(object key, out V value)
+        public bool Get<TValue>(object key, out TValue value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
             if (_values.TryGetValue(key, out var v))
             {
-                value = (V)v;
+                value = (TValue)v;
                 return true;
             }
 
