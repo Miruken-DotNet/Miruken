@@ -26,11 +26,12 @@
         private SourceSelector _publicSources;
         private TypeSelector _select;
         private Predicate<Type> _exclude;
-        private Action<Registration, IServiceCollection> _implied;
+        private AfterServicesDelegate _after;
         private readonly IServiceCollection _explicitServices;
         private readonly IServiceCollection _implicitServices;
         private readonly HashSet<object> _keys;
 
+        public delegate void AfterServicesDelegate(IServiceCollection @explicit, IServiceCollection implied);
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
         public delegate void TypeSelector(IImplementationTypeSelector selector, bool publicOnly);
 
@@ -102,9 +103,9 @@
             return this;
         }
 
-        public Registration ImpliedServices(Action<Registration, IServiceCollection> services)
+        public Registration AfterServices(AfterServicesDelegate after)
         {
-            _implied += services ?? throw new ArgumentNullException(nameof(services));
+            _after += after ?? throw new ArgumentNullException(nameof(after));
             return this;
         }
         
@@ -171,10 +172,10 @@
                 factory.RegisterDescriptor(serviceType, visitor);
             }
             
-            if (_implied != null)
+            if (_after != null)
             {
-                foreach (var implied in _implied.GetInvocationList())
-                    ((Action<Registration, IServiceCollection>)implied)(this, _implicitServices);
+                foreach (var after in _after.GetInvocationList())
+                    ((AfterServicesDelegate)after)(_explicitServices, _implicitServices);
             }
             
             var context = new Context();
