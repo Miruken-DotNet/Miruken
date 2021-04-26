@@ -43,7 +43,7 @@
                  : NormalizeKey(bindingInfo.OutKey);
         }
 
-        protected object NormalizeKey(object key)
+        protected static object NormalizeKey(object key)
         {
             var varianceType = key as Type;
             if (varianceType == null) return key;

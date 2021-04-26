@@ -31,7 +31,11 @@
         private readonly IServiceCollection _implicitServices;
         private readonly HashSet<object> _keys;
 
-        public delegate void AfterServicesDelegate(IServiceCollection @explicit, IServiceCollection implied);
+        public delegate void AfterServicesDelegate(
+            IServiceCollection        @explicit, 
+            IServiceCollection        implied,
+            IHandlerDescriptorFactory factory);
+        
         public delegate IImplementationTypeSelector SourceSelector(ITypeSourceSelector source);
         public delegate void TypeSelector(IImplementationTypeSelector selector, bool publicOnly);
 
@@ -175,7 +179,7 @@
             if (_after != null)
             {
                 foreach (var after in _after.GetInvocationList())
-                    ((AfterServicesDelegate)after)(_explicitServices, _implicitServices);
+                    ((AfterServicesDelegate)after)(_explicitServices, _implicitServices, factory);
             }
             
             var context = new Context();
