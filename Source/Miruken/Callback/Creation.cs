@@ -26,7 +26,7 @@
 
         public Type Type       { get; }
         public bool Many       { get; }
-        public bool WantsAsync { get; set; }
+        public bool WantsAsync { get; init; }
         public bool IsAsync    { get; private set; }
 
         public CallbackPolicy Policy => Creates.Policy;
@@ -47,7 +47,7 @@
                         _result = Many
                             ? Promise.All(_promises)
                                 .Then((_, _) => _instances.ToArray())
-                            : (object)Promise.All(_promises)
+                            : Promise.All(_promises)
                                 .Then((_, _) => _instances.FirstOrDefault());
                     }
                     else

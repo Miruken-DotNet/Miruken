@@ -6,14 +6,14 @@
     using System.Linq;
 
     public partial class Handler : MarshalByRefObject, IHandler
-	{
-	    public virtual bool Handle(
+    {
+        public virtual bool Handle(
             object callback, ref bool greedy, IHandler composer = null)
-	    {
+        {
             if (callback == null) return false;
-	        composer ??= this as CompositionScope ?? new CompositionScope(this);
-	        return HandleCallback(Inference.Get(callback), ref greedy, composer);
-	    }
+            composer ??= this as CompositionScope ?? new CompositionScope(this);
+            return HandleCallback(Inference.Get(callback), ref greedy, composer);
+        }
 
         protected virtual bool HandleCallback(
             object callback, ref bool greedy, IHandler composer)
@@ -21,22 +21,22 @@
             return Dispatch(this, callback, ref greedy, composer);
         }
 
-	    public static bool Dispatch(
-	        object handler, object callback, ref bool greedy, IHandler composer)
-	    {
-	        var type = handler as Type ?? handler?.GetType()
-	            ?? throw new ArgumentNullException(nameof(handler));
-	        if (SkipTypes.Contains(type)) return false;
+        public static bool Dispatch(
+            object handler, object callback, ref bool greedy, IHandler composer)
+        {
+            var type = handler as Type ?? handler?.GetType()
+                ?? throw new ArgumentNullException(nameof(handler));
+            if (SkipTypes.Contains(type)) return false;
             var dispatch = callback as IDispatchCallback ?? new Command(callback);
-	        return dispatch.Dispatch(handler, ref greedy, composer);
-	    }
+            return dispatch.Dispatch(handler, ref greedy, composer);
+        }
 
-	    public static CascadeHandler operator +(Handler h1, object h2)
+        public static CascadeHandler operator +(Handler h1, object h2)
         {
             return new(h1, h2);
         }
 
-	    public static CompositeHandler operator +(Handler h1, IEnumerable handlers)
+        public static CompositeHandler operator +(Handler h1, IEnumerable handlers)
         {
             var rest = handlers.Cast<object>().ToArray();
             var h    = new object[rest.Length + 1];
@@ -56,7 +56,7 @@
             typeof(Handler), typeof(FilteredHandler), typeof(CascadeHandler),
             typeof(CompositeHandler), typeof(CompositionScope)
         };
-	}
+    }
 
     public class CompositionScope : DecoratedHandler
     {

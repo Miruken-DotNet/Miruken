@@ -139,7 +139,7 @@ namespace Miruken.Tests.Callback
 
             decimal IBilling.Bill(decimal amount)
             {
-                throw new NotSupportedException("Not supported offline");
+                throw new NotSupportedException("Not supported offline.");
             }
 
             [Handles]

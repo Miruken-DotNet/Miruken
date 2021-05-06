@@ -118,8 +118,7 @@
             }
             else
             {
-                var arguments = Arguments;
-                DispatchType |= arguments.Length switch
+                DispatchType |= Arguments.Length switch
                 {
                     0 => FastNone,
                     1 => FastOne,
@@ -133,31 +132,28 @@
                 };
             }
 
-            var returnType = ReturnType;
-
-            if (returnType == typeof(void))
+            if (ReturnType == typeof(void))
             {
                 DispatchType |= NoReturn;
-                return returnType;
+                return ReturnType;
             }
-            if (returnType.Is<Promise>())
+            if (ReturnType.Is<Promise>())
             {
                 DispatchType |= ReturnPromise;
-                var promise = returnType.GetOpenTypeConformance(typeof(Promise<>));
+                var promise = ReturnType.GetOpenTypeConformance(typeof(Promise<>));
                 return promise != null
                      ? promise.GetGenericArguments()[0]
                      : typeof(object);
             }
-            if (returnType.Is<Task>())
-            {
-                DispatchType |= ReturnTask;
-                var task = returnType.GetOpenTypeConformance(typeof(Task<>));
-                return task != null
-                     ? task.GetGenericArguments()[0]
-                     : typeof(object);
-            }
 
-            return returnType;
+            if (!ReturnType.Is<Task>()) return ReturnType;
+            
+            DispatchType |= ReturnTask;
+            var task = ReturnType.GetOpenTypeConformance(typeof(Task<>));
+            return task != null
+                 ? task.GetGenericArguments()[0]
+                 : typeof(object);
+
         }
 
         protected const BindingFlags Binding = BindingFlags.Instance

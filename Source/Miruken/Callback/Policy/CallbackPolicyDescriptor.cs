@@ -90,7 +90,7 @@ namespace Miruken.Callback.Policy
                 compatible.AddRange(_unknown);
 
             return compatible.Count > 0 
-                 ? (IEnumerable<PolicyMemberBinding>)compatible
+                 ? compatible
                  : Array.Empty<PolicyMemberBinding>();
         }
 
@@ -99,8 +99,7 @@ namespace Miruken.Callback.Policy
             var key = member.Key;
             if (key == null)
             {
-                var unknown = _unknown ??
-                    (_unknown = new List<PolicyMemberBinding>());
+                var unknown = _unknown ??= new List<PolicyMemberBinding>();
                 unknown.AddSorted(member,
                     PolicyMemberBinding.OrderByArity);
                 return;
@@ -118,8 +117,7 @@ namespace Miruken.Callback.Policy
             }
             else
             {
-                var indexed = _indexed ??
-                    (_indexed = new Dictionary<object, List<PolicyMemberBinding>>());
+                var indexed = _indexed ??= new Dictionary<object, List<PolicyMemberBinding>>();
                 if (!indexed.TryGetValue(key, out members))
                 {
                     members = new List<PolicyMemberBinding>();

@@ -62,7 +62,7 @@
                         _result = Many
                             ? Promise.All(_promises)
                                 .Then((_, _) => _resolutions.Values.ToArray())
-                            : (object)Promise.All(_promises)
+                            : Promise.All(_promises)
                                 .Then((_, _) => _resolutions.Values.FirstOrDefault());
                     }
                     else
@@ -102,22 +102,15 @@
         public bool Resolve(object resolution, bool strict,
             bool greedy, IHandler composer, int? priority = null)
         {
-            bool resolved;
             if (resolution == null) return false;
-            if (!strict && resolution is object[] array)
+            var resolved = strict switch
             {
-                resolved = array.Aggregate(false,
-                    (s, res) => Include(res, priority, false, greedy, composer) || s);
-            }
-            else if (!strict && resolution is ICollection collection)
-            {
-                resolved = collection.Cast<object>().Aggregate(false,
-                    (s, res) => Include(res, priority, false, greedy, composer) || s);
-            }
-            else
-            {
-                resolved = Include(resolution, priority, strict, greedy, composer);
-            }
+                false when resolution is object[] array => array.Aggregate(false,
+                    (s, res) => Include(res, priority, false, greedy, composer) || s),
+                false when resolution is ICollection collection => collection.Cast<object>()
+                    .Aggregate(false, (s, res) => Include(res, priority, false, greedy, composer) || s),
+                _ => Include(resolution, priority, strict, greedy, composer)
+            };
             if (resolved) _result = null;
             return resolved;
         }

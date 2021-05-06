@@ -32,12 +32,10 @@
         [Handles]
         public object Get(StashAction.Get get)
         {
-            if (_data.TryGetValue(get.Type, out var data))
-            {
-                get.Value = data;
-                return true;
-            }
-            return _root ? (object)true : null;
+            if (!_data.TryGetValue(get.Type, out var data))
+                return _root ? true : null;
+            get.Value = data;
+            return true;
         }
 
         [Handles]

@@ -85,7 +85,7 @@
 
             ArgumentFlags = ExtractFlags(ParameterType, flags);
 
-            Key ??= IsSimple ? Parameter.Name : (object) LogicalType;
+            Key ??= IsSimple ? Parameter.Name : LogicalType;
 
             Resolver?.ValidateArgument(this);
         }

@@ -279,7 +279,7 @@
                     {
                         var singletonLike = filters?.Any(f =>
                             f.Item2 is SingletonAttribute ||
-                            f.Item2 is ContextualAttribute ctx && ctx.Rooted) == true;
+                            f.Item2 is ContextualAttribute {Rooted: true}) == true;
 
                         if (singletonLike)
                         {

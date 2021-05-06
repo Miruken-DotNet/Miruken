@@ -103,7 +103,7 @@
             if (paramType.Is(_type))
             {
                 if (!base.Matches(parameter, context)) return false;
-                if (_aliases != null && _aliases.Length > 0)
+                if (_aliases is {Length: > 0})
                 {
                     context.AddError(
                         $"{_type.FullName} is not a generic definition and cannot bind aliases");

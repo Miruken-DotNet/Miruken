@@ -99,7 +99,7 @@
 
             decimal IBilling.Bill(decimal amount)
             {
-                throw new NotSupportedException("Not supported offline");
+                throw new NotSupportedException("Not supported offline.");
             }
         }
 

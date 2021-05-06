@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Miruken.Callback;
     using Miruken.Callback.Policy;
@@ -536,8 +537,7 @@
             var handled = handler
                 .Aspect((_, c) => true, (cb, c, s) =>
                 {
-                    if (cb is Inference inf &&
-                        inf.Callback is Foo f)
+                    if (cb is Inference {Callback: Foo f})
                         f.Handled++;
                 }).Handle(foo);
             Assert.IsTrue(handled);
@@ -548,7 +548,7 @@
         public async Task Should_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = await handler.Aspect((_, c) => true).ResolveAsync<Bar>();
+            var bar     = await handler.Aspect((_, _) => true).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -558,7 +558,7 @@
         public void Should_Async_Filter_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = handler.Aspect((_, c) => Promise.True).Resolve<Bar>();
+            var bar     = handler.Aspect((_, _) => Promise.True).Resolve<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -568,7 +568,7 @@
         public async Task Should_Async_Filter_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var bar     = await handler.Aspect((_, c) => Promise.True).ResolveAsync<Bar>();
+            var bar     = await handler.Aspect((_, _) => Promise.True).ResolveAsync<Bar>();
             Assert.IsNotNull(bar);
             Assert.IsFalse(bar.HasComposer);
             Assert.AreEqual(1, bar.Handled);
@@ -579,7 +579,7 @@
         public void Should_Async_Cancel_Resolution()
         {
             var handler = new CustomHandler();
-            handler.Aspect((_, c) => Promise.False).Resolve<Bar>();
+            handler.Aspect((_, _) => Promise.False).Resolve<Bar>();
         }
 
         [TestMethod,
@@ -588,7 +588,7 @@
         public async Task Should_Cancel_Async_Resolution()
         {
             var handler = new CustomHandler();
-            var promise = handler.Aspect((_, c) => false).ResolveAsync<Bar>();
+            var promise = handler.Aspect((_, _) => false).ResolveAsync<Bar>();
             Assert.IsInstanceOfType(promise, typeof(Promise<Bar>));
             await promise;
         }
@@ -599,7 +599,7 @@
         public async Task Should_Async_Cancel_Async_Resolution()
         {
             var handler = new CustomHandler();
-            await handler.Aspect((_, c) => Promise.False)
+            await handler.Aspect((_, _) => Promise.False)
                          .ResolveAsync<Bar>();
         }
 
@@ -658,7 +658,7 @@
         public void Should_Resolve_All_Enumerable_Using_IServiceProvider()
         {
             var handler = (IServiceProvider)new CustomHandler();
-            var bars    = ((IEnumerable<Bar>)handler.GetService(typeof(IEnumerable<Bar>))).ToArray();
+            var bars    = ((IEnumerable<Bar>)handler.GetRequiredService(typeof(IEnumerable<Bar>))).ToArray();
             Assert.AreEqual(2, bars.Length);
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(Bar)));
             Assert.AreEqual(1, bars.Count(bar => bar.GetType() == typeof(SpecialBar)));

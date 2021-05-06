@@ -12,7 +12,7 @@
                 throw new ArgumentNullException(nameof(handler));
             var get = new StashAction.Get(typeof(T));
             if (!handler.Handle(get))
-                throw new NotSupportedException($"Stash get {typeof(T)} not handled");
+                throw new NotSupportedException($"Stash get {typeof(T)} not handled.");
             return get.Value as T;
         }
 
@@ -22,7 +22,7 @@
                 throw new ArgumentNullException(nameof(handler));
             var put = new StashAction.Put(typeof(T), data);
             if (!handler.Handle(put))
-                throw new NotSupportedException($"Stash put {typeof(T)} not handled");
+                throw new NotSupportedException($"Stash put {typeof(T)} not handled.");
         }
 
         public static void StashDrop<T>(this IHandler handler) where T : class
@@ -31,7 +31,7 @@
                 throw new ArgumentNullException(nameof(handler));
             var drop = new StashAction.Drop(typeof(T));
             if (!handler.Handle(drop))
-                throw new NotSupportedException($"Stash drop {typeof(T)} not handled");
+                throw new NotSupportedException($"Stash drop {typeof(T)} not handled.");
         }
 
         public static T StashTryGet<T>(this IHandler handler) where T : class

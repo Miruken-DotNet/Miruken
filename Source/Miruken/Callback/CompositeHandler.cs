@@ -83,7 +83,7 @@ namespace Miruken.Callback
 	            switch (handler)
 	            {
 	                case T t: return t;
-	                case HandlerAdapter adapter when adapter.Handler is T t:
+	                case HandlerAdapter {Handler: T t}:
 	                    return t;
 	            }
 	        }

@@ -293,7 +293,7 @@
         private static bool HaveBetweenThreeAndSixPlayers(Player[] players)
         {
             var playerCount = players.Length;
-            return playerCount >= 3 && playerCount <= 6;
+            return playerCount is >= 3 and <= 6;
         }
     }
 

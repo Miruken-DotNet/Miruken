@@ -13,7 +13,7 @@
                 list.Add(item);
                 return;
             }
-            if (list[list.Count - 1].CompareTo(item) <= 0)
+            if (list[^1].CompareTo(item) <= 0)
             {
                 list.Add(item);
                 return;
@@ -33,13 +33,13 @@
             this List<T> list, T item, IComparer<T> comparer)
         {
             if (comparer == null)
-                throw new ArgumentException(nameof(comparer));
+                throw new ArgumentNullException(nameof(comparer));
             if (list.Count == 0)
             {
                 list.Add(item);
                 return;
             }
-            if (comparer.Compare(list[list.Count - 1], item) <= 0)
+            if (comparer.Compare(list[^1], item) <= 0)
             {
                 list.Add(item);
                 return;

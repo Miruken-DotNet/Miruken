@@ -18,7 +18,7 @@
             _visitor = visitor;
         }
 
-        public LifestyleAttribute ImplicitLifestyle { get; set; }
+        public LifestyleAttribute ImplicitLifestyle { get; init; }
 
         public abstract HandlerDescriptor GetDescriptor(Type type);
 
@@ -88,7 +88,7 @@
                 if (provideImplicit)
                 {
                     Array.Resize(ref categories, categories.Length + 1);
-                    categories[categories.Length - 1] = ImplicitProvides;
+                    categories[^1] = ImplicitProvides;
                 }
 
                 foreach (var category in categories)
@@ -117,7 +117,7 @@
 
                         methodDispatch ??= method.ContainsGenericParameters
                             ? new GenericMethodDispatch(method, rule.Args.Length, attributes)
-                            : (MemberDispatch)new MethodDispatch(method, attributes);
+                            : new MethodDispatch(method, attributes);
                         memberBinding = rule.Bind(methodDispatch, category);
                     }
 
@@ -192,7 +192,7 @@
             {
                 ConstructorInfo _ => true,
                 MethodInfo method when method.IsSpecialName || method.IsFamily => false,
-                PropertyInfo property when !property.CanRead => false,
+                PropertyInfo {CanRead: false} => false,
                 _ => member.IsDefined(typeof(CategoryAttribute))
             };
         }

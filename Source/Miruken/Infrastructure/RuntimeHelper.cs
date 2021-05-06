@@ -17,7 +17,7 @@
 
         public static object GetDefault(Type type)
         {
-            return type != null && type.IsValueType && type != typeof(void)
+            return type is {IsValueType: true} && type != typeof(void)
                  ? DefaultValues.GetOrAdd(type, Activator.CreateInstance)
                  : null;
         }
@@ -50,7 +50,7 @@
 
         public static bool IsCollection(object instance)
         {
-            return instance is IEnumerable && instance is not string;
+            return instance is IEnumerable and not string;
         }
 
         public static bool IsEnumDefined(object e)

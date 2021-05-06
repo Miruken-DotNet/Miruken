@@ -20,7 +20,7 @@ namespace Miruken
         public static object Proxy(IProtocolAdapter adapter, Type protocol)
         {
             if (!protocol.IsInterface)
-                throw new NotSupportedException("Only protocol interfaces are supported");
+                throw new NotSupportedException("Only protocol interfaces are supported.");
             
             return Interceptor.Create(adapter, protocol);
         }
@@ -28,7 +28,7 @@ namespace Miruken
         public static TProto Proxy<TProto>(IProtocolAdapter adapter)
         {
             if (!typeof(TProto).IsInterface)
-                throw new NotSupportedException("Only protocol interfaces are supported");
+                throw new NotSupportedException("Only protocol interfaces are supported.");
             return Interceptor.Create<TProto>(adapter);
         }
     }

@@ -19,7 +19,7 @@
             Concurrent concurrent, IHandler composer)
         {
             var requests  = concurrent.Requests;
-            var responses = requests != null && requests.Length > 0
+            var responses = requests is {Length: > 0}
                 ? await Task.WhenAll(requests.Select(req => Process(req, composer)))
                     .ConfigureAwait(false)
                 : Array.Empty<Try<Exception, object>>();
@@ -35,7 +35,7 @@
         {
             var requests  = sequential.Requests;
             var responses = new List<Try<Exception, object>>();
-            if (requests != null && requests.Length > 0)
+            if (requests is {Length: > 0})
             {
                 foreach (var req in sequential.Requests)
                 {
@@ -54,7 +54,7 @@
         public async Task<ScheduledResult> Parallel(Parallel parallel, IHandler composer)
         {
             var requests  = parallel.Requests;
-            var responses = requests != null && requests.Length > 0
+            var responses = requests is {Length: > 0}
                 ? await Task.WhenAll(requests.AsParallel()
                     .WithExecutionMode(ParallelExecutionMode.ForceParallelism)
                     .Select(req => Process(req, composer)).ToArray())

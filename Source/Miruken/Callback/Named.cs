@@ -8,7 +8,7 @@
         public Named(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("Name cannot be empty");
+                throw new ArgumentException("Name cannot be empty.");
 
             Name = name;
         }

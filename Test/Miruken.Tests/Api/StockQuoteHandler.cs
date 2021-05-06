@@ -17,7 +17,7 @@ namespace Miruken.Tests.Api
             ++Called;
 
             if (quote.Symbol == "EX")
-                throw new Exception("Stock Exchange is down");
+                throw new Exception("Stock Exchange is down.");
 
             return Promise.Resolved(new StockQuote
             {
@@ -32,7 +32,7 @@ namespace Miruken.Tests.Api
             Interlocked.Increment(ref Called);
 
             if (sell.Symbol == "EX")
-                throw new Exception("Stock Exchange is down");
+                throw new Exception("Stock Exchange is down.");
 
             return Promise.Empty;
         }

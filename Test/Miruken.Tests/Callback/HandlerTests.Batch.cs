@@ -46,7 +46,7 @@
             {
                 if (Equals(message, "OFF"))
                     return Composer.Proxy<IOffline>().Fail(message);
-                throw new Exception("Can't send message");
+                throw new Exception("Can't send message.");
             }
 
             Promise IEmailing.FailConfirm(object message)

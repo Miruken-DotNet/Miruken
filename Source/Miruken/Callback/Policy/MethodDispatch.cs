@@ -1,17 +1,14 @@
 ﻿namespace Miruken.Callback.Policy
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Globalization;
     using System.Reflection;
-    using System.Threading;
     using Concurrency;
     using Infrastructure;
 
     public class MethodDispatch : MemberDispatch
     {
-        private bool _initialized;
-        private Delegate _delegate;
-
         public MethodDispatch(
             MethodInfo method, Attribute[] attributes = null)
             : base(method, method.ReturnType, attributes)
@@ -37,32 +34,24 @@
             }
         }
 
-        private object Dispatch(object target, object[] args, Type _)
+        private object Dispatch(object target, object[] args, Type type)
         {
             if (IsLateBound)
-            {
-                return Method.Invoke(
-                    target, Binding, null, args, CultureInfo.InvariantCulture);
-            }
-
-            if (!_initialized)
-            {
-                object guard = this;
-                LazyInitializer.EnsureInitialized(
-                    ref _delegate, ref _initialized, ref guard, CreateDelegate);
-            }
+                return Method.Invoke(target, Binding, null, args, CultureInfo.InvariantCulture);
 
             var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
-            return MemberDelegates[delegateFlags].Item2(_delegate, target, args);
+            
+            var @delegate = Delegates.GetOrAdd(Method, m => 
+                MemberDelegates.TryGetValue(delegateFlags, out var invoker)
+                    ? RuntimeHelper.CompileMethod(m, invoker.Item1)
+                    : null);
+            
+            if (@delegate == null)
+                throw new InvalidOperationException($"Unable to create delegate for method {Method}.");
+        
+            return MemberDelegates[delegateFlags].Item2(@delegate, target, args);
         }
-
-        private Delegate CreateDelegate()
-        {
-            var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
-            return MemberDelegates.TryGetValue(delegateFlags, out var invoker)
-                 ? RuntimeHelper.CompileMethod(Method, invoker.Item1)
-                     : throw new InvalidOperationException(
-                           $"Unable to create delegate for method {Method}");
-        }
+        
+        private static readonly ConcurrentDictionary<MethodInfo, Delegate> Delegates = new ();
     }
 }

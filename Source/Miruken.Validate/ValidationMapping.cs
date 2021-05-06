@@ -57,7 +57,7 @@ namespace Miruken.Validate
                         outcome.AddError(propertyName, error);
                 }
                 var nested = property.Nested;
-                if (nested != null && nested.Length > 0)
+                if (nested is {Length: > 0})
                     outcome.AddError(propertyName, CreateOutcome(nested));
             }
             return outcome;

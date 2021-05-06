@@ -16,7 +16,7 @@
         public RoutesAttribute(params string[] schemes)
         {
             if (schemes == null || schemes.Length == 0)
-                throw new ArgumentException("Schemes cannot be empty", nameof(schemes));
+                throw new ArgumentException("Schemes cannot be empty.", nameof(schemes));
             _filters = new [] { new RoutesFilter(schemes) };
         }
 

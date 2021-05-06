@@ -31,7 +31,7 @@
 
         public bool   Many       { get; }
         public object Callback   { get; }
-        public bool   WantsAsync { get; set; }
+        public bool   WantsAsync { get; init; }
         public bool   IsAsync    { get; private set; }
 
         public CallbackPolicy Policy
@@ -61,7 +61,7 @@
                         _result = Many
                                 ? Promise.All(_promises)
                                     .Then((_, _) => _results.ToArray())
-                                : (object)Promise.All(_promises)
+                                : Promise.All(_promises)
                                     .Then((_, _) => _results.FirstOrDefault());
                     }
                     else
