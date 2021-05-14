@@ -10,24 +10,22 @@
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandleMethodBinding : MemberBinding
     {
-        private static readonly List<IFilterProvider>
-            _globalFilters = new();
+        private static readonly List<IFilterProvider> GlobalFilterList = new();
 
         public HandleMethodBinding(MethodDispatch dispatch)
              : base(dispatch)
         {
         }
 
-        public static IEnumerable<IFilterProvider> GlobalFilters => _globalFilters;
+        public static IEnumerable<IFilterProvider> GlobalFilters => GlobalFilterList;
 
         public static void AddGlobalFilters(params IFilterProvider[] providers)
         {
             if (providers == null || providers.Length == 0) return;
-            _globalFilters.AddRange(providers.Where(p => p != null));
+            GlobalFilterList.AddRange(providers.Where(p => p != null));
         }
 
-        public override bool Dispatch(object target, object callback,
-            IHandler composer, int? priority = null, ResultsDelegate results = null)
+        public bool Dispatch(object target, object callback, IHandler composer)
         {
             var oldComposer = Composer;
             var oldUnhandled = Unhandled;
@@ -53,13 +51,12 @@
             }
         }
 
-        private bool Invoke(
-            HandleMethod handleMethod, object target, IHandler composer)
+        private bool Invoke(HandleMethod handleMethod, object target, IHandler composer)
         {
             var arguments = handleMethod.Arguments;
-            var filters = composer.GetOrderedFilters(
+            var filters   = composer.GetOrderedFilters(
                 this, Dispatcher, handleMethod, typeof(HandleMethod),
-                Filters, Dispatcher.Owner?.Filters, GlobalFilters);
+                Filters, GlobalFilters);
 
             if (filters == null) return false;
 

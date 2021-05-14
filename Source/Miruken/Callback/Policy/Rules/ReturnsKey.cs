@@ -20,8 +20,8 @@
             if (IsLogicalVoid(returnType)) return false;
             if (returnType.IsArray)
                 returnType = returnType.GetElementType();
-            var restrict = context.Category.OutKey as Type;
-            if (restrict == null || returnType.Is(restrict) || restrict.Is(returnType))
+            if (context.Category.OutKey is not Type restrict ||
+                returnType.Is(restrict) || restrict.Is(returnType))
                 return true;
             throw new InvalidOperationException(
                 $"Key {restrict.FullName} is not related to {returnType?.FullName}");

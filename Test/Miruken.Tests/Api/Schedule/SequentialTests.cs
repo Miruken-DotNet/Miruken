@@ -94,7 +94,7 @@
                 }
             });
             CollectionAssert.AreEqual(
-                new[] { "APPL", "Stock Exchange is down" },
+                new[] { "APPL", "Stock Exchange is down." },
                 result.Responses.Select(r => r.Match(
                         error => error.Message,
                         quote => ((StockQuote)quote).Symbol))

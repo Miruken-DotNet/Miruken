@@ -62,7 +62,7 @@
                             binding, composer, Next, provider);
                 }
 
-                return (Task<TRes>) binding.CoerceResult(
+                return (Task<TRes>) MemberBinding.CoerceResult(
                     complete(composer, out completed),
                     typeof(Task<TRes>));
             }

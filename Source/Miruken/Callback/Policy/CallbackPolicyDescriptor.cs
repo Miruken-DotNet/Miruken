@@ -21,7 +21,7 @@ namespace Miruken.Callback.Policy
         {
             Policy      = policy;
             _typed      = new Dictionary<Type, List<PolicyMemberBinding>>();
-            _compatible = new ConcurrentDictionary <object, IEnumerable<PolicyMemberBinding>>();
+            _compatible = new ConcurrentDictionary<object, IEnumerable<PolicyMemberBinding>>();
 
             foreach (var binding in bindings) AddBinding(binding);
         }
@@ -100,8 +100,7 @@ namespace Miruken.Callback.Policy
             if (key == null)
             {
                 var unknown = _unknown ??= new List<PolicyMemberBinding>();
-                unknown.AddSorted(member,
-                    PolicyMemberBinding.OrderByArity);
+                unknown.AddSorted(member, PolicyMemberBinding.OrderByArity);
                 return;
             }
 

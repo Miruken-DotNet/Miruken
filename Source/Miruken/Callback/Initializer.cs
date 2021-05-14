@@ -36,7 +36,7 @@
 
         public bool? AppliesTo(object callback, Type callbackType)
         {
-            return callback is Inquiry || callback is Creation;
+            return callback is Inquiry or Creation;
         }
 
         public IEnumerable<IFilter> GetFilters(

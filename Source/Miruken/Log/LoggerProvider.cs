@@ -16,8 +16,7 @@
         [Provides]
         public ILogger GetContextualLogger(Inquiry inquiry)
         {
-            var owner = inquiry.Parent?.Key as Type;
-            return owner == null ? null : _factory.CreateLogger(owner);
+            return inquiry.Parent?.Key is not Type owner ? null : _factory.CreateLogger(owner);
         }
     }
 }

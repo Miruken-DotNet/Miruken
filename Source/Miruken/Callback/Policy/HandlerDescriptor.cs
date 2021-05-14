@@ -11,10 +11,6 @@ namespace Miruken.Callback.Policy
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
     public class HandlerDescriptor : FilteredObject
     {
-        private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
-            new ReadOnlyDictionary<CallbackPolicy, CallbackPolicyDescriptor>(
-                new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>());
-
         public HandlerDescriptor(Type handlerType,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> policies,
             IDictionary<CallbackPolicy, CallbackPolicyDescriptor> staticPolicies)
@@ -33,11 +29,9 @@ namespace Miruken.Callback.Policy
             AddFilters(Attributes.OfType<IFilterProvider>().ToArray());
         }
 
-        public Type HandlerType { get; }
-
-        public Attribute[] Attributes { get; }
-
-        public int? Priority { get; set; }
+        public Type        HandlerType { get; }
+        public Attribute[] Attributes  { get; }
+        public int?        Priority    { get; set; }
 
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Policies       { get; }
         public IDictionary<CallbackPolicy, CallbackPolicyDescriptor> StaticPolicies { get; }
@@ -51,7 +45,7 @@ namespace Miruken.Callback.Policy
                 throw new ArgumentNullException(nameof(policy));
 
             CallbackPolicyDescriptor descriptor = null;
-            var policies = target == null || target is Type ? StaticPolicies : Policies;
+            var policies = target is null or Type ? StaticPolicies : Policies;
             if (policies?.TryGetValue(policy, out descriptor) != true)
                 return false;
 
@@ -61,31 +55,31 @@ namespace Miruken.Callback.Policy
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                dispatched = member.Dispatch(target, callback, composer, Priority, results)
+                dispatched = member.Dispatch(target, callback, composer, this, Priority, results)
                           || dispatched;
-                if (dispatched)
-                {
-                    if (!greedy) return true;
-                    hasConstructor |= isConstructor;
-                }
+                if (!dispatched) continue;
+                if (!greedy) return true;
+                hasConstructor |= isConstructor;
             }
 
             foreach (var member in descriptor.GetCompatibleMembers(callback))
             {
                 var isConstructor = member.Dispatcher.IsConstructor;
                 if (isConstructor && hasConstructor) continue;
-                dispatched = member.Dispatch(target, callback, composer, Priority, results)
+                dispatched = member.Dispatch(target, callback, composer, this, Priority, results)
                           || dispatched;
-                if (dispatched)
-                {
-                    if (!greedy) return true;
-                    hasConstructor |= isConstructor;
-                }
+                if (!dispatched) continue;
+                if (!greedy) return true;
+                hasConstructor |= isConstructor;
             }
 
             return dispatched;
         }
 
         private string DebuggerDisplay => $"{HandlerType.FullName}";
+        
+        private static readonly IDictionary<CallbackPolicy, CallbackPolicyDescriptor> Empty =
+            new ReadOnlyDictionary<CallbackPolicy, CallbackPolicyDescriptor>(
+                new Dictionary<CallbackPolicy, CallbackPolicyDescriptor>());
     }
 }

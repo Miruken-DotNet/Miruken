@@ -160,16 +160,15 @@
                 }
             }
 
-            if (staticPolicies != null)
+            if (staticPolicies == null) return descriptor;
+           
+            foreach (var binding in staticPolicies.SelectMany(p => p.Value))
             {
-                foreach (var binding in staticPolicies.SelectMany(p => p.Value))
-                {
-                    visitor?.Invoke(descriptor, binding);
-                    if (binding.Policy == Provides.Policy)
-                        AddImplicitLifestyle(binding);
-                }
+                visitor?.Invoke(descriptor, binding);
+                if (binding.Policy == Provides.Policy)
+                    AddImplicitLifestyle(binding);
             }
-
+            
             return descriptor;
         }
 

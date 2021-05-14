@@ -59,7 +59,7 @@
             set
             {
                 _result = value ?? RuntimeHelper.GetDefault(Type);
-                IsAsync = _result is Promise || _result is Task;
+                IsAsync = _result is Promise or Task;
             }
         }
 

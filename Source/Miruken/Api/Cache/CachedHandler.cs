@@ -30,8 +30,7 @@
             if (request.Request == null)
                 return Promise<TResponse>.Empty;
 
-            if (request.Action == CacheAction.Invalidate ||
-                request.Action == CacheAction.Refresh)
+            if (request.Action is CacheAction.Invalidate or CacheAction.Refresh)
             {
                 var response = _cache.TryRemove(request.Request, out var cached)
                      ? (Promise<TResponse>)cached.Response
@@ -44,9 +43,7 @@
                 request.Request,   // actual request
                 req => RefreshResponse<TResponse>(req, composer),   // add first time, 
                 (req, cached) =>   // update if stale or invalid
-                    cached.Response.State == PromiseState.Rejected  ||
-                    cached.Response.State == PromiseState.Cancelled ||
-                    DateTime.UtcNow >= cached.LastUpdated + request.TimeToLive
+                    cached.Response.State is PromiseState.Rejected or PromiseState.Cancelled || DateTime.UtcNow >= cached.LastUpdated + request.TimeToLive
                 ? RefreshResponse<TResponse>(req, composer)
                 : cached).Response;
         }

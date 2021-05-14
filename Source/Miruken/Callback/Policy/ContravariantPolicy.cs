@@ -38,10 +38,8 @@
         public override int Compare(object key1, object key2)
         {
             if (key1 == key2) return 0;
-            var type1 = key1 as Type;
-            if (type1 == null) return 1;
-            var type2 = key2 as Type;
-            if (type2 == null) return -1;
+            if (key1 is not Type type1) return 1;
+            if (key2 is not Type type2) return -1;
             if (type2.ContainsGenericParameters)
                 return type1.ContainsGenericParameters
                      ? type2.GetGenericArguments().Length -

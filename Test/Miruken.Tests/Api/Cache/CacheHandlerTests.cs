@@ -101,7 +101,7 @@
             }
             catch (Exception ex)
             {
-                Assert.AreEqual("Stock Exchange is down", ex.Message);
+                Assert.AreEqual("Stock Exchange is down.", ex.Message);
             }
             try
             {
@@ -110,7 +110,7 @@
             }
             catch (Exception ex)
             {
-                Assert.AreEqual("Stock Exchange is down", ex.Message);
+                Assert.AreEqual("Stock Exchange is down.", ex.Message);
             }
             Assert.AreEqual(2, StockQuoteHandler.Called);
         }

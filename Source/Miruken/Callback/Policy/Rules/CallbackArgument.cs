@@ -29,8 +29,8 @@ namespace Miruken.Callback.Policy.Rules
                         return false;
                 }
             }
-            var restrict = context.Category.InKey as Type;
-            if (restrict == null || paramType.Is(restrict) || restrict.Is(paramType))
+
+            if (context.Category.InKey is not Type restrict || paramType.Is(restrict) || restrict.Is(paramType))
                 return true;
 
             context.AddError(

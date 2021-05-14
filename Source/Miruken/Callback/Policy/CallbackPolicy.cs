@@ -43,10 +43,9 @@
                  : NormalizeKey(bindingInfo.OutKey);
         }
 
-        protected static object NormalizeKey(object key)
+        private static object NormalizeKey(object key)
         {
-            var varianceType = key as Type;
-            if (varianceType == null) return key;
+            if (key is not Type varianceType) return key;
             if (varianceType.ContainsGenericParameters &&
                 !varianceType.IsGenericTypeDefinition &&
                 !varianceType.IsGenericParameter)

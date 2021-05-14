@@ -22,8 +22,8 @@
             var dispatch = binding.Dispatcher;
             return dispatch.Attributes.OfType<IFormatMatching>()
                        .Any(f => f.Matches(format))
-                || dispatch.Owner.Attributes.OfType<IFormatMatching>()
-                       .Any(f => f.Matches(format));
+                /*|| dispatch.Owner.Attributes.OfType<IFormatMatching>()
+                       .Any(f => f.Matches(format))*/;
         }
 
         public static void AddFilters(params IFilterProvider[] providers) =>

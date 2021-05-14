@@ -15,7 +15,6 @@
           IFilterCallback, IBatchCallback,
           IDispatchCallback, IDispatchCallbackGuard
     {
-        private CallbackPolicy _policy;
         private readonly List<object> _results;
         private readonly List<object> _promises;
         private object _result;
@@ -34,11 +33,7 @@
         public bool   WantsAsync { get; init; }
         public bool   IsAsync    { get; private set; }
 
-        public CallbackPolicy Policy
-        {
-            get => _policy ?? Handles.Policy;
-            set => _policy = value;
-        }
+        public CallbackPolicy Policy => Handles.Policy;
 
         public ICollection<object> Results => _results.AsReadOnly();
 
@@ -88,7 +83,7 @@
             set
             {
                 _result = value;
-                IsAsync = _result is Promise || _result is Task;
+                IsAsync = _result is Promise or Task;
             }
         }
 

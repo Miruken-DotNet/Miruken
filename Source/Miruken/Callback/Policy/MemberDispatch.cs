@@ -40,8 +40,7 @@
 
 #endregion
 
-        protected MemberDispatch(MethodBase member, Type returnType,
-            Attribute[] attributes = null)
+        protected MemberDispatch(MethodBase member, Type returnType, Attribute[] attributes = null)
         {
             Member      = member ?? throw new ArgumentNullException(nameof(member));
             ReturnType  = returnType ?? throw new ArgumentNullException(nameof(returnType));
@@ -70,10 +69,7 @@
         public bool SkipFilters   => (DispatchType & NoFilters) > 0;
         public bool IsAsync       => IsPromise || IsTask;
         public bool IsConstructor => IsStatic && Member is ConstructorInfo;
-
-        public HandlerDescriptor Owner =>
-            HandlerDescriptorFactory.Current.GetDescriptor(Member.ReflectedType);
-
+        
         public abstract object Invoke(
             object target, object[] args, Type returnType = null);
 

@@ -8,8 +8,8 @@ namespace Miruken.Callback
         AllowMultiple = true, Inherited = false)]
     public abstract class CategoryAttribute : Attribute
     {
-        public object InKey  { get; protected set; }
-        public object OutKey { get; protected set; }
+        public object InKey  { get; protected init; }
+        public object OutKey { get; protected init; }
         public bool   Strict { get; set; }
 
         public abstract CallbackPolicy CallbackPolicy { get; }

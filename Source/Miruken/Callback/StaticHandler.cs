@@ -16,13 +16,11 @@
             if (!greedy) handlers = handlers.Reverse();
             foreach (var descriptor in handlers)
             {
-                if (descriptor.Dispatch(
-                        policy, descriptor.HandlerType, callback, greedy,
-                        composer, results))
-                {
-                    if (!greedy) return true;
-                    handled = true;
-                }
+                if (!descriptor.Dispatch(
+                    policy, descriptor.HandlerType, callback, greedy,
+                    composer, results)) continue;
+                if (!greedy) return true;
+                handled = true;
             }
             return handled;
         }

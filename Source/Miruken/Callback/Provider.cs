@@ -21,8 +21,7 @@
         [Provides]
         public object Provide(Inquiry inquiry)
         {
-            var type = inquiry.Key as Type;
-            if (type == null || !inquiry.Metadata.IsEmpty) return null;
+            if (inquiry.Key is not Type type || !inquiry.Metadata.IsEmpty) return null;
             return _providesType.Is(type) ? _value : null;
         }
     }

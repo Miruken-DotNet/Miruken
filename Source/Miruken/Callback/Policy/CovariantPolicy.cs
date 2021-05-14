@@ -24,10 +24,8 @@
         public override int Compare(object key1, object key2)
         {
             if (key1 == key2) return 0;
-            var type1 = key1 as Type;
-            if (type1 == null) return 1;
-            var type2 = key2 as Type;
-            if (type2 == null) return -1;
+            if (key1 is not Type type1) return 1;
+            if (key2 is not Type type2) return -1;
             if (type2.ContainsGenericParameters) return -1;
             if (type1.ContainsGenericParameters) return 1;
             return type1.IsAssignableFrom(type2) ? -1 : 1;
@@ -74,8 +72,7 @@
         public override IEnumerable<object> GetCompatibleKeys(
             object key, IEnumerable available)
         {
-            var type = key as Type;
-            if (type == null)
+            if (key is not Type type)
                 return available.Cast<object>()
                     .Where(k => !Equals(key, k) && Equals(k, key));
 

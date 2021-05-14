@@ -62,62 +62,60 @@
             return Category.Approve(callback, this);
         }
 
-        public override bool Dispatch(object target, object callback, 
-            IHandler composer, int? priority = null, ResultsDelegate results = null)
+        public bool Dispatch(object target, object callback, 
+            IHandler composer, HandlerDescriptor descriptor, int? priority = null,
+            ResultsDelegate results = null)
         {
             var resultType = Policy.GetResultType?.Invoke(callback);
-            return Invoke(target, callback, composer, resultType, priority, results);
+            return Invoke(target, callback, composer, descriptor, resultType, priority, results);
         }
 
         public Type CloseHandlerType(Type handlerType, object key)
         {
-            var type = key as Type;
-            if (type == null || !handlerType.IsGenericTypeDefinition)
+            if (key is not Type type || !handlerType.IsGenericTypeDefinition)
                 return handlerType;
+            
             var index = CallbackIndex;
             if (index.HasValue)
             {
                 var callback = Dispatcher.Arguments[index.Value];
                 var mapping  = new GenericMapping(
                     handlerType.GetGenericArguments(), new[] { callback });
-                if (mapping.Complete)
+                if (!mapping.Complete) return null;
+                try
                 {
-                    try
-                    {
-                        var closed = mapping.MapTypes(new[] { type });
-                        return handlerType.MakeGenericType(closed);
-                    }
-                    catch (ArgumentException)
-                    {
-                        // Most likely a constraint violation
-                        return null;
-                    }
+                    var closed = mapping.MapTypes(new[] { type });
+                    return handlerType.MakeGenericType(closed);
+                }
+                catch (ArgumentException)
+                {
+                    // Most likely a constraint violation
+                    return null;
                 }
             }
-            else if (!Dispatcher.IsVoid)
+
+            if (Dispatcher.IsVoid) return null;
+            
+            var returnMapping = new GenericMapping(
+                handlerType.GetGenericArguments(),
+                Array.Empty<Argument>(), Dispatcher.ReturnType);
+            
+            if (!returnMapping.Complete) return null;
+            
+            try
             {
-                var mapping = new GenericMapping(
-                    handlerType.GetGenericArguments(),
-                    Array.Empty<Argument>(), Dispatcher.ReturnType);
-                if (mapping.Complete)
-                {
-                    try
-                    {
-                        var closed = mapping.MapTypes(Array.Empty<Type>(), type);
-                        return handlerType.MakeGenericType(closed);
-                    }
-                    catch (ArgumentException)
-                    {
-                        // Most likely a constraint violation
-                        return null;
-                    }
-                }
+                var closed = returnMapping.MapTypes(Array.Empty<Type>(), type);
+                return handlerType.MakeGenericType(closed);
             }
-            return null;
+            catch (ArgumentException)
+            {
+                // Most likely a constraint violation
+                return null;
+            }
         }
 
-        private bool Invoke(object target, object callback,
-            IHandler composer, Type resultType, int? priority, ResultsDelegate results)
+        private bool Invoke(object target, object callback, IHandler composer,
+            HandlerDescriptor descriptor, Type resultType, int? priority, ResultsDelegate results)
         {
             var ruleArgs   = Rule?.ResolveArgs(callback) ?? Array.Empty<object>();
             var dispatcher = Dispatcher is GenericMethodDispatch genericDispatch
@@ -189,7 +187,7 @@
 
                 var filters = composer.GetOrderedFilters(
                     this, dispatcher, callback, callbackType, Filters,
-                    dispatcher.Owner.Filters, Policy.Filters, targetFilters);
+                    descriptor?.Filters, Policy.Filters, targetFilters);
 
                 if (filters == null) return false;
 
@@ -223,17 +221,13 @@
         private bool Accept(object callback, object result,
             Type returnType, int? priority, ResultsDelegate results, bool isAsync)
         {
-            var accepted = Policy.AcceptResult?.Invoke(result, this)
-                         ?? result != null;
-            if (accepted && (result != null))
-            {
-                var asyncCallback = callback as IAsyncCallback;
-                result = CoerceResult(result, returnType,
-                    isAsync || asyncCallback?.WantsAsync == true);
-                if (result != null)
-                    return results?.Invoke(result, Category.Strict, priority) != false;
-            }
-            return accepted;
+            var accepted = Policy.AcceptResult?.Invoke(result, this) ?? result != null;
+            if (!accepted || (result == null)) return accepted;
+            var asyncCallback = callback as IAsyncCallback;
+            result = CoerceResult(result, returnType, isAsync || asyncCallback?.WantsAsync == true);
+            if (result != null)
+                return results?.Invoke(result, Category.Strict, priority) != false;
+            return true;
         }
 
         private object ResolveArgs(MemberDispatch dispatcher, object callback,
@@ -278,8 +272,7 @@
                     if (argumentType == typeof(IServiceProvider) || argumentType == typeof(IServiceScopeFactory))
                     {
                         var singletonLike = filters?.Any(f =>
-                            f.Item2 is SingletonAttribute ||
-                            f.Item2 is ContextualAttribute {Rooted: true}) == true;
+                            f.Item2 is SingletonAttribute or ContextualAttribute {Rooted: true}) == true;
 
                         if (singletonLike)
                         {
@@ -327,13 +320,12 @@
 
             Array.Copy(ruleArgs, resolved, ruleArgs.Length);
 
-            if (promises.Count == 1)
-                return promises[0].Then((_, _) => resolved);
-
-            if (promises.Count > 1)
-                return Promise.All(promises).Then((_, _) => resolved);
-
-            return resolved;
+            return promises.Count switch
+            {
+                1 => promises[0].Then((_, _) => resolved),
+                > 1 => Promise.All(promises).Then((_, _) => resolved),
+                _ => resolved
+            };
         }
 
         private object GetCallbackInfo(object callback, object[] args,

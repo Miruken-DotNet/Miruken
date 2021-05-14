@@ -62,7 +62,7 @@
             set
             {
                 _result = value;
-                IsAsync = _result is Promise || _result is Task;
+                IsAsync = _result is Promise or Task;
             }
         }
 
