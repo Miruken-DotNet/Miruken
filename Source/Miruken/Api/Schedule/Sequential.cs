@@ -1,6 +1,5 @@
-﻿namespace Miruken.Api.Schedule
+﻿namespace Miruken.Api.Schedule;
+
+public class Sequential : Scheduled
 {
-    public class Sequential : Scheduled
-    {
-    }
 }

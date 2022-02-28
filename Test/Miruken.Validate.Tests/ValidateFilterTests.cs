@@ -1,56 +1,116 @@
 ﻿// ReSharper disable UnusedMember.Local
-namespace Miruken.Validate.Tests
+namespace Miruken.Validate.Tests;
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using Callback;
+using Callback.Policy;
+using Concurrency;
+using DataAnnotations;
+using FluentValidation;
+using global::FluentValidation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Model;
+using Validate;
+
+[TestClass]
+[SuppressMessage("ReSharper", "CA1822")]
+public class ValidateFilterTests
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Threading.Tasks;
-    using Callback;
-    using Callback.Policy;
-    using Concurrency;
-    using DataAnnotations;
-    using FluentValidation;
-    using global::FluentValidation;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Model;
-    using Validate;
+    private IHandler _handler;
+    private IHandlerDescriptorFactory _factory;
 
-    [TestClass]
-    [SuppressMessage("ReSharper", "CA1822")]
-    public class ValidateFilterTests
+    [ClassInitialize]
+    public static void Initialize(TestContext context)
     {
-        private IHandler _handler;
-        private IHandlerDescriptorFactory _factory;
+        Handles.Policy.AddFilters(new ValidateAttribute());
+    }
 
-        [ClassInitialize]
-        public static void Initialize(TestContext context)
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _factory = new MutableHandlerDescriptorFactory();
+        _factory.RegisterDescriptor<TeamHandler>();
+        _factory.RegisterDescriptor<FilterProvider>();
+        _factory.RegisterDescriptor<DataAnnotationsValidator>();
+        _factory.RegisterDescriptor<FluentValidationValidator>();
+        HandlerDescriptorFactory.UseFactory(_factory);
+
+        _handler = new TeamHandler()
+                   + new FilterProvider()
+                   + new DataAnnotationsValidator()
+                   + new FluentValidationValidator();
+    }
+
+    [TestMethod]
+    public async Task Should_Validate_Command()
+    {
+        var team = await _handler.CommandAsync<Team>(new CreateTeam
         {
-            Handles.Policy.AddFilters(new ValidateAttribute());
+            Team = new Team
+            {
+                Name  = "Liverpool Owen",
+                Coach = new Coach
+                {
+                    FirstName = "Zinedine",
+                    LastName  = "Zidane",
+                    License   = "A"
+                }
+            }
+        });
+        Assert.IsTrue(team.ValidationOutcome.IsValid);
+        Assert.AreEqual(1, team.Id);
+        Assert.IsTrue(team.Active);
+    }
+
+    [TestMethod]
+    public async Task Should_Match_All_Validators()
+    {
+        try
+        {
+            await _handler.CommandAsync(new RemoveTeam
+            {
+                Team = new Team()
+            });
+            Assert.Fail("must not succeed");
         }
-
-        [TestInitialize]
-        public void TestInitialize()
+        catch (Validate.ValidationException vex)
         {
-            _factory = new MutableHandlerDescriptorFactory();
-            _factory.RegisterDescriptor<TeamHandler>();
-            _factory.RegisterDescriptor<FilterProvider>();
-            _factory.RegisterDescriptor<DataAnnotationsValidator>();
-            _factory.RegisterDescriptor<FluentValidationValidator>();
-            HandlerDescriptorFactory.UseFactory(_factory);
-
-            _handler = new TeamHandler()
-                     + new FilterProvider()
-                     + new DataAnnotationsValidator()
-                     + new FluentValidationValidator();
+            var outcome = vex.Outcome;
+            Assert.IsNotNull(outcome);
+            var team = outcome.GetOutcome("Team");
+            Assert.IsNotNull(team);
+            CollectionAssert.AreEqual(new[] { "Id" }, team.Culprits);
+            Assert.AreEqual("'Team Id' must be greater than '0'.", team["Id"]);
         }
+    }
 
-        [TestMethod]
-        public async Task Should_Validate_Command()
+    [TestMethod]
+    public async Task Should_Reject_Invalid_Command()
+    {
+        try
         {
-            var team = await _handler.CommandAsync<Team>(new CreateTeam
+            await _handler.CommandAsync(new CreateTeam());
+        }
+        catch (Validate.ValidationException vex)
+        {
+            var outcome = vex.Outcome;
+            Assert.IsNotNull(outcome);
+            CollectionAssert.AreEqual(new[] { "Team" }, outcome.Culprits);
+            Assert.AreEqual("'Team' must not be empty.", outcome["Team"]);
+        }
+    }
+
+    [TestMethod]
+    public async Task Should_Reject_Invalid_Callback_Content()
+    {
+        try
+        {
+            await _handler.CommandAsync(new CreateTeam
             {
                 Team = new Team
                 {
-                    Name  = "Liverpool Owen",
                     Coach = new Coach
                     {
                         FirstName = "Zinedine",
@@ -59,164 +119,103 @@ namespace Miruken.Validate.Tests
                     }
                 }
             });
-            Assert.IsTrue(team.ValidationOutcome.IsValid);
-            Assert.AreEqual(1, team.Id);
-            Assert.IsTrue(team.Active);
+            Assert.Fail("must not succeed");
         }
-
-        [TestMethod]
-        public async Task Should_Match_All_Validators()
+        catch (Validate.ValidationException vex)
         {
-            try
-            {
-                await _handler.CommandAsync(new RemoveTeam
-                {
-                    Team = new Team()
-                });
-                Assert.Fail("must not succeed");
-            }
-            catch (Validate.ValidationException vex)
-            {
-                var outcome = vex.Outcome;
-                Assert.IsNotNull(outcome);
-                var team = outcome.GetOutcome("Team");
-                Assert.IsNotNull(team);
-                CollectionAssert.AreEqual(new[] { "Id" }, team.Culprits);
-                Assert.AreEqual("'Team Id' must be greater than '0'.", team["Id"]);
-            }
+            var outcome = vex.Outcome;
+            Assert.IsNotNull(outcome);
+            var team = outcome.GetOutcome("Team");
+            Assert.IsNotNull(team);
+            CollectionAssert.AreEqual(new[] { "Name" }, team.Culprits);
+            Assert.AreEqual($"The Name field is required.{Environment.NewLine}'Name' must not be empty.", team["Name"]);
         }
+    }
 
-        [TestMethod]
-        public async Task Should_Reject_Invalid_Command()
+    public class TeamAction
+    {
+        public Team Team { get; set; }
+    }
+
+    public class CreateTeam : TeamAction
+    {
+    }
+
+    public class TeamCreated : TeamAction
+    {
+    }
+
+    public class RemoveTeam : TeamAction
+    {
+    }
+
+    public class TeamRemoved : TeamAction
+    {
+    }
+
+    public class TeamIntegrity : AbstractValidator<Team>
+    {
+        public TeamIntegrity()
         {
-            try
-            {
-                await _handler.CommandAsync(new CreateTeam());
-            }
-            catch (Validate.ValidationException vex)
-            {
-                var outcome = vex.Outcome;
-                Assert.IsNotNull(outcome);
-                CollectionAssert.AreEqual(new[] { "Team" }, outcome.Culprits);
-                Assert.AreEqual("'Team' must not be empty.", outcome["Team"]);
-            }
+            RuleFor(t => t.Name).NotEmpty();
         }
+    }
 
-        [TestMethod]
-        public async Task Should_Reject_Invalid_Callback_Content()
+    public class TeamActionIntegrity : AbstractValidator<TeamAction>
+    {
+        public TeamActionIntegrity()
         {
-            try
-            {
-                await _handler.CommandAsync(new CreateTeam
-                {
-                    Team = new Team
-                    {
-                        Coach = new Coach
-                        {
-                            FirstName = "Zinedine",
-                            LastName  = "Zidane",
-                            License   = "A"
-                        }
-                    }
-                });
-                Assert.Fail("must not succeed");
-            }
-            catch (Validate.ValidationException vex)
-            {
-                var outcome = vex.Outcome;
-                Assert.IsNotNull(outcome);
-                var team = outcome.GetOutcome("Team");
-                Assert.IsNotNull(team);
-                CollectionAssert.AreEqual(new[] { "Name" }, team.Culprits);
-                Assert.AreEqual($"The Name field is required.{Environment.NewLine}'Name' must not be empty.", team["Name"]);
-            }
+            RuleFor(ta => ta.Team).NotEmpty().Valid();
         }
+    }
 
-        public class TeamAction
+    public class RemoveTeamIntegrity : AbstractValidator<RemoveTeam>
+    {
+        public RemoveTeamIntegrity()
         {
-            public Team Team { get; set; }
+            RuleFor(ta => ta.Team.Id).GreaterThan(0);
         }
+    }
 
-        public class CreateTeam : TeamAction
+    public class TeamHandler : Handler
+    {
+        private int _teamId;
+
+        [Handles]
+        public Promise<Team> Create(CreateTeam create, IHandler composer)
         {
+            var team = create.Team;
+            team.Id = ++_teamId;
+            team.Active = true;
+
+            composer.CommandAllAsync(new TeamCreated { Team = team });
+            return Promise.Resolved(team);
         }
 
-        public class TeamCreated : TeamAction
+        [Handles]
+        public void Remove(RemoveTeam remove, IHandler composer)
         {
+            var team = remove.Team;
+            team.Active = false;
+            composer.CommandAllAsync(new TeamRemoved { Team = team });
         }
+    }
 
-        public class RemoveTeam : TeamAction
-        {
-        }
+    private class FilterProvider : Handler
+    {
+        [Provides]
+        public ValidateFilter<TCb, TRes> Create<TCb, TRes>() => new();
 
-        public class TeamRemoved : TeamAction
-        {
-        }
+        [Provides]
+        public IValidator<Team>[] TeamValidators() =>
+            new IValidator<Team>[] { new TeamIntegrity() };
 
-        public class TeamIntegrity : AbstractValidator<Team>
-        {
-            public TeamIntegrity()
-            {
-                RuleFor(t => t.Name).NotEmpty();
-            }
-        }
+        [Provides]
+        public IValidator<TeamAction>[] TeamActionValidators() =>
+            new IValidator<TeamAction>[] { new TeamActionIntegrity() };
 
-        public class TeamActionIntegrity : AbstractValidator<TeamAction>
-        {
-            public TeamActionIntegrity()
-            {
-                RuleFor(ta => ta.Team).NotEmpty().Valid();
-            }
-        }
-
-        public class RemoveTeamIntegrity : AbstractValidator<RemoveTeam>
-        {
-            public RemoveTeamIntegrity()
-            {
-                RuleFor(ta => ta.Team.Id).GreaterThan(0);
-            }
-        }
-
-        public class TeamHandler : Handler
-        {
-            private int _teamId;
-
-            [Handles]
-            public Promise<Team> Create(CreateTeam create, IHandler composer)
-            {
-                var team = create.Team;
-                team.Id = ++_teamId;
-                team.Active = true;
-
-                composer.CommandAllAsync(new TeamCreated { Team = team });
-                return Promise.Resolved(team);
-            }
-
-            [Handles]
-            public void Remove(RemoveTeam remove, IHandler composer)
-            {
-                var team = remove.Team;
-                team.Active = false;
-                composer.CommandAllAsync(new TeamRemoved { Team = team });
-            }
-        }
-
-        private class FilterProvider : Handler
-        {
-            [Provides]
-            public ValidateFilter<TCb, TRes> Create<TCb, TRes>() => new();
-
-            [Provides]
-            public IValidator<Team>[] TeamValidators() =>
-                new IValidator<Team>[] { new TeamIntegrity() };
-
-            [Provides]
-            public IValidator<TeamAction>[] TeamActionValidators() =>
-                new IValidator<TeamAction>[] { new TeamActionIntegrity() };
-
-            [Provides]
-            public IValidator<RemoveTeam>[] RemoveTeamValidators() =>
-                new IValidator<RemoveTeam>[] { new RemoveTeamIntegrity() };
-        }
+        [Provides]
+        public IValidator<RemoveTeam>[] RemoveTeamValidators() =>
+            new IValidator<RemoveTeam>[] { new RemoveTeamIntegrity() };
     }
 }

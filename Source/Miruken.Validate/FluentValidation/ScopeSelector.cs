@@ -1,27 +1,26 @@
-﻿namespace Miruken.Validate.FluentValidation
+﻿namespace Miruken.Validate.FluentValidation;
+
+using System.Linq;
+using global::FluentValidation;
+using global::FluentValidation.Internal;
+
+public class ScopeSelector : IValidatorSelector
 {
-    using System.Linq;
-    using global::FluentValidation;
-    using global::FluentValidation.Internal;
+    private readonly IScopeMatching _scope;
 
-    public class ScopeSelector : IValidatorSelector
+    public ScopeSelector(IScopeMatching scope)
     {
-        private readonly IScopeMatching _scope;
+        _scope = scope;
+    }
 
-        public ScopeSelector(IScopeMatching scope)
-        {
-            _scope = scope;
-        }
-
-        public bool CanExecute(IValidationRule rule,
-            string propertyPath, IValidationContext context)
-        {
-            var ruleSets = rule.RuleSets;
-            if (ruleSets == null || ruleSets.Length == 0)
-                return _scope.Matches(Scopes.Default);
-            var scopes = ruleSets.Select(
-                scope => scope != "default" ? scope : Scopes.Default);
-            return scopes.Any(scope => _scope.Matches(scope));
-        }
+    public bool CanExecute(IValidationRule rule,
+        string propertyPath, IValidationContext context)
+    {
+        var ruleSets = rule.RuleSets;
+        if (ruleSets == null || ruleSets.Length == 0)
+            return _scope.Matches(Scopes.Default);
+        var scopes = ruleSets.Select(
+            scope => scope != "default" ? scope : Scopes.Default);
+        return scopes.Any(scope => _scope.Matches(scope));
     }
 }

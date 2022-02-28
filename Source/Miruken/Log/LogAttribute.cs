@@ -1,11 +1,10 @@
-﻿namespace Miruken.Log
-{
-    using Callback;
+﻿namespace Miruken.Log;
 
-    public class LogAttribute : FilterAttribute
+using Callback;
+
+public class LogAttribute : FilterAttribute
+{
+    public LogAttribute() : base(typeof(LogFilter<,>))
     {
-        public LogAttribute() : base(typeof(LogFilter<,>))
-        {
-        }
     }
 }

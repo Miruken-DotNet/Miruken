@@ -1,12 +1,11 @@
-﻿namespace Miruken.Callback
-{
-    using System;
+﻿namespace Miruken.Callback;
 
-    [AttributeUsage(AttributeTargets.Class  |
-                    AttributeTargets.Method |
-                    AttributeTargets.Property,
-        Inherited = false)]
-    public sealed class SkipFiltersAttribute : Attribute
-    {
-    }
+using System;
+
+[AttributeUsage(AttributeTargets.Class  |
+                AttributeTargets.Method |
+                AttributeTargets.Property,
+    Inherited = false)]
+public sealed class SkipFiltersAttribute : Attribute
+{
 }

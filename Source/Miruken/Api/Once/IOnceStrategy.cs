@@ -1,10 +1,9 @@
-﻿namespace Miruken.Api.Once
-{
-    using System.Threading.Tasks;
-    using Callback;
+﻿namespace Miruken.Api.Once;
 
-    public interface IOnceStrategy
-    {
-        Task Complete(Once once, IHandler composer);
-    }
+using System.Threading.Tasks;
+using Callback;
+
+public interface IOnceStrategy
+{
+    Task Complete(Once once, IHandler composer);
 }

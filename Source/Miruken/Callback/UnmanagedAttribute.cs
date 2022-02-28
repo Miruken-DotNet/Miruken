@@ -1,9 +1,8 @@
-﻿namespace Miruken.Callback
-{
-    using System;
+﻿namespace Miruken.Callback;
 
-    [AttributeUsage(AttributeTargets.Class)]
-    public class UnmanagedAttribute : Attribute
-    {
-    }
+using System;
+
+[AttributeUsage(AttributeTargets.Class)]
+public class UnmanagedAttribute : Attribute
+{
 }

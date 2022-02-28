@@ -1,9 +1,8 @@
-﻿namespace Miruken
-{
-    using Concurrency;
+﻿namespace Miruken;
 
-    public interface IInitialize
-    {
-        Promise Initialize();
-    }
+using Concurrency;
+
+public interface IInitialize
+{
+    Promise Initialize();
 }

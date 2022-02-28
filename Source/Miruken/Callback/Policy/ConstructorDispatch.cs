@@ -1,54 +1,53 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy;
+
+using System;
+using System.Globalization;
+using System.Reflection;
+using System.Threading;
+using Infrastructure;
+
+public class ConstructorDispatch : MemberDispatch
 {
-    using System;
-    using System.Globalization;
-    using System.Reflection;
-    using System.Threading;
-    using Infrastructure;
+    private Delegate _delegate;
+    private bool _initialized;
 
-    public class ConstructorDispatch : MemberDispatch
+    public ConstructorDispatch(
+        ConstructorInfo constructor, Attribute[] attributes = null)
+        : base(constructor, constructor.ReflectedType, attributes)
     {
-        private Delegate _delegate;
-        private bool _initialized;
+        DispatchType |= DispatchTypeEnum.StaticCall;
+    }
 
-        public ConstructorDispatch(
-            ConstructorInfo constructor, Attribute[] attributes = null)
-            : base(constructor, constructor.ReflectedType, attributes)
+    public ConstructorInfo Constructor => (ConstructorInfo)Member;
+
+    public override object Invoke(
+        object target, object[] args, Type returnType = null)
+    {
+        if (IsLateBound)
         {
-            DispatchType |= DispatchTypeEnum.StaticCall;
+            return Constructor.Invoke(
+                Binding, null, args, CultureInfo.InvariantCulture);
         }
 
-        public ConstructorInfo Constructor => (ConstructorInfo)Member;
-
-        public override object Invoke(
-            object target, object[] args, Type returnType = null)
+        if (!_initialized)
         {
-            if (IsLateBound)
-            {
-                return Constructor.Invoke(
-                    Binding, null, args, CultureInfo.InvariantCulture);
-            }
-
-            if (!_initialized)
-            {
-                object guard = this;
-                LazyInitializer.EnsureInitialized(
-                    ref _delegate, ref _initialized, ref guard, CreateDelegate);
-            }
-
-            var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
-            return MemberDelegates.TryGetValue(delegateFlags, out var invoker)
-                 ? invoker.Item2(_delegate, target, args)
-                 : null;
+            object guard = this;
+            LazyInitializer.EnsureInitialized(
+                ref _delegate, ref _initialized, ref guard, CreateDelegate);
         }
 
-        private Delegate CreateDelegate()
-        {
-            var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
-            return MemberDelegates.TryGetValue(delegateFlags, out var invoker)
-                ? RuntimeHelper.CompileConstructor(Constructor, invoker.Item1)
-                : throw new InvalidOperationException(
-                     $"Unable to create delegate for constructor {Constructor}");
-        }
+        var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
+        return MemberDelegates.TryGetValue(delegateFlags, out var invoker)
+            ? invoker.Item2(_delegate, target, args)
+            : null;
+    }
+
+    private Delegate CreateDelegate()
+    {
+        var delegateFlags = DispatchType & DispatchTypeEnum.DelegateMask;
+        return MemberDelegates.TryGetValue(delegateFlags, out var invoker)
+            ? RuntimeHelper.CompileConstructor(Constructor, invoker.Item1)
+            : throw new InvalidOperationException(
+                $"Unable to create delegate for constructor {Constructor}");
     }
 }

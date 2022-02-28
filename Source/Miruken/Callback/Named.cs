@@ -1,36 +1,39 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System;
+using Policy.Bindings;
+
+public class Named : IBindingConstraint
 {
-    using System;
-    using Policy.Bindings;
-
-    public class Named : IBindingConstraint
+    public Named(string name)
     {
-        public Named(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("Name cannot be empty.");
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentException("Name cannot be empty.");
 
-            Name = name;
-        }
-
-        public string Name { get; }
-
-        public void Require(BindingMetadata metadata)
-        {
-            metadata.Name = Name;
-        }
-
-        public bool Matches(BindingMetadata metadata)
-        {
-            return metadata.Name == null || metadata.Name == Name;
-        }
+        Name = name;
     }
 
-    public class NamedAttribute : ConstraintAttribute
+    public string Name { get; }
+
+    public void Require(BindingMetadata metadata)
     {
-        public NamedAttribute(string name)
-            : base(new Named(name))
-        {       
-        }
+        if (metadata == null)
+            throw new ArgumentNullException(nameof(metadata));
+        metadata.Name = Name;
+    }
+
+    public bool Matches(BindingMetadata metadata)
+    {
+        if (metadata == null)
+            throw new ArgumentNullException(nameof(metadata));
+        return metadata.Name == null || metadata.Name == Name;
+    }
+}
+
+public class NamedAttribute : ConstraintAttribute
+{
+    public NamedAttribute(string name)
+        : base(new Named(name))
+    {       
     }
 }

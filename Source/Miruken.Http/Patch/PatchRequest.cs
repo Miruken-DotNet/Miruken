@@ -1,26 +1,25 @@
-﻿namespace Miruken.Http.Patch
-{
-    public class PatchRequest<TPatch, TResource>
-          : ResourceRequest<TPatch, PatchResponse<TResource>>
-    {
-        public PatchRequest()
-        {
-        }
+﻿namespace Miruken.Http.Patch;
 
-        public PatchRequest(TPatch request) : base(request)
-        {
-        }
+public class PatchRequest<TPatch, TResource>
+    : ResourceRequest<TPatch, PatchResponse<TResource>>
+{
+    public PatchRequest()
+    {
     }
 
-    public class PatchResponse<TResource> : ResourceResponse<TResource>
+    public PatchRequest(TPatch request) : base(request)
     {
-        public PatchResponse()
-        {          
-        }
+    }
+}
 
-        public PatchResponse(TResource resource)
-            : base(resource)
-        {
-        }
+public class PatchResponse<TResource> : ResourceResponse<TResource>
+{
+    public PatchResponse()
+    {          
+    }
+
+    public PatchResponse(TResource resource)
+        : base(resource)
+    {
     }
 }

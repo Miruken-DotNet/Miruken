@@ -1,89 +1,88 @@
-﻿namespace Miruken.Map
+﻿namespace Miruken.Map;
+
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Callback;
+using Callback.Policy;
+using Concurrency;
+using Infrastructure;
+
+[DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
+public class Mapping : ICallback, IAsyncCallback, IDispatchCallback
 {
-    using System;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
-    using Callback;
-    using Callback.Policy;
-    using Concurrency;
-    using Infrastructure;
+    private object _result;
 
-    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    public class Mapping : ICallback, IAsyncCallback, IDispatchCallback
+    public Mapping(object source, object typeOrTarget,
+        object format = null)
     {
-        private object _result;
+        Source = source 
+                 ?? throw new ArgumentNullException(nameof(source));
+        TypeOrTarget = typeOrTarget
+                       ?? throw new ArgumentNullException(nameof(typeOrTarget));
+        Format = format;
+    }
 
-        public Mapping(object source, object typeOrTarget,
-                       object format = null)
+    public object Source       { get; }
+    public object TypeOrTarget { get; }
+    public object Format       { get; }
+    public bool   WantsAsync   { get; set; }
+    public bool   IsAsync      { get; private set; }
+
+    public Type Type =>
+        TypeOrTarget as Type ?? TypeOrTarget.GetType();
+
+    public object Target => 
+        TypeOrTarget is Type ? null : TypeOrTarget;
+
+    public Type ResultType => 
+        WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();
+
+    public CallbackPolicy Policy => Maps.Policy;
+
+    public object Result
+    {
+        get
         {
-            Source = source 
-                ?? throw new ArgumentNullException(nameof(source));
-            TypeOrTarget = typeOrTarget
-                ?? throw new ArgumentNullException(nameof(typeOrTarget));
-            Format = format;
-        }
+            _result ??= RuntimeHelper.GetDefault(Type);
 
-        public object Source       { get; }
-        public object TypeOrTarget { get; }
-        public object Format       { get; }
-        public bool   WantsAsync   { get; set; }
-        public bool   IsAsync      { get; private set; }
-
-        public Type Type =>
-            TypeOrTarget as Type ?? TypeOrTarget.GetType();
-
-        public object Target => 
-            TypeOrTarget is Type ? null : TypeOrTarget;
-
-        public Type ResultType => 
-            WantsAsync || IsAsync ? typeof(Promise) : _result?.GetType();
-
-        public CallbackPolicy Policy => Maps.Policy;
-
-        public object Result
-        {
-            get
+            if (IsAsync)
             {
-                _result ??= RuntimeHelper.GetDefault(Type);
-
-                if (IsAsync)
-                {
-                    if (!WantsAsync)
-                        _result = (_result as Promise)?.Wait();
-                }
-                else if (WantsAsync)
-                    _result = Promise.Resolved(_result);
-
-                return _result;
+                if (!WantsAsync)
+                    _result = (_result as Promise)?.Wait();
             }
-            set
-            {
-                _result = value ?? RuntimeHelper.GetDefault(Type);
-                IsAsync = _result is Promise or Task;
-            }
-        }
+            else if (WantsAsync)
+                _result = Promise.Resolved(_result);
 
-        private bool SetMapping(object mapping, bool strict, int? priority = null)
-        {
-            var mapped = mapping != null;
-            if (mapped) Result = mapping;
-            return mapped;
+            return _result;
         }
-
-        public bool Dispatch(object handler, ref bool greedy, IHandler composer)
+        set
         {
-            return Policy.Dispatch(
-                handler, this, greedy, composer, SetMapping)
-                || _result != null;
+            _result = value ?? RuntimeHelper.GetDefault(Type);
+            IsAsync = _result is Promise or Task;
         }
+    }
 
-        private string DebuggerDisplay
+    private bool SetMapping(object mapping, bool strict, int? priority = null)
+    {
+        var mapped = mapping != null;
+        if (mapped) Result = mapping;
+        return mapped;
+    }
+
+    public bool Dispatch(object handler, ref bool greedy, IHandler composer)
+    {
+        return Policy.Dispatch(
+                   handler, this, greedy, composer, SetMapping)
+               || _result != null;
+    }
+
+    private string DebuggerDisplay
+    {
+        get
         {
-            get
-            {
-                var format = Format != null ? $"as {Format}" : "";
-                return $"Mapping | {Source} to {TypeOrTarget}{format}";
-            }
+            var format = Format != null ? $"as {Format}" : "";
+            return $"Mapping | {Source} to {TypeOrTarget}{format}";
         }
     }
 }

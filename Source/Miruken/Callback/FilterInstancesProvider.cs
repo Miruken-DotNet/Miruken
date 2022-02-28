@@ -1,37 +1,36 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System;
+using System.Collections.Generic;
+using Policy;
+using Policy.Bindings;
+
+public class FilterInstancesProvider : IFilterProvider
 {
-    using System;
-    using System.Collections.Generic;
-    using Policy;
-    using Policy.Bindings;
+    private readonly HashSet<IFilter> _filters;
 
-    public class FilterInstancesProvider : IFilterProvider
+    public FilterInstancesProvider(params IFilter[] filters)
     {
-        private readonly HashSet<IFilter> _filters;
+        if (filters.Length == 0)
+            throw new ArgumentException("At least one filter must be provided.");
+        _filters = new HashSet<IFilter>(filters);
+    }
 
-        public FilterInstancesProvider(params IFilter[] filters)
-        {
-            if (filters.Length == 0)
-                throw new ArgumentException("At least one filter must be provided.");
-            _filters = new HashSet<IFilter>(filters);
-        }
+    public FilterInstancesProvider(
+        bool required, params IFilter[] filters)
+        : this(filters)
+    {
+        Required = required;
+    }
 
-        public FilterInstancesProvider(
-            bool required, params IFilter[] filters)
-            : this(filters)
-        {
-            Required = required;
-        }
+    public bool Required { get; }
 
-        public bool Required { get; }
+    public bool? AppliesTo(object callback, Type callbackType) => null;
 
-        public bool? AppliesTo(object callback, Type callbackType) => null;
-
-        public IEnumerable<IFilter> GetFilters(
-            MemberBinding binding, MemberDispatch dispatcher,
-            object callback, Type callbackType, IHandler composer)
-        {
-            return _filters;
-        }
+    public IEnumerable<IFilter> GetFilters(
+        MemberBinding binding, MemberDispatch dispatcher,
+        object callback, Type callbackType, IHandler composer)
+    {
+        return _filters;
     }
 }

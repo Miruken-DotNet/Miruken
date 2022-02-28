@@ -1,18 +1,16 @@
-﻿namespace Miruken.Tests.Register
-{
-    using System;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Register;
+﻿namespace Miruken.Tests.Register;
 
-    [TestClass, Ignore]
-    public class MirukenAssumedBehaviorTests : AssumedBehaviorTests
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Miruken.Register;
+
+[TestClass, Ignore]
+public class MirukenAssumedBehaviorTests : AssumedBehaviorTests
+{
+    protected override IServiceProvider CreateServiceProvider(
+        IServiceCollection serviceCollection)
     {
-        protected override IServiceProvider CreateServiceProvider(
-            IServiceCollection serviceCollection)
-        {
-            return serviceCollection.AddMiruken().Build();
-        }
+        return serviceCollection.AddMiruken().Build();
     }
 }
-

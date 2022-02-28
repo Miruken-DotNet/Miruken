@@ -1,82 +1,81 @@
-﻿namespace Miruken.Http
+﻿namespace Miruken.Http;
+
+using System;
+using System.Net.Http.Formatting;
+using Api;
+
+public abstract class ResourceRequest
 {
-    using System;
-    using System.Net.Http.Formatting;
-    using Api;
+    public string             BaseAddress { get; set; }
+    public string             ResourceUri { get; set; }
+    public TimeSpan?          Timeout     { get; set; }
+    public MediaTypeFormatter Formatter   { get; set; }
 
-    public abstract class ResourceRequest
+    public override bool Equals(object other)
     {
-        public string             BaseAddress { get; set; }
-        public string             ResourceUri { get; set; }
-        public TimeSpan?          Timeout     { get; set; }
-        public MediaTypeFormatter Formatter   { get; set; }
+        if (ReferenceEquals(this, other))
+            return true;
 
-        public override bool Equals(object other)
-        {
-            if (ReferenceEquals(this, other))
-                return true;
+        if (other?.GetType() != GetType())
+            return false;
 
-            if (other?.GetType() != GetType())
-                return false;
-
-            return other is ResourceRequest otherRequest
-                   && Equals(BaseAddress, otherRequest.BaseAddress)
-                   && Equals(ResourceUri, otherRequest.ResourceUri)
-                   && ReferenceEquals(Formatter, otherRequest.Formatter);
-        }
-
-        public override int GetHashCode()
-        {
-            return (BaseAddress?.GetHashCode() ?? 0) * 31 +
-                   (ResourceUri?.GetHashCode() ?? 0);
-        }
+        return other is ResourceRequest otherRequest
+               && Equals(BaseAddress, otherRequest.BaseAddress)
+               && Equals(ResourceUri, otherRequest.ResourceUri)
+               && ReferenceEquals(Formatter, otherRequest.Formatter);
     }
 
-    public abstract class ResourceRequest<TRequest, TResource>
-        : ResourceRequest, IRequest<TResource>
+    public override int GetHashCode()
     {
-        protected ResourceRequest()
-        {           
-        }
+        return (BaseAddress?.GetHashCode() ?? 0) * 31 +
+               (ResourceUri?.GetHashCode() ?? 0);
+    }
+}
 
-        protected ResourceRequest(TRequest request)
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-            Request = request;
-        }
-
-        public TRequest Request { get; set; }
-
-        public override bool Equals(object other)
-        {
-            if (!base.Equals(other)) return false;
-            return other is ResourceRequest<TRequest, TResource> otherRequest 
-                && Equals(Request, otherRequest.Request);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode() * 31 + (Request?.GetHashCode() ?? 0);
-        }
+public abstract class ResourceRequest<TRequest, TResource>
+    : ResourceRequest, IRequest<TResource>
+{
+    protected ResourceRequest()
+    {           
     }
 
-    public abstract class ResourceResponse
+    protected ResourceRequest(TRequest request)
     {
-        public Uri ResourceUri { get; set; }
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+        Request = request;
     }
 
-    public abstract class ResourceResponse<TResource> : ResourceResponse
+    public TRequest Request { get; set; }
+
+    public override bool Equals(object other)
     {
-        protected ResourceResponse()
-        {
-        }
-
-        protected ResourceResponse(TResource resource)
-        {
-            Resource = resource;
-        }
-
-        public TResource Resource { get; set; }
+        if (!base.Equals(other)) return false;
+        return other is ResourceRequest<TRequest, TResource> otherRequest 
+               && Equals(Request, otherRequest.Request);
     }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode() * 31 + (Request?.GetHashCode() ?? 0);
+    }
+}
+
+public abstract class ResourceResponse
+{
+    public Uri ResourceUri { get; set; }
+}
+
+public abstract class ResourceResponse<TResource> : ResourceResponse
+{
+    protected ResourceResponse()
+    {
+    }
+
+    protected ResourceResponse(TResource resource)
+    {
+        Resource = resource;
+    }
+
+    public TResource Resource { get; set; }
 }

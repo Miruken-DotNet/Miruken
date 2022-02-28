@@ -1,52 +1,51 @@
-﻿namespace Miruken.Callback.Policy.Rules
+﻿namespace Miruken.Callback.Policy.Rules;
+
+using System;
+using System.Collections.Generic;
+
+public class RuleContext
 {
-    using System;
-    using System.Collections.Generic;
+    private Dictionary<string, Type> _aliases;
+    private List<string> _errors;
 
-    public class RuleContext
+    public RuleContext(CategoryAttribute category)
     {
-        private Dictionary<string, Type> _aliases;
-        private List<string> _errors;
+        Category = category;
+    }
 
-        public RuleContext(CategoryAttribute category)
+    public CategoryAttribute Category { get; }
+
+    public bool HasErrors => _errors?.Count > 0;
+
+    public string[] Errors => _errors?.ToArray() ?? Array.Empty<string>();
+
+    public bool AddAlias(string alias, Type type)
+    {
+        if (_aliases == null)
         {
-            Category = category;
-        }
-
-        public CategoryAttribute Category { get; }
-
-        public bool HasErrors => _errors?.Count > 0;
-
-        public string[] Errors => _errors?.ToArray() ?? Array.Empty<string>();
-
-        public bool AddAlias(string alias, Type type)
-        {
-            if (_aliases == null)
+            _aliases = new Dictionary<string, Type>
             {
-                _aliases = new Dictionary<string, Type>
-                {
-                    { alias, type }
-                };
-                return true;
-            }
-
-            if (_aliases.TryGetValue(alias, out var aliasedType))
-            {
-                if (aliasedType != type)
-                {
-                    AddError("Mismatched alias '{alias}', {type} != {aliasType}");
-                    return false;
-                }
-                return true;
-            }
-            _aliases.Add(alias, type);
+                { alias, type }
+            };
             return true;
         }
 
-        public void AddError(string error)
+        if (_aliases.TryGetValue(alias, out var aliasedType))
         {
-            _errors ??= new List<string>();
-            _errors.Add(error);
+            if (aliasedType != type)
+            {
+                AddError("Mismatched alias '{alias}', {type} != {aliasType}");
+                return false;
+            }
+            return true;
         }
+        _aliases.Add(alias, type);
+        return true;
+    }
+
+    public void AddError(string error)
+    {
+        _errors ??= new List<string>();
+        _errors.Add(error);
     }
 }

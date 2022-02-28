@@ -1,23 +1,22 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System.Linq;
+
+public class FilterOptions : Options<FilterOptions>
 {
-    using System.Linq;
+    public bool? SkipFilters { get; set; }
 
-    public class FilterOptions : Options<FilterOptions>
+    public IFilterProvider[] ExtraFilters { get; set; }
+
+    public override void MergeInto(FilterOptions other)
     {
-        public bool? SkipFilters { get; set; }
+        if (SkipFilters != null && other.SkipFilters == null)
+            other.SkipFilters = SkipFilters;
 
-        public IFilterProvider[] ExtraFilters { get; set; }
-
-        public override void MergeInto(FilterOptions other)
+        if (ExtraFilters != null)
         {
-            if (SkipFilters != null && other.SkipFilters == null)
-                other.SkipFilters = SkipFilters;
-
-            if (ExtraFilters != null)
-            {
-                other.ExtraFilters = other.ExtraFilters?
-                    .Concat(ExtraFilters).ToArray() ?? ExtraFilters;
-            }
+            other.ExtraFilters = other.ExtraFilters?
+                .Concat(ExtraFilters).ToArray() ?? ExtraFilters;
         }
     }
 }

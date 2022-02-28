@@ -1,14 +1,13 @@
-namespace Miruken.Callback
+namespace Miruken.Callback;
+
+using Policy;
+
+public class InferenceHandler : Handler
 {
-    using Policy;
+    private readonly IHandlerDescriptorFactory _factory;
 
-    public class InferenceHandler : Handler
+    public InferenceHandler(IHandlerDescriptorFactory factory)
     {
-        private readonly IHandlerDescriptorFactory _factory;
-
-        public InferenceHandler(IHandlerDescriptorFactory factory)
-        {
-            _factory = factory;
-        }
+        _factory = factory;
     }
 }

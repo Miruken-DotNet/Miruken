@@ -1,91 +1,90 @@
-namespace Miruken.Callback.Policy.Rules
+namespace Miruken.Callback.Policy.Rules;
+
+using System;
+using System.Reflection;
+using Bindings;
+using Infrastructure;
+
+public class CallbackArgument : ArgumentRule
 {
-    using System;
-    using System.Reflection;
-    using Bindings;
-    using Infrastructure;
+    public static readonly CallbackArgument
+        Instance = new();
 
-    public class CallbackArgument : ArgumentRule
+    public override bool Matches(
+        ParameterInfo parameter, RuleContext context)
     {
-        public static readonly CallbackArgument
-            Instance = new();
-
-        public override bool Matches(
-            ParameterInfo parameter, RuleContext context)
+        var paramType = parameter.ParameterType;
+        if (paramType.IsGenericParameter)
         {
-            var paramType = parameter.ParameterType;
-            if (paramType.IsGenericParameter)
+            var constraints = paramType.GetGenericParameterConstraints();
+            switch (constraints.Length)
             {
-                var constraints = paramType.GetGenericParameterConstraints();
-                switch (constraints.Length)
-                {
-                    case 0:
-                        paramType = typeof(object);
-                        break;
-                    case 1:
-                        paramType = constraints[0];
-                        break;
-                    default:
-                        return false;
-                }
+                case 0:
+                    paramType = typeof(object);
+                    break;
+                case 1:
+                    paramType = constraints[0];
+                    break;
+                default:
+                    return false;
             }
-
-            if (context.Category.InKey is not Type restrict || paramType.Is(restrict) || restrict.Is(paramType))
-                return true;
-
-            context.AddError(
-                $"Key {restrict.FullName} is not related to {paramType.FullName}");
-            return false;
         }
 
-        public override void Configure(ParameterInfo parameter,
-            PolicyMemberBindingInfo policyMemberBindingInfo)
-        {
-            var key       = policyMemberBindingInfo.InKey;
-            var restrict  = key as Type;
-            policyMemberBindingInfo.CallbackIndex = parameter.Position;
-            if (key != null && restrict == null) return;
-            var paramType = parameter.ParameterType;
-            if (paramType.IsGenericParameter)
-            {
-                var constraints = paramType.GetGenericParameterConstraints();
-                paramType = constraints.Length == 1
-                          ? constraints[0]
-                          : typeof(object);
-            }
-            if (paramType != typeof(object) &&
-                (restrict == null || paramType.Is(restrict)))
-                policyMemberBindingInfo.InKey = paramType;
-        }
+        if (context.Category.InKey is not Type restrict || paramType.Is(restrict) || restrict.Is(paramType))
+            return true;
 
-        public override object Resolve(object callback)
-        {
-            return callback;
-        }
+        context.AddError(
+            $"Key {restrict.FullName} is not related to {paramType.FullName}");
+        return false;
     }
 
-    public class CallbackArgument<TCb> : ArgumentRule
+    public override void Configure(ParameterInfo parameter,
+        PolicyMemberBindingInfo policyMemberBindingInfo)
     {
-        public static readonly CallbackArgument<TCb>
-             Instance = new();
-
-        private CallbackArgument()
-        {         
-        }
-
-        public override bool Matches(
-            ParameterInfo parameter, RuleContext context)
+        var key       = policyMemberBindingInfo.InKey;
+        var restrict  = key as Type;
+        policyMemberBindingInfo.CallbackIndex = parameter.Position;
+        if (key != null && restrict == null) return;
+        var paramType = parameter.ParameterType;
+        if (paramType.IsGenericParameter)
         {
-            var paramType = parameter.ParameterType;
-            return paramType.Is<TCb>();
+            var constraints = paramType.GetGenericParameterConstraints();
+            paramType = constraints.Length == 1
+                ? constraints[0]
+                : typeof(object);
         }
+        if (paramType != typeof(object) &&
+            (restrict == null || paramType.Is(restrict)))
+            policyMemberBindingInfo.InKey = paramType;
+    }
 
-        public override void Configure(ParameterInfo parameter,
-            PolicyMemberBindingInfo policyMemberBindingInfo) { }
+    public override object Resolve(object callback)
+    {
+        return callback;
+    }
+}
 
-        public override object Resolve(object callback)
-        {
-            return callback;
-        }
+public class CallbackArgument<TCb> : ArgumentRule
+{
+    public static readonly CallbackArgument<TCb>
+        Instance = new();
+
+    private CallbackArgument()
+    {         
+    }
+
+    public override bool Matches(
+        ParameterInfo parameter, RuleContext context)
+    {
+        var paramType = parameter.ParameterType;
+        return paramType.Is<TCb>();
+    }
+
+    public override void Configure(ParameterInfo parameter,
+        PolicyMemberBindingInfo policyMemberBindingInfo) { }
+
+    public override object Resolve(object callback)
+    {
+        return callback;
     }
 }

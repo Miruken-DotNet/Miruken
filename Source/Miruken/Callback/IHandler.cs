@@ -1,9 +1,8 @@
-﻿namespace Miruken.Callback
-{
-    using System;
+﻿namespace Miruken.Callback;
 
-    public interface IHandler : IServiceProvider, IProtocolAdapter
-	{
-		bool Handle(object callback, ref bool greedy, IHandler composer = null);
-	}
+using System;
+
+public interface IHandler : IServiceProvider, IProtocolAdapter
+{
+	bool Handle(object callback, ref bool greedy, IHandler composer = null);
 }

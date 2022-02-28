@@ -1,27 +1,26 @@
-﻿namespace Miruken.Validate
+﻿namespace Miruken.Validate;
+
+using Callback;
+
+public class ValidationOptions : Options<ValidationOptions>
 {
-    using Callback;
+    public bool? StopOnFailure { get; set; }
 
-    public class ValidationOptions : Options<ValidationOptions>
+    public override void MergeInto(ValidationOptions other)
     {
-        public bool? StopOnFailure { get; set; }
-
-        public override void MergeInto(ValidationOptions other)
-        {
-            if (StopOnFailure.HasValue && !other.StopOnFailure.HasValue)
-                other.StopOnFailure = StopOnFailure;
-        }
+        if (StopOnFailure.HasValue && !other.StopOnFailure.HasValue)
+            other.StopOnFailure = StopOnFailure;
     }
+}
 
-    public static class ValidationOptionExtensions
+public static class ValidationOptionExtensions
+{
+    public static IHandler StopOnFailure(
+        this IHandler handler, bool stopOnFailure = true)
     {
-        public static IHandler StopOnFailure(
-            this IHandler handler, bool stopOnFailure = true)
+        return new ValidationOptions
         {
-            return new ValidationOptions
-            {
-                StopOnFailure = stopOnFailure
-            }.Decorate(handler);
-        }
+            StopOnFailure = stopOnFailure
+        }.Decorate(handler);
     }
 }

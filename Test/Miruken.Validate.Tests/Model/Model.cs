@@ -1,6 +1,5 @@
-﻿namespace Miruken.Validate.Tests.Model
+﻿namespace Miruken.Validate.Tests.Model;
+
+public class Model : ValidationAware
 {
-    public class Model : ValidationAware
-    {
-    }
 }

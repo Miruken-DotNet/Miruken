@@ -1,9 +1,8 @@
-﻿namespace Miruken.Callback.Policy.Bindings
-{
-    public interface IBindingConstraint
-    {
-        void Require(BindingMetadata metadata);
+﻿namespace Miruken.Callback.Policy.Bindings;
 
-        bool Matches(BindingMetadata metadata);
-    }
+public interface IBindingConstraint
+{
+    void Require(BindingMetadata metadata);
+
+    bool Matches(BindingMetadata metadata);
 }

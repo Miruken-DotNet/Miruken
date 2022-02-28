@@ -1,70 +1,68 @@
-﻿namespace Miruken.Http
+﻿namespace Miruken.Http;
+
+using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Callback;
+
+public class HttpService
 {
-    using System;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Callback;
+    private readonly HttpClient _client;
 
-    public class HttpService
+    private static readonly HttpClient SharedHttpClient = new(new HttpOptionsHandler
     {
-        private readonly HttpClient _client;
+        InnerHandler = new HttpClientHandler()
+    });
 
-        private static readonly HttpClient SharedHttpClient = new(new HttpOptionsHandler
-            {
-                InnerHandler = new HttpClientHandler()
-            });
+    public static readonly HttpService Shared = new(SharedHttpClient);
 
-        public static readonly HttpService Shared = new(SharedHttpClient);
+    public HttpService(HttpClient client)
+    {
+        _client         = client;
+        _client.Timeout = Timeout.InfiniteTimeSpan;
+    }
 
-        public HttpService(HttpClient client)
+    public Task<HttpResponseMessage> SendRequest(
+        ResourceRequest request, HttpRequestMessage httpRequest,
+        IHandler composer, out HttpOptions options)
+    {
+        options = new HttpOptions();
+        composer.Handle(options, true);
+        ConfigureHttpRequest(request, httpRequest, options, composer);
+        return _client.SendAsync(httpRequest);
+    }
+
+    private static void ConfigureHttpRequest(
+        ResourceRequest request, HttpRequestMessage httpRequest,
+        HttpOptions options, IHandler composer)
+    {
+        httpRequest.SetOptions(options);
+        httpRequest.SetComposer(composer);
+        httpRequest.SetTimeout(request.Timeout);
+
+        var requestUri = httpRequest.RequestUri;
+        if (requestUri == null)
         {
-            _client         = client;
-            _client.Timeout = Timeout.InfiniteTimeSpan;
+            var baseUrl = request.BaseAddress ?? options.BaseUrl;
+            if (!string.IsNullOrEmpty(baseUrl))
+                requestUri = new Uri(baseUrl, UriKind.Absolute);
         }
-
-        public Task<HttpResponseMessage> SendRequest(
-            ResourceRequest request, HttpRequestMessage httpRequest,
-            IHandler composer, out HttpOptions options)
+        else if (!requestUri.IsAbsoluteUri)
         {
-            options = new HttpOptions();
-            composer.Handle(options, true);
-            ConfigureHttpRequest(request, httpRequest, options, composer);
-            return _client.SendAsync(httpRequest);
-        }
-
-        private static void ConfigureHttpRequest(
-            ResourceRequest request, HttpRequestMessage httpRequest,
-            HttpOptions options, IHandler composer)
-        {
-            httpRequest.SetOptions(options);
-            httpRequest.SetComposer(composer);
-            httpRequest.SetTimeout(request.Timeout);
-
-            var requestUri = httpRequest.RequestUri;
-            if (requestUri == null)
+            var baseUrl = request.BaseAddress ?? options.BaseUrl;
+            if (!string.IsNullOrEmpty(baseUrl))
             {
-                var baseUrl = request.BaseAddress ?? options.BaseUrl;
-                if (!string.IsNullOrEmpty(baseUrl))
-                    requestUri = new Uri(baseUrl, UriKind.Absolute);
+                if (!baseUrl.EndsWith(@"/")) baseUrl += @"/";
+                requestUri = new Uri(new Uri(baseUrl, UriKind.Absolute), requestUri);
             }
-            else if (!requestUri.IsAbsoluteUri)
-            {
-                var baseUrl = request.BaseAddress ?? options.BaseUrl;
-                if (!string.IsNullOrEmpty(baseUrl))
-                {
-                    if (!baseUrl.EndsWith(@"/")) baseUrl += @"/";
-                    requestUri = new Uri(new Uri(baseUrl, UriKind.Absolute),
-                        httpRequest.RequestUri);
-                }
-            }
-
-            if (requestUri != null)
-                httpRequest.RequestUri = requestUri;
-
-            var version = options.Version;
-            if (version != null)
-                httpRequest.Version = version;
         }
+
+        if (requestUri != null)
+            httpRequest.RequestUri = requestUri;
+
+        var version = options.Version;
+        if (version != null)
+            httpRequest.Version = version;
     }
 }

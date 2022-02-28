@@ -1,26 +1,25 @@
-﻿namespace Miruken.Http.Put
-{
-    public class PutRequest<TPut, TResource>
-         : ResourceRequest<TPut, PutResponse<TResource>>
-    {
-        public PutRequest()
-        {
-        }
+﻿namespace Miruken.Http.Put;
 
-        public PutRequest(TPut request) : base(request)
-        {
-        }
+public class PutRequest<TPut, TResource>
+    : ResourceRequest<TPut, PutResponse<TResource>>
+{
+    public PutRequest()
+    {
     }
 
-    public class PutResponse<TResource> : ResourceResponse<TResource>
+    public PutRequest(TPut request) : base(request)
     {
-        public PutResponse()
-        {
-        }
+    }
+}
 
-        public PutResponse(TResource resource)
-            : base(resource)
-        {
-        }
+public class PutResponse<TResource> : ResourceResponse<TResource>
+{
+    public PutResponse()
+    {
+    }
+
+    public PutResponse(TResource resource)
+        : base(resource)
+    {
     }
 }

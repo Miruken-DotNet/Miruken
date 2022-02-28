@@ -1,26 +1,25 @@
-﻿namespace Miruken.Http.Get
-{
-    public class GetRequest<TGet, TResource>
-        : ResourceRequest<TGet, GetResponse<TResource>>
-    {
-        public GetRequest()
-        {
-        }
+﻿namespace Miruken.Http.Get;
 
-        public GetRequest(TGet request) : base(request)
-        {
-        }
+public class GetRequest<TGet, TResource>
+    : ResourceRequest<TGet, GetResponse<TResource>>
+{
+    public GetRequest()
+    {
     }
 
-    public class GetResponse<TResource> : ResourceResponse<TResource>
+    public GetRequest(TGet request) : base(request)
     {
-        public GetResponse()
-        {
-        }
+    }
+}
 
-        public GetResponse(TResource resource)
-            : base(resource)
-        {
-        }
+public class GetResponse<TResource> : ResourceResponse<TResource>
+{
+    public GetResponse()
+    {
+    }
+
+    public GetResponse(TResource resource)
+        : base(resource)
+    {
     }
 }

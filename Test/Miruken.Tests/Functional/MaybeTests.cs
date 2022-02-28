@@ -1,29 +1,28 @@
-﻿namespace Miruken.Tests.Functional
+﻿namespace Miruken.Tests.Functional;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Miruken.Functional;
+
+[TestClass]
+public class MaybeTests
 {
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Functional;
-
-    [TestClass]
-    public class MaybeTests
+    [TestMethod]
+    public void Linq_Works_With_Maybe()
     {
-        [TestMethod]
-        public void Linq_Works_With_Maybe()
-        {
-            var result = from a in 4.Some()
-                         from b in 6.Some()
-                         select a + b;
+        var result = from a in 4.Some()
+            from b in 6.Some()
+            select a + b;
 
-            Assert.AreEqual(10, result.Value);
-        }
+        Assert.AreEqual(10, result.Value);
+    }
 
-        [TestMethod]
-        public void Linq_Works_With_Nothing()
-        {
-            var result = from a in 4.Some()
-                         from b in Maybe<int>.Nothing
-                         select a + b;
+    [TestMethod]
+    public void Linq_Works_With_Nothing()
+    {
+        var result = from a in 4.Some()
+            from b in Maybe<int>.Nothing
+            select a + b;
 
-            Assert.AreSame(Maybe<int>.Nothing, result);
-        }
+        Assert.AreSame(Maybe<int>.Nothing, result);
     }
 }

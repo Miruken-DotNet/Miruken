@@ -1,30 +1,29 @@
-﻿namespace Miruken.Infrastructure
+﻿namespace Miruken.Infrastructure;
+
+using System;
+
+public abstract class DisposableObject : IDisposable
 {
-    using System;
-
-    public abstract class DisposableObject : IDisposable
+    ~DisposableObject()
     {
-        ~DisposableObject()
-        {
-            Dispose(false);
-        }
+        Dispose(false);
+    }
 
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+    protected virtual void Dispose(bool disposing)
+    {
+    }
 
-        public event EventHandler Disposed;
-        private void OnDisposed()
-        {
-            var handler = Disposed;
-            handler?.Invoke(this, EventArgs.Empty);
-        }
+    public event EventHandler Disposed;
+    private void OnDisposed()
+    {
+        var handler = Disposed;
+        handler?.Invoke(this, EventArgs.Empty);
+    }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            OnDisposed();
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        Dispose(true);
+        OnDisposed();
+        GC.SuppressFinalize(this);
     }
 }

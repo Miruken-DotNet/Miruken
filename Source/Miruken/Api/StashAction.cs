@@ -1,43 +1,42 @@
-﻿namespace Miruken.Api
+﻿namespace Miruken.Api;
+
+using System;
+using Callback;
+
+public abstract class StashAction : IFilterCallback
 {
-    using System;
-    using Callback;
+    bool IFilterCallback.CanFilter => false;
 
-    public abstract class StashAction : IFilterCallback
+    public sealed class Get : StashAction
     {
-        bool IFilterCallback.CanFilter => false;
+        public Type   Type  { get; }
+        public object Value { get; set; }
 
-        public sealed class Get : StashAction
+        public Get(Type type)
         {
-            public Type   Type  { get; }
-            public object Value { get; set; }
-
-            public Get(Type type)
-            {
-                Type = type ?? throw new ArgumentNullException(nameof(type));
-            }
+            Type = type ?? throw new ArgumentNullException(nameof(type));
         }
+    }
 
-        public sealed class Put : StashAction
+    public sealed class Put : StashAction
+    {
+        public Type   Type  { get; }
+        public object Value { get; }
+
+        public Put(Type type, object value)
         {
-            public Type   Type  { get; }
-            public object Value { get; }
-
-            public Put(Type type, object value)
-            {
-                Type  = type ?? throw new ArgumentNullException(nameof(type));
-                Value = value;
-            }
+            Type  = type ?? throw new ArgumentNullException(nameof(type));
+            Value = value;
         }
+    }
 
-        public sealed class Drop : StashAction
+    public sealed class Drop : StashAction
+    {
+        public Type Type { get; }
+
+        public Drop(Type type)
         {
-            public Type Type { get; }
-
-            public Drop(Type type)
-            {
-                Type = type ?? throw new ArgumentNullException(nameof(type));
-            }
+            Type = type ?? throw new ArgumentNullException(nameof(type));
         }
     }
 }

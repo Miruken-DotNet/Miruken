@@ -1,17 +1,16 @@
-﻿namespace Miruken.Secure
+﻿namespace Miruken.Secure;
+
+using System;
+
+[AttributeUsage(
+    AttributeTargets.Method | AttributeTargets.Property,
+    Inherited = false)]
+public class AccessPolicyAttribute : Attribute
 {
-    using System;
-
-    [AttributeUsage(
-        AttributeTargets.Method | AttributeTargets.Property,
-        Inherited = false)]
-    public class AccessPolicyAttribute : Attribute
+    public AccessPolicyAttribute(string policy)
     {
-        public AccessPolicyAttribute(string policy)
-        {
-            Policy = policy;
-        }
-
-        public string Policy { get; }
+        Policy = policy;
     }
+
+    public string Policy { get; }
 }

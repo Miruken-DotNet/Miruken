@@ -1,10 +1,9 @@
-﻿namespace Miruken.Validate.Tests.Model
-{
-    using System.ComponentModel.DataAnnotations;
+﻿namespace Miruken.Validate.Tests.Model;
 
-    public class Coach : Person
-    {
-        [Required]
-        public string License { get; set; }
-    }
+using System.ComponentModel.DataAnnotations;
+
+public class Coach : Person
+{
+    [Required]
+    public string License { get; set; }
 }

@@ -1,6 +1,5 @@
-﻿namespace Miruken.Api.Schedule
+﻿namespace Miruken.Api.Schedule;
+
+public class Parallel : Scheduled
 {
-    public class Parallel : Scheduled
-    {
-    }
 }

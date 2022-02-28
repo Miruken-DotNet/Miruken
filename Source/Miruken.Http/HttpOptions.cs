@@ -1,171 +1,170 @@
-﻿namespace Miruken.Http
+﻿namespace Miruken.Http;
+
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Api.Route;
+using Callback;
+
+public delegate string UriBuilderDelegate(Routed route,
+    Command command, object message, IHandler composer);
+
+public delegate Task<HttpResponseMessage> HttpRequestPipeline(
+    HttpRequestMessage request, CancellationToken cancellationToken,
+    IHandler composer, Func<Task<HttpResponseMessage>> next);
+
+public class HttpOptions : Options<HttpOptions>
 {
-    using System;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Net.Http.Formatting;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Api.Route;
-    using Callback;
+    public string                       BaseUrl    { get; set; }
+    public Version                      Version    { get; set; }
+    public TimeSpan?                    Timeout    { get; set; }
+    public UriBuilderDelegate           UriBuilder { get; set; }
+    public HttpRequestPipeline          Pipeline   { get; set; }
+    public MediaTypeFormatterCollection Formatters { get; set; }
 
-    public delegate string UriBuilderDelegate(Routed route,
-        Command command, object message, IHandler composer);
-
-    public delegate Task<HttpResponseMessage> HttpRequestPipeline(
-        HttpRequestMessage request, CancellationToken cancellationToken,
-        IHandler composer, Func<Task<HttpResponseMessage>> next);
-
-    public class HttpOptions : Options<HttpOptions>
+    public override void MergeInto(HttpOptions other)
     {
-        public string                       BaseUrl    { get; set; }
-        public Version                      Version    { get; set; }
-        public TimeSpan?                    Timeout    { get; set; }
-        public UriBuilderDelegate           UriBuilder { get; set; }
-        public HttpRequestPipeline          Pipeline   { get; set; }
-        public MediaTypeFormatterCollection Formatters { get; set; }
+        if (BaseUrl != null && other.BaseUrl == null)
+            other.BaseUrl = BaseUrl;
 
-        public override void MergeInto(HttpOptions other)
+        if (Version != null && other.Version == null)
+            other.Version = Version;
+
+        if (Timeout.HasValue && !other.Timeout.HasValue)
+            other.Timeout = Timeout;
+
+        if (UriBuilder != null && other.UriBuilder == null)
+            other.UriBuilder = UriBuilder;
+
+        if (Pipeline != null)
+            other.Pipeline += Pipeline;
+
+        if (Formatters != null)
         {
-            if (BaseUrl != null && other.BaseUrl == null)
-                other.BaseUrl = BaseUrl;
-
-            if (Version != null && other.Version == null)
-                other.Version = Version;
-
-            if (Timeout.HasValue && !other.Timeout.HasValue)
-                other.Timeout = Timeout;
-
-            if (UriBuilder != null && other.UriBuilder == null)
-                other.UriBuilder = UriBuilder;
-
-            if (Pipeline != null)
-                other.Pipeline += Pipeline;
-
-            if (Formatters != null)
-            {
-                var otherFormatters = other.Formatters;
-                if (otherFormatters == null)
-                    other.Formatters = new MediaTypeFormatterCollection(Formatters);
-                else
-                    otherFormatters.AddRange(Formatters);
-            }
+            var otherFormatters = other.Formatters;
+            if (otherFormatters == null)
+                other.Formatters = new MediaTypeFormatterCollection(Formatters);
+            else
+                otherFormatters.AddRange(Formatters);
         }
     }
+}
 
-    public static class HttpOptionsExtensions
+public static class HttpOptionsExtensions
+{
+    public static IHandler HttpOptions(
+        this IHandler handler, HttpOptions httpOptions)
     {
-        public static IHandler HttpOptions(
-            this IHandler handler, HttpOptions httpOptions)
-        {
-            return httpOptions.Decorate(handler);
-        }
+        return httpOptions.Decorate(handler);
+    }
 
-        public static IHandler BaseUrl(
-            this IHandler handler, string baseUrl)
-        {
-            return new HttpOptions { BaseUrl = baseUrl }.Decorate(handler);
-        }
+    public static IHandler BaseUrl(
+        this IHandler handler, string baseUrl)
+    {
+        return new HttpOptions { BaseUrl = baseUrl }.Decorate(handler);
+    }
 
-        public static IHandler BaseUrl(
-            this IHandler handler, Func<IHandler, string> baseUrl)
-        {
-            if (baseUrl == null)
-                throw new ArgumentNullException(nameof(baseUrl));
-            return handler.BaseUrl(baseUrl(handler));
-        }
+    public static IHandler BaseUrl(
+        this IHandler handler, Func<IHandler, string> baseUrl)
+    {
+        if (baseUrl == null)
+            throw new ArgumentNullException(nameof(baseUrl));
+        return handler.BaseUrl(baseUrl(handler));
+    }
 
-        public static IHandler HttpVersion(
-            this IHandler handler, Version version)
-        {
-            return new HttpOptions { Version = version }.Decorate(handler);
-        }
+    public static IHandler HttpVersion(
+        this IHandler handler, Version version)
+    {
+        return new HttpOptions { Version = version }.Decorate(handler);
+    }
 
-        public static IHandler Timeout(
-            this IHandler handler, TimeSpan timeout)
-        {
-            return new HttpOptions { Timeout = timeout }.Decorate(handler);
-        }
+    public static IHandler Timeout(
+        this IHandler handler, TimeSpan timeout)
+    {
+        return new HttpOptions { Timeout = timeout }.Decorate(handler);
+    }
 
-        public static IHandler UriBuilder(
-            this IHandler handler, UriBuilderDelegate uriBuilder)
-        {
-            return new HttpOptions { UriBuilder = uriBuilder }.Decorate(handler);
-        }
+    public static IHandler UriBuilder(
+        this IHandler handler, UriBuilderDelegate uriBuilder)
+    {
+        return new HttpOptions { UriBuilder = uriBuilder }.Decorate(handler);
+    }
 
-        public static IHandler Pipeline(
-            this IHandler handler, HttpRequestPipeline pipeline)
-        {
-            return new HttpOptions { Pipeline = pipeline }.Decorate(handler);
-        }
+    public static IHandler Pipeline(
+        this IHandler handler, HttpRequestPipeline pipeline)
+    {
+        return new HttpOptions { Pipeline = pipeline }.Decorate(handler);
+    }
 
-        public static IHandler UseRequestPath(IHandler handler)
-        {
-            return UriBuilder(handler, GetRequestPath);
-        }
+    public static IHandler UseRequestPath(IHandler handler)
+    {
+        return UriBuilder(handler, GetRequestPath);
+    }
 
-        public static IHandler Formatters(
-            this IHandler handler, MediaTypeFormatterCollection formatters)
-        {
-            return new HttpOptions { Formatters = formatters }.Decorate(handler);
-        }
+    public static IHandler Formatters(
+        this IHandler handler, MediaTypeFormatterCollection formatters)
+    {
+        return new HttpOptions { Formatters = formatters }.Decorate(handler);
+    }
 
-        public static IHandler Formatters(
-            this IHandler handler, params MediaTypeFormatter[] formatters)
+    public static IHandler Formatters(
+        this IHandler handler, params MediaTypeFormatter[] formatters)
+    {
+        return new HttpOptions
         {
-            return new HttpOptions
-            {
-                Formatters = new MediaTypeFormatterCollection(formatters)
-            }.Decorate(handler);
-        }
+            Formatters = new MediaTypeFormatterCollection(formatters)
+        }.Decorate(handler);
+    }
 
-        private static string GetRequestPath(
-            Routed route, Command command, object message, IHandler composer)
-        {
-            if (!string.IsNullOrEmpty(route.Tag))
-                return $"tag/{GetApplicationName()}/{route.Tag}";
-            var prefix = command.Many ? "Publish" : "Process";
-            var path   = GetRequestPath(message);
-            return path != null ? $"{prefix}/{path}" : prefix;
-        }
+    private static string GetRequestPath(
+        Routed route, Command command, object message, IHandler composer)
+    {
+        if (!string.IsNullOrEmpty(route.Tag))
+            return $"tag/{GetApplicationName()}/{route.Tag}";
+        var prefix = command.Many ? "Publish" : "Process";
+        var path   = GetRequestPath(message);
+        return path != null ? $"{prefix}/{path}" : prefix;
+    }
 
-        public static string GetRequestPath(Type requestType)
+    public static string GetRequestPath(Type requestType)
+    {
+        if (requestType.IsGenericTypeDefinition)
+            return null;
+        var path = requestType.ToString();
+        if (typeof(IDecorator).IsAssignableFrom(requestType))
         {
-            if (requestType.IsGenericTypeDefinition)
-                return null;
-            var path = requestType.ToString();
-            if (typeof(IDecorator).IsAssignableFrom(requestType))
-            {
-                var name  = requestType.Name;
-                var index = name.IndexOf('`');
-                path = index < 0 ? name : name[..index];
-            }
-            var parts = path.Split('.');
-            return string.Join("/", parts.Select(part =>
+            var name  = requestType.Name;
+            var index = name.IndexOf('`');
+            path = index < 0 ? name : name[..index];
+        }
+        var parts = path.Split('.');
+        return string.Join("/", parts.Select(part =>
                 char.ToLower(part[0]) + part[1..])
-                .ToArray());
-        }
+            .ToArray());
+    }
 
-        public static string GetRequestPath(object request)
+    public static string GetRequestPath(object request)
+    {
+        var decorators = "";
+        while (request is IDecorator d)
         {
-            var decorators = "";
-            while (request is IDecorator d)
-            {
-                var decorator = GetRequestPath(d.GetType());
-                decorators = $"{decorators}/{decorator}";
-                request    = d.Decoratee;
-            }
-            var basePath = GetRequestPath(request.GetType());
-            return basePath == null ? null : $"{basePath}{decorators}";
+            var decorator = GetRequestPath(d.GetType());
+            decorators = $"{decorators}/{decorator}";
+            request    = d.Decoratee;
         }
+        var basePath = GetRequestPath(request.GetType());
+        return basePath == null ? null : $"{basePath}{decorators}";
+    }
 
-        private static string GetApplicationName()
-        {
-            var entry = Assembly.GetEntryAssembly();
-            return entry != null
-                 ? entry.GetName().Name
-                 : AppDomain.CurrentDomain.FriendlyName;
-        }
+    private static string GetApplicationName()
+    {
+        var entry = Assembly.GetEntryAssembly();
+        return entry != null
+             ? entry.GetName().Name
+             : AppDomain.CurrentDomain.FriendlyName;
     }
 }

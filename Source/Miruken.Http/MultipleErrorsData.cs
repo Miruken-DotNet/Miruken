@@ -1,7 +1,6 @@
-﻿namespace Miruken.Http
+﻿namespace Miruken.Http;
+
+public class MultipleErrorsData
 {
-    public class MultipleErrorsData
-    {
-        public object[] Errors { get; set; }
-    }
+    public object[] Errors { get; set; }
 }

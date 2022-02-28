@@ -1,28 +1,27 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System;
+using Infrastructure;
+
+[Unmanaged]
+public class Provider : Handler
 {
-    using System;
-    using Infrastructure;
+    private readonly object _value;
+    private readonly Type _providesType;
 
-    [Unmanaged]
-    public class Provider : Handler
+    public Provider(object value, bool strict = false)
     {
-        private readonly object _value;
-        private readonly Type _providesType;
+        _value = value ??
+                 throw new ArgumentNullException(nameof(value));
+        _providesType = value.GetType();
+        if (!strict && _providesType.IsArray)
+            _providesType = _providesType.GetElementType();
+    }
 
-        public Provider(object value, bool strict = false)
-        {
-            _value = value ??
-                throw new ArgumentNullException(nameof(value));
-            _providesType = value.GetType();
-            if (!strict && _providesType.IsArray)
-                _providesType = _providesType.GetElementType();
-        }
-
-        [Provides]
-        public object Provide(Inquiry inquiry)
-        {
-            if (inquiry.Key is not Type type || !inquiry.Metadata.IsEmpty) return null;
-            return _providesType.Is(type) ? _value : null;
-        }
+    [Provides]
+    public object Provide(Inquiry inquiry)
+    {
+        if (inquiry.Key is not Type type || !inquiry.Metadata.IsEmpty) return null;
+        return _providesType.Is(type) ? _value : null;
     }
 }

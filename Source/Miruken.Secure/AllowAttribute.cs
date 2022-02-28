@@ -1,11 +1,10 @@
-﻿namespace Miruken.Secure
-{
-    using System;
+﻿namespace Miruken.Secure;
 
-    [AttributeUsage(
-        AttributeTargets.Method | AttributeTargets.Property,
-        Inherited = false)]
-    public class AllowAttribute : Attribute
-    {
-    }
+using System;
+
+[AttributeUsage(
+    AttributeTargets.Method | AttributeTargets.Property,
+    Inherited = false)]
+public class AllowAttribute : Attribute
+{
 }

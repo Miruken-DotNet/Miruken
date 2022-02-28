@@ -1,128 +1,127 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Infrastructure;
+using Rules;
+
+public abstract class CovariantPolicy : CallbackPolicy
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Infrastructure;
-    using Rules;
-
-    public abstract class CovariantPolicy : CallbackPolicy
+    public static CovariantPolicy<TCb> Create<TCb>(
+        Func<TCb, object> key,
+        Action<CovariantPolicyBuilder<TCb>> build)
     {
-        public static CovariantPolicy<TCb> Create<TCb>(
-            Func<TCb, object> key,
-            Action<CovariantPolicyBuilder<TCb>> build)
-        {
-            if (build == null)
-                throw new ArgumentNullException(nameof(build));
-            var policy  = new CovariantPolicy<TCb>(key);
-            var builder = new CovariantPolicyBuilder<TCb>(policy);
-            build(builder);
-            return policy;
-        }
+        if (build == null)
+            throw new ArgumentNullException(nameof(build));
+        var policy  = new CovariantPolicy<TCb>(key);
+        var builder = new CovariantPolicyBuilder<TCb>(policy);
+        build(builder);
+        return policy;
+    }
 
-        public override int Compare(object key1, object key2)
-        {
-            if (key1 == key2) return 0;
-            if (key1 is not Type type1) return 1;
-            if (key2 is not Type type2) return -1;
-            if (type2.ContainsGenericParameters) return -1;
-            if (type1.ContainsGenericParameters) return 1;
-            return type1.IsAssignableFrom(type2) ? -1 : 1;
-        }
+    public override int Compare(object key1, object key2)
+    {
+        if (key1 == key2) return 0;
+        if (key1 is not Type type1) return 1;
+        if (key2 is not Type type2) return -1;
+        if (type2.ContainsGenericParameters) return -1;
+        if (type1.ContainsGenericParameters) return 1;
+        return type1.IsAssignableFrom(type2) ? -1 : 1;
+    }
 
-        protected static bool IsCompatible(Type type, Type key)
+    protected static bool IsCompatible(Type type, Type key)
+    {
+        if (type == key) return true;
+        if (type == null || key == null) return false;
+        if (type.IsGenericTypeDefinition)
+            return key.GetOpenTypeConformance(type) != null;
+        if (key.IsGenericTypeDefinition)
         {
-            if (type == key) return true;
-            if (type == null || key == null) return false;
-            if (type.IsGenericTypeDefinition)
-                return key.GetOpenTypeConformance(type) != null;
-            if (key.IsGenericTypeDefinition)
+            if (type.IsGenericType)
             {
-                if (type.IsGenericType)
-                {
-                    var typeGenericDef = type.GetGenericTypeDefinition();
-                    return typeGenericDef == key ||
-                           key.GetOpenTypeConformance(typeGenericDef) != null;
-                }
-                return type.GetOpenTypeConformance(key) != null;
+                var typeGenericDef = type.GetGenericTypeDefinition();
+                return typeGenericDef == key ||
+                       key.GetOpenTypeConformance(typeGenericDef) != null;
             }
-            return key.IsGenericParameter 
-                 ? key.SatisfiesGenericParameterConstraints(type)
-                 : type.IsAssignableFrom(key);
+            return type.GetOpenTypeConformance(key) != null;
         }
+        return key.IsGenericParameter 
+            ? key.SatisfiesGenericParameterConstraints(type)
+            : type.IsAssignableFrom(key);
+    }
+}
+
+public class CovariantPolicy<TCb> : CovariantPolicy
+{
+    public CovariantPolicy(Func<TCb, object> key)
+    {
+        Key = key ?? throw new ArgumentNullException(nameof(key));
+        GetResultType = GetKeyType;
     }
 
-    public class CovariantPolicy<TCb> : CovariantPolicy
+    public Func<TCb, object> Key { get; }
+
+    public override object GetKey(object callback)
     {
-        public CovariantPolicy(Func<TCb, object> key)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-            GetResultType = GetKeyType;
-        }
+        return (callback as ICallbackKey)?.Key
+               ?? (callback is TCb cb ? Key(cb) : null);
+    }
 
-        public Func<TCb, object> Key { get; }
+    public override IEnumerable<object> GetCompatibleKeys(
+        object key, IEnumerable available)
+    {
+        if (key is not Type type)
+            return available.Cast<object>()
+                .Where(k => !Equals(key, k) && Equals(k, key));
 
-        public override object GetKey(object callback)
-        {
-            return (callback as ICallbackKey)?.Key
-                ?? (callback is TCb cb ? Key(cb) : null);
-        }
-
-        public override IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable available)
-        {
-            if (key is not Type type)
-                return available.Cast<object>()
-                    .Where(k => !Equals(key, k) && Equals(k, key));
-
-            if (type == typeof(object))
-                return available.OfType<Type>()
-                    .Where(t => !t.ContainsGenericParameters);
-
+        if (type == typeof(object))
             return available.OfType<Type>()
-                .Where(t => t != type && IsCompatible(type, t));
-        }
+                .Where(t => !t.ContainsGenericParameters);
 
-        private Type GetKeyType(object callback)
-        {
-            return Key((TCb)callback) as Type;
-        }
+        return available.OfType<Type>()
+            .Where(t => t != type && IsCompatible(type, t));
     }
 
-    public class CovariantPolicyBuilder<TCb>
-        : CallbackPolicyBuilder<CovariantPolicy<TCb>, CovariantPolicyBuilder<TCb>>
+    private Type GetKeyType(object callback)
     {
-        public CovariantPolicyBuilder(CovariantPolicy<TCb> policy)
-            : base(policy)
-        {
-        }
+        return Key((TCb)callback) as Type;
+    }
+}
 
-        public CallbackArgument<TCb> Callback  => CallbackArgument<TCb>.Instance;
-        public ReturnsKey            ReturnKey => ReturnsKey.Instance;
+public class CovariantPolicyBuilder<TCb>
+    : CallbackPolicyBuilder<CovariantPolicy<TCb>, CovariantPolicyBuilder<TCb>>
+{
+    public CovariantPolicyBuilder(CovariantPolicy<TCb> policy)
+        : base(policy)
+    {
+    }
 
-        public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
-        {
-            if (extract == null)
-                throw new ArgumentNullException(nameof(extract));
-            return new ExtractArgument<TCb, TRes>(extract);
-        }
+    public CallbackArgument<TCb> Callback  => CallbackArgument<TCb>.Instance;
+    public ReturnsKey            ReturnKey => ReturnsKey.Instance;
 
-        public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(params ArgumentRule[] args)
-        {
-            if (!args.Any(arg => arg is CallbackArgument<TCb>))
-                MatchMethod(args.Concat(new [] { Callback }).ToArray());
-            MatchMethod(args);
-            return this;
-        }
+    public ExtractArgument<TCb, TRes> Extract<TRes>(Func<TCb, TRes> extract)
+    {
+        if (extract == null)
+            throw new ArgumentNullException(nameof(extract));
+        return new ExtractArgument<TCb, TRes>(extract);
+    }
 
-        public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(
-            ReturnRule returnRule, params ArgumentRule[] args)
-        {
-            if (!args.Any(arg => arg is CallbackArgument<TCb>))
-                MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
-            MatchMethod(returnRule, args);
-            return this;
-        }
+    public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(params ArgumentRule[] args)
+    {
+        if (!args.Any(arg => arg is CallbackArgument<TCb>))
+            MatchMethod(args.Concat(new [] { Callback }).ToArray());
+        MatchMethod(args);
+        return this;
+    }
+
+    public CovariantPolicyBuilder<TCb> MatchMethodWithCallback(
+        ReturnRule returnRule, params ArgumentRule[] args)
+    {
+        if (!args.Any(arg => arg is CallbackArgument<TCb>))
+            MatchMethod(returnRule, args.Concat(new[] { Callback }).ToArray());
+        MatchMethod(returnRule, args);
+        return this;
     }
 }

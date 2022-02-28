@@ -1,4 +1,3 @@
-﻿namespace Miruken.Api
-{
-    public interface IRequest<out TResponse> { }
-}
+﻿namespace Miruken.Api;
+
+public interface IRequest<out TResponse> { }

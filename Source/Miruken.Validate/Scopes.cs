@@ -1,8 +1,7 @@
-﻿namespace Miruken.Validate
+﻿namespace Miruken.Validate;
+
+public static class Scopes
 {
-    public static class Scopes
-    {
-        public const string Default = null;
-        public const string Any     = "*";
-    }
+    public const string Default = null;
+    public const string Any     = "*";
 }

@@ -1,116 +1,115 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy;
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Bindings;
+using Rules;
+
+public delegate bool AcceptResultDelegate(object result, MemberBinding binding);
+
+public abstract class CallbackPolicy 
+    : FilteredObject, IComparer<PolicyMemberBinding>, IComparer<object>
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using Bindings;
-    using Rules;
+    private readonly List<MethodRule> _rules = new();
 
-    public delegate bool AcceptResultDelegate(object result, MemberBinding binding);
+    public AcceptResultDelegate AcceptResult  { get; set; }
+    public Func<object, Type>   GetResultType { get; set; }
+    public BindMemberDelegate   Binder        { get; set; }
 
-    public abstract class CallbackPolicy 
-        : FilteredObject, IComparer<PolicyMemberBinding>, IComparer<object>
+    public void AddMethodRule(MethodRule rule)
     {
-        private readonly List<MethodRule> _rules = new();
+        _rules.Add(rule);
+    }
 
-        public AcceptResultDelegate AcceptResult  { get; set; }
-        public Func<object, Type>   GetResultType { get; set; }
-        public BindMemberDelegate   Binder        { get; set; }
+    public MethodRule MatchMethod(MethodInfo method, CategoryAttribute category)
+    {
+        return _rules.FirstOrDefault(r => r.Matches(method, category));
+    }
 
-        public void AddMethodRule(MethodRule rule)
-        {
-            _rules.Add(rule);
-        }
+    public virtual PolicyMemberBinding BindMethod(
+        PolicyMemberBindingInfo policyMemberBindingInfo)
+    {
+        return Binder?.Invoke(this, policyMemberBindingInfo)
+               ?? new PolicyMemberBinding(this, policyMemberBindingInfo);
+    }
 
-        public MethodRule MatchMethod(MethodInfo method, CategoryAttribute category)
-        {
-            return _rules.FirstOrDefault(r => r.Matches(method, category));
-        }
+    public virtual object CreateKey(PolicyMemberBindingInfo bindingInfo)
+    {
+        return bindingInfo.InKey != null
+            ? NormalizeKey(bindingInfo.InKey)
+            : NormalizeKey(bindingInfo.OutKey);
+    }
 
-        public virtual PolicyMemberBinding BindMethod(
-            PolicyMemberBindingInfo policyMemberBindingInfo)
-        {
-            return Binder?.Invoke(this, policyMemberBindingInfo)
-                ?? new PolicyMemberBinding(this, policyMemberBindingInfo);
-        }
+    private static object NormalizeKey(object key)
+    {
+        if (key is not Type varianceType) return key;
+        if (varianceType.ContainsGenericParameters &&
+            !varianceType.IsGenericTypeDefinition &&
+            !varianceType.IsGenericParameter)
+            varianceType = varianceType.GetGenericTypeDefinition();
+        return varianceType;
+    }
 
-        public virtual object CreateKey(PolicyMemberBindingInfo bindingInfo)
-        {
-            return bindingInfo.InKey != null
-                 ? NormalizeKey(bindingInfo.InKey)
-                 : NormalizeKey(bindingInfo.OutKey);
-        }
+    public abstract object GetKey(object callback);
 
-        private static object NormalizeKey(object key)
-        {
-            if (key is not Type varianceType) return key;
-            if (varianceType.ContainsGenericParameters &&
-                !varianceType.IsGenericTypeDefinition &&
-                !varianceType.IsGenericParameter)
-                varianceType = varianceType.GetGenericTypeDefinition();
-            return varianceType;
-        }
+    public abstract IEnumerable<object> GetCompatibleKeys(
+        object key, IEnumerable available);
 
-        public abstract object GetKey(object callback);
+    public abstract int Compare(object key1, object key2);
 
-        public abstract IEnumerable<object> GetCompatibleKeys(
-            object key, IEnumerable available);
+    public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
+    {
+        var order = Compare(x?.Key, y?.Key);
+        if (order != 0) return order;
+        if (x == null) return 1;
+        if (y == null) return -1;
+        return y.Dispatcher.Arity - x.Dispatcher.Arity;
+    }
 
-        public abstract int Compare(object key1, object key2);
+    public bool Dispatch(object handler, object callback, bool greedy,
+        IHandler composer, ResultsDelegate results = null)
+    {
+        if (handler is ICallbackPolicyDispatch dispatcher)
+            return dispatcher.Dispatch(this, callback, greedy, composer, results);
+        var type = handler as Type ?? handler.GetType();
+        var descriptor = HandlerDescriptorFactory.Current.GetDescriptor(type);
+        return descriptor?.Dispatch(this, handler, callback, greedy, composer, results) == true;
+    }
 
-        public int Compare(PolicyMemberBinding x, PolicyMemberBinding y)
-        {
-            var order = Compare(x?.Key, y?.Key);
-            if (order != 0) return order;
-            if (x == null) return 1;
-            if (y == null) return -1;
-            return y.Dispatcher.Arity - x.Dispatcher.Arity;
-        }
+    public IEnumerable<PolicyMemberBinding> GetMethods()
+    {
+        return HandlerDescriptorFactory.Current.GetPolicyMembers(this);
+    }
 
-        public bool Dispatch(object handler, object callback, bool greedy,
-            IHandler composer, ResultsDelegate results = null)
-        {
-            if (handler is ICallbackPolicyDispatch dispatcher)
-                return dispatcher.Dispatch(this, callback, greedy, composer, results);
-            var type = handler as Type ?? handler.GetType();
-            var descriptor = HandlerDescriptorFactory.Current.GetDescriptor(type);
-            return descriptor?.Dispatch(this, handler, callback, greedy, composer, results) == true;
-        }
+    public IEnumerable<PolicyMemberBinding> GetMethods<T>()
+    {
+        return HandlerDescriptorFactory.Current.GetPolicyMembers<T>(this);
+    }
 
-        public IEnumerable<PolicyMemberBinding> GetMethods()
-        {
-            return HandlerDescriptorFactory.Current.GetPolicyMembers(this);
-        }
+    public static IEnumerable<HandlerDescriptor> GetInstanceHandlers(object callback)
+    {
+        var policy = GetCallbackPolicy(callback);
+        return HandlerDescriptorFactory.Current.GetInstanceHandlers(policy, callback);
+    }
 
-        public IEnumerable<PolicyMemberBinding> GetMethods<T>()
-        {
-            return HandlerDescriptorFactory.Current.GetPolicyMembers<T>(this);
-        }
+    public static IEnumerable<HandlerDescriptor> GetStaticHandlers(object callback)
+    {
+        var policy = GetCallbackPolicy(callback);
+        return HandlerDescriptorFactory.Current.GetStaticHandlers(policy, callback);
+    }
 
-        public static IEnumerable<HandlerDescriptor> GetInstanceHandlers(object callback)
-        {
-            var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptorFactory.Current.GetInstanceHandlers(policy, callback);
-        }
+    public static IEnumerable<HandlerDescriptor> GetCallbackHandlers(object callback)
+    {
+        var policy = GetCallbackPolicy(callback);
+        return HandlerDescriptorFactory.Current.GetCallbackHandlers(policy, callback);
+    }
 
-        public static IEnumerable<HandlerDescriptor> GetStaticHandlers(object callback)
-        {
-            var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptorFactory.Current.GetStaticHandlers(policy, callback);
-        }
-
-        public static IEnumerable<HandlerDescriptor> GetCallbackHandlers(object callback)
-        {
-            var policy = GetCallbackPolicy(callback);
-            return HandlerDescriptorFactory.Current.GetCallbackHandlers(policy, callback);
-        }
-
-        public static CallbackPolicy GetCallbackPolicy(object callback)
-        {
-            var dispatch = callback as IDispatchCallback;
-            return dispatch?.Policy ?? Handles.Policy;
-        }
+    public static CallbackPolicy GetCallbackPolicy(object callback)
+    {
+        var dispatch = callback as IDispatchCallback;
+        return dispatch?.Policy ?? Handles.Policy;
     }
 }

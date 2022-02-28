@@ -1,25 +1,24 @@
-﻿namespace Miruken.Callback.Policy
+﻿namespace Miruken.Callback.Policy;
+
+using System;
+using System.Collections.Generic;
+using Bindings;
+
+public delegate void HandlerDescriptorVisitor(
+    HandlerDescriptor descriptor, PolicyMemberBinding binding);
+
+public interface IHandlerDescriptorFactory
 {
-    using System;
-    using System.Collections.Generic;
-    using Bindings;
+    HandlerDescriptor GetDescriptor(Type type);
 
-    public delegate void HandlerDescriptorVisitor(
-        HandlerDescriptor descriptor, PolicyMemberBinding binding);
+    HandlerDescriptor RegisterDescriptor(Type type,
+        HandlerDescriptorVisitor visitor = null, int? priority = null);
 
-    public interface IHandlerDescriptorFactory
-    {
-        HandlerDescriptor GetDescriptor(Type type);
+    IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback);
 
-        HandlerDescriptor RegisterDescriptor(Type type,
-            HandlerDescriptorVisitor visitor = null, int? priority = null);
+    IEnumerable<HandlerDescriptor> GetInstanceHandlers(CallbackPolicy policy, object callback);
 
-        IEnumerable<HandlerDescriptor> GetStaticHandlers(CallbackPolicy policy, object callback);
+    IEnumerable<HandlerDescriptor> GetCallbackHandlers(CallbackPolicy policy, object callback);
 
-        IEnumerable<HandlerDescriptor> GetInstanceHandlers(CallbackPolicy policy, object callback);
-
-        IEnumerable<HandlerDescriptor> GetCallbackHandlers(CallbackPolicy policy, object callback);
-
-        IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy);
-    }
+    IEnumerable<PolicyMemberBinding> GetPolicyMembers(CallbackPolicy policy);
 }

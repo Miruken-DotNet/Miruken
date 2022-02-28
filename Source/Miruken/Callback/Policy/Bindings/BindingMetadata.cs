@@ -1,54 +1,52 @@
-﻿namespace Miruken.Callback.Policy.Bindings
+﻿namespace Miruken.Callback.Policy.Bindings;
+
+using System;
+using System.Collections.Generic;
+
+public class BindingMetadata
 {
-    using System;
-    using System.Collections.Generic;
+    private readonly Dictionary<object, object> _values = new();
 
-    public class BindingMetadata
+    public string Name { get; set; }
+
+    public bool IsEmpty => Name == null && _values.Count == 0;
+
+    public bool Has(object key)
     {
-        private readonly Dictionary<object, object> 
-            _values = new();
+        if (key == null)
+            throw new ArgumentNullException(nameof(key));
 
-        public string Name { get; set; }
+        return _values.ContainsKey(key);
+    }
 
-        public bool IsEmpty => Name == null && _values.Count == 0;
+    public bool Get<TValue>(object key, out TValue value)
+    {
+        if (key == null)
+            throw new ArgumentNullException(nameof(key));
 
-        public bool Has(object key)
+        if (_values.TryGetValue(key, out var v))
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            return _values.ContainsKey(key);
+            value = (TValue)v;
+            return true;
         }
 
-        public bool Get<TValue>(object key, out TValue value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+        value = default;
+        return false;
+    }
 
-            if (_values.TryGetValue(key, out var v))
-            {
-                value = (TValue)v;
-                return true;
-            }
+    public void Set(object key, object value)
+    {
+        if (key == null)
+            throw new ArgumentNullException(nameof(key));
 
-            value = default;
-            return false;
-        }
+        _values[key] = value;
+    }
 
-        public void Set(object key, object value)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            _values[key] = value;
-        }
-
-        public void MergeInto(BindingMetadata other)
-        {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-            foreach (var item in _values)
-                other.Set(item.Key, item.Value);
-        }
+    public void MergeInto(BindingMetadata other)
+    {
+        if (other == null)
+            throw new ArgumentNullException(nameof(other));
+        foreach (var (key, value) in _values)
+            other.Set(key, value);
     }
 }

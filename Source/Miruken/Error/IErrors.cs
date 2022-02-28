@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Miruken.Error
-{
-    using Concurrency;
+namespace Miruken.Error;
 
-    public interface IErrors : IProtocol
-    {
-        Promise HandleException(Exception exception, 
-            object callback = null, object context = null);
-    }
+using Concurrency;
+
+public interface IErrors : IProtocol
+{
+    Promise HandleException(Exception exception, 
+        object callback = null, object context = null);
 }

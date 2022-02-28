@@ -1,29 +1,28 @@
-namespace Miruken.Callback.Policy.Rules
+namespace Miruken.Callback.Policy.Rules;
+
+using System;
+using System.Reflection;
+using Infrastructure;
+
+public class ExtractArgument<TCb, TRes> : ArgumentRule
 {
-    using System;
-    using System.Reflection;
-    using Infrastructure;
+    private readonly Func<TCb, TRes> _extract;
 
-    public class ExtractArgument<TCb, TRes> : ArgumentRule
+    public ExtractArgument(Func<TCb, TRes> extract)
     {
-        private readonly Func<TCb, TRes> _extract;
+        _extract = extract 
+                   ?? throw new ArgumentNullException(nameof(extract));
+    }
 
-        public ExtractArgument(Func<TCb, TRes> extract)
-        {
-            _extract = extract 
-                ?? throw new ArgumentNullException(nameof(extract));
-        }
+    public override bool Matches(
+        ParameterInfo parameter, RuleContext context)
+    {
+        var paramType = parameter.ParameterType;
+        return paramType.Is<TRes>();
+    }
 
-        public override bool Matches(
-            ParameterInfo parameter, RuleContext context)
-        {
-            var paramType = parameter.ParameterType;
-            return paramType.Is<TRes>();
-        }
-
-        public override object Resolve(object callback)
-        {
-            return _extract((TCb)callback);
-        }
+    public override object Resolve(object callback)
+    {
+        return _extract((TCb)callback);
     }
 }

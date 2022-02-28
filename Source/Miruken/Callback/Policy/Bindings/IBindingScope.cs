@@ -1,7 +1,6 @@
-﻿namespace Miruken.Callback.Policy.Bindings
+﻿namespace Miruken.Callback.Policy.Bindings;
+
+public interface IBindingScope
 {
-    public interface IBindingScope
-    {
-        BindingMetadata Metadata { get; }
-    }
+    BindingMetadata Metadata { get; }
 }

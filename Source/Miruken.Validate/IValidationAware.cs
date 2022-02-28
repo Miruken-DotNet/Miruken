@@ -1,7 +1,6 @@
-﻿namespace Miruken.Validate
+﻿namespace Miruken.Validate;
+
+public interface IValidationAware
 {
-    public interface IValidationAware
-    {
-        ValidationOutcome ValidationOutcome { get; set; }
-    }
+    ValidationOutcome ValidationOutcome { get; set; }
 }

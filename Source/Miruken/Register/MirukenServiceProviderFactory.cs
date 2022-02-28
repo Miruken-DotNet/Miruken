@@ -1,38 +1,35 @@
-﻿namespace Miruken.Register
+﻿namespace Miruken.Register;
+
+using System;
+using Callback.Policy;
+using Microsoft.Extensions.DependencyInjection;
+
+public class MirukenServiceProviderFactory : IServiceProviderFactory<Registration>
 {
-    using System;
-    using Callback.Policy;
-    using Microsoft.Extensions.DependencyInjection;
+    private readonly Action<Registration> _configure;
+    private readonly IHandlerDescriptorFactory _factory;
 
-    public class MirukenServiceProviderFactory : IServiceProviderFactory<Registration>
+    public MirukenServiceProviderFactory(
+        IHandlerDescriptorFactory factory = null)
+        : this(null, factory)
     {
-        private readonly Action<Registration> _configure;
-        private readonly IHandlerDescriptorFactory _factory;
-
-        public MirukenServiceProviderFactory(
-            IHandlerDescriptorFactory factory = null)
-            : this(null, factory)
-        {
-        }
-
-        public MirukenServiceProviderFactory(
-            Action<Registration> configure,
-            IHandlerDescriptorFactory factory = null)
-        {
-            _configure = configure;
-            _factory   = factory;
-        }
-
-        public Registration CreateBuilder(IServiceCollection services)
-        {
-            var registration = services.GetRegistration() ?? new Registration(services);
-            _configure?.Invoke(registration);
-            return registration;
-        }
-
-        public IServiceProvider CreateServiceProvider(Registration registration)
-        {
-            return registration.Build(_factory);
-        }
     }
+
+    public MirukenServiceProviderFactory(
+        Action<Registration> configure,
+        IHandlerDescriptorFactory factory = null)
+    {
+        _configure = configure;
+        _factory   = factory;
+    }
+
+    public Registration CreateBuilder(IServiceCollection services)
+    {
+        var registration = services.GetRegistration() ?? new Registration(services);
+        _configure?.Invoke(registration);
+        return registration;
+    }
+
+    public IServiceProvider CreateServiceProvider(Registration registration) =>
+        registration.Build(_factory);
 }

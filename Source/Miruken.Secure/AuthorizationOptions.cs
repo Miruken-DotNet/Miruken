@@ -1,20 +1,19 @@
-﻿namespace Miruken.Secure
+﻿namespace Miruken.Secure;
+
+using Callback;
+
+public class AuthorizationOptions : Options<AuthorizationOptions>
 {
-    using Callback;
+    public bool? RequireAuthenticatedUser { get; set; }
+    public bool? RequirePolicy            { get; set; }
 
-    public class AuthorizationOptions : Options<AuthorizationOptions>
+    public override void MergeInto(AuthorizationOptions other)
     {
-        public bool? RequireAuthenticatedUser { get; set; }
-        public bool? RequirePolicy            { get; set; }
+        if (RequireAuthenticatedUser.HasValue &&
+            !other.RequireAuthenticatedUser.HasValue)
+            other.RequireAuthenticatedUser = RequireAuthenticatedUser;
 
-        public override void MergeInto(AuthorizationOptions other)
-        {
-            if (RequireAuthenticatedUser.HasValue &&
-                !other.RequireAuthenticatedUser.HasValue)
-                other.RequireAuthenticatedUser = RequireAuthenticatedUser;
-
-            if (RequirePolicy.HasValue && !other.RequirePolicy.HasValue)
-                other.RequirePolicy = RequirePolicy;
-        }
+        if (RequirePolicy.HasValue && !other.RequirePolicy.HasValue)
+            other.RequirePolicy = RequirePolicy;
     }
 }

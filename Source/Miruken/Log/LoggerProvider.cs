@@ -1,23 +1,19 @@
-﻿namespace Miruken.Log
+﻿namespace Miruken.Log;
+
+using System;
+using Callback;
+using Microsoft.Extensions.Logging;
+
+public class LoggerProvider : Handler
 {
-    using System;
-    using Callback;
-    using Microsoft.Extensions.Logging;
+    private readonly ILoggerFactory _factory;
 
-    public class LoggerProvider : Handler
+    public LoggerProvider(ILoggerFactory factory)
     {
-        private readonly ILoggerFactory _factory;
-
-        public LoggerProvider(ILoggerFactory factory)
-        {
-            _factory = factory;
-        }
-
-        [Provides]
-        public ILogger GetContextualLogger(Inquiry inquiry)
-        {
-            return inquiry.Parent?.Key is not Type owner ? null : _factory.CreateLogger(owner);
-        }
+        _factory = factory;
     }
-}
 
+    [Provides]
+    public ILogger GetContextualLogger(Inquiry inquiry) =>
+        inquiry.Parent?.Key is not Type owner ? null : _factory.CreateLogger(owner);
+}

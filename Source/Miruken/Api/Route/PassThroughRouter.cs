@@ -1,20 +1,19 @@
-﻿namespace Miruken.Api.Route
+﻿namespace Miruken.Api.Route;
+
+using Api;
+using Callback;
+using Concurrency;
+
+[Unmanaged]
+public class PassThroughRouter : Handler
 {
-    using Api;
-    using Callback;
-    using Concurrency;
+    public const string Scheme = "pass-through";
 
-    [Unmanaged]
-    public class PassThroughRouter : Handler
+    [Handles, SkipFilters]
+    public Promise Route(Routed request, IHandler composer)
     {
-        public const string Scheme = "pass-through";
-
-        [Handles, SkipFilters]
-        public Promise Route(Routed request, IHandler composer)
-        {
-            return request.Route == Scheme
-                 ? composer.Send(request.Message)
-                 : null;
-        }
+        return request.Route == Scheme
+             ? composer.Send(request.Message)
+             : null;
     }
 }

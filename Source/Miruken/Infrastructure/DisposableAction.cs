@@ -1,38 +1,37 @@
-﻿namespace Miruken.Infrastructure
+﻿namespace Miruken.Infrastructure;
+
+using System;
+
+public class DisposableAction<T> : IDisposable
 {
-    using System;
+    private readonly Action<T> _action;
 
-    public class DisposableAction<T> : IDisposable
+    public DisposableAction(Action<T> action, T val)
     {
-        private readonly Action<T> _action;
-
-        public DisposableAction(Action<T> action, T val)
-        {
-            _action = action
-                ?? throw new ArgumentNullException(nameof(action));
-            Value   = val;
-        }
-
-        public T Value { get; }
-
-        public void Dispose()
-        {
-            _action(Value);
-        }
+        _action = action
+                  ?? throw new ArgumentNullException(nameof(action));
+        Value   = val;
     }
 
-    public class DisposableAction : IDisposable
+    public T Value { get; }
+
+    public void Dispose()
     {
-        private readonly Action _action;
+        _action(Value);
+    }
+}
 
-        public DisposableAction(Action action)
-        {
-            _action = action;
-        }
+public class DisposableAction : IDisposable
+{
+    private readonly Action _action;
 
-        public void Dispose()
-        {
-            _action?.Invoke();
-        }
+    public DisposableAction(Action action)
+    {
+        _action = action;
+    }
+
+    public void Dispose()
+    {
+        _action?.Invoke();
     }
 }

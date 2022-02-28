@@ -1,53 +1,52 @@
-﻿namespace Miruken.Tests.Api.Once
+﻿namespace Miruken.Tests.Api.Once;
+
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Miruken.Api;
+using Miruken.Api.Once;
+using Miruken.Callback;
+using Miruken.Callback.Policy;
+using Miruken.Map;
+
+[TestClass]
+public class DelegatingOnceStrategyTests
 {
-    using System.Threading.Tasks;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Miruken.Api;
-    using Miruken.Api.Once;
-    using Miruken.Callback;
-    using Miruken.Callback.Policy;
-    using Miruken.Map;
+    private IHandler _handler;
 
-    [TestClass]
-    public class DelegatingOnceStrategyTests
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private IHandler _handler;
+        var factory = new MutableHandlerDescriptorFactory();
+        factory.RegisterDescriptor<FooHandler>();
+        factory.RegisterDescriptor<OnceHandler>();
+        factory.RegisterDescriptor<Provider>();
+        HandlerDescriptorFactory.UseFactory(factory);
 
-        [TestInitialize]
-        public void TestInitialize()
+        _handler = new FooHandler() + new OnceHandler();
+    }
+
+    [TestMethod]
+    public async Task Should_Delegate_Once()
+    {
+        var foo  = new Foo().Once();
+        var once = await _handler.Send<Once>(foo);
+        Assert.AreEqual(foo.RequestId, once.RequestId);
+    }
+
+    private class Foo { }
+
+    private class FooHandler : Handler
+    {
+        [Handles]
+        public Once HandleFoo(Foo foo, Once once)
         {
-            var factory = new MutableHandlerDescriptorFactory();
-            factory.RegisterDescriptor<FooHandler>();
-            factory.RegisterDescriptor<OnceHandler>();
-            factory.RegisterDescriptor<Provider>();
-            HandlerDescriptorFactory.UseFactory(factory);
-
-            _handler = new FooHandler() + new OnceHandler();
+            return once;
         }
 
-        [TestMethod]
-        public async Task Should_Delegate_Once()
+        [Maps]
+        public IOnceStrategy Once(Foo foo)
         {
-            var foo  = new Foo().Once();
-            var once = await _handler.Send<Once>(foo);
-            Assert.AreEqual(foo.RequestId, once.RequestId);
-        }
-
-        private class Foo { }
-
-        private class FooHandler : Handler
-        {
-            [Handles]
-            public Once HandleFoo(Foo foo, Once once)
-            {
-                return once;
-            }
-
-            [Maps]
-            public IOnceStrategy Once(Foo foo)
-            {
-                return DelegatingOnceStrategy.Instance;
-            }
+            return DelegatingOnceStrategy.Instance;
         }
     }
 }

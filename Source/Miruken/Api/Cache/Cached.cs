@@ -1,27 +1,26 @@
-﻿namespace Miruken.Api.Cache
+﻿namespace Miruken.Api.Cache;
+
+using System;
+using Api;
+
+public enum CacheAction
 {
-    using System;
-    using Api;
+    Refresh = 0,
+    Invalidate
+}
 
-    public enum CacheAction
+public class Cached<TResponse> : RequestDecorator<TResponse>
+{
+    public Cached()
     {
-        Refresh = 0,
-        Invalidate
     }
 
-    public class Cached<TResponse> : RequestDecorator<TResponse>
+    public Cached(IRequest<TResponse> request)
+        : base(request)
     {
-        public Cached()
-        {
-        }
-
-        public Cached(IRequest<TResponse> request)
-            : base(request)
-        {
-            TimeToLive = TimeSpan.FromDays(1);
-        }
-
-        public CacheAction? Action     { get; set; }
-        public TimeSpan     TimeToLive { get; set; }
+        TimeToLive = TimeSpan.FromDays(1);
     }
+
+    public CacheAction? Action     { get; set; }
+    public TimeSpan     TimeToLive { get; set; }
 }

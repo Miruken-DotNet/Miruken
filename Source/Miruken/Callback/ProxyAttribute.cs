@@ -1,47 +1,38 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System;
+using Concurrency;
+using Policy;
+
+public class ProxyAttribute : ResolvingAttribute
 {
-    using System;
-    using Concurrency;
-    using Policy;
+    public static readonly ProxyAttribute
+        Instance = new();
 
-    public class ProxyAttribute : ResolvingAttribute
+    public override void ValidateArgument(Argument argument)
     {
-        public static readonly ProxyAttribute
-            Instance = new();
-
-        public override void ValidateArgument(Argument argument)
+        if (!argument.ParameterType.IsInterface)
         {
-            if (!argument.ParameterType.IsInterface)
-            {
-                throw new ArgumentException(
-                    "Proxy parameters must be interfaces.");
-            }
-
-            if (argument.IsEnumerable)
-            {
-                throw new ArgumentException(
-                    "Proxy parameters cannot be collections.");
-            }
-
-            if (argument.IsPromise || argument.IsTask)
-            {
-                throw new ArgumentException(
-                    "Proxy parameters cannot be tasks or promises.");
-            }
+            throw new ArgumentException(
+                "Proxy parameters must be interfaces.");
         }
 
-        protected override object Resolve(
-            Inquiry parent, Argument argument,
-            object key, IHandler handler)
+        if (argument.IsEnumerable)
         {
-            return handler.Proxy((Type)key);
+            throw new ArgumentException(
+                "Proxy parameters cannot be collections.");
         }
 
-        protected override Promise ResolveAsync(
-            Inquiry parent, Argument argument,
-            object key, IHandler handler)
+        if (argument.IsPromise || argument.IsTask)
         {
-            return Promise.Resolved(handler.Proxy((Type) key));
+            throw new ArgumentException(
+                "Proxy parameters cannot be tasks or promises.");
         }
     }
+
+    protected override object Resolve(Inquiry parent, Argument argument, object key, IHandler handler) =>
+        handler.Proxy((Type)key);
+
+    protected override Promise ResolveAsync(Inquiry parent, Argument argument, object key, IHandler handler) =>
+        Promise.Resolved(handler.Proxy((Type) key));
 }

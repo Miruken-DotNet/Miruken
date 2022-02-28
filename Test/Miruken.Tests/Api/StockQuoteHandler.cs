@@ -1,40 +1,39 @@
-namespace Miruken.Tests.Api
+namespace Miruken.Tests.Api;
+
+using System;
+using System.Threading;
+using Miruken.Callback;
+using Miruken.Concurrency;
+
+public class StockQuoteHandler : Handler
 {
-    using System;
-    using System.Threading;
-    using Miruken.Callback;
-    using Miruken.Concurrency;
+    public static volatile int Called;
 
-    public class StockQuoteHandler : Handler
+    private readonly Random random = new();
+
+    [Handles]
+    public Promise<StockQuote> GetQuote(GetStockQuote quote)
     {
-        public static volatile int Called;
+        ++Called;
 
-        private readonly Random random = new();
+        if (quote.Symbol == "EX")
+            throw new Exception("Stock Exchange is down.");
 
-        [Handles]
-        public Promise<StockQuote> GetQuote(GetStockQuote quote)
+        return Promise.Resolved(new StockQuote
         {
-            ++Called;
+            Symbol = quote.Symbol,
+            Value = Convert.ToDecimal(random.NextDouble() * 10.0)
+        });
+    }
 
-            if (quote.Symbol == "EX")
-                throw new Exception("Stock Exchange is down.");
+    [Handles]
+    public Promise SellStock(SellStock sell)
+    {
+        Interlocked.Increment(ref Called);
 
-            return Promise.Resolved(new StockQuote
-            {
-                Symbol = quote.Symbol,
-                Value = Convert.ToDecimal(random.NextDouble() * 10.0)
-            });
-        }
+        if (sell.Symbol == "EX")
+            throw new Exception("Stock Exchange is down.");
 
-        [Handles]
-        public Promise SellStock(SellStock sell)
-        {
-            Interlocked.Increment(ref Called);
-
-            if (sell.Symbol == "EX")
-                throw new Exception("Stock Exchange is down.");
-
-            return Promise.Empty;
-        }
+        return Promise.Empty;
     }
 }

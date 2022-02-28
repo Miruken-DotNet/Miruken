@@ -1,56 +1,55 @@
-﻿namespace Miruken.Callback.Policy.Bindings
+﻿namespace Miruken.Callback.Policy.Bindings;
+
+using System;
+using System.Collections.Generic;
+
+public class MetadataConstraint : IBindingConstraint
 {
-    using System;
-    using System.Collections.Generic;
+    private readonly IDictionary<object, object> _metadata;
 
-    public class MetadataConstraint : IBindingConstraint
+    public MetadataConstraint(IDictionary<object, object> metadata)
     {
-        private readonly IDictionary<object, object> _metadata;
-
-        public MetadataConstraint(IDictionary<object, object> metadata)
-        {
-            if (metadata == null)
-                throw new ArgumentNullException(nameof(metadata));
-            _metadata = new Dictionary<object, object>(metadata);
-        }
-
-        public void Require(BindingMetadata metadata)
-        {
-            foreach (var item in _metadata)
-                metadata.Set(item.Key, item.Value);
-        }
-
-        public bool Matches(BindingMetadata metadata)
-        {
-            foreach (var item in _metadata)
-            {
-                if (!(metadata.Get(item.Key, out object value) &&
-                      Equals(item.Value, value))) return false;
-            }
-            return true;
-        }
+        if (metadata == null)
+            throw new ArgumentNullException(nameof(metadata));
+        _metadata = new Dictionary<object, object>(metadata);
     }
 
-    public class MetadataKeyConstraint : IBindingConstraint
+    public void Require(BindingMetadata metadata)
     {
-        private readonly object _key;
-        private readonly object _value;
+        foreach (var (key, value) in _metadata)
+            metadata.Set(key, value);
+    }
 
-        public MetadataKeyConstraint(object key, object value)
+    public bool Matches(BindingMetadata metadata)
+    {
+        foreach (var (key, val) in _metadata)
         {
-            _key   = key ?? throw new ArgumentNullException(nameof(key));
-            _value = value;
+            if (!(metadata.Get(key, out object value) &&
+                  Equals(val, value))) return false;
         }
+        return true;
+    }
+}
 
-        public void Require(BindingMetadata metadata)
-        {
-            metadata.Set(_key, _value);
-        }
+public class MetadataKeyConstraint : IBindingConstraint
+{
+    private readonly object _key;
+    private readonly object _value;
 
-        public bool Matches(BindingMetadata metadata)
-        {
-            return metadata.Get(_key, out object value)
-                   && Equals(_value, value);
-        }
+    public MetadataKeyConstraint(object key, object value)
+    {
+        _key   = key ?? throw new ArgumentNullException(nameof(key));
+        _value = value;
+    }
+
+    public void Require(BindingMetadata metadata)
+    {
+        metadata.Set(_key, _value);
+    }
+
+    public bool Matches(BindingMetadata metadata)
+    {
+        return metadata.Get(_key, out object value)
+               && Equals(_value, value);
     }
 }

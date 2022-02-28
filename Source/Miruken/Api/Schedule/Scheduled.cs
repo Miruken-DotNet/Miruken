@@ -1,16 +1,15 @@
-﻿namespace Miruken.Api.Schedule
+﻿namespace Miruken.Api.Schedule;
+
+using System;
+using Api;
+using Functional;
+
+public abstract class Scheduled : IRequest<ScheduledResult>
 {
-    using System;
-    using Api;
-    using Functional;
+    public object[] Requests { get; set; }
+}
 
-    public abstract class Scheduled : IRequest<ScheduledResult>
-    {
-        public object[] Requests { get; set; }
-    }
-
-    public class ScheduledResult
-    {
-        public Try<Exception, object>[] Responses { get; set; }
-    }
+public class ScheduledResult
+{
+    public Try<Exception, object>[] Responses { get; set; }
 }

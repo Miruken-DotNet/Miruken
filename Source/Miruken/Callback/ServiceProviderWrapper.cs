@@ -1,32 +1,25 @@
-﻿namespace Miruken.Callback
+﻿namespace Miruken.Callback;
+
+using System;
+using System.Collections.Generic;
+
+[Unmanaged]
+public class ServiceProviderWrapper : Handler
 {
-    using System;
-    using System.Collections.Generic;
+    private readonly IServiceProvider _provider;
 
-    [Unmanaged]
-    public class ServiceProviderWrapper : Handler
+    public ServiceProviderWrapper(IServiceProvider provider)
     {
-        private readonly IServiceProvider _provider;
+        _provider = provider ??
+                    throw new ArgumentNullException(nameof(provider));
+    }
 
-        public ServiceProviderWrapper(IServiceProvider provider)
-        {
-            _provider = provider ??
-                throw new ArgumentNullException(nameof(provider));
-        }
-
-        [Provides]
-        public object Provide(Inquiry inquiry)
-        {
-            if (inquiry.Key is Type type && inquiry.Metadata.IsEmpty)
-            {
-                if (inquiry.Many)
-                {
-                    var manyType = typeof(IEnumerable<>).MakeGenericType(type);
-                    return _provider.GetService(manyType);
-                }
-                return _provider.GetService(type);
-            }
-            return null;
-        }
+    [Provides]
+    public object Provide(Inquiry inquiry)
+    {
+        if (inquiry.Key is not Type type || !inquiry.Metadata.IsEmpty) return null;
+        if (!inquiry.Many) return _provider.GetService(type);
+        var manyType = typeof(IEnumerable<>).MakeGenericType(type);
+        return _provider.GetService(manyType);
     }
 }

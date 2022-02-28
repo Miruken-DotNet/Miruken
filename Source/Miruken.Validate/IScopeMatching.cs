@@ -1,48 +1,47 @@
-﻿namespace Miruken.Validate
+﻿namespace Miruken.Validate;
+
+using System;
+using System.Linq;
+
+public interface IScopeMatching
 {
-    using System;
-    using System.Linq;
+    bool Matches(object scope);
+}
 
-    public interface IScopeMatching
+public class EqualsScopeMatcher : IScopeMatching
+{
+    private readonly object _scope;
+
+    public static readonly EqualsScopeMatcher
+        Default = new(Scopes.Default);
+
+    public EqualsScopeMatcher(object scope)
     {
-        bool Matches(object scope);
+        _scope = scope;
     }
 
-    public class EqualsScopeMatcher : IScopeMatching
+    public bool Matches(object scope)
     {
-        private readonly object _scope;
+        if (Equals(scope, Scopes.Any) ||
+            Equals(_scope, Scopes.Any))
+            return true;
+        return scope is object[] collection
+            ? Array.IndexOf(collection, _scope) >= 0 
+            : Equals(scope, _scope);
+    }
+}
 
-        public static readonly EqualsScopeMatcher
-            Default = new(Scopes.Default);
+public class CompositeScopeMatcher : IScopeMatching
+{
+    private readonly IScopeMatching[] _matchers;
 
-        public EqualsScopeMatcher(object scope)
-        {
-            _scope = scope;
-        }
-
-        public bool Matches(object scope)
-        {
-            if (Equals(scope, Scopes.Any) ||
-                Equals(_scope, Scopes.Any))
-                return true;
-            return scope is object[] collection
-                 ? Array.IndexOf(collection, _scope) >= 0 
-                 : Equals(scope, _scope);
-        }
+    public CompositeScopeMatcher(IScopeMatching[] matchers)
+    {
+        _matchers = matchers;
     }
 
-    public class CompositeScopeMatcher : IScopeMatching
+    public bool Matches(object scope)
     {
-        private readonly IScopeMatching[] _matchers;
-
-        public CompositeScopeMatcher(IScopeMatching[] matchers)
-        {
-            _matchers = matchers;
-        }
-
-        public bool Matches(object scope)
-        {
-            return _matchers.Any(matcher => matcher.Matches(scope));
-        }
+        return _matchers.Any(matcher => matcher.Matches(scope));
     }
 }

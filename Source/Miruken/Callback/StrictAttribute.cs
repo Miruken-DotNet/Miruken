@@ -1,7 +1,6 @@
-﻿namespace Miruken.Callback
-{
-    using System;
+﻿namespace Miruken.Callback;
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class StrictAttribute : Attribute { }
-}
+using System;
+
+[AttributeUsage(AttributeTargets.Parameter)]
+public class StrictAttribute : Attribute { }

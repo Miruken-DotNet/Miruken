@@ -1,79 +1,60 @@
-﻿namespace Miruken.Callback.Policy.Rules
+﻿namespace Miruken.Callback.Policy.Rules;
+
+using System;
+using System.Reflection;
+using Infrastructure;
+
+public delegate bool ReturnTestDelegate(
+    Type returnType, ParameterInfo[] parameters,
+    RuleContext context);
+
+public class Return : ReturnRule
 {
-    using System;
-    using System.Reflection;
-    using Infrastructure;
+    private readonly Type _type;
 
-    public delegate bool ReturnTestDelegate(
+    public Return(Type type)
+    {
+        _type = type ?? throw new ArgumentNullException(nameof(type));
+    }
+
+    public override bool Matches(
         Type returnType, ParameterInfo[] parameters,
-        RuleContext context);
+        RuleContext context) => returnType.IsClassOf(_type);
 
-    public class Return : ReturnRule
+    public static readonly Return Void = new(typeof(void));
+
+    public static Return Of(Type type) => new(type);
+
+    public static Return Of<T>() => Of(typeof(T));
+
+    public new static ReturnRule Alias(string alias) => TestReturn.True.Alias(alias);
+
+    public static TestReturn Is(ReturnTestDelegate test) => new(test);
+}
+
+public class Return<T> : Return
+{
+    public static readonly ReturnRule Instance = new Return<T>();
+
+    public new static readonly ReturnRule OrVoid = Instance.OrVoid;
+
+    private Return() : base(typeof(T))
+    {         
+    }
+}
+
+public class TestReturn : ReturnRule
+{
+    private readonly ReturnTestDelegate _test;
+
+    public static readonly TestReturn True = Return.Is((_, _, _) => true);
+
+    public TestReturn(ReturnTestDelegate test)
     {
-        private readonly Type _type;
-
-        public Return(Type type)
-        {
-            _type = type ?? throw new ArgumentNullException(nameof(type));
-        }
-
-        public override bool Matches(
-            Type returnType, ParameterInfo[] parameters,
-            RuleContext context)
-        {
-            return returnType.IsClassOf(_type);
-        }
-
-        public static readonly Return Void = new(typeof(void));
-
-        public static Return Of(Type type)
-        {
-            return new(type);
-        }
-
-        public static Return Of<T>()
-        {
-            return Of(typeof(T));
-        }
-
-        public new static ReturnRule Alias(string alias)
-        {
-            return TestReturn.True.Alias(alias);
-        }
-
-        public static TestReturn Is(ReturnTestDelegate test)
-        {
-            return new(test);
-        }
+        _test = test ?? throw new ArgumentNullException(nameof(test));
     }
 
-    public class Return<T> : Return
-    {
-        public static readonly ReturnRule Instance = new Return<T>();
-
-        public new static readonly ReturnRule OrVoid = Instance.OrVoid;
-
-        private Return() : base(typeof(T))
-        {         
-        }
-    }
-
-    public class TestReturn : ReturnRule
-    {
-        private readonly ReturnTestDelegate _test;
-
-        public static readonly TestReturn True = Return.Is((_, _, _) => true);
-
-        public TestReturn(ReturnTestDelegate test)
-        {
-            _test = test ?? throw new ArgumentNullException(nameof(test));
-        }
-
-        public override bool Matches(
-             Type returnType, ParameterInfo[] parameters,
-             RuleContext context)
-        {
-            return _test(returnType, parameters, context);
-        }
-    }
+    public override bool Matches(
+        Type returnType, ParameterInfo[] parameters,
+        RuleContext context) =>_test(returnType, parameters, context);
 }

@@ -1,26 +1,25 @@
-﻿namespace Miruken.Http.Post
-{
-    public class PostRequest<TPost, TResource>
-          : ResourceRequest<TPost, PostResponse<TResource>>
-    {
-        public PostRequest()
-        {
-        }
+﻿namespace Miruken.Http.Post;
 
-        public PostRequest(TPost request) : base(request)
-        {
-        }
+public class PostRequest<TPost, TResource>
+    : ResourceRequest<TPost, PostResponse<TResource>>
+{
+    public PostRequest()
+    {
     }
 
-    public class PostResponse<TResource> : ResourceResponse<TResource>
+    public PostRequest(TPost request) : base(request)
     {
-        public PostResponse()
-        {          
-        }
+    }
+}
 
-        public PostResponse(TResource resource)
-            : base(resource)
-        {
-        }
+public class PostResponse<TResource> : ResourceResponse<TResource>
+{
+    public PostResponse()
+    {          
+    }
+
+    public PostResponse(TResource resource)
+        : base(resource)
+    {
     }
 }

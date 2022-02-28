@@ -1,7 +1,6 @@
-﻿namespace Miruken
+﻿namespace Miruken;
+
+public interface IOrdered
 {
-    public interface IOrdered
-    {
-        int? Order { get; set; }
-    }
+    int? Order { get; set; }
 }

@@ -1,68 +1,67 @@
-﻿namespace Miruken.Api.Route
+﻿namespace Miruken.Api.Route;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Callback;
+using Callback.Policy;
+using Callback.Policy.Bindings;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
+    Inherited = false)]
+public class RoutesAttribute : Attribute, IFilterProvider
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Callback;
-    using Callback.Policy;
-    using Callback.Policy.Bindings;
+    private readonly RoutesFilter[] _filters;
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,
-        Inherited = false)]
-    public class RoutesAttribute : Attribute, IFilterProvider
+    public RoutesAttribute(params string[] schemes)
     {
-        private readonly RoutesFilter[] _filters;
+        if (schemes == null || schemes.Length == 0)
+            throw new ArgumentException("Schemes cannot be empty.", nameof(schemes));
+        _filters = new [] { new RoutesFilter(schemes) };
+    }
 
-        public RoutesAttribute(params string[] schemes)
+    public bool Required => true;
+
+    public bool? AppliesTo(object callback, Type callbackType) => null;
+
+    public IEnumerable<IFilter> GetFilters(
+        MemberBinding binding, MemberDispatch dispatcher,
+        object callback, Type callbackType, IHandler composer)
+    {
+        return _filters;
+    }
+
+    private class RoutesFilter : IFilter<Routed, object>
+    {
+        private readonly string[] _schemes;
+
+        public int? Order { get; set; } = Stage.Logging - 1;
+
+        public RoutesFilter(string[] schemes)
         {
-            if (schemes == null || schemes.Length == 0)
-                throw new ArgumentException("Schemes cannot be empty.", nameof(schemes));
-            _filters = new [] { new RoutesFilter(schemes) };
+            _schemes = schemes;
         }
 
-        public bool Required => true;
-
-        public bool? AppliesTo(object callback, Type callbackType) => null;
-
-        public IEnumerable<IFilter> GetFilters(
-            MemberBinding binding, MemberDispatch dispatcher,
-            object callback, Type callbackType, IHandler composer)
+        public Task<object> Next(Routed routed,
+            object rawCallback, MemberBinding method,
+            IHandler composer, Next<object> next,
+            IFilterProvider provider)
         {
-            return _filters;
+            var matches = Array.IndexOf(_schemes, GetScheme(routed)) >= 0;
+            if (matches)
+            {
+                var batch = composer.GetBatch<BatchRouter>();
+                if (batch != null)
+                    return composer.EnableFilters().CommandAsync(
+                        new Batched<Routed>(routed, rawCallback));
+            }
+            return next(composer.EnableFilters(), matches);
         }
 
-        private class RoutesFilter : IFilter<Routed, object>
+        private static string GetScheme(Routed routed)
         {
-            private readonly string[] _schemes;
-
-            public int? Order { get; set; } = Stage.Logging - 1;
-
-            public RoutesFilter(string[] schemes)
-            {
-                _schemes = schemes;
-            }
-
-            public Task<object> Next(Routed routed,
-                object rawCallback, MemberBinding method,
-                IHandler composer, Next<object> next,
-                IFilterProvider provider)
-            {
-                var matches = Array.IndexOf(_schemes, GetScheme(routed)) >= 0;
-                if (matches)
-                {
-                    var batch = composer.GetBatch<BatchRouter>();
-                    if (batch != null)
-                        return composer.EnableFilters().CommandAsync(
-                            new Batched<Routed>(routed, rawCallback));
-                }
-                return next(composer.EnableFilters(), matches);
-            }
-
-            private static string GetScheme(Routed routed)
-            {
-                return Uri.TryCreate(routed.Route, UriKind.Absolute, out var uri)
-                     ? uri.Scheme : null;
-            }
+            return Uri.TryCreate(routed.Route, UriKind.Absolute, out var uri)
+                 ? uri.Scheme : null;
         }
     }
 }

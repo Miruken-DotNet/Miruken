@@ -1,7 +1,6 @@
-﻿namespace Miruken.Map
+﻿namespace Miruken.Map;
+
+public interface IFormatMatching
 {
-    public interface IFormatMatching
-    {
-        bool Matches(object format);
-    }
+    bool Matches(object format);
 }

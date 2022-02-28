@@ -1,7 +1,6 @@
-﻿namespace Miruken.Callback.Policy.Bindings
+﻿namespace Miruken.Callback.Policy.Bindings;
+
+public interface IBindingConstraintProvider
 {
-    public interface IBindingConstraintProvider
-    {
-        IBindingConstraint Constraint { get; }
-    }
+    IBindingConstraint Constraint { get; }
 }
