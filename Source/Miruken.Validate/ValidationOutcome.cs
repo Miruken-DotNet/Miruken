@@ -145,8 +145,8 @@ public class ValidationOutcome : IDataErrorInfo, INotifyDataErrorInfo
             ref _errorDetails, ref _initialized, ref _lock,
             () => string.Join(Environment.NewLine, _errors.SelectMany(e =>
             {
-                var property = e.Key;
-                return e.Value.Select(err => err is ValidationOutcome
+                var (property, value) = e;
+                return value.Select(err => err is ValidationOutcome
                     ? $"{property}[{Environment.NewLine}{err}{Environment.NewLine}]"
                     : err);
             }).ToArray()));

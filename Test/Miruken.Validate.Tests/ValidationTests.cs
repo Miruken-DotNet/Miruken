@@ -133,7 +133,7 @@ public class ValidationTests
         }
     }
 
-    public class ValidateTeam: Handler
+    public class ValidateTeam : Handler
     {
         [Validates]
         public async Task ShouldHaveName(Team team, ValidationOutcome outcome)
@@ -144,7 +144,7 @@ public class ValidationTests
         }
 
         [Validates(Scope = "ECNL")]
-        public Promise ShouldHaveLicensesCoach(Team team, ValidationOutcome outcome)
+        public Promise ShouldHaveLicensedCoach(Team team, ValidationOutcome outcome)
         {
             return Promise.Delay(TimeSpan.FromMilliseconds(10)).Then((d, s) =>
             {

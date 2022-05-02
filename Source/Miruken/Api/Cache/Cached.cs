@@ -21,6 +21,6 @@ public class Cached<TResponse> : RequestDecorator<TResponse>
         TimeToLive = TimeSpan.FromDays(1);
     }
 
-    public CacheAction? Action     { get; set; }
-    public TimeSpan     TimeToLive { get; set; }
+    public CacheAction? Action     { get; init; }
+    public TimeSpan     TimeToLive { get; init; }
 }

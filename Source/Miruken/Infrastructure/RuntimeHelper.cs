@@ -103,25 +103,23 @@ public static class RuntimeHelper
 
     public static Type GetOpenTypeConformance(this Type type, Type openType)
     {
-        if (openType.IsGenericTypeDefinition)
+        if (!openType.IsGenericTypeDefinition) return null;
+        if (openType.IsInterface)
         {
-            if (openType.IsInterface)
-            {
-                if (type == openType) return type;
-                if (type.IsGenericType &&
-                    type.GetGenericTypeDefinition() == openType)
-                    return type;
-                return type.GetInterfaces()
-                    .Select(t => GetOpenTypeConformance(t, openType))
-                    .FirstOrDefault(t => t != null);
-            }
-            while (type != null && type != typeof(object))
-            {
-                if (type.IsGenericType &&
-                    type.GetGenericTypeDefinition() == openType)
-                    return type;
-                type = type.BaseType;
-            }
+            if (type == openType) return type;
+            if (type.IsGenericType &&
+                type.GetGenericTypeDefinition() == openType)
+                return type;
+            return type.GetInterfaces()
+                .Select(t => GetOpenTypeConformance(t, openType))
+                .FirstOrDefault(t => t != null);
+        }
+        while (type != null && type != typeof(object))
+        {
+            if (type.IsGenericType &&
+                type.GetGenericTypeDefinition() == openType)
+                return type;
+            type = type.BaseType;
         }
         return null;
     }
@@ -227,7 +225,7 @@ public static class RuntimeHelper
         }
         var declaringType = sourceMethod.DeclaringType;
         MethodInfo methodOnTarget = null;
-        if (declaringType.GetTypeInfo().IsInterface &&
+        if (declaringType!.GetTypeInfo().IsInterface &&
             declaringType?.IsAssignableFrom(type) == true)
         {
             var mapping = type.GetTypeInfo().GetRuntimeInterfaceMap(declaringType);
@@ -236,15 +234,13 @@ public static class RuntimeHelper
         }
         else
         {
-            var methods = type.GetMethods(BindingFlags.Instance | binding);
+            var methods = type!.GetMethods(BindingFlags.Instance | binding);
             foreach (var method in methods)
             {
-                if (MethodSignatureComparer.Instance.Equals(
-                        method.GetBaseDefinition(), sourceMethod))
-                {
-                    methodOnTarget = method;
-                    break;
-                }
+                if (!MethodSignatureComparer.Instance.Equals(
+                        method.GetBaseDefinition(), sourceMethod)) continue;
+                methodOnTarget = method;
+                break;
             }
         }
         if (methodOnTarget == null) return null;

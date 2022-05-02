@@ -94,7 +94,7 @@ public sealed class CallbackSemanticsDecorator : Handler, IDecorator
                 if (greedy)
                     _handler.Handle(callback, ref greedy, composer);
                 return true;
-            case Composition _:
+            case Composition:
                 return _handler.Handle(callback, ref greedy, composer);
         }
 

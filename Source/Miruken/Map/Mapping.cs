@@ -13,20 +13,17 @@ public class Mapping : ICallback, IAsyncCallback, IDispatchCallback
 {
     private object _result;
 
-    public Mapping(object source, object typeOrTarget,
-        object format = null)
+    public Mapping(object source, object typeOrTarget, object format = null)
     {
-        Source = source 
-                 ?? throw new ArgumentNullException(nameof(source));
-        TypeOrTarget = typeOrTarget
-                       ?? throw new ArgumentNullException(nameof(typeOrTarget));
-        Format = format;
+        Source       = source ?? throw new ArgumentNullException(nameof(source));
+        TypeOrTarget = typeOrTarget ?? throw new ArgumentNullException(nameof(typeOrTarget));
+        Format       = format;
     }
 
     public object Source       { get; }
     public object TypeOrTarget { get; }
     public object Format       { get; }
-    public bool   WantsAsync   { get; set; }
+    public bool   WantsAsync   { get; init; }
     public bool   IsAsync      { get; private set; }
 
     public Type Type =>

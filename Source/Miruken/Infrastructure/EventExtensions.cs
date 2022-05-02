@@ -5,18 +5,11 @@ using System.ComponentModel;
 
 public static class EventExtensions
 {
-    public static void Raise(this EventHandler handler, object sender)
-    {
-        var evt = handler;
-        evt?.Invoke(sender, EventArgs.Empty);
-    }
+    public static void Raise(this EventHandler handler, object sender) =>
+        handler?.Invoke(sender, EventArgs.Empty);
 
     public static void Raise<T>(this EventHandler<T> handler, object sender, T args)
-        where T : EventArgs
-    {
-        var evt = handler;
-        evt?.Invoke(sender, args);
-    }
+        where T : EventArgs => handler?.Invoke(sender, args);
 
     public static void Raise(this EventHandlerList events, object sender, object key)
     {

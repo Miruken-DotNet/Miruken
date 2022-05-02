@@ -8,31 +8,29 @@ public class MethodSignatureComparer : IEqualityComparer<MethodInfo>
 {
     public static readonly MethodSignatureComparer Instance = new();
 
-    public bool EqualGenericParameters(MethodInfo x, MethodInfo y)
+    private static bool EqualGenericParameters(MethodInfo x, MethodInfo y)
     {
         if (x.IsGenericMethod != y.IsGenericMethod) return false;
+        if (!x.IsGenericMethod) return true;
+        
+        var xArgs = x.GetGenericArguments();
+        var yArgs = y.GetGenericArguments();
 
-        if (x.IsGenericMethod)
+        if (xArgs.Length != yArgs.Length) return false;
+
+        for (var i = 0; i < xArgs.Length; ++i)
         {
-            var xArgs = x.GetGenericArguments();
-            var yArgs = y.GetGenericArguments();
+            if (xArgs[i].GetTypeInfo().IsGenericParameter != yArgs[i].GetTypeInfo().IsGenericParameter)
+                return false;
 
-            if (xArgs.Length != yArgs.Length) return false;
-
-            for (var i = 0; i < xArgs.Length; ++i)
-            {
-                if (xArgs[i].GetTypeInfo().IsGenericParameter != yArgs[i].GetTypeInfo().IsGenericParameter)
-                    return false;
-
-                if (!xArgs[i].GetTypeInfo().IsGenericParameter && xArgs[i] != yArgs[i])
-                    return false;
-            }
+            if (!xArgs[i].GetTypeInfo().IsGenericParameter && xArgs[i] != yArgs[i])
+                return false;
         }
 
         return true;
     }
 
-    public bool EqualParameters(MethodInfo x, MethodInfo y)
+    private static bool EqualParameters(MethodBase x, MethodBase y)
     {
         var xArgs = x.GetParameters();
         var yArgs = y.GetParameters();
@@ -51,7 +49,7 @@ public class MethodSignatureComparer : IEqualityComparer<MethodInfo>
         return true;
     }
 
-    public bool EqualSignatureTypes(Type x, Type y)
+    private static bool EqualSignatureTypes(Type x, Type y)
     {
         if (x.GetTypeInfo().IsGenericParameter != y.GetTypeInfo().IsGenericParameter)
             return false;
@@ -86,8 +84,5 @@ public class MethodSignatureComparer : IEqualityComparer<MethodInfo>
         return obj.Name.GetHashCode() ^ obj.GetParameters().Length;
     }
 
-    private static bool EqualNames(MethodInfo x, MethodInfo y)
-    {
-        return x.Name == y.Name;
-    }
+    private static bool EqualNames(MemberInfo x, MemberInfo y) =>  x.Name == y.Name;
 }

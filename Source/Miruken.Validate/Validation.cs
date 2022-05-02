@@ -27,14 +27,13 @@ public class Validation :
     public object            Target        { get; }
     public ValidationOutcome Outcome       { get; }
     public IScopeMatching    ScopeMatcher  { get; }
-    public bool              WantsAsync    { get; set; }
+    public bool              WantsAsync    { get; init; }
     public bool              IsAsync       { get; private set; }
-    public bool              StopOnFailure { get; set; }
+    public bool              StopOnFailure { get; init; }
 
     public CallbackPolicy Policy => Validates.Policy;
 
-    public Type ResultType => WantsAsync
-                              || IsAsync ? typeof(Promise) : null;
+    public Type ResultType => WantsAsync || IsAsync ? typeof(Promise) : null;
 
     public object Result
     {
@@ -68,8 +67,7 @@ public class Validation :
     {
         if (result == null) return false;
 
-        var promise = result as Promise
-                      ?? (result as Task)?.ToPromise();
+        var promise = result as Promise ?? (result as Task)?.ToPromise();
 
         if (promise != null)
         {

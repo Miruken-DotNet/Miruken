@@ -245,7 +245,7 @@ public abstract class MemberDispatch
             { FastSeven | NoReturn, (typeof(Action<object, object, object, object, object, object, object, object>),
                 (member, target, args) => { ((Action<object, object, object, object, object, object, object, object>) member)(target, args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
             { FastSeven | NoReturn | StaticCall, (typeof(Action<object, object, object, object, object, object, object>),
-                (member, _, args) => { ((Action<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) },
+                (member, _, args) => { ((Action<object, object, object, object, object, object, object>)member)(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); return null; }) }
         };
 
     #endregion

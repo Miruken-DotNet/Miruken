@@ -39,7 +39,7 @@ public class Scheduler : Handler
         {
             foreach (var req in sequential.Requests)
             {
-                var response = await Process(req, composer).ConfigureAwait(false);;
+                var response = await Process(req, composer).ConfigureAwait(false);
                 responses.Add(response);
                 if (response is IEither.ILeft) break;
             }

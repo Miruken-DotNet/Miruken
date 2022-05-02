@@ -36,7 +36,7 @@ public class Inquiry : ICallback, IAsyncCallback,
     public object  Key        { get; }
     public bool    Many       { get; }
     public Inquiry Parent     { get; }
-    public bool    WantsAsync { get; set; }
+    public bool    WantsAsync { get; init; }
     public bool    IsAsync    { get; private set; }
 
     public object              Target     { get; private set; }

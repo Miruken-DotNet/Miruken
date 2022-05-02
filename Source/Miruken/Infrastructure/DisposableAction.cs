@@ -17,6 +17,7 @@ public class DisposableAction<T> : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _action(Value);
     }
 }
@@ -32,6 +33,7 @@ public class DisposableAction : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _action?.Invoke();
     }
 }

@@ -9,16 +9,16 @@ using Policy;
 public delegate object[] ResolveArgs(Argument[] args);
 public delegate bool TargetAction<in T>(T target, ResolveArgs args);
 
-public class TargetActionBuilder<T, TR>
+public class TargetActionBuilder<T, Tr>
 {
-    private readonly Func<TargetAction<T>, TR> _notify;
+    private readonly Func<TargetAction<T>, Tr> _notify;
 
-    public TargetActionBuilder(Func<TargetAction<T>, TR> notify)
+    public TargetActionBuilder(Func<TargetAction<T>, Tr> notify)
     {
         _notify = notify ?? throw new ArgumentNullException(nameof(notify));
     }
 
-    public TR Invoke(Action<T> block)
+    public Tr Invoke(Action<T> block)
     {
         if (block == null)
             throw new ArgumentNullException(nameof(block));
@@ -31,11 +31,11 @@ public class TargetActionBuilder<T, TR>
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TS>(Func<T, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ts>(Func<T, Ts> block)
     {
         if (block == null)
             throw new ArgumentNullException(nameof(block));
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Array.Empty<Argument>());
@@ -45,163 +45,163 @@ public class TargetActionBuilder<T, TR>
         }), s);
     }
 
-    public TR Invoke<TA>(Action<T, TA> block)
+    public Tr Invoke<Ta>(Action<T, Ta> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 1 }) return false;
-            block(t, (TA)args[0]);
+            block(t, (Ta)args[0]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA, TS>(Func<T, TA, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta, Ts>(Func<T, Ta, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 1 }) return false;
-            s = block(t, (TA)args[0]);
+            s = block(t, (Ta)args[0]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2>(Action<T, TA1, TA2> block)
+    public Tr Invoke<Ta1, Ta2>(Action<T, Ta1, Ta2> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 2 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1]);
+            block(t, (Ta1)args[0], (Ta2)args[1]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TS>(Func<T, TA1, TA2, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ts>(Func<T, Ta1, Ta2, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 2 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2, TA3>(Action<T, TA1, TA2, TA3> block)
+    public Tr Invoke<Ta1, Ta2, Ta3>(Action<T, Ta1, Ta2, Ta3> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 3 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2]);
+            block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TA3, TS>(Func<T, TA1, TA2, TA3, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ta3, Ts>(Func<T, Ta1, Ta2, Ta3, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 3 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2, TA3, TA4>(Action<T, TA1, TA2, TA3, TA4> block)
+    public Tr Invoke<Ta1, Ta2, Ta3, Ta4>(Action<T, Ta1, Ta2, Ta3, Ta4> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 4 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3]);
+            block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TA3, TA4, TS>(Func<T, TA1, TA2, TA3, TA4, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ta3, Ta4, Ts>(Func<T, Ta1, Ta2, Ta3, Ta4, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 4 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2, TA3, TA4, TA5>(Action<T, TA1, TA2, TA3, TA4, TA5> block)
+    public Tr Invoke<Ta1, Ta2, Ta3, Ta4, Ta5>(Action<T, Ta1, Ta2, Ta3, Ta4, Ta5> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 5 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4]);
+            block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TA3, TA4, TA5, TS>(Func<T, TA1, TA2, TA3, TA4, TA5, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ta3, Ta4, Ta5, Ts>(Func<T, Ta1, Ta2, Ta3, Ta4, Ta5, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 5 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2, TA3, TA4, TA5, TA6>(Action<T, TA1, TA2, TA3, TA4, TA5, TA6> block)
+    public Tr Invoke<Ta1, Ta2, Ta3, Ta4, Ta5, Ta6>(Action<T, Ta1, Ta2, Ta3, Ta4, Ta5, Ta6> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 6 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4], (TA6)args[5]);
+            block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4], (Ta6)args[5]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TA3, TA4, TA5, TA6, TS>(Func<T, TA1, TA2, TA3, TA4, TA5, TA6, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ts>(Func<T, Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 6 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4], (TA6)args[5]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4], (Ta6)args[5]);
             return true;
         }), s);
     }
 
-    public TR Invoke<TA1, TA2, TA3, TA4, TA5, TA6, TA7>(Action<T, TA1, TA2, TA3, TA4, TA5, TA6, TA7> block)
+    public Tr Invoke<Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ta7>(Action<T, Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ta7> block)
     {
         return _notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 7 }) return false;
-            block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4], (TA6)args[5], (TA7)args[6]);
+            block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4], (Ta6)args[5], (Ta7)args[6]);
             return true;
         });
     }
 
-    public Tuple<TR, Maybe<TS>> Invoke<TA1, TA2, TA3, TA4, TA5, TA6, TA7, TS>(Func<T, TA1, TA2, TA3, TA4, TA5, TA6, TA7, TS> block)
+    public Tuple<Tr, Maybe<Ts>> Invoke<Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ta7, Ts>(Func<T, Ta1, Ta2, Ta3, Ta4, Ta5, Ta6, Ta7, Ts> block)
     {
-        var s = Maybe<TS>.Nothing;
+        var s = Maybe<Ts>.Nothing;
         return Tuple.Create(_notify((t, resolveArgs) =>
         {
             var args = resolveArgs(Arguments(block));
             if (args is not { Length: 7 }) return false;
-            s = block(t, (TA1)args[0], (TA2)args[1], (TA3)args[2], (TA4)args[3], (TA5)args[4], (TA6)args[5], (TA7)args[6]);
+            s = block(t, (Ta1)args[0], (Ta2)args[1], (Ta3)args[2], (Ta4)args[3], (Ta5)args[4], (Ta6)args[5], (Ta7)args[6]);
             return true;
         }), s);
     }

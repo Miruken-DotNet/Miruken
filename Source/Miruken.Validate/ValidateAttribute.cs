@@ -8,5 +8,5 @@ public class ValidateAttribute : FilterAttribute
     {         
     }
 
-    public bool ValidateResult { get; set; }
+    public bool ValidateResult { get; init; }
 }

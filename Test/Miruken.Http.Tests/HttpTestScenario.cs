@@ -151,7 +151,7 @@ public class SecureHttpTestScenario : HttpTestScenario
             var credentialBytes = Convert.FromBase64String(authHeader.Parameter ?? "");
             var credentials     = Encoding.UTF8.GetString(credentialBytes).Split(':');
             var username        = credentials[0];
-            var claims          = new[] { new Claim(ClaimTypes.Name, username),  };
+            var claims          = new[] { new Claim(ClaimTypes.Name, username) };
             var identity        = new ClaimsIdentity(claims, Scheme.Name);
             var principal       = new ClaimsPrincipal(identity);
             var ticket          = new AuthenticationTicket(principal, Scheme.Name);

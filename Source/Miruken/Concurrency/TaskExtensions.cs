@@ -34,10 +34,10 @@ public static class TaskExtensions
 
     public static Promise<object> ToPromise(
         this Task task,
-        CancellationToken cancellationToken = default,
-        ChildCancelMode mode = ChildCancelMode.All)
+        ChildCancelMode mode = ChildCancelMode.All,
+        CancellationToken cancellationToken = default)
     {
-        return task.Cast<object>().ToPromise(cancellationToken, mode);
+        return task.Cast<object>().ToPromise(mode, cancellationToken);
     }
 
     public static Promise<object> ToPromise(
@@ -50,8 +50,8 @@ public static class TaskExtensions
 
     public static Promise<T> ToPromise<T>(
         this Task<T> task,
-        CancellationToken cancellationToken = default,
-        ChildCancelMode mode = ChildCancelMode.All)
+        ChildCancelMode mode = ChildCancelMode.All,
+        CancellationToken cancellationToken = default)
     {
         return new Promise<T>(task, cancellationToken, mode);
     }
@@ -77,7 +77,7 @@ public static class TaskExtensions
 
     #region Helper
 
-    internal class Helper
+    private class Helper
     {
         internal static Task<T> Coerce<T>(Task task)
         {

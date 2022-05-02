@@ -2,7 +2,6 @@
 
 using System;
 using System.Linq;
-using Functional;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Miruken.Callback;
 using Miruken.Callback.Policy;

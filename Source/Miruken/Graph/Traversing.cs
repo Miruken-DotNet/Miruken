@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Miruken.Graph;
 
@@ -85,7 +86,7 @@ public static class TraversingHelper
                 node.TraverseSelfSiblingOrAncestor(visitor, true, true);   
                 break;
             default:
-                throw new NotImplementedException();
+                throw new NotSupportedException($"Unexpected axis {axis}.");
         }
     }
 
@@ -96,10 +97,9 @@ public static class TraversingHelper
 
     public static void TraverseRoot(this ITraversing node, Visitor visitor)
     {
-        ITraversing parent;
         var root    = node;
         var visited = new[] { node }.ToList();
-        while ((parent = root.Parent) != null)
+        while (root.Parent is { } parent)
         {
             CheckCircularity(visited, parent);
             root = parent;

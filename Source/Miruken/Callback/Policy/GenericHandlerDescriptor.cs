@@ -3,7 +3,6 @@ namespace Miruken.Callback.Policy;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Bindings;
 
 public class GenericHandlerDescriptor : HandlerDescriptor

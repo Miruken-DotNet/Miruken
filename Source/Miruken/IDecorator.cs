@@ -12,7 +12,8 @@ public static class DecoratorExtensions
         var decorator = source as IDecorator;
         while (decorator != null)
         {
-            source    = decorator.Decoratee;
+            source = decorator.Decoratee;
+            if (!deepest) return source;
             decorator = source as IDecorator;
         }
         return source;

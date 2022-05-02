@@ -48,10 +48,10 @@ public class Argument
                                 $"Only one KeyAttribute allowed for {parameter.Member}");
                         Key = key.Key;
                         break;
-                    case StrictAttribute _:
+                    case StrictAttribute:
                         flags |= Flags.Strict;
                         break;
-                    case OptionalAttribute _:
+                    case OptionalAttribute:
                         flags |= Flags.Optional;
                         break;
                     case IArgumentResolver resolver:

@@ -52,9 +52,8 @@ public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
     {
         return _descriptors.SelectMany(descriptor =>
         {
-            CallbackPolicyDescriptor cpd = null;
             var handler       = descriptor.Value.Value;
-            var staticMembers = handler.StaticPolicies?.TryGetValue(policy, out cpd) == true
+            var staticMembers = handler.StaticPolicies?.TryGetValue(policy, out var cpd) == true
                 ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
             var members       = handler.Policies?.TryGetValue(policy, out cpd) == true
                 ? cpd.InvariantMembers : Enumerable.Empty<PolicyMemberBinding>();
@@ -66,7 +65,7 @@ public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
     protected override IEnumerable<HandlerDescriptor> GetCallbackHandlers(
         CallbackPolicy policy, object callback, bool instance, bool @static)
     {
-        if (_descriptors.Count == 0)
+        if (_descriptors.IsEmpty)
             return Enumerable.Empty<HandlerDescriptor>();
 
         var lookup = _descriptors.ToLookup(
@@ -154,28 +153,27 @@ public class MutableHandlerDescriptorFactory : AbstractHandlerDescriptorFactory
                 instanceCallbacks?.GetCompatibleMembers(callback).FirstOrDefault()
                 ?? staticCallbacks?.GetCompatibleMembers(callback).FirstOrDefault();
 
-            if (binding != null)
+            if (binding == null) continue;
+            
+            if (handler is GenericHandlerDescriptor genericHandler)
             {
-                if (handler is GenericHandlerDescriptor genericHandler)
-                {
-                    key ??= policy.GetKey(callback);
-                    handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor);
-                    if (handler == null) continue;
-                }
+                key ??= policy.GetKey(callback);
+                handler = genericHandler.CloseDescriptor(key, binding, CreateDescriptor);
+                if (handler == null) continue;
+            }
 
-                if (orderBy != null)
-                {
-                    sortedCompatibleList ??= new SortedDictionary<
-                        PolicyMemberBinding, HandlerDescriptor>(
-                        new DuplicateComparer(orderBy));
-                    sortedCompatibleList.Add(binding, handler);
-                }
-                else
-                {
-                    if (compatibleList == null)
-                        compatible = compatibleList = new List<HandlerDescriptor>();
-                    compatibleList.Add(handler);
-                }
+            if (orderBy != null)
+            {
+                sortedCompatibleList ??= new SortedDictionary<
+                    PolicyMemberBinding, HandlerDescriptor>(
+                    new DuplicateComparer(orderBy));
+                sortedCompatibleList.Add(binding, handler);
+            }
+            else
+            {
+                if (compatibleList == null)
+                    compatible = compatibleList = new List<HandlerDescriptor>();
+                compatibleList.Add(handler);
             }
         }
 

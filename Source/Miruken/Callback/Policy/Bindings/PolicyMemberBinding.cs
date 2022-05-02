@@ -222,7 +222,7 @@ public class PolicyMemberBinding : MemberBinding
         Type returnType, int? priority, ResultsDelegate results, bool isAsync)
     {
         var accepted = Policy.AcceptResult?.Invoke(result, this) ?? result != null;
-        if (!accepted || (result == null)) return accepted;
+        if (!accepted || result == null) return accepted;
         var asyncCallback = callback as IAsyncCallback;
         result = CoerceResult(result, returnType, isAsync || asyncCallback?.WantsAsync == true);
         if (result != null)

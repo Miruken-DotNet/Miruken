@@ -26,14 +26,13 @@ public class ServiceConfiguration
         var lifestyle = GetLifestyle(binding);
         if (lifestyle != null)
         {
-            if (lifestyle is SingletonAttribute)
-            {
-                binding.RemoveFilters(lifestyle);
-                binding.AddFilters(Singleton);
-            }
+            if (lifestyle is not SingletonAttribute) return;
+            binding.RemoveFilters(lifestyle);
+            binding.AddFilters(Singleton);
         }
         else if (binding.Dispatcher.IsConstructor)
         {
+            // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
             switch (_serviceDescriptor.Lifetime)
             {
                 case ServiceLifetime.Scoped:

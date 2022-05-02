@@ -5,7 +5,7 @@ using Callback;
 
 public sealed class DelegatingOnceStrategy : IOnceStrategy
 {
-    public static DelegatingOnceStrategy Instance = new();
+    public static readonly DelegatingOnceStrategy Instance = new();
 
     private DelegatingOnceStrategy()
     {            

@@ -110,13 +110,12 @@ public class DynamicFilter<TCb, TRes> : DynamicFilter, IFilter<TCb, TRes>
             }
         }
 
-        if (promises.Count == 1)
-            return promises[0].Then((_, _) => resolved);
-
-        if (promises.Count > 1)
-            return Promise.All(promises).Then((_, _) => resolved);
-
-        return resolved;
+        return promises.Count switch
+        {
+            1 => promises[0].Then((_, _) => resolved),
+            > 1 => Promise.All(promises).Then((_, _) => resolved),
+            _ => resolved
+        };
     }
 
     private static MethodDispatch GetDynamicNext(Type type)

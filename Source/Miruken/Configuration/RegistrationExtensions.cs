@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Register;
@@ -21,27 +22,27 @@ public static class RegistrationExtensions
             .Select((selector, publicOnly) =>
                 selector.AddClasses(x => x.Where(type =>
                 {
-                    if (type
-                            .GetCustomAttributes(typeof(ConfigurationAttribute), true)
-                            .FirstOrDefault() is ConfigurationAttribute attribute)
+                    if (type.GetCustomAttributes(typeof(ConfigurationAttribute), true)
+                            .FirstOrDefault() is not ConfigurationAttribute attribute)
+                        return false;
+                    
+                    var ctor = type.GetConstructor(Type.EmptyTypes);
+                    if (ctor == null) return false;
+                    var instance = ctor.Invoke(Array.Empty<object>());
+                    var key      = GetConfigurationKey(attribute, type);
+                    services.AddSingleton(type, _ =>
                     {
-                        var ctor = type.GetConstructor(Type.EmptyTypes);
-                        if (ctor == null) return false;
-                        var instance = ctor.Invoke(Array.Empty<object>());
-                        var key      = GetConfigurationKey(attribute, type);
-                        services.AddSingleton(type, _ =>
-                        {
-                            configuration.GetSection(key).Bind(instance);
-                            return instance;
-                        });
-                    }
+                        configuration.GetSection(key).Bind(instance);
+                        return instance;
+                    });
+                    
                     return false;
                 }), publicOnly)));
 
         return registration;
     }
 
-    private static string GetConfigurationKey(ConfigurationAttribute attribute, Type type)
+    private static string GetConfigurationKey(ConfigurationAttribute attribute, MemberInfo type)
     {
         var key = attribute.Key;
         if (!string.IsNullOrEmpty(key)) return key;

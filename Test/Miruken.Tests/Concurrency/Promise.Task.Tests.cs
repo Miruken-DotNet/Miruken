@@ -261,7 +261,7 @@ public class PromiseTaskTests
                 while (true)
                     token.ThrowIfCancellationRequested();
             }, token);
-            var promise = task.ToPromise(token);
+            var promise = task.ToPromise(cancellationToken: token);
             cancellation.Cancel();
             Assert.AreEqual(PromiseState.Cancelled, promise.State);
         });

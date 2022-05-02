@@ -38,9 +38,9 @@ public class ValidateFilterTests
         HandlerDescriptorFactory.UseFactory(_factory);
 
         _handler = new TeamHandler()
-                   + new FilterProvider()
-                   + new DataAnnotationsValidator()
-                   + new FluentValidationValidator();
+                 + new FilterProvider()
+                 + new DataAnnotationsValidator()
+                 + new FluentValidationValidator();
     }
 
     [TestMethod]

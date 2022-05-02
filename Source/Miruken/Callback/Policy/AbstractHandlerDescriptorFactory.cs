@@ -189,7 +189,7 @@ public abstract class AbstractHandlerDescriptorFactory : IHandlerDescriptorFacto
             return false;
         return member switch
         {
-            ConstructorInfo _ => true,
+            ConstructorInfo => true,
             MethodInfo method when method.IsSpecialName || method.IsFamily => false,
             PropertyInfo {CanRead: false} => false,
             _ => member.IsDefined(typeof(CategoryAttribute))

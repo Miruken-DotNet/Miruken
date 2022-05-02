@@ -32,7 +32,7 @@ public static class HandlerValidateExtensions
         };
         handler.Handle(validation, true);
 
-        return ((Promise)validation.Result).Then((r, s) =>
+        return ((Promise)validation.Result).Then((_, _) =>
         {
             var outcome = validation.Outcome;
             if (target is IValidationAware validationAware)
@@ -53,6 +53,6 @@ public static class HandlerValidateExtensions
     {
         return handler.Aspect((_, composer) =>
             composer.ValidateAsync(target, scopes)
-                .Then((outcome, s) => outcome.IsValid));
+                .Then((outcome, _) => outcome.IsValid));
     }
 }

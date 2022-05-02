@@ -72,7 +72,7 @@ public static class HandlerStashExtensions
             throw new ArgumentNullException(nameof(put));
         var data = handler.StashTryGet<T>();
         if (data != null) return data;
-        data = await put().ConfigureAwait(false);;
+        data = await put().ConfigureAwait(false);
         handler.StashPut(data);
         return data;
     }

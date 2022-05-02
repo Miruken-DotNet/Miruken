@@ -157,10 +157,10 @@ public class Context : CompositeHandler,
 		var handled = false;
 		Traverse(axis, node =>
 		{
-			handled |= (node == this
+			handled |= node == this
 				? BaseHandle(callback, ref g, composer)
 				: ((Context)node).Handle(
-					TraversingAxis.Self, callback, ref g, composer));
+					TraversingAxis.Self, callback, ref g, composer);
 			return handled && !g;
 		});
 		greedy = g;

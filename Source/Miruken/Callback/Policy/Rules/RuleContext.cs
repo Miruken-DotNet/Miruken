@@ -32,12 +32,9 @@ public class RuleContext
 
         if (_aliases.TryGetValue(alias, out var aliasedType))
         {
-            if (aliasedType != type)
-            {
-                AddError("Mismatched alias '{alias}', {type} != {aliasType}");
-                return false;
-            }
-            return true;
+            if (aliasedType == type) return true;
+            AddError("Mismatched alias '{alias}', {type} != {aliasType}");
+            return false;
         }
         _aliases.Add(alias, type);
         return true;

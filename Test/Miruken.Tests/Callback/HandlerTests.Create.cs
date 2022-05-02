@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Miruken.Callback;
 using Miruken.Callback.Policy;
 using Miruken.Concurrency;
-using Miruken.Infrastructure;
 
 [TestClass]
 public class HandlerCreateTests

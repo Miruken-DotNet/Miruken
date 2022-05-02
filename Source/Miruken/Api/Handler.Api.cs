@@ -12,7 +12,7 @@ public static class HandlerApiExtensions
             return Promise.Empty;
         var command = new Command(request)
         {
-            WantsAsync = true,
+            WantsAsync = true
         };
         try
         {
@@ -33,7 +33,7 @@ public static class HandlerApiExtensions
             return Promise<TResp>.Empty;
         var command = new Command(request)
         {
-            WantsAsync = true,
+            WantsAsync = true
         };
         try
         {
@@ -55,7 +55,7 @@ public static class HandlerApiExtensions
             return Promise<TResp>.Empty;
         var command = new Command(request)
         {
-            WantsAsync = true,
+            WantsAsync = true
         };
         try
         {
@@ -77,7 +77,7 @@ public static class HandlerApiExtensions
             return Promise.Empty;
         var command = new Command(notification, true)
         {
-            WantsAsync = true,
+            WantsAsync = true
         };
         try
         {

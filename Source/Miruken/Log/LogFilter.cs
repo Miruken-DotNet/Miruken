@@ -43,16 +43,14 @@ public class LogFilter<TRequest, TResponse>
         try
         {
             var response = await next().ConfigureAwait(false);
-
-            if (debug)
-            {
-                var elapsedMs = GetElapsedMilliseconds(start, Stopwatch.GetTimestamp());
-                logger.LogDebug("Completed {RequestName} in {Duration}{With}{Response}",
-                    PrettyName(request.GetType()),
-                    FormatElapsedMilliseconds(elapsedMs),
-                    response != null ? " with " : "",
-                    Describe(response));
-            }
+            if (!debug) return response;
+            
+            var elapsedMs = GetElapsedMilliseconds(start, Stopwatch.GetTimestamp());
+            logger.LogDebug("Completed {RequestName} in {Duration}{With}{Response}",
+                PrettyName(request.GetType()),
+                FormatElapsedMilliseconds(elapsedMs),
+                response != null ? " with " : "",
+                Describe(response));
 
             return response;
         }
@@ -99,13 +97,13 @@ public class LogFilter<TRequest, TResponse>
         var description = new StringBuilder(PrettyName(instance.GetType()));
         try
         {
-            description.Append(" ")
+            description.Append(' ')
                 .Append(JsonConvert.SerializeObject(instance, JsonSettings))
                 .Replace("\"", "");
         }
         catch
         {
-            description.Append(" ").Append(instance);
+            description.Append(' ').Append(instance);
         }
 
         return description.ToString();
@@ -114,7 +112,7 @@ public class LogFilter<TRequest, TResponse>
     private ILogger GetLogger(MemberBinding member)
     {
         var type = member.Dispatcher.Member.ReflectedType;
-        return _factory.CreateLogger(type);
+        return _factory.CreateLogger(type!);
     }
 }
 

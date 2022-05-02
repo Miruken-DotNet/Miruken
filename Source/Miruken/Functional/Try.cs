@@ -2,19 +2,19 @@
 
 using System;
 
-public abstract class Try<TF, TS> : EitherCore<TF, TS>
+public abstract class Try<Tf, Ts> : EitherCore<Tf, Ts>
 {
-    public TF FailureOrDefault() => Match(l => l, _ => default);
-    public TS SuccessOrDefault() => Match(_ => default, r => r);
+    public Tf FailureOrDefault() => Match(l => l, _ => default);
+    public Ts SuccessOrDefault() => Match(_ => default, r => r);
 
-    public static implicit operator Try<TF, TS>(TF failure) => new Failure(failure);
-    public static implicit operator Try<TF, TS>(TS success) => new Success(success);
+    public static implicit operator Try<Tf, Ts>(Tf failure) => new Failure(failure);
+    public static implicit operator Try<Tf, Ts>(Ts success) => new Success(success);
 
-    public sealed class Failure : Try<TF, TS>, IEither.ILeft
+    public sealed class Failure : Try<Tf, Ts>, IEither.ILeft
     {
-        private readonly TF _failure;
+        private readonly Tf _failure;
 
-        public Failure(TF failure)
+        public Failure(Tf failure)
         {
             _failure = failure;
         }
@@ -22,39 +22,39 @@ public abstract class Try<TF, TS> : EitherCore<TF, TS>
         public override object Value  => _failure;
         public override bool   IsLeft => true;
             
-        public override void Match(Action<TF> matchFailure, Action<TS> matchSuccess)
+        public override void Match(Action<Tf> matchFailure, Action<Ts> matchSuccess)
         {
             if (matchFailure == null)
                 throw new ArgumentNullException(nameof(matchFailure));
             matchFailure(_failure);
         }
 
-        public override T Match<T>(Func<TF, T> matchFailure, Func<TS, T> matchSuccess)
+        public override T Match<T>(Func<Tf, T> matchFailure, Func<Ts, T> matchSuccess)
         {
             if (matchFailure == null)
                 throw new ArgumentNullException(nameof(matchFailure));
             return matchFailure(_failure);
         }
 
-        public Try<TF, TUs> Select<TUs>(Func<TS, TUs> selector) =>
-            new Try<TF, TUs>.Failure(_failure);
+        public Try<Tf, TUs> Select<TUs>(Func<Ts, TUs> selector) =>
+            new Try<Tf, TUs>.Failure(_failure);
 
-        public Try<TF, TVs> SelectMany<TUs, TVs>(
-            Func<TS, Try<TF, TUs>> selector,
-            Func<TS, TUs, TVs>     projector) =>
-            new Try<TF, TVs>.Failure(_failure);
+        public Try<Tf, TVs> SelectMany<TUs, TVs>(
+            Func<Ts, Try<Tf, TUs>> selector,
+            Func<Ts, TUs, TVs>     projector) =>
+            new Try<Tf, TVs>.Failure(_failure);
             
-        public static implicit operator TF(Failure failure)
+        public static implicit operator Tf(Failure failure)
         {
             return failure != null ? failure._failure : default;
         }
     }
         
-    public sealed class Success : Try<TF, TS>, IEither.IRight
+    public sealed class Success : Try<Tf, Ts>, IEither.IRight
     {
-        private readonly TS _success;
+        private readonly Ts _success;
 
-        public Success(TS success)
+        public Success(Ts success)
         {
             _success = success;
         }
@@ -62,30 +62,30 @@ public abstract class Try<TF, TS> : EitherCore<TF, TS>
         public override object Value  => _success;
         public override bool   IsLeft => false;
             
-        public override void Match(Action<TF> matchFailure, Action<TS> matchSuccess)
+        public override void Match(Action<Tf> matchFailure, Action<Ts> matchSuccess)
         {
             if (matchSuccess == null)
                 throw new ArgumentNullException(nameof(matchSuccess));
             matchSuccess(_success);
         }
 
-        public override T Match<T>(Func<TF, T> matchFailure, Func<TS, T> matchSuccess)
+        public override T Match<T>(Func<Tf, T> matchFailure, Func<Ts, T> matchSuccess)
         {
             if (matchSuccess == null)
                 throw new ArgumentNullException(nameof(matchSuccess));
             return matchSuccess(_success);
         }
 
-        public Try<TF, TUs> Select<TUs>(Func<TS, TUs> selector)
+        public Try<Tf, TUs> Select<TUs>(Func<Ts, TUs> selector)
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-            return new Try<TF, TUs>.Success(selector(_success));
+            return new Try<Tf, TUs>.Success(selector(_success));
         }
 
-        public Try<TF, TVs> SelectMany<TUs, TVs>(
-            Func<TS, Try<TF, TUs>> selector,
-            Func<TS, TUs, TVs>     projector)
+        public Try<Tf, TVs> SelectMany<TUs, TVs>(
+            Func<Ts, Try<Tf, TUs>> selector,
+            Func<Ts, TUs, TVs>     projector)
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
@@ -96,11 +96,11 @@ public abstract class Try<TF, TS> : EitherCore<TF, TS>
             var result = selector(_success);
 
             return result.Match(
-                failure => (Try<TF, TVs>)new Try<TF, TVs>.Failure(failure),
-                success => new Try<TF, TVs>.Success(projector(_success, success)));
+                failure => (Try<Tf, TVs>)new Try<Tf, TVs>.Failure(failure),
+                success => new Try<Tf, TVs>.Success(projector(_success, success)));
         }
             
-        public static implicit operator TS(Success success)
+        public static implicit operator Ts(Success success)
         {
             return success != null ? success._success : default;
         }
